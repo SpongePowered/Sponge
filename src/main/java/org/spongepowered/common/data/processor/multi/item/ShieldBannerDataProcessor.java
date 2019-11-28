@@ -42,7 +42,6 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.processor.common.AbstractItemDataProcessor;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Map;

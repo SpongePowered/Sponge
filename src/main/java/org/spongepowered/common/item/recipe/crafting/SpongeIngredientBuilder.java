@@ -28,7 +28,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.item.crafting.IngredientAccessor;
 
 import java.util.ArrayList;

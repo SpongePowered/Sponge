@@ -36,8 +36,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.ArrayList;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;

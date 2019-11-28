@@ -25,7 +25,7 @@
 package org.spongepowered.common.item.inventory.lens.comp;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
 
 public interface CraftingInventoryLens extends OrderedInventoryLens {

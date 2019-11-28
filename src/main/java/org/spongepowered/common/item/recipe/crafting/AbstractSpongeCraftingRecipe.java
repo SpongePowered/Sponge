@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.recipe.crafting;
 
-import static org.spongepowered.common.item.inventory.util.InventoryUtil.toSpongeInventory;
+import static org.spongepowered.common.inventory.util.InventoryUtil.toSpongeInventory;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.inventory.CraftingInventory;
@@ -35,8 +35,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;

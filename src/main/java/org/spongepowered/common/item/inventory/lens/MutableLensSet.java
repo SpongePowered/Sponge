@@ -25,7 +25,7 @@
 package org.spongepowered.common.item.inventory.lens;
 
 import org.spongepowered.api.item.inventory.InventoryProperty;
-
+import org.spongepowered.common.inventory.lens.Lens;
 import java.util.Set;
 
 public interface MutableLensSet extends Set<Lens>, DynamicLensCollection {

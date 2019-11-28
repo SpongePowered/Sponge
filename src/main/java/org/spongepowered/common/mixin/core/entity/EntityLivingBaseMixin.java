@@ -98,15 +98,15 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
@@ -928,7 +928,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             } else {
                 if (this.slotLens.isEmpty()) {
                     for (final EquipmentSlotType slot : EquipmentSlotType.values()) {
-                        this.slotLens.put(slot, new SlotLensImpl(slot.getSlotIndex()));
+                        this.slotLens.put(slot, new BasicSlotLens(slot.getSlotIndex()));
                     }
                 }
                 slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter((Fabric) this, null);

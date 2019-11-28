@@ -43,8 +43,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

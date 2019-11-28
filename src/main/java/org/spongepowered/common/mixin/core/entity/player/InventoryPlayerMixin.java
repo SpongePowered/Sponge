@@ -48,16 +48,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.EquipmentSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,34 +97,34 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
 
     @SuppressWarnings("RedundantCast")
     @Override
-    public SlotProvider bridge$generateSlotProvider() {
+    public SlotLensProvider bridge$generateSlotProvider() {
         if ((Class<?>) this.getClass() == net.minecraft.entity.player.PlayerInventory.class) { // Build Player Lens
-            return new SlotCollection.Builder()
+            return new SlotLensCollection.Builder()
                 .add(this.mainInventory.size())
                 .add(this.offHandInventory.size())
                 // TODO predicates for ItemStack/ItemType?
-                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
-                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
-                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE))
-                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLens(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLens(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLens(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLens(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR))
                 // for mods providing bigger inventories
                 .add(this.armorInventory.size() - 4, EquipmentSlotAdapter.class)
                 .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
                 .build();
         } else if (this.getSizeInventory() != 0) { // Fallback OrderedLens when not 0 sized inventory
-            return new SlotCollection.Builder().add(this.getSizeInventory()).build();
+            return new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
         } else {
-            return new SlotCollection.Builder().build();
+            return new SlotLensCollection.Builder().build();
         }
     }
 
     @SuppressWarnings({"RedundantCast", "Unchecked"})
     @Override
-    public Lens bridge$generateLens(SlotProvider slots) {
+    public Lens bridge$generateLens(SlotLensProvider slots) {
         if ((Class<?>) this.getClass() == net.minecraft.entity.player.PlayerInventory.class) { // Build Player Lens
             return new PlayerInventoryLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slots);
         }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+        return new DefaultIndexedLens(0, this.getSizeInventory(), 1, slots);
     }
 
     @Override

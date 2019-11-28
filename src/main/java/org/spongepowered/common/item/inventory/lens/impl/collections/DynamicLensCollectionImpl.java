@@ -25,9 +25,8 @@
 package org.spongepowered.common.item.inventory.lens.impl.collections;
 
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.DynamicLensCollection;
-import org.spongepowered.common.item.inventory.lens.Lens;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;

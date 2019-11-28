@@ -25,9 +25,8 @@
 package org.spongepowered.common.item.inventory;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;

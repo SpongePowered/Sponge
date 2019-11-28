@@ -48,15 +48,13 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.util.InventoryUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,13 +86,13 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
         return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
-    private SlotProvider impl$generateSlotProvider() {
-        return new SlotCollection.Builder().add(5).build();
+    private SlotLensProvider impl$generateSlotProvider() {
+        return new SlotLensCollection.Builder().add(5).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens impl$generateRootLens(final SlotProvider slots) {
-        return new GridInventoryLensImpl(0, 5, 1, 5, (Class<? extends Inventory>) this.getClass(), slots);
+    private GridInventoryLens impl$generateRootLens(final SlotLensProvider slots) {
+        return new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(0, 5, 1, 5, (Class<? extends Inventory>) this.getClass(), slots);
     }
 
     @Inject(method = "putDropInInventoryAllSlots",

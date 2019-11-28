@@ -36,8 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeActiveItem
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.Optional;
 import net.minecraft.entity.LivingEntity;
 

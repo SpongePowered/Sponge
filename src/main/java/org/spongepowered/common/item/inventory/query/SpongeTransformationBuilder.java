@@ -33,10 +33,10 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class SpongeTransformationBuilder implements InventoryTransformation.Builder {
 
-    private List<Query> operationList = new ArrayList<>();
+    private List<org.spongepowered.common.inventory.query.Query> operationList = new ArrayList<>();
 
     @Override
-    public InventoryTransformation.Builder append(Query... operations) {
+    public InventoryTransformation.Builder append(org.spongepowered.common.inventory.query.Query... operations) {
         this.operationList.addAll(Arrays.asList(operations));
         return this;
     }

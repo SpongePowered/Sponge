@@ -31,13 +31,12 @@ import net.minecraft.world.storage.loot.ILootContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
+import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import javax.annotation.Nullable;
 
 @Mixin(ContainerMinecartEntity.class)
@@ -63,15 +62,15 @@ public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin i
     }
 
     @Override
-    public SlotProvider bridge$generateSlotProvider() {
-        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
+    public SlotLensProvider bridge$generateSlotProvider() {
+        return new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
     }
 
     @Override
-    public Lens bridge$generateLens(SlotProvider slots) {
+    public Lens bridge$generateLens(SlotLensProvider slots) {
         return this.getSizeInventory() == 0
                 ? new DefaultEmptyLens(this)
-                : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+                : new DefaultIndexedLens(0, this.getSizeInventory(), 1, slots);
     }
 
 }

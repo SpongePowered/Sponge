@@ -31,9 +31,8 @@ import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
-import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.query.ReverseTransformation;
+import org.spongepowered.common.inventory.EmptyInventoryImpl;
+import org.spongepowered.common.inventory.query.type.ReverseQuery;
 import org.spongepowered.common.item.inventory.query.SpongeQueryTransformation;
 import org.spongepowered.common.registry.RegistryHelper;
 
@@ -53,7 +52,7 @@ public class TransformationRegistryModule implements RegistryModule {
         this.register("NO_OP", Collections.emptyList());
         this.register("PLAYER_MAIN_HOTBAR_FIRST", Arrays.asList(QueryTypes.INVENTORY_TYPE.of(Hotbar.class),
                                                        QueryTypes.INVENTORY_TYPE.of(PrimaryPlayerInventory.class)));
-        this.register("REVERSE", new ReverseTransformation());
+        this.register("REVERSE", new ReverseQuery());
         this.register("EMPTY", EmptyInventoryImpl::new);
     }
 

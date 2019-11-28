@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.bridge.item.inventory;
 
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.util.InventoryUtil;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.util.InventoryUtil;
 
 public interface InventoryBridge {
     default InventoryAdapter bridge$getAdapter() {

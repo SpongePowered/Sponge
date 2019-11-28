@@ -27,16 +27,16 @@ package org.spongepowered.common.item.inventory.query.result;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.query.Query.ResultAdapterProvider;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
-import org.spongepowered.common.item.inventory.query.Query.ResultAdapterProvider;
 
 public class MinecraftResultAdapterProvider implements ResultAdapterProvider {
     
-    public class MinecraftQueryResultAdapter extends AbstractInventoryAdapter implements QueryResult {
+    public class MinecraftQueryResultAdapter extends BasicInventoryAdapter implements QueryResult {
         
         public class MinecraftQueryLens extends QueryLens {
 

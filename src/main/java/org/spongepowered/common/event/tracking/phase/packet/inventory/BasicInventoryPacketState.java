@@ -46,8 +46,8 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.item.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;

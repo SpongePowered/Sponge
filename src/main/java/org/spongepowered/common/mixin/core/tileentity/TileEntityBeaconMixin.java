@@ -32,14 +32,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.tileentity.TileEntityBeaconBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.InputSlotAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 import javax.annotation.Nullable;
@@ -59,16 +58,16 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private SlotProvider impl$generateBeaconSlotProvider() {
-        final InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) BeaconTileEntity.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
+    private SlotLensProvider impl$generateBeaconSlotProvider() {
+        final org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens lens = new org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens(0, ((Class) BeaconTileEntity.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
-        return new SlotCollection.Builder()
+        return new SlotLensCollection.Builder()
                 .add(InputSlotAdapter.class, i -> lens)
                 .build();
     }
 
     @SuppressWarnings({"rawtypes"})
-    private InputSlotLens impl$generateBeaconRootLens(final SlotProvider slots) {
+    private InputSlotLens impl$generateBeaconRootLens(final SlotLensProvider slots) {
         return ((InputSlotLens) slots.getSlot(0));
     }
 

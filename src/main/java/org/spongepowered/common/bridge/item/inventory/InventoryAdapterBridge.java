@@ -25,16 +25,16 @@
 package org.spongepowered.common.bridge.item.inventory;
 
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public interface InventoryAdapterBridge {
 
-    SlotProvider bridge$generateSlotProvider();
+    SlotLensProvider bridge$generateSlotProvider();
 
-    void bridge$setSlotProvider(SlotProvider provider);
+    void bridge$setSlotProvider(SlotLensProvider provider);
 
-    Lens bridge$generateLens(SlotProvider slotProvider);
+    Lens bridge$generateLens(SlotLensProvider slotProvider);
 
     void bridge$setLens(Lens lens);
 

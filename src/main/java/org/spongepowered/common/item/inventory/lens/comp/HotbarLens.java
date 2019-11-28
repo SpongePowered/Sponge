@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.inventory.fabric.Fabric;
 
 public interface HotbarLens extends InventoryRowLens {
 

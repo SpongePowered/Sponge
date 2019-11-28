@@ -26,7 +26,7 @@ package org.spongepowered.common.item.inventory.lens.slots;
 
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import java.util.function.Predicate;
 
 public interface FilteringSlotLens extends SlotLens {

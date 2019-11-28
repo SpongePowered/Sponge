@@ -26,7 +26,7 @@ package org.spongepowered.common.item.inventory.lens.slots;
 
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.inventory.fabric.Fabric;
 
 public interface SidedSlotLens extends FilteringSlotLens {
 

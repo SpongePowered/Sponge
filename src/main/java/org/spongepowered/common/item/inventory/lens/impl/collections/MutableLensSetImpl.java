@@ -25,7 +25,7 @@
 package org.spongepowered.common.item.inventory.lens.impl.collections;
 
 import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
 
 import java.util.Spliterator;

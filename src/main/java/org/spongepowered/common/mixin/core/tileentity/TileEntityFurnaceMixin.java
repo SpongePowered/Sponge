@@ -50,20 +50,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.FuelSlotAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.OutputSlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.FurnaceInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.slots.FuelSlotLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.slots.OutputSlotLensImpl;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.FuelSlotAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.InputSlotAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.OutputSlotAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.Collections;
 
 @Mixin(FurnaceTileEntity.class)
@@ -81,19 +80,19 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         return ReusableLens.getLens(FurnaceInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
-    private SlotProvider impl$generateSlotProvider() {
-        return new SlotCollection.Builder().add(InputSlotAdapter.class, InputSlotLensImpl::new)
-                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> FurnaceTileEntity.isItemFuel((ItemStack) s) || isBucket(
+    private SlotLensProvider impl$generateSlotProvider() {
+        return new SlotLensCollection.Builder().add(InputSlotAdapter.class, InputSlotLens::new)
+                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLens(i, (s) -> FurnaceTileEntity.isItemFuel((ItemStack) s) || isBucket(
                         (ItemStack) s), t -> {
                     final ItemStack nmsStack = (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1);
                     return FurnaceTileEntity.isItemFuel(nmsStack) || isBucket(nmsStack);
                 }))
                 // TODO represent the filtering in the API somehow
-                .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> true, (t) -> true))
+                .add(OutputSlotAdapter.class, (i) -> new OutputSlotLens(i, (s) -> true, (t) -> true))
                 .build();
     }
 
-    private FurnaceInventoryLens impl$generateRootLens(final SlotProvider slots) {
+    private FurnaceInventoryLens impl$generateRootLens(final SlotLensProvider slots) {
         return new FurnaceInventoryLens(this, slots);
     }
 

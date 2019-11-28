@@ -37,15 +37,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
-
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +60,7 @@ public abstract class InventoryPlayerMixin_API implements PlayerInventory {
     @Shadow public abstract ItemStack getStackInSlot(int index);
 
 
-    @Nullable private MainPlayerInventoryAdapter api$main;
+    @Nullable private PrimaryPlayerInventoryAdapter api$main;
     @Nullable private EquipmentInventoryAdapter api$equipment;
     @Nullable private SlotAdapter api$offhand;
 
@@ -78,7 +76,7 @@ public abstract class InventoryPlayerMixin_API implements PlayerInventory {
         if (this.api$main == null && ((InventoryAdapter) this).bridge$getRootLens() instanceof PlayerInventoryLens) {
             final Lens lens = ((InventoryAdapter) this).bridge$getRootLens();
             final Fabric fabric = ((InventoryAdapter) this).bridge$getFabric();
-            this.api$main = (MainPlayerInventoryAdapter) ((PlayerInventoryLens) lens).getMainLens().getAdapter(fabric, this);
+            this.api$main = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) lens).getMainLens().getAdapter(fabric, this);
         }
         return this.api$main;
     }

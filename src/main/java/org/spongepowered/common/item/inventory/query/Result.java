@@ -25,8 +25,8 @@
 package org.spongepowered.common.item.inventory.query;
 
 import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.DefaultImplementedAdapterInventory;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
 public interface Result extends InventoryAdapter, DefaultImplementedAdapterInventory, InventoryBridge {
 

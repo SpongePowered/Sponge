@@ -26,8 +26,7 @@ package org.spongepowered.common.item.recipe.crafting;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.item.util.ItemStackUtil;
 import javax.annotation.Nullable;
 
 /**

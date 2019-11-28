@@ -41,11 +41,11 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
+import org.spongepowered.common.inventory.SpongeInventoryBuilder;
+import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.archetype.SlotArchetype;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
-import org.spongepowered.common.item.inventory.custom.CustomInventory;
-import org.spongepowered.common.mixin.core.inventory.ContainerRepairAccessor;
+import org.spongepowered.common.mixin.core.inventory.accessor.ContainerRepairAccessor;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -75,7 +75,7 @@ import net.minecraft.tileentity.DropperTileEntity;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.tileentity.HopperTileEntity;
 
-@RegistrationDependency(GuiIdRegistryModule.class)
+@RegistrationDependency(ContainerTypeRegistryModule.class)
 public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistryModule<InventoryArchetype>,
     SpongeAdditionalCatalogRegistryModule<InventoryArchetype> {
 

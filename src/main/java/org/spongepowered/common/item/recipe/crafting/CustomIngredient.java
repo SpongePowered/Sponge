@@ -26,8 +26,7 @@ package org.spongepowered.common.item.recipe.crafting;
 
 import net.minecraft.item.crafting.Ingredient;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import java.util.function.Predicate;
 

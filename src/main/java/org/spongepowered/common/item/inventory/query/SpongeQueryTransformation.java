@@ -27,8 +27,7 @@ package org.spongepowered.common.item.inventory.query;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryTransformation;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
-
+import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import java.util.List;
 
 /**
@@ -37,9 +36,9 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class SpongeQueryTransformation implements InventoryTransformation {
 
-    private final List<Query> operations;
+    private final List<org.spongepowered.common.inventory.query.Query> operations;
 
-    public SpongeQueryTransformation(List<Query> operations) {
+    public SpongeQueryTransformation(List<org.spongepowered.common.inventory.query.Query> operations) {
         this.operations = operations;
     }
 
@@ -49,7 +48,7 @@ public class SpongeQueryTransformation implements InventoryTransformation {
             return inventory;
         }
         Inventory result = new EmptyInventoryImpl(inventory);
-        for (Query operation : this.operations) {
+        for (org.spongepowered.common.inventory.query.Query operation : this.operations) {
             result = result.union(inventory.query(operation));
         }
         return result;

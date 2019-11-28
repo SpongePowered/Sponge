@@ -32,8 +32,7 @@ import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.inventory.util.TradeOfferUtil;
-
+import org.spongepowered.common.item.util.TradeOfferUtil;
 import java.util.List;
 import java.util.Random;
 

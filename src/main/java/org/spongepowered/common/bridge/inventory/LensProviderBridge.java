@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.bridge.inventory;
 
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public interface LensProviderBridge {
 
     Lens bridge$rootLens(Fabric fabric, InventoryAdapter adapter);
 
-    SlotProvider bridge$slotProvider(Fabric fabric, InventoryAdapter adapter);
+    SlotLensProvider bridge$slotProvider(Fabric fabric, InventoryAdapter adapter);
 }

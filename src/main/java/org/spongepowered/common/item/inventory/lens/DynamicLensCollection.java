@@ -25,6 +25,8 @@
 package org.spongepowered.common.item.inventory.lens;
 
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.LensCollection;
 
 /**
  * A type of Lens collection whose members are fixed but properties for member

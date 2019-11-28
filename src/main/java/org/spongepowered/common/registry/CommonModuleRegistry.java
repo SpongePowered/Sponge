@@ -154,13 +154,13 @@ import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
 import org.spongepowered.common.event.damage.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
+import org.spongepowered.common.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
-import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
+import org.spongepowered.common.item.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
-import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.inventory.query.SpongeTransformationBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
@@ -375,7 +375,7 @@ public final class CommonModuleRegistry {
                 .registerModule(Fish.class, new FishRegistryModule())
                 .registerModule(FluidType.class, FluidTypeRegistryModule.getInstance())
                 .registerModule(GameMode.class, new GameModeRegistryModule())
-                .registerModule(GeneratorType.class, GeneratorTypeRegistryModule.getInstance())
+                .registerModule(org.spongepowered.api.world.GeneratorType.class, GeneratorTypeRegistryModule.getInstance())
                 .registerModule(GoalType.class, GoalTypeModule.getInstance())
                 .registerModule(GoldenApple.class, new GoldenAppleRegistryModule())
                 .registerModule(Hinge.class, new HingeRegistryModule())
@@ -437,7 +437,7 @@ public final class CommonModuleRegistry {
                 .registerModule(WorldArchetype.class, WorldArchetypeRegistryModule.getInstance())
                 .registerModule(BossBarColor.class, new BossBarColorRegistryModule())
                 .registerModule(BossBarOverlay.class, new BossBarOverlayRegistryModule())
-                .registerModule(PortalAgentType.class, PortalAgentRegistryModule.getInstance())
+                .registerModule(org.spongepowered.api.world.PortalAgentType.class, PortalAgentRegistryModule.getInstance())
                 .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
                 .registerModule(PickupRule.class, new PickupRuleRegistryModule())
                 .registerModule(org.spongepowered.api.world.schematic.BlockPaletteType.class, new BlockPaletteTypeRegistryModule())
@@ -445,7 +445,7 @@ public final class CommonModuleRegistry {
                 .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
                 .registerModule(DismountType.class, new DismountTypeRegistryModule())
                 .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
-                .registerModule(GuiId.class, GuiIdRegistryModule.getInstance())
+                .registerModule(GuiId.class, ContainerTypeRegistryModule.getInstance())
                 .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
                 .registerModule(TransformationRegistryModule.getInstance())
                 .registerModule(StructureMode.class, new StructureModeRegistryModule())

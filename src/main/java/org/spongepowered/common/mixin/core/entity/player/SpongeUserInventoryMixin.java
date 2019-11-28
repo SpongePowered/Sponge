@@ -40,16 +40,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
-
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -65,7 +64,7 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     @Shadow public abstract int getSizeInventory();
 
     @Nullable private User impl$carrier;
-    @Nullable private MainPlayerInventoryAdapter impl$main;
+    @Nullable private PrimaryPlayerInventoryAdapter impl$main;
     @Nullable private EquipmentInventoryAdapter impl$equipment;
     @Nullable private SlotAdapter offhand;
 
@@ -76,8 +75,8 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     }
 
     @Override
-    public SlotProvider bridge$generateSlotProvider() {
-        return new SlotCollection.Builder()
+    public SlotLensProvider bridge$generateSlotProvider() {
+        return new SlotLensCollection.Builder()
             .add(this.mainInventory.size())
             .add(this.offHandInventory.size())
             .add(this.armorInventory.size(), EquipmentSlotAdapter.class)
@@ -86,7 +85,7 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     }
 
     @Override
-    public Lens bridge$generateLens(SlotProvider slots) {
+    public Lens bridge$generateLens(SlotLensProvider slots) {
         return new PlayerInventoryLens(this.getSizeInventory(), this.getClass(), slots);
     }
 
@@ -98,7 +97,7 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     @Override
     public PrimaryPlayerInventory getMain() {
         if (this.impl$main == null) {
-            this.impl$main = (MainPlayerInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getMainLens().getAdapter(this.bridge$getFabric(), this);
+            this.impl$main = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getMainLens().getAdapter(this.bridge$getFabric(), this);
         }
         return this.impl$main;
     }

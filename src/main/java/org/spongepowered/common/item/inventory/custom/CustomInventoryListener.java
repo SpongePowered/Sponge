@@ -29,8 +29,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.util.ContainerUtil;
-
+import org.spongepowered.common.inventory.util.ContainerUtil;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.function.Consumer;

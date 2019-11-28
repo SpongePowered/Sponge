@@ -25,9 +25,9 @@
 package org.spongepowered.common.item.inventory.query.result;
 
 import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
-import org.spongepowered.common.item.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.item.inventory.query.Result;
 
 import java.util.Collection;

@@ -33,8 +33,8 @@ import org.spongepowered.api.event.item.inventory.container.InteractContainerEve
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.item.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 public final class OpenInventoryState extends BasicInventoryPacketState {
 

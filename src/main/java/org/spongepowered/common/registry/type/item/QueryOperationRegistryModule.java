@@ -28,17 +28,16 @@ import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperationType;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperationTypes;
-import org.spongepowered.common.item.inventory.query.operation.InventoryPropertyQueryOperation;
-import org.spongepowered.common.item.inventory.query.operation.InventoryTranslationQueryOperation;
-import org.spongepowered.common.item.inventory.query.operation.InventoryTypeQueryOperation;
-import org.spongepowered.common.item.inventory.query.operation.ItemStackCustomOperation;
-import org.spongepowered.common.item.inventory.query.operation.ItemStackExactQueryOperation;
-import org.spongepowered.common.item.inventory.query.operation.ItemStackIgnoreQuantityOperation;
-import org.spongepowered.common.item.inventory.query.operation.ItemTypeQueryOperation;
-import org.spongepowered.common.item.inventory.query.operation.TypeQueryOperation;
-
+import org.spongepowered.common.inventory.query.SpongeQueryType;
+import org.spongepowered.common.inventory.query.SpongeQueryTypes;
+import org.spongepowered.common.inventory.query.type.InventoryPropertyMatcherQuery;
+import org.spongepowered.common.inventory.query.type.InventoryTranslationQuery;
+import org.spongepowered.common.inventory.query.type.InventoryTypeQuery;
+import org.spongepowered.common.inventory.query.type.ItemStackCustomQuery;
+import org.spongepowered.common.inventory.query.type.ItemStackExactQuery;
+import org.spongepowered.common.inventory.query.type.ItemStackIgnoreQuantityQuery;
+import org.spongepowered.common.inventory.query.type.ItemTypeQuery;
+import org.spongepowered.common.inventory.query.type.TypeQuery;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,17 +61,17 @@ public final class QueryOperationRegistryModule implements CatalogRegistryModule
 
     @Override
     public void registerDefaults() {
-        register(new SpongeQueryOperationType<>("inventory_type", InventoryTypeQueryOperation::new));
-        register(new SpongeQueryOperationType<>("type", TypeQueryOperation::new));
-        register(new SpongeQueryOperationType<>("item_type", ItemTypeQueryOperation::new));
-        register(new SpongeQueryOperationType<>("item_stack_ignore_quantity", ItemStackIgnoreQuantityOperation::new));
-        register(new SpongeQueryOperationType<>("item_stack_exact", ItemStackExactQueryOperation::new));
-        register(new SpongeQueryOperationType<>("item_stack_custom", ItemStackCustomOperation::new));
-        register(new SpongeQueryOperationType<>("inventory_property", InventoryPropertyQueryOperation::new));
-        register(new SpongeQueryOperationType<>("inventory_translation", InventoryTranslationQueryOperation::new));
+        register(new SpongeQueryType<>("inventory_type", InventoryTypeQuery::new));
+        register(new SpongeQueryType<>("type", TypeQuery::new));
+        register(new SpongeQueryType<>("item_type", ItemTypeQuery::new));
+        register(new SpongeQueryType<>("item_stack_ignore_quantity", ItemStackIgnoreQuantityQuery::new));
+        register(new SpongeQueryType<>("item_stack_exact", ItemStackExactQuery::new));
+        register(new SpongeQueryType<>("item_stack_custom", ItemStackCustomQuery::new));
+        register(new SpongeQueryType<>("inventory_property", InventoryPropertyMatcherQuery::new));
+        register(new SpongeQueryType<>("inventory_translation", InventoryTranslationQuery::new));
 
-        register(SpongeQueryOperationTypes.LENS);
-        register(SpongeQueryOperationTypes.SLOT_LENS);
+        register(SpongeQueryTypes.LENS);
+        register(SpongeQueryTypes.SLOT_LENS);
     }
 
     private void register(QueryOperationType<?> type) {

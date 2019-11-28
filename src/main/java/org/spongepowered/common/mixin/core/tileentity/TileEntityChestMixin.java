@@ -35,13 +35,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
@@ -63,14 +62,14 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
         return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
-    private SlotProvider impl$generateSlotProvider() {
-        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
+    private SlotLensProvider impl$generateSlotProvider() {
+        return new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens impl$generateRootLens(final SlotProvider slots) {
+    private GridInventoryLens impl$generateRootLens(final SlotLensProvider slots) {
         final int size = this.getSizeInventory();
-        return new GridInventoryLensImpl(0, 9, size / 9, 9, (Class<? extends Inventory>) this.getClass(), slots);
+        return new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(0, 9, size / 9, 9, (Class<? extends Inventory>) this.getClass(), slots);
     }
 
     /**

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
-import static org.spongepowered.common.item.inventory.util.InventoryUtil.toNativeInventory;
+import static org.spongepowered.common.inventory.util.InventoryUtil.toNativeInventory;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.crafting.CraftingManager;
@@ -38,8 +38,7 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-
+import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

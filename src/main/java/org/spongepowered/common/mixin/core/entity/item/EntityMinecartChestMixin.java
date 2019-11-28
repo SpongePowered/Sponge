@@ -29,16 +29,16 @@ import org.spongepowered.api.entity.vehicle.minecart.ChestMinecart;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 @Mixin(ChestMinecartEntity.class)
 @Implements(@Interface(iface = ChestMinecart.class, prefix = "minecart$"))
 public abstract class EntityMinecartChestMixin extends EntityMinecartContainerMixin {
 
     @Override
-    public Lens bridge$generateLens(SlotProvider slots) {
-        return new GridInventoryLensImpl(0, 9, 3, 9, this.bridge$getSlotProvider());
+    public Lens bridge$generateLens(SlotLensProvider slots) {
+        return new GridInventoryLens(0, 9, 3, 9, this.bridge$getSlotProvider());
     }
 }

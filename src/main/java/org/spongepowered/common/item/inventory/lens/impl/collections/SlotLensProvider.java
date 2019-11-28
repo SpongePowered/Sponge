@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.collections;
 
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 @FunctionalInterface
 public interface SlotLensProvider {

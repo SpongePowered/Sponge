@@ -59,8 +59,8 @@ import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.custom.CustomInventoryListener;
 import org.spongepowered.common.util.TypeTokenHelper;
 
