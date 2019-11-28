@@ -51,57 +51,57 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        this.field_76373_n = type;
+        this.damageType = type;
     }
 
     public void setEntitySource(final Entity entitySource) {
-        this.field_76386_o = entitySource;
+        this.damageSourceEntity = entitySource;
     }
 
     public void bridge$setDamageIsAbsolute() {
-        this.func_151518_m();
+        this.setDamageIsAbsolute();
     }
     public void bridge$setDamageBypassesArmor() {
-        this.func_76348_h();
+        this.setDamageBypassesArmor();
     }
 
     @Override
-    public Entity func_76346_g() {
+    public Entity getTrueSource() {
         return (Entity) getSource();
     }
 
     @Override
-    public boolean func_94541_c() {
+    public boolean isExplosion() {
         return this.isExplosive();
     }
 
     @Override
-    public boolean func_76363_c() {
+    public boolean isUnblockable() {
         return this.isBypassingArmor();
     }
 
     @Override
-    public boolean func_76357_e() {
+    public boolean canHarmInCreative() {
         return this.doesAffectCreative();
     }
 
     @Override
-    public boolean func_151517_h() {
+    public boolean isDamageAbsolute() {
         return this.isAbsolute();
     }
 
     @Override
-    public boolean func_76350_n() {
+    public boolean isDifficultyScaled() {
         return this.isScaledByDifficulty();
     }
 
     @Override
-    public boolean func_82725_o() {
+    public boolean isMagicDamage() {
         return this.isMagic();
     }
 
     @Override
-    public float func_76345_d() {
+    public float getHungerDamage() {
         return (float) this.getExhaustion();
     }
 

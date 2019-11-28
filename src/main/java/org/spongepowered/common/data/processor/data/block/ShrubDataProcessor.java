@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, Value<ShrubType>, ShrubData, ImmutableShrubData> {
 
     public ShrubDataProcessor() {
-        super(Keys.SHRUB_TYPE, input -> input.func_77973_b() == ItemTypes.TALLGRASS);
+        super(Keys.SHRUB_TYPE, input -> input.getItem() == ItemTypes.TALLGRASS);
     }
 
     @Override

@@ -89,7 +89,7 @@ public final class SpongePlayerDataHandler {
                     final CompoundNBT compound;
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
-                        compound = CompressedStreamTools.func_74796_a(stream);
+                        compound = CompressedStreamTools.readCompressed(stream);
                     } catch (Exception e) {
                         throw new RuntimeException("Failed to decompress playerdata for playerfile " + playerFile, e);
                     }
@@ -140,7 +140,7 @@ public final class SpongePlayerDataHandler {
             final Path finalDatPath = instance.playerDir.resolve(id + ".dat");
             final Path newDatPath = instance.playerDir.resolve(id + ".dat.tmp");
             try (final OutputStream stream = Files.newOutputStream(newDatPath, StandardOpenOption.CREATE)) {
-                CompressedStreamTools.func_74799_a(compound, stream);
+                CompressedStreamTools.writeCompressed(compound, stream);
             }
             Files.move(newDatPath, finalDatPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {

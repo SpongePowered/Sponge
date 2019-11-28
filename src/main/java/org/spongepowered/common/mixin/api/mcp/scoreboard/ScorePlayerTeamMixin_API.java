@@ -196,10 +196,10 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     public boolean removeMember(final Text member) {
         final String legacyName = SpongeTexts.toLegacy(member);
         if (this.scoreboard != null) {
-            final ScorePlayerTeam realTeam = this.scoreboard.func_96509_i(legacyName);
+            final ScorePlayerTeam realTeam = this.scoreboard.getPlayersTeam(legacyName);
 
             if (realTeam == (ScorePlayerTeam) (Object) this) {
-                this.scoreboard.func_96512_b(legacyName, realTeam);
+                this.scoreboard.removePlayerFromTeam(legacyName, realTeam);
                 return true;
             }
             return false;
@@ -217,7 +217,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
         if (this.scoreboard == null) {
             return false;
         }
-        this.scoreboard.func_96511_d((ScorePlayerTeam) (Object) this);
+        this.scoreboard.removeTeam((ScorePlayerTeam) (Object) this);
         this.scoreboard = null;
         return true;
     }

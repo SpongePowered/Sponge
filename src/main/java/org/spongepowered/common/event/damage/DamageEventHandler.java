@@ -93,11 +93,11 @@ public class DamageEventHandler {
 
     public static Optional<DamageFunction> createHardHatModifier(final LivingEntity entityLivingBase,
             final DamageSource damageSource) {
-        if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.func_184582_a(EquipmentSlotType.HEAD).func_190926_b()) {
+        if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.getItemStackFromSlot(EquipmentSlotType.HEAD).isEmpty()) {
             // TODO: direct cause creation: bad bad bad
             final DamageModifier modifier = DamageModifier.builder()
                 .cause(
-                    Cause.of(EventContext.empty(), ((ItemStack) entityLivingBase.func_184582_a(EquipmentSlotType.HEAD)).createSnapshot()))
+                    Cause.of(EventContext.empty(), ((ItemStack) entityLivingBase.getItemStackFromSlot(EquipmentSlotType.HEAD)).createSnapshot()))
                 .type(DamageModifierTypes.HARD_HAT)
                 .build();
             return Optional.of(new DamageFunction(modifier, HARD_HAT_FUNCTION));
@@ -109,21 +109,21 @@ public class DamageEventHandler {
 
     public static Optional<List<DamageFunction>> createArmorModifiers(final LivingEntity entityLivingBase,
             final DamageSource damageSource, double damage) {
-        if (!damageSource.func_76363_c()) {
+        if (!damageSource.isUnblockable()) {
             damage *= 25;
-            final net.minecraft.item.ItemStack[] inventory = Iterables.toArray(entityLivingBase.func_184193_aE(), net.minecraft.item.ItemStack.class);
+            final net.minecraft.item.ItemStack[] inventory = Iterables.toArray(entityLivingBase.getArmorInventoryList(), net.minecraft.item.ItemStack.class);
             final List<DamageFunction> modifiers = new ArrayList<>();
             final List<DamageObject> damageObjects = new ArrayList<>();
 
             for (int index = 0; index < inventory.length; index++) {
                 final net.minecraft.item.ItemStack itemStack = inventory[index];
-                if (itemStack.func_190926_b()) {
+                if (itemStack.isEmpty()) {
                     continue;
                 }
-                final Item item = itemStack.func_77973_b();
+                final Item item = itemStack.getItem();
                 if (item instanceof ArmorItem) {
                     final ArmorItem armor = (ArmorItem) item;
-                    final double reduction = armor.field_77879_b / 25D;
+                    final double reduction = armor.damageReduceAmount / 25D;
                     final DamageObject object = new DamageObject();
                     object.slot = index;
                     object.ratio = reduction;
@@ -189,11 +189,11 @@ public class DamageEventHandler {
      */
     public static void acceptArmorModifier(final LivingEntity entity, final DamageSource damageSource, final DamageModifier modifier, double damage) {
         final Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);
-        final Iterable<net.minecraft.item.ItemStack> inventory = entity.func_184193_aE();
+        final Iterable<net.minecraft.item.ItemStack> inventory = entity.getArmorInventoryList();
         if (property.isPresent()) {
             damage = Math.abs(damage) * 25;
             final net.minecraft.item.ItemStack stack = Iterables.get(inventory, property.get().slot);
-            if (stack.func_190926_b()) {
+            if (stack.isEmpty()) {
                 throw new IllegalStateException("Invalid slot position " + property.get().slot);
             }
 
@@ -217,8 +217,8 @@ public class DamageEventHandler {
     }
 
     public static Optional<DamageFunction> createResistanceModifier(final LivingEntity entityLivingBase, final DamageSource damageSource) {
-        if (!damageSource.func_151517_h() && entityLivingBase.func_70644_a(Effects.field_76429_m) && damageSource != DamageSource.field_76380_i) {
-            final PotionEffect effect = ((PotionEffect) entityLivingBase.func_70660_b(Effects.field_76429_m));
+        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(Effects.RESISTANCE) && damageSource != DamageSource.OUT_OF_WORLD) {
+            final PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(Effects.RESISTANCE));
             // TODO: direct cause creation: bad bad bad
             return Optional.of(new DamageFunction(DamageModifier.builder()
                                                .cause(Cause.of(EventContext.empty(), effect))
@@ -231,32 +231,32 @@ public class DamageEventHandler {
     private static double enchantmentDamageTracked;
 
     public static Optional<List<DamageFunction>> createEnchantmentModifiers(final LivingEntity entityLivingBase, final DamageSource damageSource) {
-        if (!damageSource.func_151517_h()) {
-            final Iterable<net.minecraft.item.ItemStack> inventory = entityLivingBase.func_184193_aE();
-            if (EnchantmentHelper.func_77508_a(Lists.newArrayList(entityLivingBase.func_184193_aE()), damageSource) == 0) {
+        if (!damageSource.isDamageAbsolute()) {
+            final Iterable<net.minecraft.item.ItemStack> inventory = entityLivingBase.getArmorInventoryList();
+            if (EnchantmentHelper.getEnchantmentModifierDamage(Lists.newArrayList(entityLivingBase.getArmorInventoryList()), damageSource) == 0) {
                 return Optional.empty();
             }
             final List<DamageFunction> modifiers = new ArrayList<>();
             boolean first = true;
             int totalModifier = 0;
             for (final net.minecraft.item.ItemStack itemStack : inventory) {
-                if (itemStack.func_190926_b()) {
+                if (itemStack.isEmpty()) {
                     continue;
                 }
                 final Multimap<Enchantment, Short> enchantments = LinkedHashMultimap.create();
-                final ListNBT enchantmentList = itemStack.func_77986_q();
+                final ListNBT enchantmentList = itemStack.getEnchantmentTagList();
                 if (enchantmentList == null) {
                     continue;
                 }
 
                 for (int i = 0; i < enchantmentList.func_74745_c(); ++i) {
-                    final short enchantmentId = enchantmentList.func_150305_b(i).func_74765_d(Constants.Item.ITEM_ENCHANTMENT_ID);
-                    final short level = enchantmentList.func_150305_b(i).func_74765_d(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
+                    final short enchantmentId = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
+                    final short level = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
-                    if (Enchantment.func_185262_c(enchantmentId) != null) {
+                    if (Enchantment.getEnchantmentByID(enchantmentId) != null) {
                         // Ok, we have an enchantment!
-                        final Enchantment enchantment = Enchantment.func_185262_c(enchantmentId);
-                        final int temp = enchantment.func_77318_a(level, damageSource);
+                        final Enchantment enchantment = Enchantment.getEnchantmentByID(enchantmentId);
+                        final int temp = enchantment.calcModifierDamage(level, damageSource);
                         if (temp != 0) {
                             enchantments.put(enchantment, level);
                         }
@@ -268,7 +268,7 @@ public class DamageEventHandler {
                     final DamageObject object = new DamageObject();
                     int modifierTemp = 0;
                     for (final short level : enchantment.getValue()) {
-                        modifierTemp += enchantment.getKey().func_77318_a(level, damageSource);
+                        modifierTemp += enchantment.getKey().calcModifierDamage(level, damageSource);
                     }
                     final int modifier = modifierTemp;
                     object.previousDamage = totalModifier;
@@ -319,7 +319,7 @@ public class DamageEventHandler {
 
     public static Optional<DamageFunction> createAbsorptionModifier(final LivingEntity entityLivingBase,
                                                                                                              final DamageSource damageSource) {
-        final float absorptionAmount = entityLivingBase.func_110139_bj();
+        final float absorptionAmount = entityLivingBase.getAbsorptionAmount();
         if (absorptionAmount > 0) {
             final DoubleUnaryOperator function = damage ->
                 -(Math.max(damage - Math.max(damage - absorptionAmount, 0.0F), 0.0F));
@@ -334,23 +334,23 @@ public class DamageEventHandler {
     }
 
     public static Location<World> findFirstMatchingBlock(final Entity entity, final AxisAlignedBB bb, final Predicate<BlockState> predicate) {
-        final int i = MathHelper.func_76128_c(bb.field_72340_a);
-        final int j = MathHelper.func_76128_c(bb.field_72336_d + 1.0D);
-        final int k = MathHelper.func_76128_c(bb.field_72338_b);
-        final int l = MathHelper.func_76128_c(bb.field_72337_e + 1.0D);
-        final int i1 = MathHelper.func_76128_c(bb.field_72339_c);
-        final int j1 = MathHelper.func_76128_c(bb.field_72334_f + 1.0D);
-        final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) entity.field_70170_p.func_72863_F();
+        final int i = MathHelper.floor(bb.minX);
+        final int j = MathHelper.floor(bb.maxX + 1.0D);
+        final int k = MathHelper.floor(bb.minY);
+        final int l = MathHelper.floor(bb.maxY + 1.0D);
+        final int i1 = MathHelper.floor(bb.minZ);
+        final int j1 = MathHelper.floor(bb.maxZ + 1.0D);
+        final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) entity.world.getChunkProvider();
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     final BlockPos blockPos = new BlockPos(k1, l1, i2);
-                    final Chunk chunk = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive(blockPos.func_177958_n() >> 4, blockPos.func_177952_p() >> 4);
+                    final Chunk chunk = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive(blockPos.getX() >> 4, blockPos.getZ() >> 4);
                     if (chunk == null) {
                         continue;
                     }
                     if (predicate.test(chunk.func_177435_g(blockPos))) {
-                        return new Location<>((World) entity.field_70170_p, k1, l1, i2);
+                        return new Location<>((World) entity.world, k1, l1, i2);
                     }
                 }
             }
@@ -369,14 +369,14 @@ public class DamageEventHandler {
      */
     public static void generateCauseFor(final DamageSource damageSource, final CauseStackManager.StackFrame frame) {
         if (damageSource instanceof IndirectEntityDamageSource) {
-            final net.minecraft.entity.Entity source = damageSource.func_76346_g();
+            final net.minecraft.entity.Entity source = damageSource.getTrueSource();
             if (!(source instanceof PlayerEntity) && source instanceof OwnershipTrackedBridge) {
                 final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) source;
                 ownerBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
                 ownerBridge.tracked$getOwnerReference().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
         } else if (damageSource instanceof EntityDamageSource) {
-            final net.minecraft.entity.Entity source = damageSource.func_76346_g();
+            final net.minecraft.entity.Entity source = damageSource.getTrueSource();
             if (!(source instanceof PlayerEntity) && source instanceof OwnershipTrackedBridge) {
                 final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) source;
                 ownerBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
@@ -385,7 +385,7 @@ public class DamageEventHandler {
         } else if (damageSource instanceof BlockDamageSource) {
             final Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             final BlockPos blockPos = VecHelper.toBlockPos(location);
-            final ChunkBridge mixinChunk = (ChunkBridge) ((net.minecraft.world.World) location.getExtent()).func_175726_f(blockPos);
+            final ChunkBridge mixinChunk = (ChunkBridge) ((net.minecraft.world.World) location.getExtent()).getChunkAt(blockPos);
             mixinChunk.bridge$getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             mixinChunk.bridge$getBlockOwner(blockPos).ifPresent(owner -> frame.addContext(EventContextKeys.CREATOR, owner));
         }
@@ -396,17 +396,17 @@ public class DamageEventHandler {
             final net.minecraft.item.ItemStack heldItem, final EnumCreatureAttribute creatureAttribute, final float attackStrength) {
         final Multimap<Enchantment, Integer> enchantments = LinkedHashMultimap.create();
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
-        if (!heldItem.func_190926_b()) {
-            final ListNBT nbttaglist = heldItem.func_77986_q();
+        if (!heldItem.isEmpty()) {
+            final ListNBT nbttaglist = heldItem.getEnchantmentTagList();
             if (nbttaglist.func_82582_d()) {
                 return ImmutableList.of();
             }
 
             for (int i = 0; i < nbttaglist.func_74745_c(); ++i) {
-                final int j = nbttaglist.func_150305_b(i).func_74765_d("id");
-                final int enchantmentLevel = nbttaglist.func_150305_b(i).func_74765_d("lvl");
+                final int j = nbttaglist.getCompound(i).getShort("id");
+                final int enchantmentLevel = nbttaglist.getCompound(i).getShort("lvl");
 
-                final Enchantment enchantment = Enchantment.func_185262_c(j);
+                final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
                 if (enchantment != null) {
                     enchantments.put(enchantment, enchantmentLevel);
                 }
@@ -424,7 +424,7 @@ public class DamageEventHandler {
                 final DoubleUnaryOperator enchantmentFunction = (damage) -> {
                     double totalDamage = 0;
                     for (final int level : enchantment.getValue()) {
-                        totalDamage += (double) enchantment.getKey().func_152376_a(level, creatureAttribute) * attackStrength;
+                        totalDamage += (double) enchantment.getKey().calcDamageByCreature(level, creatureAttribute) * attackStrength;
                     }
                     return totalDamage;
                 };
@@ -459,10 +459,10 @@ public class DamageEventHandler {
     }
 
     public static Optional<DamageFunction> createShieldFunction(final LivingEntity entity, final DamageSource source, final float amount) {
-        if (entity.func_184585_cz() && amount > 0.0 && ((EntityLivingBaseAccessor) entity).accessor$canBlockDamageSource(source)) {
+        if (entity.isActiveItemStackBlocking() && amount > 0.0 && ((EntityLivingBaseAccessor) entity).accessor$canBlockDamageSource(source)) {
             // TODO: direct cause creation: bad bad bad
             final DamageModifier modifier = DamageModifier.builder()
-                    .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) entity.func_184607_cu()).createSnapshot()))
+                    .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) entity.getActiveItemStack()).createSnapshot()))
                     .type(DamageModifierTypes.SHIELD)
                     .build();
             return Optional.of(new DamageFunction(modifier, (damage) -> -damage));

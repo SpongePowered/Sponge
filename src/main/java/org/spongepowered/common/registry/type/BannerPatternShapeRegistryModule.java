@@ -59,7 +59,7 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
     public void registerDefaults() {
         for (BannerPattern pattern : BannerPattern.values()) {
             this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
-            this.bannerPatternShapeMappings.put(pattern.func_190993_b().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
+            this.bannerPatternShapeMappings.put(pattern.getHashname().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
         }
     }
 
@@ -68,7 +68,7 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
         for (BannerPattern pattern : BannerPattern.values()) {
             if (!this.bannerPatternShapeMappings.containsKey(pattern.name())) {
                 this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
-                this.bannerPatternShapeMappings.put(pattern.func_190993_b().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
+                this.bannerPatternShapeMappings.put(pattern.getHashname().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
             }
         }
     }

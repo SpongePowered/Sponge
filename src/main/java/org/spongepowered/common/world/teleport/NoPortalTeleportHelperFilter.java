@@ -41,11 +41,11 @@ public class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return ((net.minecraft.block.BlockState) blockState).func_185904_a() != Material.field_151567_E && super.isSafeFloorMaterial(blockState);
+        return ((net.minecraft.block.BlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeFloorMaterial(blockState);
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
-        return ((net.minecraft.block.BlockState) blockState).func_185904_a() != Material.field_151567_E && super.isSafeBodyMaterial(blockState);
+        return ((net.minecraft.block.BlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeBodyMaterial(blockState);
     }
 }

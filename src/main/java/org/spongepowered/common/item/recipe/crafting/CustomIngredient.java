@@ -59,7 +59,7 @@ public class CustomIngredient extends Ingredient {
 
         for (final ItemStack itemStack : this.matchItems) {
             final net.minecraft.item.ItemStack nativeItem = ItemStackUtil.toNative(itemStack);
-            if (nativeItem.func_77973_b() == item.func_77973_b()) {
+            if (nativeItem.getItem() == item.getItem()) {
                 final int i = nativeItem.func_77960_j();
 
                 if (i == 32767 || i == item.func_77960_j())

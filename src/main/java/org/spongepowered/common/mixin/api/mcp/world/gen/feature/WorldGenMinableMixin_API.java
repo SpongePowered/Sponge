@@ -68,7 +68,7 @@ public abstract class WorldGenMinableMixin_API extends Feature implements Ore {
         // WorldGenMineable applies an 8 block offset to the blockpos
         final BlockPos position = new BlockPos(min.getX() - 8, min.getY(), min.getZ() - 8);
         for (int i = 0; i < n; i++) {
-            final BlockPos pos = position.func_177982_a(random.nextInt(size.getX()), this.api$height.getFlooredAmount(random), random.nextInt(size.getX()));
+            final BlockPos pos = position.add(random.nextInt(size.getX()), this.api$height.getFlooredAmount(random), random.nextInt(size.getX()));
             this.numberOfBlocks = this.api$size.getFlooredAmount(random);
             func_180709_b(world, random, pos);
         }

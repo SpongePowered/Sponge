@@ -62,7 +62,7 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
     @Override
     public void registerDefaults() {
         for (net.minecraft.item.DyeColor dyeColor : net.minecraft.item.DyeColor.values()) {
-            this.dyeColorMappings.put(dyeColor.func_176610_l().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
+            this.dyeColorMappings.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
         }
     }
 
@@ -70,7 +70,7 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
     public void registerAdditional() {
         for (net.minecraft.item.DyeColor dyeColor : net.minecraft.item.DyeColor.values()) {
             if (!this.dyeColorMappings.containsValue(dyeColor)) {
-                this.dyeColorMappings.put(dyeColor.func_176610_l().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
+                this.dyeColorMappings.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
             }
         }
     }

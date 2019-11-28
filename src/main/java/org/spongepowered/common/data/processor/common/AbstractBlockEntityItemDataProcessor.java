@@ -38,7 +38,7 @@ public abstract class AbstractBlockEntityItemDataProcessor<M extends DataManipul
     private final TileEntityType validTileId;
 
     protected AbstractBlockEntityItemDataProcessor(final Item item, final TileEntityType validTileId) {
-        super(incoming -> item.equals(incoming.func_77973_b()));
+        super(incoming -> item.equals(incoming.getItem()));
         this.validItem = item;
         this.validTileId = validTileId;
     }

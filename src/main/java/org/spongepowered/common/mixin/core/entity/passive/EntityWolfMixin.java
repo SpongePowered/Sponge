@@ -61,14 +61,14 @@ public abstract class EntityWolfMixin extends EntityAgeableMixin implements Aggr
         at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     private int impl$ChangeRandomForTameEvent(Random rand, int bound, PlayerEntity player, Hand hand) {
         int random = rand.nextInt(bound);
-        ItemStack stack = player.func_184586_b(hand);
+        ItemStack stack = player.getHeldItem(hand);
         if (random == 0) {
-            stack.func_190918_g(1);
+            stack.shrink(1);
             try {
                 Sponge.getCauseStackManager().pushCause(((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot());
                 Sponge.getCauseStackManager().pushCause(player);
                 if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (Wolf) this))) {
-                    stack.func_190917_f(1);
+                    stack.grow(1);
                     return random;
                 }
             } finally {

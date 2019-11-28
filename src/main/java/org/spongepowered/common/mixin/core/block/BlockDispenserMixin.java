@@ -74,7 +74,7 @@ import javax.annotation.Nullable;
 @Mixin(DispenserBlock.class)
 public abstract class BlockDispenserMixin extends BlockMixin {
 
-    private ItemStack originalItem = ItemStack.field_190927_a;
+    private ItemStack originalItem = ItemStack.EMPTY;
     private PhaseContext<?> impl$context = PhaseContext.empty();
 
     @Shadow protected abstract void dispense(World worldIn, BlockPos pos);
@@ -93,7 +93,7 @@ public abstract class BlockDispenserMixin extends BlockMixin {
     @Override
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
-            return Optional.of((BlockState) blockState.func_177226_a(DispenserBlock.field_176441_a, Constants.DirectionFunctions
+            return Optional.of((BlockState) blockState.func_177226_a(DispenserBlock.FACING, Constants.DirectionFunctions
                 .getFor(((ImmutableDirectionalData) manipulator).direction().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -102,21 +102,21 @@ public abstract class BlockDispenserMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DIRECTION)) {
-            return Optional.of((BlockState) blockState.func_177226_a(DispenserBlock.field_176441_a, Constants.DirectionFunctions.getFor((Direction) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(DispenserBlock.FACING, Constants.DirectionFunctions.getFor((Direction) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(DispenserBlock.field_176441_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(DispenserBlock.FACING)));
     }
 
     @Inject(method = "dispense", at = @At(value = "HEAD"))
     private void impl$CreateContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
-        final net.minecraft.block.BlockState state = worldIn.func_180495_p(pos);
+        final net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
         final SpongeBlockSnapshot spongeBlockSnapshot = ((WorldServerBridge) worldIn).bridge$createSnapshot(state, state, pos, BlockChangeFlags.ALL);
-        final ChunkBridge mixinChunk = (ChunkBridge) worldIn.func_175726_f(pos);
+        final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunkAt(pos);
         this.impl$context = BlockPhase.State.DISPENSE.createPhaseContext()
             .source(spongeBlockSnapshot)
             .owner(() -> mixinChunk.bridge$getBlockOwner(pos))
@@ -151,10 +151,10 @@ public abstract class BlockDispenserMixin extends BlockMixin {
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // If we captured nothing, simply set the slot contents and return
         if (context.getCapturedItemsOrEmptyList().isEmpty()) {
-            dispenser.func_70299_a(index, stack);
+            dispenser.setInventorySlotContents(index, stack);
             return;
         }
-        final ItemStack dispensedItem = context.getCapturedItems().get(0).func_92059_d();
+        final ItemStack dispensedItem = context.getCapturedItems().get(0).getItem();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(dispensedItem);
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
@@ -163,7 +163,7 @@ public abstract class BlockDispenserMixin extends BlockMixin {
             final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), ImmutableList.of(snapshot), original);
             SpongeImpl.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
-                dispenser.func_70299_a(index, this.originalItem);
+                dispenser.setInventorySlotContents(index, this.originalItem);
                 context.getCapturedItems().clear();
                 return;
             }
@@ -171,7 +171,7 @@ public abstract class BlockDispenserMixin extends BlockMixin {
                 context.getCapturedItems().clear();
             }
 
-            dispenser.func_70299_a(index, stack);
+            dispenser.setInventorySlotContents(index, stack);
         }
     }
 

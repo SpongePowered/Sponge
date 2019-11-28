@@ -102,7 +102,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 this.potionList.add(potionEffectType);
-                this.potionEffectTypeMap.put(Effect.field_188414_b.func_177774_c(potion).toString(), potionEffectType);
+                this.potionEffectTypeMap.put(Effect.field_188414_b.getKey(potion).toString(), potionEffectType);
             }
         }
     }
@@ -114,7 +114,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 if (!this.potionList.contains(potionEffectType)) {
                     this.potionList.add(potionEffectType);
-                    this.potionEffectTypeMap.put(Effect.field_188414_b.func_177774_c(potion).toString(), potionEffectType);
+                    this.potionEffectTypeMap.put(Effect.field_188414_b.getKey(potion).toString(), potionEffectType);
                 }
             }
         }

@@ -54,7 +54,7 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
     @Override
     public Optional<GroundLuminanceProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final float light = world.func_175642_b(LightType.BLOCK, VecHelper.toBlockPos(location));
+        final float light = world.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(location));
         return Optional.of(new GroundLuminanceProperty(light));
     }
 

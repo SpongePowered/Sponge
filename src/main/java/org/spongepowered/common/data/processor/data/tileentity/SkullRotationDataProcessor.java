@@ -72,7 +72,7 @@ public class SkullRotationDataProcessor
 
     @Override
     protected Optional<Direction> getVal(final SkullTileEntity skull) {
-        if (skull.func_145831_w().func_180495_p(skull.func_174877_v()).func_177229_b(SkullBlock.field_176418_a) != net.minecraft.util.Direction.UP) {
+        if (skull.getWorld().getBlockState(skull.getPos()).get(SkullBlock.field_176418_a) != net.minecraft.util.Direction.UP) {
             return Optional.empty();
         }
         final int rot = ((TileEntitySkullAccessor) skull).accessor$getSkullRotation() % 16;

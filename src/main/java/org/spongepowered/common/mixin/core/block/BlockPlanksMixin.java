@@ -74,6 +74,6 @@ public abstract class BlockPlanksMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableTreeData impl$getTreeTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.func_177229_b(BlockPlanks.field_176383_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(BlockPlanks.field_176383_a));
     }
 }

@@ -56,7 +56,7 @@ public abstract class BlockReedMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             final int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            return Optional.of((BlockState) blockState.func_177226_a(SugarCaneBlock.field_176355_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(SugarCaneBlock.AGE, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -65,13 +65,13 @@ public abstract class BlockReedMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             final int growth = (Integer) value;
-            return Optional.of((BlockState) blockState.func_177226_a(SugarCaneBlock.field_176355_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(SugarCaneBlock.AGE, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(SugarCaneBlock.field_176355_a), 0, 15);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(SugarCaneBlock.AGE), 0, 15);
     }
 
 }

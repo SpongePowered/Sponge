@@ -58,7 +58,7 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
             brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
             brewingStand.offer(brewingData);
 
-            ((BrewingStandTileEntity) brewingStand).func_145829_t();
+            ((BrewingStandTileEntity) brewingStand).validate();
             return brewingStand;
         });
     }

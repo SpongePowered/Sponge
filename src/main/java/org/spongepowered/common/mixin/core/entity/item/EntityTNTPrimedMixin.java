@@ -126,7 +126,7 @@ public abstract class EntityTNTPrimedMixin extends EntityMixin implements Entity
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
     private void onSpongeUpdateTNTPushPrime(final CallbackInfo ci) {
-        if (this.fuse == this.bridge$fuseDuration - 1 && !this.world.field_72995_K) {
+        if (this.fuse == this.bridge$fuseDuration - 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (this.impl$detonator != null) {
                     frame.pushCause(this.impl$detonator);

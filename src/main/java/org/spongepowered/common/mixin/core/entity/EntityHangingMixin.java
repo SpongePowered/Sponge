@@ -69,14 +69,14 @@ public abstract class EntityHangingMixin extends EntityMixin {
     @Override
     public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.func_74757_a("ignorePhysics", this.ignorePhysics);
+        compound.putBoolean("ignorePhysics", this.ignorePhysics);
     }
 
     @Override
     public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.func_74764_b("ignorePhysics")) {
-            this.ignorePhysics = compound.func_74767_n("ignorePhysics");
+        if (compound.contains("ignorePhysics")) {
+            this.ignorePhysics = compound.getBoolean("ignorePhysics");
         }
     }
 
@@ -101,13 +101,13 @@ public abstract class EntityHangingMixin extends EntityMixin {
     @Overwrite
     public ItemEntity entityDropItem(ItemStack stack, float offsetY) {
         // Sponge Start - Check for client worlds,, don't care about them really. If it's server world, then we care.
-        final double xOffset = ((float) this.facingDirection.func_82601_c() * 0.15F);
-        final double zOffset = ((float) this.facingDirection.func_82599_e() * 0.15F);
+        final double xOffset = ((float) this.facingDirection.getXOffset() * 0.15F);
+        final double zOffset = ((float) this.facingDirection.getZOffset() * 0.15F);
         if (((WorldBridge) this.world).bridge$isFake()) {
             // Sponge End
             ItemEntity entityitem = new ItemEntity(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
-            entityitem.func_174869_p();
-            this.world.func_72838_d(entityitem);
+            entityitem.setDefaultPickupDelay();
+            this.world.addEntity0(entityitem);
             return entityitem;
         }
         // Sponge - redirect server sided logic to sponge to handle cause stacks and phase states

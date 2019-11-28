@@ -44,8 +44,8 @@ public abstract class NetHandlerHandshakeTCPMixin {
     @Inject(method = "processHandshake", at = @At("HEAD"))
     private void impl$updateVersionAndHost(final CHandshakePacket packetIn, final CallbackInfo ci) {
         final NetworkManagerBridge info = (NetworkManagerBridge) this.networkManager;
-        info.bridge$setVersion(packetIn.func_149595_d());
-        info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(packetIn.field_149598_b), packetIn.field_149599_c);
+        info.bridge$setVersion(packetIn.getProtocolVersion());
+        info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(packetIn.ip), packetIn.port);
     }
 
 }

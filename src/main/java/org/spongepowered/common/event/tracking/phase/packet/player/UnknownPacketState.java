@@ -98,7 +98,7 @@ public final class UnknownPacketState extends BasicPacketState {
         context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
                 final UUID entityUuid = entry.getKey();
-                final net.minecraft.entity.Entity entityFromUuid = player.func_71121_q().func_175733_a(entityUuid);
+                final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().func_175733_a(entityUuid);
                 final Entity affectedEntity = (Entity) entityFromUuid;
                 if (entityFromUuid != null) {
                     final List<Entity> entities = entry.getValue()
@@ -124,7 +124,7 @@ public final class UnknownPacketState extends BasicPacketState {
         });
         context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
             final List<ItemEntity> items =
-                drops.stream().map(drop -> drop.create(player.func_71121_q())).collect(Collectors.toList());
+                drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
             final List<Entity> entities = items
                 .stream()
                 .map(entity -> (Entity) entity)

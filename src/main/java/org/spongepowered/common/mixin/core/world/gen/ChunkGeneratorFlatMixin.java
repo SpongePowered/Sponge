@@ -68,10 +68,10 @@ public class ChunkGeneratorFlatMixin implements  PopulatorProviderBridge {
             }
         }
 
-        if (this.flatWorldGenInfo.func_82644_b().containsKey("lake")) {
+        if (this.flatWorldGenInfo.getWorldFeatures().containsKey("lake")) {
             final Lake lake = Lake.builder()
                     .chance(1 / 4d)
-                    .liquidType((BlockState) Blocks.field_150355_j.func_176223_P())
+                    .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
             final FilteredPopulator filtered = new FilteredPopulator(lake);
@@ -79,10 +79,10 @@ public class ChunkGeneratorFlatMixin implements  PopulatorProviderBridge {
             generator.getPopulators().add(lake);
         }
 
-        if (this.flatWorldGenInfo.func_82644_b().containsKey("lava_lake")) {
+        if (this.flatWorldGenInfo.getWorldFeatures().containsKey("lava_lake")) {
             final Lake lake = Lake.builder()
                     .chance(1 / 8d)
-                    .liquidType((BlockState) Blocks.field_150355_j.func_176223_P())
+                    .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithVariance(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))
                     .build();

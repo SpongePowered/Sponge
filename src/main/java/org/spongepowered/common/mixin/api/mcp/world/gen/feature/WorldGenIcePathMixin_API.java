@@ -66,7 +66,7 @@ public abstract class WorldGenIcePathMixin_API extends Feature implements IcePat
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            func_180709_b(world, random, world.func_175645_m(chunkPos.func_177982_a(x, 0, z)));
+            func_180709_b(world, random, world.func_175645_m(chunkPos.add(x, 0, z)));
         }
     }
 

@@ -57,18 +57,18 @@ public abstract class BlockDoubleStoneSlabMixin extends BlockStoneSlabMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableSlabData impl$getSlabTypeFor(final BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSlabData.class,
-                blockState.func_177230_c() instanceof BlockStoneSlab
-                        ? (SlabType) (Object) blockState.func_177229_b(BlockStoneSlab.field_176556_M)
-                        : blockState.func_177230_c() instanceof BlockStoneSlabNew
-                                ? (SlabType) (Object) blockState.func_177229_b(BlockStoneSlabNew.field_176559_M)
+                blockState.getBlock() instanceof BlockStoneSlab
+                        ? (SlabType) (Object) blockState.get(BlockStoneSlab.field_176556_M)
+                        : blockState.getBlock() instanceof BlockStoneSlabNew
+                                ? (SlabType) (Object) blockState.get(BlockStoneSlabNew.field_176559_M)
                                 : SlabTypes.COBBLESTONE);
     }
 
     private ImmutableSeamlessData impl$getIsSeamlessFor(final BlockState blockState) {
-        if (blockState.func_177230_c() instanceof BlockStoneSlab) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.func_177229_b(BlockStoneSlab.field_176555_b));
+        if (blockState.getBlock() instanceof BlockStoneSlab) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.get(BlockStoneSlab.field_176555_b));
         }
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.func_177229_b(BlockStoneSlabNew.field_176558_b));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.get(BlockStoneSlabNew.field_176558_b));
     }
 
 }

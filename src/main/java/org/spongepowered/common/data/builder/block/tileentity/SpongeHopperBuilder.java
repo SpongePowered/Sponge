@@ -47,11 +47,11 @@ public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
                 ((HopperTileEntity) hopper).func_190575_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
             if (!container.contains(Keys.COOLDOWN.getQuery())) {
-                ((HopperTileEntity) hopper).func_145843_s();
+                ((HopperTileEntity) hopper).remove();
                 return Optional.empty();
             }
             ((TileEntityHopperAccessor) hopper).accessor$setTransferCooldown(container.getInt(Keys.COOLDOWN.getQuery()).get());
-            ((HopperTileEntity) hopper).func_145829_t();
+            ((HopperTileEntity) hopper).validate();
             return Optional.of(hopper);
         });
     }

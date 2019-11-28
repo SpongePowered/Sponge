@@ -59,7 +59,7 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     private void impl$updateBiomes(final CallbackInfo ci) {
         if (this.impl$updateBiomes) {
-            final Chunk chunk = this.playerChunkMap.func_72688_a().func_72964_e(this.pos.field_77276_a, this.pos.field_77275_b);
+            final Chunk chunk = this.playerChunkMap.func_72688_a().func_72964_e(this.pos.x, this.pos.z);
             this.sendPacket(new SChunkDataPacket(chunk, 65534));
             this.sendPacket(new SChunkDataPacket(chunk, 1));
             this.changes = 0;

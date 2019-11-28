@@ -81,7 +81,7 @@ public interface IRecipeMixin_API extends CraftingRecipe {
 
     @Override
     default String getId() {
-        return CraftingManager.field_193380_a.func_177774_c(((IRecipe) this)).toString();
+        return CraftingManager.field_193380_a.getKey(((IRecipe) this)).toString();
     }
 
     @Override
@@ -94,10 +94,10 @@ public interface IRecipeMixin_API extends CraftingRecipe {
         String group = "";
         if (this instanceof ShapedRecipe) {
 
-            group = ((ShapedRecipe) this).field_194137_e;
+            group = ((ShapedRecipe) this).group;
         }
         if (this instanceof ShapelessRecipe) {
-            group = ((ShapelessRecipe) this).field_194138_c;
+            group = ((ShapelessRecipe) this).group;
         }
         if (group.isEmpty()) {
             return Optional.empty();

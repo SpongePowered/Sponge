@@ -80,7 +80,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     private void impl$DisableTickingChestsOnServer(final CallbackInfo ci) {
-        if (this.world == null || !this.world.field_72995_K) {
+        if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
         }
@@ -97,16 +97,16 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
             ci.cancel();
             return;
         }
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 
         this.checkForAdjacentChests();
         if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
             this.lidAngle = 0.7F;
-            double posX = this.pos.func_177958_n() + 0.5D;
-            final double posY = this.pos.func_177956_o() + 0.5D;
-            double posZ = this.pos.func_177952_p() + 0.5D;
+            double posX = this.pos.getX() + 0.5D;
+            final double posY = this.pos.getY() + 0.5D;
+            double posZ = this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {
                 posX += 0.5D;
@@ -116,7 +116,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
                 posZ += 0.5D;
             }
 
-            this.world.func_184148_a(null, posX, posY, posZ, SoundEvents.field_187657_V, SoundCategory.BLOCKS, 0.5F, this.world.field_73012_v.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
@@ -132,7 +132,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
             ci.cancel();
             return;
         }
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 
@@ -145,9 +145,9 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
                 this.lidAngle = 0.0f;
             }
 
-            double posX = this.pos.func_177958_n() + 0.5D;
-            final double posY = this.pos.func_177956_o() + 0.5D;
-            double posZ = this.pos.func_177952_p() + 0.5D;
+            double posX = this.pos.getX() + 0.5D;
+            final double posY = this.pos.getY() + 0.5D;
+            double posZ = this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {
                 posX += 0.5D;
@@ -157,7 +157,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
                 posZ += 0.5D;
             }
 
-            this.world.func_184148_a(null, posX, posY, posZ, SoundEvents.field_187651_T, SoundCategory.BLOCKS, 0.5F, this.world.field_73012_v.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 

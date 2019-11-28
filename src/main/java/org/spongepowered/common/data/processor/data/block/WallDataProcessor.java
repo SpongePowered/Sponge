@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Value<WallType>, WallData, ImmutableWallData> {
 
     public WallDataProcessor() {
-        super(Keys.WALL_TYPE, input -> input.func_77973_b() == ItemTypes.COBBLESTONE_WALL);
+        super(Keys.WALL_TYPE, input -> input.getItem() == ItemTypes.COBBLESTONE_WALL);
     }
 
     @Override

@@ -52,9 +52,9 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (container instanceof net.minecraft.entity.Entity) {
             final net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) container);
-            if (entity.func_184218_aH()) {
-                final Entity vehicle = (Entity) entity.func_184187_bx();
-                entity.func_184210_p();
+            if (entity.isPassenger()) {
+                final Entity vehicle = (Entity) entity.getRidingEntity();
+                entity.stopRiding();
                 return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, vehicle.createSnapshot()));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
@@ -74,7 +74,7 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
 
     @Override
     protected Optional<EntitySnapshot> getVal(final net.minecraft.entity.Entity container) {
-        final Entity entity = (Entity) container.func_184187_bx();
+        final Entity entity = (Entity) container.getRidingEntity();
         if (entity == null) {
             return Optional.empty();
         }

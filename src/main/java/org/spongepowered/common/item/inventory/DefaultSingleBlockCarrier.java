@@ -43,7 +43,7 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
     static Inventory getInventory(Direction from, BlockCarrier thisThing) {
         if (thisThing instanceof ISidedInventory) {
             net.minecraft.util.Direction facing = DirectionFacingProvider.getInstance().get(from).get();
-            int[] slots = ((ISidedInventory) thisThing).func_180463_a(facing);
+            int[] slots = ((ISidedInventory) thisThing).getSlotsForFace(facing);
             SlotIndex[] indices = new SlotIndex[slots.length];
             for (int i = 0; i < slots.length; i++) {
                 indices[i] = SlotIndex.of(slots[i]);

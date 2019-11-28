@@ -40,7 +40,7 @@ public class PrismarineDataProcessor extends
         AbstractCatalogDataProcessor<PrismarineType, Value<PrismarineType>, PrismarineData, ImmutablePrismarineData> {
 
     public PrismarineDataProcessor() {
-        super(Keys.PRISMARINE_TYPE, input -> input.func_77973_b() == ItemTypes.PRISMARINE);
+        super(Keys.PRISMARINE_TYPE, input -> input.getItem() == ItemTypes.PRISMARINE);
     }
 
     @Override

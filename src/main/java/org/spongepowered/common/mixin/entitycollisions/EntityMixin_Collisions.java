@@ -58,7 +58,7 @@ public class EntityMixin_Collisions implements CollisionsCapability {
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void collisions$InjectActivationInformation(final World world, final CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.func_72912_H()).bridge$isValid()) {
+        if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
             final EntityType entityType = ((Entity) this).getType();
             if (entityType == EntityTypes.UNKNOWN || !(entityType instanceof SpongeEntityType)) {
                 return;
@@ -67,16 +67,16 @@ public class EntityMixin_Collisions implements CollisionsCapability {
 
             if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
                 final ItemEntity item = (ItemEntity) (Object) this;
-                final ItemStack itemstack = item.func_92059_d();
-                if (!itemstack.func_190926_b()) {
-                    this.collision$entityName = itemstack.func_77977_a().replace("item.", "");
+                final ItemStack itemstack = item.getItem();
+                if (!itemstack.isEmpty()) {
+                    this.collision$entityName = itemstack.getTranslationKey().replace("item.", "");
                 }
             } else {
                 this.collision$entityName = ((Entity) this).getType().getName();
             }
 
             this.collision$entityModId = ((SpongeEntityType) ((Entity) this).getType()).getModId();
-            if (!this.world.field_72995_K) {
+            if (!this.world.isRemote) {
                 collision$initializeCollisionState(this.world);
             }
         }
@@ -115,7 +115,7 @@ public class EntityMixin_Collisions implements CollisionsCapability {
     @SuppressWarnings({"ConstantConditions", "Duplicates"})
     @Override
     public void collision$initializeCollisionState(final World world) {
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.func_72912_H()).bridge$getConfigAdapter();
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
         final EntityCollisionCategory worldCollCat = worldConfigAdapter.getConfig().getEntityCollisionCategory();
         final EntityCollisionCategory globalCollCat = globalConfigAdapter.getConfig().getEntityCollisionCategory();

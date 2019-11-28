@@ -44,7 +44,7 @@ public class SpongeDropperBuilder extends SpongeLockableBuilder<Dropper> {
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
                 ((DropperTileEntity) dropper).func_190575_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
-            ((DropperTileEntity) dropper).func_145829_t();
+            ((DropperTileEntity) dropper).validate();
             return dropper;
         });
     }

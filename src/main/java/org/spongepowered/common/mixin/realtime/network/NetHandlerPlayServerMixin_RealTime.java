@@ -55,7 +55,7 @@ public abstract class NetHandlerPlayServerMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeChatSpamCheck(final ServerPlayNetHandler self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.field_70170_p).bridge$isFake()) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.world).bridge$isFake()) {
             this.chatSpamThresholdCount = modifier;
             return;
         }
@@ -72,7 +72,7 @@ public abstract class NetHandlerPlayServerMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeDropSpamCheck(final ServerPlayNetHandler self, final int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.field_70170_p).bridge$isFake()) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.world).bridge$isFake()) {
             this.itemDropThreshold = modifier;
             return;
         }

@@ -67,9 +67,9 @@ public class FireworkRocketDataProcessor extends
     @Override
     protected Optional<Integer> getVal(final FireworkRocketEntity firework) {
         final ItemStack item = FireworkUtils.getItem(firework);
-        final CompoundNBT fireworks = item.func_190925_c("Fireworks");
-        if (fireworks.func_74764_b("Flight")) {
-            return Optional.of((int) fireworks.func_74771_c("Flight"));
+        final CompoundNBT fireworks = item.getOrCreateChildTag("Fireworks");
+        if (fireworks.contains("Flight")) {
+            return Optional.of((int) fireworks.getByte("Flight"));
         }
         return Optional.empty();
 
@@ -78,8 +78,8 @@ public class FireworkRocketDataProcessor extends
     @Override
     protected boolean set(final FireworkRocketEntity firework, final Integer modifier) {
         final ItemStack item = FireworkUtils.getItem(firework);
-        final CompoundNBT fireworks = item.func_190925_c("Fireworks");
-        fireworks.func_74774_a("Flight", modifier.byteValue());
+        final CompoundNBT fireworks = item.getOrCreateChildTag("Fireworks");
+        fireworks.putByte("Flight", modifier.byteValue());
         ((EntityFireworkRocketAccessor) firework).spongeImpl$setLifeTime(10 * modifier.byteValue() + ((EntityAccessor) firework).accessor$getRandom().nextInt(6) + ((EntityAccessor) firework).accessor$getRandom().nextInt(7));
         return true;
     }

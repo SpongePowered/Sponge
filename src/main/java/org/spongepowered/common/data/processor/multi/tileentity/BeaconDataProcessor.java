@@ -63,7 +63,7 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<BeaconT
         ((TileEntityBeaconBridge) dataHolder).bridge$forceSetPrimaryEffect(primary);
         ((TileEntityBeaconBridge) dataHolder).bridge$forceSetSecondaryEffect(secondary);
 
-        dataHolder.func_70296_d();
+        dataHolder.markDirty();
         return true;
     }
 
@@ -73,10 +73,10 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<BeaconT
         int primaryID = dataHolder.func_174887_a_(1);
         int secondaryID = dataHolder.func_174887_a_(2);
         if (primaryID > 0) {
-            builder.put(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(Effect.func_188412_a(primaryID)));
+            builder.put(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(Effect.get(primaryID)));
         }
         if (secondaryID > 0 && dataHolder.func_174887_a_(0) == 4) {
-            builder.put(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(Effect.func_188412_a(secondaryID)));
+            builder.put(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(Effect.get(secondaryID)));
         }
         return builder.build();
     }

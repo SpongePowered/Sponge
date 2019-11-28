@@ -168,7 +168,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .with(MENU_GRID)
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.chest"))))
             .property(new GuiIdProperty(GuiIds.CHEST))
-            .container((i, p) -> new ChestContainer(p.field_71071_by, i, p))
+            .container((i, p) -> new ChestContainer(p.inventory, i, p))
             .build("minecraft:chest", "Chest");
 
         DOUBLE_CHEST = builder.reset()
@@ -176,7 +176,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(9, 6))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.chestDouble"))))
             .property(new GuiIdProperty(GuiIds.CHEST))
-            .container((i, p) -> new ChestContainer(p.field_71071_by, i, p))
+            .container((i, p) -> new ChestContainer(p.inventory, i, p))
             .build("minecraft:double_chest", "DoubleChest");
 
         FURNACE = builder.reset()
@@ -197,7 +197,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryTitle(Text.of(new SpongeTranslation("container.furnace"))))
             .property(new InventoryDimension(3, 1))
             .property(new GuiIdProperty(GuiIds.FURNACE))
-            .container((i, p) -> new FurnaceContainer(p.field_71071_by, i))
+            .container((i, p) -> new FurnaceContainer(p.inventory, i))
             .build("minecraft:furnace", "Furnace");
 
         DISPENSER = builder.reset()
@@ -205,7 +205,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(3, 3))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.dispenser"))))
             .property(new GuiIdProperty(GuiIds.DISPENSER))
-            .container((i, p) -> new DispenserContainer(p.field_71071_by, i))
+            .container((i, p) -> new DispenserContainer(p.inventory, i))
             .build("minecraft:dispenser", "Dispenser");
 
         WORKBENCH = builder.reset()
@@ -217,10 +217,10 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.crafting"))))
             .property(new GuiIdProperty(GuiIds.CRAFTING_TABLE))
             .container((i, p) -> {
-                WorkbenchContainer container = new WorkbenchContainer(p.field_71071_by, p.func_130014_f_(), p.func_180425_c());
+                WorkbenchContainer container = new WorkbenchContainer(p.inventory, p.getEntityWorld(), p.getPosition());
                 // Pre-Fills the container input with the items from the inventory
-                for (int index = 0; index < container.field_75162_e.func_70302_i_(); index++) {
-                    container.field_75162_e.func_70299_a(index, i.func_70301_a(index));
+                for (int index = 0; index < container.field_75162_e.getSizeInventory(); index++) {
+                    container.field_75162_e.setInventorySlotContents(index, i.getStackInSlot(index));
                 }
                 return container;
             })
@@ -232,7 +232,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(5, 1))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.brewing"))))
             .property(new GuiIdProperty(GuiIds.BREWING_STAND))
-            .container((i, p) -> new BrewingStandContainer(p.field_71071_by, i))
+            .container((i, p) -> new BrewingStandContainer(p.inventory, i))
             .build("minecraft:brewing_stand", "BrewingStand");
 
         HOPPER = builder.reset()
@@ -240,7 +240,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(5, 1))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.hopper"))))
             .property(new GuiIdProperty(GuiIds.HOPPER))
-            .container((i, p) -> new HopperContainer(p.field_71071_by, i, p))
+            .container((i, p) -> new HopperContainer(p.inventory, i, p))
             .build("minecraft:hopper", "Hopper");
 
         BEACON = builder.reset()
@@ -248,7 +248,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(new InventoryDimension(1, 1))
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.beacon"))))
             .property(new GuiIdProperty(GuiIds.BEACON))
-            .container((i, p) -> new BeaconContainer(p.field_71071_by, i))
+            .container((i, p) -> new BeaconContainer(p.inventory, i))
             .build("minecraft:beacon", "Beacon");
 
         ENCHANTING_TABLE = builder.reset()
@@ -258,10 +258,10 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.enchant"))))
             .property(new GuiIdProperty(GuiIds.ENCHANTING_TABLE))
             .container((i, p) -> {
-                EnchantmentContainer container = new EnchantmentContainer(p.field_71071_by, p.func_130014_f_(), p.func_180425_c());
+                EnchantmentContainer container = new EnchantmentContainer(p.inventory, p.getEntityWorld(), p.getPosition());
                 // Pre-Fills the container with the items from the inventory
-                for (int index = 0; index < container.field_75168_e.func_70302_i_(); index++) {
-                    container.field_75168_e.func_70299_a(index, i.func_70301_a(index));
+                for (int index = 0; index < container.tableInventory.getSizeInventory(); index++) {
+                    container.tableInventory.setInventorySlotContents(index, i.getStackInSlot(index));
                 }
                 return container;
             })
@@ -276,10 +276,10 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.repair"))))
             .property(new GuiIdProperty(GuiIds.ANVIL))
             .container((i, p) -> {
-                RepairContainer container = new RepairContainer(p.field_71071_by, p.func_130014_f_(), p.func_180425_c(), p);
+                RepairContainer container = new RepairContainer(p.inventory, p.getEntityWorld(), p.getPosition(), p);
                 // Pre-Fills the container input with the items from the inventory
-                for (int index = 0; index < ((ContainerRepairAccessor) container).accessor$getInputSlots().func_70302_i_(); index++) {
-                    ((ContainerRepairAccessor) container).accessor$getInputSlots().func_70299_a(index, i.func_70301_a(index));
+                for (int index = 0; index < ((ContainerRepairAccessor) container).accessor$getInputSlots().getSizeInventory(); index++) {
+                    ((ContainerRepairAccessor) container).accessor$getInputSlots().setInventorySlotContents(index, i.getStackInSlot(index));
                 }
                 return container;
             })
@@ -297,7 +297,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
                             && ((CarriedInventory) i).getCarrier().isPresent()
                             && ((CarriedInventory) i).getCarrier().get() instanceof IMerchant) {
                         IMerchant merchant = ((IMerchant) ((CarriedInventory) i).getCarrier().get());
-                        MerchantContainer container = new MerchantContainer(p.field_71071_by, merchant, p.func_130014_f_());
+                        MerchantContainer container = new MerchantContainer(p.inventory, merchant, p.getEntityWorld());
                         // TODO Pre-Fill the Container?
                         return container;
                     }
@@ -315,7 +315,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
                             && ((CarriedInventory) i).getCarrier().isPresent()
                             && ((CarriedInventory) i).getCarrier().get() instanceof AbstractHorseEntity) {
                         AbstractHorseEntity horse = ((AbstractHorseEntity) ((CarriedInventory) i).getCarrier().get());
-                        return new HorseInventoryContainer(p.field_71071_by, i, horse, p);
+                        return new HorseInventoryContainer(p.inventory, i, horse, p);
                     }
                     throw new IllegalArgumentException("Cannot open horse inventory without a horse as Carrier");
                 })
@@ -335,7 +335,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
                         && ((CarriedInventory) i).getCarrier().get() instanceof AbstractHorseEntity) {
                     AbstractHorseEntity horse = ((AbstractHorseEntity) ((CarriedInventory) i).getCarrier().get());
                     // TODO size
-                    return new HorseInventoryContainer(p.field_71071_by, i, horse, p);
+                    return new HorseInventoryContainer(p.inventory, i, horse, p);
                 }
                 throw new IllegalArgumentException("Cannot open horse inventory without a horse as Carrier");
             })

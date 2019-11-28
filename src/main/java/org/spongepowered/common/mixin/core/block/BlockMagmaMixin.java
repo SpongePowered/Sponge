@@ -51,19 +51,19 @@ public abstract class BlockMagmaMixin extends BlockMixin {
     )
     private boolean impl$SwapDamageSourceForMagma(final Entity entity, final DamageSource source, final float damage, final World world,
             final BlockPos pos, final Entity original) {
-        if (!world.field_72995_K) {
+        if (!world.isRemote) {
             try {
                 final Vector3i blockPosition = VecHelper.toVector3i(pos);
                 final Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) world, blockPosition);
                 final MinecraftBlockDamageSource hotFloor = new MinecraftBlockDamageSource("hotFloor", location);
                 hotFloor.impl$setFireDamage();
                 ((DamageSourceBridge) hotFloor).bridge$setHotFloorSource();
-                return entity.func_70097_a(DamageSource.field_190095_e, damage);
+                return entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
             } finally {
                 ((DamageSourceBridge) source).bridge$setHotFloorSource();
             }
         }
-        return entity.func_70097_a(source, damage);
+        return entity.attackEntityFrom(source, damage);
     }
 
 }

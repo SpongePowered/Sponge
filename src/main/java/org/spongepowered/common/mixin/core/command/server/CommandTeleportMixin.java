@@ -73,18 +73,18 @@ public abstract class CommandTeleportMixin extends CommandBase {
         {
             final Entity entity = func_184885_b(server, sender, args[0]);
 
-            if (entity.field_70170_p != null)
+            if (entity.world != null)
             {
                 // int i = 4096;
-                final Vec3d vec3d = sender.func_174791_d();
+                final Vec3d vec3d = sender.getPositionVector();
                 int j = 1;
-                final CommandBase.CoordinateArg commandbase$coordinatearg = func_175770_a(vec3d.field_72450_a, args[j++], true);
-                final CommandBase.CoordinateArg commandbase$coordinatearg1 = func_175767_a(vec3d.field_72448_b, args[j++], -4096, 4096, false);
-                final CommandBase.CoordinateArg commandbase$coordinatearg2 = func_175770_a(vec3d.field_72449_c, args[j++], true);
+                final CommandBase.CoordinateArg commandbase$coordinatearg = func_175770_a(vec3d.x, args[j++], true);
+                final CommandBase.CoordinateArg commandbase$coordinatearg1 = func_175767_a(vec3d.y, args[j++], -4096, 4096, false);
+                final CommandBase.CoordinateArg commandbase$coordinatearg2 = func_175770_a(vec3d.z, args[j++], true);
                 final Entity entity1 = sender.func_174793_f() == null ? entity : sender.func_174793_f();
-                final CommandBase.CoordinateArg commandbase$coordinatearg3 = func_175770_a(args.length > j ? (double)entity1.field_70177_z : (double)entity.field_70177_z, args.length > j ? args[j] : "~", false);
+                final CommandBase.CoordinateArg commandbase$coordinatearg3 = func_175770_a(args.length > j ? (double)entity1.rotationYaw : (double)entity.rotationYaw, args.length > j ? args[j] : "~", false);
                 ++j;
-                final CommandBase.CoordinateArg commandbase$coordinatearg4 = func_175770_a(args.length > j ? (double)entity1.field_70125_A : (double)entity.field_70125_A, args.length > j ? args[j] : "~", false);
+                final CommandBase.CoordinateArg commandbase$coordinatearg4 = func_175770_a(args.length > j ? (double)entity1.rotationPitch : (double)entity.rotationPitch, args.length > j ? args[j] : "~", false);
                 // Sponge start - check impl$shouldNotifyCommandListener before calling 'notifyCommandListener'
 
                 // Guard against any possible re-entrance
@@ -118,7 +118,7 @@ public abstract class CommandTeleportMixin extends CommandBase {
             }
             else
             {
-                f = MathHelper.func_76142_g(f);
+                f = MathHelper.wrapDegrees(f);
             }
 
             float f1 = (float)p_189862_5_.func_179629_b();
@@ -129,7 +129,7 @@ public abstract class CommandTeleportMixin extends CommandBase {
             }
             else
             {
-                f1 = MathHelper.func_76142_g(f1);
+                f1 = MathHelper.wrapDegrees(f1);
             }
 
             // Sponge start
@@ -144,18 +144,18 @@ public abstract class CommandTeleportMixin extends CommandBase {
                     return;
                 }
 
-                p_189862_0_.func_184210_p();
+                p_189862_0_.stopRiding();
                 final Vector3d position = event.getToTransform().getPosition();
-                ((ServerPlayerEntity)p_189862_0_).field_71135_a.func_175089_a(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch(), set);
-                p_189862_0_.func_70034_d((float) event.getToTransform().getYaw());
+                ((ServerPlayerEntity)p_189862_0_).connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch(), set);
+                p_189862_0_.setRotationYawHead((float) event.getToTransform().getYaw());
             }
             // Sponge end
         }
         else
         {
-            final float f2 = (float)MathHelper.func_76138_g(p_189862_4_.func_179628_a());
-            float f3 = (float)MathHelper.func_76138_g(p_189862_5_.func_179628_a());
-            f3 = MathHelper.func_76131_a(f3, -90.0F, 90.0F);
+            final float f2 = (float)MathHelper.wrapDegrees(p_189862_4_.func_179628_a());
+            float f3 = (float)MathHelper.wrapDegrees(p_189862_5_.func_179628_a());
+            f3 = MathHelper.clamp(f3, -90.0F, 90.0F);
 
             // Sponge start
             final double x = p_189862_1_.func_179628_a();
@@ -169,16 +169,16 @@ public abstract class CommandTeleportMixin extends CommandBase {
                 }
 
                 final Vector3d position = event.getToTransform().getPosition();
-                p_189862_0_.func_70012_b(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
-                p_189862_0_.func_70034_d((float) event.getToTransform().getYaw());
+                p_189862_0_.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                p_189862_0_.setRotationYawHead((float) event.getToTransform().getYaw());
             }
             // Sponge end
         }
 
-        if (!(p_189862_0_ instanceof LivingEntity) || !((LivingEntity)p_189862_0_).func_184613_cA())
+        if (!(p_189862_0_ instanceof LivingEntity) || !((LivingEntity)p_189862_0_).isElytraFlying())
         {
             p_189862_0_.field_70181_x = 0.0D;
-            p_189862_0_.field_70122_E = true;
+            p_189862_0_.onGround = true;
         }
 
         // Sponge start - set 'impl$shouldNotifyCommandListener' to 'true' if we make it to the end of the method (the event wasn't cancelled)

@@ -63,7 +63,7 @@ public abstract class EntityZombieVillagerMixin_RealTime extends EntityLivingBas
         if (((WorldBridge) this.world).bridge$isFake()) {
             return this.getConversionProgress();
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
         return this.getConversionProgress() * ticks;
     }
 

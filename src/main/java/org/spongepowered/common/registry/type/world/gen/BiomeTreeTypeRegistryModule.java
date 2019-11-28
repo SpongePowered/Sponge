@@ -71,14 +71,14 @@ public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogT
         register(create("tall_taiga", new TallTaigaTreeFeature(false), tall_megapine));
         register(create("pointy_taiga", new PointyTaigaTreeFeature(), megapine));
 
-        BlockState jlog = Blocks.field_150364_r.func_176223_P()
+        BlockState jlog = Blocks.field_150364_r.getDefaultState()
             .func_177226_a(BlockOldLog.field_176301_b, BlockPlanks.EnumType.JUNGLE);
 
-        BlockState jleaf = Blocks.field_150362_t.func_176223_P()
+        BlockState jleaf = Blocks.field_150362_t.getDefaultState()
             .func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE)
             .func_177226_a(LeavesBlock.field_176236_b, Boolean.valueOf(false));
 
-        BlockState leaf = Blocks.field_150362_t.func_176223_P()
+        BlockState leaf = Blocks.field_150362_t.getDefaultState()
             .func_177226_a(BlockOldLeaf.field_176239_P, BlockPlanks.EnumType.JUNGLE)
             .func_177226_a(LeavesBlock.field_176236_b, Boolean.valueOf(false));
 

@@ -55,10 +55,10 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Furn
     @Override
     protected boolean set(FurnaceTileEntity container, Integer value) {
         if (!container.func_145950_i() && value > 0 || container.func_145950_i() && value == 0) {
-            final World world = (World) container.func_145831_w();
-            world.setBlockType(container.func_174877_v().func_177958_n(), container.func_174877_v().func_177956_o(),
-                    container.func_174877_v().func_177952_p(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
-            container = (FurnaceTileEntity) container.func_145831_w().func_175625_s(container.func_174877_v());
+            final World world = (World) container.getWorld();
+            world.setBlockType(container.getPos().getX(), container.getPos().getY(),
+                    container.getPos().getZ(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
+            container = (FurnaceTileEntity) container.getWorld().getTileEntity(container.getPos());
         }
         container.func_174885_b(1, value);
         return true;

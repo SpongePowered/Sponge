@@ -37,6 +37,6 @@ public class AdvancementManagerMixin {
 
     @Inject(method = "reload", at = @At("RETURN"))
     private void impl$reloadAdvancementProgressforPlayerList(final CallbackInfo ci) {
-        ((PlayerListBridge) SpongeImpl.getServer().func_184103_al()).bridge$reloadAdvancementProgress();
+        ((PlayerListBridge) SpongeImpl.getServer().getPlayerList()).bridge$reloadAdvancementProgress();
     }
 }

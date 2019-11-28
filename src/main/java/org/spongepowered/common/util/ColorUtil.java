@@ -41,23 +41,23 @@ public final class ColorUtil {
 
     public static Optional<Color> getItemStackColor(final ItemStack stack) {
         // Special case for armor: it has a special method
-        final Item item = stack.func_77973_b();
+        final Item item = stack.getItem();
         if (item instanceof ArmorItem) {
-            final CompoundNBT tagCompound = stack.func_77978_p();
-            if (tagCompound == null || !tagCompound.func_74764_b(Constants.Item.Armor.ARMOR_COLOR_DISPLAY_TAG)) {
+            final CompoundNBT tagCompound = stack.getTag();
+            if (tagCompound == null || !tagCompound.contains(Constants.Item.Armor.ARMOR_COLOR_DISPLAY_TAG)) {
                 return Optional.empty();
             }
             final int color = ((ArmorItem) item).func_82814_b(stack);
             return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }
-        final CompoundNBT compound = stack.func_77978_p();
+        final CompoundNBT compound = stack.getTag();
         if (compound == null) {
             return Optional.empty();
         }
-        if (!compound.func_74764_b(Constants.Item.ITEM_COLOR)) {
+        if (!compound.contains(Constants.Item.ITEM_COLOR)) {
             return Optional.empty();
         }
-        return Optional.of(Color.ofRgb(compound.func_74762_e(Constants.Item.ITEM_COLOR)));
+        return Optional.of(Color.ofRgb(compound.getInt(Constants.Item.ITEM_COLOR)));
     }
 
     public static int javaColorToMojangColor(final Color color) {
@@ -98,7 +98,7 @@ public final class ColorUtil {
 
     public static void setItemStackColor(final ItemStack stack, final Color value) {
         final int mojangColor = javaColorToMojangColor(value);
-        stack.func_190925_c(Constants.Item.ITEM_DISPLAY).func_74768_a(Constants.Item.ITEM_COLOR, mojangColor);
+        stack.getOrCreateChildTag(Constants.Item.ITEM_DISPLAY).putInt(Constants.Item.ITEM_COLOR, mojangColor);
     }
 
     /**
@@ -107,13 +107,13 @@ public final class ColorUtil {
      * there is a color set on the display tag.
      */
     public static boolean hasColorInNbt(final ItemStack stack) {
-        return stack.func_77942_o() &&
-               stack.func_77978_p().func_74764_b(Constants.Item.ITEM_DISPLAY) &&
-               stack.func_77978_p().func_74775_l(Constants.Item.ITEM_DISPLAY).func_74764_b(Constants.Item.ITEM_COLOR);
+        return stack.hasTag() &&
+               stack.getTag().contains(Constants.Item.ITEM_DISPLAY) &&
+               stack.getTag().getCompound(Constants.Item.ITEM_DISPLAY).contains(Constants.Item.ITEM_COLOR);
     }
 
     public static boolean hasColor(final ItemStack stack) {
-        final Item item = stack.func_77973_b();
+        final Item item = stack.getItem();
         return item instanceof ArmorItem &&
                 ((ArmorItem) item).func_82812_d() == ArmorItem.ArmorMaterial.LEATHER;
     }

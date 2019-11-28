@@ -90,7 +90,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
 
     private Set<UUID> mapOptimizationImpl$activeWorlds = new HashSet<>();
     // Used
-    private ItemStack mapOptimizationImpl$dummyItemStack = new ItemStack(Items.field_151098_aY, 1, this.mapOptimizationImpl$getMapId());
+    private ItemStack mapOptimizationImpl$dummyItemStack = new ItemStack(Items.FILLED_MAP, 1, this.mapOptimizationImpl$getMapId());
 
     private static Constructor<MapData.MapInfo> mapOptimizationImpl$mapInfoConstructor;
     // Forge changes the type of this field from 'byte' to 'integer'
@@ -113,7 +113,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
     }
 
     private Integer mapOptimizationImpl$getMapId() {
-        return Integer.valueOf(this.field_76190_i.split("map_")[1]);
+        return Integer.valueOf(this.name.split("map_")[1]);
     }
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
@@ -170,7 +170,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                 final PlayerEntity player = entry.getKey();
                 final MapData.MapInfo mapInfo = entry.getValue();
                 final OptimizedMapInfoBridge mixinMapInfo = (OptimizedMapInfoBridge) mapInfo;
-                if (player.field_70128_L) {
+                if (player.removed) {
                     it.remove();
                     continue;
                 }
@@ -178,9 +178,9 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                 if (!mixinMapInfo.mapOptimizationBridge$isValid()) {
                     this.mapDecorations.remove(player.func_70005_c_());
                 } else {
-                    if (this.trackingPosition && mapOptimizationImpl$dimensionField.get(this).equals(player.field_71093_bK)) {
-                        this.updateDecorations(MapDecoration.Type.PLAYER, player.field_70170_p, player.func_70005_c_(), player.field_70165_t, player.field_70161_v,
-                                (double) player.field_70177_z);
+                    if (this.trackingPosition && mapOptimizationImpl$dimensionField.get(this).equals(player.dimension)) {
+                        this.updateDecorations(MapDecoration.Type.PLAYER, player.world, player.func_70005_c_(), player.posX, player.posZ,
+                                (double) player.rotationYaw);
                     }
                     // We invalidate the player's map info every tick.
                     // If the map item is still in the player's hand, the MapInfo
@@ -236,11 +236,11 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                     }
 
                     //mapdata.updateVisiblePlayers(entityplayermp, itemstack); - Sponge - this is handled above in bridge$tickMap
-                    final IPacket<?> packet = Items.field_151098_aY.func_150911_c(this.mapOptimizationImpl$dummyItemStack, (World) world, entityplayermp);
+                    final IPacket<?> packet = Items.FILLED_MAP.getUpdatePacket(this.mapOptimizationImpl$dummyItemStack, (World) world, entityplayermp);
 
                     if (packet != null)
                     {
-                        entityplayermp.field_71135_a.func_147359_a(packet);
+                        entityplayermp.connection.sendPacket(packet);
                     }
                 }
             }
@@ -274,17 +274,17 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
         }
         ((OptimizedMapInfoBridge) info).mapOptimizationBridge$setValid(true);
 
-        if (mapStack.func_77942_o() && mapStack.func_77978_p().func_150297_b("Decorations", 9))
+        if (mapStack.hasTag() && mapStack.getTag().contains("Decorations", 9))
         {
-            final ListNBT nbttaglist = mapStack.func_77978_p().func_150295_c("Decorations", 10);
+            final ListNBT nbttaglist = mapStack.getTag().getList("Decorations", 10);
 
             for (int j = 0; j < nbttaglist.func_74745_c(); ++j)
             {
-                final CompoundNBT nbttagcompound = nbttaglist.func_150305_b(j);
+                final CompoundNBT nbttagcompound = nbttaglist.getCompound(j);
 
-                if (!this.mapDecorations.containsKey(nbttagcompound.func_74779_i("id")))
+                if (!this.mapDecorations.containsKey(nbttagcompound.getString("id")))
                 {
-                    this.updateDecorations(MapDecoration.Type.func_191159_a(nbttagcompound.func_74771_c("type")), player.field_70170_p, nbttagcompound.func_74779_i("id"), nbttagcompound.func_74769_h("x"), nbttagcompound.func_74769_h("z"), nbttagcompound.func_74769_h("rot"));
+                    this.updateDecorations(MapDecoration.Type.byIcon(nbttagcompound.getByte("type")), player.world, nbttagcompound.getString("id"), nbttagcompound.getDouble("x"), nbttagcompound.getDouble("z"), nbttagcompound.getDouble("rot"));
                 }
             }
         }
@@ -294,18 +294,18 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
     public void mapOptimizationBridge$updateItemFrameDecoration(final ItemFrameEntity frame) {
         this.mapOptimizationImpl$activeWorlds.add(((Entity) frame).getWorld().getUniqueId());
         if (this.trackingPosition) {
-            final BlockPos blockpos = frame.func_174857_n();
-            if (blockpos == null || frame.field_174860_b == null) {
+            final BlockPos blockpos = frame.getHangingPosition();
+            if (blockpos == null || frame.facingDirection == null) {
                 return;
             }
-            this.updateDecorations(MapDecoration.Type.FRAME, frame.field_70170_p, "frame-" + frame.func_145782_y(), (double)blockpos.func_177958_n(), (double)blockpos.func_177952_p(), (double)(frame.field_174860_b.func_176736_b() * 90));
+            this.updateDecorations(MapDecoration.Type.FRAME, frame.world, "frame-" + frame.getEntityId(), (double)blockpos.getX(), (double)blockpos.getZ(), (double)(frame.facingDirection.getHorizontalIndex() * 90));
         }
     }
 
     @Override
     public void mapOptimizationBridge$removeItemFrame(final ItemFrameEntity frame) {
         this.mapOptimizationImpl$activeWorlds.remove(((Entity) frame).getWorld().getUniqueId());
-        this.mapDecorations.remove("frame-" + frame.func_145782_y());
+        this.mapDecorations.remove("frame-" + frame.getEntityId());
     }
 
 }

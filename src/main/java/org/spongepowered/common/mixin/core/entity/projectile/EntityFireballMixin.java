@@ -57,7 +57,7 @@ public abstract class EntityFireballMixin extends EntityMixin {
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
     private void onProjectileImpact(DamagingProjectileEntity projectile, RayTraceResult movingObjectPosition) {
-        if (this.world.field_72995_K || movingObjectPosition.field_72313_a == RayTraceResult.Type.MISS) {
+        if (this.world.isRemote || movingObjectPosition.field_72313_a == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }

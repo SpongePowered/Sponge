@@ -50,7 +50,7 @@ public class SpongeShapedRecipe extends ShapedRecipe implements CatalogType {
     }
 
     @Override
-    public boolean func_192399_d() {
+    public boolean isDynamic() {
         return true; // For RecipeBook
     }
 }

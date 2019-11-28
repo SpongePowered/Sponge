@@ -52,7 +52,7 @@ public abstract class CommandSourceMixin_API implements CommandSource {
     @Override
     public void sendMessage(final Text message) {
         checkNotNull(message, "message");
-        ((CommandSourceBridge) this).bridge$asICommandSender().func_145747_a(SpongeTexts.toComponent(message));
+        ((CommandSourceBridge) this).bridge$asICommandSender().sendMessage(SpongeTexts.toComponent(message));
     }
 
     @Override

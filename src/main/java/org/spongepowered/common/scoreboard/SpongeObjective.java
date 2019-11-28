@@ -147,7 +147,7 @@ public class SpongeObjective implements Objective {
     }
 
     private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
-        final String name = score.func_96653_e();
+        final String name = score.getPlayerName();
         final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectivesMap()
             .computeIfAbsent(name, k -> Maps.newHashMap());
 
@@ -155,7 +155,7 @@ public class SpongeObjective implements Objective {
 
         // Trigger refresh
         ((ScoreAccessor) score).accessor$setForceUpdate(true);
-        score.func_96647_c(((ScoreAccessor) score).accessor$getScorePoints());
+        score.setScorePoints(((ScoreAccessor) score).accessor$getScorePoints());
     }
 
     @Override
@@ -196,10 +196,10 @@ public class SpongeObjective implements Objective {
                     final Map<?, ?> map1 = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectivesMap().remove(name);
 
                     if (map1 != null) {
-                        scoreboard.func_96516_a(name);
+                        scoreboard.onPlayerRemoved(name);
                     }
                 } else if (score != null) {
-                    scoreboard.func_178820_a(name, objective);
+                    scoreboard.onPlayerScoreRemoved(name, objective);
                 }
             }
             ((SpongeScore) spongeScore).removeScoreFor(objective);

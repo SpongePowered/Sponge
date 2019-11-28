@@ -77,7 +77,7 @@ public class WorldTimingsHandler {
     public final Timing chunkPopulate;
 
     public WorldTimingsHandler(World world) {
-        String name = world.func_72912_H().func_76065_j() + " - ";
+        String name = world.getWorldInfo().getWorldName() + " - ";
 
         this.mobSpawn = SpongeTimingsFactory.ofSafe(name + "mobSpawn");
         this.doChunkUnload = SpongeTimingsFactory.ofSafe(name + "doChunkUnload");

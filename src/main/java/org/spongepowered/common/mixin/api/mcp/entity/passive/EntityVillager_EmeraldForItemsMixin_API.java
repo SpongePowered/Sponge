@@ -60,7 +60,7 @@ public class EntityVillager_EmeraldForItemsMixin_API implements TradeOfferGenera
         }
 
         final ItemStack buyingItem = new ItemStack(this.buyingItem, buyingCount, 0);
-        return (TradeOffer) new MerchantRecipe(buyingItem, Items.field_151166_bC);
+        return (TradeOffer) new MerchantRecipe(buyingItem, Items.EMERALD);
     }
 
     @Override

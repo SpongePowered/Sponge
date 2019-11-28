@@ -159,7 +159,7 @@ public abstract class BlockTransaction {
 
         @Override
         void cancel(final ServerWorld worldServer, final BlockPos blockPos, final SpongeProxyBlockAccess proxyBlockAccess) {
-            proxyBlockAccess.unQueueTileAddition(this.added.func_174877_v(), this.added);
+            proxyBlockAccess.unQueueTileAddition(this.added.getPos(), this.added);
         }
 
         @Override
@@ -176,8 +176,8 @@ public abstract class BlockTransaction {
                     .toString();
                 SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured Tile Entity adding! Skipping change: " + transactionForLogging);
                 //noinspection ConstantConditions
-                this.added.func_145834_a(null);
-                this.added.func_145843_s();
+                this.added.setWorld(null);
+                this.added.remove();
                 return;
             }
             final ServerWorld worldServer = maybeWorld.get();
@@ -236,7 +236,7 @@ public abstract class BlockTransaction {
 
         @Override
         void cancel(final ServerWorld worldServer, final BlockPos blockPos, final SpongeProxyBlockAccess proxyBlockAccess) {
-            proxyBlockAccess.unmarkRemoval(this.removed.func_174877_v(), this.removed);
+            proxyBlockAccess.unmarkRemoval(this.removed.getPos(), this.removed);
 
         }
 
@@ -255,8 +255,8 @@ public abstract class BlockTransaction {
                     .toString();
                 SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured Tile Entity removal! Skipping change: " + transactionForLogging);
                 //noinspection ConstantConditions
-                this.removed.func_145834_a(null);
-                this.removed.func_145843_s();
+                this.removed.setWorld(null);
+                this.removed.remove();
                 return;
             }
             final ServerWorld worldServer = maybeWorld.get();
@@ -264,7 +264,7 @@ public abstract class BlockTransaction {
             ((TileEntityBridge) this.removed).bridge$setCaptured(false); // Disable the capture logic in other places.
             proxyAccess.proceedWithRemoval(targetPosition, this.removed);
             // Reset captured state since we want it to be removed
-            worldServer.func_175666_e(targetPosition, worldServer.func_180495_p(targetPosition).func_177230_c());
+            worldServer.updateComparatorOutputLevel(targetPosition, worldServer.getBlockState(targetPosition).getBlock());
         }
 
         @Override
@@ -321,16 +321,16 @@ public abstract class BlockTransaction {
         @Override
         void cancel(final ServerWorld worldServer, final BlockPos blockPos,
             final SpongeProxyBlockAccess proxyBlockAccess) {
-            proxyBlockAccess.unQueueTileAddition(this.removed.func_174877_v(), this.added);
-            proxyBlockAccess.unmarkRemoval(this.removed.func_174877_v(), this.removed);
+            proxyBlockAccess.unQueueTileAddition(this.removed.getPos(), this.added);
+            proxyBlockAccess.unmarkRemoval(this.removed.getPos(), this.removed);
 
         }
 
         @Override
         void process(final Transaction<BlockSnapshot> eventTransaction, final IPhaseState phaseState, final PhaseContext<?> phaseContext,
             final int currentDepth) {
-            final WorldServerBridge mixinWorldServer = (WorldServerBridge) this.added.func_145831_w();
-            final BlockPos position = this.added.func_174877_v();
+            final WorldServerBridge mixinWorldServer = (WorldServerBridge) this.added.getWorld();
+            final BlockPos position = this.added.getPos();
             final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.bridge$getProxyAccess();
             ((TileEntityBridge) this.removed).bridge$setCaptured(false);
             proxyAccess.proceedWithRemoval(position, this.removed);
@@ -406,7 +406,7 @@ public abstract class BlockTransaction {
             if (this.queuedRemoval != null) {
                 if (this.queueTileSet != null) {
                     // Make sure the new tile entity has the correct position
-                    this.queueTileSet.func_174878_a(target);
+                    this.queueTileSet.setPos(target);
                     proxyBlockAccess.queueReplacement(this.queueTileSet, this.queuedRemoval);
                 } else {
                     proxyBlockAccess.queueRemoval(this.queuedRemoval);
@@ -463,7 +463,7 @@ public abstract class BlockTransaction {
             // ChunkMixin#bridge$setBlockState will call onBlockAdded for blocks
             // with a TileEntity or when capturing is not being done.
             if (this.queueOnAdd) {
-                this.newState.func_177230_c().func_176213_c(worldServer, targetPosition, this.newState);
+                this.newState.getBlock().func_176213_c(worldServer, targetPosition, this.newState);
                 phaseState.performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
             }
             if (this.queueTileSet != null) {
@@ -473,7 +473,7 @@ public abstract class BlockTransaction {
             ((IPhaseState) currentContext.state).postProcessSpecificBlockChange(currentContext, this, currentDepth + 1);
 
             if (this.blockChangeFlag.isNotifyClients()) { // Always try to notify clients of the change.
-                worldServer.func_184138_a(targetPosition, oldState, this.newState, this.blockChangeFlag.getRawFlag());
+                worldServer.notifyBlockUpdate(targetPosition, oldState, this.newState, this.blockChangeFlag.getRawFlag());
             }
 
             TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, newBlockSnapshot,
@@ -573,11 +573,11 @@ public abstract class BlockTransaction {
             final Block sourceBlock = this.sourceBlock;
             final BlockPos sourcePos = this.sourcePos;
             final SpongeProxyBlockAccess proxyAccess = worldServer.bridge$getProxyAccess();
-            BlockState blockState = proxyAccess.func_180495_p(notifyPos);
+            BlockState blockState = proxyAccess.getBlockState(notifyPos);
             if (blockState == null) {
-                blockState = ((ServerWorld) this.worldServer).func_180495_p(notifyPos);
+                blockState = ((ServerWorld) this.worldServer).getBlockState(notifyPos);
             }
-            final Chunk chunk = ((ServerWorld) this.worldServer).func_175726_f(sourcePos);
+            final Chunk chunk = ((ServerWorld) this.worldServer).getChunkAt(sourcePos);
             final Block used = PhaseTracker.validateBlockForNeighborNotification((ServerWorld) this.worldServer, sourcePos, sourceBlock, notifyPos, chunk);
 
             PhaseTracker.getInstance().notifyBlockOfStateChange(worldServer, blockState, notifyPos, used, sourcePos);

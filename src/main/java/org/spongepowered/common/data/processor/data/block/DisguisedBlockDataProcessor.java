@@ -40,7 +40,7 @@ public class DisguisedBlockDataProcessor extends
         AbstractCatalogDataProcessor<DisguisedBlockType, Value<DisguisedBlockType>, DisguisedBlockData, ImmutableDisguisedBlockData> {
 
     public DisguisedBlockDataProcessor() {
-        super(Keys.DISGUISED_BLOCK_TYPE, input -> input.func_77973_b() == ItemTypes.MONSTER_EGG);
+        super(Keys.DISGUISED_BLOCK_TYPE, input -> input.getItem() == ItemTypes.MONSTER_EGG);
     }
 
     @Override

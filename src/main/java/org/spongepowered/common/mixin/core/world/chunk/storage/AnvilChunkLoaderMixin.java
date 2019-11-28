@@ -100,9 +100,9 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 final int ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 final int notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 final CompoundNBT valueNbt = new CompoundNBT();
-                valueNbt.func_74768_a("owner", ownerUniqueIdIndex);
-                valueNbt.func_74768_a("notifier", notifierUniqueIdIndex);
-                valueNbt.func_74777_a("pos", pos);
+                valueNbt.putInt("owner", ownerUniqueIdIndex);
+                valueNbt.putInt("notifier", notifierUniqueIdIndex);
+                valueNbt.putShort("pos", pos);
                 positions.func_74742_a(valueNbt);
             }
 
@@ -111,9 +111,9 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 final int ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 final int notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 final CompoundNBT valueNbt = new CompoundNBT();
-                valueNbt.func_74768_a("owner", ownerUniqueIdIndex);
-                valueNbt.func_74768_a("notifier", notifierUniqueIdIndex);
-                valueNbt.func_74768_a("ipos", pos);
+                valueNbt.putInt("owner", ownerUniqueIdIndex);
+                valueNbt.putInt("notifier", notifierUniqueIdIndex);
+                valueNbt.putInt("ipos", pos);
                 positions.func_74742_a(valueNbt);
             }
         }
@@ -122,29 +122,29 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
     private void onReadChunkFromNBT(final World worldIn, final CompoundNBT compound, final CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, final int chunkX,
       final int chunkZ, final net.minecraft.world.chunk.Chunk chunkIn) {
-        if (compound.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
+        if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
             final Map<Integer, PlayerTracker> trackedIntPlayerPositions = new HashMap<>();
             final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
-            final ListNBT positions = compound.func_74775_l(Constants.Sponge.SPONGE_DATA).func_150295_c(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
+            final ListNBT positions = compound.getCompound(Constants.Sponge.SPONGE_DATA).getList(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
             final ChunkBridge chunk = (ChunkBridge) chunkIn;
             for (int i = 0; i < positions.func_74745_c(); i++) {
-                final CompoundNBT valueNbt = positions.func_150305_b(i);
-                final boolean isShortPos = valueNbt.func_74764_b("pos");
+                final CompoundNBT valueNbt = positions.getCompound(i);
+                final boolean isShortPos = valueNbt.contains("pos");
                 final PlayerTracker tracker = new PlayerTracker();
-                if (valueNbt.func_74764_b("owner")) {
-                    tracker.ownerIndex = valueNbt.func_74762_e("owner");
-                } else if (valueNbt.func_74764_b("uuid")) { // Migrate old data, remove in future
-                    tracker.ownerIndex = valueNbt.func_74762_e("uuid");
+                if (valueNbt.contains("owner")) {
+                    tracker.ownerIndex = valueNbt.getInt("owner");
+                } else if (valueNbt.contains("uuid")) { // Migrate old data, remove in future
+                    tracker.ownerIndex = valueNbt.getInt("uuid");
                 }
-                if (valueNbt.func_74764_b("notifier")) {
-                    tracker.notifierIndex = valueNbt.func_74762_e("notifier");
+                if (valueNbt.contains("notifier")) {
+                    tracker.notifierIndex = valueNbt.getInt("notifier");
                 }
 
                 if (tracker.notifierIndex != -1 || tracker.ownerIndex != -1) {
                     if (isShortPos) {
-                        trackedShortPlayerPositions.put(valueNbt.func_74765_d("pos"), tracker);
+                        trackedShortPlayerPositions.put(valueNbt.getShort("pos"), tracker);
                     } else {
-                        trackedIntPlayerPositions.put(valueNbt.func_74762_e("ipos"), tracker);
+                        trackedIntPlayerPositions.put(valueNbt.getInt("ipos"), tracker);
                     }
                 }
             }
@@ -167,12 +167,12 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         require = 0,
         expect = 0)
     private static Entity impl$createEntityFromCompound(final CompoundNBT compound, final World world) {
-        if ("Minecart".equals(compound.func_74779_i(Constants.Entity.ENTITY_TYPE_ID))) {
-            compound.func_74778_a(Constants.Entity.ENTITY_TYPE_ID,
-                    AbstractMinecartEntity.Type.values()[compound.func_74762_e(Constants.Entity.Minecart.MINECART_TYPE)].func_184954_b());
-            compound.func_82580_o(Constants.Entity.Minecart.MINECART_TYPE);
+        if ("Minecart".equals(compound.getString(Constants.Entity.ENTITY_TYPE_ID))) {
+            compound.putString(Constants.Entity.ENTITY_TYPE_ID,
+                    AbstractMinecartEntity.Type.values()[compound.getInt(Constants.Entity.Minecart.MINECART_TYPE)].func_184954_b());
+            compound.remove(Constants.Entity.Minecart.MINECART_TYPE);
         }
-        final Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.func_74779_i(Constants.Entity.ENTITY_TYPE_ID)));
+        final Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.getString(Constants.Entity.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }
@@ -180,10 +180,10 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         if (type == null) {
             return null;
         }
-        final ListNBT positionList = compound.func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-        final ListNBT rotationList = compound.func_150295_c(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
-        final Vector3d position = new Vector3d(positionList.func_150309_d(0), positionList.func_150309_d(1), positionList.func_150309_d(2));
-        final Vector3d rotation = new Vector3d(rotationList.func_150308_e(0), rotationList.func_150308_e(1), 0);
+        final ListNBT positionList = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+        final ListNBT rotationList = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
+        final Vector3d position = new Vector3d(positionList.getDouble(0), positionList.getDouble(1), positionList.getDouble(2));
+        final Vector3d rotation = new Vector3d(rotationList.getFloat(0), rotationList.getFloat(1), 0);
         final Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);

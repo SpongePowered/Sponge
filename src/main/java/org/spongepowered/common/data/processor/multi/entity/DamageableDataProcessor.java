@@ -58,7 +58,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<LivingE
     protected boolean set(LivingEntity dataHolder, Map<Key<?>, Object> keyValues) {
         final Optional<EntitySnapshot> lastAttacker = (Optional<EntitySnapshot>) keyValues.get(Keys.LAST_ATTACKER);
         if (lastAttacker == null || !lastAttacker.isPresent()) {
-            dataHolder.func_70604_c(null);
+            dataHolder.setRevengeTarget(null);
             return true;
         }
         if (lastAttacker.get().getUniqueId().isPresent()) {
@@ -66,7 +66,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<LivingE
             if (optionalEntity.isPresent()) {
                 final Entity entity = optionalEntity.get();
                 if (entity.isLoaded() && entity instanceof LivingEntity) {
-                    dataHolder.func_70604_c((LivingEntity) entity);
+                    dataHolder.setRevengeTarget((LivingEntity) entity);
                     ((EntityLivingBaseAccessor) dataHolder).accessor$setLastDamage(((Optional<Double>)keyValues.get(Keys.LAST_DAMAGE)).orElse(0D).floatValue());
                     return true;
                 }
@@ -77,9 +77,9 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<LivingE
 
     @Override
     protected Map<Key<?>, ?> getValues(LivingEntity dataHolder) {
-        EntitySnapshot snapshot = dataHolder.func_94060_bK() != null ? ((Entity) dataHolder.func_94060_bK()).createSnapshot() : null;
+        EntitySnapshot snapshot = dataHolder.getAttackingEntity() != null ? ((Entity) dataHolder.getAttackingEntity()).createSnapshot() : null;
         return ImmutableMap.of(Keys.LAST_ATTACKER, Optional.ofNullable(snapshot),
-                Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.func_94060_bK() == null ? null : ((EntityLivingBaseAccessor) dataHolder).accessor$getLastDamage()));
+                Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.getAttackingEntity() == null ? null : ((EntityLivingBaseAccessor) dataHolder).accessor$getLastDamage()));
     }
 
     @Override

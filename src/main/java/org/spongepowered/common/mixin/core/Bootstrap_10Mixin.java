@@ -41,8 +41,8 @@ public class Bootstrap_10Mixin {
     @Redirect(method = "dispenseStack(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private boolean impl$setShooterOnFirework(final World world, final Entity firework, final IBlockSource source, final ItemStack stack) {
-        ((Firework) firework).setShooter(source.func_150835_j());
-        return world.func_72838_d(firework);
+        ((Firework) firework).setShooter(source.getBlockTileEntity());
+        return world.addEntity0(firework);
     }
 
 }

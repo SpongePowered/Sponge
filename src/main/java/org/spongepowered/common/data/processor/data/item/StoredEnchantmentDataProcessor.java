@@ -51,7 +51,7 @@ public class StoredEnchantmentDataProcessor extends
         AbstractItemSingleDataProcessor<List<Enchantment>, ListValue<Enchantment>, StoredEnchantmentData, ImmutableStoredEnchantmentData> {
 
     public StoredEnchantmentDataProcessor() {
-        super(stack -> stack.func_77973_b().equals(Items.field_151134_bR), Keys.STORED_ENCHANTMENTS);
+        super(stack -> stack.getItem().equals(Items.ENCHANTED_BOOK), Keys.STORED_ENCHANTMENTS);
     }
 
     @Override
@@ -61,32 +61,32 @@ public class StoredEnchantmentDataProcessor extends
 
     @Override
     protected boolean set(ItemStack entity, List<Enchantment> value) {
-        if (!entity.func_77942_o()) {
-            entity.func_77982_d(new CompoundNBT());
+        if (!entity.hasTag()) {
+            entity.setTag(new CompoundNBT());
         }
         ListNBT list = new ListNBT();
         for (Enchantment enchantment : value) {
             CompoundNBT tag = new CompoundNBT();
-            tag.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.func_185258_b((net.minecraft.enchantment.Enchantment) enchantment.getType()));
-            tag.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
+            tag.putShort(Constants.Item.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.func_185258_b((net.minecraft.enchantment.Enchantment) enchantment.getType()));
+            tag.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
             list.func_74742_a(tag);
         }
-        entity.func_77978_p().func_74782_a(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, list);
+        entity.getTag().func_74782_a(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, list);
         return true;
     }
 
     @Override
     protected Optional<List<Enchantment>> getVal(ItemStack entity) {
-        if (!entity.func_77942_o() || !entity.func_77978_p().func_150297_b(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_LIST)) {
+        if (!entity.hasTag() || !entity.getTag().contains(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
         List<Enchantment> list = Lists.newArrayList();
-        ListNBT tags = entity.func_77978_p().func_150295_c(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
+        ListNBT tags = entity.getTag().getList(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < tags.func_74745_c(); i++) {
-            CompoundNBT tag = tags.func_150305_b(i);
+            CompoundNBT tag = tags.getCompound(i);
             list.add(new SpongeEnchantment(
-                    (EnchantmentType) net.minecraft.enchantment.Enchantment.func_185262_c(tag.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_ID)),
-                    tag.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_LEVEL)));
+                    (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(tag.getShort(Constants.Item.ITEM_ENCHANTMENT_ID)),
+                    tag.getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL)));
         }
         return Optional.of(list);
     }
@@ -105,8 +105,8 @@ public class StoredEnchantmentDataProcessor extends
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (supports(container)) {
             ItemStack stack = (ItemStack) container;
-            if (stack.func_77942_o() && stack.func_77978_p().func_150297_b(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND)) {
-                stack.func_77978_p().func_82580_o(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST);
+            if (stack.hasTag() && stack.getTag().contains(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND)) {
+                stack.getTag().remove(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST);
             }
             return DataTransactionResult.successNoData();
         }

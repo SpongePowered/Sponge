@@ -68,7 +68,7 @@ public abstract class WorldGenGlowstoneMixin_API extends Feature implements Glow
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
             y = this.api$height.getFlooredAmount(random);
-            func_180709_b(world, random, position.func_177982_a(x, y, z));
+            func_180709_b(world, random, position.add(x, y, z));
         }
     }
 

@@ -51,7 +51,7 @@ import java.util.Optional;
 public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerData, ImmutableBannerData> {
 
     public ShieldBannerDataProcessor() {
-        super(input -> input.func_77973_b() == Items.field_185159_cQ);
+        super(input -> input.getItem() == Items.SHIELD);
     }
 
     @Override
@@ -62,10 +62,10 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
     @SuppressWarnings("ConstantConditions")
     @Override
     public boolean set(final ItemStack itemStack, final Map<Key<?>, Object> keyValues) {
-        if (itemStack.func_77978_p() == null) {
-            itemStack.func_77982_d(new CompoundNBT());
+        if (itemStack.getTag() == null) {
+            itemStack.setTag(new CompoundNBT());
         }
-        final CompoundNBT blockEntity = itemStack.func_190925_c(Constants.Item.BLOCK_ENTITY_TAG);
+        final CompoundNBT blockEntity = itemStack.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
         final DyeColor baseColor = (DyeColor) keyValues.get(Keys.BANNER_BASE_COLOR);
         final PatternListValue patternLayers = (PatternListValue) keyValues.get(Keys.BANNER_PATTERNS);
         if (!patternLayers.isEmpty()) {
@@ -73,23 +73,23 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
 
             for (final PatternLayer layer : patternLayers) {
                 final CompoundNBT compound = new CompoundNBT();
-                compound.func_74778_a(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).func_190993_b());
-                compound.func_74768_a(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).func_176767_b());
+                compound.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).getHashname());
+                compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).func_176767_b());
                 patterns.func_74742_a(compound);
             }
             blockEntity.func_74782_a(Constants.TileEntity.Banner.BANNER_PATTERNS, patterns);
         }
-        blockEntity.func_74768_a(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) baseColor).func_176767_b());
+        blockEntity.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) baseColor).func_176767_b());
         return true;
     }
 
     @Override
     public Map<Key<?>, ?> getValues(final ItemStack itemStack) {
-        if (itemStack.func_77942_o() && itemStack.func_77978_p().func_74764_b(Constants.Item.ITEM_UNBREAKABLE)) {
-            return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.func_77958_k() - itemStack.func_77952_i(),
-                    Keys.UNBREAKABLE, itemStack.func_77978_p().func_74767_n(Constants.Item.ITEM_UNBREAKABLE));
+        if (itemStack.hasTag() && itemStack.getTag().contains(Constants.Item.ITEM_UNBREAKABLE)) {
+            return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getDamage(),
+                    Keys.UNBREAKABLE, itemStack.getTag().getBoolean(Constants.Item.ITEM_UNBREAKABLE));
         }
-        return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.func_77958_k() - itemStack.func_77952_i(), Keys.UNBREAKABLE, false);
+        return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getDamage(), Keys.UNBREAKABLE, false);
     }
 
     @Override

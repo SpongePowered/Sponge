@@ -68,7 +68,7 @@ public class ExtentBufferUtil {
         for (int x = min.getX(); x <= max.getX(); x++) {
             for (int z = min.getZ(); z <= max.getZ(); z++) {
                 for (int y = min.getY(); y <= max.getY(); y++) {
-                    copy[i++] = (char) Block.field_176229_d.func_148747_b((BlockState) volume.getBlock(x, y, z));
+                    copy[i++] = (char) Block.BLOCK_STATE_IDS.get((BlockState) volume.getBlock(x, y, z));
                 }
             }
         }

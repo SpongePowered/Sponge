@@ -74,10 +74,10 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<Furnac
         final boolean needsUpdate = !tileEntity.func_145950_i() && maxBurnTime > 0 || tileEntity.func_145950_i() && maxBurnTime == 0;
 
         if (needsUpdate) {
-            final World world = (World) tileEntity.func_145831_w();
-            world.setBlockType(tileEntity.func_174877_v().func_177958_n(), tileEntity.func_174877_v().func_177956_o(),
-                    tileEntity.func_174877_v().func_177952_p(), maxBurnTime > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
-            tileEntity = (FurnaceTileEntity) tileEntity.func_145831_w().func_175625_s(tileEntity.func_174877_v());
+            final World world = (World) tileEntity.getWorld();
+            world.setBlockType(tileEntity.getPos().getX(), tileEntity.getPos().getY(),
+                    tileEntity.getPos().getZ(), maxBurnTime > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
+            tileEntity = (FurnaceTileEntity) tileEntity.getWorld().getTileEntity(tileEntity.getPos());
         }
 
         tileEntity.func_174885_b(0, maxBurnTime - passedBurnTime);

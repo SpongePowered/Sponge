@@ -72,6 +72,6 @@ public abstract class BlockSilverfishMixin extends BlockMixin {
     }
 
     private ImmutableDisguisedBlockData impl$getSilverfishTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisguisedBlockData.class, (DisguisedBlockType) blockState.func_177229_b(SilverfishBlock.field_176378_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisguisedBlockData.class, (DisguisedBlockType) blockState.get(SilverfishBlock.field_176378_a));
     }
 }

@@ -44,7 +44,7 @@ import net.minecraft.block.BannerBlock.BlockBannerStanding;
 public abstract class BlockBannerStandingMixin extends BlockBannerMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
-        final int intDir = blockState.func_177229_b(BannerBlock.field_176448_b);
+        final int intDir = blockState.get(BannerBlock.ROTATION);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Direction.values()[(intDir + 8) % 16]);
     }
 
@@ -58,7 +58,7 @@ public abstract class BlockBannerStandingMixin extends BlockBannerMixin {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.func_177226_a(BannerBlock.field_176448_b, intDirection));
+            return Optional.of((BlockState) blockState.func_177226_a(BannerBlock.ROTATION, intDirection));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -68,7 +68,7 @@ public abstract class BlockBannerStandingMixin extends BlockBannerMixin {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.func_177226_a(BannerBlock.field_176448_b, intDirection));
+            return Optional.of((BlockState) blockState.func_177226_a(BannerBlock.ROTATION, intDirection));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

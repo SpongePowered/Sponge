@@ -68,7 +68,7 @@ public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected Optional<Vector3d> getVal(final DamagingProjectileEntity fireball) {
-        return Optional.of(new Vector3d(fireball.field_70232_b, fireball.field_70233_c, fireball.field_70230_d));
+        return Optional.of(new Vector3d(fireball.accelerationX, fireball.accelerationY, fireball.accelerationZ));
     }
 
     @Override

@@ -132,7 +132,7 @@ public abstract class AbstractLens implements Lens {
     public ItemStack getStack(final Fabric inv, final int ordinal) {
         final LensHandle lens = this.getLensForOrdinal(ordinal);
         if (lens == null) {
-            return ItemStack.field_190927_a;
+            return ItemStack.EMPTY;
         }
         return lens.lens.getStack(inv, ordinal - lens.ordinal);
     }

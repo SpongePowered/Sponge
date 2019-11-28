@@ -38,7 +38,7 @@ public class UserListUtils {
         ((UserListAccessor) list).accessor$getValues().put(((UserListAccessor) list).accessor$getObjectKey(((UserLIstEntryAccessor) entry).accessor$getValue()), entry);
 
         try {
-            list.func_152678_f();
+            list.writeChanges();
         }
         catch (IOException ioexception) {
             UserListAccessor.accessor$getLogger().warn("Could not save the list after adding a user.", ioexception);
@@ -50,7 +50,7 @@ public class UserListUtils {
         ((UserListAccessor) list).accessor$getValues().remove(((UserListAccessor) list).accessor$getObjectKey(object));
 
         try {
-            list.func_152678_f();
+            list.writeChanges();
         }
         catch (IOException ioexception) {
             UserListAccessor.accessor$getLogger().warn("Could not save the list after removing a user.", ioexception);

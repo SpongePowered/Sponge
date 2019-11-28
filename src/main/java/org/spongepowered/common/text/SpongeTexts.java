@@ -51,7 +51,7 @@ public final class SpongeTexts {
         }
         Text source = null;
         Text body = null;
-        for (Object arg : ((TranslationTextComponent) (component)).func_150271_j()) {
+        for (Object arg : ((TranslationTextComponent) (component)).getFormatArgs()) {
             if (source == null) {
                 if (arg instanceof ITextComponent) {
                     source = SpongeTexts.toText((ITextComponent) arg);
@@ -102,15 +102,15 @@ public final class SpongeTexts {
     }
 
     public static ITextComponent fixActionBarFormatting(ITextComponent component) {
-        if (!component.func_150253_a().isEmpty()) {
-            List<ITextComponent> children = component.func_150253_a();
+        if (!component.getSiblings().isEmpty()) {
+            List<ITextComponent> children = component.getSiblings();
             for (int i = 0; i < children.size(); i++) {
                 children.set(i, fixActionBarFormatting(children.get(i)));
             }
         }
 
         StringTextComponent result = new StringTextComponent(((ITextComponentBridge) component).bridge$getLegacyFormatting());
-        result.func_150257_a(component);
+        result.appendSibling(component);
         return result;
     }
 
@@ -141,7 +141,7 @@ public final class SpongeTexts {
     public static List<Text> fromNbtJson(ListNBT legacy) throws TextParseException {
         List<Text> list = Lists.newArrayList();
         for (int i = 0; i < legacy.func_74745_c(); i++) {
-            list.add(TextSerializers.JSON.deserialize(legacy.func_150307_f(i)));
+            list.add(TextSerializers.JSON.deserialize(legacy.getString(i)));
         }
         return list;
     }
@@ -149,7 +149,7 @@ public final class SpongeTexts {
     public static List<Text> fromNbtLegacy(ListNBT legacy) {
         List<Text> list = Lists.newArrayList();
         for (int i = 0; i < legacy.func_74745_c(); i++) {
-            list.add(SpongeTexts.fromLegacy(legacy.func_150307_f(i)));
+            list.add(SpongeTexts.fromLegacy(legacy.getString(i)));
         }
         return list;
     }

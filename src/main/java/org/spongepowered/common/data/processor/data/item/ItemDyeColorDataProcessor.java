@@ -47,7 +47,7 @@ import java.util.Optional;
 public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<DyeColor, Value<DyeColor>, DyeableData, ImmutableDyeableData> {
 
     public ItemDyeColorDataProcessor() {
-        super(x -> isDyeable(x.func_77973_b()), Keys.DYE_COLOR);
+        super(x -> isDyeable(x.getItem()), Keys.DYE_COLOR);
     }
 
     public static boolean isDyeable(Item item) {
@@ -55,7 +55,7 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
             return true;
         }
 
-        final Block block = Block.func_149634_a(item);
+        final Block block = Block.getBlockFromItem(item);
 
         return block.equals(Blocks.field_150325_L)
                 || block.equals(Blocks.field_180393_cK)
@@ -74,7 +74,7 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
 
     @Override
     protected boolean set(ItemStack container, DyeColor value) {
-        Item item = container.func_77973_b();
+        Item item = container.getItem();
 
         if(item.equals(Items.field_151100_aR) || item.equals(Items.field_179564_cE)) {
             container.func_77964_b(((net.minecraft.item.DyeColor) (Object) value).func_176767_b());
@@ -86,12 +86,12 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
 
     @Override
     protected Optional<DyeColor> getVal(ItemStack container) {
-        Item item = container.func_77973_b();
+        Item item = container.getItem();
 
         if(item.equals(Items.field_151100_aR) || item.equals(Items.field_179564_cE)) {
-            return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.func_176766_a(container.func_77952_i()));
+            return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.func_176766_a(container.getDamage()));
         }
-        return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.func_176764_b(container.func_77952_i()));
+        return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.func_176764_b(container.getDamage()));
     }
 
     @Override

@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class QuartzDataProcessor extends AbstractCatalogDataProcessor<QuartzType, Value<QuartzType>, QuartzData, ImmutableQuartzData> {
 
     public QuartzDataProcessor() {
-        super(Keys.QUARTZ_TYPE, input -> input.func_77973_b() == ItemTypes.QUARTZ_BLOCK || input.func_77973_b() == ItemTypes.QUARTZ_STAIRS);
+        super(Keys.QUARTZ_TYPE, input -> input.getItem() == ItemTypes.QUARTZ_BLOCK || input.getItem() == ItemTypes.QUARTZ_STAIRS);
     }
 
     @Override

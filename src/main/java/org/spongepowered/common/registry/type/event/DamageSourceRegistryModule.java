@@ -46,37 +46,37 @@ public final class DamageSourceRegistryModule implements RegistryModule {
             // These need to be instantiated after the DamageTypeRegistryModule has had a chance to register
             // the damage types, otherwise it will fail and have invalid types.
             {
-                DAMAGESOURCE_POISON = net.minecraft.util.DamageSource.func_188405_b((LivingEntity) null);
+                DAMAGESOURCE_POISON = net.minecraft.util.DamageSource.causeExplosionDamage((LivingEntity) null);
                 ((DamageSourceAccessor) DAMAGESOURCE_POISON).accessor$setId("poison");
                 ((DamageSourceBridge) DAMAGESOURCE_POISON).bridge$resetDamageType();
                 ((DamageSourceAccessor) DAMAGESOURCE_POISON).accessor$setDamageBypassesArmor();
-                DAMAGESOURCE_POISON.func_82726_p();
+                DAMAGESOURCE_POISON.setMagicDamage();
             }
             {
-                DAMAGESOURCE_MELTING = net.minecraft.util.DamageSource.func_188405_b((LivingEntity) null);
+                DAMAGESOURCE_MELTING = net.minecraft.util.DamageSource.causeExplosionDamage((LivingEntity) null);
                 ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setId("melting");
                 ((DamageSourceBridge) DAMAGESOURCE_MELTING).bridge$resetDamageType();
                 ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setDamageBypassesArmor();
                 ((DamageSourceAccessor) DAMAGESOURCE_MELTING).accessor$setFireDamage();
             }
             {
-                IGNORED_DAMAGE_SOURCE = net.minecraft.util.DamageSource.func_188405_b((LivingEntity) null);
+                IGNORED_DAMAGE_SOURCE = net.minecraft.util.DamageSource.causeExplosionDamage((LivingEntity) null);
                 ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setId("spongespecific");
                 ((DamageSourceBridge) IGNORED_DAMAGE_SOURCE).bridge$resetDamageType();
                 ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setDamageAllowedInCreativeMode();
                 ((DamageSourceAccessor) IGNORED_DAMAGE_SOURCE).accessor$setDamageBypassesArmor();
             }
-            RegistryHelper.setFinalStatic(DamageSources.class, "DRAGON_BREATH", DamageSource.field_188407_q);
-            RegistryHelper.setFinalStatic(DamageSources.class, "DROWNING", DamageSource.field_76369_e);
-            RegistryHelper.setFinalStatic(DamageSources.class, "FALLING", DamageSource.field_76379_h);
-            RegistryHelper.setFinalStatic(DamageSources.class, "FIRE_TICK", DamageSource.field_76370_b);
-            RegistryHelper.setFinalStatic(DamageSources.class, "GENERIC", DamageSource.field_76377_j);
-            RegistryHelper.setFinalStatic(DamageSources.class, "MAGIC", DamageSource.field_76376_m);
+            RegistryHelper.setFinalStatic(DamageSources.class, "DRAGON_BREATH", DamageSource.DRAGON_BREATH);
+            RegistryHelper.setFinalStatic(DamageSources.class, "DROWNING", DamageSource.DROWN);
+            RegistryHelper.setFinalStatic(DamageSources.class, "FALLING", DamageSource.FALL);
+            RegistryHelper.setFinalStatic(DamageSources.class, "FIRE_TICK", DamageSource.ON_FIRE);
+            RegistryHelper.setFinalStatic(DamageSources.class, "GENERIC", DamageSource.GENERIC);
+            RegistryHelper.setFinalStatic(DamageSources.class, "MAGIC", DamageSource.MAGIC);
             RegistryHelper.setFinalStatic(DamageSources.class, "MELTING", DAMAGESOURCE_MELTING);
             RegistryHelper.setFinalStatic(DamageSources.class, "POISON", DAMAGESOURCE_POISON);
-            RegistryHelper.setFinalStatic(DamageSources.class, "STARVATION", DamageSource.field_76366_f);
-            RegistryHelper.setFinalStatic(DamageSources.class, "WITHER", DamageSource.field_82727_n);
-            RegistryHelper.setFinalStatic(DamageSources.class, "VOID", DamageSource.field_76380_i);
+            RegistryHelper.setFinalStatic(DamageSources.class, "STARVATION", DamageSource.STARVE);
+            RegistryHelper.setFinalStatic(DamageSources.class, "WITHER", DamageSource.WITHER);
+            RegistryHelper.setFinalStatic(DamageSources.class, "VOID", DamageSource.OUT_OF_WORLD);
         } catch (Exception e) {
             e.printStackTrace();
         }

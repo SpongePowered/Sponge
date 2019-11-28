@@ -297,9 +297,9 @@ public final class WorldGenConstants {
 
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) topBlock, SeededVariableAmount.fixed(1)));
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) fillerBlock, GROUND_COVER_DEPTH));
-        if (fillerBlock.func_177230_c() == Blocks.field_150354_m) {
+        if (fillerBlock.getBlock() == Blocks.SAND) {
             final BlockType type;
-            if (fillerBlock.func_177229_b(SandBlock.field_176504_a) == SandBlock.EnumType.RED_SAND) {
+            if (fillerBlock.get(SandBlock.field_176504_a) == SandBlock.EnumType.RED_SAND) {
                 type = BlockTypes.RED_SANDSTONE;
             } else {
                 type = BlockTypes.SANDSTONE;
@@ -307,11 +307,11 @@ public final class WorldGenConstants {
             gensettings.getGroundCoverLayers().add(new SandstoneGroundCoverLayer(type.getDefaultState()));
         }
 
-        final String s = world.func_72912_H().func_82571_y();
+        final String s = world.getWorldInfo().func_82571_y();
         final ChunkGeneratorSettings settings = ChunkGeneratorSettings.Factory.func_177865_a(s).func_177864_b();
 
         final Ore dirt = Ore.builder()
-                .ore((BlockState) Blocks.field_150346_d.func_176223_P())
+                .ore((BlockState) Blocks.DIRT.getDefaultState())
                 .size(settings.field_177789_I)
                 .perChunk(settings.field_177790_J)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177791_K, settings.field_177784_L - settings.field_177791_K))
@@ -319,7 +319,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(dirt);
 
         final Ore gravel = Ore.builder()
-                .ore((BlockState) Blocks.field_150351_n.func_176223_P())
+                .ore((BlockState) Blocks.GRAVEL.getDefaultState())
                 .size(settings.field_177785_M)
                 .perChunk(settings.field_177786_N)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177787_O, settings.field_177797_P - settings.field_177787_O))
@@ -327,7 +327,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(gravel);
 
         final Ore diorite = Ore.builder()
-                .ore((BlockState) Blocks.field_150348_b.func_176223_P().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.DIORITE))
+                .ore((BlockState) Blocks.STONE.getDefaultState().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.DIORITE))
                 .size(settings.field_177792_U)
                 .perChunk(settings.field_177795_V)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177794_W, settings.field_177801_X - settings.field_177794_W))
@@ -335,7 +335,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(diorite);
 
         final Ore granite = Ore.builder()
-                .ore((BlockState) Blocks.field_150348_b.func_176223_P().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.GRANITE))
+                .ore((BlockState) Blocks.STONE.getDefaultState().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.GRANITE))
                 .size(settings.field_177796_Q)
                 .perChunk(settings.field_177799_R)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177798_S, settings.field_177793_T - settings.field_177798_S))
@@ -343,7 +343,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(granite);
 
         final Ore andesite = Ore.builder()
-                .ore((BlockState) Blocks.field_150348_b.func_176223_P().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.ANDESITE))
+                .ore((BlockState) Blocks.STONE.getDefaultState().func_177226_a(BlockStone.field_176247_a, BlockStone.EnumType.ANDESITE))
                 .size(settings.field_177800_Y)
                 .perChunk(settings.field_177802_Z)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177846_aa, settings.field_177847_ab - settings.field_177846_aa))
@@ -351,7 +351,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(andesite);
 
         final Ore coal = Ore.builder()
-                .ore((BlockState) Blocks.field_150365_q.func_176223_P())
+                .ore((BlockState) Blocks.COAL_ORE.getDefaultState())
                 .size(settings.field_177844_ac)
                 .perChunk(settings.field_177845_ad)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177851_ae, settings.field_177853_af - settings.field_177851_ae))
@@ -359,7 +359,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(coal);
 
         final Ore iron = Ore.builder()
-                .ore((BlockState) Blocks.field_150366_p.func_176223_P())
+                .ore((BlockState) Blocks.IRON_ORE.getDefaultState())
                 .size(settings.field_177848_ag)
                 .perChunk(settings.field_177849_ah)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177832_ai, settings.field_177834_aj - settings.field_177832_ai))
@@ -367,7 +367,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(iron);
 
         final Ore gold = Ore.builder()
-                .ore((BlockState) Blocks.field_150352_o.func_176223_P())
+                .ore((BlockState) Blocks.GOLD_ORE.getDefaultState())
                 .size(settings.field_177828_ak)
                 .perChunk(settings.field_177830_al)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177840_am, settings.field_177842_an - settings.field_177840_am))
@@ -375,7 +375,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(gold);
 
         final Ore redstone = Ore.builder()
-                .ore((BlockState) Blocks.field_150450_ax.func_176223_P())
+                .ore((BlockState) Blocks.REDSTONE_ORE.getDefaultState())
                 .size(settings.field_177836_ao)
                 .perChunk(settings.field_177838_ap)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177818_aq, settings.field_177816_ar - settings.field_177818_aq))
@@ -383,7 +383,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(redstone);
 
         final Ore diamond = Ore.builder()
-                .ore((BlockState) Blocks.field_150482_ag.func_176223_P())
+                .ore((BlockState) Blocks.DIAMOND_ORE.getDefaultState())
                 .size(settings.field_177814_as)
                 .perChunk(settings.field_177812_at)
                 .height(VariableAmount.baseWithRandomAddition(settings.field_177826_au, settings.field_177824_av - settings.field_177826_au))
@@ -391,7 +391,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(diamond);
 
         final Ore lapis = Ore.builder()
-                .ore((BlockState) Blocks.field_150369_x.func_176223_P())
+                .ore((BlockState) Blocks.LAPIS_ORE.getDefaultState())
                 .size(settings.field_177822_aw)
                 .perChunk(settings.field_177820_ax)
                 .height(VariableAmount.baseWithVariance(settings.field_177807_ay, settings.field_177805_az))
@@ -401,7 +401,7 @@ public final class WorldGenConstants {
         final BiomeDecoratorAccessor accessor = (BiomeDecoratorAccessor) decorator;
         if (accessor.accessor$getSandPerChunk() > 0) {
             final SeaFloor sand = SeaFloor.builder()
-                    .block((BlockState) Blocks.field_150354_m.func_176223_P())
+                    .block((BlockState) Blocks.SAND.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(2, 5))
                     .depth(2)
                     .perChunk(accessor.accessor$getSandPerChunk())
@@ -411,7 +411,7 @@ public final class WorldGenConstants {
         }
         if (accessor.accessor$getClayPerChunk() > 0) {
             final SeaFloor clay = SeaFloor.builder()
-                    .block((BlockState) Blocks.field_150435_aG.func_176223_P())
+                    .block((BlockState) Blocks.CLAY.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(2, 2))
                     .depth(1)
                     .perChunk(accessor.accessor$getClayPerChunk())
@@ -421,7 +421,7 @@ public final class WorldGenConstants {
         }
         if (accessor.accessor$getGravelPerChunk() > 0) {
             final SeaFloor gravelSeaFloor = SeaFloor.builder()
-                    .block((BlockState) Blocks.field_150351_n.func_176223_P())
+                    .block((BlockState) Blocks.GRAVEL.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(2, 4))
                     .depth(2)
                     .perChunk(accessor.accessor$getGravelPerChunk())
@@ -499,14 +499,14 @@ public final class WorldGenConstants {
         }
         if (decorator.field_76808_K) {
             final RandomBlock water = RandomBlock.builder()
-                    .block((BlockState) Blocks.field_150358_i.func_176223_P())
+                    .block((BlockState) Blocks.field_150358_i.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, VariableAmount.baseWithRandomAddition(8, 248)))
                     .perChunk(50)
                     .placementTarget(CAVE_LIQUIDS)
                     .build();
             gensettings.getPopulators().add(water);
             final RandomBlock lava = RandomBlock.builder()
-                    .block((BlockState) Blocks.field_150356_k.func_176223_P())
+                    .block((BlockState) Blocks.field_150356_k.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithRandomAddition(8, 240))))
                     .perChunk(20)
@@ -525,7 +525,7 @@ public final class WorldGenConstants {
 
     public static void buildHellPopulators(final net.minecraft.world.World world, final SpongeBiomeGenerationSettings gensettings) {
         final RandomBlock lava1 = RandomBlock.builder()
-                .block((BlockState) Blocks.field_150356_k.func_176223_P())
+                .block((BlockState) Blocks.field_150356_k.getDefaultState())
                 .perChunk(8)
                 .height(VariableAmount.baseWithRandomAddition(4, 120))
                 .placementTarget(HELL_LAVA)
@@ -579,7 +579,7 @@ public final class WorldGenConstants {
                 .build();
         gensettings.getPopulators().add(quartz);
 
-        final int halfSeaLevel = world.func_181545_F() / 2 + 1;
+        final int halfSeaLevel = world.getSeaLevel() / 2 + 1;
         final Ore magma = Ore.builder()
                 .height(VariableAmount.baseWithRandomAddition(halfSeaLevel - 5, 10))
                 .ore(BlockTypes.MAGMA.getDefaultState())
@@ -590,7 +590,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(magma);
 
         final RandomBlock lava2 = RandomBlock.builder()
-                .block((BlockState) Blocks.field_150356_k.func_176223_P())
+                .block((BlockState) Blocks.field_150356_k.getDefaultState())
                 .perChunk(16)
                 .height(VariableAmount.baseWithRandomAddition(10, 108))
                 .placementTarget(HELL_LAVA_ENCLOSED)
@@ -628,26 +628,26 @@ public final class WorldGenConstants {
     public static void buildHillsPopulator(final SpongeBiomeGenerationSettings gensettings, final ExtremeHillsBiome.Type type, final BiomeDecorator decorator) {
         gensettings.getGroundCoverLayers().clear();
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((stoneNoise) -> {
-            net.minecraft.block.BlockState result = Blocks.field_150349_c.func_176223_P();
+            net.minecraft.block.BlockState result = Blocks.GRASS.getDefaultState();
             if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && type == ExtremeHillsBiome.Type.MUTATED) {
-                result = Blocks.field_150351_n.func_176223_P();
+                result = Blocks.GRAVEL.getDefaultState();
             } else if (stoneNoise > 1.0D && type != ExtremeHillsBiome.Type.EXTRA_TREES) {
-                result = Blocks.field_150348_b.func_176223_P();
+                result = Blocks.STONE.getDefaultState();
             }
             return (BlockState) result;
         } , SeededVariableAmount.fixed(1)));
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((stoneNoise) -> {
-            net.minecraft.block.BlockState result = Blocks.field_150346_d.func_176223_P();
+            net.minecraft.block.BlockState result = Blocks.DIRT.getDefaultState();
             if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && type == ExtremeHillsBiome.Type.MUTATED) {
-                result = Blocks.field_150351_n.func_176223_P();
+                result = Blocks.GRAVEL.getDefaultState();
             } else if (stoneNoise > 1.0D && type != ExtremeHillsBiome.Type.EXTRA_TREES) {
-                result = Blocks.field_150348_b.func_176223_P();
+                result = Blocks.STONE.getDefaultState();
             }
             return (BlockState) result;
         } , GROUND_COVER_DEPTH));
 
         final RandomBlock emerald = RandomBlock.builder()
-                .block((BlockState) Blocks.field_150412_bA.func_176223_P())
+                .block((BlockState) Blocks.EMERALD_ORE.getDefaultState())
                 .placementTarget(STONE_LOCATION)
                 .perChunk(VariableAmount.baseWithRandomAddition(3, 6))
                 .height(VariableAmount.baseWithRandomAddition(4, 28))
@@ -655,7 +655,7 @@ public final class WorldGenConstants {
         gensettings.getPopulators().add(emerald);
 
         final Ore silverfish = Ore.builder()
-                .ore((BlockState) Blocks.field_150418_aU.func_176223_P().func_177226_a(SilverfishBlock.field_176378_a, SilverfishBlock.EnumType.STONE))
+                .ore((BlockState) Blocks.field_150418_aU.getDefaultState().func_177226_a(SilverfishBlock.field_176378_a, SilverfishBlock.EnumType.STONE))
                 .perChunk(7)
                 .height(VariableAmount.baseWithRandomAddition(0, 64))
                 .size(9)
@@ -717,12 +717,12 @@ public final class WorldGenConstants {
 
     public static void buildMesaPopulators(
         final net.minecraft.world.World world, final SpongeBiomeGenerationSettings gensettings, final BiomeDecorator decorator) {
-        final String s = world.func_72912_H().func_82571_y();
+        final String s = world.getWorldInfo().func_82571_y();
         final ChunkGeneratorSettings settings = ChunkGeneratorSettings.Factory.func_177865_a(s).func_177864_b();
 
         // Extra gold is generated in mesa biomes
         final Ore gold = Ore.builder()
-                .ore((BlockState) Blocks.field_150352_o.func_176223_P())
+                .ore((BlockState) Blocks.GOLD_ORE.getDefaultState())
                 .size(settings.field_177828_ak)
                 .perChunk(20)
                 .height(VariableAmount.baseWithRandomAddition(32, 80 - 32))
@@ -780,11 +780,11 @@ public final class WorldGenConstants {
             gensettings.getGroundCoverLayers().clear();
             gensettings.getGroundCoverLayers().add(new GroundCoverLayer((Double seed) -> {
                 if (seed > 1.75D) {
-                    return (BlockState) Blocks.field_150346_d.func_176223_P().func_177226_a(BlockDirt.field_176386_a, BlockDirt.DirtType.COARSE_DIRT);
+                    return (BlockState) Blocks.DIRT.getDefaultState().func_177226_a(BlockDirt.field_176386_a, BlockDirt.DirtType.COARSE_DIRT);
                 } else if (seed > -0.95D) {
-                    return (BlockState) Blocks.field_150346_d.func_176223_P().func_177226_a(BlockDirt.field_176386_a, BlockDirt.DirtType.PODZOL);
+                    return (BlockState) Blocks.DIRT.getDefaultState().func_177226_a(BlockDirt.field_176386_a, BlockDirt.DirtType.PODZOL);
                 }
-                return (BlockState) Blocks.field_150349_c.func_176223_P();
+                return (BlockState) Blocks.GRASS.getDefaultState();
 
             } , GROUND_COVER_DEPTH));
             gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) fillerBlock, GROUND_COVER_DEPTH));

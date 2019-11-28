@@ -36,8 +36,8 @@ public class ArmorTypePropertyStore extends AbstractItemStackPropertyStore<Armor
 
     @Override
     protected Optional<ArmorTypeProperty> getFor(ItemStack itemStack) {
-        if (itemStack.func_77973_b() instanceof ArmorItem) {
-            final ArmorItem armor = (ArmorItem) itemStack.func_77973_b();
+        if (itemStack.getItem() instanceof ArmorItem) {
+            final ArmorItem armor = (ArmorItem) itemStack.getItem();
             final ArmorItem.ArmorMaterial armorMaterial = armor.func_82812_d();
             return Optional.of(new ArmorTypeProperty((ArmorType) (Object) armorMaterial));
         }

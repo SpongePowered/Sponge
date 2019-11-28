@@ -50,7 +50,7 @@ public abstract class SoundEventMixin_API implements SoundType {
 
     @Override
     public String getName() {
-        return this.soundName.func_110623_a();
+        return this.soundName.getPath();
     }
 
 }

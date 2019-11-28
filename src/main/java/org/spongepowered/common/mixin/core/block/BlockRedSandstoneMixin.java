@@ -75,7 +75,7 @@ public abstract class BlockRedSandstoneMixin extends BlockMixin {
 
     private ImmutableSandstoneData impl$getSandstoneTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandstoneData.class,
-               impl$convertType(blockState.func_177229_b(BlockRedSandstone.field_176336_a)));
+               impl$convertType(blockState.get(BlockRedSandstone.field_176336_a)));
     }
     
     @SuppressWarnings("ConstantConditions")

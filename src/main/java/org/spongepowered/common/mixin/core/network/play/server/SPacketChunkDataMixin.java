@@ -86,7 +86,7 @@ public abstract class SPacketChunkDataMixin {
                             + "specifically provide as much information as possible about the issue.")
             .add()
             .add("%s : %s, %s", "Chunk Information", this.chunkX, this.chunkZ)
-            .add("%s : %s", "World", chunkIn.func_177412_p())
+            .add("%s : %s", "World", chunkIn.getWorld())
             .add("%s : %s", "Writing Skylight", writeSkylight)
             .add("%s : %s", "Full Chunk", this.fullChunk)
             .add("%s : %s", "ByteArraySize", this.buffer.length)
@@ -96,29 +96,29 @@ public abstract class SPacketChunkDataMixin {
             .add();
         printer.add("Printing ExtendedStorage data")
             .add();
-        final ExtendedBlockStorage[] aextendedblockstorage = chunkIn.func_76587_i();
+        final ExtendedBlockStorage[] aextendedblockstorage = chunkIn.getSections();
         int j = 0;
 
         for (final int k = aextendedblockstorage.length; j < k; ++j)
         {
             final ExtendedBlockStorage extendedblockstorage = aextendedblockstorage[j];
 
-            if (extendedblockstorage != Chunk.field_186036_a && (changedSectionFilter & 1 << j) != 0)
+            if (extendedblockstorage != Chunk.EMPTY_SECTION && (changedSectionFilter & 1 << j) != 0)
             {
-                final BlockStateContainer data = extendedblockstorage.func_186049_g();
+                final BlockStateContainer data = extendedblockstorage.getData();
                 printer.add(" - %s : %s", j, "ExtendedArrayIndex");
                 // TODO - Eventually can be moved to using BlockStateContainerAccessor once mixins allows referencing accessors
                 // within mixin classes
                 final BlockStateContainerBridge mixinData = (BlockStateContainerBridge) data;
                 printer.add("  - %s : %s", "ContainerBits", mixinData.bridge$getBits())
-                    .add("  - %s : %s", "Palette Size", mixinData.bridge$getPalette().func_186040_a())
-                    .add("  - %s : %s", "BackingArray", mixinData.bridge$getStorage().func_188143_a())
-                    .add("  - %s : %s", "BlockLight", extendedblockstorage.func_76661_k().func_177481_a());
+                    .add("  - %s : %s", "Palette Size", mixinData.bridge$getPalette().getSerializedSize())
+                    .add("  - %s : %s", "BackingArray", mixinData.bridge$getStorage().getBackingLongArray())
+                    .add("  - %s : %s", "BlockLight", extendedblockstorage.func_76661_k().getData());
 
 
                 if (writeSkylight)
                 {
-                    printer.add("  - %s : %s", "SkyLight", extendedblockstorage.func_76671_l().func_177481_a());
+                    printer.add("  - %s : %s", "SkyLight", extendedblockstorage.func_76671_l().getData());
                 }
             }
         }

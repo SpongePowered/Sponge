@@ -116,12 +116,12 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
 
         worldOptional.get().getLocation(x, y, z).setBlockType(type);
         BlockPos pos = new BlockPos(x, y, z);
-        TileEntity tileEntity = ((net.minecraft.world.World) worldOptional.get()).func_175625_s(pos);
+        TileEntity tileEntity = ((net.minecraft.world.World) worldOptional.get()).getTileEntity(pos);
         if (tileEntity == null) {
             return Optional.empty(); // TODO throw exception maybe?
         }
         // We really need to validate only after the implementing class deems it ready...
-        tileEntity.func_145843_s();
+        tileEntity.remove();
         return Optional.of((T) tileEntity);
     }
 

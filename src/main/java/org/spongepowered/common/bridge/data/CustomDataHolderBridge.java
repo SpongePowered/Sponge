@@ -65,17 +65,17 @@ public interface CustomDataHolderBridge {
     default void bridge$removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
         if (this instanceof DataCompoundHolder) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
-            if (spongeData.func_150297_b(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
-                final ListNBT tagList = spongeData.func_150295_c(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
+            if (spongeData.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
+                final ListNBT tagList = spongeData.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
                 if (!tagList.func_82582_d()) {
                     String id = DataUtil.getRegistrationFor(manipulator).getId();
                     for (int i = 0; i < tagList.func_74745_c(); i++) {
-                        final CompoundNBT tag = tagList.func_150305_b(i);
-                        if (id.equals(tag.func_74779_i(Constants.Sponge.MANIPULATOR_ID))) {
+                        final CompoundNBT tag = tagList.getCompound(i);
+                        if (id.equals(tag.getString(Constants.Sponge.MANIPULATOR_ID))) {
                             tagList.func_74744_a(i);
                             break;
                         }
-                        final String dataClass = tag.func_74779_i(Constants.Sponge.CUSTOM_DATA_CLASS);
+                        final String dataClass = tag.getString(Constants.Sponge.CUSTOM_DATA_CLASS);
                         if (dataClass.equalsIgnoreCase(manipulator.getClass().getName())) {
                             tagList.func_74744_a(i);
                             break;

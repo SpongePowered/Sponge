@@ -65,10 +65,10 @@ public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourc
             accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.scales) {
-            damageSource.func_76351_m();
+            damageSource.setDifficultyScaled();
         }
         if (this.magical) {
-            damageSource.func_82726_p();
+            damageSource.setMagicDamage();
         }
         if (this.bypasses) {
             accessor.accessor$setDamageBypassesArmor();
@@ -77,7 +77,7 @@ public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourc
             accessor.accessor$setDamageIsAbsolute();
         }
         if (this.explosion) {
-            damageSource.func_94540_d();
+            damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
             accessor.accessor$setHungerDamage(this.exhaustion.floatValue());

@@ -65,9 +65,9 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
             container.set(Constants.TileEntity.LOCK_CODE, this.code.func_180159_b());
         }
         final List<DataView> items = Lists.newArrayList();
-        for (int i = 0; i < ((IInventory) this).func_70302_i_(); i++) {
-            final ItemStack stack = ((IInventory) this).func_70301_a(i);
-            if (!stack.func_190926_b()) {
+        for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {
+            final ItemStack stack = ((IInventory) this).getStackInSlot(i);
+            if (!stack.isEmpty()) {
                 // todo make a helper object for this
                 final DataContainer stackView = DataContainer.createNew()
                     .set(Queries.CONTENT_VERSION, 1)
@@ -87,7 +87,7 @@ public abstract class TileEntityLockableMixin_API<T extends TileEntity & Carrier
         lockData.ifPresent(manipulators::add);
         final Optional<InventoryItemData> inventoryData = get(InventoryItemData.class);
         inventoryData.ifPresent(manipulators::add);
-        if (((LockableTileEntity) (Object) this).func_145818_k_()) {
+        if (((LockableTileEntity) (Object) this).hasCustomName()) {
             manipulators.add(get(DisplayNameData.class).get());
         }
     }

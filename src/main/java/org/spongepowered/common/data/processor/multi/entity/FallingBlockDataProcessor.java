@@ -62,7 +62,7 @@ public class FallingBlockDataProcessor extends
         entity.accessor$setFallHurtMax(((Double) keyValues.get(Keys.MAX_FALL_DAMAGE)).intValue());
         entity.accessor$setFallBlockState((BlockState) keyValues.get(Keys.FALLING_BLOCK_STATE));
         entity.accessor$setDontSetAsBlock(!(Boolean) keyValues.get(Keys.CAN_PLACE_AS_BLOCK));
-        ((FallingBlockEntity) entity).field_145813_c = (Boolean) keyValues.get(Keys.CAN_DROP_AS_ITEM);
+        ((FallingBlockEntity) entity).shouldDropItem = (Boolean) keyValues.get(Keys.CAN_DROP_AS_ITEM);
         entity.accessor$setFallTime((Integer) keyValues.get(Keys.FALL_TIME));
         entity.accessor$setHurtEntities((Boolean) keyValues.get(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES));
         return true;
@@ -75,7 +75,7 @@ public class FallingBlockDataProcessor extends
                 .put(Keys.MAX_FALL_DAMAGE, (double)entity.accessor$getFallHurtMax())
                 .put(Keys.FALLING_BLOCK_STATE, entity.accessor$getFallBlockState())
                 .put(Keys.CAN_PLACE_AS_BLOCK, !entity.accessor$getDontSetAsBlock())
-                .put(Keys.CAN_DROP_AS_ITEM, ((FallingBlockEntity) entity).field_145813_c)
+                .put(Keys.CAN_DROP_AS_ITEM, ((FallingBlockEntity) entity).shouldDropItem)
                 .put(Keys.FALL_TIME, entity.accessor$getFallTime())
                 .put(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, entity.accessor$getHurtEntities())
                 .build();

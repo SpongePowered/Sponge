@@ -59,13 +59,13 @@ public class GravityDataProcessor extends AbstractEntitySingleDataProcessor<Enti
 
     @Override
     protected boolean set(Entity entity, Boolean value) {
-        entity.func_189654_d(!value);
+        entity.setNoGravity(!value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity entity) {
-        return OptBool.of(!entity.func_189652_ae());
+        return OptBool.of(!entity.hasNoGravity());
     }
 
     @Override

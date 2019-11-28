@@ -60,7 +60,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
 
     @Override
     default BlockType getType() {
-        return (BlockType) func_177230_c();
+        return (BlockType) getBlock();
     }
 
     @Override
@@ -91,7 +91,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     @Override
     default Optional<BlockTrait<?>> getTrait(final String blockTrait) {
         for (final IProperty property : func_177228_b().keySet()) {
-            if (property.func_177701_a().equalsIgnoreCase(blockTrait)) {
+            if (property.getName().equalsIgnoreCase(blockTrait)) {
                 return Optional.of((BlockTrait<?>) property);
             }
         }
@@ -114,7 +114,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
             }
         }
         if (value instanceof Comparable) {
-            if (func_177228_b().containsKey((IProperty) trait) && ((IProperty) trait).func_177700_c().contains(value)) {
+            if (func_177228_b().containsKey((IProperty) trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
                 return Optional.of((BlockState) this.func_177226_a((IProperty) trait, (Comparable) value));
             }
         }
@@ -140,14 +140,14 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     @Override
     default String getId() {
         final StringBuilder builder = new StringBuilder();
-        builder.append(((BlockType) func_177230_c()).getId());
+        builder.append(((BlockType) getBlock()).getId());
         final ImmutableMap<IProperty<?>, Comparable<?>> properties =  this.func_177228_b();
         if (!properties.isEmpty()) {
             builder.append('[');
             final Joiner joiner = Joiner.on(',');
             final List<String> propertyValues = new ArrayList<>();
             for (final Map.Entry<IProperty<?>, Comparable<?>> entry : properties.entrySet()) {
-                propertyValues.add(entry.getKey().func_177701_a() + "=" + entry.getValue());
+                propertyValues.add(entry.getKey().getName() + "=" + entry.getValue());
             }
             builder.append(joiner.join(propertyValues));
             builder.append(']');

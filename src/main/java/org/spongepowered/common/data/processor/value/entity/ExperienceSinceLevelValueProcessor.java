@@ -60,8 +60,8 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
 
     @Override
     protected boolean set(PlayerEntity container, Integer value) {
-        while (value >= container.func_71050_bK()) {
-            value -= container.func_71050_bK();
+        while (value >= container.xpBarCap()) {
+            value -= container.xpBarCap();
         }
         ((EntityPlayerBridge) container).bridge$setExperienceSinceLevel(value);
         ((EntityPlayerMPBridge) container).bridge$refreshExp();

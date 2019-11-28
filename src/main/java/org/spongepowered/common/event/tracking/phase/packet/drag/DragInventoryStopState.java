@@ -49,7 +49,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
     @Override
     public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        ((ContainerBridge) playerMP.field_71070_bA).bridge$setFirePreview(false);
+        ((ContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
     }
 
     @Override
@@ -60,16 +60,16 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
 
     public static void unwindCraftPreview(InventoryPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
-        ((ContainerBridge) player.field_71070_bA).bridge$setFirePreview(true);
+        ((ContainerBridge) player.openContainer).bridge$setFirePreview(true);
 
-        Inventory craftInv = ((Inventory) player.field_71070_bA).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (craftInv instanceof CraftingInventory) {
-            List<SlotTransaction> previewTransactions = ((ContainerBridge) player.field_71070_bA).bridge$getPreviewTransactions();
+            List<SlotTransaction> previewTransactions = ((ContainerBridge) player.openContainer).bridge$getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {
                 CraftingRecipe recipe = SpongeCraftingRecipeRegistry
-                        .getInstance().findMatchingRecipe(((CraftingInventory) craftInv).getCraftingGrid(), ((World) player.field_70170_p)).orElse(null);
+                        .getInstance().findMatchingRecipe(((CraftingInventory) craftInv).getCraftingGrid(), ((World) player.world)).orElse(null);
                 SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransactions.get(0),
-                        recipe, player.field_71070_bA, previewTransactions);
+                        recipe, player.openContainer, previewTransactions);
                 previewTransactions.clear();
             }
         }

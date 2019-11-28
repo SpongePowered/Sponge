@@ -49,7 +49,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
 
     @Override
     protected boolean doesDataExist(final net.minecraft.entity.Entity entity) {
-        return entity.func_184187_bx() != null;
+        return entity.getRidingEntity() != null;
     }
 
     @Override
@@ -60,8 +60,8 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
 
     @Override
     protected Map<Key<?>, ?> getValues(final net.minecraft.entity.Entity entity) {
-        return ImmutableMap.of(Keys.VEHICLE, ((Entity) entity.func_184187_bx()).createSnapshot(), Keys.BASE_VEHICLE, ((Entity) entity
-                .func_184208_bv()).createSnapshot());
+        return ImmutableMap.of(Keys.VEHICLE, ((Entity) entity.getRidingEntity()).createSnapshot(), Keys.BASE_VEHICLE, ((Entity) entity
+                .getLowestRidingEntity()).createSnapshot());
     }
 
     @Override
@@ -78,9 +78,9 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
     public DataTransactionResult remove(final DataHolder dataHolder) {
         if (supports(dataHolder)) {
             final net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) dataHolder);
-            if (entity.func_184187_bx() != null) {
-                final EntitySnapshot previousVehicle = ((Entity) entity.func_184187_bx()).createSnapshot();
-                entity.func_184210_p();
+            if (entity.getRidingEntity() != null) {
+                final EntitySnapshot previousVehicle = ((Entity) entity.getRidingEntity()).createSnapshot();
+                entity.stopRiding();
                 return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicle));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();

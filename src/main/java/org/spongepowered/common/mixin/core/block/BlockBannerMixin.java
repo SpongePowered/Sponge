@@ -69,7 +69,7 @@ public abstract class BlockBannerMixin extends BlockMixin {
     }
 
     private ImmutableAttachedData impl$getIsAttachedFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.func_177230_c() instanceof BlockBannerHanging);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.getBlock() instanceof BlockBannerHanging);
     }
 
 }

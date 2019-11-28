@@ -56,7 +56,7 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
         dataHolder.func_70674_bp();
         for (PotionEffect effect : value) {
             net.minecraft.potion.EffectInstance mcEffect =
-                new net.minecraft.potion.EffectInstance(((net.minecraft.potion.EffectInstance) effect).func_188419_a(), effect.getDuration(),
+                new net.minecraft.potion.EffectInstance(((net.minecraft.potion.EffectInstance) effect).getPotion(), effect.getDuration(),
                     effect.getAmplifier(), effect.isAmbient(),
                     effect.getShowParticles());
             dataHolder.func_70690_d(mcEffect);
@@ -66,15 +66,15 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
 
     @Override
     protected Optional<List<PotionEffect>> getVal(LivingEntity dataHolder) {
-        Collection<net.minecraft.potion.EffectInstance> effects = dataHolder.func_70651_bq();
+        Collection<net.minecraft.potion.EffectInstance> effects = dataHolder.getActivePotionEffects();
         if (effects.isEmpty()) {
             return Optional.empty();
         }
         List<PotionEffect> apiEffects = new ArrayList<>();
         for (net.minecraft.potion.EffectInstance potionEffect : effects) {
-            apiEffects.add((PotionEffect) new net.minecraft.potion.EffectInstance(potionEffect.func_188419_a(), potionEffect.func_76459_b(),
-                potionEffect.func_76458_c(),
-                potionEffect.func_82720_e(), potionEffect.func_188418_e()));
+            apiEffects.add((PotionEffect) new net.minecraft.potion.EffectInstance(potionEffect.getPotion(), potionEffect.getDuration(),
+                potionEffect.getAmplifier(),
+                potionEffect.isAmbient(), potionEffect.doesShowParticles()));
         }
         return Optional.of(apiEffects);
     }

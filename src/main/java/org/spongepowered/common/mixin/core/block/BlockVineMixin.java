@@ -74,11 +74,11 @@ public abstract class BlockVineMixin extends BlockMixin {
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final net.minecraft.block.BlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.func_177229_b(VineBlock.field_176273_b);
-        final Boolean east = blockState.func_177229_b(VineBlock.field_176278_M);
-        final Boolean west = blockState.func_177229_b(VineBlock.field_176280_O);
-        final Boolean south = blockState.func_177229_b(VineBlock.field_176279_N);
-        final Boolean up = blockState.func_177229_b(VineBlock.field_176277_a);
+        final Boolean north = blockState.get(VineBlock.NORTH);
+        final Boolean east = blockState.get(VineBlock.EAST);
+        final Boolean west = blockState.get(VineBlock.WEST);
+        final Boolean south = blockState.get(VineBlock.SOUTH);
+        final Boolean up = blockState.get(VineBlock.UP);
         if (north) {
             directions.add(Direction.NORTH);
         }

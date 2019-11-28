@@ -59,7 +59,7 @@ public class InvisibilityDataProcessor
 
     @Override
     protected boolean set(final VanishableBridge dataHolder, final Map<Key<?>, Object> keyValues) {
-        if (dataHolder instanceof Entity && ((Entity) dataHolder).field_70170_p.field_72995_K) {
+        if (dataHolder instanceof Entity && ((Entity) dataHolder).world.isRemote) {
             return false;
         }
         final boolean invis = (Boolean) keyValues.get(Keys.INVISIBLE);

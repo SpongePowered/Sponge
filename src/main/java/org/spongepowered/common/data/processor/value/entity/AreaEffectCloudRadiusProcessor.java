@@ -53,13 +53,13 @@ public class AreaEffectCloudRadiusProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected boolean set(AreaEffectCloudEntity container, Double value) {
-        container.func_184483_a(value.floatValue());
+        container.setRadius(value.floatValue());
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(AreaEffectCloudEntity container) {
-        return Optional.of((double) container.func_184490_j());
+        return Optional.of((double) container.getRadius());
     }
 
     @Override

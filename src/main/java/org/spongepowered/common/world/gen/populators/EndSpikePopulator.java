@@ -53,10 +53,10 @@ public class EndSpikePopulator implements Populator {
         EndSpikeFeature.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.func_185426_a(worldIn);
         BlockPos pos = VecHelper.toBlockPos(min);
         for (EndSpikeFeature.EndSpike worldgenspikes$endspike : aworldgenspikes$endspike) {
-            if (worldgenspikes$endspike.func_186154_a(pos)) {
+            if (worldgenspikes$endspike.doesStartInChunk(pos)) {
                 this.spikeGen.func_186143_a(worldgenspikes$endspike);
                 this.spikeGen.func_180709_b(worldIn, rand,
-                        new BlockPos(worldgenspikes$endspike.func_186151_a(), 45, worldgenspikes$endspike.func_186152_b()));
+                        new BlockPos(worldgenspikes$endspike.getCenterX(), 45, worldgenspikes$endspike.getCenterZ()));
             }
         }
     }

@@ -106,7 +106,7 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
                 if (inventory instanceof ActiveChunkReferantBridge && inventory instanceof TileEntity) {
                     final TileEntity te = (TileEntity) inventory;
                     final ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) inventory).bridge$getActiveChunk();
-                    spongeChunk.bridge$addTrackedBlockPosition(te.func_145838_q(), te.func_174877_v(), owner, PlayerTracker.Type.NOTIFIER);
+                    spongeChunk.bridge$addTrackedBlockPosition(te.func_145838_q(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
                 }
             });
         }
@@ -182,7 +182,7 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
     private void impl$afterPutStackInSlots(final CallbackInfoReturnable<Boolean> cir, final IInventory iInventory, final Direction enumFacing,
         final int i, final ItemStack itemStack, ItemStack itemStack1) {
         // after putStackInInventoryAllSlots if the transfer worked
-        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack1.func_190926_b()) {
+        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = impl$forCapture(this);
             SpongeCommonEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
@@ -207,7 +207,7 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
         final Direction direction,
         final CallbackInfoReturnable<Boolean> cir, final ItemStack itemStack, ItemStack itemStack1, final ItemStack itemStack2) {
         // after putStackInInventoryAllSlots if the transfer worked
-        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack2.func_190926_b()) {
+        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = impl$forCapture(hopper);
             SpongeCommonEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);

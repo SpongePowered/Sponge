@@ -90,7 +90,7 @@ public abstract class AdapterLogic{
         }
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             final net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-            if (stack.func_190926_b() || (remove && !lens.setStack(inv, ord, net.minecraft.item.ItemStack.field_190927_a))) {
+            if (stack.isEmpty() || (remove && !lens.setStack(inv, ord, net.minecraft.item.ItemStack.EMPTY))) {
                 continue;
             }
             return ItemStackUtil.cloneDefensiveOptional(stack);
@@ -109,7 +109,7 @@ public abstract class AdapterLogic{
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             final net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-            if (stack.func_190926_b() || stack.func_190916_E() < 1 || (result != null && !result.getType().equals(stack.func_77973_b()))) {
+            if (stack.isEmpty() || stack.getCount() < 1 || (result != null && !result.getType().equals(stack.getItem()))) {
                 continue;
             }
 
@@ -117,7 +117,7 @@ public abstract class AdapterLogic{
                 result = ItemStackUtil.cloneDefensive(stack, 0);
             }
 
-            final int pull = Math.min(stack.func_190916_E(), limit);
+            final int pull = Math.min(stack.getCount(), limit);
             result.setQuantity(result.getQuantity() + pull);
             limit -= pull;
 
@@ -125,10 +125,10 @@ public abstract class AdapterLogic{
                 continue;
             }
 
-            if (pull >= stack.func_190916_E()) {
-                lens.setStack(inv, ord, net.minecraft.item.ItemStack.field_190927_a);
+            if (pull >= stack.getCount()) {
+                lens.setStack(inv, ord, net.minecraft.item.ItemStack.EMPTY);
             } else {
-                stack.func_190920_e(stack.func_190916_E() - pull);
+                stack.setCount(stack.getCount() - pull);
             }
         }
 
@@ -158,7 +158,7 @@ public abstract class AdapterLogic{
         final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.func_77976_d());
+        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
@@ -187,17 +187,17 @@ public abstract class AdapterLogic{
         final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.func_77976_d());
+        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
             final net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
             int push = Math.min(remaining, maxStackSize);
-            if (old.func_190926_b() && lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
+            if (old.isEmpty() && lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                 remaining -= push;
-            } else if (!old.func_190926_b() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
-                push = Math.max(Math.min(maxStackSize - old.func_190916_E(), remaining), 0); // max() accounts for oversized stacks
-                old.func_190920_e(old.func_190916_E() + push);
+            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+                push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
+                old.setCount(old.getCount() + push);
                 remaining -= push;
             }
         }
@@ -221,7 +221,7 @@ public abstract class AdapterLogic{
         int stacks = 0;
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            stacks += !lens.getStack(inv, ord).func_190926_b() ? 1 : 0;
+            stacks += !lens.getStack(inv, ord).isEmpty() ? 1 : 0;
         }
 
         return stacks;
@@ -236,7 +236,7 @@ public abstract class AdapterLogic{
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             final net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-            items += stack.func_190916_E();
+            items += stack.getCount();
         }
 
         return items;
@@ -338,8 +338,8 @@ public abstract class AdapterLogic{
         int found = 0;
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             final net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
-            if (slotStack.func_190926_b()) {
-                if (nonNullStack.func_190926_b()) {
+            if (slotStack.isEmpty()) {
+                if (nonNullStack.isEmpty()) {
                     found++; // Found an empty Slot
                     if (found >= quantity) {
                         return true;
@@ -347,7 +347,7 @@ public abstract class AdapterLogic{
                 }
             } else {
                 if (ItemStackUtil.compareIgnoreQuantity(slotStack, stack)) {
-                    found += slotStack.func_190916_E(); // Found a matching stack
+                    found += slotStack.getCount(); // Found a matching stack
                     if (found >= quantity) {
                         return true;
                     }
@@ -364,12 +364,12 @@ public abstract class AdapterLogic{
     public static boolean contains(final Fabric inv, final Lens lens, final ItemType type) {
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             final net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
-            if (slotStack.func_190926_b()) {
+            if (slotStack.isEmpty()) {
                 if (type == null || type == ItemTypes.NONE) {
                     return true; // Found an empty Slot
                 }
             } else {
-                if (slotStack.func_77973_b() == type) {
+                if (slotStack.getItem() == type) {
                     return true; // Found a matching stack
                 }
             }
@@ -384,16 +384,16 @@ public abstract class AdapterLogic{
 
         final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.func_77976_d());
+        final int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
             final net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
             int push = Math.min(remaining, maxStackSize);
-            if (old.func_190926_b()) {
+            if (old.isEmpty()) {
                 remaining -= push;
             } else if (ItemStackUtil.compareIgnoreQuantity(old, stack)) {
-                push = Math.max(Math.min(maxStackSize - old.func_190916_E(), remaining), 0); // max() accounts for oversized stacks
+                push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
                 remaining -= push;
             }
         }

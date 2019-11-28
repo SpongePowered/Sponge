@@ -66,7 +66,7 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     @Override
     public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        ((ContainerBridge) playerMP.field_71070_bA).bridge$setFirePreview(false);
+        ((ContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
     }
 
     @Override

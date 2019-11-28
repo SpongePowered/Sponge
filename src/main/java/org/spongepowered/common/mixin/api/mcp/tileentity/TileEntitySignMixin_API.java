@@ -49,7 +49,7 @@ public abstract class TileEntitySignMixin_API extends TileEntityMixin_API implem
         DataContainer container = super.toContainer();
         List<String> lines = Lists.newArrayList();
         for (ITextComponent line : this.signText) {
-            lines.add(ITextComponent.Serializer.func_150696_a(line));
+            lines.add(ITextComponent.Serializer.toJson(line));
         }
         container.set(Keys.SIGN_LINES.getQuery(), lines);
         return container;

@@ -56,13 +56,13 @@ public class HeadRotationValueProcessor extends AbstractSpongeValueProcessor<Arm
 
     @Override
     protected boolean set(ArmorStandEntity container, Vector3d value) {
-        container.func_175415_a(VecHelper.toRotation(value));
+        container.setHeadRotation(VecHelper.toRotation(value));
         return true;
     }
 
     @Override
     protected Optional<Vector3d> getVal(ArmorStandEntity container) {
-        return Optional.of(VecHelper.toVector3d(container.func_175418_s()));
+        return Optional.of(VecHelper.toVector3d(container.getHeadRotation()));
     }
 
     @Override

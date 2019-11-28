@@ -449,7 +449,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         } else if (((WorldInfoBridge) this).bridge$getIsMod() && !keepSpawnLoaded) { // If disabled and a mod dimension, validate
             final Integer dimensionId = ((WorldInfoBridge) this).bridge$getDimensionId();
 
-            if (dimensionId != null && dimensionId == ((net.minecraft.world.dimension.DimensionType)(Object) ((WorldInfoBridge) this).bridge$getDimensionType()).func_186068_a()) {
+            if (dimensionId != null && dimensionId == ((net.minecraft.world.dimension.DimensionType)(Object) ((WorldInfoBridge) this).bridge$getDimensionType()).getId()) {
                 if (((DimensionTypeBridge)((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldKeepSpawnLoaded()) {
                     this.setKeepSpawnLoaded(true);
                     keepSpawnLoaded = true;
@@ -516,9 +516,9 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public Optional<DataView> getPropertySection(final DataQuery path) {
-        if ( ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74764_b(path.toString())) {
+        if ( ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().contains(path.toString())) {
             try {
-                final CompoundNBT property = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74775_l(path.toString());
+                final CompoundNBT property = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().getCompound(path.toString());
                 return Optional.of(NbtTranslator.getInstance().translateFrom(property));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -542,8 +542,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public DataContainer getAdditionalProperties() {
-        final CompoundNBT additionalProperties = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().func_74737_b();
-        additionalProperties.func_82580_o(SpongeImpl.ECOSYSTEM_NAME);
+        final CompoundNBT additionalProperties = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().copy();
+        additionalProperties.remove(SpongeImpl.ECOSYSTEM_NAME);
         return NbtTranslator.getInstance().translateFrom(additionalProperties);
     }
 

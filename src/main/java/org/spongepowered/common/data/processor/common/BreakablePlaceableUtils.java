@@ -40,13 +40,13 @@ import java.util.Set;
 public final class BreakablePlaceableUtils {
 
     public static boolean set(final ItemStack stack, final String nbtKey, final Set<? extends BlockType> value) {
-        CompoundNBT stackTag = stack.func_77978_p();
+        CompoundNBT stackTag = stack.getTag();
 
         if (value.isEmpty()) {
             if (stackTag != null) {
-                stackTag.func_82580_o(nbtKey);
+                stackTag.remove(nbtKey);
                 if (stackTag.func_82582_d()) {
-                    stack.func_77982_d(null);
+                    stack.setTag(null);
                 }
             }
         } else {
@@ -60,7 +60,7 @@ public final class BreakablePlaceableUtils {
             }
             if (stackTag == null) {
                 stackTag = new CompoundNBT();
-                stack.func_77982_d(stackTag);
+                stack.setTag(stackTag);
             }
             stackTag.func_74782_a(nbtKey, breakableIds);
         }
@@ -69,17 +69,17 @@ public final class BreakablePlaceableUtils {
     }
 
     public static Optional<Set<BlockType>> get(final ItemStack stack, final String nbtKey) {
-        final CompoundNBT tag = stack.func_77978_p();
+        final CompoundNBT tag = stack.getTag();
         if (tag == null) {
             return Optional.empty();
         }
-        final ListNBT blockIds = tag.func_150295_c(nbtKey, Constants.NBT.TAG_STRING);
+        final ListNBT blockIds = tag.getList(nbtKey, Constants.NBT.TAG_STRING);
         if (blockIds.func_82582_d()) {
             return Optional.empty();
         }
         final Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.func_74745_c());
         for (int i = 0; i < blockIds.func_74745_c(); i++) {
-            BlockTypeRegistryModule.getInstance().getById(blockIds.func_150307_f(i)).ifPresent(blockTypes::add);
+            BlockTypeRegistryModule.getInstance().getById(blockIds.getString(i)).ifPresent(blockTypes::add);
         }
         return Optional.of(blockTypes);
     }

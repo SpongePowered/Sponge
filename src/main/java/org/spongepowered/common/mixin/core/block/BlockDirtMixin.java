@@ -80,10 +80,10 @@ public abstract class BlockDirtMixin extends BlockMixin {
     }
 
     private ImmutableDirtData impl$getDirtTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) (Object) blockState.func_177229_b(BlockDirt.field_176386_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) (Object) blockState.get(BlockDirt.field_176386_a));
     }
 
     private ImmutableSnowedData impl$getIsSnowedFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.func_177229_b(BlockDirt.field_176385_b));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.get(BlockDirt.field_176385_b));
     }
 }

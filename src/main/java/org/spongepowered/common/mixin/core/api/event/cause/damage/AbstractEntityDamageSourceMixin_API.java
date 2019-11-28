@@ -58,16 +58,16 @@ public abstract class AbstractEntityDamageSourceMixin_API implements EntityDamag
             commonSource.bridge$setDamageBypassesArmor();
         }
         if (isExplosive()) {
-            commonSource.func_94540_d();
+            commonSource.setExplosion();
         }
         if (isMagic()) {
-            commonSource.func_82726_p();
+            commonSource.setMagicDamage();
         }
         if (isScaledByDifficulty()) {
-            commonSource.func_76351_m();
+            commonSource.setDifficultyScaled();
         }
         if (doesAffectCreative()) {
-            commonSource.func_76357_e();
+            commonSource.canHarmInCreative();
         }
     }
 

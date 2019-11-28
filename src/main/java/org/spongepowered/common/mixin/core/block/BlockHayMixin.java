@@ -59,7 +59,7 @@ public abstract class BlockHayMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableAxisData) {
             final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            return Optional.of((BlockState) blockState.func_177226_a(RotatedPillarBlock.field_176298_M, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.func_177226_a(RotatedPillarBlock.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -68,13 +68,13 @@ public abstract class BlockHayMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.AXIS)) {
             final Axis axis = (Axis) value;
-            return Optional.of((BlockState) blockState.func_177226_a(RotatedPillarBlock.field_176298_M, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.func_177226_a(RotatedPillarBlock.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableAxisData impl$getAxisData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                Constants.DirectionFunctions.convertAxisToSponge(blockState.func_177229_b(RotatedPillarBlock.field_176298_M)));
+                Constants.DirectionFunctions.convertAxisToSponge(blockState.get(RotatedPillarBlock.AXIS)));
     }
 }

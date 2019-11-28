@@ -74,6 +74,6 @@ public abstract class BlockFurnaceMixin extends BlockMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(FurnaceBlock.field_176447_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(FurnaceBlock.field_176447_a)));
     }
 }

@@ -76,7 +76,7 @@ public class RoofedForestPopulator implements Forest {
             for (int z = 0; z < 4; ++z) {
                 int x0 = x * 4 + 1 + random.nextInt(3);
                 int z0 = z * 4 + 1 + random.nextInt(3);
-                BlockPos blockpos1 = world.func_175672_r(pos.func_177982_a(x0, 0, z0));
+                BlockPos blockpos1 = world.func_175672_r(pos.add(x0, 0, z0));
                 if (this.override != null) {
                     Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(blockpos1));
                     tree = this.override.apply(pos2);
@@ -87,8 +87,8 @@ public class RoofedForestPopulator implements Forest {
                     }
                     tree = results.get(0);
                 }
-                if (tree.canPlaceAt(worldIn, blockpos1.func_177958_n(), blockpos1.func_177956_o(), blockpos1.func_177952_p())) {
-                    tree.placeObject(worldIn, random, blockpos1.func_177958_n(), blockpos1.func_177956_o(), blockpos1.func_177952_p());
+                if (tree.canPlaceAt(worldIn, blockpos1.getX(), blockpos1.getY(), blockpos1.getZ())) {
+                    tree.placeObject(worldIn, random, blockpos1.getX(), blockpos1.getY(), blockpos1.getZ());
                 }
             }
         }

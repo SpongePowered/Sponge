@@ -54,13 +54,13 @@ public class TileEntityTracksOutputValueProcessor extends AbstractSpongeValuePro
 
     @Override
     protected boolean set(CommandBlockTileEntity container, Boolean value) {
-        container.func_145993_a().func_175573_a(value);
+        container.getCommandBlockLogic().setTrackOutput(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(CommandBlockTileEntity container) {
-        return Optional.of(container.func_145993_a().func_175571_m());
+        return Optional.of(container.getCommandBlockLogic().shouldTrackOutput());
     }
 
     @Override

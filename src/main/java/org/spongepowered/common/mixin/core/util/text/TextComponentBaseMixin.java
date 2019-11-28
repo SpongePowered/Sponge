@@ -66,7 +66,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
 
     @Override
     public Iterator<ITextComponent> bridge$childrenIterator() {
-        return func_150253_a().iterator();
+        return getSiblings().iterator();
     }
 
     @Override
@@ -79,7 +79,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
         final StringBuilder builder = new StringBuilder();
 
         for (final ITextComponent component : bridge$withChildren()) {
-            builder.append(component.func_150261_e());
+            builder.append(component.getUnformattedComponentText());
         }
 
         return builder.toString();
@@ -88,13 +88,13 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
     private StringBuilder getLegacyFormattingBuilder() {
         final StringBuilder builder = new StringBuilder();
 
-        final Style style = func_150256_b();
-        apply(builder, COLOR_CHAR, defaultIfNull(style.func_150215_a(), RESET));
-        apply(builder, COLOR_CHAR, BOLD, style.func_150223_b());
-        apply(builder, COLOR_CHAR, ITALIC, style.func_150242_c());
-        apply(builder, COLOR_CHAR, UNDERLINE, style.func_150234_e());
-        apply(builder, COLOR_CHAR, STRIKETHROUGH, style.func_150236_d());
-        apply(builder, COLOR_CHAR, OBFUSCATED, style.func_150233_f());
+        final Style style = getStyle();
+        apply(builder, COLOR_CHAR, defaultIfNull(style.getColor(), RESET));
+        apply(builder, COLOR_CHAR, BOLD, style.getBold());
+        apply(builder, COLOR_CHAR, ITALIC, style.getItalic());
+        apply(builder, COLOR_CHAR, UNDERLINE, style.getUnderlined());
+        apply(builder, COLOR_CHAR, STRIKETHROUGH, style.getStrikethrough());
+        apply(builder, COLOR_CHAR, OBFUSCATED, style.getObfuscated());
 
         return builder;
     }
@@ -112,7 +112,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
         Style previous = null;
 
         for (final ITextComponent component : bridge$withChildren()) {
-            final Style newStyle = component.func_150256_b();
+            final Style newStyle = component.getStyle();
             final ResolvedChatStyle style = resolve(current, previous, newStyle);
             previous = newStyle;
 
@@ -144,7 +144,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
             }
 
             current = style;
-            builder.append(component.func_150261_e());
+            builder.append(component.getUnformattedComponentText());
         }
 
         return builder.toString();
@@ -153,7 +153,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
     @Override
     public String bridge$toLegacySingle(final char code) {
         return getLegacyFormattingBuilder()
-                .append(func_150261_e())
+                .append(getUnformattedComponentText())
                 .toString();
     }
 
@@ -170,12 +170,12 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
             );
         }
         return new ResolvedChatStyle(
-                style.func_150215_a(),
-                style.func_150223_b(),
-                style.func_150242_c(),
-                style.func_150234_e(),
-                style.func_150236_d(),
-                style.func_150233_f()
+                style.getColor(),
+                style.getBold(),
+                style.getItalic(),
+                style.getUnderlined(),
+                style.getStrikethrough(),
+                style.getObfuscated()
         );
     }
 

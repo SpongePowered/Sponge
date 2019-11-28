@@ -86,7 +86,7 @@ public abstract class TileEntityBeaconMixin extends TileEntityLockableMixin impl
     )
     @Nullable
     private Effect impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {
-        return Effect.func_188412_a(id);
+        return Effect.get(id);
     }
 
     @Override

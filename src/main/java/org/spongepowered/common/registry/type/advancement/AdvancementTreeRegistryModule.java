@@ -73,7 +73,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
         if (optTree.isPresent()) {
             super.register(optTree.get());
         } else {
-            SpongeImpl.getLogger().warn("Attempted to register a root advancement {} without a advancement tree?", rootAdvancement.func_192067_g());
+            SpongeImpl.getLogger().warn("Attempted to register a root advancement {} without a advancement tree?", rootAdvancement.getId());
         }
     }
 

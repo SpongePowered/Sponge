@@ -62,7 +62,7 @@ public abstract class ContainerEnchantmentMixin {
 
     @Redirect(method = "onCraftMatrixChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;calcItemStackEnchantability(Ljava/util/Random;IILnet/minecraft/item/ItemStack;)I"))
     private int impl$onCalcItemStackEnchantability(Random random, int option, int power, ItemStack itemStack) {
-        int levelRequirement = EnchantmentHelper.func_77514_a(random, option, power, itemStack);
+        int levelRequirement = EnchantmentHelper.calcItemStackEnchantability(random, option, power, itemStack);
         levelRequirement = SpongeCommonEventFactory.callEnchantEventLevelRequirement((EnchantmentContainer)(Object) this, this.xpSeed, option, power, itemStack, levelRequirement);
         return levelRequirement;
     }
@@ -79,14 +79,14 @@ public abstract class ContainerEnchantmentMixin {
 
     @Inject(method = "enchantItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;onEnchant(Lnet/minecraft/item/ItemStack;I)V"))
     private void impl$beforeEnchantItem(PlayerEntity playerIn, int option, CallbackInfoReturnable<Boolean> cir) {
-        this.prevItem = ItemStackUtil.snapshotOf(this.tableInventory.func_70301_a(0));
-        this.prevLapis = ItemStackUtil.snapshotOf(this.tableInventory.func_70301_a(1));
+        this.prevItem = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(0));
+        this.prevLapis = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(1));
     }
 
     @Inject(method = "enchantItem", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;addStat(Lnet/minecraft/stats/StatBase;)V"))
     private void impl$afterEnchantItem(PlayerEntity playerIn, int option, CallbackInfoReturnable<Boolean> cir) {
-        ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(this.tableInventory.func_70301_a(0));
-        ItemStackSnapshot newLapis = ItemStackUtil.snapshotOf(this.tableInventory.func_70301_a(1));
+        ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(0));
+        ItemStackSnapshot newLapis = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(1));
 
         org.spongepowered.api.item.inventory.Container container = ContainerUtil.fromNative((Container) (Object) this);
 

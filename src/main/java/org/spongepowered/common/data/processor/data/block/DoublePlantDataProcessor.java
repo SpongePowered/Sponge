@@ -40,7 +40,7 @@ public class DoublePlantDataProcessor extends
         AbstractCatalogDataProcessor<DoublePlantType, Value<DoublePlantType>, DoublePlantData, ImmutableDoublePlantData> {
 
     public DoublePlantDataProcessor() {
-        super(Keys.DOUBLE_PLANT_TYPE, input -> input.func_77973_b() == ItemTypes.DOUBLE_PLANT);
+        super(Keys.DOUBLE_PLANT_TYPE, input -> input.getItem() == ItemTypes.DOUBLE_PLANT);
     }
 
     @Override

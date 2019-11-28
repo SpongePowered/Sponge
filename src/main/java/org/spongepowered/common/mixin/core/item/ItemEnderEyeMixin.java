@@ -91,7 +91,7 @@ public class ItemEnderEyeMixin extends Item {
     private void implThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, final RayTraceResult rayTraceResult, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            final Vector3d targetPosition = new Vector3d(playerIn.field_70165_t, playerIn.field_70163_u + (double) (playerIn.field_70131_O / 2.0F), playerIn.field_70161_v);
+            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.field_70131_O / 2.0F), playerIn.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
@@ -117,7 +117,7 @@ public class ItemEnderEyeMixin extends Item {
     private void implThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            final Vector3d targetPosition = new Vector3d(playerIn.field_70165_t, playerIn.field_70163_u + (double) (playerIn.field_70131_O / 2.0F), playerIn.field_70161_v);
+            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.field_70131_O / 2.0F), playerIn.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),

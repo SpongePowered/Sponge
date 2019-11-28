@@ -69,7 +69,7 @@ public abstract class EntityDragonMixin extends EntityLivingMixin {
         require = 0 // Forge rewrites the material request to block.isAir
     )
     private Block spongeImpl$onCanGrief(BlockState state) {
-        return ((GrieferBridge) this).bridge$CanGrief() ? state.func_177230_c() : Blocks.field_150350_a;
+        return ((GrieferBridge) this).bridge$CanGrief() ? state.getBlock() : Blocks.AIR;
     }
 
     /**
@@ -81,8 +81,8 @@ public abstract class EntityDragonMixin extends EntityLivingMixin {
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
     @Nullable
     private Vec3d spongeImpl$getTargetLocationOrNull(IPhase iPhase) {
-        Vec3d target = iPhase.func_188650_g();
-        if (target != null && target.field_72450_a == this.posX && target.field_72449_c == this.posZ) {
+        Vec3d target = iPhase.getTargetLocation();
+        if (target != null && target.x == this.posX && target.z == this.posZ) {
             return null; // Skips the movement code
         }
         return target;

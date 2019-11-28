@@ -67,13 +67,13 @@ public abstract class BlockTripWireMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDisarmedData) {
             final boolean disarmed = ((ImmutableDisarmedData) manipulator).disarmed().get();
-            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.field_176295_N, disarmed));
+            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.DISARMED, disarmed));
         }
         if (manipulator instanceof ImmutableAttachedData) {
             return Optional.of((BlockState) blockState);
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.field_176293_a, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             return Optional.of((BlockState) blockState);
@@ -85,7 +85,7 @@ public abstract class BlockTripWireMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.DISARMED)) {
             final boolean disarmed = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.field_176295_N, disarmed));
+            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.DISARMED, disarmed));
         }
         if (key.equals(Keys.SUSPENDED)) {
             return Optional.of((BlockState) blockState);
@@ -94,7 +94,7 @@ public abstract class BlockTripWireMixin extends BlockMixin {
             return Optional.of((BlockState) blockState);
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.field_176293_a, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(TripWireBlock.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
                 || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
@@ -104,23 +104,23 @@ public abstract class BlockTripWireMixin extends BlockMixin {
     }
 
     private ImmutableDisarmedData impl$getIsDisarmedFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisarmedData.class, blockState.func_177229_b(TripWireBlock.field_176295_N));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisarmedData.class, blockState.get(TripWireBlock.DISARMED));
     }
 
     private ImmutableAttachedData impl$getIsAttachedFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.func_177229_b(TripWireBlock.field_176294_M));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.get(TripWireBlock.ATTACHED));
     }
 
     private ImmutablePoweredData impl$getIsPoweredFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(TripWireBlock.field_176293_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(TripWireBlock.POWERED));
     }
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final net.minecraft.block.BlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.func_177229_b(TripWireBlock.field_176296_O);
-        final Boolean east = blockState.func_177229_b(TripWireBlock.field_176291_P);
-        final Boolean west = blockState.func_177229_b(TripWireBlock.field_176292_R);
-        final Boolean south = blockState.func_177229_b(TripWireBlock.field_176289_Q);
+        final Boolean north = blockState.get(TripWireBlock.NORTH);
+        final Boolean east = blockState.get(TripWireBlock.EAST);
+        final Boolean west = blockState.get(TripWireBlock.WEST);
+        final Boolean south = blockState.get(TripWireBlock.SOUTH);
         if (north) {
             directions.add(Direction.NORTH);
         }

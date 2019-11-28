@@ -56,7 +56,7 @@ public class SlimeDataProcessor
 
     @Override
     protected Optional<Integer> getVal(final SlimeEntity entity) {
-        return Optional.of(entity.func_70809_q() - 1);
+        return Optional.of(entity.getSlimeSize() - 1);
     }
 
     @Override

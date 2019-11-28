@@ -49,10 +49,10 @@ public abstract class GrieferBridgeMixin implements GrieferBridge {
         this.griefer$canGrief = grief;
         if (grief) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
-            spongeData.func_74757_a(Constants.Sponge.Entity.CAN_GRIEF, true);
+            spongeData.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
         } else {
             if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-                ((DataCompoundHolder) this).data$getSpongeCompound().func_82580_o(Constants.Sponge.Entity.CAN_GRIEF);
+                ((DataCompoundHolder) this).data$getSpongeCompound().remove(Constants.Sponge.Entity.CAN_GRIEF);
             }
         }
     }

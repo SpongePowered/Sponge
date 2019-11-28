@@ -57,7 +57,7 @@ public abstract class BlockRailDetectorMixin extends BlockRailBaseMixin {
     @Override
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(DetectorRailBlock.field_176574_M, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.func_177226_a(DetectorRailBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -65,12 +65,12 @@ public abstract class BlockRailDetectorMixin extends BlockRailBaseMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(DetectorRailBlock.field_176574_M, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(DetectorRailBlock.POWERED, (Boolean) value));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutablePoweredData impl$getIsPoweredFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(DetectorRailBlock.field_176574_M));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(DetectorRailBlock.POWERED));
     }
 }

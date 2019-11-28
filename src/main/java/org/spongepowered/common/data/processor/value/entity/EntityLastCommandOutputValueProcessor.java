@@ -56,13 +56,13 @@ public class EntityLastCommandOutputValueProcessor extends
 
     @Override
     protected boolean set(MinecartCommandBlockEntity container, Optional<Text> value) {
-        container.func_145822_e().func_145750_b(SpongeTexts.toComponent(value.orElse(Text.of())));
+        container.getCommandBlockLogic().setLastOutput(SpongeTexts.toComponent(value.orElse(Text.of())));
         return true;
     }
 
     @Override
     protected Optional<Optional<Text>> getVal(MinecartCommandBlockEntity container) {
-        Text text = SpongeTexts.toText(container.func_145822_e().func_145749_h());
+        Text text = SpongeTexts.toText(container.getCommandBlockLogic().getLastOutput());
         return Optional.of(Optional.of(text)); //#OptionalWrapping o.o
     }
 

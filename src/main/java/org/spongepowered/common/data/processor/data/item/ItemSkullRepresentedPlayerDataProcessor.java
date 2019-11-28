@@ -80,8 +80,8 @@ public class ItemSkullRepresentedPlayerDataProcessor
     @Override
     protected Optional<GameProfile> getVal(ItemStack itemStack) {
         if (SkullUtils.isValidItemStack(itemStack) && SkullUtils.getSkullType(itemStack.func_77960_j()).equals(SkullTypes.PLAYER)) {
-            final CompoundNBT nbt = itemStack.func_179543_a(Constants.Item.Skull.ITEM_SKULL_OWNER);
-            final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.func_152459_a(nbt);
+            final CompoundNBT nbt = itemStack.getChildTag(Constants.Item.Skull.ITEM_SKULL_OWNER);
+            final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfile(nbt);
             return Optional.ofNullable((GameProfile) mcProfile);
         }
         return Optional.empty();

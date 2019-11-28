@@ -99,24 +99,24 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     final Slot slot;
                     if (context.getPacket() instanceof CPlayerDiggingPacket) {
                         final CPlayerDiggingPacket packetIn = context.getPacket();
-                        usedButton = packetIn.func_180762_c() == CPlayerDiggingPacket.Action.DROP_ITEM ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID : 1;
-                        slot = ((PlayerInventory) player.field_71071_by).getEquipment().getSlot(EquipmentTypes.MAIN_HAND).orElse(null);
+                        usedButton = packetIn.getAction() == CPlayerDiggingPacket.Action.DROP_ITEM ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID : 1;
+                        slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(EquipmentTypes.MAIN_HAND).orElse(null);
                     } else {
                         final CClickWindowPacket packetIn = context.getPacket();
-                        usedButton = packetIn.func_149543_e();
-                        slot = ((InventoryAdapter) player.field_71071_by).bridge$getSlot(packetIn.func_149544_d()).orElse(null);
+                        usedButton = packetIn.getUsedButton();
+                        slot = ((InventoryAdapter) player.inventory).bridge$getSlot(packetIn.getSlotId()).orElse(null);
                     }
 
                     final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-                    final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.field_71070_bA;
+                    final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
                     final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
-                    final ClickInventoryEvent.Drop dropItemEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(player.field_71070_bA),
+                    final ClickInventoryEvent.Drop dropItemEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer),
                             cursorTrans, Lists.newArrayList(slotTrans), entities,  usedButton, slot);
 
                     SpongeImpl.postEvent(dropItemEvent);
                     if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(dropItemEvent.getTransactions())) {
                         ((EntityPlayerMPBridge) player).bridge$restorePacketItem(Hand.MAIN_HAND);
-                        PacketPhaseUtil.handleSlotRestore(player, player.field_71070_bA, dropItemEvent.getTransactions(), true);
+                        PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(), true);
                     } else {
                         processSpawnedEntities(player, dropItemEvent);
                     }
@@ -132,7 +132,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 .acceptAndClearIfNotEmpty(itemMapping -> {
 
                 });
-            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.field_71070_bA;
+            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
             mixinContainer.bridge$setCaptureInventory(false);
             mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
@@ -147,7 +147,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 if (currentEntity instanceof OwnershipTrackedBridge) {
                     ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference((Player) playerMP);
                 } else {
-                    currentEntity.setCreator(playerMP.func_110124_au());
+                    currentEntity.setCreator(playerMP.getUniqueID());
                 }            }
 
             // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')

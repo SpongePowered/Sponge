@@ -47,7 +47,7 @@ public class ReplaceablePropertyStore extends AbstractBlockPropertyStore<Replace
 
     @Override
     protected Optional<ReplaceableProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
-        return Optional.of(block.func_185904_a().func_76222_j() ? TRUE : FALSE);
+        return Optional.of(block.getMaterial().isReplaceable() ? TRUE : FALSE);
     }
 
     @Override

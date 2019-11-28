@@ -45,7 +45,7 @@ import java.util.Optional;
 
 public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<ItemType>, AlternateCatalogRegistryModule<ItemType> {
 
-    public final ItemStack NONE = (ItemStack) net.minecraft.item.ItemStack.field_190927_a;
+    public final ItemStack NONE = (ItemStack) net.minecraft.item.ItemStack.EMPTY;
     public final ItemStackSnapshot NONE_SNAPSHOT = NONE.createSnapshot();
 
     public static ItemTypeRegistryModule getInstance() {

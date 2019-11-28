@@ -146,11 +146,11 @@ public final class NetworkUtil {
      * @param handler
      */
     public static void initializeConnectionToPlayer(final PlayerList playerList, final NetworkManager netManager, final ServerPlayerEntity playerIn, @Nullable ServerPlayNetHandler handler) {
-        final GameProfile gameprofile = playerIn.func_146103_bH();
-        final PlayerProfileCache playerprofilecache = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().func_152358_ax();
-        final GameProfile gameprofile1 = playerprofilecache.func_152652_a(gameprofile.getId());
+        final GameProfile gameprofile = playerIn.getGameProfile();
+        final PlayerProfileCache playerprofilecache = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().getPlayerProfileCache();
+        final GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
         final String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
-        playerprofilecache.func_152649_a(gameprofile);
+        playerprofilecache.addEntry(gameprofile);
         
         // Sponge start - save changes to offline User before reading player data
         final SpongeUser user = (SpongeUser) ((EntityPlayerMPBridge) playerIn).bridge$getUserObject();
@@ -161,29 +161,29 @@ public final class NetworkUtil {
         }
         // Sponge end
 
-        final CompoundNBT nbttagcompound = playerList.func_72380_a(playerIn);
-        ServerWorld worldServer = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().func_71218_a(playerIn.field_71093_bK);
+        final CompoundNBT nbttagcompound = playerList.readPlayerDataFromFile(playerIn);
+        ServerWorld worldServer = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().getWorld(playerIn.dimension);
         final int actualDimensionId = ((WorldServerBridge) worldServer).bridge$getDimensionId();
         final BlockPos spawnPos;
         // Join data
-        final Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.func_110124_au());
+        final Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
         final Instant lastJoined = Instant.now();
-        SpongePlayerDataHandler.setPlayerInfo(playerIn.func_110124_au(), firstJoined.orElse(lastJoined), lastJoined);
+        SpongePlayerDataHandler.setPlayerInfo(playerIn.getUniqueID(), firstJoined.orElse(lastJoined), lastJoined);
 
-        if (actualDimensionId != playerIn.field_71093_bK) {
+        if (actualDimensionId != playerIn.dimension) {
             SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded world [{}]. This is not safe so we have moved them to "
-                                        + "the default world's spawn point.", playerIn.func_70005_c_(), playerIn.field_71093_bK);
+                                        + "the default world's spawn point.", playerIn.func_70005_c_(), playerIn.dimension);
             if (!firstJoined.isPresent()) {
                 spawnPos = SpongeImplHooks.getRandomizedSpawnPoint(worldServer);
             } else {
-                spawnPos = worldServer.func_175694_M();
+                spawnPos = worldServer.getSpawnPoint();
             }
-            playerIn.field_71093_bK = actualDimensionId;
-            playerIn.func_70107_b(spawnPos.func_177958_n(), spawnPos.func_177956_o(), spawnPos.func_177952_p());
+            playerIn.dimension = actualDimensionId;
+            playerIn.setPosition(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
         }
 
         // Sponge start - fire login event
-        @Nullable final String kickReason = playerList.func_148542_a(netManager.func_74430_c(), gameprofile);
+        @Nullable final String kickReason = playerList.func_148542_a(netManager.getRemoteAddress(), gameprofile);
         final Text disconnectMessage;
         if (kickReason != null) {
             disconnectMessage = SpongeTexts.fromLegacy(kickReason);
@@ -217,9 +217,9 @@ public final class NetworkUtil {
                 }
 
                 try {
-                    ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.func_74430_c().toString() + ")" : String.valueOf(netManager.func_74430_c() + ": " + reason.func_150260_c())));
-                    netManager.func_179290_a(new SDisconnectPacket(reason));
-                    netManager.func_150718_a(reason);
+                    ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.func_150260_c())));
+                    netManager.sendPacket(new SDisconnectPacket(reason));
+                    netManager.closeChannel(reason);
                 } catch (Exception exception) {
                     ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().error("Error whilst disconnecting player", exception);
                 }
@@ -236,22 +236,22 @@ public final class NetworkUtil {
         final float pitch = (float) loginEvent.getToTransform().getPitch();
         final float yaw = (float) loginEvent.getToTransform().getYaw();
 
-        playerIn.field_71093_bK = ((WorldServerBridge) worldServer).bridge$getDimensionId();
-        playerIn.func_70029_a(worldServer);
-        playerIn.field_71134_c.func_73080_a((ServerWorld) playerIn.field_70170_p);
-        playerIn.func_70080_a(x, y, z, yaw, pitch);
+        playerIn.dimension = ((WorldServerBridge) worldServer).bridge$getDimensionId();
+        playerIn.setWorld(worldServer);
+        playerIn.interactionManager.setWorld((ServerWorld) playerIn.world);
+        playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
         // make sure the chunk is loaded for login
-        worldServer.func_72863_F().func_186028_c(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
+        worldServer.getChunkProvider().func_186028_c(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
         // Sponge end
 
         String s1 = "local";
 
-        if (netManager.func_74430_c() != null) {
-            s1 = netManager.func_74430_c().toString();
+        if (netManager.getRemoteAddress() != null) {
+            s1 = netManager.getRemoteAddress().toString();
         }
 
-        final WorldInfo worldinfo = worldServer.func_72912_H();
-        final BlockPos spawnBlockPos = worldServer.func_175694_M();
+        final WorldInfo worldinfo = worldServer.getWorldInfo();
+        final BlockPos spawnBlockPos = worldServer.getSpawnPoint();
         ((PlayerListAccessor) playerList).accessor$setPlayerGameType(playerIn, null, worldServer);
 
         // Sponge start
@@ -259,39 +259,39 @@ public final class NetworkUtil {
             // Create the handler here (so the player's gets set)
             handler = new ServerPlayNetHandler(((PlayerListAccessor) playerList).accessor$getPlayerListServer(), netManager, playerIn);
         }
-        playerIn.field_71135_a = handler;
+        playerIn.connection = handler;
         SpongeImplHooks.fireServerConnectionEvent(netManager);
         // Sponge end
 
         // Support vanilla clients logging into custom dimensions
         final int dimensionId = WorldManager.getClientDimensionId(playerIn, worldServer);
 
-        WorldManager.sendDimensionRegistration(playerIn, worldServer.field_73011_w);
+        WorldManager.sendDimensionRegistration(playerIn, worldServer.dimension);
 
-        handler.func_147359_a(new SJoinGamePacket(playerIn.func_145782_y(), playerIn.field_71134_c.func_73081_b(), worldinfo
-                .func_76093_s(), dimensionId, worldServer.func_175659_aa(), playerList.func_72352_l(), worldinfo
-                .func_76067_t(), worldServer.func_82736_K().func_82766_b("reducedDebugInfo")));
-        handler.func_147359_a(new SCustomPayloadPlayPacket("MC|Brand", (new PacketBuffer(Unpooled.buffer())).func_180714_a(playerList
-                .func_72365_p().getServerModName())));
-        handler.func_147359_a(new SServerDifficultyPacket(worldinfo.func_176130_y(), worldinfo.func_176123_z()));
-        handler.func_147359_a(new SSpawnPositionPacket(spawnBlockPos));
-        handler.func_147359_a(new SPlayerAbilitiesPacket(playerIn.field_71075_bZ));
-        handler.func_147359_a(new SHeldItemChangePacket(playerIn.field_71071_by.field_70461_c));
-        playerList.func_187243_f(playerIn);
-        playerIn.func_147099_x().func_150877_d();
-        playerIn.func_192037_E().func_192826_c(playerIn);
-        ((PlayerListAccessor) playerList).accessor$getPlayerListServer().func_147132_au();
+        handler.sendPacket(new SJoinGamePacket(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo
+                .isHardcore(), dimensionId, worldServer.getDifficulty(), playerList.getMaxPlayers(), worldinfo
+                .getGenerator(), worldServer.getGameRules().func_82766_b("reducedDebugInfo")));
+        handler.sendPacket(new SCustomPayloadPlayPacket("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(playerList
+                .getServer().getServerModName())));
+        handler.sendPacket(new SServerDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
+        handler.sendPacket(new SSpawnPositionPacket(spawnBlockPos));
+        handler.sendPacket(new SPlayerAbilitiesPacket(playerIn.abilities));
+        handler.sendPacket(new SHeldItemChangePacket(playerIn.inventory.currentItem));
+        playerList.updatePermissionLevel(playerIn);
+        playerIn.getStats().markAllDirty();
+        playerIn.getRecipeBook().init(playerIn);
+        ((PlayerListAccessor) playerList).accessor$getPlayerListServer().refreshStatusNextTick();
 
-        handler.func_147364_a(x, y, z, yaw, pitch);
+        handler.setPlayerLocation(x, y, z, yaw, pitch);
         playerList.func_72377_c(playerIn);
 
         // Sponge start - add world name to message
-        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.func_70005_c_(), s1, playerIn.func_145782_y(),
-            worldServer.func_72912_H().func_76065_j(), ((DimensionType) (Object) worldServer.field_73011_w.func_186058_p()).getId(),
-            ((WorldServerBridge) worldServer).bridge$getDimensionId(), playerIn.field_70165_t, playerIn.field_70163_u, playerIn.field_70161_v);
+        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.func_70005_c_(), s1, playerIn.getEntityId(),
+            worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.dimension.getType()).getId(),
+            ((WorldServerBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
         // Sponge end
 
-        playerList.func_72354_b(playerIn, worldServer);
+        playerList.sendWorldInfo(playerIn, worldServer);
 
         // Sponge Start - Use the server's ResourcePack object
         final Optional<ResourcePack> pack = ((Server) ((PlayerListAccessor) playerList).accessor$getPlayerListServer()).getDefaultResourcePack();
@@ -308,61 +308,61 @@ public final class NetworkUtil {
 
         ((EntityPlayerMPBridge) playerIn).bridge$initScoreboard();
 
-        for (final EffectInstance potioneffect : playerIn.func_70651_bq()) {
-            handler.func_147359_a(new SPlayEntityEffectPacket(playerIn.func_145782_y(), potioneffect));
+        for (final EffectInstance potioneffect : playerIn.getActivePotionEffects()) {
+            handler.sendPacket(new SPlayEntityEffectPacket(playerIn.getEntityId(), potioneffect));
         }
 
         if (nbttagcompound != null) {
-            if (nbttagcompound.func_150297_b("RootVehicle", 10)) {
-                final CompoundNBT nbttagcompound1 = nbttagcompound.func_74775_l("RootVehicle");
-                final Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.func_74775_l("Entity"), worldServer, true);
+            if (nbttagcompound.contains("RootVehicle", 10)) {
+                final CompoundNBT nbttagcompound1 = nbttagcompound.getCompound("RootVehicle");
+                final Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.getCompound("Entity"), worldServer, true);
 
                 if (entity2 != null) {
-                    final UUID uuid = nbttagcompound1.func_186857_a("Attach");
+                    final UUID uuid = nbttagcompound1.getUniqueId("Attach");
 
-                    if (entity2.func_110124_au().equals(uuid)) {
-                        playerIn.func_184205_a(entity2, true);
+                    if (entity2.getUniqueID().equals(uuid)) {
+                        playerIn.startRiding(entity2, true);
                     } else {
-                        for (final Entity entity : entity2.func_184182_bu()) {
-                            if (entity.func_110124_au().equals(uuid)) {
-                                playerIn.func_184205_a(entity, true);
+                        for (final Entity entity : entity2.getRecursivePassengers()) {
+                            if (entity.getUniqueID().equals(uuid)) {
+                                playerIn.startRiding(entity, true);
                                 break;
                             }
                         }
                     }
 
-                    if (!playerIn.func_184218_aH()) {
+                    if (!playerIn.isPassenger()) {
                         ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().warn("Couldn\'t reattach entity to player");
                         worldServer.func_72973_f(entity2);
 
-                        for (final Entity entity3 : entity2.func_184182_bu()) {
+                        for (final Entity entity3 : entity2.getRecursivePassengers()) {
                             worldServer.func_72973_f(entity3);
                         }
                     }
                 }
-            } else if (nbttagcompound.func_150297_b("Riding", 10)) {
-                final Entity entity1 = AnvilChunkLoader.func_186051_a(nbttagcompound.func_74775_l("Riding"), worldServer, true);
+            } else if (nbttagcompound.contains("Riding", 10)) {
+                final Entity entity1 = AnvilChunkLoader.func_186051_a(nbttagcompound.getCompound("Riding"), worldServer, true);
 
                 if (entity1 != null) {
-                    playerIn.func_184205_a(entity1, true);
+                    playerIn.startRiding(entity1, true);
                 }
             }
         }
 
-        playerIn.func_71116_b();
+        playerIn.addSelfToInternalCraftingInventory();
 
         final TranslationTextComponent chatcomponenttranslation;
 
         if (!playerIn.func_70005_c_().equalsIgnoreCase(s))
         {
-            chatcomponenttranslation = new TranslationTextComponent("multiplayer.player.joined.renamed", playerIn.func_145748_c_(), s);
+            chatcomponenttranslation = new TranslationTextComponent("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
         }
         else
         {
-            chatcomponenttranslation = new TranslationTextComponent("multiplayer.player.joined", playerIn.func_145748_c_());
+            chatcomponenttranslation = new TranslationTextComponent("multiplayer.player.joined", playerIn.getDisplayName());
         }
 
-        chatcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.YELLOW);
+        chatcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
 
         // Fire PlayerJoinEvent
         final Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);

@@ -58,14 +58,14 @@ public class FlyingAbilityDataProcessor extends
 
     @Override
     protected boolean set(PlayerEntity entity, Boolean value) {
-        entity.field_71075_bZ.field_75101_c = value;
-        entity.func_71016_p();
+        entity.abilities.allowFlying = value;
+        entity.sendPlayerAbilities();
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(PlayerEntity entity) {
-        return Optional.of(entity.field_71075_bZ.field_75101_c);
+        return Optional.of(entity.abilities.allowFlying);
     }
 
     @Override

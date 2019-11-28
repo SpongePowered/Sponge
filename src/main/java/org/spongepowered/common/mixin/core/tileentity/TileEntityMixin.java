@@ -226,7 +226,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
         return MoreObjects.toStringHelper(this)
             .add("type", ((TileEntity) this).getType().getId())
-            .add("world", this.world.func_72912_H().func_76065_j())
+            .add("world", this.world.getWorldInfo().getWorldName())
             .add("pos", this.pos);
     }
 

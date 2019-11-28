@@ -40,7 +40,7 @@ public class SpongeEndPortalBuilder extends AbstractTileBuilder<EndPortal> {
     @Override
     protected Optional<EndPortal> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(endPortal -> {
-            ((EndPortalTileEntity) endPortal).func_145829_t();
+            ((EndPortalTileEntity) endPortal).validate();
             return endPortal;
         });
     }

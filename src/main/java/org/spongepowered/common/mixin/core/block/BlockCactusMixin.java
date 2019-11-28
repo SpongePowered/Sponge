@@ -55,14 +55,14 @@ public abstract class BlockCactusMixin extends BlockMixin {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean impl$reAssignForBlockDamageSource(final Entity entity, final DamageSource source, final float damage,
         final net.minecraft.world.World world, final BlockPos pos, final net.minecraft.block.BlockState state, final Entity entityIn) {
-        if (world.field_72995_K) {
-            return entity.func_70097_a(source, damage);
+        if (world.isRemote) {
+            return entity.attackEntityFrom(source, damage);
         }
         try {
-            final Location<World> location = new Location<>((World) world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
+            final Location<World> location = new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ());
             final MinecraftBlockDamageSource cactus = new MinecraftBlockDamageSource("cactus", location);
             ((DamageSourceBridge) cactus).bridge$setCactusSource();
-            return entity.func_70097_a(DamageSource.field_76367_g, damage);
+            return entity.attackEntityFrom(DamageSource.CACTUS, damage);
         } finally {
             ((DamageSourceBridge) source).bridge$setCactusSource();
         }
@@ -83,7 +83,7 @@ public abstract class BlockCactusMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             final int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            return Optional.of((BlockState) blockState.func_177226_a(CactusBlock.field_176587_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(CactusBlock.AGE, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -92,13 +92,13 @@ public abstract class BlockCactusMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             final int growth = (Integer) value;
-            return Optional.of((BlockState) blockState.func_177226_a(CactusBlock.field_176587_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(CactusBlock.AGE, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(CactusBlock.field_176587_a), 0, 15);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(CactusBlock.AGE), 0, 15);
     }
 
 }

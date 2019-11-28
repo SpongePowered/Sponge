@@ -123,7 +123,7 @@ public final class SpongeGenerationPopulator implements GenerationPopulator, Tim
         final int zInChunkEnd = Math.min(15, maxBound.getZ() - zOffset);
 
         // Copy the right blocks in
-        final ExtendedBlockStorage[] blockStorage = chunk.func_76587_i();
+        final ExtendedBlockStorage[] blockStorage = chunk.getSections();
         for (final ExtendedBlockStorage miniChunk : blockStorage) {
             if (miniChunk == null) {
                 continue;
@@ -136,7 +136,7 @@ public final class SpongeGenerationPopulator implements GenerationPopulator, Tim
                 for (int yInChunk = yInChunkStart; yInChunk <= yInChunkEnd; yInChunk++) {
                     for (int zInChunk = zInChunkStart; zInChunk <= zInChunkEnd; zInChunk++) {
                         buffer.setBlock(xOffset + xInChunk, yOffset + yInChunk, zOffset + zInChunk,
-                                (BlockState) miniChunk.func_177485_a(xInChunk, yInChunk, zInChunk));
+                                (BlockState) miniChunk.getBlockState(xInChunk, yInChunk, zInChunk));
                     }
                 }
             }

@@ -185,7 +185,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
 
         if (context.allowsBulkEntityCaptures() && context.allowsBlockPosCapturing()) {
             context.getCaptureBlockPos().setPos(pos);
-            worldIn.func_72838_d(toSpawn);
+            worldIn.addEntity0(toSpawn);
             context.getCaptureBlockPos().setPos(null);
             ci.cancel();
         }
@@ -227,13 +227,13 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             return;
         }
-        final double xPos = (double) pos.func_177958_n() + xOffset;
-        final double yPos = (double) pos.func_177956_o() + yOffset;
-        final double zPos = (double) pos.func_177952_p() + zOffset;
+        final double xPos = (double) pos.getX() + xOffset;
+        final double yPos = (double) pos.getY() + yOffset;
+        final double zPos = (double) pos.getZ() + zOffset;
         // Go ahead and throw the construction event
         final Transform<World> position = new Transform<>((World) worldIn, new Vector3d(xPos, yPos, zPos));
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(worldIn.func_180495_p(pos));
+            frame.pushCause(worldIn.getBlockState(pos));
             final ConstructEntityEvent.Pre
                 eventPre =
                 SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, position);

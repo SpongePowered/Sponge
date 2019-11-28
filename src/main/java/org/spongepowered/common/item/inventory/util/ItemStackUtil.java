@@ -84,13 +84,13 @@ public abstract class ItemStackUtil {
     }
 
     public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack) {
-        return stack.func_77946_l();
+        return stack.copy();
     }
 
     public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack, int newSize) {
-        net.minecraft.item.ItemStack clone = stack.func_77946_l();
-        if (!clone.func_190926_b()) {
-            clone.func_190920_e(newSize);
+        net.minecraft.item.ItemStack clone = stack.copy();
+        if (!clone.isEmpty()) {
+            clone.setCount(newSize);
         }
         return clone;
     }
@@ -120,7 +120,7 @@ public abstract class ItemStackUtil {
     }
 
     public static boolean compareIgnoreQuantity(net.minecraft.item.ItemStack stack1, net.minecraft.item.ItemStack stack2) {
-        return stack1.func_77969_a(stack2) && net.minecraft.item.ItemStack.func_77970_a(stack1, stack2);
+        return stack1.isItemEqual(stack2) && net.minecraft.item.ItemStack.areItemStackTagsEqual(stack1, stack2);
     }
 
     public static boolean compareIgnoreQuantity(net.minecraft.item.ItemStack stack1, ItemStack stack2) {
@@ -136,7 +136,7 @@ public abstract class ItemStackUtil {
     }
 
     public static ItemStackSnapshot snapshotOf(net.minecraft.item.ItemStack itemStack) {
-        return itemStack.func_190926_b() ? ItemStackSnapshot.NONE : fromNative(itemStack).createSnapshot();
+        return itemStack.isEmpty() ? ItemStackSnapshot.NONE : fromNative(itemStack).createSnapshot();
     }
 
     public static ItemStackSnapshot snapshotOf(@Nullable ItemStack itemStack) {
@@ -152,10 +152,10 @@ public abstract class ItemStackUtil {
     }
 
     public static ItemStack empty() {
-        return fromNative(net.minecraft.item.ItemStack.field_190927_a);
+        return fromNative(net.minecraft.item.ItemStack.EMPTY);
     }
 
     public static net.minecraft.item.ItemStack emptyNative() {
-        return net.minecraft.item.ItemStack.field_190927_a;
+        return net.minecraft.item.ItemStack.EMPTY;
     }
 }

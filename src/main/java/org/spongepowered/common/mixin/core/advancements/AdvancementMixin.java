@@ -105,11 +105,11 @@ public class AdvancementMixin implements AdvancementBridge {
         if (displayIn != null) {
             ((DisplayInfoBridge) displayIn).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this);
         }
-        String path = id.func_110623_a();
+        String path = id.getPath();
         this.impl$name = path.replace('/', '_');
-        this.impl$spongeId = id.func_110624_b() + ':' + this.impl$name;
+        this.impl$spongeId = id.getNamespace() + ':' + this.impl$name;
         if (displayIn != null) {
-            this.impl$name = SpongeTexts.toPlain(displayIn.func_192297_a());
+            this.impl$name = SpongeTexts.toPlain(displayIn.getTitle());
         }
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             final Object event = ((EventListenerPhaseContext) PhaseTracker.getInstance().getCurrentContext()).getEvent();
@@ -134,7 +134,7 @@ public class AdvancementMixin implements AdvancementBridge {
             if (displayIn != null) {
                 name = this.impl$name;
             }
-            path = id.func_110624_b() + ':' + path;
+            path = id.getNamespace() + ':' + path;
             this.impl$tree = new SpongeAdvancementTree((org.spongepowered.api.advancement.Advancement) this, path, new FixedTranslation(name));
             AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.impl$tree);
         } else {
@@ -143,11 +143,11 @@ public class AdvancementMixin implements AdvancementBridge {
         this.impl$text = SpongeTexts.toText(this.displayText);
         final ImmutableList.Builder<Text> toastText = ImmutableList.builder();
         if (this.display != null) {
-            final FrameType frameType = this.display.func_192291_d();
-            toastText.add(Text.builder(new SpongeTranslation("advancements.toast." + frameType.func_192307_a()))
+            final FrameType frameType = this.display.getFrame();
+            toastText.add(Text.builder(new SpongeTranslation("advancements.toast." + frameType.getName()))
                     .format(((AdvancementType) (Object) frameType).getTextFormat())
                     .build());
-            toastText.add(((ITextComponentBridge) this.display.func_192297_a()).bridge$toText());
+            toastText.add(((ITextComponentBridge) this.display.getTitle()).bridge$toText());
         } else {
             toastText.add(Text.of("Unlocked advancement"));
             toastText.add(Text.of(this.impl$spongeId));
@@ -160,7 +160,7 @@ public class AdvancementMixin implements AdvancementBridge {
             final DefaultedAdvancementCriterion criterion;
             if (mixinCriterion.bridge$getScoreGoal() != null) {
                 criterion = new SpongeScoreCriterion(entry.getKey(), mixinCriterion.bridge$getScoreGoal(),
-                        entry.getValue().func_192143_a());
+                        entry.getValue().getCriterionInstance());
                 scoreCriteria.add(entry.getKey());
                 ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
                         criterion1 -> criteriaIn.put(criterion1.getName(), (Criterion) criterion1));
@@ -244,7 +244,7 @@ public class AdvancementMixin implements AdvancementBridge {
         }
         this.parent = this.impl$tempParent;
         // The child didn't get added yet to it's actual parent
-        this.parent.func_192071_a((Advancement) (Object) this);
+        this.parent.addChild((Advancement) (Object) this);
         this.impl$tempParent = null;
     }
 

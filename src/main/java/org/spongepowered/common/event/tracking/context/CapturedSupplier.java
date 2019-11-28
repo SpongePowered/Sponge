@@ -45,7 +45,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>>, ICapture
     @Override
     public final List<T> get() {
         if (this.captured == null) {
-            this.captured = NonNullList.func_191196_a();
+            this.captured = NonNullList.create();
         }
         return this.captured;
     }

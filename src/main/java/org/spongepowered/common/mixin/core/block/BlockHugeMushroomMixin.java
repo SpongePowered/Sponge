@@ -75,6 +75,6 @@ public abstract class BlockHugeMushroomMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableBigMushroomData impl$getBigMushroomTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBigMushroomData.class,
-                (BigMushroomType) (Object) blockState.func_177229_b(HugeMushroomBlock.field_176380_a));
+                (BigMushroomType) (Object) blockState.get(HugeMushroomBlock.field_176380_a));
     }
 }

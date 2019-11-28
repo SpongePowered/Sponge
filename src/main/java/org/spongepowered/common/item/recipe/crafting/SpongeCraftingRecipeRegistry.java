@@ -119,7 +119,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
 
     @Override
     public void registerDefaults() {
-        RegistryHelper.setFinalStatic(Ingredient.class, "NONE", net.minecraft.item.crafting.Ingredient.field_193370_a);
+        RegistryHelper.setFinalStatic(Ingredient.class, "NONE", net.minecraft.item.crafting.Ingredient.EMPTY);
     }
 
     @Override

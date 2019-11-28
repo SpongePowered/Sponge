@@ -43,7 +43,7 @@ import net.minecraft.block.SpongeBlock;
 public abstract class BlockSpongeMixin extends BlockMixin {
 
     private ImmutableWetData impl$getWetData(final net.minecraft.block.BlockState blockState) {
-        final boolean isWet = blockState.func_177229_b(SpongeBlock.field_176313_a);
+        final boolean isWet = blockState.get(SpongeBlock.field_176313_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWetData.class, isWet);
     }
 

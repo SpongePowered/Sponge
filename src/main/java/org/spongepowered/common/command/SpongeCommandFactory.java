@@ -400,14 +400,14 @@ public class SpongeCommandFactory {
                 }
 
                 protected Text getChunksInfo(final ServerWorld worldserver) {
-                    if (((WorldBridge) worldserver).bridge$isFake() || worldserver.func_72912_H() == null) {
+                    if (((WorldBridge) worldserver).bridge$isFake() || worldserver.getWorldInfo() == null) {
                         return Text.of(NEWLINE_TEXT, "Fake world");
                     }
                     return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((WorldServerBridge) worldserver).bridge$getDimensionId()), NEWLINE_TEXT,
-                        key("Loaded chunks: "), value(worldserver.func_72863_F().func_73152_e()), NEWLINE_TEXT,
-                        key("Active chunks: "), value(worldserver.func_72863_F().func_189548_a().size()), NEWLINE_TEXT,
+                        key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
+                        key("Active chunks: "), value(worldserver.getChunkProvider().func_189548_a().size()), NEWLINE_TEXT,
                         key("Entities: "), value(worldserver.field_72996_f.size()), NEWLINE_TEXT,
-                        key("Tile Entities: "), value(worldserver.field_147482_g.size()), NEWLINE_TEXT,
+                        key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), NEWLINE_TEXT,
                         key("Removed Entities:"), value(((WorldAccessor) worldserver).accessor$getUnloadedEntityList().size()), NEWLINE_TEXT,
                         key("Removed Tile Entities: "), value(((WorldAccessor) worldserver).accessor$getTileEntitiesToBeRemoved()), NEWLINE_TEXT
                     );
@@ -539,10 +539,10 @@ public class SpongeCommandFactory {
                         "Failed to find a block! Please execute the command when looking at a block!"));
                     return CommandResult.empty();
                 }
-                final ServerWorld worldServer = (ServerWorld) entityPlayerMP.field_70170_p;
-                final Chunk chunk = worldServer.func_175726_f(rayTraceResult.func_178782_a());
+                final ServerWorld worldServer = (ServerWorld) entityPlayerMP.world;
+                final Chunk chunk = worldServer.getChunkAt(rayTraceResult.func_178782_a());
                 final ChunkBridge mixinChunk = (ChunkBridge) chunk;
-                final net.minecraft.block.BlockState blockState = worldServer.func_180495_p(rayTraceResult.func_178782_a());
+                final net.minecraft.block.BlockState blockState = worldServer.getBlockState(rayTraceResult.func_178782_a());
                 final BlockState spongeState = (BlockState) blockState;
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));
                 src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.bridge$getBlockOwner(rayTraceResult.func_178782_a())));
@@ -845,7 +845,7 @@ public class SpongeCommandFactory {
                 } else {
                     Sponge.getServer().getWorlds().forEach(world -> printWorldTickTime(src, world));
                 }
-                final double serverMeanTickTime = mean(SpongeImpl.getServer().field_71311_j) * 1.0e-6d;
+                final double serverMeanTickTime = mean(SpongeImpl.getServer().tickTimeArray) * 1.0e-6d;
                 src.sendMessage(Text.of("Overall TPS: ", TextColors.LIGHT_PURPLE,
                     THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (serverMeanTickTime), 20)),
                     TextColors.RESET, ", Mean: ", TextColors.RED, THREE_DECIMAL_DIGITS_FORMATTER.

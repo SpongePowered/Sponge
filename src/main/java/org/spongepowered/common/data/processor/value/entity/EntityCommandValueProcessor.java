@@ -54,13 +54,13 @@ public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<Mi
 
     @Override
     protected boolean set(final MinecartCommandBlockEntity container, final String value) {
-        ((CommandBlockBaseLogicAccessor) container.func_145822_e()).accessor$setCommandStored(value);
+        ((CommandBlockBaseLogicAccessor) container.getCommandBlockLogic()).accessor$setCommandStored(value);
         return true;
     }
 
     @Override
     protected Optional<String> getVal(final MinecartCommandBlockEntity container) {
-        return Optional.of(container.func_145822_e().func_145753_i());
+        return Optional.of(container.getCommandBlockLogic().getCommand());
     }
 
     @Override

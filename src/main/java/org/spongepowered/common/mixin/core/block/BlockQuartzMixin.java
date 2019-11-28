@@ -75,6 +75,6 @@ public abstract class BlockQuartzMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableQuartzData impl$getQuartzTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeQuartzData.class,
-                (QuartzType) (Object) blockState.func_177229_b(BlockQuartz.field_176335_a));
+                (QuartzType) (Object) blockState.get(BlockQuartz.field_176335_a));
     }
 }

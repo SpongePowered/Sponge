@@ -45,7 +45,7 @@ public class BookFaker {
 
     public static void fakeBookView(BookView bookView, Player player) {
         ServerPlayerEntity mcPlayer = (ServerPlayerEntity) player;
-        ServerPlayNetHandler receiver = mcPlayer.field_71135_a;
+        ServerPlayNetHandler receiver = mcPlayer.connection;
 
         // First we need to send a fake a Book ItemStack with the BookView's
         // contents to the player's hand
@@ -54,18 +54,18 @@ public class BookFaker {
         item.offer(Keys.BOOK_AUTHOR, bookView.getAuthor());
         item.offer(Keys.BOOK_PAGES, bookView.getPages());
 
-        PlayerInventory inventory = mcPlayer.field_71071_by;
-        int bookSlot = inventory.field_70462_a.size() + inventory.field_70461_c;
-        receiver.func_147359_a(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
+        PlayerInventory inventory = mcPlayer.inventory;
+        int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
+        receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
         // Next we tell the client to open the Book GUI
         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
-        packetbuffer.func_179249_a(Hand.MAIN_HAND);
-        receiver.func_147359_a(new SCustomPayloadPlayPacket("MC|BOpen", packetbuffer));
+        packetbuffer.writeEnumValue(Hand.MAIN_HAND);
+        receiver.sendPacket(new SCustomPayloadPlayPacket("MC|BOpen", packetbuffer));
 
         // Now we can remove the fake Book since it's contents will have already
         // been transferred to the GUI
-        receiver.func_147359_a(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.func_70448_g()));
+        receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
     }
 
 }

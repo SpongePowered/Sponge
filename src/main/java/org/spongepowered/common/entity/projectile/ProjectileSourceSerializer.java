@@ -57,15 +57,15 @@ public class ProjectileSourceSerializer {
     public static ProjectileSource fromNbt(World worldObj, NBTBase tag) {
         if (tag instanceof StringNBT) {
             Entity entity =
-                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((StringNBT) tag).func_150285_a_())).orElse(null);
+                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((StringNBT) tag).getString())).orElse(null);
             if (entity instanceof ProjectileSource) {
                 return (ProjectileSource) entity;
             }
         }
         if (tag instanceof LongNBT) {
-            BlockPos pos = BlockPos.func_177969_a(((LongNBT) tag).func_150291_c());
-            if (worldObj.func_175667_e(pos)) {
-                TileEntity tileEntity = worldObj.func_175625_s(pos);
+            BlockPos pos = BlockPos.func_177969_a(((LongNBT) tag).getLong());
+            if (worldObj.isBlockLoaded(pos)) {
+                TileEntity tileEntity = worldObj.getTileEntity(pos);
                 if (tileEntity instanceof ProjectileSource) {
                     return (ProjectileSource) tileEntity;
                 }
@@ -85,8 +85,8 @@ public class ProjectileSourceSerializer {
     }
 
     public static void readSourceFromNbt(CompoundNBT compound, Projectile projectile) {
-        if (compound.func_74764_b("projectileSource")) {
-            projectile.setShooter(fromNbt((World) projectile.getWorld(), compound.func_74781_a("projectileSource")));
+        if (compound.contains("projectileSource")) {
+            projectile.setShooter(fromNbt((World) projectile.getWorld(), compound.get("projectileSource")));
         }
     }
 }

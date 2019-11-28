@@ -47,13 +47,13 @@ public class ShearedDataProcessor extends AbstractEntitySingleDataProcessor<Shee
 
     @Override
     protected boolean set(SheepEntity entity, Boolean value) {
-        entity.func_70893_e(value);
+        entity.setSheared(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(SheepEntity entity) {
-        return Optional.of(entity.func_70892_o());
+        return Optional.of(entity.getSheared());
     }
 
     @Override

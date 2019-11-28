@@ -163,18 +163,18 @@ public final class ContainerUtil {
             final Multimap<BlockPos, ItemEntity> multimap = context.getBlockItemDropSupplier().get();
             final BlockPos pos = new BlockPos(x, y, z);
             final Collection<ItemEntity> itemStacks = multimap.get(pos);
-            for (int j = 0; j < inventory.func_70302_i_(); j++) {
-                final net.minecraft.item.ItemStack itemStack = inventory.func_70301_a(j);
-                if (!itemStack.func_190926_b()) {
+            for (int j = 0; j < inventory.getSizeInventory(); j++) {
+                final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(j);
+                if (!itemStack.isEmpty()) {
                     final float f = RANDOM.nextFloat() * 0.8F + 0.1F;
                     final float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
                     final float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
 
-                    while (!itemStack.func_190926_b())
+                    while (!itemStack.isEmpty())
                     {
                         final int i = RANDOM.nextInt(21) + 10;
 
-                        final ItemEntity entityitem = new ItemEntity(worldServer, x + f, y + f1, z + f2, itemStack.func_77979_a(i));
+                        final ItemEntity entityitem = new ItemEntity(worldServer, x + f, y + f1, z + f2, itemStack.split(i));
 
                         entityitem.field_70159_w = RANDOM.nextGaussian() * 0.05;
                         entityitem.field_70181_x = RANDOM.nextGaussian() * 0.05 + 0.2;
@@ -186,10 +186,10 @@ public final class ContainerUtil {
             return;
         }
         // Finally, just default to spawning the entities normally, regardless of the case.
-        for (int i = 0; i < inventory.func_70302_i_(); i++) {
-            final net.minecraft.item.ItemStack itemStack = inventory.func_70301_a(i);
-            if (!itemStack.func_190926_b()) {
-                InventoryHelper.func_180173_a(worldServer, x, y, z, itemStack);
+        for (int i = 0; i < inventory.getSizeInventory(); i++) {
+            final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
+            if (!itemStack.isEmpty()) {
+                InventoryHelper.spawnItemStack(worldServer, x, y, z, itemStack);
             }
         }
     }
@@ -209,8 +209,8 @@ public final class ContainerUtil {
      */
     @SuppressWarnings("unchecked") public static Lens generateLens(final net.minecraft.inventory.container.Container container, final SlotProvider slots) {
         // Get all inventories viewed in the Container & count slots & retain order
-        final Map<Optional<IInventory>, List<Slot>> viewed = container.field_75151_b.stream()
-                .collect(Collectors.groupingBy(i -> Optional.<IInventory>ofNullable(i.field_75224_c), LinkedHashMap::new, Collectors.toList()));
+        final Map<Optional<IInventory>, List<Slot>> viewed = container.inventorySlots.stream()
+                .collect(Collectors.groupingBy(i -> Optional.<IInventory>ofNullable(i.inventory), LinkedHashMap::new, Collectors.toList()));
         int index = 0; // Count the index
         final CraftingInventoryData crafting = new CraftingInventoryData();
         final List<Lens> lenses = new ArrayList<>();
@@ -230,11 +230,11 @@ public final class ContainerUtil {
                 if (subInventory instanceof CraftResultInventory) { // InventoryCraftResult is a Slot
                     final Slot slot = slotList.get(0);
                     lens = new CraftingOutputSlotLensImpl(index,
-                            item -> slot.func_75214_a(((ItemStack) item)),
-                            itemType -> (slot.func_75214_a((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
+                            item -> slot.isItemValid(((ItemStack) item)),
+                            itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
                 } else if (subInventory instanceof CraftingInventory) { // InventoryCrafting has width and height and is Input
                     final CraftingInventory craftGrid = (CraftingInventory) subInventory;
-                    lens = new GridInventoryLensImpl(index, craftGrid.func_174922_i(), craftGrid.func_174923_h(), craftGrid.func_174922_i(), InputSlot.class, slots);
+                    lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), InputSlot.class, slots);
                 } else if (slotCount == 1) { // Unknown - A single Slot
                     lens = new SlotLensImpl(index);
                 }
@@ -262,9 +262,9 @@ public final class ContainerUtil {
         final List<Lens> additional = new ArrayList<>();
         try {
             if (crafting.out != null && crafting.base != null && crafting.grid != null) {
-                additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.func_174922_i(), crafting.grid.func_174923_h(), slots));
+                additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
             } else if (crafting.base != null && crafting.grid != null) {
-                additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.func_174922_i(), crafting.grid.func_174923_h(), crafting.grid.func_174922_i(), slots));
+                additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), crafting.grid.getWidth(), slots));
             }
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
@@ -272,7 +272,7 @@ public final class ContainerUtil {
 
 
         // Lens containing/delegating to other lenses
-        return new ContainerLens(container.field_75151_b.size(), (Class<? extends Inventory>) container.getClass(), slots, lenses, additional);
+        return new ContainerLens(container.inventorySlots.size(), (Class<? extends Inventory>) container.getClass(), slots, lenses, additional);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -285,7 +285,7 @@ public final class ContainerUtil {
         if (adapterLens == null) {
             return null;
         }
-        if (subInventory.func_70302_i_() == 0) {
+        if (subInventory.getSizeInventory() == 0) {
             return new DefaultEmptyLens(((InventoryAdapter) subInventory));
         }
 
@@ -298,8 +298,8 @@ public final class ContainerUtil {
         // For Crafting Result we need the Slot to get Filter logic
         if (subInventory instanceof CraftResultInventory) {
             final Slot slot = slotList.get(0);
-            adapterLens = new CraftingOutputSlotLensImpl(index, item -> slot.func_75214_a(((ItemStack) item)),
-                    itemType -> (slot.func_75214_a((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
+            adapterLens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
+                    itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
             if (slot instanceof SlotCraftingAccessor) {
                 crafting.out = index;
                 if (crafting.base == null) {
@@ -362,11 +362,11 @@ public final class ContainerUtil {
         }
 
         final SlotCollection.Builder builder = new SlotCollection.Builder();
-        for (final Slot slot : container.field_75151_b) {
+        for (final Slot slot : container.inventorySlots) {
             if (slot instanceof CraftingResultSlot) {
                 builder.add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i,
-                        item -> slot.func_75214_a(((ItemStack) item)),
-                        itemType -> (slot.func_75214_a((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)))));
+                        item -> slot.isItemValid(((ItemStack) item)),
+                        itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)))));
             } else {
                 builder.add(1);
             }
@@ -376,7 +376,7 @@ public final class ContainerUtil {
 
     public static InventoryArchetype getArchetype(final net.minecraft.inventory.container.Container container) {
         if (container instanceof ChestContainer) {
-            final IInventory inventory = ((ChestContainer) container).func_85151_d();
+            final IInventory inventory = ((ChestContainer) container).getLowerChestInventory();
             if (inventory instanceof ChestTileEntity) {
                 return InventoryArchetypes.CHEST;
             } else if (inventory instanceof DoubleSidedInventory) {
@@ -402,7 +402,7 @@ public final class ContainerUtil {
             return InventoryArchetypes.BEACON;
         } else if (container instanceof ContainerHorseInventoryAccessor) {
             final AbstractHorseEntity horse = ((ContainerHorseInventoryAccessor) container).accessor$getHorseCarrier();
-            if (horse instanceof AbstractChestedHorseEntity && ((AbstractChestedHorseEntity) horse).func_190695_dh()) {
+            if (horse instanceof AbstractChestedHorseEntity && ((AbstractChestedHorseEntity) horse).hasChest()) {
                 return InventoryArchetypes.HORSE_WITH_CHEST;
             }
             return InventoryArchetypes.HORSE;
@@ -422,7 +422,7 @@ public final class ContainerUtil {
         if (container instanceof CustomContainer) {
             return ((CustomContainer) container).inv.getCarrier();
         } else if (container instanceof ChestContainer) {
-            final IInventory inventory = ((ChestContainer) container).func_85151_d();
+            final IInventory inventory = ((ChestContainer) container).getLowerChestInventory();
             if (inventory instanceof Carrier) {
                 if (inventory instanceof ChestTileEntity) {
                     return (Carrier) inventory;
@@ -456,16 +456,16 @@ public final class ContainerUtil {
         if (container instanceof ContainerAccessor) {
             for (final Slot slot : ((ContainerAccessor) container).accessor$getSlots()) {
                 // Slot Inventory is a Carrier?
-                if (slot.field_75224_c instanceof Carrier) {
-                    return ((Carrier) slot.field_75224_c);
+                if (slot.inventory instanceof Carrier) {
+                    return ((Carrier) slot.inventory);
                 }
                 // Slot Inventory is a TileEntity
-                if (slot.field_75224_c instanceof TileEntity) {
+                if (slot.inventory instanceof TileEntity) {
                     return new DefaultSingleBlockCarrier() {
                         @Override
                         public Location<org.spongepowered.api.world.World> getLocation() {
-                            final BlockPos pos = ((TileEntity) slot.field_75224_c).func_174877_v();
-                            return new Location<>(((org.spongepowered.api.world.World) ((TileEntity) slot.field_75224_c).func_145831_w()), pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
+                            final BlockPos pos = ((TileEntity) slot.inventory).getPos();
+                            return new Location<>(((org.spongepowered.api.world.World) ((TileEntity) slot.inventory).getWorld()), pos.getX(), pos.getY(), pos.getZ());
                         }
 
                         @SuppressWarnings("rawtypes")

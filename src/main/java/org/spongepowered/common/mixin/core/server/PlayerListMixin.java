@@ -192,33 +192,33 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         // Vanilla will always use overworld, set to the world the player was in
         // UNLESS comming back from the end.
         if (!conqueredEnd && targetDimension == 0) {
-            targetDimension = playerIn.field_71093_bK;
+            targetDimension = playerIn.dimension;
         }
 
-        if (playerIn.func_184207_aI()) {
-            playerIn.func_184226_ay();
+        if (playerIn.isBeingRidden()) {
+            playerIn.removePassengers();
         }
 
-        if (playerIn.func_184218_aH()) {
-            playerIn.func_184210_p();
+        if (playerIn.isPassenger()) {
+            playerIn.stopRiding();
         }
 
         final Player player = (Player) playerIn;
         final Transform<World> fromTransform = player.getTransform();
-        ServerWorld worldServer = this.server.func_71218_a(targetDimension);
+        ServerWorld worldServer = this.server.getWorld(targetDimension);
         final Location<World> toLocation;
-        final Location<World> temp = ((World) playerIn.field_70170_p).getSpawnLocation();
+        final Location<World> temp = ((World) playerIn.world).getSpawnLocation();
         boolean tempIsBedSpawn = false;
         if (worldServer == null) { // Target world doesn't exist? Use global
             toLocation = temp;
         } else {
-            final Dimension toDimension = (Dimension) worldServer.field_73011_w;
+            final Dimension toDimension = (Dimension) worldServer.dimension;
             int toDimensionId = ((WorldServerBridge) worldServer).bridge$getDimensionId();
             // Cannot respawn in requested world, use the fallback dimension for
             // that world. (Usually overworld unless a mod says otherwise).
             if (!toDimension.allowsPlayerRespawns()) {
                 toDimensionId = SpongeImplHooks.getRespawnDimension((net.minecraft.world.dimension.Dimension) toDimension, playerIn);
-                worldServer = worldServer.func_73046_m().func_71218_a(toDimensionId);
+                worldServer = worldServer.getServer().getWorld(toDimensionId);
             }
 
             Vector3d targetSpawnVec = VecHelper.toVector3d(SpongeImplHooks.getRandomizedSpawnPoint(worldServer));
@@ -228,9 +228,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 final BlockPos bedSpawnLoc = PlayerEntity.func_180467_a(worldServer, bedPos, forceBedSpawn);
                 if (bedSpawnLoc != null) { // The bed exists and is not obstructed
                     tempIsBedSpawn = true;
-                    targetSpawnVec = new Vector3d(bedSpawnLoc.func_177958_n() + 0.5D, bedSpawnLoc.func_177956_o() + 0.1D, bedSpawnLoc.func_177952_p() + 0.5D);
+                    targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
                 } else { // Bed invalid
-                    playerIn.field_71135_a.func_147359_a(new SChangeGameStatePacket(0, 0.0F));
+                    playerIn.connection.sendPacket(new SChangeGameStatePacket(0, 0.0F));
                 }
             }
             toLocation = new Location<>((World) worldServer, targetSpawnVec);
@@ -245,7 +245,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             // When leaving the end, players are never placed inside the teleporter but instead "respawned" in the target world
             final MoveEntityEvent.Teleport teleportEvent = EntityUtil.handleDisplaceEntityTeleportEvent(playerIn, location);
             if (teleportEvent.isCancelled()) {
-                playerIn.field_71136_j = false;
+                playerIn.queuedEndExit = false;
                 return playerIn;
             }
 
@@ -254,56 +254,56 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         }
         // Keep players out of blocks
         final Vector3d tempPos = player.getLocation().getPosition();
-        playerIn.func_70107_b(location.getX(), location.getY(), location.getZ());
-        while (!((ServerWorld) location.getExtent()).func_184144_a(playerIn, playerIn.func_174813_aQ()).isEmpty() && location.getPosition().getY() < 256.0D) {
-            playerIn.func_70107_b(playerIn.field_70165_t, playerIn.field_70163_u + 1.0D, playerIn.field_70161_v);
+        playerIn.setPosition(location.getX(), location.getY(), location.getZ());
+        while (!((ServerWorld) location.getExtent()).func_184144_a(playerIn, playerIn.getBoundingBox()).isEmpty() && location.getPosition().getY() < 256.0D) {
+            playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
             location = location.add(0, 1, 0);
         }
-        playerIn.func_70107_b(tempPos.getX(), tempPos.getY(), tempPos.getZ());
+        playerIn.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
 
         // ### PHASE 2 ### Remove player from current dimension
-        playerIn.func_71121_q().func_73039_n().func_72787_a(playerIn);
-        playerIn.func_71121_q().func_73039_n().func_72790_b(playerIn);
-        playerIn.func_71121_q().func_184164_w().func_72695_c(playerIn);
+        playerIn.getServerWorld().func_73039_n().func_72787_a(playerIn);
+        playerIn.getServerWorld().func_73039_n().func_72790_b(playerIn);
+        playerIn.getServerWorld().func_184164_w().func_72695_c(playerIn);
         this.playerEntityList.remove(playerIn);
-        this.server.func_71218_a(playerIn.field_71093_bK).func_72973_f(playerIn);
+        this.server.getWorld(playerIn.dimension).func_72973_f(playerIn);
         final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, targetDimension);
 
         // ### PHASE 3 ### Reset player (if applicable)
         // Recreate the player object in order to support Forge's PlayerEvent.Clone
         final PlayerInteractionManager playerinteractionmanager;
 
-        if (this.server.func_71242_L()) {
-            playerinteractionmanager = new DemoPlayerInteractionManager(this.server.func_71218_a(targetDimension));
+        if (this.server.isDemo()) {
+            playerinteractionmanager = new DemoPlayerInteractionManager(this.server.getWorld(targetDimension));
         } else {
-            playerinteractionmanager = new PlayerInteractionManager(this.server.func_71218_a(targetDimension));
+            playerinteractionmanager = new PlayerInteractionManager(this.server.getWorld(targetDimension));
         }
 
-        final ServerPlayerEntity newPlayer = new ServerPlayerEntity(SpongeImpl.getServer(), worldServer, playerIn.func_146103_bH(), playerinteractionmanager);
-        newPlayer.field_71135_a = playerIn.field_71135_a;
-        newPlayer.func_193104_a(playerIn, conqueredEnd);
+        final ServerPlayerEntity newPlayer = new ServerPlayerEntity(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
+        newPlayer.connection = playerIn.connection;
+        newPlayer.copyFrom(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
-        newPlayer.field_71093_bK = targetDimension;
-        newPlayer.func_145769_d(playerIn.func_145782_y());
+        newPlayer.dimension = targetDimension;
+        newPlayer.setEntityId(playerIn.getEntityId());
         newPlayer.func_174817_o(playerIn);
-        newPlayer.func_184819_a(playerIn.func_184591_cq());
+        newPlayer.setPrimaryHand(playerIn.getPrimaryHand());
 
         // Sponge - Vanilla does this before recreating the player entity. However, we need to determine the bed location
         // before respawning the player, so we know what dimension to spawn them into. This means that the bed location must be copied
         // over to the new player
         if (bedPos != null && tempIsBedSpawn) {
-            newPlayer.func_180473_a(bedPos, playerIn.func_82245_bX());
+            newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
         ((EntityPlayerMPBridge) newPlayer).bridge$setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
         ((EntityPlayerMPBridge) playerIn).bridge$removeScoreboardOnRespawn();
 
-        for (final String s : playerIn.func_184216_O()) {
-            newPlayer.func_184211_a(s);
+        for (final String s : playerIn.getTags()) {
+            newPlayer.addTag(s);
         }
 
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
-        newPlayer.func_70095_a(false);
+        newPlayer.setSneaking(false);
 
         ((EntityPlayerMPBridge) playerIn).bridge$setDelegateAfterRespawn(newPlayer);
 
@@ -328,11 +328,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
         // Set the dimension again in case a plugin changed the target world during RespawnPlayerEvent
-        newPlayer.field_71093_bK = mixinWorldServer.bridge$getDimensionId();
-        newPlayer.func_70029_a(worldServer);
-        newPlayer.field_71134_c.func_73080_a(worldServer);
+        newPlayer.dimension = mixinWorldServer.bridge$getDimensionId();
+        newPlayer.setWorld(worldServer);
+        newPlayer.interactionManager.setWorld(worldServer);
 
-        worldServer.func_72863_F().func_186028_c((int) location.getX() >> 4, (int) location.getZ() >> 4);
+        worldServer.getChunkProvider().func_186028_c((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
         // ### PHASE 5 ### Respawn player in new world
 
@@ -341,47 +341,47 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         // Send dimension registration
         if (((EntityPlayerMPBridge) newPlayer).bridge$usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(newPlayer, worldServer.field_73011_w);
+            WorldManager.sendDimensionRegistration(newPlayer, worldServer.dimension);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
             if (fromTransform.getExtent().getUniqueId() != ((World) worldServer).getUniqueId() && fromTransform.getExtent().getDimension().getType() ==
               toTransform.getExtent().getDimension().getType()) {
-                newPlayer.field_71135_a.func_147359_a(new SRespawnPacket((dimensionId >= 0 ? -1 : 0), worldServer.func_175659_aa(), worldServer
-                        .func_72912_H().func_76067_t(), newPlayer.field_71134_c.func_73081_b()));
+                newPlayer.connection.sendPacket(new SRespawnPacket((dimensionId >= 0 ? -1 : 0), worldServer.getDifficulty(), worldServer
+                        .getWorldInfo().getGenerator(), newPlayer.interactionManager.getGameType()));
             }
         }
-        newPlayer.field_71135_a.func_147359_a(new SRespawnPacket(dimensionId, worldServer.func_175659_aa(), worldServer
-                .func_72912_H().func_76067_t(), newPlayer.field_71134_c.func_73081_b()));
-        newPlayer.field_71135_a.func_147359_a(new SServerDifficultyPacket(worldServer.func_175659_aa(), worldServer.func_72912_H().func_176123_z()));
-        newPlayer.field_71135_a.func_147364_a(location.getX(), location.getY(), location.getZ(),
+        newPlayer.connection.sendPacket(new SRespawnPacket(dimensionId, worldServer.getDifficulty(), worldServer
+                .getWorldInfo().getGenerator(), newPlayer.interactionManager.getGameType()));
+        newPlayer.connection.sendPacket(new SServerDifficultyPacket(worldServer.getDifficulty(), worldServer.getWorldInfo().isDifficultyLocked()));
+        newPlayer.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                 (float) toTransform.getYaw(), (float) toTransform.getPitch());
 
-        final BlockPos spawnLocation = worldServer.func_175694_M();
-        newPlayer.field_71135_a.func_147359_a(new SSpawnPositionPacket(spawnLocation));
-        newPlayer.field_71135_a.func_147359_a(new SSetExperiencePacket(newPlayer.field_71106_cc, newPlayer.field_71067_cb,
-                newPlayer.field_71068_ca));
+        final BlockPos spawnLocation = worldServer.getSpawnPoint();
+        newPlayer.connection.sendPacket(new SSpawnPositionPacket(spawnLocation));
+        newPlayer.connection.sendPacket(new SSetExperiencePacket(newPlayer.experience, newPlayer.experienceTotal,
+                newPlayer.experienceLevel));
         this.updateTimeAndWeatherForPlayer(newPlayer, worldServer);
         this.updatePermissionLevel(newPlayer);
         worldServer.func_184164_w().func_72683_a(newPlayer);
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) newPlayer;
         ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity);
         this.playerEntityList.add(newPlayer);
-        newPlayer.field_71135_a.func_147359_a(new SPlayerListItemPacket(SPlayerListItemPacket.Action.UPDATE_GAME_MODE, newPlayer));
+        newPlayer.connection.sendPacket(new SPlayerListItemPacket(SPlayerListItemPacket.Action.UPDATE_GAME_MODE, newPlayer));
         for (DataManipulator<?, ?> container : ((Player) playerIn).getContainers()) {
             ((Player) newPlayer).offer(container);
         }
-        this.uuidToPlayerMap.put(newPlayer.func_110124_au(), newPlayer);
-        newPlayer.func_71116_b();
+        this.uuidToPlayerMap.put(newPlayer.getUniqueID(), newPlayer);
+        newPlayer.addSelfToInternalCraftingInventory();
 
         // Update reducedDebugInfo game rule
-        newPlayer.field_71135_a.func_147359_a(new SEntityStatusPacket(newPlayer,
-                worldServer.func_82736_K().func_82766_b(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
+        newPlayer.connection.sendPacket(new SEntityStatusPacket(newPlayer,
+                worldServer.getGameRules().func_82766_b(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
 
-        for (final EffectInstance potioneffect : newPlayer.func_70651_bq()) {
-            newPlayer.field_71135_a.func_147359_a(new SPlayEntityEffectPacket(newPlayer.func_145782_y(), potioneffect));
+        for (final EffectInstance potioneffect : newPlayer.getActivePotionEffects()) {
+            newPlayer.connection.sendPacket(new SPlayEntityEffectPacket(newPlayer.getEntityId(), potioneffect));
         }
         ((EntityPlayerMPBridge) newPlayer).bridge$refreshScaledHealth();
-        newPlayer.field_71135_a.func_147359_a(new SHeldItemChangePacket(playerIn.field_71071_by.field_70461_c));
+        newPlayer.connection.sendPacket(new SHeldItemChangePacket(playerIn.inventory.currentItem));
         SpongeCommonEventFactory.callPostPlayerRespawnEvent(newPlayer, conqueredEnd);
 
         return newPlayer;
@@ -393,7 +393,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
      */
     @Overwrite
     public void transferEntityToWorld(final Entity entityIn, final int lastDimension, final ServerWorld oldWorldIn, final ServerWorld toWorldIn) {
-        EntityUtil.transferEntityToWorld(entityIn, null, toWorldIn, (ForgeITeleporterBridge) toWorldIn.func_85176_s(), false);
+        EntityUtil.transferEntityToWorld(entityIn, null, toWorldIn, (ForgeITeleporterBridge) toWorldIn.getDefaultTeleporter(), false);
     }
 
     /**
@@ -402,9 +402,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
      */
     @Overwrite
     public void changePlayerDimension(final ServerPlayerEntity player, final int dimension) {
-        final ServerWorld toWorld = this.server.func_71218_a(dimension);
+        final ServerWorld toWorld = this.server.getWorld(dimension);
 
-        EntityUtil.transferPlayerToWorld(player, null, toWorld, (ForgeITeleporterBridge) toWorld.func_85176_s());
+        EntityUtil.transferPlayerToWorld(player, null, toWorld, (ForgeITeleporterBridge) toWorld.getDefaultTeleporter());
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -420,18 +420,18 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
     private WorldBorder onUpdateTimeGetWorldBorder(final ServerWorld worldServer, final ServerPlayerEntity entityPlayerMP, final ServerWorld worldServerIn) {
-        return worldServerIn.func_175723_af();
+        return worldServerIn.getWorldBorder();
     }
 
     @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket"
             + "(Lnet/minecraft/network/Packet;)V", ordinal = 0))
     private void onWorldBorderInitializePacket(
         final ServerPlayNetHandler invoker, final IPacket<?> packet, final ServerPlayerEntity playerMP, final ServerWorld worldServer) {
-        if (worldServer.field_73011_w instanceof NetherDimension) {
+        if (worldServer.dimension instanceof NetherDimension) {
             ((SPacketWorldBorderBridge) packet).bridge$changeCoordinatesForNether();
         }
 
-        invoker.func_147359_a(packet);
+        invoker.sendPacket(packet);
     }
 
     @Inject(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At("HEAD"))
@@ -462,18 +462,18 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         for (final ServerPlayerEntity viewer : this.playerEntityList) {
             if (((Player) viewer).canSee((Player) player)) {
-                viewer.field_71135_a.func_147359_a(noSpecificViewerPacket);
+                viewer.connection.sendPacket(noSpecificViewerPacket);
             }
 
             if (player == viewer || ((Player) player).canSee((Player) viewer)) {
-                player.field_71135_a.func_147359_a(new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, viewer));
+                player.connection.sendPacket(new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, viewer));
             }
         }
 
         // Spawn player into level
-        final ServerWorld level = this.server.func_71218_a(player.field_71093_bK);
+        final ServerWorld level = this.server.getWorld(player.dimension);
         // TODO direct this appropriately
-        level.func_72838_d(player);
+        level.addEntity0(player);
         this.preparePlayer(player, null);
 
         // We always want to cancel.
@@ -482,7 +482,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Inject(method = "writePlayerData", at = @At(target = "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V", value = "INVOKE"))
     private void impl$saveSpongePlayerDataAfterSavingPlayerData(final ServerPlayerEntity playerMP, final CallbackInfo callbackInfo) {
-        SpongePlayerDataHandler.savePlayer(playerMP.func_110124_au());
+        SpongePlayerDataHandler.savePlayer(playerMP.getUniqueID());
     }
 
     @ModifyVariable(method = "sendPlayerPermissionLevel", at = @At("HEAD"), argsOnly = true)
@@ -502,7 +502,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         // We can't get the world from the game profile
 
         // Check the world info of the current world instead of overworld world info
-        return player.field_70170_p.func_72912_H();
+        return player.world.getWorldInfo();
     }
 
     /**

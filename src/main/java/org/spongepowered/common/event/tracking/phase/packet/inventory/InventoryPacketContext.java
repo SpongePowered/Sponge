@@ -50,10 +50,10 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
 
     @Override
     public boolean hasCaptures() {
-        if (!((ContainerBridge) this.packetPlayer.field_71070_bA).bridge$getPreviewTransactions().isEmpty()) {
+        if (!((ContainerBridge) this.packetPlayer.openContainer).bridge$getPreviewTransactions().isEmpty()) {
             return true;
         }
-        if (!((TrackedInventoryBridge) this.packetPlayer.field_71070_bA).bridge$getCapturedSlotTransactions().isEmpty()) {
+        if (!((TrackedInventoryBridge) this.packetPlayer.openContainer).bridge$getCapturedSlotTransactions().isEmpty()) {
             return true;
         }
         if (this.state == PacketPhase.Inventory.DROP_ITEMS) {
@@ -86,7 +86,7 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
         ) {
             return true;
         }
-        ((TrackedInventoryBridge) this.packetPlayer.field_71070_bA).bridge$setCaptureInventory(false);
+        ((TrackedInventoryBridge) this.packetPlayer.openContainer).bridge$setCaptureInventory(false);
 
         return super.hasCaptures();
     }

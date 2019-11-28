@@ -164,9 +164,9 @@ public final class SpongeParticleHelper {
             } else if (type == ParticleTypes.SPLASH_POTION) {
                 final Effect potion = (Effect) effect.getOptionOrDefault(ParticleOptions.POTION_EFFECT_TYPE).get();
                 for (final Potion potionType : Potion.field_185176_a) {
-                    for (final net.minecraft.potion.EffectInstance potionEffect : potionType.func_185170_a()) {
-                        if (potionEffect.func_188419_a() == potion) {
-                            return new CachedEffectPacket(2002, Potion.field_185176_a.func_148757_b(potionType), false);
+                    for (final net.minecraft.potion.EffectInstance potionEffect : potionType.getEffects()) {
+                        if (potionEffect.getPotion() == potion) {
+                            return new CachedEffectPacket(2002, Potion.field_185176_a.getId(potionType), false);
                         }
                     }
                 }
@@ -217,21 +217,21 @@ public final class SpongeParticleHelper {
             final Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
             if (optSnapshot.isPresent()) {
                 final ItemStackSnapshot snapshot = optSnapshot.get();
-                extra = new int[] { Item.func_150891_b((Item) snapshot.getType()), ((SpongeItemStackSnapshot) snapshot).getDamageValue() };
+                extra = new int[] { Item.getIdFromItem((Item) snapshot.getType()), ((SpongeItemStackSnapshot) snapshot).getDamageValue() };
             } else {
                 final Optional<BlockState> optBlockState = effect.getOption(ParticleOptions.BLOCK_STATE);
                 if (optBlockState.isPresent()) {
                     final BlockState blockState = optBlockState.get();
                     final Optional<ItemType> optItemType = blockState.getType().getItem();
                     if (optItemType.isPresent()) {
-                        extra = new int[] { Item.func_150891_b((Item) optItemType.get()),
+                        extra = new int[] { Item.getIdFromItem((Item) optItemType.get()),
                                 ((Block) blockState.getType()).func_176201_c((net.minecraft.block.BlockState) blockState) };
                     } else {
                         return EmptyCachedPacket.INSTANCE;
                     }
                 } else {
                     final ItemStackSnapshot snapshot = defaultSnapshot.get();
-                    extra = new int[] { Item.func_150891_b((Item) snapshot.getType()), ((SpongeItemStackSnapshot) snapshot).getDamageValue() };
+                    extra = new int[] { Item.getIdFromItem((Item) snapshot.getType()), ((SpongeItemStackSnapshot) snapshot).getDamageValue() };
                 }
             }
         }
@@ -350,7 +350,7 @@ public final class SpongeParticleHelper {
         static {
             FIREWORK_ROCKET_ID = EntityAccessor.accessor$getNextEntityId();
             EntityAccessor.accessor$setNextEntityId(FIREWORK_ROCKET_ID + 1);
-            FIREWORK_ROCKET_UNIQUE_ID = MathHelper.func_180182_a(new Random());
+            FIREWORK_ROCKET_UNIQUE_ID = MathHelper.getRandomUUID(new Random());
 
             DESTROY_FIREWORK_ROCKET_DUMMY = new SDestroyEntitiesPacket(FIREWORK_ROCKET_ID);
 

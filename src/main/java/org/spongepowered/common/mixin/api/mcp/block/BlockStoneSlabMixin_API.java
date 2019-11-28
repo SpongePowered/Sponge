@@ -35,7 +35,7 @@ public abstract class BlockStoneSlabMixin_API extends BlockMixin_API {
 
     @Override
     public Translation getTranslation() {
-        if (getBlockState().func_177622_c() instanceof BlockStoneSlabNew) {
+        if (getBlockState().getOwner() instanceof BlockStoneSlabNew) {
             return new SpongeTranslation(getTranslationKey() + ".red_sandstone.name");
         }
         return super.getTranslation();

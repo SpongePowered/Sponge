@@ -60,7 +60,7 @@ public class BaseVehicleValueProcessor extends AbstractSpongeValueProcessor<net.
 
     @Override
     protected Optional<EntitySnapshot> getVal(net.minecraft.entity.Entity container) {
-        return Optional.ofNullable(container.func_184208_bv() == null ? null : ((Entity) container.func_184208_bv()).createSnapshot());
+        return Optional.ofNullable(container.getLowestRidingEntity() == null ? null : ((Entity) container.getLowestRidingEntity()).createSnapshot());
     }
 
     @Override

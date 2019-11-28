@@ -135,12 +135,12 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
 
     @Override
     public Optional<Instant> add(final int score) {
-        return set(MathHelper.func_76125_a(getScore() + score, 0, getGoal()));
+        return set(MathHelper.clamp(getScore() + score, 0, getGoal()));
     }
 
     @Override
     public Optional<Instant> remove(final int score) {
-        return set(MathHelper.func_76125_a(getScore() - score, 0, getGoal()));
+        return set(MathHelper.clamp(getScore() - score, 0, getGoal()));
     }
 
     @Override

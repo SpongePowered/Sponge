@@ -55,9 +55,9 @@ public final class SoundRegistryModule implements AdditionalCatalogRegistryModul
 
     @Override
     public void registerDefaults() {
-        for (ResourceLocation key: SoundEvent.field_187505_a.func_148742_b()) {
-            this.soundMappings.put(key.toString(), (SoundType) SoundEvent.field_187505_a.func_82594_a(key));
-            this.soundMappings.put(key.toString().replace('.', '_'), (SoundType) SoundEvent.field_187505_a.func_82594_a(key));
+        for (ResourceLocation key: SoundEvent.field_187505_a.keySet()) {
+            this.soundMappings.put(key.toString(), (SoundType) SoundEvent.field_187505_a.getOrDefault(key));
+            this.soundMappings.put(key.toString().replace('.', '_'), (SoundType) SoundEvent.field_187505_a.getOrDefault(key));
         }
     }
 

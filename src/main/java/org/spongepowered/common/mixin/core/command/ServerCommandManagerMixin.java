@@ -81,7 +81,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
     private GameRules impl$useSenderWorldGamerules(final ServerWorld overworld, final ICommandSender sender, final ICommand command,
         final int flags, final String translationKey, final Object... translationArgs) {
         // Check the game rules of the current world instead of overworld game rules
-        return sender.func_130014_f_().func_82736_K();
+        return sender.getEntityWorld().getGameRules();
     }
 
     /**
@@ -123,7 +123,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
                         .add("Details of the command:")
                         .add("%s : %s", "Command", command)
                         .add("%s : %s", "Offending Mod", id)
-                        .add("%s : %s", "Sender", sender.func_145748_c_() == null ? "null" : sender.func_145748_c_().func_150260_c())
+                        .add("%s : %s", "Sender", sender.getDisplayName() == null ? "null" : sender.getDisplayName().func_150260_c())
                         .add("Stacktrace")
                         .add(new Exception("Async Command Executor"))
                         .trace(SpongeImpl.getLogger(), Level.WARN);
@@ -146,7 +146,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
                         .add("Details of the command:")
                         .add("%s : %s", "Command", command)
                         .add("%s : %s", "Offending Mod", id)
-                        .add("%s : %s", "Sender", sender == null || sender.func_145748_c_() == null ? "null" : sender.func_145748_c_().func_150260_c())
+                        .add("%s : %s", "Sender", sender == null || sender.getDisplayName() == null ? "null" : sender.getDisplayName().func_150260_c())
                         .add("Stacktrace")
                         .add(new Exception("Async Command Executor"))
                         .trace(SpongeImpl.getLogger(), Level.WARN);
@@ -247,7 +247,7 @@ public abstract class ServerCommandManagerMixin extends CommandHandler implement
     public List<String> func_180524_a(final ICommandSender sender, final String input, @Nullable final BlockPos pos) {
         @Nullable Location<org.spongepowered.api.world.World> targetPos = null;
         if (pos != null) {
-            targetPos = new Location<>((org.spongepowered.api.world.World) sender.func_130014_f_(), VecHelper.toVector3i(pos));
+            targetPos = new Location<>((org.spongepowered.api.world.World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
         }
         return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, targetPos, false);
     }

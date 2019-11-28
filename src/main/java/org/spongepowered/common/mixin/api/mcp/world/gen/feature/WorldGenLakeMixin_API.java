@@ -86,7 +86,7 @@ public abstract class WorldGenLakeMixin_API extends Feature implements Lake {
 
     @Override
     public BlockState getLiquidType() {
-        return (BlockState) this.block.func_176223_P();
+        return (BlockState) this.block.getDefaultState();
     }
 
     @Override

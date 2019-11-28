@@ -107,12 +107,12 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         this.entityType = checkNotNull(entity.getType(), "Entity is returning a null EntityType!");
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final CompoundNBT compound = new CompoundNBT();
-        minecraftEntity.func_189511_e(compound);
-        compound.func_74778_a(Constants.Sponge.EntityArchetype.ENTITY_ID, entity.getType().getId());
-        compound.func_82580_o(Constants.UUID);
-        compound.func_82580_o(Constants.UUID_MOST);
-        compound.func_82580_o(Constants.UUID_LEAST);
-        compound.func_74757_a(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
+        minecraftEntity.writeWithoutTypeId(compound);
+        compound.putString(Constants.Sponge.EntityArchetype.ENTITY_ID, entity.getType().getId());
+        compound.remove(Constants.UUID);
+        compound.remove(Constants.UUID_MOST);
+        compound.remove(Constants.UUID_LEAST);
+        compound.putBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
         this.compound = compound;
         return this;
     }

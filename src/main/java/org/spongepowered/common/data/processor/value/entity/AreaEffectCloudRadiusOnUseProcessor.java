@@ -54,7 +54,7 @@ public class AreaEffectCloudRadiusOnUseProcessor extends AbstractSpongeValueProc
 
     @Override
     protected boolean set(AreaEffectCloudEntity container, Double value) {
-        container.func_184495_b(value.floatValue());
+        container.setRadiusOnUse(value.floatValue());
         return true;
     }
 

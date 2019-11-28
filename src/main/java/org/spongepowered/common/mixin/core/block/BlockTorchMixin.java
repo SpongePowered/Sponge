@@ -82,11 +82,11 @@ public abstract class BlockTorchMixin extends BlockMixin {
 
     private ImmutableAttachedData impl$getIsAttachedFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class,
-                blockState.func_177229_b(TorchBlock.field_176596_a) != net.minecraft.util.Direction.UP);
+                blockState.get(TorchBlock.field_176596_a) != net.minecraft.util.Direction.UP);
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(TorchBlock.field_176596_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(TorchBlock.field_176596_a)));
     }
 }

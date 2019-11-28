@@ -43,7 +43,7 @@ import java.util.Optional;
 public class ItemWetDataProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, WetData, ImmutableWetData> {
 
     public ItemWetDataProcessor() {
-        super(item -> item.func_77973_b().equals(ItemTypes.SPONGE), Keys.IS_WET);
+        super(item -> item.getItem().equals(ItemTypes.SPONGE), Keys.IS_WET);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class ItemWetDataProcessor extends AbstractItemSingleDataProcessor<Boolea
 
     @Override
     protected Optional<Boolean> getVal(ItemStack itemStack) {
-        return Optional.of(itemStack.func_77952_i() == 1);
+        return Optional.of(itemStack.getDamage() == 1);
     }
 
     @Override

@@ -52,13 +52,13 @@ public class ParrotDataProcessor extends
 
     @Override
     protected boolean set(ParrotEntity dataHolder, ParrotVariant value) {
-        dataHolder.func_191997_m(((SpongeParrotVariant)value).type);
+        dataHolder.setVariant(((SpongeParrotVariant)value).type);
         return true;
     }
 
     @Override
     protected Optional<ParrotVariant> getVal(ParrotEntity dataHolder) {
-        return Optional.of(ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(dataHolder.func_191998_ds()));
+        return Optional.of(ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(dataHolder.getVariant()));
     }
 
     @Override

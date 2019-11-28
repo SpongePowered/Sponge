@@ -70,7 +70,7 @@ public abstract class WorldGenMegaPineTreeMixin_API extends HugeTreesFeature imp
 
     @Override
     public boolean canPlaceAt(final World world, final int x, final int y, final int z) {
-        return this.func_175929_a((net.minecraft.world.World) world, null, new BlockPos(x, y, z), this.field_76522_a);
+        return this.func_175929_a((net.minecraft.world.World) world, null, new BlockPos(x, y, z), this.baseHeight);
     }
 
     @Override
@@ -78,7 +78,7 @@ public abstract class WorldGenMegaPineTreeMixin_API extends HugeTreesFeature imp
         final BlockPos pos = new BlockPos(x, y, z);
         func_175904_e();
         if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
-            func_180711_a((net.minecraft.world.World) world, random, pos);
+            generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }
 

@@ -61,11 +61,11 @@ public abstract class WorldGenIcePathMixin extends WorldGeneratorMixin {
     @Override
     @Overwrite
     public boolean generate(final World worldIn, final Random rand, BlockPos position) {
-        while (worldIn.func_175623_d(position) && position.func_177956_o() > 2) {
-            position = position.func_177977_b();
+        while (worldIn.isAirBlock(position) && position.getY() > 2) {
+            position = position.down();
         }
 
-        if (worldIn.func_180495_p(position).func_177230_c() != Blocks.field_150433_aE) {
+        if (worldIn.getBlockState(position).getBlock() != Blocks.SNOW) {
             return false;
         }
         // Sponge start
@@ -73,18 +73,18 @@ public abstract class WorldGenIcePathMixin extends WorldGeneratorMixin {
         // Sponge end
         final byte b0 = 1;
 
-        for (int j = position.func_177958_n() - i; j <= position.func_177958_n() + i; ++j) {
-            for (int k = position.func_177952_p() - i; k <= position.func_177952_p() + i; ++k) {
-                final int l = j - position.func_177958_n();
-                final int i1 = k - position.func_177952_p();
+        for (int j = position.getX() - i; j <= position.getX() + i; ++j) {
+            for (int k = position.getZ() - i; k <= position.getZ() + i; ++k) {
+                final int l = j - position.getX();
+                final int i1 = k - position.getZ();
 
                 if (l * l + i1 * i1 <= i * i) {
-                    for (int j1 = position.func_177956_o() - b0; j1 <= position.func_177956_o() + b0; ++j1) {
+                    for (int j1 = position.getY() - b0; j1 <= position.getY() + b0; ++j1) {
                         final BlockPos blockpos1 = new BlockPos(j, j1, k);
-                        final Block block = worldIn.func_180495_p(blockpos1).func_177230_c();
+                        final Block block = worldIn.getBlockState(blockpos1).getBlock();
 
-                        if (block == Blocks.field_150346_d || block == Blocks.field_150433_aE || block == Blocks.field_150432_aD) {
-                            worldIn.func_180501_a(blockpos1, this.block.func_176223_P(), 2);
+                        if (block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE) {
+                            worldIn.setBlockState(blockpos1, this.block.getDefaultState(), 2);
                         }
                     }
                 }

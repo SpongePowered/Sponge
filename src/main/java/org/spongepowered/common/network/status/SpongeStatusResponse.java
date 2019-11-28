@@ -59,10 +59,10 @@ public final class SpongeStatusResponse {
     public static ServerStatusResponse postLegacy(MinecraftServer server, InetSocketAddress address, MinecraftVersion version,
             InetSocketAddress virtualHost) {
         ServerStatusResponse response = create(server);
-        response.func_151321_a(new ServerStatusResponse.Version(response.func_151322_c().func_151303_a(), Byte.MAX_VALUE));
+        response.setVersion(new ServerStatusResponse.Version(response.getVersion().getName(), Byte.MAX_VALUE));
         response = call(response, new SpongeLegacyStatusClient(address, version, virtualHost));
-        if (response != null && response.func_151318_b() == null) {
-            response.func_151319_a(new ServerStatusResponse.Players(-1, 0));
+        if (response != null && response.getPlayers() == null) {
+            response.setPlayers(new ServerStatusResponse.Players(-1, 0));
         }
         return response;
     }
@@ -77,27 +77,27 @@ public final class SpongeStatusResponse {
     }
 
     public static ServerStatusResponse create(MinecraftServer server) {
-        return clone(server.func_147134_at());
+        return clone(server.getServerStatusResponse());
     }
 
     private static ServerStatusResponse clone(ServerStatusResponse original) {
         ServerStatusResponse clone = new ServerStatusResponse();
-        clone.func_151315_a(original.func_151317_a());
-        if (original.func_151316_d() != null) {
+        clone.setServerDescription(original.getServerDescription());
+        if (original.getFavicon() != null) {
             ((ClientPingServerEvent.Response) clone).setFavicon(((StatusResponse) original).getFavicon().get());
         }
 
-        clone.func_151319_a(clone(original.func_151318_b()));
-        clone.func_151321_a(clone(original.func_151322_c()));
+        clone.setPlayers(clone(original.getPlayers()));
+        clone.setVersion(clone(original.getVersion()));
         return clone;
     }
 
     @Nullable
     private static ServerStatusResponse.Players clone(@Nullable ServerStatusResponse.Players original) {
         if (original != null) {
-            ServerStatusResponse.Players clone = new ServerStatusResponse.Players(original.func_151332_a(),
-                    original.func_151333_b());
-            clone.func_151330_a(original.func_151331_c());
+            ServerStatusResponse.Players clone = new ServerStatusResponse.Players(original.getMaxPlayers(),
+                    original.getOnlinePlayerCount());
+            clone.setPlayers(original.getPlayers());
             return clone;
         }
         return null;
@@ -105,15 +105,15 @@ public final class SpongeStatusResponse {
 
     @Nullable
     private static ServerStatusResponse.Version clone(@Nullable ServerStatusResponse.Version original) {
-        return original != null ? new ServerStatusResponse.Version(original.func_151303_a(), original.func_151304_b()) : null;
+        return original != null ? new ServerStatusResponse.Version(original.getName(), original.getProtocol()) : null;
     }
 
     public static String getMotd(ServerStatusResponse response) {
-        return getFirstLine(SpongeTexts.toLegacy(response.func_151317_a()));
+        return getFirstLine(SpongeTexts.toLegacy(response.getServerDescription()));
     }
 
     public static String getUnformattedMotd(ServerStatusResponse response) {
-        return getFirstLine(LegacyTexts.stripAll(response.func_151317_a().func_150260_c(), COLOR_CHAR));
+        return getFirstLine(LegacyTexts.stripAll(response.getServerDescription().func_150260_c(), COLOR_CHAR));
     }
 
     private static String getFirstLine(String s) {

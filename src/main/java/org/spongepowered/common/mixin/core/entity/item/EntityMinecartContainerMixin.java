@@ -64,14 +64,14 @@ public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin i
 
     @Override
     public SlotProvider bridge$generateSlotProvider() {
-        return new SlotCollection.Builder().add(this.func_70302_i_()).build();
+        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
     }
 
     @Override
     public Lens bridge$generateLens(SlotProvider slots) {
-        return this.func_70302_i_() == 0
+        return this.getSizeInventory() == 0
                 ? new DefaultEmptyLens(this)
-                : new OrderedInventoryLensImpl(0, this.func_70302_i_(), 1, slots);
+                : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
     }
 
 }

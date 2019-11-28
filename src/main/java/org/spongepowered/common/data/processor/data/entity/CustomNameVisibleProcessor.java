@@ -54,13 +54,13 @@ public final class CustomNameVisibleProcessor extends
 
     @Override
     protected boolean set(Entity container, Boolean value) {
-        container.func_174805_g(value);
+        container.setCustomNameVisible(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(container.func_174833_aM());
+        return Optional.of(container.isCustomNameVisible());
     }
 
     @Override

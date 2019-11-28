@@ -76,11 +76,11 @@ public abstract class BlockBedMixin extends BlockHorizontalMixin {
     }
 
     private ImmutableOccupiedData impl$getIsOccupiedFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.func_177229_b(BedBlock.field_176471_b));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.get(BedBlock.OCCUPIED));
     }
 
     @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)
     private static void onHasRoomForPlayer(final World world, final BlockPos pos, final CallbackInfoReturnable<Boolean> ci ) {
-        ci.setReturnValue(ci.getReturnValue() && world.func_175723_af().func_177746_a(pos));
+        ci.setReturnValue(ci.getReturnValue() && world.getWorldBorder().contains(pos));
     }
 }

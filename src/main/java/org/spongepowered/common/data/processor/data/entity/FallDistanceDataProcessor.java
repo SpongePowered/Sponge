@@ -49,13 +49,13 @@ public class FallDistanceDataProcessor
 
     @Override
     protected boolean set(LivingEntity entity, Float value) {
-        entity.field_70143_R = checkNotNull(value);
+        entity.fallDistance = checkNotNull(value);
         return true;
     }
 
     @Override
     protected Optional<Float> getVal(LivingEntity entity) {
-        return Optional.of(entity.field_70143_R);
+        return Optional.of(entity.fallDistance);
     }
 
     @Override

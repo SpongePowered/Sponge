@@ -76,7 +76,7 @@ public class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, 
     @Override
     protected Advancement build(PluginContainer plugin, String id, Translation name) {
         final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
-        final AdvancementRewards rewards = AdvancementRewards.field_192114_a;
+        final AdvancementRewards rewards = AdvancementRewards.EMPTY;
         final ResourceLocation resourceLocation = new ResourceLocation(plugin.getId(), this.id);
         final net.minecraft.advancements.DisplayInfo displayInfo = this.displayInfo == null ? null :
                 (net.minecraft.advancements.DisplayInfo) DisplayInfo.builder().from(this.displayInfo).build(); // Create a copy

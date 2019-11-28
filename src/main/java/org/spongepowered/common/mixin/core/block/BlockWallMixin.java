@@ -86,16 +86,16 @@ public abstract class BlockWallMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableWallData impl$getWallTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.func_177229_b(WallBlock.field_176255_P));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.get(WallBlock.field_176255_P));
     }
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final net.minecraft.block.BlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.func_177229_b(WallBlock.field_176254_b);
-        final Boolean east = blockState.func_177229_b(WallBlock.field_176257_M);
-        final Boolean west = blockState.func_177229_b(WallBlock.field_176259_O);
-        final Boolean south = blockState.func_177229_b(WallBlock.field_176258_N);
-        final Boolean up = blockState.func_177229_b(WallBlock.field_176256_a);
+        final Boolean north = blockState.get(WallBlock.field_176254_b);
+        final Boolean east = blockState.get(WallBlock.field_176257_M);
+        final Boolean west = blockState.get(WallBlock.field_176259_O);
+        final Boolean south = blockState.get(WallBlock.field_176258_N);
+        final Boolean up = blockState.get(WallBlock.UP);
         if (north) {
             directions.add(Direction.NORTH);
         }

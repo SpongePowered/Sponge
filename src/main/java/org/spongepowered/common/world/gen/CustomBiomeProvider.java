@@ -154,7 +154,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
     }
 
     @Override
-    public BlockPos func_180630_a(int xCenter, int zCenter, int range, List<Biome> biomes, Random random) {
+    public BlockPos findBiomePosition(int xCenter, int zCenter, int range, List<Biome> biomes, Random random) {
         IntCache.func_76446_a();
         int xStartSegment = xCenter - range;
         int zStartSegment = zCenter - range;
@@ -191,7 +191,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
             // all positions to ocean first, every position not set will be
             // ocean, and not some random biome from the last time this array
             // was used
-            Arrays.fill(biomeArray, Biomes.field_76771_b);
+            Arrays.fill(biomeArray, Biomes.OCEAN);
         }
 
         ObjectArrayMutableBiomeBuffer biomeArea = new ObjectArrayMutableBiomeBuffer(new Vector3i(startX, 0, startZ), new Vector3i(sizeX, 1, sizeZ));

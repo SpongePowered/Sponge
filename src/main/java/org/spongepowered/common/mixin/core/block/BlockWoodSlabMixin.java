@@ -86,10 +86,10 @@ public abstract class BlockWoodSlabMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableTreeData impl$getTreeTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.func_177229_b(BlockPlanks.field_176383_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(BlockPlanks.field_176383_a));
     }
 
     private ImmutablePortionData impl$getPortionTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.func_177229_b(SlabBlock.field_176554_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.get(SlabBlock.field_176554_a));
     }
 }

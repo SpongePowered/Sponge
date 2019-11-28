@@ -76,7 +76,7 @@ public abstract class WorldGenTaiga2Mixin_API extends AbstractTreeFeature implem
                     for (int k1 = z - i3; k1 <= z + i3 && flag; ++k1) {
                         if (i1 >= 0 && i1 < 256) {
                             final BlockPos pos = new BlockPos(j1, i1, k1);
-                            final BlockState state = worldIn.func_180495_p(pos);
+                            final BlockState state = worldIn.getBlockState(pos);
                             if (!((WorldGeneratorBridge) this).bridge$isAir(state, worldIn, pos) && !((WorldGeneratorBridge) this).bridge$isLeaves(state, worldIn, pos)) {
                                 flag = false;
                             }
@@ -91,7 +91,7 @@ public abstract class WorldGenTaiga2Mixin_API extends AbstractTreeFeature implem
                 return false;
             }
             final BlockPos down = new BlockPos(x, y - 1, z);
-            final Block block = worldIn.func_180495_p(down).func_177230_c();
+            final Block block = worldIn.getBlockState(down).getBlock();
             if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, Direction.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
                 return true;
             }
@@ -104,7 +104,7 @@ public abstract class WorldGenTaiga2Mixin_API extends AbstractTreeFeature implem
         final BlockPos pos = new BlockPos(x, y, z);
         func_175904_e();
         if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
-            func_180711_a((net.minecraft.world.World) world, random, pos);
+            generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }
 

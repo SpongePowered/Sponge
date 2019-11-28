@@ -107,25 +107,25 @@ public abstract class EntityMinecartMixin extends EntityMixin implements EntityM
     @Override
     public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.func_74764_b(Constants.Entity.Minecart.MAX_SPEED)) {
-            this.impl$maxSpeed = compound.func_74769_h(Constants.Entity.Minecart.MAX_SPEED);
+        if (compound.contains(Constants.Entity.Minecart.MAX_SPEED)) {
+            this.impl$maxSpeed = compound.getDouble(Constants.Entity.Minecart.MAX_SPEED);
         }
-        if (compound.func_74764_b(Constants.Entity.Minecart.SLOW_WHEN_EMPTY)) {
-            this.impl$slowWhenEmpty = compound.func_74767_n(Constants.Entity.Minecart.SLOW_WHEN_EMPTY);
+        if (compound.contains(Constants.Entity.Minecart.SLOW_WHEN_EMPTY)) {
+            this.impl$slowWhenEmpty = compound.getBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY);
         }
-        if (compound.func_74764_b(Constants.Entity.Minecart.AIRBORNE_MODIFIER)) {
-            this.impl$airborneMod = VectorSerializer.fromNbt(compound.func_74775_l(Constants.Entity.Minecart.AIRBORNE_MODIFIER));
+        if (compound.contains(Constants.Entity.Minecart.AIRBORNE_MODIFIER)) {
+            this.impl$airborneMod = VectorSerializer.fromNbt(compound.getCompound(Constants.Entity.Minecart.AIRBORNE_MODIFIER));
         }
-        if (compound.func_74764_b(Constants.Entity.Minecart.DERAILED_MODIFIER)) {
-            this.impl$derailedMod = VectorSerializer.fromNbt(compound.func_74775_l(Constants.Entity.Minecart.DERAILED_MODIFIER));
+        if (compound.contains(Constants.Entity.Minecart.DERAILED_MODIFIER)) {
+            this.impl$derailedMod = VectorSerializer.fromNbt(compound.getCompound(Constants.Entity.Minecart.DERAILED_MODIFIER));
         }
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.func_74780_a(Constants.Entity.Minecart.MAX_SPEED, this.impl$maxSpeed);
-        compound.func_74757_a(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, this.impl$slowWhenEmpty);
+        compound.putDouble(Constants.Entity.Minecart.MAX_SPEED, this.impl$maxSpeed);
+        compound.putBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, this.impl$slowWhenEmpty);
         compound.func_74782_a(Constants.Entity.Minecart.AIRBORNE_MODIFIER, VectorSerializer.toNbt(this.impl$airborneMod));
         compound.func_74782_a(Constants.Entity.Minecart.DERAILED_MODIFIER, VectorSerializer.toNbt(this.impl$derailedMod));
     }

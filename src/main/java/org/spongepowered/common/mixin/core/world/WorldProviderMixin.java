@@ -112,7 +112,7 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
     public boolean canDropChunk(final int x, final int z) {
         final boolean isSpawnChunk = this.world.func_72916_c(x, z);
 
-        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.field_73011_w.func_186058_p(), ((WorldServerBridge) this.world)
+        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.dimension.getType(), ((WorldServerBridge) this.world)
                 .bridge$getDimensionId());
     }
 }

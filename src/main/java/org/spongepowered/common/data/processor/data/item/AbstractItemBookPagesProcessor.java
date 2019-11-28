@@ -77,7 +77,7 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            final CompoundNBT tag = stack.func_77978_p();
+            final CompoundNBT tag = stack.getTag();
             if (tag != null) {
                 tag.func_74782_a(Constants.Item.Book.ITEM_BOOK_PAGES, new ListNBT());
             }
@@ -93,29 +93,29 @@ abstract class AbstractItemBookPagesProcessor<T, M extends DataManipulator<M, I>
         for (final T page : value) {
             list.func_74742_a(this.translateTo(page));
         }
-        itemStack.func_77983_a(Constants.Item.Book.ITEM_BOOK_PAGES, list);
-        final CompoundNBT compound = itemStack.func_77978_p();
-        if (!compound.func_74764_b(Constants.Item.Book.ITEM_BOOK_TITLE)) {
-            compound.func_74778_a(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);
+        itemStack.setTagInfo(Constants.Item.Book.ITEM_BOOK_PAGES, list);
+        final CompoundNBT compound = itemStack.getTag();
+        if (!compound.contains(Constants.Item.Book.ITEM_BOOK_TITLE)) {
+            compound.putString(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);
         }
-        if (!compound.func_74764_b(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
-            compound.func_74778_a(Constants.Item.Book.ITEM_BOOK_AUTHOR, Constants.Item.Book.INVALID_TITLE);
+        if (!compound.contains(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
+            compound.putString(Constants.Item.Book.ITEM_BOOK_AUTHOR, Constants.Item.Book.INVALID_TITLE);
         }
-        compound.func_74757_a(Constants.Item.Book.ITEM_BOOK_RESOLVED, true);
+        compound.putBoolean(Constants.Item.Book.ITEM_BOOK_RESOLVED, true);
         return true;
     }
 
     @Override
     protected Optional<List<T>> getVal(final ItemStack itemStack) {
-        final CompoundNBT tagCompound = itemStack.func_77978_p();
-        if (tagCompound == null || !tagCompound.func_74764_b(Constants.Item.Book.ITEM_BOOK_PAGES)) {
+        final CompoundNBT tagCompound = itemStack.getTag();
+        if (tagCompound == null || !tagCompound.contains(Constants.Item.Book.ITEM_BOOK_PAGES)) {
             return Optional.empty();
         }
-        final ListNBT list = tagCompound.func_150295_c(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
+        final ListNBT list = tagCompound.getList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
         final List<T> stringList = new ArrayList<>();
         if (!list.func_82582_d()) {
             for (int i = 0; i < list.func_74745_c(); i++) {
-                stringList.add(this.translateFrom(list.func_150307_f(i)));
+                stringList.add(this.translateFrom(list.getString(i)));
             }
         }
         return Optional.of(stringList);

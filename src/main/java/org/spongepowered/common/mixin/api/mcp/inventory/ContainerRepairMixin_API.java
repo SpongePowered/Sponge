@@ -44,7 +44,7 @@ public abstract class ContainerRepairMixin_API implements SingleBlockCarrier {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>(((World) this.world), new Vector3d(this.pos.func_177958_n(), this.pos.func_177956_o(), this.pos.func_177952_p()));
+        return new Location<>(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
     }
 
     @Override

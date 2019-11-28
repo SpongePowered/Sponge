@@ -53,10 +53,10 @@ public abstract class BlockLogMixin extends BlockMixin {
 
     private ImmutableTreeData getTreeData(final net.minecraft.block.BlockState blockState) {
         final BlockPlanks.EnumType type;
-        if(blockState.func_177230_c() instanceof BlockOldLog) {
-            type = blockState.func_177229_b(BlockOldLog.field_176301_b);
-        } else if(blockState.func_177230_c() instanceof BlockNewLog) {
-            type = blockState.func_177229_b(BlockNewLog.field_176300_b);
+        if(blockState.getBlock() instanceof BlockOldLog) {
+            type = blockState.get(BlockOldLog.field_176301_b);
+        } else if(blockState.getBlock() instanceof BlockNewLog) {
+            type = blockState.get(BlockNewLog.field_176300_b);
         } else {
             type = BlockPlanks.EnumType.OAK;
         }
@@ -68,7 +68,7 @@ public abstract class BlockLogMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableLogAxisData getLogAxisData(final net.minecraft.block.BlockState blockState) {
-        final LogAxis logAxis = (LogAxis) (Object) blockState.func_177229_b(LogBlock.field_176299_a);
+        final LogAxis logAxis = (LogAxis) (Object) blockState.get(LogBlock.field_176299_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLogAxisData.class, logAxis);
     }
 
@@ -106,14 +106,14 @@ public abstract class BlockLogMixin extends BlockMixin {
     }
 
     private Optional<BlockState> impl$processLogType(final net.minecraft.block.BlockState blockState, final BlockPlanks.EnumType type, final TreeType treeType) {
-        if (blockState.func_177230_c() instanceof BlockOldLog) {
+        if (blockState.getBlock() instanceof BlockOldLog) {
             if (treeType.equals(TreeTypes.OAK) ||
                 treeType.equals(TreeTypes.BIRCH) ||
                 treeType.equals(TreeTypes.SPRUCE) ||
                 treeType.equals(TreeTypes.JUNGLE)) {
                 return Optional.of((BlockState) blockState.func_177226_a(BlockOldLog.field_176301_b, type));
             }
-        } else if (blockState.func_177230_c() instanceof BlockNewLog) {
+        } else if (blockState.getBlock() instanceof BlockNewLog) {
             if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
                 return Optional.of((BlockState) blockState.func_177226_a(BlockNewLog.field_176300_b, type));
             }

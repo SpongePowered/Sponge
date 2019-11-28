@@ -78,7 +78,7 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
             for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.func_177228_b().entrySet
                     ()) {
                 if (entry.getValue() instanceof AbstractRailBlock.EnumRailDirection) {
-                    if (entry.getKey().func_177700_c().contains(railDirection)) {
+                    if (entry.getKey().getAllowedValues().contains(railDirection)) {
                         final PropertyEnum<AbstractRailBlock.EnumRailDirection> property = (PropertyEnum<AbstractRailBlock.EnumRailDirection>) entry.getKey();
                         final net.minecraft.block.BlockState newState = blockState.func_177226_a(property, railDirection);
                         return Optional.of((BlockState) newState);
@@ -103,34 +103,34 @@ public abstract class BlockRailBaseMixin extends BlockMixin {
     }
 
     private Optional<BlockState> impl$getStateForDirection(final net.minecraft.block.BlockState blockState, final AbstractRailBlock.EnumRailDirection railDirection) {
-        if (blockState.func_177230_c() instanceof RailBlock) {
-            return Optional.of((BlockState) blockState.func_177226_a(RailBlock.field_176565_b, railDirection));
+        if (blockState.getBlock() instanceof RailBlock) {
+            return Optional.of((BlockState) blockState.func_177226_a(RailBlock.SHAPE, railDirection));
         }
-        if (blockState.func_177230_c() instanceof PoweredRailBlock) {
-            if (!PoweredRailBlock.field_176568_b.func_177700_c().contains(railDirection)) {
+        if (blockState.getBlock() instanceof PoweredRailBlock) {
+            if (!PoweredRailBlock.SHAPE.getAllowedValues().contains(railDirection)) {
                 return Optional.empty();
             }
-            return Optional.of((BlockState) blockState.func_177226_a(PoweredRailBlock.field_176568_b, railDirection));
+            return Optional.of((BlockState) blockState.func_177226_a(PoweredRailBlock.SHAPE, railDirection));
         }
-        if (blockState.func_177230_c() instanceof DetectorRailBlock) {
-            if (!DetectorRailBlock.field_176573_b.func_177700_c().contains(railDirection)) {
+        if (blockState.getBlock() instanceof DetectorRailBlock) {
+            if (!DetectorRailBlock.SHAPE.getAllowedValues().contains(railDirection)) {
                 return Optional.empty();
             }
-            return Optional.of((BlockState) blockState.func_177226_a(DetectorRailBlock.field_176573_b, railDirection));
+            return Optional.of((BlockState) blockState.func_177226_a(DetectorRailBlock.SHAPE, railDirection));
         }
         return Optional.empty();
     }
 
     @Nullable
     private ImmutableRailDirectionData impl$getRailDirectionFor(final net.minecraft.block.BlockState blockState) {
-        if (blockState.func_177230_c() instanceof RailBlock) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.func_177229_b(RailBlock.field_176565_b));
+        if (blockState.getBlock() instanceof RailBlock) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.get(RailBlock.SHAPE));
         }
-        if (blockState.func_177230_c() instanceof PoweredRailBlock) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.func_177229_b(PoweredRailBlock.field_176568_b));
+        if (blockState.getBlock() instanceof PoweredRailBlock) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.get(PoweredRailBlock.SHAPE));
         }
-        if (blockState.func_177230_c() instanceof DetectorRailBlock) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.func_177229_b(DetectorRailBlock.field_176573_b));
+        if (blockState.getBlock() instanceof DetectorRailBlock) {
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class, blockState.get(DetectorRailBlock.SHAPE));
         } // For mods extending BlockRailBase
         for (final Map.Entry<IProperty<?>, Comparable<?>> entry :  blockState.func_177228_b().entrySet()) {
             if (entry.getValue() instanceof AbstractRailBlock.EnumRailDirection) {

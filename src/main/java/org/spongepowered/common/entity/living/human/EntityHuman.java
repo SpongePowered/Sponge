@@ -93,7 +93,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
 
                 @Override
                 public PropertyMap load(final UUID uuid) throws Exception {
-                    return SpongeImpl.getServer().func_147130_as().fillProfileProperties(new GameProfile(uuid, ""), true)
+                    return SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
                             .getProperties();
                 }
             });
@@ -107,39 +107,39 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
 
     public EntityHuman(final World worldIn) {
         super(worldIn);
-        this.fakeProfile = new GameProfile(this.field_96093_i, "");
+        this.fakeProfile = new GameProfile(this.entityUniqueID, "");
         this.func_70105_a(0.6F, 1.8F);
-        this.func_98053_h(true);
+        this.setCanPickUpLoot(true);
     }
 
     @Override
-    protected void func_110147_ax() {
-        super.func_110147_ax();
-        this.func_110140_aT().func_111150_b(SharedMonsterAttributes.field_111264_e).func_111128_a(1.0D);
+    protected void registerAttributes() {
+        super.registerAttributes();
+        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
     }
 
     @Override
-    protected void func_70088_a() {
+    protected void registerData() {
         // EntityLivingBase
-        this.field_70180_af.func_187214_a(EntityLivingBaseAccessor.accessor$getHandStatesParameter(), Byte.valueOf((byte)0));
-        this.field_70180_af.func_187214_a(EntityLivingBaseAccessor.accessor$getPotionEffectsParameter(), Integer.valueOf(0));
-        this.field_70180_af.func_187214_a(EntityLivingBaseAccessor.accessor$getHideParticlesParameter(), Boolean.valueOf(false));
-        this.field_70180_af.func_187214_a(EntityLivingBaseAccessor.accessor$getArrowCountInEntityParameter(), Integer.valueOf(0));
-        this.field_70180_af.func_187214_a(EntityLivingBaseAccessor.accessor$getHealthParameter(), Float.valueOf(1.0F));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHandStatesParameter(), Byte.valueOf((byte)0));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getPotionEffectsParameter(), Integer.valueOf(0));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHideParticlesParameter(), Boolean.valueOf(false));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getArrowCountInEntityParameter(), Integer.valueOf(0));
+        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHealthParameter(), Float.valueOf(1.0F));
         // EntityPlayer
-        this.field_70180_af.func_187214_a(EntityPlayerAccessor.accessor$getAbsorptionParameter(), Float.valueOf(0.0F));
-        this.field_70180_af.func_187214_a(EntityPlayerAccessor.accessor$getPlayerScoreParameter(), Integer.valueOf(0));
-        this.field_70180_af.func_187214_a(EntityPlayerAccessor.accessor$getPlayerModelFlagParameter(), Byte.valueOf((byte)0));
-        this.field_70180_af.func_187214_a(EntityPlayerAccessor.accessor$getMainHandParameter(), Byte.valueOf((byte)1));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getAbsorptionParameter(), Float.valueOf(0.0F));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerScoreParameter(), Integer.valueOf(0));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerModelFlagParameter(), Byte.valueOf((byte)0));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getMainHandParameter(), Byte.valueOf((byte)1));
     }
 
     @Override
-    public boolean func_184638_cS() {
+    public boolean isLeftHanded() {
         return this.leftHanded;
     }
 
     @Override
-    public boolean func_175446_cd() {
+    public boolean isAIDisabled() {
         return this.aiDisabled;
     }
 
@@ -149,8 +149,8 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     @Override
-    public Team func_96124_cp() {
-        return this.field_70170_p.func_96441_U().func_96509_i(this.fakeProfile.getName());
+    public Team getTeam() {
+        return this.world.getScoreboard().getPlayersTeam(this.fakeProfile.getName());
     }
 
     @Override
@@ -170,9 +170,9 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     @Override
-    public void func_70037_a(final CompoundNBT tagCompund) {
-        super.func_70037_a(tagCompund);
-        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeCompound().func_74779_i("skinUuid");
+    public void readAdditional(final CompoundNBT tagCompund) {
+        super.readAdditional(tagCompund);
+        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinUuid");
         if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
         }
@@ -183,141 +183,141 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
         super.func_70014_b(tagCompound);
         final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
         if (this.skinUuid != null) {
-            spongeData.func_74778_a("skinUuid", this.skinUuid.toString());
+            spongeData.putString("skinUuid", this.skinUuid.toString());
         } else {
-            spongeData.func_82580_o("skinUuid");
+            spongeData.remove("skinUuid");
         }
     }
 
     @Override
-    public void func_70636_d() {
-        super.func_70636_d();
-        this.func_82168_bl();
+    public void livingTick() {
+        super.livingTick();
+        this.updateArmSwingProgress();
     }
 
     @Override
-    public void func_94061_f(final boolean disable) {
+    public void setNoAI(final boolean disable) {
         this.aiDisabled = disable;
     }
 
     @Override
-    public void func_184641_n(final boolean leftHanded) {
+    public void setLeftHanded(final boolean leftHanded) {
         this.leftHanded = leftHanded;
     }
 
     @Override
-    public int func_82145_z() {
+    public int getMaxInPortalTime() {
         return 80;
     }
 
     @Override
-    protected SoundEvent func_184184_Z() {
-        return SoundEvents.field_187808_ef;
+    protected SoundEvent getSwimSound() {
+        return SoundEvents.ENTITY_PLAYER_SWIM;
     }
 
     @Override
-    protected SoundEvent func_184181_aa() {
-        return SoundEvents.field_187806_ee;
+    protected SoundEvent getSplashSound() {
+        return SoundEvents.ENTITY_PLAYER_SPLASH;
     }
 
     @Override
-    public int func_82147_ab() {
+    public int getPortalCooldown() {
         return 10;
     }
 
     @Override
-    public void func_70645_a(@Nullable final DamageSource cause) {
-        super.func_70645_a(cause);
+    public void onDeath(@Nullable final DamageSource cause) {
+        super.onDeath(cause);
         this.func_70105_a(0.2F, 0.2F);
-        this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
+        this.setPosition(this.posX, this.posY, this.posZ);
         this.field_70181_x = 0.1D;
         if (cause != null) {
-            this.field_70159_w = -MathHelper.func_76134_b((this.field_70739_aP + this.field_70177_z) * (float) Math.PI / 180.0F) * 0.1F;
-            this.field_70179_y = -MathHelper.func_76126_a((this.field_70739_aP + this.field_70177_z) * (float) Math.PI / 180.0F) * 0.1F;
+            this.field_70159_w = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
+            this.field_70179_y = -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
         } else {
             this.field_70159_w = this.field_70179_y = 0.0D;
         }
     }
 
     @Override
-    protected SoundEvent func_184601_bQ(final DamageSource source) {
-        return SoundEvents.field_187800_eb;
+    protected SoundEvent getHurtSound(final DamageSource source) {
+        return SoundEvents.ENTITY_PLAYER_HURT;
     }
 
     @Override
-    protected SoundEvent func_184615_bR() {
-        return SoundEvents.field_187798_ea;
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.ENTITY_PLAYER_DEATH;
     }
 
     @Override
-    public double func_70033_W() {
+    public double getYOffset() {
         return -0.35D;
     }
 
     @Override
-    public float func_70689_ay() {
-        return (float) this.func_110148_a(SharedMonsterAttributes.field_111263_d).func_111126_e();
+    public float getAIMoveSpeed() {
+        return (float) this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
     }
 
     @Override
-    protected SoundEvent func_184588_d(final int height) {
-        return height > 4 ? SoundEvents.field_187736_dY : SoundEvents.field_187804_ed;
+    protected SoundEvent getFallSound(final int height) {
+        return height > 4 ? SoundEvents.ENTITY_PLAYER_BIG_FALL : SoundEvents.ENTITY_PLAYER_SMALL_FALL;
     }
     @Override
-    public float func_70047_e() {
+    public float getEyeHeight() {
         return 1.62f;
     }
 
     @Override
-    public float func_110139_bj() {
-        return this.func_184212_Q().func_187225_a(EntityPlayerAccessor.accessor$getAbsorptionParameter());
+    public float getAbsorptionAmount() {
+        return this.getDataManager().get(EntityPlayerAccessor.accessor$getAbsorptionParameter());
     }
 
     @Override
-    public void func_110149_m(float amount) {
+    public void setAbsorptionAmount(float amount) {
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.func_184212_Q().func_187227_b(EntityPlayerAccessor.accessor$getAbsorptionParameter(), amount);
+        this.getDataManager().set(EntityPlayerAccessor.accessor$getAbsorptionParameter(), amount);
     }
 
     @Override
-    protected float func_110146_f(final float p_110146_1_, final float p_110146_2_) {
-        final float retValue = super.func_110146_f(p_110146_1_, p_110146_2_);
+    protected float updateDistance(final float p_110146_1_, final float p_110146_2_) {
+        final float retValue = super.updateDistance(p_110146_1_, p_110146_2_);
         // Make the body rotation follow head rotation
-        this.field_70177_z = this.field_70759_as;
+        this.rotationYaw = this.rotationYawHead;
         return retValue;
     }
 
     @Override
-    public boolean func_70652_k(final Entity entityIn) {
-        super.func_70652_k(entityIn);
-        this.func_184609_a(Hand.MAIN_HAND);
-        float f = (float) this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111126_e();
+    public boolean attackEntityAsMob(final Entity entityIn) {
+        super.attackEntityAsMob(entityIn);
+        this.swingArm(Hand.MAIN_HAND);
+        float f = (float) this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
         int i = 0;
 
         if (entityIn instanceof LivingEntity) {
-            f += EnchantmentHelper.func_152377_a(this.func_184586_b(Hand.MAIN_HAND), ((LivingEntity) entityIn).func_70668_bt());
-            i += EnchantmentHelper.func_77501_a(this);
+            f += EnchantmentHelper.getModifierForCreature(this.getHeldItem(Hand.MAIN_HAND), ((LivingEntity) entityIn).getCreatureAttribute());
+            i += EnchantmentHelper.getKnockbackModifier(this);
         }
 
-        final boolean flag = entityIn.func_70097_a(DamageSource.func_76358_a(this), f);
+        final boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
 
         if (flag) {
             if (i > 0) {
-                entityIn.func_70024_g(-MathHelper.func_76126_a(this.field_70177_z * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
-                        MathHelper.func_76134_b(this.field_70177_z * (float) Math.PI / 180.0F) * i * 0.5F);
+                entityIn.addVelocity(-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
+                        MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F);
                 this.field_70159_w *= 0.6D;
                 this.field_70179_y *= 0.6D;
             }
 
-            final int j = EnchantmentHelper.func_90036_a(this);
+            final int j = EnchantmentHelper.getFireAspectModifier(this);
 
             if (j > 0) {
-                entityIn.func_70015_d(j * 4);
+                entityIn.setFire(j * 4);
             }
 
-            this.func_174815_a(this, entityIn);
+            this.applyEnchantments(this, entityIn);
         }
 
         return flag;
@@ -353,7 +353,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     public boolean setSkinUuid(final UUID skin) {
-        if (!SpongeImpl.getServer().func_71266_T()) {
+        if (!SpongeImpl.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
             return false;
         }
@@ -388,11 +388,11 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     private boolean isAliveAndInWorld() {
-        return this.field_70170_p.func_73045_a(this.func_145782_y()) == this && !this.field_70128_L;
+        return this.world.getEntityByID(this.getEntityId()) == this && !this.removed;
     }
 
     private void respawnOnClient() {
-        this.pushPackets(new SDestroyEntitiesPacket(this.func_145782_y()), this.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
+        this.pushPackets(new SDestroyEntitiesPacket(this.getEntityId()), this.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
         this.pushPackets(this.createSpawnPacket());
         removeFromTabListDelayed(null, this.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER));
     }
@@ -416,8 +416,8 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
      * @param player The player that has stopped tracking this human
      */
     public void onRemovedFrom(final ServerPlayerEntity player) {
-        this.playerPacketMap.remove(player.func_110124_au());
-        player.field_71135_a.func_147359_a(this.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER));
+        this.playerPacketMap.remove(player.getUniqueID());
+        player.connection.sendPacket(this.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER));
     }
 
     /**
@@ -432,14 +432,14 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     public SSpawnPlayerPacket createSpawnPacket() {
         final SSpawnPlayerPacket packet = new SSpawnPlayerPacket();
         final SPacketSpawnPlayerAccessor accessor = (SPacketSpawnPlayerAccessor) packet;
-        accessor.accessor$setentityId(this.func_145782_y());
+        accessor.accessor$setentityId(this.getEntityId());
         accessor.accessor$setuniqueId(this.fakeProfile.getId());
-        accessor.accessor$setx(this.field_70165_t);
-        accessor.accessor$sety(this.field_70163_u);
-        accessor.accessor$setZ(this.field_70161_v);
-        accessor.accessor$setYaw((byte) ((int) (this.field_70177_z * 256.0F / 360.0F)));
-        accessor.accessor$setPitch((byte) ((int) (this.field_70125_A * 256.0F / 360.0F)));
-        accessor.accessor$setWatcher(this.func_184212_Q());
+        accessor.accessor$setx(this.posX);
+        accessor.accessor$sety(this.posY);
+        accessor.accessor$setZ(this.posZ);
+        accessor.accessor$setYaw((byte) ((int) (this.rotationYaw * 256.0F / 360.0F)));
+        accessor.accessor$setPitch((byte) ((int) (this.rotationPitch * 256.0F / 360.0F)));
+        accessor.accessor$setWatcher(this.getDataManager());
         return packet;
     }
 
@@ -453,7 +453,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     public SPlayerListItemPacket createPlayerListPacket(final SPlayerListItemPacket.Action action) {
         final SPlayerListItemPacket packet = new SPlayerListItemPacket(action);
         ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas()
-            .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.func_145748_c_()));
+            .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }
 
@@ -482,10 +482,10 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
             }
             queue.add(packets);
         } else {
-            List<IPacket<?>[]> queue = this.playerPacketMap.get(player.func_110124_au());
+            List<IPacket<?>[]> queue = this.playerPacketMap.get(player.getUniqueID());
             if (queue == null) {
                 queue = new ArrayList<>();
-                this.playerPacketMap.put(player.func_110124_au(), queue);
+                this.playerPacketMap.put(player.getUniqueID(), queue);
             }
             queue.add(packets);
         }
@@ -498,41 +498,41 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
      * @return An array of packets to send in a single tick
      */
     public IPacket<?>[] popQueuedPackets(@Nullable final ServerPlayerEntity player) {
-        final List<IPacket<?>[]> queue = this.playerPacketMap.get(player == null ? null : player.func_110124_au());
+        final List<IPacket<?>[]> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
         return queue == null || queue.isEmpty() ? null : queue.remove(0);
     }
 
     @Override
-    public void func_82196_d(final LivingEntity target, final float distanceFactor) {
+    public void attackEntityWithRangedAttack(final LivingEntity target, final float distanceFactor) {
         // Borrowed from Skeleton
         // TODO Figure out how to API this out
-        final ArrowEntity entitytippedarrow = new ArrowEntity(this.field_70170_p, this);
-        final double d0 = target.field_70165_t - this.field_70165_t;
-        final double d1 = target.func_174813_aQ().field_72338_b + target.field_70131_O / 3.0F - entitytippedarrow.field_70163_u;
-        final double d2 = target.field_70161_v - this.field_70161_v;
-        final double d3 = MathHelper.func_76133_a(d0 * d0 + d2 * d2);
-        entitytippedarrow.func_70186_c(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.field_70170_p.func_175659_aa().func_151525_a() * 4);
+        final ArrowEntity entitytippedarrow = new ArrowEntity(this.world, this);
+        final double d0 = target.posX - this.posX;
+        final double d1 = target.getBoundingBox().minY + target.field_70131_O / 3.0F - entitytippedarrow.posY;
+        final double d2 = target.posZ - this.posZ;
+        final double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
+        entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getId() * 4);
         // These names are wrong
-        final int i = EnchantmentHelper.func_185284_a(Enchantments.field_185310_v, this);
-        final int j = EnchantmentHelper.func_185284_a(Enchantments.field_185311_w, this);
-        entitytippedarrow.func_70239_b(distanceFactor * 2.0F + this.field_70146_Z.nextGaussian() * 0.25D + this.field_70170_p.func_175659_aa().func_151525_a() * 0.11F);
+        final int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
+        final int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
+        entitytippedarrow.setDamage(distanceFactor * 2.0F + this.rand.nextGaussian() * 0.25D + this.world.getDifficulty().getId() * 0.11F);
 
         if (i > 0) {
-            entitytippedarrow.func_70239_b(entitytippedarrow.func_70242_d() + i * 0.5D + 0.5D);
+            entitytippedarrow.setDamage(entitytippedarrow.getDamage() + i * 0.5D + 0.5D);
         }
 
         if (j > 0) {
-            entitytippedarrow.func_70240_a(j);
+            entitytippedarrow.setKnockbackStrength(j);
         }
 
-        final ItemStack itemstack = this.func_184586_b(Hand.OFF_HAND);
+        final ItemStack itemstack = this.getHeldItem(Hand.OFF_HAND);
 
-        if (itemstack.func_77973_b() == Items.field_185167_i) {
-            entitytippedarrow.func_184555_a(itemstack);
+        if (itemstack.getItem() == Items.TIPPED_ARROW) {
+            entitytippedarrow.setPotionEffect(itemstack);
         }
 
-        this.func_184185_a(SoundEvents.field_187737_v, 1.0F, 1.0F / (this.func_70681_au().nextFloat() * 0.4F + 0.8F));
-        this.field_70170_p.func_72838_d(entitytippedarrow);
+        this.playSound(SoundEvents.ENTITY_ARROW_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+        this.world.addEntity0(entitytippedarrow);
     }
 
     @Override

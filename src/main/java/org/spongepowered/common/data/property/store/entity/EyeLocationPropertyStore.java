@@ -36,8 +36,8 @@ public class EyeLocationPropertyStore extends AbstractEntityPropertyStore<EyeLoc
 
     @Override
     protected Optional<EyeLocationProperty> getForEntity(Entity entity) {
-        final double eyeHeight = entity.func_70047_e();
-        final Vector3d position = VecHelper.toVector3d(entity.func_174791_d());
+        final double eyeHeight = entity.getEyeHeight();
+        final Vector3d position = VecHelper.toVector3d(entity.getPositionVector());
         final Vector3d eyeLocation = position.add(0, eyeHeight, 0);
         return Optional.of(new EyeLocationProperty(eyeLocation));
     }

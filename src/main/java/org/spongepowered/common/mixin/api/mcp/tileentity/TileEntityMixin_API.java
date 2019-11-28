@@ -88,9 +88,9 @@ public abstract class TileEntityMixin_API implements TileEntity {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(Queries.WORLD_ID, ((World) this.world).getUniqueId().toString())
-            .set(Queries.POSITION_X, this.getPos().func_177958_n())
-            .set(Queries.POSITION_Y, this.getPos().func_177956_o())
-            .set(Queries.POSITION_Z, this.getPos().func_177952_p())
+            .set(Queries.POSITION_X, this.getPos().getX())
+            .set(Queries.POSITION_Y, this.getPos().getY())
+            .set(Queries.POSITION_Z, this.getPos().getZ())
             .set(Constants.TileEntity.TILE_TYPE, this.api$TileEntityType.getId());
         final CompoundNBT compound = new CompoundNBT();
         this.writeToNBT(compound);
@@ -135,7 +135,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
 
     @Override
     public BlockState getBlock() {
-        return (BlockState) this.world.func_180495_p(this.getPos());
+        return (BlockState) this.world.getBlockState(this.getPos());
     }
 
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
@@ -163,7 +163,7 @@ public abstract class TileEntityMixin_API implements TileEntity {
             BlockState blockState = this.getBlock();
             this.api$LocatableBlock = new SpongeLocatableBlockBuilder()
                 .world((World) this.world)
-                .position(this.pos.func_177958_n(), this.pos.func_177956_o(), this.pos.func_177952_p())
+                .position(this.pos.getX(), this.pos.getY(), this.pos.getZ())
                 .state(blockState)
                 .build();
         }

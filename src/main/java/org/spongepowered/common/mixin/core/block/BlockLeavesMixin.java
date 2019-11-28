@@ -78,13 +78,13 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                                            .source(new SpongeLocatableBlockBuilder()
                                                .world((World) worldIn)
-                                               .position(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())
+                                               .position(pos.getX(), pos.getY(), pos.getZ())
                                                .state((BlockState) state)
                                                .build())) {
             if (context != null) {
                 context.buildAndSwitch();
             }
-            return worldIn.func_180501_a(pos, state, flags);
+            return worldIn.setBlockState(pos, state, flags);
         }
     }
 
@@ -102,7 +102,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
      */
     @Overwrite
     private void destroy(final net.minecraft.world.World worldIn, final BlockPos pos) {
-        final net.minecraft.block.BlockState state = worldIn.func_180495_p(pos);
+        final net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
         // Sponge Start - Cause tracking
         if (!((WorldBridge) worldIn).bridge$isFake()) {
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
@@ -110,7 +110,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
             try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                 .source(new SpongeLocatableBlockBuilder()
                     .world((World) worldIn)
-                    .position(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())
+                    .position(pos.getX(), pos.getY(), pos.getZ())
                     .state((BlockState) state)
                     .build())) {
                 if (context != null) {
@@ -129,10 +129,10 @@ public abstract class BlockLeavesMixin extends BlockMixin {
 
     private ImmutableTreeData impl$getTreeData(final net.minecraft.block.BlockState blockState) {
         final BlockPlanks.EnumType type;
-        if (blockState.func_177230_c() instanceof BlockOldLeaf) {
-            type = blockState.func_177229_b(BlockOldLeaf.field_176239_P);
-        } else if (blockState.func_177230_c() instanceof BlockNewLeaf) {
-            type = blockState.func_177229_b(BlockNewLeaf.field_176240_P);
+        if (blockState.getBlock() instanceof BlockOldLeaf) {
+            type = blockState.get(BlockOldLeaf.field_176239_P);
+        } else if (blockState.getBlock() instanceof BlockNewLeaf) {
+            type = blockState.get(BlockNewLeaf.field_176240_P);
         } else {
             type = BlockPlanks.EnumType.OAK;
         }
@@ -143,7 +143,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
     }
 
     private ImmutableDecayableData impl$getIsDecayableFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.func_177229_b(LeavesBlock.field_176237_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.get(LeavesBlock.field_176237_a));
     }
 
     @Override
@@ -156,14 +156,14 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         if (manipulator instanceof ImmutableTreeData) {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
-            if (blockState.func_177230_c() instanceof BlockOldLeaf) {
+            if (blockState.getBlock() instanceof BlockOldLeaf) {
                 if (treeType.equals(TreeTypes.OAK) ||
                         treeType.equals(TreeTypes.BIRCH) ||
                         treeType.equals(TreeTypes.SPRUCE) ||
                         treeType.equals(TreeTypes.JUNGLE)) {
                     return Optional.of((BlockState) blockState.func_177226_a(BlockOldLeaf.field_176239_P, type));
                 }
-            } else if (blockState.func_177230_c() instanceof BlockNewLeaf) {
+            } else if (blockState.getBlock() instanceof BlockNewLeaf) {
                 if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
                     return Optional.of((BlockState) blockState.func_177226_a(BlockNewLeaf.field_176240_P, type));
                 }
@@ -182,14 +182,14 @@ public abstract class BlockLeavesMixin extends BlockMixin {
         if (key.equals(Keys.TREE_TYPE)) {
             final TreeType treeType = (TreeType) value;
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
-            if (blockState.func_177230_c() instanceof BlockOldLeaf) {
+            if (blockState.getBlock() instanceof BlockOldLeaf) {
                 if (treeType.equals(TreeTypes.OAK) ||
                         treeType.equals(TreeTypes.BIRCH) ||
                         treeType.equals(TreeTypes.SPRUCE) ||
                         treeType.equals(TreeTypes.JUNGLE)) {
                     return Optional.of((BlockState) blockState.func_177226_a(BlockOldLeaf.field_176239_P, type));
                 }
-            } else if (blockState.func_177230_c() instanceof BlockNewLeaf) {
+            } else if (blockState.getBlock() instanceof BlockNewLeaf) {
                 if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
                     return Optional.of((BlockState) blockState.func_177226_a(BlockNewLeaf.field_176240_P, type));
                 }

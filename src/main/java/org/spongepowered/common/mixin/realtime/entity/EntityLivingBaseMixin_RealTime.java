@@ -46,7 +46,7 @@ public abstract class EntityLivingBaseMixin_RealTime extends EntityMixin_RealTim
             this.deathTime = vanillaNewDeathTime;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
         int newDeathTime = this.deathTime + ticks;
         // At tick 20, XP is dropped and the death animation finishes. The
         // entity is also removed from the world... except in the case of

@@ -53,13 +53,13 @@ public abstract class NetHandlerHandshakeTCPMixin_Bungee {
 
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
     private void bungee$patchHandshake(final CHandshakePacket packetIn, final CallbackInfo ci) {
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding() && packetIn.func_149594_c().equals(ProtocolType.LOGIN)) {
-            final String[] split = packetIn.field_149598_b.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
+        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding() && packetIn.getRequestedState().equals(ProtocolType.LOGIN)) {
+            final String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {
-                packetIn.field_149598_b = split[0];
+                packetIn.ip = split[0];
                 ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setRemoteAddress(new InetSocketAddress(split[1],
-                        ((InetSocketAddress) this.networkManager.func_74430_c()).getPort()));
+                        ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
                 ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
 
                 if (split.length == 4) {
@@ -68,8 +68,8 @@ public abstract class NetHandlerHandshakeTCPMixin_Bungee {
             } else {
                 final StringTextComponent chatcomponenttext =
                         new StringTextComponent("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
-                this.networkManager.func_179290_a(new SPacketDisconnect(chatcomponenttext));
-                this.networkManager.func_150718_a(chatcomponenttext);
+                this.networkManager.sendPacket(new SPacketDisconnect(chatcomponenttext));
+                this.networkManager.closeChannel(chatcomponenttext);
             }
         }
     }

@@ -70,7 +70,7 @@ public final class SpongeMessageHandler {
         ServerPlayerEntity sender = (ServerPlayerEntity) player;
 
         BlockPos pos = new BlockPos(message.x, message.y, message.z);
-        if (!sender.field_70170_p.func_175667_e(pos)) {
+        if (!sender.world.isBlockLoaded(pos)) {
             return;
         }
 
@@ -80,11 +80,11 @@ public final class SpongeMessageHandler {
         Optional<User> notifier = Optional.empty();
 
         if (message.type == 0) { // block
-            ChunkBridge spongeChunk = (ChunkBridge) sender.field_70170_p.func_175726_f(pos);
+            ChunkBridge spongeChunk = (ChunkBridge) sender.world.getChunkAt(pos);
             owner = spongeChunk.bridge$getBlockOwner(pos);
             notifier = spongeChunk.bridge$getBlockNotifier(pos);
         } else if (message.type == 1) { // entity
-            Entity entity = sender.field_70170_p.func_73045_a(message.entityId);
+            Entity entity = sender.world.getEntityByID(message.entityId);
             if (entity instanceof OwnershipTrackedBridge) {
                 OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) entity;
                 owner = ownerBridge.tracked$getOwnerReference();

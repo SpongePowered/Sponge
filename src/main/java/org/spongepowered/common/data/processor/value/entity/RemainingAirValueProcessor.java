@@ -54,13 +54,13 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Liv
 
     @Override
     protected boolean set(final LivingEntity container, final Integer value) {
-        container.func_70050_g(value);
+        container.setAir(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(final LivingEntity container) {
-        return Optional.of(container.func_70086_ai());
+        return Optional.of(container.getAir());
     }
 
     @Override
@@ -70,7 +70,7 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Liv
 
     @Override
     protected boolean supports(final LivingEntity container) {
-        return container.func_70090_H();
+        return container.isInWater();
     }
 
     @Override

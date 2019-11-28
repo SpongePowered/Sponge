@@ -46,15 +46,15 @@ public class SpongeSignBuilder extends AbstractTileBuilder<Sign> {
     protected Optional<Sign> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(sign1 -> {
             if (!container.contains(Keys.SIGN_LINES.getQuery())) {
-                ((TileEntity) sign1).func_145843_s();
+                ((TileEntity) sign1).remove();
                 return Optional.empty();
             }
             List<String> rawLines = container.getStringList(Keys.SIGN_LINES.getQuery()).get();
             List<Text> textLines = SpongeTexts.fromJson(rawLines);
             for (int i = 0; i < 4; i++) {
-                ((SignTileEntity) sign1).field_145915_a[i] = SpongeTexts.toComponent(textLines.get(i));
+                ((SignTileEntity) sign1).signText[i] = SpongeTexts.toComponent(textLines.get(i));
             }
-            ((SignTileEntity) sign1).func_145829_t();
+            ((SignTileEntity) sign1).validate();
             return Optional.of(sign1);
         });
     }

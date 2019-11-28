@@ -45,7 +45,7 @@ import net.minecraft.block.BannerBlock.BlockBannerHanging;
 public abstract class BlockBannerHangingMixin extends BlockBannerMixin {
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
-        final net.minecraft.util.Direction facing = blockState.func_177229_b(BannerBlock.field_176449_a);
+        final net.minecraft.util.Direction facing = blockState.get(BannerBlock.field_176449_a);
         final Direction direction = Constants.DirectionFunctions.getFor(facing);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }

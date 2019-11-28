@@ -79,7 +79,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public ScoreObjective func_96535_a(final String name, final ScoreCriteria criteria) {
         final SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
-        objective.setDisplayMode((ObjectiveDisplayMode) (Object) criteria.func_178790_c());
+        objective.setDisplayMode((ObjectiveDisplayMode) (Object) criteria.getRenderType());
         ((org.spongepowered.api.scoreboard.Scoreboard) this).addObjective(objective);
         return objective.getObjectiveFor(this);
     }
@@ -98,31 +98,31 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
      */
     @Override
     @Overwrite
-    public void func_96530_a(final int slot, @Nullable final ScoreObjective objective) {
+    public void setObjectiveInDisplaySlot(final int slot, @Nullable final ScoreObjective objective) {
         final Objective apiObjective = objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
         final DisplaySlot displaySlot = DisplaySlotRegistryModule.getInstance().getForIndex(slot).get();
         ((org.spongepowered.api.scoreboard.Scoreboard) this).updateDisplaySlot(apiObjective, displaySlot);
     }
 
     @Override
-    public void func_96519_k(final ScoreObjective objective) {
+    public void removeObjective(final ScoreObjective objective) {
         ((org.spongepowered.api.scoreboard.Scoreboard) this).removeObjective(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
     }
 
     @Override
-    public void func_96511_d(final ScorePlayerTeam team) {
-        super.func_96511_d(team);
+    public void removeTeam(final ScorePlayerTeam team) {
+        super.removeTeam(team);
         ((ScorePlayerTeamBridge) team).accessor$setScoreboard(null);
     }
 
     @Override
-    public Score func_96529_a(final String name, final ScoreObjective objective) {
+    public Score getOrCreateScore(final String name, final ScoreObjective objective) {
         return ((SpongeScore) ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getOrCreateScore(SpongeTexts.fromLegacy(name)))
                 .getScoreFor(objective);
     }
 
     @Override
-    public void func_178822_d(final String name, final ScoreObjective objective) {
+    public void removeObjectiveFromEntity(final String name, final ScoreObjective objective) {
         if (objective != null) {
             final SpongeObjective spongeObjective = ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
             final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.getScore(SpongeTexts.fromLegacy(name));
@@ -133,7 +133,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             }
         } else {
             final Text textName = SpongeTexts.fromLegacy(name);
-            for (final ScoreObjective scoreObjective: this.func_96514_c()) {
+            for (final ScoreObjective scoreObjective: this.getScoreObjectives()) {
                 ((ScoreObjectiveBridge) scoreObjective).bridge$getSpongeObjective().removeScore(textName);
             }
         }
@@ -143,7 +143,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public void bridge$sendToPlayers(final IPacket<?> packet) {
         for (final ServerPlayerEntity player: this.impl$scoreboardPlayers) {
-            player.field_71135_a.func_147359_a(packet);
+            player.connection.sendPacket(packet);
         }
     }
 
@@ -151,19 +151,19 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     public void bridge$addPlayer(final ServerPlayerEntity player, final boolean sendPackets) {
         this.impl$scoreboardPlayers.add(player);
         if (sendPackets) {
-            for (final ScorePlayerTeam team: this.func_96525_g()) {
-                player.field_71135_a.func_147359_a(new STeamsPacket(team, 0));
+            for (final ScorePlayerTeam team: this.getTeams()) {
+                player.connection.sendPacket(new STeamsPacket(team, 0));
             }
 
-            for (final ScoreObjective objective: this.func_96514_c()) {
-                player.field_71135_a.func_147359_a(new SScoreboardObjectivePacket(objective, 0));
-                for (final Score score: this.func_96534_i(objective)) {
-                    player.field_71135_a.func_147359_a(new SUpdateScorePacket(score));
+            for (final ScoreObjective objective: this.getScoreObjectives()) {
+                player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 0));
+                for (final Score score: this.getSortedScores(objective)) {
+                    player.connection.sendPacket(new SUpdateScorePacket(score));
                 }
             }
 
             for (int i = 0; i < 19; ++i) {
-                player.field_71135_a.func_147359_a(new SDisplayObjectivePacket(i, this.func_96539_a(i)));
+                player.connection.sendPacket(new SDisplayObjectivePacket(i, this.getObjectiveInDisplaySlot(i)));
             }
         }
     }
@@ -183,14 +183,14 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     private void impl$removeTeams(final ServerPlayerEntity player) {
-        for (final ScorePlayerTeam team: this.func_96525_g()) {
-            player.field_71135_a.func_147359_a(new STeamsPacket(team, 1));
+        for (final ScorePlayerTeam team: this.getTeams()) {
+            player.connection.sendPacket(new STeamsPacket(team, 1));
         }
     }
 
     private void impl$removeObjectives(final ServerPlayerEntity player) {
-        for (final ScoreObjective objective: this.func_96514_c()) {
-            player.field_71135_a.func_147359_a(new SScoreboardObjectivePacket(objective, 1));
+        for (final ScoreObjective objective: this.getScoreObjectives()) {
+            player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 1));
         }
     }
 

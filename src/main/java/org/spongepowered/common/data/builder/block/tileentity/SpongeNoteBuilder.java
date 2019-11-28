@@ -43,11 +43,11 @@ public class SpongeNoteBuilder extends AbstractTileBuilder<Note> {
     protected Optional<Note> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(note1 -> {
             if (!container.contains(Constants.TileEntity.NOTE_ID)) {
-                ((TileEntity) note1).func_145843_s();
+                ((TileEntity) note1).remove();
                 return Optional.empty();
             }
             ((TileEntityNote) note1).field_145879_a = container.getInt(Constants.TileEntity.NOTE_ID).get().byteValue();
-            ((TileEntityNote) note1).func_145829_t();
+            ((TileEntityNote) note1).validate();
             return Optional.of(note1);
         });
     }

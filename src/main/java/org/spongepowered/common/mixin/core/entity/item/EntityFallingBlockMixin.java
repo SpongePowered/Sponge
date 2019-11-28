@@ -111,7 +111,7 @@ public abstract class EntityFallingBlockMixin extends EntityMixin {
             // then it's been captured/processed for single events. And if it's not air,
             // that means that single event was cancelled, so, the block needs to remain
             // and this entity needs to die.
-        } else if (this.world.func_180495_p(pos) != Blocks.field_150350_a.func_176223_P()) {
+        } else if (this.world.getBlockState(pos) != Blocks.AIR.getDefaultState()) {
             this.setDead();
             ci.cancel();
         }
@@ -125,22 +125,22 @@ public abstract class EntityFallingBlockMixin extends EntityMixin {
         )
     )
     private boolean spongeAttackFallingOrAnvil(final Entity entity, final DamageSource source, final float damage) {
-        if (entity.field_70170_p.field_72995_K) {
-            return entity.func_70097_a(source, damage);
+        if (entity.world.isRemote) {
+            return entity.attackEntityFrom(source, damage);
         }
-        final boolean isAnvil = this.fallTile.func_177230_c() == Blocks.field_150467_bQ;
+        final boolean isAnvil = this.fallTile.getBlock() == Blocks.ANVIL;
         try {
             if (isAnvil) {
                 final MinecraftFallingBlockDamageSource anvil = new MinecraftFallingBlockDamageSource("anvil", (FallingBlockEntity) (Object) this);
                 ((DamageSourceBridge) anvil).bridge$setAnvilSource();
 
-                return entity.func_70097_a(DamageSource.field_82728_o, damage);
+                return entity.attackEntityFrom(DamageSource.ANVIL, damage);
             } else {
                 final MinecraftFallingBlockDamageSource
                     fallingblock =
                     new MinecraftFallingBlockDamageSource("fallingblock", (FallingBlockEntity) (Object) this);
                 ((DamageSourceBridge) fallingblock).bridge$setFallingBlockSource();
-                return entity.func_70097_a(DamageSource.field_82729_p, damage);
+                return entity.attackEntityFrom(DamageSource.FALLING_BLOCK, damage);
             }
         } finally {
             if (isAnvil) {

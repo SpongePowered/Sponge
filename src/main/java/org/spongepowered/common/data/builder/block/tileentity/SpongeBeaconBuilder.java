@@ -49,15 +49,15 @@ public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
         return super.buildContent(container).flatMap(beacon -> {
             final BeaconData beaconData = new SpongeBeaconData();
             container.getInt(Constants.TileEntity.Beacon.PRIMARY)
-                .map(Effect::func_188412_a)
+                .map(Effect::get)
                 .map(potion -> (PotionEffectType) potion)
                 .ifPresent(potion -> beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of(potion)));
             container.getInt(Constants.TileEntity.Beacon.SECONDARY)
-                .map(Effect::func_188412_a)
+                .map(Effect::get)
                 .map(potion -> (PotionEffectType) potion)
                 .ifPresent(potion -> beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of(potion)));
             beacon.offer(beaconData);
-            ((BeaconTileEntity) beacon).func_145829_t();
+            ((BeaconTileEntity) beacon).validate();
             return Optional.of(beacon);
         });
     }

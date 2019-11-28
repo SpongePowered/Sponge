@@ -61,7 +61,7 @@ public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature impleme
         final net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         final int i;
         BlockPos position = new BlockPos(x, y, z);
-        for (i = 5; worldIn.func_180495_p(position.func_177977_b()).func_185904_a() == Material.field_151586_h; position = position.func_177977_b());
+        for (i = 5; worldIn.getBlockState(position.down()).getMaterial() == Material.WATER; position = position.down());
 
         boolean flag = true;
 
@@ -84,9 +84,9 @@ public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature impleme
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
                             final BlockPos pos = new BlockPos(k, j, l);
-                            final BlockState state = worldIn.func_180495_p(pos);
+                            final BlockState state = worldIn.getBlockState(pos);
                             if (!((WorldGeneratorBridge) this).bridge$isAir(state, worldIn, pos) && !((WorldGeneratorBridge) this).bridge$isLeaves(state, worldIn, pos)) {
-                                if (state.func_177230_c() != Blocks.field_150355_j && state.func_177230_c() != Blocks.field_150358_i) {
+                                if (state.getBlock() != Blocks.WATER && state.getBlock() != Blocks.field_150358_i) {
                                     flag = false;
                                 } else if (j > y) {
                                     flag = false;
@@ -103,7 +103,7 @@ public abstract class WorldGenSwampMixin_API extends AbstractTreeFeature impleme
                 return false;
             }
             final BlockPos down = new BlockPos(x, y - 1, z);
-            final Block block = worldIn.func_180495_p(down).func_177230_c();
+            final Block block = worldIn.getBlockState(down).getBlock();
             if (((WorldGeneratorBridge) this).bridge$canSustainPlant(block, worldIn, down, Direction.UP, Blocks.field_150345_g) && y < 256 - i - 1) {
 
                 return true;

@@ -72,14 +72,14 @@ public abstract class WorldGenBlockBlobMixin_API extends Feature implements Bloc
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            func_180709_b(world, random, world.func_175645_m(chunkPos.func_177982_a(x, 0, z)));
+            func_180709_b(world, random, world.func_175645_m(chunkPos.add(x, 0, z)));
         }
     }
 
     @Override
     public BlockState getBlock() {
         if (this.api$blockState == null) {
-            this.api$blockState = (BlockState) this.block.func_176223_P();
+            this.api$blockState = (BlockState) this.block.getDefaultState();
         }
         return this.api$blockState;
     }

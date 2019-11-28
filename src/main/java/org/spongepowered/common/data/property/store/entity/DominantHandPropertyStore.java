@@ -41,7 +41,7 @@ public class DominantHandPropertyStore extends AbstractEntityPropertyStore<Domin
             return Optional.empty();
         }
 
-        HandSide hand = ((PlayerEntity) entity).func_184591_cq();
+        HandSide hand = ((PlayerEntity) entity).getPrimaryHand();
         HandPreference type = (HandPreference) (Object) hand;
         return Optional.of(new DominantHandProperty(type));
     }

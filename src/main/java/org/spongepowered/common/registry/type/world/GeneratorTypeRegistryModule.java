@@ -66,8 +66,8 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
         {
             final WorldType the_end = new WorldType(getNextID(), "the_end");
             ((WorldTypeBridge) the_end).bridge$setChunkGenerator((world, options)
-                -> new EndChunkGenerator(world, true, world.func_72905_C(), new BlockPos(100, 50, 0)));
-            ((WorldTypeBridge) the_end).bridge$setBiomeProvider(world -> new SingleBiomeProvider(Biomes.field_76779_k));
+                -> new EndChunkGenerator(world, true, world.getSeed(), new BlockPos(100, 50, 0)));
+            ((WorldTypeBridge) the_end).bridge$setBiomeProvider(world -> new SingleBiomeProvider(Biomes.THE_END));
             ((WorldTypeAccessor) the_end).accessor$setHasInfoNotice(true);
 
             this.registerAdditionalCatalog((GeneratorType) the_end);
@@ -75,15 +75,15 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
         {
             final WorldType nether = new WorldType(getNextID(), "nether");
             ((WorldTypeAccessor) nether).accessor$setHasInfoNotice(true);
-            ((WorldTypeBridge) nether).bridge$setBiomeProvider(world -> new SingleBiomeProvider(Biomes.field_76778_j));
-            ((WorldTypeBridge) nether).bridge$setChunkGenerator((world, s) -> new NetherChunkGenerator(world, world.func_72912_H().func_76089_r(), world.func_72905_C()));
+            ((WorldTypeBridge) nether).bridge$setBiomeProvider(world -> new SingleBiomeProvider(Biomes.NETHER));
+            ((WorldTypeBridge) nether).bridge$setChunkGenerator((world, s) -> new NetherChunkGenerator(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed()));
             this.registerAdditionalCatalog((GeneratorType) nether);
         }
         {
             final WorldType overworld = new WorldType(getNextID(), "overworld");
             ((WorldTypeAccessor) overworld).accessor$setCanBeCreated(false);
-            ((WorldTypeBridge) overworld).bridge$setBiomeProvider(world -> new BiomeProvider(world.func_72912_H()));
-            ((WorldTypeBridge) overworld).bridge$setChunkGenerator(((world, s) -> new OverworldChunkGenerator(world, world.func_72905_C(), world.func_72912_H().func_76089_r(), s)));
+            ((WorldTypeBridge) overworld).bridge$setBiomeProvider(world -> new BiomeProvider(world.getWorldInfo()));
+            ((WorldTypeBridge) overworld).bridge$setChunkGenerator(((world, s) -> new OverworldChunkGenerator(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), s)));
             this.registerAdditionalCatalog((GeneratorType) overworld);
         }
 

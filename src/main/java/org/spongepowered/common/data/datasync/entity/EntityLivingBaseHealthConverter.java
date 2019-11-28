@@ -49,7 +49,7 @@ public class EntityLivingBaseHealthConverter extends DataParameterConverter<Floa
                                 ? (float) ((EntityPlayerMPBridge) entity).bridge$getHealthScale()
                                 // Players scale their health and send it through the
                                 // data provider, only the server knows their actual max health
-                                : ((LivingEntity) entity).func_110138_aP();
+                                : ((LivingEntity) entity).getMaxHealth();
         return Optional.of(DataTransactionResult.builder()
             .replace(SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .defaultValue((double) maxHealth)

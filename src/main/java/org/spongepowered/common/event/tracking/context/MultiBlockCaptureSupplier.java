@@ -198,7 +198,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             final SpongeBlockSnapshot originalSnapshot = list.get(0);
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
             final BlockState currentState = (BlockState) originalSnapshot.getState();
-            originalSnapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(peek, newState, newState.func_177230_c(), currentState, originalSnapshot, currentState.func_177230_c());
+            originalSnapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(peek, newState, newState.getBlock(), currentState, originalSnapshot, currentState.getBlock());
         }
     }
 
@@ -403,7 +403,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     public void captureNeighborNotification(
             final WorldServerBridge mixinWorldServer, final BlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
         final int transactionIndex = ++this.transactionIndex;
-        final BlockState actualSourceState = ((ServerWorld) mixinWorldServer).func_180495_p(sourcePos);
+        final BlockState actualSourceState = ((ServerWorld) mixinWorldServer).getBlockState(sourcePos);
         final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer,
             notifyState, notifyPos, sourceBlock, sourcePos, actualSourceState);
         notification.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(), this);
@@ -435,7 +435,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     public void logTileChange(
             final WorldServerBridge mixinWorldServer, final BlockPos pos, @Nullable final TileEntity oldTile, @Nullable final TileEntity newTile) {
         final ServerWorld world = (ServerWorld) mixinWorldServer;
-        final BlockState current = world.func_180495_p(pos);
+        final BlockState current = world.getBlockState(pos);
 
         if (this.tail instanceof BlockTransaction.ChangeBlock) {
             final BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) this.tail;
@@ -449,7 +449,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     mixinWorldServer.bridge$getProxyAccess().queueRemoval(oldTile);
                 } else {
                     // Make sure the new tile entity has the correct position
-                    changeBlock.queueTileSet.func_174878_a(pos);
+                    changeBlock.queueTileSet.setPos(pos);
                     mixinWorldServer.bridge$getProxyAccess().queueReplacement(changeBlock.queueTileSet, changeBlock.queuedRemoval);
                     mixinWorldServer.bridge$getProxyAccess().unmarkRemoval(pos, oldTile);
                 }
@@ -579,7 +579,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         }
         final ServerWorld worldServer = maybeWorld.get();
         final BlockPos blockPos = snapshot.getBlockPos();
-        final BlockState newState = worldServer.func_180495_p(blockPos);
+        final BlockState newState = worldServer.getBlockState(blockPos);
         // Because enhanced tracking requires handling very specific proxying of block states
         // so, the requests for the actual states sometimes may cause issues with mods and their
         // extended state handling logic if what the world sees is different from what our tracker
@@ -619,7 +619,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             if (this.scheduledEvents == null) {
                 this.scheduledEvents = LinkedListMultimap.create();
             }
-            this.scheduledEvents.put(pos.func_185334_h(), blockEventData);
+            this.scheduledEvents.put(pos.toImmutable(), blockEventData);
             return true;
         }
         return false;

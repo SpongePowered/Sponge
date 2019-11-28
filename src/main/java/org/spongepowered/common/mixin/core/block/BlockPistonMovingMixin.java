@@ -89,11 +89,11 @@ public abstract class BlockPistonMovingMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutablePistonData impl$getPistonTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePistonData.class,
-                (PistonType) (Object) blockState.func_177229_b(MovingPistonBlock.field_176425_b));
+                (PistonType) (Object) blockState.get(MovingPistonBlock.field_176425_b));
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(MovingPistonBlock.field_176426_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(MovingPistonBlock.field_176426_a)));
     }
 }

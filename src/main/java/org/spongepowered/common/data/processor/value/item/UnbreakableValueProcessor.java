@@ -45,7 +45,7 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
 
     @Override
     public boolean supports(ItemStack container) {
-        return container.func_77973_b().func_77645_m();
+        return container.getItem().isDamageable();
     }
 
     @Override
@@ -58,17 +58,17 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
         if (value) {
             container.func_77964_b(0);
         }
-        if (!container.func_77942_o()) {
-            container.func_77982_d(new CompoundNBT());
+        if (!container.hasTag()) {
+            container.setTag(new CompoundNBT());
         }
-        container.func_77978_p().func_74757_a(Constants.Item.ITEM_UNBREAKABLE, value);
+        container.getTag().putBoolean(Constants.Item.ITEM_UNBREAKABLE, value);
         return true;
     }
 
     @Override
     public Optional<Boolean> getVal(ItemStack container) {
-        if (container.func_77942_o() && container.func_77978_p().func_74764_b(Constants.Item.ITEM_UNBREAKABLE)) {
-            return Optional.of(container.func_77978_p().func_74767_n(Constants.Item.ITEM_UNBREAKABLE));
+        if (container.hasTag() && container.getTag().contains(Constants.Item.ITEM_UNBREAKABLE)) {
+            return Optional.of(container.getTag().getBoolean(Constants.Item.ITEM_UNBREAKABLE));
         }
         return Optional.of(false);
     }

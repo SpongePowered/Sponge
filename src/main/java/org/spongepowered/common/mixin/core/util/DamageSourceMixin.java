@@ -84,7 +84,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     private void beforeGetDeathMessageReturn(final LivingEntity entityLivingBaseIn, final CallbackInfoReturnable<ITextComponent> cir) {
         // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
         if (cir.getReturnValue().func_150260_c().equals("death.attack." + this.damageType)) {
-            cir.setReturnValue(new TranslationTextComponent("death.attack.generic", entityLivingBaseIn.func_145748_c_()));
+            cir.setReturnValue(new TranslationTextComponent("death.attack.generic", entityLivingBaseIn.getDisplayName()));
         }
     }
 
@@ -93,7 +93,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
         if (explosionIn != null) {
             final Entity entity = ((ExplosionBridge) explosionIn).bridge$getExploder();
             if (entity != null && !((WorldBridge) ((ExplosionBridge) explosionIn).bridge$getWorld()).bridge$isFake()) {
-                if (explosionIn.func_94613_c() == null && entity instanceof OwnershipTrackedBridge) {
+                if (explosionIn.getExplosivePlacedBy() == null && entity instanceof OwnershipTrackedBridge) {
                     // check creator
                     final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) entity;
                     spongeEntity.tracked$getOwnerReference()
@@ -101,7 +101,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
                         .map(user -> (PlayerEntity) user)
                         .ifPresent(player -> {
                             final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, player);
-                            damageSource.func_76351_m().func_94540_d();
+                            damageSource.setDifficultyScaled().setExplosion();
                             cir.setReturnValue(damageSource);
                         });
                 }

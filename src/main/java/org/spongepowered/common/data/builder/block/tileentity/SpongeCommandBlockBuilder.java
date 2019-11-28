@@ -46,18 +46,18 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
         return super.buildContent(container).flatMap(commandBlock -> {
             if (!container.contains(
                 Constants.TileEntity.CommandBlock.STORED_COMMAND, Constants.TileEntity.CommandBlock.SUCCESS_COUNT, Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT)) {
-                ((TileEntity) commandBlock).func_145843_s();
+                ((TileEntity) commandBlock).remove();
                 return Optional.empty();
             }
-            final CommandBlockLogic cmdBlockLogic = ((CommandBlockTileEntity) commandBlock).func_145993_a();
-            cmdBlockLogic.func_145752_a(container.getString(Constants.TileEntity.CommandBlock.STORED_COMMAND).get());
-            cmdBlockLogic.func_184167_a(container.getInt(Constants.TileEntity.CommandBlock.SUCCESS_COUNT).get());
-            cmdBlockLogic.func_175573_a(container.getBoolean(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT).get());
-            if (cmdBlockLogic.func_175571_m()) {
-                cmdBlockLogic.func_145750_b(SpongeTexts.toComponent(SpongeTexts.fromLegacy(
+            final CommandBlockLogic cmdBlockLogic = ((CommandBlockTileEntity) commandBlock).getCommandBlockLogic();
+            cmdBlockLogic.setCommand(container.getString(Constants.TileEntity.CommandBlock.STORED_COMMAND).get());
+            cmdBlockLogic.setSuccessCount(container.getInt(Constants.TileEntity.CommandBlock.SUCCESS_COUNT).get());
+            cmdBlockLogic.setTrackOutput(container.getBoolean(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT).get());
+            if (cmdBlockLogic.shouldTrackOutput()) {
+                cmdBlockLogic.setLastOutput(SpongeTexts.toComponent(SpongeTexts.fromLegacy(
                         container.getString(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT).get())));
             }
-            ((CommandBlockTileEntity)commandBlock).func_145829_t();
+            ((CommandBlockTileEntity)commandBlock).validate();
             return Optional.of(commandBlock);
         });
     }

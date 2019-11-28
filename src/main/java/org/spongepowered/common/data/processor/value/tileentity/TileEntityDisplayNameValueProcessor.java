@@ -66,7 +66,7 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
 
     @Override
     protected Optional<Text> getVal(INameable container) {
-        if (container.func_145818_k_()) {
+        if (container.hasCustomName()) {
             return Optional.of(SpongeTexts.fromLegacy(container.func_70005_c_()));
         }
         return Optional.empty();

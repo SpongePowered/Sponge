@@ -162,7 +162,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 final String tileType = tile.getString(TILE_ID).get();
                 final ResourceLocation name = new ResourceLocation(tileType);
                 TileEntityType type = TileEntityTypeRegistryModule.getInstance()
-                        .getForClass(TileEntityAccessor.accessor$getRegistry().func_82594_a(name));
+                        .getForClass(TileEntityAccessor.accessor$getRegistry().getOrDefault(name));
                 final BlockState state = buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ);
                 // Somehow we need to get some DataFixers in here, because some data may be legacy from older versions before data
                 // fixers.

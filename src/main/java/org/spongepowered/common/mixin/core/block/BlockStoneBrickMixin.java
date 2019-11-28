@@ -75,6 +75,6 @@ public abstract class BlockStoneBrickMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableBrickData impl$getStoneBrickTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBrickData.class,
-                (BrickType) (Object) blockState.func_177229_b(BlockStoneBrick.field_176249_a));
+                (BrickType) (Object) blockState.get(BlockStoneBrick.field_176249_a));
     }
 }

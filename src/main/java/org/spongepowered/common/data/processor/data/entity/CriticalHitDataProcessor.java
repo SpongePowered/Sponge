@@ -52,13 +52,13 @@ public class CriticalHitDataProcessor
 
     @Override
     protected boolean set(AbstractArrowEntity entity, Boolean value) {
-        entity.func_70243_d(value);
+        entity.setIsCritical(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(AbstractArrowEntity entity) {
-        return Optional.of(entity.func_70241_g());
+        return Optional.of(entity.getIsCritical());
     }
 
     @Override

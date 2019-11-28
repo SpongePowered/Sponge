@@ -51,9 +51,9 @@ public abstract class WorldGenFireMixin extends WorldGeneratorMixin {
         //END sponge
         for (int i = 0; i < n; ++i) {
             final BlockPos blockpos1 =
-                    pos.func_177982_a(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
-            if (worldIn.func_175623_d(blockpos1) && worldIn.func_180495_p(blockpos1.func_177977_b()).func_177230_c() == Blocks.field_150424_aL) {
-                worldIn.func_180501_a(blockpos1, Blocks.field_150480_ab.func_176223_P(), 2);
+                    pos.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
+            if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.NETHERRACK) {
+                worldIn.setBlockState(blockpos1, Blocks.FIRE.getDefaultState(), 2);
             }
         }
 

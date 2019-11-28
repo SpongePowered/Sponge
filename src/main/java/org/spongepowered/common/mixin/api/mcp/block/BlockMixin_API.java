@@ -79,7 +79,7 @@ public abstract class BlockMixin_API implements BlockType {
         // This should always succeed when things are working properly,
         // so we just catch the exception instead of doing a null check.
         try {
-            return Block.field_149771_c.func_177774_c((Block) (Object) this).toString();
+            return Block.field_149771_c.getKey((Block) (Object) this).toString();
         } catch (NullPointerException e) {
             throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
         }
@@ -93,7 +93,7 @@ public abstract class BlockMixin_API implements BlockType {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<BlockState> getAllBlockStates() {
-        return (Collection<BlockState>) (Collection<?>) this.blockState.func_177619_a();
+        return (Collection<BlockState>) (Collection<?>) this.blockState.getValidStates();
     }
 
     @Override
@@ -101,8 +101,8 @@ public abstract class BlockMixin_API implements BlockType {
         if (this == BlockTypes.AIR) {
             return Optional.of(ItemTypes.AIR);
         }
-        ItemType itemType = (ItemType) Item.func_150898_a((Block) (Object) this);
-        return Items.field_190931_a.equals(itemType) ? Optional.empty() : Optional.of(itemType);
+        ItemType itemType = (ItemType) Item.getItemFromBlock((Block) (Object) this);
+        return Items.AIR.equals(itemType) ? Optional.empty() : Optional.of(itemType);
     }
 
     @Override

@@ -77,7 +77,7 @@ public abstract class BlockTallGrassMixin extends BlockMixin {
 
 
     private ImmutableShrubData impl$getPlantData(final net.minecraft.block.BlockState blockState) {
-        final ShrubType shrubType = (ShrubType) (Object) blockState.func_177229_b(TallGrassBlock.field_176497_a);
+        final ShrubType shrubType = (ShrubType) (Object) blockState.get(TallGrassBlock.field_176497_a);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeShrubData.class, shrubType);
     }
 }

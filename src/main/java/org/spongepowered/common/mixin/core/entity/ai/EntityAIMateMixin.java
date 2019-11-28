@@ -114,10 +114,10 @@ public abstract class EntityAIMateMixin {
                 final org.spongepowered.api.event.entity.BreedEntityEvent.Breed event =
                     SpongeEventFactory.createBreedEntityEventBreed(Sponge.getCauseStackManager().getCurrentCause(),
                     Optional.empty(), (Ageable) baby, (Ageable) this.targetMate);
-                this.impl$spawnEntityResult = !SpongeImpl.postEvent(event) && world.func_72838_d(baby);
+                this.impl$spawnEntityResult = !SpongeImpl.postEvent(event) && world.addEntity0(baby);
             }
         } else {
-            this.impl$spawnEntityResult = world.func_72838_d(baby);
+            this.impl$spawnEntityResult = world.addEntity0(baby);
         }
         return this.impl$spawnEntityResult;
     }

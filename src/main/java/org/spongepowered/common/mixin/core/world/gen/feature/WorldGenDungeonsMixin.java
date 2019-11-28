@@ -51,7 +51,7 @@ public abstract class WorldGenDungeonsMixin extends WorldGeneratorMixin {
         if (((Dungeon) this).getChoices().isPresent()) {
             // Use custom choices
             final WeightedTable<EntityArchetype> choices = ((Dungeon) this).getChoices().get();
-            final EntityArchetype entity = choices.get(logic.func_98271_a().field_73012_v).stream().findFirst().orElse(null);
+            final EntityArchetype entity = choices.get(logic.getWorld().rand).stream().findFirst().orElse(null);
             if (entity == null) {
                 return; // No choices to choose from? Use default instead.
             }

@@ -76,8 +76,8 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     public static Palette<BlockState> getBlockPalette() {
         if (blockPalette == null) {
             blockPalette = new BlockPaletteWrapper(new GlobalPalette<>(PaletteTypes.GLOBAL_BLOCKS,
-                (type) -> Block.field_176229_d.func_148747_b((net.minecraft.block.BlockState) type),
-                (id) -> (BlockState) Block.field_176229_d.func_148745_a(id),
+                (type) -> Block.BLOCK_STATE_IDS.get((net.minecraft.block.BlockState) type),
+                (id) -> (BlockState) Block.BLOCK_STATE_IDS.getByValue(id),
                 BlockState.class), org.spongepowered.api.world.schematic.BlockPaletteTypes.GLOBAL);
         }
         return blockPalette;

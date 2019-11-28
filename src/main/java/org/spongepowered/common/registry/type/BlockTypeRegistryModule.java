@@ -124,7 +124,7 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
     private void registerBlockTrait(String id, BlockType block) {
         Block nmsBlock = (Block) block;
-        for (net.minecraft.block.BlockState state : nmsBlock.func_176194_O().func_177619_a()) {
+        for (net.minecraft.block.BlockState state : nmsBlock.getStateContainer().getValidStates()) {
             BlockStateRegistryModule.getInstance().registerBlockState((BlockState) state);
         }
         for (Map.Entry<BlockTrait<?>, ?> mapEntry : block.getDefaultState().getTraitMap().entrySet()) {
@@ -145,10 +145,10 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
         BlockSnapshot NONE_SNAPSHOT = SpongeBlockSnapshotBuilder.pooled()
             .worldId(Constants.World.INVALID_WORLD_UUID)
             .position(new Vector3i(0, 0, 0))
-            .blockState(Blocks.field_150350_a.func_176223_P())
+            .blockState(Blocks.AIR.getDefaultState())
             .build();
         RegistryHelper.setFinalStatic(BlockSnapshot.class, "NONE", NONE_SNAPSHOT);
-        this.blockTypeMappings.put("none", (BlockType) Blocks.field_150350_a);
+        this.blockTypeMappings.put("none", (BlockType) Blocks.AIR);
     }
 
     BlockTypeRegistryModule() { }

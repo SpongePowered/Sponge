@@ -116,14 +116,14 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
             .blockState((net.minecraft.block.BlockState) (Object) this)
             .position(location.getBlockPosition())
             .worldId(location.getExtent().getUniqueId());
-        if (this.block.func_149716_u() && location.getBlockType().equals(this.block)) {
+        if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
             final TileEntity tileEntity = location.getTileEntity()
                 .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
             for (final DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
                 builder.add(manipulator);
             }
             final CompoundNBT compound = new CompoundNBT();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).func_189515_b(compound);
+            ((net.minecraft.tileentity.TileEntity) tileEntity).write(compound);
             builder.unsafeNbt(compound);
         }
         return builder.build();
@@ -379,8 +379,8 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
             final List<String> propertyValues = new ArrayList<>();
             for (final Map.Entry<IProperty<?>, Comparable<?>> entry : this.properties.entrySet()) {
                 final Comparable<?> value = entry.getValue();
-                final String stringValue = (value instanceof IStringSerializable) ? ((IStringSerializable) value).func_176610_l() : value.toString();
-                propertyValues.add(entry.getKey().func_177701_a() + "=" + stringValue);
+                final String stringValue = (value instanceof IStringSerializable) ? ((IStringSerializable) value).getName() : value.toString();
+                propertyValues.add(entry.getKey().getName() + "=" + stringValue);
             }
             builder.append(joiner.join(propertyValues));
             builder.append(']');

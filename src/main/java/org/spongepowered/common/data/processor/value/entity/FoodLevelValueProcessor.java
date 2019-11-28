@@ -54,13 +54,13 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Player
 
     @Override
     protected boolean set(PlayerEntity container, Integer value) {
-        container.func_71024_bL().func_75114_a(value);
+        container.getFoodStats().setFoodLevel(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(PlayerEntity container) {
-        return Optional.of(container.func_71024_bL().func_75116_a());
+        return Optional.of(container.getFoodStats().getFoodLevel());
     }
 
     @Override

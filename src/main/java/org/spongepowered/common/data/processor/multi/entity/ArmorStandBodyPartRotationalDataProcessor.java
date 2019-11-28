@@ -119,20 +119,20 @@ public class ArmorStandBodyPartRotationalDataProcessor
         final Vector3d rightLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_LEG_ROTATION, bodyRotations, BodyParts.RIGHT_LEG,
                 Constants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION);
 
-        dataHolder.func_175415_a(VecHelper.toRotation(headRotation));
-        dataHolder.func_175424_b(VecHelper.toRotation(chestRotation));
-        dataHolder.func_175405_c(VecHelper.toRotation(leftArmRotation));
-        dataHolder.func_175428_d(VecHelper.toRotation(rightArmRotation));
-        dataHolder.func_175417_e(VecHelper.toRotation(leftLegRotation));
-        dataHolder.func_175427_f(VecHelper.toRotation(rightLegRotation));
+        dataHolder.setHeadRotation(VecHelper.toRotation(headRotation));
+        dataHolder.setBodyRotation(VecHelper.toRotation(chestRotation));
+        dataHolder.setLeftArmRotation(VecHelper.toRotation(leftArmRotation));
+        dataHolder.setRightArmRotation(VecHelper.toRotation(rightArmRotation));
+        dataHolder.setLeftLegRotation(VecHelper.toRotation(leftLegRotation));
+        dataHolder.setRightLegRotation(VecHelper.toRotation(rightLegRotation));
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(final ArmorStandEntity dataHolder) {
         final Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(6);
-        values.put(Keys.HEAD_ROTATION, VecHelper.toVector3d(dataHolder.func_175418_s()));
-        values.put(Keys.CHEST_ROTATION, VecHelper.toVector3d(dataHolder.func_175408_t()));
+        values.put(Keys.HEAD_ROTATION, VecHelper.toVector3d(dataHolder.getHeadRotation()));
+        values.put(Keys.CHEST_ROTATION, VecHelper.toVector3d(dataHolder.getBodyRotation()));
         values.put(Keys.LEFT_ARM_ROTATION, VecHelper.toVector3d(((EntityArmorStandAccessor) dataHolder).accessor$getleftArmRotation()));
         values.put(Keys.RIGHT_ARM_ROTATION, VecHelper.toVector3d(((EntityArmorStandAccessor) dataHolder).accessor$getrightArmRotation()));
         values.put(Keys.LEFT_LEG_ROTATION, VecHelper.toVector3d(((EntityArmorStandAccessor) dataHolder).accessor$getleftLegRotation()));

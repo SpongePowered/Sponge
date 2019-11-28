@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import static net.minecraft.util.EntityPredicates.field_180132_d;
+import static net.minecraft.util.EntityPredicates.NOT_SPECTATING;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -134,14 +134,14 @@ public final class EntityUtil {
     private EntityUtil() {
     }
 
-    @SuppressWarnings("Guava") private static final Predicate<Entity> TRACEABLE = Predicates.and(field_180132_d,
-      entity -> entity != null && entity.func_70067_L());
+    @SuppressWarnings("Guava") private static final Predicate<Entity> TRACEABLE = Predicates.and(NOT_SPECTATING,
+      entity -> entity != null && entity.canBeCollidedWith());
 
     @Nullable
     public static Entity transferEntityToWorld(final Entity entity, @Nullable MoveEntityEvent.Teleport event,
         @Nullable ServerWorld toWorld,  @Nullable final ForgeITeleporterBridge teleporter, final boolean recreate) {
 
-        if (entity.field_70170_p.field_72995_K || entity.field_70128_L) {
+        if (entity.world.isRemote || entity.removed) {
             return null;
         }
 
@@ -150,7 +150,7 @@ public final class EntityUtil {
         final Transform<World> fromTransform = sEntity.getTransform();
         final ServerWorld fromWorld = (ServerWorld) fromTransform.getExtent();
 
-        fromWorld.field_72984_F.func_76320_a("changeDimension");
+        fromWorld.profiler.startSection("changeDimension");
 
         boolean loadChunks = true;
 
@@ -187,7 +187,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge) {
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)
-                                .bridge$removePortalPositionFromCache(ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ()));
+                                .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
 
                         context.getCapturedBlockSupplier().restoreOriginals();
@@ -207,7 +207,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge) {
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)
-                                .bridge$removePortalPositionFromCache(ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ()));
+                                .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
 
                         context.getCapturedBlockSupplier().restoreOriginals();
@@ -221,7 +221,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge) {
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)
-                                .bridge$removePortalPositionFromCache(ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ()));
+                                .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
                         context.getCapturedBlockSupplier().restoreOriginals();
                     } else {
@@ -232,7 +232,7 @@ public final class EntityUtil {
                             // Transactions were rolled back, the portal wasn't made. We need to bomb the dimension change and clear portal cache
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)
-                                .bridge$removePortalPositionFromCache(ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ()));
+                                .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 
                             return null;
                         }
@@ -250,7 +250,7 @@ public final class EntityUtil {
             toWorld = (ServerWorld) toTransform.getExtent();
         }
 
-        fromWorld.field_72984_F.func_76318_c("reloading");
+        fromWorld.profiler.func_76318_c("reloading");
         final Entity toReturn;
 
         if (recreate) {
@@ -273,22 +273,22 @@ public final class EntityUtil {
 
         if (loadChunks) {
             final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
-            toWorld.func_72863_F().func_186028_c(toChunkPosition.getX(), toChunkPosition.getZ());
+            toWorld.getChunkProvider().func_186028_c(toChunkPosition.getX(), toChunkPosition.getZ());
         }
 
-        fromWorld.field_72984_F.func_76320_a("moving");
+        fromWorld.profiler.startSection("moving");
         ((EntityBridge) toReturn).bridge$setLocationAndAngles(toTransform);
-        fromWorld.field_72984_F.func_76319_b();
+        fromWorld.profiler.endSection();
 
         try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
             if (recreate) {
-                final boolean flag = toReturn.field_98038_p;
-                toReturn.field_98038_p = true;
-                toWorld.func_72838_d(toReturn);
-                toReturn.field_98038_p = flag;
+                final boolean flag = toReturn.forceSpawn;
+                toReturn.forceSpawn = true;
+                toWorld.addEntity0(toReturn);
+                toReturn.forceSpawn = flag;
                 toWorld.func_72866_a(toReturn, false);
             } else {
-                toWorld.func_72838_d(toReturn);
+                toWorld.addEntity0(toReturn);
                 toWorld.func_72866_a(toReturn, false);
             }
         }
@@ -296,15 +296,15 @@ public final class EntityUtil {
         // Fix Vanilla bug where primed minecart TNTs don't keep state through a portal
         if (toReturn instanceof TNTMinecartEntity) {
             if (((FusedExplosive) sEntity).isPrimed()) {
-                toReturn.field_70170_p.func_72960_a(toReturn, (byte) 10);
+                toReturn.world.setEntityState(toReturn, (byte) 10);
             }
         }
 
-        entity.field_70128_L = true;
-        fromWorld.field_72984_F.func_76319_b();
-        fromWorld.func_82742_i();
-        toWorld.func_82742_i();
-        fromWorld.field_72984_F.func_76319_b();
+        entity.removed = true;
+        fromWorld.profiler.endSection();
+        fromWorld.resetUpdateEntityTick();
+        toWorld.resetUpdateEntityTick();
+        fromWorld.profiler.endSection();
 
         return toReturn;
     }
@@ -313,16 +313,16 @@ public final class EntityUtil {
     public static ServerPlayerEntity transferPlayerToWorld(final ServerPlayerEntity player, @Nullable MoveEntityEvent.Teleport event,
         @Nullable ServerWorld toWorld,  @Nullable final ForgeITeleporterBridge teleporter) {
 
-        if (player.field_70170_p.field_72995_K || player.field_70128_L) {
+        if (player.world.isRemote || player.removed) {
             return null;
         }
 
-        final PlayerList playerList = SpongeImpl.getServer().func_184103_al();
+        final PlayerList playerList = SpongeImpl.getServer().getPlayerList();
         final Player sPlayer = (Player) player;
         final Transform<World> fromTransform = sPlayer.getTransform();
         final ServerWorld fromWorld = (ServerWorld) fromTransform.getExtent();
 
-        fromWorld.field_72984_F.func_76320_a("changeDimension");
+        fromWorld.profiler.startSection("changeDimension");
 
         // use the world from event
         final Transform<World> toTransform;
@@ -357,7 +357,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge) {
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)
-                                .bridge$removePortalPositionFromCache(ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ()));
+                                .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
 
                         context.getCapturedBlockSupplier().restoreOriginals();
@@ -377,7 +377,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge) {
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)
-                                .bridge$removePortalPositionFromCache(ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ()));
+                                .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
 
                         context.getCapturedBlockSupplier().restoreOriginals();
@@ -390,7 +390,7 @@ public final class EntityUtil {
                     if (!((MoveEntityEvent.Teleport.Portal) event).getUsePortalAgent()) {
                         final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                         if (teleporter instanceof TeleporterBridge) {
-                            ((TeleporterBridge) teleporter).bridge$removePortalPositionFromCache(ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ()));
+                            ((TeleporterBridge) teleporter).bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
                         context.getCapturedBlockSupplier().restoreOriginals();
                     } else {
@@ -401,7 +401,7 @@ public final class EntityUtil {
                             // Transactions were rolled back, the portal wasn't made. We need to bomb the dimension change and clear portal cache
                             final Vector3i chunkPosition = context.getExitTransform().getLocation().getChunkPosition();
                             ((TeleporterBridge) teleporter)
-                                .bridge$removePortalPositionFromCache(ChunkPos.func_77272_a(chunkPosition.getX(), chunkPosition.getZ()));
+                                .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 
                             return null;
                         }
@@ -438,34 +438,34 @@ public final class EntityUtil {
                         break;
                 }
 
-                player.field_71135_a.func_147359_a(new SRespawnPacket(fakeDimId, toWorld.func_175659_aa(), toWorld.func_175624_G(),
-                        player.field_71134_c.func_73081_b()));
+                player.connection.sendPacket(new SRespawnPacket(fakeDimId, toWorld.getDifficulty(), toWorld.getWorldType(),
+                        player.interactionManager.getGameType()));
             }
 
             dimensionId = toClientDimId;
         } else {
             // We're a custom client, their problem to handle the client provider
-            WorldManager.sendDimensionRegistration(player, toWorld.field_73011_w);
+            WorldManager.sendDimensionRegistration(player, toWorld.dimension);
 
             dimensionId = ((WorldServerBridge) toWorld).bridge$getDimensionId();
         }
 
-        player.field_71135_a.func_147359_a(new SRespawnPacket(dimensionId, toWorld.func_175659_aa(), toWorld.func_175624_G(),
-            player.field_71134_c.func_73081_b()));
+        player.connection.sendPacket(new SRespawnPacket(dimensionId, toWorld.getDifficulty(), toWorld.getWorldType(),
+            player.interactionManager.getGameType()));
 
-        player.field_71093_bK = ((WorldServerBridge) toWorld).bridge$getDimensionId(); // If a Vanilla client, dimensionId could be a provider id.
-        player.func_70029_a(toWorld);
+        player.dimension = ((WorldServerBridge) toWorld).bridge$getDimensionId(); // If a Vanilla client, dimensionId could be a provider id.
+        player.setWorld(toWorld);
 
-        playerList.func_187243_f(player);
+        playerList.updatePermissionLevel(player);
 
         fromWorld.func_72973_f(player);
-        player.field_70128_L = false;
+        player.removed = false;
 
         final Vector3d position = toTransform.getPosition();
-        player.func_70012_b(position.getX(), position.getY(), position.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
+        player.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
 
         try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
-            toWorld.func_72838_d(player);
+            toWorld.addEntity0(player);
             toWorld.func_72866_a(player, false);
         }
 
@@ -474,39 +474,39 @@ public final class EntityUtil {
         toWorld.func_184164_w().func_72683_a(player);
 
         final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
-        toWorld.func_72863_F().func_186025_d(toChunkPosition.getX(), toChunkPosition.getZ());
+        toWorld.getChunkProvider().func_186025_d(toChunkPosition.getX(), toChunkPosition.getZ());
 
         if (event instanceof MoveEntityEvent.Teleport.Portal) {
-            CriteriaTriggers.field_193134_u.func_193143_a(player, fromWorld.field_73011_w.func_186058_p(), toWorld.field_73011_w.func_186058_p());
+            CriteriaTriggers.CHANGED_DIMENSION.trigger(player, fromWorld.dimension.getType(), toWorld.dimension.getType());
 
-            if (fromWorld.field_73011_w.func_186058_p() == DimensionType.NETHER && toWorld.field_73011_w.func_186058_p() == DimensionType.OVERWORLD
+            if (fromWorld.dimension.getType() == DimensionType.NETHER && toWorld.dimension.getType() == DimensionType.OVERWORLD
                 && player.func_193106_Q() != null) {
-                CriteriaTriggers.field_193131_B.func_193168_a(player, player.func_193106_Q());
+                CriteriaTriggers.NETHER_TRAVEL.trigger(player, player.func_193106_Q());
             }
         }
         //
 
-        player.field_71135_a.func_147364_a(player.field_70165_t, player.field_70163_u, player.field_70161_v, player.field_70177_z, player.field_70125_A);
+        player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
 
-        player.field_71134_c.func_73080_a(toWorld);
-        playerList.func_72354_b(player, toWorld);
-        playerList.func_72385_f(player);
+        player.interactionManager.setWorld(toWorld);
+        playerList.sendWorldInfo(player, toWorld);
+        playerList.sendInventory(player);
 
-        player.field_71135_a.func_147359_a(new SPlayerAbilitiesPacket(player.field_71075_bZ));
+        player.connection.sendPacket(new SPlayerAbilitiesPacket(player.abilities));
 
-        for (final EffectInstance potioneffect : player.func_70651_bq()) {
-            player.field_71135_a.func_147359_a(new SPlayEntityEffectPacket(player.func_145782_y(), potioneffect));
+        for (final EffectInstance potioneffect : player.getActivePotionEffects()) {
+            player.connection.sendPacket(new SPlayEntityEffectPacket(player.getEntityId(), potioneffect));
         }
 
         // Fix MC-88179: on non-death SPacketRespawn, also resend attributes
-        final AttributeMap attributemap = (AttributeMap) player.func_110140_aT();
-        final Collection<IAttributeInstance> watchedAttribs = attributemap.func_111160_c();
+        final AttributeMap attributemap = (AttributeMap) player.getAttributes();
+        final Collection<IAttributeInstance> watchedAttribs = attributemap.getWatchedAttributes();
         if (!watchedAttribs.isEmpty()) {
-            player.field_71135_a.func_147359_a(new SEntityPropertiesPacket(player.func_145782_y(), watchedAttribs));
+            player.connection.sendPacket(new SEntityPropertiesPacket(player.getEntityId(), watchedAttribs));
         }
 
-        player.field_71135_a.func_147359_a(new SServerDifficultyPacket(toWorld.func_175659_aa(), toWorld.func_72912_H().func_176123_z()));
-        player.field_71135_a.func_147359_a(new SEntityStatusPacket(player, toWorld.func_82736_K().func_82766_b(DefaultGameRules.REDUCED_DEBUG_INFO) ?
+        player.connection.sendPacket(new SServerDifficultyPacket(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
+        player.connection.sendPacket(new SEntityStatusPacket(player, toWorld.getGameRules().func_82766_b(DefaultGameRules.REDUCED_DEBUG_INFO) ?
             (byte) 22 : 23));
 
         if (!event.getKeepsVelocity()) {
@@ -527,24 +527,24 @@ public final class EntityUtil {
         final MinecraftServer mcServer = SpongeImpl.getServer();
         final org.spongepowered.api.entity.Entity sEntity = (org.spongepowered.api.entity.Entity) entity;
         final Transform<World> fromTransform = sEntity.getTransform();
-        final ServerWorld fromWorld = ((ServerWorld) entity.field_70170_p);
+        final ServerWorld fromWorld = ((ServerWorld) entity.world);
 
         int toDimensionId = ((WorldServerBridge) toWorld).bridge$getDimensionId();
 
         // Entering End Portal in End goes to Overworld in Vanilla
-        if (toDimensionId == 1 && fromWorld.field_73011_w instanceof EndDimension) {
+        if (toDimensionId == 1 && fromWorld.dimension instanceof EndDimension) {
             toDimensionId = 0;
         }
 
-        toWorld = mcServer.func_71218_a(toDimensionId);
+        toWorld = mcServer.getWorld(toDimensionId);
 
         final Map<String, String> portalAgents =
-            ((WorldInfoBridge) fromWorld.func_72912_H()).bridge$getConfigAdapter().getConfig().getWorld().getPortalAgents();
+            ((WorldInfoBridge) fromWorld.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getPortalAgents();
         final String worldName;
 
         // Check if we're to use a different teleporter for this world
         if (teleporter.getClass().getName().equals("net.minecraft.world.Teleporter")) {
-            worldName = portalAgents.get("minecraft:default_" + toWorld.field_73011_w.func_186058_p().func_186065_b().toLowerCase(Locale.ENGLISH));
+            worldName = portalAgents.get("minecraft:default_" + toWorld.dimension.getType().func_186065_b().toLowerCase(Locale.ENGLISH));
         } else {
             worldName = portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName());
         }
@@ -555,9 +555,9 @@ public final class EntityUtil {
                     final Optional<World> spongeWorld = Sponge.getServer().loadWorld(properties);
                     if (spongeWorld.isPresent()) {
                         toWorld = (ServerWorld) spongeWorld.get();
-                        teleporter = (ForgeITeleporterBridge) toWorld.func_85176_s();
+                        teleporter = (ForgeITeleporterBridge) toWorld.getDefaultTeleporter();
                         if (teleporter instanceof TeleporterBridge) {
-                            if (!((fromWorld.field_73011_w.func_177495_o() || toWorld.field_73011_w.func_177495_o()))) {
+                            if (!((fromWorld.dimension.isNether() || toWorld.dimension.isNether()))) {
                                 ((TeleporterBridge) teleporter).bridge$setNetherPortalType(false);
                             }
                         }
@@ -566,9 +566,9 @@ public final class EntityUtil {
             }
         }
 
-        fromWorld.field_72984_F.func_76320_a("reposition");
+        fromWorld.profiler.startSection("reposition");
         final Transform<World> toTransform = getPortalExitTransform(entity, fromWorld, toWorld);
-        fromWorld.field_72984_F.func_76319_b();
+        fromWorld.profiler.endSection();
 
         // Portals create blocks and the PhaseTracker is known to capture blocks..
         final InvokingTeleporterContext context = EntityPhase.State.INVOKING_TELEPORTER.createPhaseContext()
@@ -577,25 +577,25 @@ public final class EntityUtil {
             .setExitTransform(toTransform)
             .buildAndSwitch();
 
-        if (!(fromWorld.field_73011_w instanceof EndDimension)) {
+        if (!(fromWorld.dimension instanceof EndDimension)) {
 
             // Only place entity in portal if one of the following are true :
             // 1. The teleporter is custom. (not vanilla)
             // 2. The last known portal vec is known. (Usually set after block collision)
             // 3. The entity is traveling to end from a non-end world.
             // Note: We must always use placeInPortal to support mods.
-            if (!teleporter.bridge$isVanilla() || entity.func_181014_aG() != null || toWorld.field_73011_w instanceof EndDimension) {
+            if (!teleporter.bridge$isVanilla() || entity.getLastPortalVec() != null || toWorld.dimension instanceof EndDimension) {
                 // In Forge, the entity dimension is already set by this point.
                 // To maintain compatibility with Forge mods, we temporarily
                 // set the entity's dimension to the current target dimension
                 // when calling Teleporter#bridge$placeEntity.
 
                 Vector3d position = toTransform.getPosition();
-                entity.func_70012_b(position.getX(), position.getY(), position.getZ(), (float) toTransform.getYaw(),
+                entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) toTransform.getYaw(),
                     (float) toTransform.getPitch());
 
-                fromWorld.field_72984_F.func_76320_a("placing");
-                if (!teleporter.bridge$isVanilla() || toWorld.field_73011_w instanceof EndDimension) {
+                fromWorld.profiler.startSection("placing");
+                if (!teleporter.bridge$isVanilla() || toWorld.dimension instanceof EndDimension) {
                     // Have to assume mod teleporters or end -> overworld always port. We set this state for nether ports in
                     // TeleporterMixin#bridge$placeEntity
                     context.setDidPort(true);
@@ -603,13 +603,13 @@ public final class EntityUtil {
 
                 teleporter.bridge$placeEntity(toWorld, entity, (float) fromTransform.getRotation().getY());
 
-                fromWorld.field_72984_F.func_76319_b();
+                fromWorld.profiler.endSection();
 
                 context.setExitTransform(sEntity.getTransform().setExtent((World) toWorld));
 
                 // Roll back Entity transform
                 position = fromTransform.getPosition();
-                entity.func_70012_b(position.getX(), position.getY(), position.getZ(), (float) fromTransform.getYaw(),
+                entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) fromTransform.getYaw(),
                     (float) fromTransform.getPitch());
             }
         } else {
@@ -620,8 +620,8 @@ public final class EntityUtil {
     }
 
     private static Transform<World> getPortalExitTransform(final Entity entity, final ServerWorld fromWorld, final ServerWorld toWorld) {
-        final Dimension fromWorldProvider = fromWorld.field_73011_w;
-        final Dimension toWorldProvider = toWorld.field_73011_w;
+        final Dimension fromWorldProvider = fromWorld.dimension;
+        final Dimension toWorldProvider = toWorld.dimension;
 
         double x;
         final double y;
@@ -630,31 +630,31 @@ public final class EntityUtil {
         final Transform<World> transform;
 
         if (toWorldProvider instanceof EndDimension) {
-            final BlockPos coordinate = toWorld.func_180504_m();
-            x = coordinate.func_177958_n();
-            y = coordinate.func_177956_o();
-            z = coordinate.func_177952_p();
+            final BlockPos coordinate = toWorld.getSpawnCoordinate();
+            x = coordinate.getX();
+            y = coordinate.getY();
+            z = coordinate.getZ();
         } else if (fromWorldProvider instanceof EndDimension && toWorldProvider instanceof OverworldDimension) {
-            final BlockPos coordinate = toWorld.func_175694_M();
-            x = coordinate.func_177958_n();
-            y = coordinate.func_177956_o();
-            z = coordinate.func_177952_p();
+            final BlockPos coordinate = toWorld.getSpawnPoint();
+            x = coordinate.getX();
+            y = coordinate.getY();
+            z = coordinate.getZ();
         }
         else {
 
             final double moveFactor = ((WorldProviderBridge) fromWorldProvider).bridge$getMovementFactor() / ((WorldProviderBridge) toWorldProvider).bridge$getMovementFactor();
 
-            x = MathHelper.func_151237_a(entity.field_70165_t * moveFactor, toWorld.func_175723_af().func_177726_b() + 16.0D, toWorld.func_175723_af().func_177728_d() - 16.0D);
-            y = entity.field_70163_u;
-            z = MathHelper.func_151237_a(entity.field_70161_v * moveFactor, toWorld.func_175723_af().func_177736_c() + 16.0D, toWorld.func_175723_af().func_177733_e() - 16.0D);
-            entity.field_70177_z = 90f;
-            entity.field_70125_A = 0f;
+            x = MathHelper.clamp(entity.posX * moveFactor, toWorld.getWorldBorder().minX() + 16.0D, toWorld.getWorldBorder().maxX() - 16.0D);
+            y = entity.posY;
+            z = MathHelper.clamp(entity.posZ * moveFactor, toWorld.getWorldBorder().minZ() + 16.0D, toWorld.getWorldBorder().maxZ() - 16.0D);
+            entity.rotationYaw = 90f;
+            entity.rotationPitch = 0f;
 
-            x = (double) MathHelper.func_76125_a((int) x, -29999872, 29999872);
-            z = (double) MathHelper.func_76125_a((int) z, -29999872, 29999872);
+            x = (double) MathHelper.clamp((int) x, -29999872, 29999872);
+            z = (double) MathHelper.clamp((int) z, -29999872, 29999872);
         }
 
-        transform = new Transform<>((World) toWorld, new Vector3d(x, y, z), new Vector3d(entity.field_70125_A, entity.field_70177_z, 0f));
+        transform = new Transform<>((World) toWorld, new Vector3d(x, y, z), new Vector3d(entity.rotationPitch, entity.rotationYaw, 0f));
 
         return transform;
     }
@@ -662,14 +662,14 @@ public final class EntityUtil {
     public static boolean isEntityDead(final net.minecraft.entity.Entity entity) {
         if (entity instanceof LivingEntity) {
             final LivingEntity base = (LivingEntity) entity;
-            return base.func_110143_aJ() <= 0 || base.field_70725_aQ > 0 || ((EntityLivingBaseAccessor) entity).accessor$isLivingDead();
+            return base.getHealth() <= 0 || base.deathTime > 0 || ((EntityLivingBaseAccessor) entity).accessor$isLivingDead();
         }
-        return entity.field_70128_L;
+        return entity.removed;
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final Location<World> location) {
         final Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
-        final Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.field_70125_A, entityIn.field_70177_z, 0));
+        final Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
@@ -710,8 +710,8 @@ public final class EntityUtil {
     public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<User>> supplier) {
         final Entity minecraftEntity = (Entity) entity;
         if (minecraftEntity instanceof ItemEntity) {
-            final ItemStack item = ((ItemEntity) minecraftEntity).func_92059_d();
-            if (!item.func_190926_b()) {
+            final ItemStack item = ((ItemEntity) minecraftEntity).getItem();
+            if (!item.isEmpty()) {
                 final Optional<Entity> customEntityItem = Optional.ofNullable(SpongeImplHooks.getCustomEntityIfItem(minecraftEntity));
                 if (customEntityItem.isPresent()) {
                     // Bypass spawning the entity item, since it is established that the custom entity is spawned.
@@ -722,13 +722,13 @@ public final class EntityUtil {
                                 ((OwnershipTrackedBridge) entityToSpawn).tracked$setOwnerReference(spawned);
                             }
                         });
-                    if (entityToSpawn.field_70128_L) {
-                        entityToSpawn.field_70128_L = false;
+                    if (entityToSpawn.removed) {
+                        entityToSpawn.removed = false;
                     }
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    ((WorldServerBridge) entityToSpawn.field_70170_p).bridge$forceSpawnEntity(entityToSpawn);
+                    ((WorldServerBridge) entityToSpawn.world).bridge$forceSpawnEntity(entityToSpawn);
                     return true;
                 }
             }
@@ -768,23 +768,23 @@ public final class EntityUtil {
         }
 
         final Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
-        final double blockDistance = (blockRay != null) ? blockRay.field_72307_f.func_72438_d(traceStart) : traceDistance;
+        final double blockDistance = (blockRay != null) ? blockRay.hitResult.distanceTo(traceStart) : traceDistance;
         final EntityTrace trace = new EntityTrace(blockDistance);
 
-        final Vec3d lookDir = source.func_70676_i(partialTicks).func_186678_a(traceDistance);
-        final Vec3d traceEnd = traceStart.func_178787_e(lookDir);
+        final Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
+        final Vec3d traceEnd = traceStart.add(lookDir);
 
-        final AxisAlignedBB boundingBox = source.func_174813_aQ();
-        final AxisAlignedBB traceBox = boundingBox.func_72321_a(lookDir.field_72450_a, lookDir.field_72448_b, lookDir.field_72449_c);
-        final List<Entity> entities = source.field_70170_p.func_175674_a(source, traceBox.func_72314_b(1.0F, 1.0F, 1.0F), EntityUtil.TRACEABLE);
+        final AxisAlignedBB boundingBox = source.getBoundingBox();
+        final AxisAlignedBB traceBox = boundingBox.expand(lookDir.x, lookDir.y, lookDir.z);
+        final List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), EntityUtil.TRACEABLE);
         for (final Entity entity : entities) {
-            final AxisAlignedBB entityBB = entity.func_174813_aQ().func_186662_g(entity.func_70111_Y());
+            final AxisAlignedBB entityBB = entity.getBoundingBox().grow(entity.getCollisionBorderSize());
             final RayTraceResult entityRay1 = entityBB.func_72327_a(traceStart, traceEnd);
 
-            if (entityBB.func_72318_a(traceStart)) {
+            if (entityBB.contains(traceStart)) {
                 if (trace.distance >= 0.0D) {
                     trace.entity = entity;
-                    trace.location = entityRay1 == null ? traceStart : entityRay1.field_72307_f;
+                    trace.location = entityRay1 == null ? traceStart : entityRay1.hitResult;
                     trace.distance = 0.0D;
                 }
                 continue;
@@ -794,17 +794,17 @@ public final class EntityUtil {
                 continue;
             }
 
-            final double distanceToEntity = traceStart.func_72438_d(entityRay1.field_72307_f);
+            final double distanceToEntity = traceStart.distanceTo(entityRay1.hitResult);
 
             if (distanceToEntity < trace.distance || trace.distance == 0.0D) {
-                if (entity.func_184208_bv() == source.func_184208_bv()) {
+                if (entity.getLowestRidingEntity() == source.getLowestRidingEntity()) {
                     if (trace.distance == 0.0D) {
                         trace.entity = entity;
-                        trace.location = entityRay1.field_72307_f;
+                        trace.location = entityRay1.hitResult;
                     }
                 } else {
                     trace.entity = entity;
-                    trace.location = entityRay1.field_72307_f;
+                    trace.location = entityRay1.hitResult;
                     trace.distance = distanceToEntity;
                 }
             }
@@ -820,21 +820,21 @@ public final class EntityUtil {
     @Nullable
     public static RayTraceResult rayTraceFromEntity(final Entity source, final double traceDistance, final float partialTicks) {
         final Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
-        final Vec3d lookDir = source.func_70676_i(partialTicks).func_186678_a(traceDistance);
-        final Vec3d traceEnd = traceStart.func_178787_e(lookDir);
-        return source.field_70170_p.func_147447_a(traceStart, traceEnd, false, false, true);
+        final Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
+        final Vec3d traceEnd = traceStart.add(lookDir);
+        return source.world.func_147447_a(traceStart, traceEnd, false, false, true);
     }
 
     private static Vec3d getPositionEyes(final Entity entity, final float partialTicks)
     {
         if (partialTicks == 1.0F)
         {
-            return new Vec3d(entity.field_70165_t, entity.field_70163_u + entity.func_70047_e(), entity.field_70161_v);
+            return new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
         }
 
-        final double interpX = entity.field_70169_q + (entity.field_70165_t - entity.field_70169_q) * partialTicks;
-        final double interpY = entity.field_70167_r + (entity.field_70163_u - entity.field_70167_r) * partialTicks + entity.func_70047_e();
-        final double interpZ = entity.field_70166_s + (entity.field_70161_v - entity.field_70166_s) * partialTicks;
+        final double interpX = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
+        final double interpY = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks + entity.getEyeHeight();
+        final double interpZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
         return new Vec3d(interpX, interpY, interpZ);
     }
 
@@ -851,14 +851,14 @@ public final class EntityUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
     public static ItemEntity entityOnDropItem(final Entity entity, final ItemStack itemStack, final float offsetY, final double xPos, final double zPos) {
-        if (itemStack.func_190926_b()) {
+        if (itemStack.isEmpty()) {
             // Sanity check, just like vanilla
             return null;
         }
         // Now the real fun begins.
         final ItemStack item;
         final double posX = xPos;
-        final double posY = entity.field_70163_u + offsetY;
+        final double posY = entity.posY + offsetY;
         final double posZ = zPos;
 
         // FIRST we want to throw the DropItemEvent.PRE
@@ -875,7 +875,7 @@ public final class EntityUtil {
             // Perform the event throws first, if they return false, return null
             item = SpongeCommonEventFactory.throwDropItemAndConstructEvent(entity, posX, posY, posZ, snapshot, original, frame);
 
-            if (item == null || item.func_190926_b()) {
+            if (item == null || item.isEmpty()) {
                 return null;
             }
 
@@ -883,8 +883,8 @@ public final class EntityUtil {
             // This is where we could perform item pre merging, and cancel before we create a new entity.
             // For now, we aren't performing pre merging.
 
-            final ItemEntity entityitem = new ItemEntity(entity.field_70170_p, posX, posY, posZ, item);
-            entityitem.func_174869_p();
+            final ItemEntity entityitem = new ItemEntity(entity.world, posX, posY, posZ, item);
+            entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
             if (((IPhaseState) currentState).spawnItemOrCapture(phaseContext, entity, entityitem)) {
@@ -915,14 +915,14 @@ public final class EntityUtil {
         if (dropAround) {
             final float f = random.nextFloat() * 0.5F;
             final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-            x = -MathHelper.func_76126_a(f1) * f;
-            z = MathHelper.func_76134_b(f1) * f;
+            x = -MathHelper.sin(f1) * f;
+            z = MathHelper.cos(f1) * f;
             y = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
-            x = -MathHelper.func_76126_a(player.field_70177_z * 0.017453292F) * MathHelper.func_76134_b(player.field_70125_A * 0.017453292F) * f2;
-            z = MathHelper.func_76134_b(player.field_70177_z * 0.017453292F) * MathHelper.func_76134_b(player.field_70125_A * 0.017453292F) * f2;
-            y = - MathHelper.func_76126_a(player.field_70125_A * 0.017453292F) * f2 + 0.1F;
+            x = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+            z = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+            y = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
             final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * random.nextFloat();
             x += Math.cos(f3) * f2;
@@ -957,7 +957,7 @@ public final class EntityUtil {
             return true;
         }
         // Temporary fix for https://bugs.mojang.com/browse/MC-149563
-        if (from.field_70170_p != target.field_70170_p) {
+        if (from.world != target.world) {
             return true;
         }
         return false;

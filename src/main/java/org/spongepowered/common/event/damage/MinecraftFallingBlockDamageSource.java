@@ -48,7 +48,7 @@ public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 
     @Override
     public FallingBlockEntity getTrueSource() {
-        return (FallingBlockEntity) super.func_76346_g();
+        return (FallingBlockEntity) super.getTrueSource();
     }
 
 }

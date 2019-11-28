@@ -94,16 +94,16 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_MODIFY) {
             return;
         }
-        final BlockPos targetPos = sourcePos.func_177977_b();
-        final LocatableBlock source = new SpongeLocatableBlockBuilder().world((World) worldIn).position(sourcePos.func_177958_n(), sourcePos.func_177956_o(), sourcePos.func_177952_p()).state((BlockState) state).build();
-        final net.minecraft.block.BlockState newState = Blocks.field_150348_b.func_176223_P();
+        final BlockPos targetPos = sourcePos.down();
+        final LocatableBlock source = new SpongeLocatableBlockBuilder().world((World) worldIn).position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()).state((BlockState) state).build();
+        final net.minecraft.block.BlockState newState = Blocks.STONE.getDefaultState();
         final ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, targetPos, newState, source);
         final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
         if (event.isCancelled() || !transaction.isValid()) {
             ci.cancel();
             return;
         }
-        if (!worldIn.func_175656_a(targetPos, (net.minecraft.block.BlockState) transaction.getFinal().getState())) {
+        if (!worldIn.setBlockState(targetPos, (net.minecraft.block.BlockState) transaction.getFinal().getState())) {
             ci.cancel();
         }
     }
@@ -133,8 +133,8 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
             return;
         }
         // Do not call events when just flowing into air or same liquid
-        if (state.func_185904_a() != Material.field_151579_a && state.func_185904_a() != this.shadow$getDefaultState().func_185904_a()) {
-            final net.minecraft.block.BlockState newState = this.shadow$getDefaultState().func_177226_a(BlockLiquid.field_176367_b, level);
+        if (state.getMaterial() != Material.AIR && state.getMaterial() != this.shadow$getDefaultState().getMaterial()) {
+            final net.minecraft.block.BlockState newState = this.shadow$getDefaultState().func_177226_a(BlockLiquid.LEVEL, level);
             final ChangeBlockEvent.Break event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidBreak(worldIn, pos, newState);
 
             final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
@@ -145,7 +145,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
 
             // Transaction modified?
             if (transaction.getCustom().isPresent()) {
-                worldIn.func_175656_a(pos, (net.minecraft.block.BlockState) transaction.getFinal().getState());
+                worldIn.setBlockState(pos, (net.minecraft.block.BlockState) transaction.getFinal().getState());
                 ci.cancel();
             }
             // else do vanilla logic

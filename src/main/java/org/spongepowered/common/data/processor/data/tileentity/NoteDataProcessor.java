@@ -55,7 +55,7 @@ public class NoteDataProcessor
     @Override
     protected boolean set(TileEntityNote entity, NotePitch value) {
         entity.field_145879_a = ((SpongeNotePitch) checkNotNull(value)).getByteId();
-        entity.func_70296_d();
+        entity.markDirty();
         return true;
     }
 

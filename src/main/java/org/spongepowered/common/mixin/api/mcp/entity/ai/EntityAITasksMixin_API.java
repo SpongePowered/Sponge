@@ -83,7 +83,7 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
 
             if (otherTask.getType().equals(type)) {
                 if (this.executingTaskEntries.contains(entityaitaskentry)) {
-                    otherAiBase.func_75251_c();
+                    otherAiBase.resetTask();
                     this.executingTaskEntries.remove(entityaitaskentry);
                 }
 

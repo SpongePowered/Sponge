@@ -82,7 +82,7 @@ public abstract class BlockCropsMixin extends BlockMixin {
     }
 
     private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(getAgeProperty()), 0, getMaxAge());
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(getAgeProperty()), 0, getMaxAge());
     }
 
 }

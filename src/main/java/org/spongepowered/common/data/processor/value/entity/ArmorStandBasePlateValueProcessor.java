@@ -56,7 +56,7 @@ public class ArmorStandBasePlateValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected Optional<Boolean> getVal(final ArmorStandEntity container) {
-        return Optional.of(!container.func_175414_r());
+        return Optional.of(!container.hasNoBasePlate());
     }
 
     @Override

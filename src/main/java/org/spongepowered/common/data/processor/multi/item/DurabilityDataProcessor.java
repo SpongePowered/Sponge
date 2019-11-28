@@ -44,35 +44,35 @@ import java.util.Optional;
 public class DurabilityDataProcessor extends AbstractItemDataProcessor<DurabilityData, ImmutableDurabilityData> {
 
     public DurabilityDataProcessor() {
-        super(input -> input.func_77973_b().func_77645_m());
+        super(input -> input.getItem().isDamageable());
     }
 
     @Override
     public boolean doesDataExist(ItemStack itemStack) {
-        return itemStack.func_77973_b().func_77645_m();
+        return itemStack.getItem().isDamageable();
     }
 
     @Override
     public boolean set(ItemStack itemStack, Map<Key<?>, Object> keyValues) {
-        itemStack.func_77964_b(itemStack.func_77958_k() - (int) keyValues.get(Keys.ITEM_DURABILITY));
+        itemStack.func_77964_b(itemStack.getMaxDamage() - (int) keyValues.get(Keys.ITEM_DURABILITY));
         final boolean unbreakable = (boolean) keyValues.get(Keys.UNBREAKABLE);
         if (unbreakable) {
             itemStack.func_77964_b(0);
         }
-        if (!itemStack.func_77942_o()) {
-            itemStack.func_77982_d(new CompoundNBT());
+        if (!itemStack.hasTag()) {
+            itemStack.setTag(new CompoundNBT());
         }
-        itemStack.func_77978_p().func_74757_a(Constants.Item.ITEM_UNBREAKABLE, unbreakable);
+        itemStack.getTag().putBoolean(Constants.Item.ITEM_UNBREAKABLE, unbreakable);
         return true;
     }
 
     @Override
     public Map<Key<?>, ?> getValues(ItemStack itemStack) {
-        if (itemStack.func_77942_o() && itemStack.func_77978_p().func_74764_b(Constants.Item.ITEM_UNBREAKABLE)) {
-            return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.func_77958_k() - itemStack.func_77952_i(),
-                    Keys.UNBREAKABLE, itemStack.func_77978_p().func_74767_n(Constants.Item.ITEM_UNBREAKABLE));
+        if (itemStack.hasTag() && itemStack.getTag().contains(Constants.Item.ITEM_UNBREAKABLE)) {
+            return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getDamage(),
+                    Keys.UNBREAKABLE, itemStack.getTag().getBoolean(Constants.Item.ITEM_UNBREAKABLE));
         }
-        return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.func_77958_k() - itemStack.func_77952_i(), Keys.UNBREAKABLE, false);
+        return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getDamage(), Keys.UNBREAKABLE, false);
     }
 
     @Override

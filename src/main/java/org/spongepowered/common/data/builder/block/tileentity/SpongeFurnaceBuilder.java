@@ -50,7 +50,7 @@ public class SpongeFurnaceBuilder extends SpongeLockableBuilder<Furnace> {
 
             if (!container.contains(Keys.PASSED_BURN_TIME.getQuery(), Keys.MAX_BURN_TIME.getQuery(),
                     Keys.PASSED_COOK_TIME.getQuery(), Keys.MAX_COOK_TIME.getQuery())) {
-                ((TileEntity) furnace).func_145843_s();
+                ((TileEntity) furnace).remove();
                 return Optional.empty();
             }
             final int burnTime = container.getInt(Keys.PASSED_BURN_TIME.getQuery()).get();
@@ -61,7 +61,7 @@ public class SpongeFurnaceBuilder extends SpongeLockableBuilder<Furnace> {
             tileEntityFurnace.func_174885_b(1, maxBurnTime);
             tileEntityFurnace.func_174885_b(2, passedCookTime);
             tileEntityFurnace.func_174885_b(3, maxCookTime);
-            tileEntityFurnace.func_70296_d();
+            tileEntityFurnace.markDirty();
             return Optional.of(furnace);
         });
     }

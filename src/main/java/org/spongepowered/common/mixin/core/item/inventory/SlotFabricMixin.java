@@ -87,7 +87,7 @@ public abstract class SlotFabricMixin implements Fabric, InventoryBridge {
 
     @Override
     public void fabric$clear() {
-        this.putStack(ItemStack.field_190927_a);
+        this.putStack(ItemStack.EMPTY);
     }
 
     @Override

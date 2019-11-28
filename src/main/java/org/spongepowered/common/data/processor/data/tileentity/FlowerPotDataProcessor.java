@@ -60,25 +60,25 @@ public class FlowerPotDataProcessor extends
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        flowerPot.func_190614_a(ItemStack.field_190927_a);
-        flowerPot.func_70296_d();
+        flowerPot.func_190614_a(ItemStack.EMPTY);
+        flowerPot.markDirty();
         return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
 
     @Override
     protected boolean set(TileEntityFlowerPot flowerPot, ItemStackSnapshot stackSnapshot) {
         if (stackSnapshot == ItemStackSnapshot.NONE) {
-            flowerPot.func_190614_a(ItemStack.field_190927_a);
+            flowerPot.func_190614_a(ItemStack.EMPTY);
         } else {
             ItemStack stack = (ItemStack) stackSnapshot.createStack();
-            if (!((BlockFlowerPotAccessor) Blocks.field_150457_bL).accessor$canItemBePotted(stack)) {
+            if (!((BlockFlowerPotAccessor) Blocks.FLOWER_POT).accessor$canItemBePotted(stack)) {
                 return false;
             }
             flowerPot.func_190614_a(stack);
         }
-        flowerPot.func_70296_d();
-        flowerPot.func_145831_w().func_184138_a(flowerPot.func_174877_v(), flowerPot.func_145831_w().func_180495_p(flowerPot.func_174877_v()), flowerPot.func_145831_w()
-                .func_180495_p(flowerPot.func_174877_v()), 3);
+        flowerPot.markDirty();
+        flowerPot.getWorld().notifyBlockUpdate(flowerPot.getPos(), flowerPot.getWorld().getBlockState(flowerPot.getPos()), flowerPot.getWorld()
+                .getBlockState(flowerPot.getPos()), 3);
         return true;
     }
 

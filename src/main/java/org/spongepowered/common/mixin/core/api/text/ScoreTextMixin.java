@@ -58,7 +58,7 @@ public abstract class ScoreTextMixin extends TextMixin {
                 textComponentScore.func_186876_a((ICommandSender) Sponge.getServer());
             }
         }
-        this.override.ifPresent(textComponentScore::func_179997_b);
+        this.override.ifPresent(textComponentScore::setValue);
         return textComponentScore;
     }
 }

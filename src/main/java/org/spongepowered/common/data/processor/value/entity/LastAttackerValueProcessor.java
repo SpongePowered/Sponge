@@ -56,7 +56,7 @@ public class LastAttackerValueProcessor
     @Override
     protected boolean set(LivingEntity dataHolder, @Nullable Optional<EntitySnapshot> lastAttacker) {
         if (lastAttacker == null || !lastAttacker.isPresent()) {
-            dataHolder.func_70604_c(null);
+            dataHolder.setRevengeTarget(null);
             return true;
         }
         if (lastAttacker.get().getUniqueId().isPresent()) {
@@ -64,7 +64,7 @@ public class LastAttackerValueProcessor
             if (optionalEntity.isPresent()) {
                 final Entity entity = optionalEntity.get();
                 if (entity.isLoaded() && entity instanceof LivingEntity) {
-                    dataHolder.func_70604_c((LivingEntity) entity);
+                    dataHolder.setRevengeTarget((LivingEntity) entity);
                     return true;
                 }
             }

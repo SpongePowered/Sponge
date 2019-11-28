@@ -119,9 +119,9 @@ public abstract class WorldGenEndIslandMixin_API extends Feature implements EndI
             final float f = this.implClone$chunkGeneratorEnd$getIslandHeightValue(chunkX, chunkZ, 1, 1);
 
             if (f < -20.0F && rand.nextInt(14) == 0) {
-                func_180709_b(world, rand, chunkPos.func_177982_a(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
+                func_180709_b(world, rand, chunkPos.add(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
                 if (rand.nextInt(4) == 0) {
-                    func_180709_b((World) worldIn, rand, chunkPos.func_177982_a(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
+                    func_180709_b((World) worldIn, rand, chunkPos.add(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
                 }
             }
         }
@@ -130,7 +130,7 @@ public abstract class WorldGenEndIslandMixin_API extends Feature implements EndI
     private float implClone$chunkGeneratorEnd$getIslandHeightValue(final int p_185960_1_, final int p_185960_2_, final int p_185960_3_, final int p_185960_4_) {
         float f = p_185960_1_ * 2 + p_185960_3_;
         float f1 = p_185960_2_ * 2 + p_185960_4_;
-        float f2 = 100.0F - MathHelper.func_76129_c(f * f + f1 * f1) * 8.0F;
+        float f2 = 100.0F - MathHelper.sqrt(f * f + f1 * f1) * 8.0F;
 
         if (f2 > 80.0F) {
             f2 = 80.0F;
@@ -145,11 +145,11 @@ public abstract class WorldGenEndIslandMixin_API extends Feature implements EndI
                 final long k = p_185960_1_ + i;
                 final long l = p_185960_2_ + j;
 
-                if (k * k + l * l > 4096L && this.api$noise.func_151605_a(k, l) < -0.8999999761581421D) {
-                    final float f3 = (MathHelper.func_76135_e(k) * 3439.0F + MathHelper.func_76135_e(l) * 147.0F) % 13.0F + 9.0F;
+                if (k * k + l * l > 4096L && this.api$noise.getValue(k, l) < -0.8999999761581421D) {
+                    final float f3 = (MathHelper.abs(k) * 3439.0F + MathHelper.abs(l) * 147.0F) % 13.0F + 9.0F;
                     f = p_185960_3_ - i * 2;
                     f1 = p_185960_4_ - j * 2;
-                    float f4 = 100.0F - MathHelper.func_76129_c(f * f + f1 * f1) * f3;
+                    float f4 = 100.0F - MathHelper.sqrt(f * f + f1 * f1) * f3;
 
                     if (f4 > 80.0F) {
                         f4 = 80.0F;

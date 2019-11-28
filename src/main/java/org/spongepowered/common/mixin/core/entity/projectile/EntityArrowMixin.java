@@ -82,24 +82,24 @@ public abstract class EntityArrowMixin extends EntityMixin {
      */
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final RayTraceResult hitResult, final CallbackInfo ci) {
-        if (!this.world.field_72995_K) {
+        if (!this.world.isRemote) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrowEntity) (Object) this, ((Arrow) this).getShooter(), hitResult)) {
                 // deflect and drop to ground
                 this.motionX *= -0.10000000149011612D;
                 this.motionY *= -0.10000000149011612D;
                 this.motionZ *= -0.10000000149011612D;
                 this.rotationYaw += 180.0F;
-                ((AbstractArrowEntity) (Object) this).field_70126_B += 180.0F;
+                ((AbstractArrowEntity) (Object) this).prevRotationYaw += 180.0F;
                 this.ticksInAir = 0;
-                this.playSound(SoundEvents.field_187731_t, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely
                 if (hitResult.field_72308_g == null) {
                     final BlockPos blockpos = hitResult.func_178782_a();
-                    this.xTile = blockpos.func_177958_n();
-                    this.yTile = blockpos.func_177956_o();
-                    this.zTile = blockpos.func_177952_p();
-                    final BlockState iblockstate = this.world.func_180495_p(blockpos);
-                    this.inTile = iblockstate.func_177230_c();
+                    this.xTile = blockpos.getX();
+                    this.yTile = blockpos.getY();
+                    this.zTile = blockpos.getZ();
+                    final BlockState iblockstate = this.world.getBlockState(blockpos);
+                    this.inTile = iblockstate.getBlock();
                     this.inData = this.inTile.func_176201_c(iblockstate);
                     this.inGround = true;
                     this.arrowShake = 7;

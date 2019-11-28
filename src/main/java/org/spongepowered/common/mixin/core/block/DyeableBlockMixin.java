@@ -92,7 +92,7 @@ public abstract class DyeableBlockMixin extends BlockMixin implements DyeableBlo
     @SuppressWarnings("ConstantConditions")
     private ImmutableDyeableData impl$getDyeableData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDyeableData.class,
-                (DyeColor) (Object) blockState.func_177229_b(this.bridge$ColorProperty));
+                (DyeColor) (Object) blockState.get(this.bridge$ColorProperty));
     }
 
 }

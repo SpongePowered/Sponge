@@ -55,13 +55,13 @@ public class TileEntityLastCommandOutputValueProcessor extends AbstractSpongeVal
 
     @Override
     protected boolean set(CommandBlockTileEntity container, Optional<Text> value) {
-        container.func_145993_a().func_145750_b(SpongeTexts.toComponent(value.orElse(Text.of())));
+        container.getCommandBlockLogic().setLastOutput(SpongeTexts.toComponent(value.orElse(Text.of())));
         return true;
     }
 
     @Override
     protected Optional<Optional<Text>> getVal(CommandBlockTileEntity container) {
-        Text text = SpongeTexts.toText(container.func_145993_a().func_145749_h());
+        Text text = SpongeTexts.toText(container.getCommandBlockLogic().getLastOutput());
         return Optional.of(Optional.of(text)); //#OptionalWrapping o.o
     }
 

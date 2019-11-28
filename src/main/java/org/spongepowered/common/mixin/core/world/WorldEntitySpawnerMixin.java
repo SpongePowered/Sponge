@@ -111,7 +111,7 @@ public abstract class WorldEntitySpawnerMixin {
             spongeWorld.bridge$getTimingsHandler().mobSpawn.startTiming();
 
             int chunkSpawnCandidates = 0;
-            final int mobSpawnRange = Math.min(((WorldInfoBridge) world.func_72912_H()).bridge$getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
+            final int mobSpawnRange = Math.min(((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
                     ((org.spongepowered.api.world.World) world).getViewDistance());
             // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
             // Since we allow for custom ranges, we need to adjust the div count based on the
@@ -120,19 +120,19 @@ public abstract class WorldEntitySpawnerMixin {
 
             for (final PlayerEntity entityplayer : world.field_73010_i) {
                 // We treat players who do not affect spawning as "spectators"
-                if (!((EntityPlayerBridge) entityplayer).bridge$affectsSpawning() || entityplayer.func_175149_v()) {
+                if (!((EntityPlayerBridge) entityplayer).bridge$affectsSpawning() || entityplayer.isSpectator()) {
                     continue;
                 }
 
-                final int playerPosX = MathHelper.func_76128_c(entityplayer.field_70165_t / 16.0D);
-                final int playerPosZ = MathHelper.func_76128_c(entityplayer.field_70161_v / 16.0D);
+                final int playerPosX = MathHelper.floor(entityplayer.posX / 16.0D);
+                final int playerPosZ = MathHelper.floor(entityplayer.posZ / 16.0D);
 
                 for (int i = -mobSpawnRange; i <= mobSpawnRange; ++i) {
                     for (int j = -mobSpawnRange; j <= mobSpawnRange; ++j) {
                         final boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
                         final Chunk
                             chunk =
-                            ((ChunkProviderBridge) world.func_72863_F())
+                            ((ChunkProviderBridge) world.getChunkProvider())
                                 .bridge$getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
                         if (chunk == null || (chunk.field_189550_d && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
                             // Don't attempt to spawn in an unloaded chunk
@@ -141,9 +141,9 @@ public abstract class WorldEntitySpawnerMixin {
 
                         final ChunkBridge spongeChunk = (ChunkBridge) chunk;
                         ++chunkSpawnCandidates;
-                        final ChunkPos chunkPos = chunk.func_76632_l();
-                        if (!flag && world.func_175723_af().func_177730_a(chunkPos)) {
-                            final PlayerChunkMapEntry playerchunkmapentry = world.func_184164_w().func_187301_b(chunkPos.field_77276_a, chunkPos.field_77275_b);
+                        final ChunkPos chunkPos = chunk.getPos();
+                        if (!flag && world.getWorldBorder().contains(chunkPos)) {
+                            final PlayerChunkMapEntry playerchunkmapentry = world.func_184164_w().func_187301_b(chunkPos.x, chunkPos.z);
 
                             if (playerchunkmapentry != null && playerchunkmapentry.func_187274_e() && !spongeChunk.bridge$isSpawning()) {
                                 this.impl$eligibleSpawnChunks.add(chunk);
@@ -161,8 +161,8 @@ public abstract class WorldEntitySpawnerMixin {
             }
 
             int totalSpawned = 0;
-            final long worldTotalTime = world.func_82737_E();
-            final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.func_72912_H()).bridge$getConfigAdapter();
+            final long worldTotalTime = world.getGameTime();
+            final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
 
             labelOuterLoop:
             for (final EntityClassification enumCreatureType : EntityClassification.values()) {
@@ -186,7 +186,7 @@ public abstract class WorldEntitySpawnerMixin {
                     continue;
                 }
 
-                if ((!enumCreatureType.func_75599_d() || spawnPeacefulMobs) && (enumCreatureType.func_75599_d() || spawnHostileMobs)) {
+                if ((!enumCreatureType.getPeacefulCreature() || spawnPeacefulMobs) && (enumCreatureType.getPeacefulCreature() || spawnHostileMobs)) {
                     final int entityCount = SpongeImplHooks.countEntities(world, enumCreatureType, true);
                     final int maxCount = limit * chunkSpawnCandidates / MOB_SPAWN_COUNT_DIV;
                     if (entityCount > maxCount) {
@@ -200,10 +200,10 @@ public abstract class WorldEntitySpawnerMixin {
                         final Chunk chunk = chunkIterator.next();
                         final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
                         final BlockPos blockpos = getRandomChunkPosition(world, chunk);
-                        final int k1 = blockpos.func_177958_n();
-                        final int l1 = blockpos.func_177956_o();
-                        final int i2 = blockpos.func_177952_p();
-                        final BlockState iblockstate = world.func_180495_p(blockpos);
+                        final int k1 = blockpos.getX();
+                        final int l1 = blockpos.getY();
+                        final int i2 = blockpos.getZ();
+                        final BlockState iblockstate = world.getBlockState(blockpos);
 
                         if (!iblockstate.func_185915_l()) {
                             int spawnCount = 0;
@@ -213,19 +213,19 @@ public abstract class WorldEntitySpawnerMixin {
                                 int j3 = i2;
                                 Biome.SpawnListEntry spawnListEntry = null;
                                 ILivingEntityData ientitylivingdata = null;
-                                final int l3 = MathHelper.func_76143_f(Math.random() * 4.0D);
+                                final int l3 = MathHelper.ceil(Math.random() * 4.0D);
 
                                 for (int i4 = 0; i4 < l3; ++i4) {
-                                    l2 += world.field_73012_v.nextInt(6) - world.field_73012_v.nextInt(6);
-                                    i3 += world.field_73012_v.nextInt(1) - world.field_73012_v.nextInt(1);
-                                    j3 += world.field_73012_v.nextInt(6) - world.field_73012_v.nextInt(6);
-                                    mutableBlockPos.func_181079_c(l2, i3, j3);
+                                    l2 += world.rand.nextInt(6) - world.rand.nextInt(6);
+                                    i3 += world.rand.nextInt(1) - world.rand.nextInt(1);
+                                    j3 += world.rand.nextInt(6) - world.rand.nextInt(6);
+                                    mutableBlockPos.setPos(l2, i3, j3);
                                     final double spawnX = l2 + 0.5F;
                                     final double spawnY = i3;
                                     final double spawnZ = j3 + 0.5F;
 
                                     if (!world.func_175636_b(spawnX, spawnY, spawnZ, 24.0D)
-                                        && world.func_175694_M().func_177954_c(spawnX, spawnY, spawnZ) >= 576.0D) {
+                                        && world.getSpawnPoint().func_177954_c(spawnX, spawnY, spawnZ) >= 576.0D) {
                                         if (spawnListEntry == null) {
                                             spawnListEntry = world.func_175734_a(enumCreatureType, mutableBlockPos);
 
@@ -264,20 +264,20 @@ public abstract class WorldEntitySpawnerMixin {
                                                 continue labelOuterLoop;
                                             }
 
-                                            entityliving.func_70012_b(spawnX, spawnY, spawnZ, world.field_73012_v.nextFloat() * 360.0F, 0.0F);
+                                            entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, world.rand.nextFloat() * 360.0F, 0.0F);
                                             final boolean entityNotColliding = entityliving.func_70058_J();
 
                                             final SpawnerSpawnType type = SpongeImplHooks.canEntitySpawnHere(entityliving, entityNotColliding);
                                             if (type != SpawnerSpawnType.NONE) {
                                                 if (type == SpawnerSpawnType.NORMAL) {
-                                                    ientitylivingdata = entityliving.func_180482_a(world.func_175649_E(new BlockPos(entityliving)), ientitylivingdata);
+                                                    ientitylivingdata = entityliving.func_180482_a(world.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
                                                 }
 
                                                 if (entityNotColliding) {
                                                     ++spawnCount;
-                                                    world.func_72838_d(entityliving);
+                                                    world.addEntity0(entityliving);
                                                 } else {
-                                                    entityliving.func_70106_y();
+                                                    entityliving.remove();
                                                 }
 
                                                 mobLimit--;
@@ -304,10 +304,10 @@ public abstract class WorldEntitySpawnerMixin {
 
     private static BlockPos getRandomChunkPosition(final World worldIn, final Chunk chunk)
     {
-        final int i = chunk.field_76635_g * 16 + worldIn.field_73012_v.nextInt(16);
-        final int j = chunk.field_76647_h * 16 + worldIn.field_73012_v.nextInt(16);
-        final int k = MathHelper.func_154354_b(chunk.func_177433_f(new BlockPos(i, 0, j)) + 1, 16);
-        final int l = worldIn.field_73012_v.nextInt(k > 0 ? k : chunk.func_76625_h() + 16 - 1);
+        final int i = chunk.field_76635_g * 16 + worldIn.rand.nextInt(16);
+        final int j = chunk.field_76647_h * 16 + worldIn.rand.nextInt(16);
+        final int k = MathHelper.roundUp(chunk.func_177433_f(new BlockPos(i, 0, j)) + 1, 16);
+        final int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
         return new BlockPos(i, l, j);
     }
 
@@ -321,17 +321,17 @@ public abstract class WorldEntitySpawnerMixin {
     private static BlockPos getRandomChunkPosition(final World worldIn, final int x, final int z)
     {
         // Sponge start
-        final Chunk chunk = ((ChunkProviderBridge) worldIn.func_72863_F()).bridge$getLoadedChunkWithoutMarkingActive(x, z);
+        final Chunk chunk = ((ChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x, z);
         if (chunk == null || (chunk.field_189550_d && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
             // Don't attempt to spawn in an unloaded chunk
             return null;
         }
         // Sponge end
 
-        final int i = x * 16 + worldIn.field_73012_v.nextInt(16);
-        final int j = z * 16 + worldIn.field_73012_v.nextInt(16);
-        final int k = MathHelper.func_154354_b(chunk.func_177433_f(new BlockPos(i, 0, j)) + 1, 16);
-        final int l = worldIn.field_73012_v.nextInt(k > 0 ? k : chunk.func_76625_h() + 16 - 1);
+        final int i = x * 16 + worldIn.rand.nextInt(16);
+        final int j = z * 16 + worldIn.rand.nextInt(16);
+        final int k = MathHelper.roundUp(chunk.func_177433_f(new BlockPos(i, 0, j)) + 1, 16);
+        final int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
         return new BlockPos(i, l, j);
     }
 
@@ -376,7 +376,7 @@ public abstract class WorldEntitySpawnerMixin {
         "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/List;)"
             + "Lnet/minecraft/util/WeightedRandom$Item;"))
     private static WeightedRandom.Item onGetRandom(final Random random, final List<Biome.SpawnListEntry> collection) {
-        final Biome.SpawnListEntry entry = WeightedRandom.func_76271_a(random, collection);
+        final Biome.SpawnListEntry entry = WeightedRandom.getRandomItem(random, collection);
         setEntityType(entry.field_76300_b);
         return entry;
     }
@@ -390,7 +390,7 @@ public abstract class WorldEntitySpawnerMixin {
         if (entityType == null) {
             return true; // Basically, we can't throw our own event.
         }
-        final Vector3d vector3d = new Vector3d(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
+        final Vector3d vector3d = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
         final Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, vector3d);
         Sponge.getCauseStackManager().pushCause(world);
         final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType, transform);

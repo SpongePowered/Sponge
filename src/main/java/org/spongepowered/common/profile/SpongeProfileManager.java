@@ -51,7 +51,7 @@ import javax.annotation.Nullable;
 public final class SpongeProfileManager implements GameProfileManager {
 
     private static final int LOOKUP_INTERVAL = SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getGameProfileQueryTaskInterval();
-    private final GameProfileCache defaultCache = (GameProfileCache) SpongeImpl.getServer().func_152358_ax();
+    private final GameProfileCache defaultCache = (GameProfileCache) SpongeImpl.getServer().getPlayerProfileCache();
     private GameProfileCache cache = this.defaultCache;
     private ExecutorService gameLookupExecutorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Sponge - Async User Lookup Thread").build());
 

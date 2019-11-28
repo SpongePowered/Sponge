@@ -68,12 +68,12 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
     }
 
     public void populateEntityPosition(final Entity entity) {
-        this.posX = entity.field_70165_t;
-        this.posY = entity.field_70163_u;
-        this.posZ = entity.field_70161_v;
-        this.prevX = entity.field_70142_S;
-        this.prevY = entity.field_70137_T;
-        this.prevZ = entity.field_70136_U;
+        this.posX = entity.posX;
+        this.posY = entity.posY;
+        this.posZ = entity.posZ;
+        this.prevX = entity.lastTickPosX;
+        this.prevY = entity.lastTickPosY;
+        this.prevZ = entity.lastTickPosZ;
 
     }
 }

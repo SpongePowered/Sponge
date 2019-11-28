@@ -72,12 +72,12 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
     // Get Objective
 
     public Optional<Objective> scoreboard$getObjective(final String name) {
-        final ScoreObjective objective = this.func_96518_b(name);
+        final ScoreObjective objective = this.getObjective(name);
         return Optional.ofNullable(objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
     }
 
     public void scoreboard$addObjective(final Objective objective) {
-        final ScoreObjective nmsObjective = this.func_96518_b(objective.getName());
+        final ScoreObjective nmsObjective = this.getObjective(objective.getName());
 
         if (nmsObjective != null) {
             throw new IllegalArgumentException("An objective with the name \'" + objective.getName() + "\' already exists!");
@@ -92,7 +92,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
 
         objectives.add(scoreObjective);
         ((ScoreboardBridge) this).accessor$getScoreObjectives().put(objective.getName(), scoreObjective);
-        this.func_96522_a(scoreObjective);
+        this.onObjectiveAdded(scoreObjective);
 
         ((SpongeObjective) objective).updateScores(this);
     }
@@ -135,20 +135,20 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
     @SuppressWarnings({"rawtypes"})
     public void scoreboard$removeObjective(final Objective objective) {
         final ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        ((ScoreboardBridge) this).accessor$getScoreObjectives().remove(scoreObjective.func_96679_b());
+        ((ScoreboardBridge) this).accessor$getScoreObjectives().remove(scoreObjective.getName());
 
         for (int i = 0; i < 19; ++i)
         {
-            if (this.func_96539_a(i) == scoreObjective)
+            if (this.getObjectiveInDisplaySlot(i) == scoreObjective)
             {
                 //noinspection ConstantConditions
-                this.func_96530_a(i, null);
+                this.setObjectiveInDisplaySlot(i, null);
             }
         }
 
         ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SScoreboardObjectivePacket(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
 
-        final List list = ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().get(scoreObjective.func_96680_c());
+        final List list = ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().get(scoreObjective.getCriteria());
 
         if (list != null)
         {
@@ -187,7 +187,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
     public void scoreboard$registerTeam(final Team spongeTeam) {
         final ScorePlayerTeam team = (ScorePlayerTeam) spongeTeam;
         //noinspection ConstantConditions
-        if (this.func_96508_e(spongeTeam.getName()) != null) {
+        if (this.getTeam(spongeTeam.getName()) != null) {
             throw new IllegalArgumentException("A team with the name \'" +spongeTeam.getName() + "\' already exists!");
         }
 
@@ -196,12 +196,12 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
         }
 
         ((ScorePlayerTeamBridge) team).accessor$setScoreboard(this);
-        ((ScoreboardBridge) this).accessor$getTeams().put(team.func_96661_b(), team);
+        ((ScoreboardBridge) this).accessor$getTeams().put(team.getName(), team);
 
-        for (final String entry: team.func_96670_d()) {
-            this.func_151392_a(entry, team.func_96661_b());
+        for (final String entry: team.getMembershipCollection()) {
+            this.func_151392_a(entry, team.getName());
         }
-        this.func_96523_a(team);
+        this.onTeamAdded(team);
     }
 
     public Set<org.spongepowered.api.scoreboard.Score> scoreboard$getScores() {

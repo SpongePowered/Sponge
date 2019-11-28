@@ -63,7 +63,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
 
     @Override
     protected Optional<Double> getVal(LivingEntity container) {
-        return Optional.of((double) container.func_110143_aJ());
+        return Optional.of((double) container.getHealth());
     }
 
     @Override
@@ -74,8 +74,8 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
     @Override
     public Optional<MutableBoundedValue<Double>> getApiValueFromContainer(ValueContainer<?> container) {
         if (container instanceof LivingEntity) {
-            final double health = ((LivingEntity) container).func_110143_aJ();
-            final double maxHealth = ((LivingEntity) container).func_110138_aP();
+            final double health = ((LivingEntity) container).getHealth();
+            final double maxHealth = ((LivingEntity) container).getMaxHealth();
             return Optional.of(SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .minimum(0D)
                 .maximum(maxHealth)
@@ -97,7 +97,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
         if (container instanceof LivingEntity) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final LivingEntity livingbase = (LivingEntity) container;
-            final double maxHealth = livingbase.func_110138_aP();
+            final double maxHealth = livingbase.getMaxHealth();
             final ImmutableBoundedValue<Double> newHealthValue = SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .defaultValue(maxHealth)
                 .minimum(0D)
@@ -110,12 +110,12 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
                 return DataTransactionResult.errorResult(newHealthValue);
             }
             try {
-                livingbase.func_70606_j(value.floatValue());
+                livingbase.setHealth(value.floatValue());
             } catch (Exception e) {
                 return DataTransactionResult.errorResult(newHealthValue);
             }
             if (value.floatValue() <= 0.0F) {
-                livingbase.func_70097_a(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 1000F);
+                livingbase.attackEntityFrom(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 1000F);
             } else {
                 ((LivingEntityBaseBridge) livingbase).bridge$resetDeathEventsPosted();
             }

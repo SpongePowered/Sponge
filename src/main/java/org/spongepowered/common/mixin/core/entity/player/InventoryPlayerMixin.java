@@ -145,7 +145,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
         itemIndex = itemIndex % 9;
         if (notify && this.player instanceof ServerPlayerEntity) {
             final SHeldItemChangePacket packet = new SHeldItemChangePacket(itemIndex);
-            ((ServerPlayerEntity)this.player).field_71135_a.func_147359_a(packet);
+            ((ServerPlayerEntity)this.player).connection.sendPacket(packet);
         }
         this.currentItem = itemIndex;
     }
@@ -200,7 +200,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     @Override
     public void bridge$cleanupDirty() {
         if (this.timesChanged != this.impl$lastTimesChanged) {
-            this.player.field_71070_bA.func_75142_b();
+            this.player.openContainer.detectAndSendChanges();
         }
     }
 

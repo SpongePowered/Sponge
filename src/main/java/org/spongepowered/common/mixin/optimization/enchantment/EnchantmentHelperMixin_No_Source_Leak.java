@@ -79,11 +79,11 @@ public abstract class EnchantmentHelperMixin_No_Source_Leak {
         ENCHANTMENT_ITERATOR_HURT.field_151364_a = p_151384_0_;
 
         if (p_151384_0_ != null) {
-            applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.func_184209_aF());
+            applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.getEquipmentAndArmor());
         }
 
         if (p_151384_1_ instanceof PlayerEntity) {
-            applyEnchantmentModifier(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.func_184614_ca());
+            applyEnchantmentModifier(ENCHANTMENT_ITERATOR_HURT, p_151384_0_.getHeldItemMainhand());
         }
         // Sponge Start - remove references to entity objects to avoid memory leaks
         ENCHANTMENT_ITERATOR_HURT.field_151363_b = null;
@@ -103,11 +103,11 @@ public abstract class EnchantmentHelperMixin_No_Source_Leak {
         ENCHANTMENT_ITERATOR_DAMAGE.field_151365_b = p_151385_1_;
 
         if (p_151385_0_ != null) {
-            applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.func_184209_aF());
+            applyEnchantmentModifierArray(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.getEquipmentAndArmor());
         }
 
         if (p_151385_0_ instanceof PlayerEntity) {
-            applyEnchantmentModifier(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.func_184614_ca());
+            applyEnchantmentModifier(ENCHANTMENT_ITERATOR_DAMAGE, p_151385_0_.getHeldItemMainhand());
         }
         // Sponge Start - remove references to entity objects to avoid memory leaks
         ENCHANTMENT_ITERATOR_DAMAGE.field_151366_a = null;

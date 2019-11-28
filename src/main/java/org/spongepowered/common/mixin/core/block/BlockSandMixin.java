@@ -74,6 +74,6 @@ public abstract class BlockSandMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableSandData impl$getSandTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandData.class, (SandType) (Object) blockState.func_177229_b(SandBlock.field_176504_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandData.class, (SandType) (Object) blockState.get(SandBlock.field_176504_a));
     }
 }

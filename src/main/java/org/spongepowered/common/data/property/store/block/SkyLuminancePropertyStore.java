@@ -51,7 +51,7 @@ public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLu
     @Override
     public Optional<SkyLuminanceProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final float light = world.func_175642_b(LightType.SKY, VecHelper.toBlockPos(location));
+        final float light = world.getLightFor(LightType.SKY, VecHelper.toBlockPos(location));
         return Optional.of(new SkyLuminanceProperty(light));
     }
 

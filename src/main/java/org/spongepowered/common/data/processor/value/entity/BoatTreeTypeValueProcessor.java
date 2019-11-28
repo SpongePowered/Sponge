@@ -55,17 +55,17 @@ public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcesso
     @Override
     protected boolean set(BoatEntity dataHolder, TreeType value) {
         if (value == TreeTypes.OAK) {
-            dataHolder.func_184458_a(BoatEntity.Type.OAK);
+            dataHolder.setBoatType(BoatEntity.Type.OAK);
         } else if (value == TreeTypes.SPRUCE) {
-            dataHolder.func_184458_a(BoatEntity.Type.SPRUCE);
+            dataHolder.setBoatType(BoatEntity.Type.SPRUCE);
         } else if (value == TreeTypes.JUNGLE) {
-            dataHolder.func_184458_a(BoatEntity.Type.JUNGLE);
+            dataHolder.setBoatType(BoatEntity.Type.JUNGLE);
         } else if (value == TreeTypes.DARK_OAK) {
-            dataHolder.func_184458_a(BoatEntity.Type.DARK_OAK);
+            dataHolder.setBoatType(BoatEntity.Type.DARK_OAK);
         } else if (value == TreeTypes.BIRCH) {
-            dataHolder.func_184458_a(BoatEntity.Type.BIRCH);
+            dataHolder.setBoatType(BoatEntity.Type.BIRCH);
         } else if (value == TreeTypes.ACACIA) {
-            dataHolder.func_184458_a(BoatEntity.Type.ACACIA);
+            dataHolder.setBoatType(BoatEntity.Type.ACACIA);
         } else {
             return false;
         }
@@ -75,7 +75,7 @@ public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcesso
 
     @Override
     protected Optional<TreeType> getVal(BoatEntity dataHolder) {
-        switch (dataHolder.func_184453_r()) {
+        switch (dataHolder.getBoatType()) {
             case OAK:
                 return Optional.of(TreeTypes.OAK);
             case SPRUCE:

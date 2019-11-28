@@ -58,7 +58,7 @@ public class TileEntityBannerDataProcessor extends AbstractTileEntityDataProcess
     @SuppressWarnings("unchecked")
     @Override
     protected boolean set(BannerTileEntity entity, Map<Key<?>, Object> keyValues) {
-        if (!entity.func_145831_w().field_72995_K) {
+        if (!entity.getWorld().isRemote) {
             List<PatternLayer> layers = (List<PatternLayer>) keyValues.get(Keys.BANNER_PATTERNS);
             DyeColor baseColor = (DyeColor) keyValues.get(Keys.BANNER_BASE_COLOR);
             ((TileEntityBannerBridge) entity).bridge$setLayers(layers);

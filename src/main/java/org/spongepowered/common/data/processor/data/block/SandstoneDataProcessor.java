@@ -39,8 +39,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SandstoneDataProcessor extends AbstractCatalogDataProcessor<SandstoneType, Value<SandstoneType>, SandstoneData, ImmutableSandstoneData> {
 
     public SandstoneDataProcessor() {
-        super(Keys.SANDSTONE_TYPE, input -> input.func_77973_b() == ItemTypes.SANDSTONE || input.func_77973_b() == ItemTypes.SANDSTONE_STAIRS
-                || input.func_77973_b() == ItemTypes.RED_SANDSTONE || input.func_77973_b() == ItemTypes.RED_SANDSTONE_STAIRS);
+        super(Keys.SANDSTONE_TYPE, input -> input.getItem() == ItemTypes.SANDSTONE || input.getItem() == ItemTypes.SANDSTONE_STAIRS
+                || input.getItem() == ItemTypes.RED_SANDSTONE || input.getItem() == ItemTypes.RED_SANDSTONE_STAIRS);
     }
 
     @Override

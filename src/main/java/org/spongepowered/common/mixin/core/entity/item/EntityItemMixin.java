@@ -81,11 +81,11 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
-        if (this.world.field_72995_K || ((WorldBridge) this.world).bridge$isFake()) {
+        if (this.world.isRemote || ((WorldBridge) this.world).bridge$isFake()) {
             return originalRadius;
         }
         if (this.cachedRadius == -1) {
-            final double configRadius = ((WorldInfoBridge) this.world.func_72912_H()).bridge$getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
+            final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
             this.cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.cachedRadius;
@@ -141,15 +141,15 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
 
-        this.infinitePickupDelay = compound.func_74767_n(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY);
-        if (compound.func_150297_b(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
-            this.previousPickupDelay = compound.func_74762_e(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY);
+        this.infinitePickupDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY);
+        if (compound.contains(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
+            this.previousPickupDelay = compound.getInt(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY);
         } else {
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
-        this.infiniteDespawnDelay = compound.func_74767_n(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY);
-        if (compound.func_150297_b(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
-            this.previousDespawnDelay = compound.func_74762_e(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY);
+        this.infiniteDespawnDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY);
+        if (compound.contains(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
+            this.previousDespawnDelay = compound.getInt(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY);
         } else {
             this.previousDespawnDelay = MAGIC_PREVIOUS;
         }
@@ -181,10 +181,10 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
 
-        compound.func_74757_a(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
-        compound.func_74777_a(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
-        compound.func_74757_a(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
-        compound.func_74777_a(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
+        compound.putBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
+        compound.putShort(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
+        compound.putBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
+        compound.putShort(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
     }
 
     @Inject(
@@ -210,7 +210,7 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
         )
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
-        if (!SpongeImplHooks.isMainThread() || this.getItem().func_190926_b()) {
+        if (!SpongeImplHooks.isMainThread() || this.getItem().isEmpty()) {
             // In the rare case the first if block is actually at the end of the method instruction list, we don't want to 
             // erroneously be calling this twice.
             return;
@@ -226,7 +226,7 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     private boolean spongeImpl$throwPikcupEventForAddItem(final PlayerInventory inventory, final ItemStack itemStack, final PlayerEntity player) {
         final TrackedInventoryBridge inv = (TrackedInventoryBridge) inventory;
         inv.bridge$setCaptureInventory(true);
-        final boolean added = inventory.func_70441_a(itemStack);
+        final boolean added = inventory.addItemStackToInventory(itemStack);
         inv.bridge$setCaptureInventory(false);
         inv.bridge$getCapturedSlotTransactions();
         if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(player, inv)) {

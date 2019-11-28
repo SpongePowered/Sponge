@@ -83,24 +83,24 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Mine
     @SuppressWarnings("unchecked")
     @Override
     protected boolean set(final MinecartCommandBlockEntity entity, final Map<Key<?>, Object> keyValues) {
-        final CommandBlockLogic logic = entity.func_145822_e();
-        logic.func_145750_b(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
+        final CommandBlockLogic logic = entity.getCommandBlockLogic();
+        logic.setLastOutput(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
         ((CommandBlockBaseLogicAccessor) logic).accessor$setCommandStored((String) keyValues.get(Keys.COMMAND));
         ((CommandBlockBaseLogicAccessor) logic).accessor$setSuccessCount((int) keyValues.get(Keys.SUCCESS_COUNT));
-        logic.func_175573_a((boolean) keyValues.get(Keys.TRACKS_OUTPUT));
-        entity.func_70071_h_();
+        logic.setTrackOutput((boolean) keyValues.get(Keys.TRACKS_OUTPUT));
+        entity.tick();
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(final MinecartCommandBlockEntity entity) {
-        final CommandBlockLogic logic = entity.func_145822_e();
+        final CommandBlockLogic logic = entity.getCommandBlockLogic();
         final Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(4);
-        final Optional<Text> lastCommandOutput = logic.func_145749_h() != null ? Optional.of(SpongeTexts.toText(logic.func_145749_h())) : Optional.empty();
+        final Optional<Text> lastCommandOutput = logic.getLastOutput() != null ? Optional.of(SpongeTexts.toText(logic.getLastOutput())) : Optional.empty();
         values.put(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);
-        values.put(Keys.COMMAND, logic.func_145753_i());
-        values.put(Keys.SUCCESS_COUNT, logic.func_145760_g());
-        values.put(Keys.TRACKS_OUTPUT, logic.func_175571_m());
+        values.put(Keys.COMMAND, logic.getCommand());
+        values.put(Keys.SUCCESS_COUNT, logic.getSuccessCount());
+        values.put(Keys.TRACKS_OUTPUT, logic.shouldTrackOutput());
         return values;
     }
 

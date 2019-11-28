@@ -49,13 +49,13 @@ public class ChargedDataProcessor
 
     @Override
     protected boolean set(CreeperEntity entity, Boolean value) {
-        entity.func_184212_Q().func_187227_b(EntityCreeperAccessor.accessor$getPoweredParameter(), value);
+        entity.getDataManager().set(EntityCreeperAccessor.accessor$getPoweredParameter(), value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(CreeperEntity entity) {
-        return Optional.of(entity.func_70830_n());
+        return Optional.of(entity.getPowered());
     }
 
     @Override

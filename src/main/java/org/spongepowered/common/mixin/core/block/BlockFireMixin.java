@@ -61,7 +61,7 @@ public abstract class BlockFireMixin extends BlockMixin {
             }
 
         }
-        return world.func_180501_a(pos, state, updateFlag);
+        return world.setBlockState(pos, state, updateFlag);
     }
 
     @Inject(method = "catchOnFire",
@@ -73,7 +73,7 @@ public abstract class BlockFireMixin extends BlockMixin {
         cancellable = true)
     private void impl$onCatchFirePreCheck(
         final World world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
-        if (!world.field_72995_K) {
+        if (!world.isRemote) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
@@ -89,7 +89,7 @@ public abstract class BlockFireMixin extends BlockMixin {
         cancellable = true)
     private void impl$onCatchFirePreCheckOther(
         final World world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
-        if (!world.field_72995_K) {
+        if (!world.isRemote) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }

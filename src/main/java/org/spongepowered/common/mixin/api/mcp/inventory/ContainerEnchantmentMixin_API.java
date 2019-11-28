@@ -50,7 +50,7 @@ public abstract class ContainerEnchantmentMixin_API implements SingleBlockCarrie
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>(((World) this.world), new Vector3d(this.position.func_177958_n(), this.position.func_177956_o(), this.position.func_177952_p()));
+        return new Location<>(((World) this.world), new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
     }
 
     @Override

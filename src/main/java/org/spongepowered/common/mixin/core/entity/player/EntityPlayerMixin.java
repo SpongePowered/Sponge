@@ -176,7 +176,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     }
 
     private boolean affectsSpawning = true;
-    private Vector3d targetedLocation = VecHelper.toVector3d(this.world.func_175694_M());
+    private Vector3d targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean dontRecalculateExperience;
     private boolean shouldRestoreInventory = false;
     protected final boolean isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);
@@ -334,35 +334,35 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         this.motionY = 0.10000000149011612D;
 
         if (this.shadow$getName().equals("Notch")) {
-            this.dropItem(new ItemStack(Items.field_151034_e, 1), true, false);
+            this.dropItem(new ItemStack(Items.APPLE, 1), true, false);
         }
 
-        if (!this.world.func_82736_K().func_82766_b("keepInventory") && !this.isSpectator()) {
+        if (!this.world.getGameRules().func_82766_b("keepInventory") && !this.isSpectator()) {
             this.destroyVanishingCursedItems();
-            this.inventory.func_70436_m();
+            this.inventory.dropAllItems();
         }
 
         if (cause != null) {
-            this.motionX = (double) (-MathHelper.func_76134_b((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
-            this.motionZ = (double) (-MathHelper.func_76126_a((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
+            this.motionX = (double) (-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
+            this.motionZ = (double) (-MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
         } else {
             this.motionX = this.motionZ = 0.0D;
         }
 
-        this.addStat(Stats.field_188069_A);
-        this.takeStat(Stats.field_188098_h);
+        this.addStat(Stats.DEATHS);
+        this.takeStat(Stats.TIME_SINCE_DEATH);
         this.extinguish();
         this.setFlag(0, false);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     private boolean onSpongeIsPlayerSleeping(final PlayerEntity self) {
-        if (self.func_70608_bn()) {
+        if (self.isSleeping()) {
             if (!((WorldBridge) this.world).bridge$isFake()) {
                 final CauseStackManager csm = Sponge.getCauseStackManager();
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.bedLocation;
-                final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) this.world).createSnapshot(bedLocation.func_177958_n(), bedLocation.func_177956_o(), bedLocation.func_177952_p());
+                final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
                 SpongeImpl.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (org.spongepowered.api.entity.Entity) this));
                 csm.popCause();
             }
@@ -379,7 +379,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"))
     private void spongePlaySound(final World world, final PlayerEntity player, final double d1, final double d2, final double d3, final SoundEvent sound, final SoundCategory category, final float volume, final float pitch) {
         if (!this.bridge$isVanished()) {
-            this.world.func_184148_a(player, d1, d2, d3, sound, category, volume, pitch);
+            this.world.playSound(player, d1, d2, d3, sound, category, volume, pitch);
         }
     }
 
@@ -400,10 +400,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
     @Override
     public void bridge$setTargetedLocation(@Nullable final Vector3d vec) {
-        this.targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.func_175694_M());
+        this.targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
         //noinspection ConstantConditions
         if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
-            this.world.func_175652_B(VecHelper.toBlockPos(this.targetedLocation));
+            this.world.setSpawnPoint(VecHelper.toBlockPos(this.targetedLocation));
         }
     }
 
@@ -484,7 +484,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Nullable
     @Overwrite
     public ItemEntity dropItem(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem) {
-        if (droppedItem.func_190926_b()) {
+        if (droppedItem.isEmpty()) {
             return null;
         }
         // Sponge Start - redirect to our handling to capture and throw events.
@@ -492,9 +492,9 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
             ((EntityPlayerBridge) this).bridge$shouldRestoreInventory(false);
             final PlayerEntity player = (PlayerEntity) (EntityPlayerBridge) this;
 
-            final double posX1 = player.field_70165_t;
-            final double posY1 = player.field_70163_u - 0.3 + player.func_70047_e();
-            final double posZ1 = player.field_70161_v;
+            final double posX1 = player.posX;
+            final double posY1 = player.posY - 0.3 + player.getEyeHeight();
+            final double posZ1 = player.posZ;
             // Now the real fun begins.
             final ItemStack item;
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);
@@ -508,7 +508,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
                 item = SpongeCommonEventFactory.throwDropItemAndConstructEvent((PlayerEntity) (EntityPlayerBridge) this, posX1, posY1, posZ1, snapshot, original, frame);
 
-                if (item == null || item.func_190926_b()) {
+                if (item == null || item.isEmpty()) {
                     return null;
                 }
 
@@ -517,25 +517,25 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                 // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
                 // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
 
-                final ItemEntity entityitem = new ItemEntity(player.field_70170_p, posX1, posY1, posZ1, droppedItem);
-                entityitem.func_174867_a(40);
+                final ItemEntity entityitem = new ItemEntity(player.world, posX1, posY1, posZ1, droppedItem);
+                entityitem.setPickupDelay(40);
 
                 if (traceItem) {
                     entityitem.func_145799_b(player.func_70005_c_());
                 }
 
-                final Random random = player.func_70681_au();
+                final Random random = player.getRNG();
                 if (dropAround) {
                     final float f = random.nextFloat() * 0.5F;
                     final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-                    entityitem.field_70159_w = -MathHelper.func_76126_a(f1) * f;
-                    entityitem.field_70179_y = MathHelper.func_76134_b(f1) * f;
+                    entityitem.field_70159_w = -MathHelper.sin(f1) * f;
+                    entityitem.field_70179_y = MathHelper.cos(f1) * f;
                     entityitem.field_70181_x = 0.20000000298023224D;
                 } else {
                     float f2 = 0.3F;
-                    entityitem.field_70159_w = -MathHelper.func_76126_a(player.field_70177_z * 0.017453292F) * MathHelper.func_76134_b(player.field_70125_A * 0.017453292F) * f2;
-                    entityitem.field_70179_y = MathHelper.func_76134_b(player.field_70177_z * 0.017453292F) * MathHelper.func_76134_b(player.field_70125_A * 0.017453292F) * f2;
-                    entityitem.field_70181_x = - MathHelper.func_76126_a(player.field_70125_A * 0.017453292F) * f2 + 0.1F;
+                    entityitem.field_70159_w = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+                    entityitem.field_70179_y = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+                    entityitem.field_70181_x = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
                     final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
                     f2 = 0.02F * random.nextFloat();
                     entityitem.field_70159_w += Math.cos(f3) * f2;
@@ -547,15 +547,15 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                     return entityitem;
                 }
                 // TODO - Investigate whether player drops are adding to the stat list in captures.
-                final ItemStack stack = entityitem.func_92059_d();
-                player.field_70170_p.func_72838_d(entityitem);
+                final ItemStack stack = entityitem.getItem();
+                player.world.addEntity0(entityitem);
 
                 if (traceItem) {
-                    if (!stack.func_190926_b()) {
-                        player.func_71064_a(Stats.func_188058_e(stack.func_77973_b()), droppedItem.func_190916_E());
+                    if (!stack.isEmpty()) {
+                        player.addStat(Stats.func_188058_e(stack.getItem()), droppedItem.getCount());
                     }
 
-                    player.func_71029_a(Stats.field_75952_v);
+                    player.addStat(Stats.DROP);
                 }
 
                 return entityitem;
@@ -564,7 +564,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         // Sponge end
         final double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
         final ItemEntity entityitem = new ItemEntity(this.world, this.posX, d0, this.posZ, droppedItem);
-        entityitem.func_174867_a(40);
+        entityitem.setPickupDelay(40);
 
         if (traceItem) {
             entityitem.func_145799_b(this.shadow$getName());
@@ -573,16 +573,16 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         if (dropAround) {
             final float f = this.rand.nextFloat() * 0.5F;
             final float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-            entityitem.field_70159_w = (double) (-MathHelper.func_76126_a(f1) * f);
-            entityitem.field_70179_y = (double) (MathHelper.func_76134_b(f1) * f);
+            entityitem.field_70159_w = (double) (-MathHelper.sin(f1) * f);
+            entityitem.field_70179_y = (double) (MathHelper.cos(f1) * f);
             entityitem.field_70181_x = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
             entityitem.field_70159_w =
-                (double) (-MathHelper.func_76126_a(this.rotationYaw * 0.017453292F) * MathHelper.func_76134_b(this.rotationPitch * 0.017453292F) * f2);
+                (double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
             entityitem.field_70179_y =
-                (double) (MathHelper.func_76134_b(this.rotationYaw * 0.017453292F) * MathHelper.func_76134_b(this.rotationPitch * 0.017453292F) * f2);
-            entityitem.field_70181_x = (double) (-MathHelper.func_76126_a(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
+                (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
+            entityitem.field_70181_x = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
             final float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * this.rand.nextFloat();
             entityitem.field_70159_w += Math.cos((double) f3) * (double) f2;
@@ -593,11 +593,11 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         final ItemStack itemstack = this.dropItemAndGetStack(entityitem);
 
         if (traceItem) {
-            if (itemstack != null && !itemstack.func_190926_b()) { // Sponge - add null check
-                this.addStat(Stats.func_188058_e(itemstack.func_77973_b()), droppedItem.func_190916_E());
+            if (itemstack != null && !itemstack.isEmpty()) { // Sponge - add null check
+                this.addStat(Stats.func_188058_e(itemstack.getItem()), droppedItem.getCount());
             }
 
-            this.addStat(Stats.field_75952_v);
+            this.addStat(Stats.DROP);
         }
 
         return entityitem;
@@ -615,13 +615,13 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Overwrite
     @Nullable
     public ItemStack dropItemAndGetStack(final ItemEntity entity) {
-        this.world.func_72838_d(entity);
-        return entity.func_92059_d();
+        this.world.addEntity0(entity);
+        return entity.getItem();
     }
 
     @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V")) // collideWithPlayer
     private void onPlayerCollideEntity(final net.minecraft.entity.Entity entity, final PlayerEntity player) {
-        entity.func_70100_b_(player);
+        entity.onCollideWithPlayer(player);
     }
 
 
@@ -636,7 +636,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     private void onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         if (source == DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) {
             // Taken from the original method, wake the player up if they are about to die.
-            if (this.isPlayerSleeping() && !this.world.field_72995_K) {
+            if (this.isPlayerSleeping() && !this.world.isRemote) {
                 this.wakeUpPlayer(true, true, false);
             }
 
@@ -684,11 +684,11 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
             return;
         }
         // Sponge End
-        if (targetEntity.func_70075_an()) {
-            if (!targetEntity.func_85031_j((PlayerEntity) (Object) this)) {
+        if (targetEntity.canBeAttackedWithItem()) {
+            if (!targetEntity.hitByEntity((PlayerEntity) (Object) this)) {
                 // Sponge Start - Prepare our event values
                 // float damage = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-                final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.field_111264_e).func_111126_e();
+                final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
                 float damage = (float) originalBaseDamage;
                 // Sponge End
                 float enchantmentDamage = 0.0F;
@@ -704,7 +704,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                 final List<ModifierFunction<DamageModifier>> originalFunctions = new ArrayList<>();
 
                 final EnumCreatureAttribute creatureAttribute = targetEntity instanceof LivingEntity
-                                                                ? ((LivingEntity) targetEntity).func_70668_bt()
+                                                                ? ((LivingEntity) targetEntity).getCreatureAttribute()
                                                                 : EnumCreatureAttribute.UNDEFINED;
                 final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
@@ -728,7 +728,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                     boolean isCriticalAttack = false;
                     boolean isSweapingAttack = false;
                     int knockbackModifier = 0;
-                    knockbackModifier = knockbackModifier + EnchantmentHelper.func_77501_a((PlayerEntity) (Object) this);
+                    knockbackModifier = knockbackModifier + EnchantmentHelper.getKnockbackModifier((PlayerEntity) (Object) this);
 
                     if (this.isSprinting() && isStrongAttack) {
                         // Sponge - Only play sound after the event has be thrown and not cancelled.
@@ -737,7 +737,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                         isSprintingAttack = true;
                     }
 
-                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.shadow$isInWater() && !this.isPotionActive(Effects.field_76440_q) && !this.isRiding() && targetEntity instanceof LivingEntity;
+                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.shadow$isInWater() && !this.isPotionActive(Effects.BLINDNESS) && !this.isRiding() && targetEntity instanceof LivingEntity;
                     isCriticalAttack = isCriticalAttack && !this.isSprinting();
 
                     if (isCriticalAttack) {
@@ -754,14 +754,14 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.getAIMoveSpeed()) {
                         final ItemStack itemstack = heldItem;
 
-                        if (itemstack.func_77973_b() instanceof SwordItem) {
+                        if (itemstack.getItem() instanceof SwordItem) {
                             isSweapingAttack = true;
                         }
                     }
 
                     // Sponge Start - Create the event and throw it
-                    final DamageSource damageSource = DamageSource.func_76365_a((PlayerEntity) (Object) this);
-                    final boolean isMainthread = !this.world.field_72995_K;
+                    final DamageSource damageSource = DamageSource.causePlayerDamage((PlayerEntity) (Object) this);
+                    final boolean isMainthread = !this.world.isRemote;
                     if (isMainthread) {
                         Sponge.getCauseStackManager().pushCause(damageSource);
                     }
@@ -787,28 +787,28 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
                     float targetOriginalHealth = 0.0F;
                     boolean litEntityOnFire = false;
-                    final int fireAspectModifier = EnchantmentHelper.func_90036_a((PlayerEntity) (Object) this);
+                    final int fireAspectModifier = EnchantmentHelper.getFireAspectModifier((PlayerEntity) (Object) this);
 
                     if (targetEntity instanceof LivingEntity) {
-                        targetOriginalHealth = ((LivingEntity) targetEntity).func_110143_aJ();
+                        targetOriginalHealth = ((LivingEntity) targetEntity).getHealth();
 
-                        if (fireAspectModifier > 0 && !targetEntity.func_70027_ad()) {
+                        if (fireAspectModifier > 0 && !targetEntity.isBurning()) {
                             litEntityOnFire = true;
-                            targetEntity.func_70015_d(1);
+                            targetEntity.setFire(1);
                         }
                     }
 
                     final double targetMotionX = targetEntity.field_70159_w;
                     final double targetMotionY = targetEntity.field_70181_x;
                     final double targetMotionZ = targetEntity.field_70179_y;
-                    final boolean attackSucceeded = targetEntity.func_70097_a(DamageSource.func_76365_a((PlayerEntity) (Object) this), damage);
+                    final boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage((PlayerEntity) (Object) this), damage);
 
                     if (attackSucceeded) {
                         if (knockbackModifier > 0) {
                             if (targetEntity instanceof LivingEntity) {
-                                ((LivingEntity) targetEntity).func_70653_a((PlayerEntity) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper.func_76126_a(this.rotationYaw * 0.017453292F), (double) (-MathHelper.func_76134_b(this.rotationYaw * 0.017453292F)));
+                                ((LivingEntity) targetEntity).knockBack((PlayerEntity) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper.sin(this.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                             } else {
-                                targetEntity.func_70024_g((double) (-MathHelper.func_76126_a(this.rotationYaw * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (MathHelper.func_76134_b(this.rotationYaw * 0.017453292F) * (float) knockbackModifier * 0.5F));
+                                targetEntity.addVelocity((double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * (float) knockbackModifier * 0.5F));
                             }
 
                             this.motionX *= 0.6D;
@@ -817,7 +817,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                         }
 
                         if (isSweapingAttack) {
-                            for (final LivingEntity entitylivingbase : this.world.func_72872_a(LivingEntity.class, targetEntity.func_174813_aQ().func_72314_b(1.0D, 0.25D, 1.0D))) {
+                            for (final LivingEntity entitylivingbase : this.world.func_72872_a(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
                                 if (entitylivingbase != (PlayerEntity) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
@@ -836,7 +836,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                                                 .item(heldSnapshot)
                                                 .type(DamageModifierTypes.SWEEPING)
                                                 .build(),
-                                            incoming -> EnchantmentHelper.func_191527_a((PlayerEntity) (Object) this) * attackDamage);
+                                            incoming -> EnchantmentHelper.getSweepingDamageRatio((PlayerEntity) (Object) this) * attackDamage);
                                         final List<DamageFunction> sweapingFunctions = new ArrayList<>();
                                         sweapingFunctions.add(sweapingFunction);
                                         final AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
@@ -845,10 +845,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                                         SpongeImpl.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
                                             entitylivingbase
-                                                .func_70653_a((PlayerEntity) (Object) this, sweepingAttackEvent.getKnockbackModifier() * 0.4F,
-                                                    (double) MathHelper.func_76126_a(this.rotationYaw * 0.017453292F),
-                                                    (double) -MathHelper.func_76134_b(this.rotationYaw * 0.017453292F));
-                                            entitylivingbase.func_70097_a(DamageSource.func_76365_a((PlayerEntity) (Object) this),
+                                                .knockBack((PlayerEntity) (Object) this, sweepingAttackEvent.getKnockbackModifier() * 0.4F,
+                                                    (double) MathHelper.sin(this.rotationYaw * 0.017453292F),
+                                                    (double) -MathHelper.cos(this.rotationYaw * 0.017453292F));
+                                            entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage((PlayerEntity) (Object) this),
                                                 (float) sweepingAttackEvent.getFinalOutputDamage());
                                         }
                                     }
@@ -856,28 +856,28 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                                 }
                             }
 
-                            this.world.func_184148_a(null, this.posX, this.posY, this.posZ, SoundEvents.field_187730_dW, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.getSoundCategory(), 1.0F, 1.0F);
                             this.spawnSweepParticles();
                         }
 
-                        if (targetEntity instanceof ServerPlayerEntity && targetEntity.field_70133_I) {
-                            ((ServerPlayerEntity) targetEntity).field_71135_a.func_147359_a(new SEntityVelocityPacket(targetEntity));
-                            targetEntity.field_70133_I = false;
+                        if (targetEntity instanceof ServerPlayerEntity && targetEntity.velocityChanged) {
+                            ((ServerPlayerEntity) targetEntity).connection.sendPacket(new SEntityVelocityPacket(targetEntity));
+                            targetEntity.velocityChanged = false;
                             targetEntity.field_70159_w = targetMotionX;
                             targetEntity.field_70181_x = targetMotionY;
                             targetEntity.field_70179_y = targetMotionZ;
                         }
 
                         if (isCriticalAttack) {
-                            this.world.func_184148_a(null, this.posX, this.posY, this.posZ, SoundEvents.field_187718_dS, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.getSoundCategory(), 1.0F, 1.0F);
                             this.onCriticalHit(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
                             if (isStrongAttack) {
-                                this.world.func_184148_a(null, this.posX, this.posY, this.posZ, SoundEvents.field_187727_dV, this.getSoundCategory(), 1.0F, 1.0F);
+                                this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.getSoundCategory(), 1.0F, 1.0F);
                             } else {
-                                this.world.func_184148_a(null, this.posX, this.posY, this.posZ, SoundEvents.field_187733_dX , this.getSoundCategory(), 1.0F, 1.0F);
+                                this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.getSoundCategory(), 1.0F, 1.0F);
                             }
                         }
 
@@ -888,10 +888,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                         this.setLastAttackedEntity(targetEntity);
 
                         if (targetEntity instanceof LivingEntity) {
-                            EnchantmentHelper.func_151384_a((LivingEntity) targetEntity, (PlayerEntity) (Object) this);
+                            EnchantmentHelper.applyThornEnchantments((LivingEntity) targetEntity, (PlayerEntity) (Object) this);
                         }
 
-                        EnchantmentHelper.func_151385_b((PlayerEntity) (Object) this, targetEntity);
+                        EnchantmentHelper.applyArthropodEnchantments((PlayerEntity) (Object) this, targetEntity);
                         final ItemStack itemstack1 = this.getHeldItemMainhand();
                         Entity entity = targetEntity;
 
@@ -903,33 +903,33 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                             }
                         }
 
-                        if(!itemstack1.func_190926_b() && entity instanceof LivingEntity) {
-                            itemstack1.func_77961_a((LivingEntity) entity, (PlayerEntity) (Object) this);
-                            if(itemstack1.func_190926_b()) {
-                                this.setHeldItem(Hand.MAIN_HAND, ItemStack.field_190927_a);
+                        if(!itemstack1.isEmpty() && entity instanceof LivingEntity) {
+                            itemstack1.hitEntity((LivingEntity) entity, (PlayerEntity) (Object) this);
+                            if(itemstack1.isEmpty()) {
+                                this.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
                             }
                         }
 
                         if (targetEntity instanceof LivingEntity) {
-                            final float f5 = targetOriginalHealth - ((LivingEntity) targetEntity).func_110143_aJ();
-                            this.addStat(Stats.field_188111_y, Math.round(f5 * 10.0F));
+                            final float f5 = targetOriginalHealth - ((LivingEntity) targetEntity).getHealth();
+                            this.addStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
 
                             if (fireAspectModifier > 0) {
-                                targetEntity.func_70015_d(fireAspectModifier * 4);
+                                targetEntity.setFire(fireAspectModifier * 4);
                             }
 
                             if (this.world instanceof ServerWorld && f5 > 2.0F) {
                                 final int k = (int) ((double) f5 * 0.5D);
-                                ((ServerWorld) this.world).func_175739_a(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.field_70165_t, targetEntity.field_70163_u + (double) (targetEntity.field_70131_O * 0.5F), targetEntity.field_70161_v, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
+                                ((ServerWorld) this.world).func_175739_a(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.field_70131_O * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
                             }
                         }
 
                         this.addExhaustion(0.3F);
                     } else {
-                        this.world.func_184148_a(null, this.posX, this.posY, this.posZ, SoundEvents.field_187724_dU, this.getSoundCategory(), 1.0F, 1.0F);
+                        this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
-                            targetEntity.func_70066_B();
+                            targetEntity.extinguish();
                         }
                     }
                 }
@@ -942,16 +942,16 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     {
         if (((TrackedInventoryBridge) this.inventory).bridge$capturingInventory()) {
             if (slotIn == EquipmentSlotType.MAINHAND) {
-                final ItemStack orig = this.inventory.field_70462_a.get(this.inventory.field_70461_c);
-                final Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.field_70461_c)).get();
+                final ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
+                final Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
                 ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EquipmentSlotType.OFFHAND) {
-                final ItemStack orig = this.inventory.field_184439_c.get(0);
+                final ItemStack orig = this.inventory.offHandInventory.get(0);
                 final Slot slot = ((PlayerInventory) this.inventory).getOffhand();
                 ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
-            } else if (slotIn.func_188453_a() == EquipmentSlotType.Group.ARMOR) {
-                final ItemStack orig = this.inventory.field_70460_b.get(slotIn.func_188454_b());
-                final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(SlotIndex.of(slotIn.func_188454_b())).get();
+            } else if (slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR) {
+                final ItemStack orig = this.inventory.armorInventory.get(slotIn.getIndex());
+                final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(SlotIndex.of(slotIn.getIndex())).get();
                 ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }
@@ -961,7 +961,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     private void onOnContainerClosed(final Container container, final PlayerEntity player) {
         // Corner case where the server is shutting down on the client, the enitty player mp is also being killed off.
         if (Sponge.isServerAvailable() && SpongeImplHooks.isClientAvailable() && Sponge.getGame().getState() == GameState.SERVER_STOPPING) {
-            container.func_75134_a(player);
+            container.onContainerClosed(player);
             return;
         }
         if (player instanceof ServerPlayerEntity ) {
@@ -974,13 +974,13 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                     .openContainer(container)) {
                 // intentionally missing the lastCursor to not double throw close event
                 ctx.buildAndSwitch();
-                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.func_70445_o());
-                container.func_75134_a(player);
+                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
+                container.onContainerClosed(player);
                 SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, serverPlayer, cursor, ItemStackSnapshot.NONE, false);
             }
         } else {
             // Proceed as normal with client code
-            container.func_75134_a(player);
+            container.onContainerClosed(player);
         }
     }
 

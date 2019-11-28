@@ -47,10 +47,10 @@ public abstract class EntityItemFrameMixin_MapOptimization extends EntityMixin {
             return;
         }
 
-        if (stack.func_77973_b() instanceof FilledMapItem) {
-            ((OptimizedMapDataBridge) ((FilledMapItem) stack.func_77973_b()).func_77873_a(stack, this.world)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) (Object) this);
-        } else if (this.getDisplayedItem().func_77973_b() instanceof FilledMapItem && stack.func_190926_b()) {
-            ((OptimizedMapDataBridge) ((FilledMapItem) this.getDisplayedItem().func_77973_b()).func_77873_a(stack, this.world)).mapOptimizationBridge$removeItemFrame((ItemFrameEntity) (Object) this);
+        if (stack.getItem() instanceof FilledMapItem) {
+            ((OptimizedMapDataBridge) ((FilledMapItem) stack.getItem()).func_77873_a(stack, this.world)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) (Object) this);
+        } else if (this.getDisplayedItem().getItem() instanceof FilledMapItem && stack.isEmpty()) {
+            ((OptimizedMapDataBridge) ((FilledMapItem) this.getDisplayedItem().getItem()).func_77873_a(stack, this.world)).mapOptimizationBridge$removeItemFrame((ItemFrameEntity) (Object) this);
         }
     }
 

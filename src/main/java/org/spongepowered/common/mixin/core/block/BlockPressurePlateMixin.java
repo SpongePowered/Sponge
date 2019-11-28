@@ -55,7 +55,7 @@ public abstract class BlockPressurePlateMixin extends BlockMixin {
     @Override
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.func_177226_a(PressurePlateBlock.field_176580_a, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.func_177226_a(PressurePlateBlock.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -63,12 +63,12 @@ public abstract class BlockPressurePlateMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.func_177226_a(PressurePlateBlock.field_176580_a, (Boolean) value));
+            return Optional.of((BlockState) blockState.func_177226_a(PressurePlateBlock.POWERED, (Boolean) value));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutablePoweredData impl$getIsPoweredFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(PressurePlateBlock.field_176580_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(PressurePlateBlock.POWERED));
     }
 }

@@ -68,15 +68,15 @@ public abstract class BlockStairsMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableStairShapeData) {
             final StairsBlock.EnumShape stairShapeType = (StairsBlock.EnumShape) (Object) ((ImmutableStairShapeData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.field_176310_M, stairShapeType));
+            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.SHAPE, stairShapeType));
         }
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.field_176308_b, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.field_176309_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -85,14 +85,14 @@ public abstract class BlockStairsMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.STAIR_SHAPE)) {
             final StairsBlock.EnumShape stairShapeType = (StairsBlock.EnumShape) value;
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.field_176310_M, stairShapeType));
+            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.SHAPE, stairShapeType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.field_176308_b, impl$convertType((SlabBlock.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.field_176309_a, Constants.DirectionFunctions.getFor(dir)));
+            return Optional.of((BlockState) blockState.func_177226_a(StairsBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -100,25 +100,25 @@ public abstract class BlockStairsMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableStairShapeData impl$getStairShapeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStairShapeData.class,
-                (StairShape) (Object) blockState.func_177229_b(StairsBlock.field_176310_M));
+                (StairShape) (Object) blockState.get(StairsBlock.SHAPE));
     }
 
     private ImmutablePortionData impl$getPortionTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
-                impl$convertType(blockState.func_177229_b(StairsBlock.field_176308_b)));
+                impl$convertType(blockState.get(StairsBlock.HALF)));
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(StairsBlock.field_176309_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(StairsBlock.FACING)));
     }
 
     @SuppressWarnings("ConstantConditions")
     private PortionType impl$convertType(final StairsBlock.EnumHalf type) {
-        return (PortionType) (Object) SlabBlock.EnumBlockHalf.valueOf(type.func_176610_l().toUpperCase());
+        return (PortionType) (Object) SlabBlock.EnumBlockHalf.valueOf(type.getName().toUpperCase());
     }
 
     private StairsBlock.EnumHalf impl$convertType(final SlabBlock.EnumBlockHalf type) {
-        return StairsBlock.EnumHalf.valueOf(type.func_176610_l().toUpperCase());
+        return StairsBlock.EnumHalf.valueOf(type.getName().toUpperCase());
     }
 }

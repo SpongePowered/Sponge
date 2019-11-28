@@ -41,7 +41,7 @@ public class EntitySelector_7Mixin {
         if (entity instanceof EntityHuman) {
             return entity.func_95999_t();
         }
-        return entity.func_189512_bd();
+        return entity.getCachedUniqueIdString();
     }
 
 }

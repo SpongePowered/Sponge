@@ -63,7 +63,7 @@ public abstract class EntityThrowableMixin extends EntityMixin {
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
     public void onProjectileImpact(ThrowableEntity projectile, RayTraceResult movingObjectPosition) {
-        if (this.world.field_72995_K || movingObjectPosition.field_72313_a == RayTraceResult.Type.MISS) {
+        if (this.world.isRemote || movingObjectPosition.field_72313_a == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }

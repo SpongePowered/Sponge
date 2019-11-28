@@ -34,14 +34,14 @@ public interface DataCompoundHolder {
     CompoundNBT data$getRootCompound();
 
     default boolean data$hasSpongeCompound() {
-        return this.data$hasRootCompound() && this.data$getRootCompound().func_150297_b(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
+        return this.data$hasRootCompound() && this.data$getRootCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
     }
 
     default CompoundNBT data$getSpongeCompound() {
         final CompoundNBT data = this.data$getRootCompound();
-        if (!data.func_150297_b(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+        if (!data.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             data.func_74782_a(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
         }
-        return data.func_74775_l(Constants.Sponge.SPONGE_DATA);
+        return data.getCompound(Constants.Sponge.SPONGE_DATA);
     }
 }

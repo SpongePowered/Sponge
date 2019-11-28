@@ -52,21 +52,21 @@ public abstract class WorldGenReedMixin extends WorldGeneratorMixin {
         final int n = ((Reed) this).getReedsPerChunk().getFlooredAmount(rand);
         // Sponge end
         for (int i = 0; i < n; ++i) {
-            final BlockPos blockpos1 = position.func_177982_a(rand.nextInt(4) - rand.nextInt(4), 0, rand.nextInt(4) - rand.nextInt(4));
+            final BlockPos blockpos1 = position.add(rand.nextInt(4) - rand.nextInt(4), 0, rand.nextInt(4) - rand.nextInt(4));
 
-            if (worldIn.func_175623_d(blockpos1)) {
-                final BlockPos blockpos2 = blockpos1.func_177977_b();
+            if (worldIn.isAirBlock(blockpos1)) {
+                final BlockPos blockpos2 = blockpos1.down();
                 
-                if (worldIn.func_180495_p(blockpos2.func_177976_e()).func_185904_a() == Material.field_151586_h
-                        || worldIn.func_180495_p(blockpos2.func_177974_f()).func_185904_a() == Material.field_151586_h
-                        || worldIn.func_180495_p(blockpos2.func_177978_c()).func_185904_a() == Material.field_151586_h
-                        || worldIn.func_180495_p(blockpos2.func_177968_d()).func_185904_a() == Material.field_151586_h) {
+                if (worldIn.getBlockState(blockpos2.west()).getMaterial() == Material.WATER
+                        || worldIn.getBlockState(blockpos2.east()).getMaterial() == Material.WATER
+                        || worldIn.getBlockState(blockpos2.north()).getMaterial() == Material.WATER
+                        || worldIn.getBlockState(blockpos2.south()).getMaterial() == Material.WATER) {
                     // Sponge start
                     final int height = ((Reed) this).getReedHeight().getFlooredAmount(rand);
                     // Sponge end
                     for (int y = 0; y < height; ++y) {
                         if (Blocks.field_150436_aH.func_176354_d(worldIn, blockpos1)) {
-                            worldIn.func_180501_a(blockpos1.func_177981_b(y), Blocks.field_150436_aH.func_176223_P(), 2);
+                            worldIn.setBlockState(blockpos1.up(y), Blocks.field_150436_aH.getDefaultState(), 2);
                         }
                     }
                 }

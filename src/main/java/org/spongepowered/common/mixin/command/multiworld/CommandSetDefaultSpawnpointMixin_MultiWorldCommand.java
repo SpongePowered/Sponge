@@ -42,7 +42,7 @@ public abstract class CommandSetDefaultSpawnpointMixin_MultiWorldCommand {
             target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     private void multiWorldCommand$onSendSpawnPointPacket(final PlayerList playerList, final IPacket<?> packet, final MinecraftServer server,
         final ICommandSender sender, final String[] args) {
-        playerList.func_148537_a(packet, ((WorldServerBridge) sender.func_130014_f_()).bridge$getDimensionId());
+        playerList.sendPacketToAllPlayersInDimension(packet, ((WorldServerBridge) sender.getEntityWorld()).bridge$getDimensionId());
     }
 
 }

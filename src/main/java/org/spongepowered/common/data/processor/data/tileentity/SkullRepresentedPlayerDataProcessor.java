@@ -77,7 +77,7 @@ public class SkullRepresentedPlayerDataProcessor extends
 
     @Override
     protected Optional<GameProfile> getVal(SkullTileEntity entity) {
-        return Optional.ofNullable((GameProfile) entity.func_152108_a());
+        return Optional.ofNullable((GameProfile) entity.getPlayerProfile());
     }
 
     @Override

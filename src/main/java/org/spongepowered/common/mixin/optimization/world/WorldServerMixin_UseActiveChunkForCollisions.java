@@ -53,12 +53,12 @@ public abstract class WorldServerMixin_UseActiveChunkForCollisions extends World
                 return false;
             }
         } else {
-            final int xStart = MathHelper.func_76128_c(bb.field_72340_a);
-            final int xEnd = MathHelper.func_76143_f(bb.field_72336_d);
-            final int yStart = MathHelper.func_76128_c(bb.field_72338_b);
-            final int yEnd = MathHelper.func_76143_f(bb.field_72337_e);
-            final int zStart = MathHelper.func_76128_c(bb.field_72339_c);
-            final int zEnd = MathHelper.func_76143_f(bb.field_72334_f);
+            final int xStart = MathHelper.floor(bb.minX);
+            final int xEnd = MathHelper.ceil(bb.maxX);
+            final int yStart = MathHelper.floor(bb.minY);
+            final int yEnd = MathHelper.ceil(bb.maxY);
+            final int zStart = MathHelper.floor(bb.minZ);
+            final int zEnd = MathHelper.ceil(bb.maxZ);
             if (!((WorldBridge) this).bridge$isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, true)) {
                 return false;
             }

@@ -81,17 +81,17 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
             final BlockState block = (BlockState) location.getBlock();
             return getForBlock(location, block);
         } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
-            final Item item = ((ItemStack) propertyHolder).func_77973_b();
+            final Item item = ((ItemStack) propertyHolder).getItem();
             if (item instanceof BlockItem) {
-                final Block block = ((BlockItem) item).func_179223_d();
+                final Block block = ((BlockItem) item).getBlock();
                 if (block != null) {
-                    return getForBlock(null, block.func_176223_P());
+                    return getForBlock(null, block.getDefaultState());
                 }
             }
         } else if (propertyHolder instanceof BlockState) {
             return getForBlock(null, ((BlockState) propertyHolder));
         } else if (propertyHolder instanceof Block) {
-            return getForBlock(null, ((Block) propertyHolder).func_176223_P());
+            return getForBlock(null, ((Block) propertyHolder).getDefaultState());
         }
         return Optional.empty();
     }

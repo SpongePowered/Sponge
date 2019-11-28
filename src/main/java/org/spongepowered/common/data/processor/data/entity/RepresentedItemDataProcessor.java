@@ -53,10 +53,10 @@ public class RepresentedItemDataProcessor extends
     @Override
     protected boolean set(Entity container, ItemStackSnapshot value) {
         if (container instanceof ItemFrameEntity) {
-            ((ItemFrameEntity) container).func_82334_a((ItemStack) value.createStack());
+            ((ItemFrameEntity) container).setDisplayedItem((ItemStack) value.createStack());
             return true;
         } else if (container instanceof ItemEntity) {
-            ((ItemEntity) container).func_92058_a((ItemStack) value.createStack());
+            ((ItemEntity) container).setItem((ItemStack) value.createStack());
             return true;
         }
         return false;
@@ -65,12 +65,12 @@ public class RepresentedItemDataProcessor extends
     @Override
     protected Optional<ItemStackSnapshot> getVal(Entity container) {
         if (container instanceof ItemFrameEntity) {
-            final ItemStack itemStack = ((ItemFrameEntity) container).func_82335_i();
-            if (!itemStack.func_190926_b()) {
+            final ItemStack itemStack = ((ItemFrameEntity) container).getDisplayedItem();
+            if (!itemStack.isEmpty()) {
                 return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot());
             }
         } else if (container instanceof ItemEntity) {
-            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((ItemEntity) container).func_92059_d()).createSnapshot());
+            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((ItemEntity) container).getItem()).createSnapshot());
         }
         return Optional.empty();
     }
@@ -94,9 +94,9 @@ public class RepresentedItemDataProcessor extends
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemFrameEntity) {
             ItemFrameEntity frame = (ItemFrameEntity) container;
-            if (!frame.func_82335_i().func_190926_b()) {
+            if (!frame.getDisplayedItem().isEmpty()) {
                 final ImmutableValue<ItemStackSnapshot> old = constructImmutableValue(getVal(frame).get());
-                frame.func_82334_a(ItemStack.field_190927_a);
+                frame.setDisplayedItem(ItemStack.EMPTY);
                 return DataTransactionResult.successRemove(old);
             }
             return DataTransactionResult.successNoData();

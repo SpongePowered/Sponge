@@ -214,10 +214,10 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     public BlockChange associateBlockChangeWithSnapshot(BlockTickContext phaseContext, net.minecraft.block.BlockState newState, Block newBlock,
         net.minecraft.block.BlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
         if (phaseContext.tickingBlock instanceof IGrowable) {
-            if (newBlock == Blocks.field_150350_a) {
+            if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
             }
-            if (newBlock instanceof IGrowable || newState.func_185904_a().func_76217_h()) {
+            if (newBlock instanceof IGrowable || newState.getMaterial().isFlammable()) {
                 return BlockChange.GROW;
             }
         }

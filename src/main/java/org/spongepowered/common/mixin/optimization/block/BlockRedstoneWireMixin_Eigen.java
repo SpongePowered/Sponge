@@ -74,7 +74,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
 
     @Inject(method = "updateSurroundingRedstone", at = @At("HEAD"), cancellable = true)
     private void onUpdateSurroundingRedstone(World worldIn, BlockPos pos, BlockState state, CallbackInfoReturnable<BlockState> cir) {
-        if (!worldIn.field_72995_K) {
+        if (!worldIn.isRemote) {
             this.updateSurroundingRedstone(worldIn, pos, state, null);
             cir.setReturnValue(state);
         }
@@ -89,7 +89,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
     @Overwrite
     public void func_189540_a(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
-        if (!worldIn.field_72995_K)
+        if (!worldIn.isRemote)
         {
             if (this.func_176196_c(worldIn, pos))
             {
@@ -148,11 +148,11 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
     private BlockState calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, BlockState state)
     {
         BlockState iblockstate = state;
-        int i = state.func_177229_b(RedstoneWireBlock.field_176351_O).intValue();
+        int i = state.get(RedstoneWireBlock.POWER).intValue();
         int j = 0;
         j = this.getMaxCurrentStrength(worldIn, pos2, j);
         this.canProvidePower = false;
-        int k = worldIn.func_175687_A(pos1);
+        int k = worldIn.getRedstonePowerFromNeighbors(pos1);
         this.canProvidePower = true;
 
         if (this.old_decrement) {
@@ -173,24 +173,24 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
         if (this.old_search || k < 15)
         for (Direction enumfacing : Direction.Plane.HORIZONTAL)
         {
-            BlockPos blockpos = pos1.func_177972_a(enumfacing);
-            boolean flag = blockpos.func_177958_n() != pos2.func_177958_n() || blockpos.func_177952_p() != pos2.func_177952_p();
+            BlockPos blockpos = pos1.offset(enumfacing);
+            boolean flag = blockpos.getX() != pos2.getX() || blockpos.getZ() != pos2.getZ();
 
             if (flag)
             {
                 l = this.getMaxCurrentStrength(worldIn, blockpos, l);
             }
 
-            if (worldIn.func_180495_p(blockpos).func_185915_l() && !worldIn.func_180495_p(pos1.func_177984_a()).func_185915_l())
+            if (worldIn.getBlockState(blockpos).func_185915_l() && !worldIn.getBlockState(pos1.up()).func_185915_l())
             {
-                if (flag && pos1.func_177956_o() >= pos2.func_177956_o())
+                if (flag && pos1.getY() >= pos2.getY())
                 {
-                    l = this.getMaxCurrentStrength(worldIn, blockpos.func_177984_a(), l);
+                    l = this.getMaxCurrentStrength(worldIn, blockpos.up(), l);
                 }
             }
-            else if (!worldIn.func_180495_p(blockpos).func_185915_l() && flag && pos1.func_177956_o() <= pos2.func_177956_o())
+            else if (!worldIn.getBlockState(blockpos).func_185915_l() && flag && pos1.getY() <= pos2.getY())
             {
-                l = this.getMaxCurrentStrength(worldIn, blockpos.func_177977_b(), l);
+                l = this.getMaxCurrentStrength(worldIn, blockpos.down(), l);
             }
         }
 
@@ -226,11 +226,11 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
 
         if (i != j)
         {
-            state = state.func_177226_a(RedstoneWireBlock.field_176351_O, Integer.valueOf(j));
+            state = state.func_177226_a(RedstoneWireBlock.POWER, Integer.valueOf(j));
             
-            if (worldIn.func_180495_p(pos1) == iblockstate)
+            if (worldIn.getBlockState(pos1) == iblockstate)
             {
-                worldIn.func_180501_a(pos1, state, 2);
+                worldIn.setBlockState(pos1, state, 2);
             }
 
             if (this.old_search) {
@@ -240,7 +240,7 @@ public abstract class BlockRedstoneWireMixin_Eigen extends Block {
 
                 for (Direction enumfacing1 : Direction.values())
                 {   
-                    this.blocksNeedingUpdate.add(pos1.func_177972_a(enumfacing1));
+                    this.blocksNeedingUpdate.add(pos1.offset(enumfacing1));
                 }
             }
         }

@@ -51,7 +51,7 @@ public abstract class EntityLivingEquipmentFabricMixin implements Fabric, Invent
         EquipmentSlotType[] values = EquipmentSlotType.values();
         SLOTS = new EquipmentSlotType[values.length];
         for (EquipmentSlotType slot : values) {
-            SLOTS[slot.func_188452_c()] = slot;
+            SLOTS[slot.getSlotIndex()] = slot;
         }
     }
 
@@ -93,7 +93,7 @@ public abstract class EntityLivingEquipmentFabricMixin implements Fabric, Invent
     @Override
     public void fabric$clear() {
         for (EquipmentSlotType slot : SLOTS) {
-            this.setItemStackToSlot(slot, ItemStack.field_190927_a);
+            this.setItemStackToSlot(slot, ItemStack.EMPTY);
         }
     }
 

@@ -44,7 +44,7 @@ public class SpongeChestBuilder extends SpongeLockableBuilder<Chest> {
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
                 ((ChestTileEntity) chest).func_190575_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
-            ((ChestTileEntity) chest).func_145829_t();
+            ((ChestTileEntity) chest).validate();
             return chest;
         });
     }

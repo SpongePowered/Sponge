@@ -147,7 +147,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     public Optional<GameProfile> lookupById(UUID uniqueId) {
         checkNotNull(uniqueId, "unique id");
 
-        com.mojang.authlib.GameProfile profile = SpongeImpl.getServer().func_147130_as().fillProfileProperties(
+        com.mojang.authlib.GameProfile profile = SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(
                 new com.mojang.authlib.GameProfile(uniqueId, ""), true);
         if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
             this.addEntry(profile, null);
@@ -162,7 +162,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
         Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
 
-        MinecraftSessionService service = SpongeImpl.getServer().func_147130_as();
+        MinecraftSessionService service = SpongeImpl.getServer().getMinecraftSessionService();
         for (UUID uniqueId : uniqueIds) {
             com.mojang.authlib.GameProfile profile = service.fillProfileProperties(new com.mojang.authlib.GameProfile(uniqueId, ""), true);
             if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
@@ -228,7 +228,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     public Optional<GameProfile> lookupByName(String name) {
         SingleProfileLookupCallback callback = new SingleProfileLookupCallback();
 
-        SpongeImpl.getServer().func_152359_aw().findProfilesByNames(new String[]{name}, Agent.MINECRAFT, callback);
+        SpongeImpl.getServer().getGameProfileRepository().findProfilesByNames(new String[]{name}, Agent.MINECRAFT, callback);
 
         Optional<GameProfile> profile = callback.getResult();
         if (profile.isPresent()) {
@@ -244,7 +244,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
         Map<String, Optional<GameProfile>> result = Maps.newHashMap();
 
-        SpongeImpl.getServer().func_152359_aw().findProfilesByNames(Iterables.toArray(names, String.class), Agent.MINECRAFT,
+        SpongeImpl.getServer().getGameProfileRepository().findProfilesByNames(Iterables.toArray(names, String.class), Agent.MINECRAFT,
                 new MapProfileLookupCallback(result));
 
         if (!result.isEmpty()) {
@@ -292,7 +292,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     public Optional<GameProfile> fillProfile(GameProfile profile, boolean signed) {
         checkNotNull(profile, "profile");
 
-        return Optional.ofNullable((GameProfile) SpongeImpl.getServer().func_147130_as()
+        return Optional.ofNullable((GameProfile) SpongeImpl.getServer().getMinecraftSessionService()
                 .fillProfileProperties((com.mojang.authlib.GameProfile) profile, signed));
     }
 

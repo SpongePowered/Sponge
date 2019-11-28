@@ -39,36 +39,36 @@ public abstract class CommandWeatherMixin_GlobalCommand {
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setCleanWeatherTime(I)V"))
     private void globalCommand$setAllWorldInfoWeathers(final WorldInfo info, final int time) {
-        for (final ServerWorld world : SpongeImpl.getServer().field_71305_c) {
-            world.func_72912_H().func_176142_i(time);
+        for (final ServerWorld world : SpongeImpl.getServer().worlds) {
+            world.getWorldInfo().setClearWeatherTime(time);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRainTime(I)V"))
     private void globalCommand$setAllWorldInfoRainTime(final WorldInfo info, final int time) {
-        for (final ServerWorld world : SpongeImpl.getServer().field_71305_c) {
-            world.func_72912_H().func_76080_g(time);
+        for (final ServerWorld world : SpongeImpl.getServer().worlds) {
+            world.getWorldInfo().setRainTime(time);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThunderTime(I)V"))
     private void globalCommand$setAllWorldInfoThunderTime(final WorldInfo info, final int time) {
-        for (final ServerWorld world : SpongeImpl.getServer().field_71305_c) {
-            world.func_72912_H().func_76090_f(time);
+        for (final ServerWorld world : SpongeImpl.getServer().worlds) {
+            world.getWorldInfo().setThunderTime(time);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRaining(Z)V"))
     private void globalCommand$setAllWorldInfoRainingState(final WorldInfo info, final boolean state) {
-        for (final ServerWorld world : SpongeImpl.getServer().field_71305_c) {
-            world.func_72912_H().func_76084_b(state);
+        for (final ServerWorld world : SpongeImpl.getServer().worlds) {
+            world.getWorldInfo().setRaining(state);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThundering(Z)V"))
     private void globalCommand$setAllWorldThunderingState(final WorldInfo info, final boolean state) {
-        for (final ServerWorld world : SpongeImpl.getServer().field_71305_c) {
-            world.func_72912_H().func_76069_a(state);
+        for (final ServerWorld world : SpongeImpl.getServer().worlds) {
+            world.getWorldInfo().setThundering(state);
         }
     }
 

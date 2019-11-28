@@ -75,7 +75,7 @@ public abstract class BlockPrismarineMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutablePrismarineData impl$getPrismarineTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePrismarineData.class,
-                (PrismarineType) (Object) blockState.func_177229_b(BlockPrismarine.field_176332_a));
+                (PrismarineType) (Object) blockState.get(BlockPrismarine.field_176332_a));
     }
 
 }

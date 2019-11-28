@@ -64,7 +64,7 @@ public class KnockbackDataProcessor
 
     @Override
     protected boolean set(final AbstractArrowEntity entity, final Integer value) {
-        entity.func_70240_a(value);
+        entity.setKnockbackStrength(value);
         return true;
     }
 

@@ -55,7 +55,7 @@ public class ElytraFlyingDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected Optional<Boolean> getVal(final LivingEntity dataHolder) {
-        return Optional.of(dataHolder.func_184613_cA());
+        return Optional.of(dataHolder.isElytraFlying());
     }
 
     @Override

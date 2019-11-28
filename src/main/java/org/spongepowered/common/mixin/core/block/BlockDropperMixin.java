@@ -56,9 +56,9 @@ public abstract class BlockDropperMixin {
             final ProxyBlockSource blocksourceimpl, final DispenserTileEntity tileentitydispenser, final int i, final ItemStack itemstack,
             final Direction enumfacing, final BlockPos blockpos, final IInventory iinventory, final ItemStack itemstack1) {
         // after setInventorySlotContents
-        tileentitydispenser.func_70299_a(i, itemstack1);
+        tileentitydispenser.setInventorySlotContents(i, itemstack1);
         // Transfer worked if remainder is one less than the original stack
-        if (itemstack1.func_190916_E() == itemstack.func_190916_E() - 1) {
+        if (itemstack1.getCount() == itemstack.getCount() - 1) {
             final TrackedInventoryBridge capture = impl$forCapture(tileentitydispenser);
             final Inventory sourceInv = ((Inventory) tileentitydispenser);
             SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
@@ -72,15 +72,15 @@ public abstract class BlockDropperMixin {
             final ProxyBlockSource blocksourceimpl, final DispenserTileEntity tileentitydispenser, final int i, final ItemStack itemstack,
             final ItemStack itemstack1) {
         // after setInventorySlotContents
-        tileentitydispenser.func_70299_a(i, itemstack1);
+        tileentitydispenser.setInventorySlotContents(i, itemstack1);
         // Transfer worked if remainder is one less than the original stack
-        if (itemstack1.func_190916_E() == itemstack.func_190916_E() - 1) {
+        if (itemstack1.getCount() == itemstack.getCount() - 1) {
             final TrackedInventoryBridge capture = impl$forCapture(tileentitydispenser);
             final Inventory sourceInv = ((Inventory) tileentitydispenser);
             SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-            final Direction enumfacing = worldIn.func_180495_p(pos).func_177229_b(DispenserBlock.field_176441_a);
-            final BlockPos blockpos = pos.func_177972_a(enumfacing);
-            final IInventory iinventory = HopperTileEntity.func_145893_b(worldIn, (double)blockpos.func_177958_n(), (double)blockpos.func_177956_o(), (double)blockpos.func_177952_p());
+            final Direction enumfacing = worldIn.getBlockState(pos).get(DispenserBlock.FACING);
+            final BlockPos blockpos = pos.offset(enumfacing);
+            final IInventory iinventory = HopperTileEntity.getInventoryAtPosition(worldIn, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
             SpongeCommonEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory));
         }
         callbackInfo.cancel();

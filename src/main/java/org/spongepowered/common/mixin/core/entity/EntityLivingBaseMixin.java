@@ -194,10 +194,10 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         this.impl$maxAir = air;
         if (air != Constants.Sponge.Entity.DEFAULT_MAX_AIR) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
-            spongeData.func_74768_a(Constants.Sponge.Entity.MAX_AIR, air);
+            spongeData.putInt(Constants.Sponge.Entity.MAX_AIR, air);
         } else {
             if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-                ((DataCompoundHolder) this).data$getSpongeCompound().func_82580_o(Constants.Sponge.Entity.MAX_AIR);
+                ((DataCompoundHolder) this).data$getSpongeCompound().remove(Constants.Sponge.Entity.MAX_AIR);
             }
         }
     }
@@ -205,8 +205,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Override
     public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.func_74764_b(Constants.Sponge.Entity.MAX_AIR)) {
-            this.impl$maxAir = compound.func_74762_e(Constants.Sponge.Entity.MAX_AIR);
+        if (compound.contains(Constants.Sponge.Entity.MAX_AIR)) {
+            this.impl$maxAir = compound.getInt(Constants.Sponge.Entity.MAX_AIR);
         }
     }
 
@@ -214,7 +214,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         if (this.impl$maxAir != Constants.Sponge.Entity.DEFAULT_MAX_AIR) { // We don't need to set max air unless it's really necessary
-            compound.func_74768_a(Constants.Sponge.Entity.MAX_AIR, this.impl$maxAir);
+            compound.putInt(Constants.Sponge.Entity.MAX_AIR, this.impl$maxAir);
         }
     }
 
@@ -261,21 +261,21 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 return;
             }
 
-            final Entity entity = cause.func_76346_g();
+            final Entity entity = cause.getTrueSource();
             final LivingEntity entitylivingbase = this.getAttackingEntity();
 
             if (this.scoreValue >= 0 && entitylivingbase != null) {
-                entitylivingbase.func_191956_a((LivingEntity) (Object) this, this.scoreValue, cause);
+                entitylivingbase.awardKillScore((LivingEntity) (Object) this, this.scoreValue, cause);
             }
 
             if (entity != null) {
-                entity.func_70074_a((LivingEntity) (Object) this);
+                entity.onKillEntity((LivingEntity) (Object) this);
             }
 
             this.dead = true;
-            this.getCombatTracker().func_94549_h();
+            this.getCombatTracker().reset();
 
-            if (!this.world.field_72995_K) {
+            if (!this.world.isRemote) {
                 int i = 0;
 
                 if (entity instanceof PlayerEntity) {
@@ -284,7 +284,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                     i = SpongeImplHooks.getLootingEnchantmentModifier((LivingEntity) (Object) this, (LivingEntity) entity, cause);
                 }
 
-                if (this.canDropLoot() && this.world.func_82736_K().func_82766_b("doMobLoot")) {
+                if (this.canDropLoot() && this.world.getGameRules().func_82766_b("doMobLoot")) {
                     final boolean flag = this.recentlyHit > 0;
                     this.dropLoot(flag, i, cause);
                 }
@@ -293,7 +293,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
             // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
             if (!((LivingEntity) (Object) this instanceof EntityHuman)) {
-                this.world.func_72960_a((LivingEntity) (Object) this, (byte) 3);
+                this.world.setEntityState((LivingEntity) (Object) this, (byte) 3);
             }
 
         }
@@ -400,7 +400,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         // Sponge end
         if (this.isEntityInvulnerable(source)) {
             return false;
-        } else if (this.world.field_72995_K) {
+        } else if (this.world.isRemote) {
             return false;
         } else {
             this.idleTime = 0;
@@ -409,7 +409,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             // has already been set to zero if Keys#HEALTH or SpongeHealthData is set to zero.
             if (this.getHealth() <= 0.0F && source != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) {
                 return false;
-            } else if (source.func_76347_k() && this.isPotionActive(Effects.field_76426_n)) {
+            } else if (source.isFireDamage() && this.isPotionActive(Effects.FIRE_RESISTANCE)) {
                 return false;
             } else {
 
@@ -489,7 +489,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 }
 
                 this.attackedAtYaw = 0.0F;
-                final Entity entity = source.func_76346_g();
+                final Entity entity = source.getTrueSource();
 
                 if (entity instanceof LivingEntity) {
                     this.shadow$setRevengeTarget((LivingEntity) entity);
@@ -502,7 +502,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
                     final TameableEntity entitywolf = (TameableEntity)entity;
 
-                    if (entitywolf.func_70909_n()) {
+                    if (entitywolf.isTamed()) {
                         this.recentlyHit = 100;
                         this.attackingPlayer = null;
                     }
@@ -510,37 +510,37 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
                 if (flag1) {
                     if (flag) {
-                        this.world.func_72960_a((LivingEntity) (Object) this, (byte) 29);
-                    } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source).func_180139_w()) {
-                        this.world.func_72960_a((LivingEntity) (Object) this, (byte) 33);
+                        this.world.setEntityState((LivingEntity) (Object) this, (byte) 29);
+                    } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source).getIsThornsDamage()) {
+                        this.world.setEntityState((LivingEntity) (Object) this, (byte) 33);
                     } else {
                         final byte b0;
 
-                        if (source == DamageSource.field_76369_e) {
+                        if (source == DamageSource.DROWN) {
                             b0 = 36;
-                        } else if (source.func_76347_k()) {
+                        } else if (source.isFireDamage()) {
                             b0 = 37;
                         } else {
                             b0 = 2;
                         }
 
-                        this.world.func_72960_a((LivingEntity) (Object) this, b0);
+                        this.world.setEntityState((LivingEntity) (Object) this, b0);
                     }
 
 
-                    if (source != DamageSource.field_76369_e && !flag) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
+                    if (source != DamageSource.DROWN && !flag) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
                         this.markVelocityChanged();
                     }
 
                     if (entity != null) {
-                        double d1 = entity.field_70165_t - this.posX;
+                        double d1 = entity.posX - this.posX;
                         double d0;
 
-                        for (d0 = entity.field_70161_v - this.posZ; d1 * d1 + d0 * d0 < 1.0E-4D; d0 = (Math.random() - Math.random()) * 0.01D) {
+                        for (d0 = entity.posZ - this.posZ; d1 * d1 + d0 * d0 < 1.0E-4D; d0 = (Math.random() - Math.random()) * 0.01D) {
                             d1 = (Math.random() - Math.random()) * 0.01D;
                         }
 
-                        this.attackedAtYaw = (float) (MathHelper.func_181159_b(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
+                        this.attackedAtYaw = (float) (MathHelper.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
                         this.knockBack(entity, 0.4F, d1, d0);
                     } else {
                         this.attackedAtYaw = (float) (Math.random() * 2.0D * 180);
@@ -572,15 +572,15 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 if (!flag) // Sponge - remove 'amount > 0.0F'
                 {
                     this.lastDamageSource = source;
-                    this.lastDamageStamp = this.world.func_82737_E();
+                    this.lastDamageStamp = this.world.getGameTime();
                 }
 
                 if ((LivingEntity) (Object) this instanceof ServerPlayerEntity) {
-                    CriteriaTriggers.field_192128_h.func_192200_a((ServerPlayerEntity) (Object) this, source, f, amount, flag);
+                    CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((ServerPlayerEntity) (Object) this, source, f, amount, flag);
                 }
 
                 if (entity instanceof ServerPlayerEntity) {
-                    CriteriaTriggers.field_192127_g.func_192220_a((ServerPlayerEntity) entity, (Entity) (Object) this, source, f, amount, flag);
+                    CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayerEntity) entity, (Entity) (Object) this, source, f, amount, flag);
                 }
 
                 return !flag; // Sponge - remove 'amount > 0.0F'
@@ -656,15 +656,15 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 final ItemStack helmet = this.getItemStackFromSlot(EquipmentSlotType.HEAD);
                 // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
                 // without using our mixin redirects in EntityFallingBlockMixin.
-                if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.field_82728_o || damageSource == DamageSource.field_82729_p && !helmet.func_190926_b()) {
+                if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
                     helmet.func_77972_a((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (LivingEntity) (Object) this);
                 }
 
                 // Shield
                 if (shieldFunction.isPresent()) {
                     this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
-                    if (!damageSource.func_76352_a()) {
-                        final Entity entity = damageSource.func_76364_f();
+                    if (!damageSource.isProjectile()) {
+                        final Entity entity = damageSource.getImmediateSource();
 
                         if (entity instanceof LivingEntity) {
                             this.blockUsingShield((LivingEntity) entity);
@@ -673,7 +673,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 }
 
                 // Armor
-                if (!damageSource.func_76363_c()) {
+                if (!damageSource.isUnblockable()) {
                     for (final DamageFunction modifier : event.getModifiers()) {
                         bridge$applyArmorDamage((LivingEntity) (Object) this, damageSource, event, modifier.getModifier());
                     }
@@ -687,12 +687,12 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 this.setAbsorptionAmount(Math.max(this.getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
                 if (damage != 0.0F) {
                     if (human) {
-                        ((PlayerEntity) (Object) this).func_71020_j(damageSource.func_76345_d());
+                        ((PlayerEntity) (Object) this).addExhaustion(damageSource.getHungerDamage());
                     }
                     final float f2 = this.getHealth();
 
                     this.setHealth(f2 - damage);
-                    this.getCombatTracker().func_94547_a(damageSource, f2, damage);
+                    this.getCombatTracker().trackDamage(damageSource, f2, damage);
 
                     if (human) {
                         return true;
@@ -726,16 +726,16 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         final World world = this.world;
         final Random random = this.getRNG();
 
-        if (world.func_175667_e(blockpos))
+        if (world.isBlockLoaded(blockpos))
         {
             boolean flag1 = false;
 
-            while (!flag1 && blockpos.func_177956_o() > 0)
+            while (!flag1 && blockpos.getY() > 0)
             {
-                final BlockPos blockpos1 = blockpos.func_177977_b();
-                final BlockState iblockstate = world.func_180495_p(blockpos1);
+                final BlockPos blockpos1 = blockpos.down();
+                final BlockState iblockstate = world.getBlockState(blockpos1);
 
-                if (iblockstate.func_185904_a().func_76230_c())
+                if (iblockstate.getMaterial().blocksMovement())
                 {
                     flag1 = true;
                 }
@@ -749,7 +749,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             if (flag1)
             {
                 // Sponge start
-                if (!world.field_72995_K) {
+                if (!world.isRemote) {
                     final Transform<org.spongepowered.api.world.World> fromTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(d0, d1, d2));
                     final Transform<org.spongepowered.api.world.World> toTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
 
@@ -769,7 +769,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 }
                 // Sponge end
 
-                if (world.func_184144_a((Entity) (Object) this, this.getEntityBoundingBox()).isEmpty() && !world.func_72953_d(this.getEntityBoundingBox()))
+                if (world.func_184144_a((Entity) (Object) this, this.getEntityBoundingBox()).isEmpty() && !world.containsAnyLiquid(this.getEntityBoundingBox()))
                 {
                     flag = true;
                 }
@@ -779,7 +779,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         if (!flag)
         {
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
-            if (!world.field_72995_K) {
+            if (!world.isRemote) {
                 final Transform<org.spongepowered.api.world.World> transform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(d0, d1, d2));
                 final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform);
                 if (event.isCancelled()) {
@@ -814,7 +814,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
             if ((LivingEntity) (Object) this instanceof CreatureEntity)
             {
-                ((CreatureEntity) (Object) this).func_70661_as().func_75499_g();
+                ((CreatureEntity) (Object) this).getNavigator().clearPath();
             }
 
             return true;
@@ -873,7 +873,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(final LivingEntity entityLivingBase) {
-        if (!this.world.field_72995_K) {
+        if (!this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                  final PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext().source(entityLivingBase)) {
                 context.buildAndSwitch();
@@ -903,11 +903,11 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         }
         final ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
         final LivingEntity entity = (LivingEntity) (LivingEntityBaseBridge) this;
-        if (!ItemStack.func_77989_b(after, before)) {
+        if (!ItemStack.areItemStacksEqual(after, before)) {
             final InventoryAdapter slotAdapter;
             if (entity instanceof ServerPlayerEntity) {
                 final SlotLens slotLens;
-                final InventoryPlayerBridge inventory = (InventoryPlayerBridge) ((ServerPlayerEntity) entity).field_71071_by;
+                final InventoryPlayerBridge inventory = (InventoryPlayerBridge) ((ServerPlayerEntity) entity).inventory;
                 final Lens inventoryLens = ((InventoryAdapter) inventory).bridge$getRootLens();
                 if (inventoryLens instanceof PlayerInventoryLens) {
                     switch (entityEquipmentSlot) {
@@ -919,17 +919,17 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                             slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).bridge$getFabric()));
                             break;
                         default:
-                            slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlot(entityEquipmentSlot.func_188454_b());
+                            slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
                     }
                 } else {
-                    slotLens = inventoryLens.getSlotLens(entityEquipmentSlot.func_188454_b());
+                    slotLens = inventoryLens.getSlotLens(entityEquipmentSlot.getIndex());
                 }
 
                 slotAdapter = slotLens.getAdapter(((InventoryAdapter) inventory).bridge$getFabric(), (Inventory) inventory);
             } else {
                 if (this.slotLens.isEmpty()) {
                     for (final EquipmentSlotType slot : EquipmentSlotType.values()) {
-                        this.slotLens.put(slot, new SlotLensImpl(slot.func_188452_c()));
+                        this.slotLens.put(slot, new SlotLensImpl(slot.getSlotIndex()));
                     }
                 }
                 slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter((Fabric) this, null);
@@ -965,7 +965,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
     @Inject(method = "onItemPickup", at = @At("HEAD"))
     public void onEntityItemPickup(final Entity entityItem, final int unused, final CallbackInfo ci) {
-        if (!this.world.field_72995_K) {
+        if (!this.world.isRemote) {
 //            EntityUtil.toMixin(entityItem).setDestructCause(Cause.of(NamedCause.of("PickedUp", this)));
         }
     }
@@ -984,7 +984,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Inject(method = "setActiveHand", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;activeItemStack:Lnet/minecraft/item/ItemStack;"))
     private void onSetActiveItemStack(final Hand hand, final CallbackInfo ci, final ItemStack stack) {
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 
@@ -994,7 +994,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             final HandType handType = (HandType) (Object) hand;
             this.addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventStart(Sponge.getCauseStackManager().getCurrentCause(),
-                    stack.func_77988_m(), stack.func_77988_m(), snapshot);
+                    stack.getUseDuration(), stack.getUseDuration(), snapshot);
         }
 
         if (SpongeImpl.postEvent(event)) {
@@ -1006,7 +1006,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
     @Redirect(method = "setActiveHand", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;activeItemStackUseCount:I"))
     private void getItemDuration(final LivingEntity this$0, final int count) {
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             this.activeItemStackUseCount = count;
         }
         // If we're on the server, do nothing, since we already set this field on onSetActiveItemStack
@@ -1033,8 +1033,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Redirect(method = "updateActiveHand",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemInUseCount()I", ordinal = 0))
     private int onGetRemainingItemDuration(final LivingEntity self) {
-        if (this.world.field_72995_K) {
-            return self.func_184605_cv();
+        if (this.world.isRemote) {
+            return self.getItemInUseCount();
         }
 
         final UseItemStackEvent.Tick event;
@@ -1065,7 +1065,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Inject(method = "onItemUseFinish", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;updateItemUse(Lnet/minecraft/item/ItemStack;I)V"))
     private void onUpdateItemUse(final CallbackInfo ci) {
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 
@@ -1086,15 +1086,15 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             resetActiveHand();
             ci.cancel();
         } else {
-            this.impl$activeItemStackCopy = this.activeItemStack.func_77946_l();
+            this.impl$activeItemStackCopy = this.activeItemStack.copy();
         }
     }
 
     @Redirect(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;"
             + "setHeldItem(Lnet/minecraft/util/EnumHand;Lnet/minecraft/item/ItemStack;)V"))
     private void onSetHeldItem(final LivingEntity self, final Hand hand, final ItemStack stack) {
-        if (this.world.field_72995_K) {
-            self.func_184611_a(hand, stack);
+        if (this.world.isRemote) {
+            self.setHeldItem(hand, stack);
             return;
         }
 
@@ -1105,12 +1105,12 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         // set the copy back in the player's hand, since it may have been already
         // modified if an ItemFood is being used.
 
-        final ItemStackSnapshot activeItemStackSnapshot = ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy == null ? ItemStack.field_190927_a : this.impl$activeItemStackCopy);
+        final ItemStackSnapshot activeItemStackSnapshot = ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy == null ? ItemStack.EMPTY : this.impl$activeItemStackCopy);
 
 
         final UseItemStackEvent.Replace event;
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack == null ? ItemStack.field_190927_a : stack);
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack == null ? ItemStack.EMPTY : stack);
             final HandType handType = (HandType) (Object) hand;
             this.addSelfToFrame(frame, activeItemStackSnapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
@@ -1119,12 +1119,12 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         }
 
         if (SpongeImpl.postEvent(event)) {
-            this.setHeldItem(hand, this.impl$activeItemStackCopy.func_77946_l());
+            this.setHeldItem(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
         if (!event.getItemStackResult().isValid()) {
-            this.setHeldItem(hand, this.impl$activeItemStackCopy.func_77946_l());
+            this.setHeldItem(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
@@ -1135,8 +1135,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Redirect(method = "stopActiveHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;"
                                                                              + "onPlayerStoppedUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V")) // stopActiveHand
     private void onStopPlayerUsing(final ItemStack stack, final World world, final LivingEntity self, final int duration) {
-        if (this.world.field_72995_K) {
-            stack.func_77974_b(world, self, duration);
+        if (this.world.isRemote) {
+            stack.onPlayerStoppedUsing(world, self, duration);
             return;
         }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -1145,14 +1145,14 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             this.addSelfToFrame(frame, snapshot, handType);
             if (!SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
                     duration, duration, snapshot))) {
-                stack.func_77974_b(world, self, duration);
+                stack.onPlayerStoppedUsing(world, self, duration);
             }
         }
     }
 
     @Inject(method = "resetActiveHand", at = @At("HEAD"))
     private void onResetActiveHand(final CallbackInfo ci) {
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 

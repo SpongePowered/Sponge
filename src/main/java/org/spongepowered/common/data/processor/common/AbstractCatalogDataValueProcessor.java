@@ -58,7 +58,7 @@ public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType, V
 
     @Override
     protected Optional<T> getVal(ItemStack container) {
-        return Optional.of(this.getFromMeta(container.func_77952_i()));
+        return Optional.of(this.getFromMeta(container.getDamage()));
     }
 
     @Override

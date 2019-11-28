@@ -108,7 +108,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
             return false;
         }
 
-        final MinecraftServer server = this.networkSystem.func_151267_d();
+        final MinecraftServer server = this.networkSystem.getServer();
         final InetSocketAddress client = (InetSocketAddress) ctx.channel().remoteAddress();
         final ServerStatusResponse response;
 
@@ -121,8 +121,8 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
                 if (response != null) {
                     this.writeResponse(ctx, String.format("%s§%d§%d",
                             SpongeStatusResponse.getUnformattedMotd(response),
-                            response.func_151318_b().func_151333_b(),
-                            response.func_151318_b().func_151332_a()));
+                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
                 }
@@ -138,11 +138,11 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
                 response = SpongeStatusResponse.postLegacy(server, client, SpongeLegacyMinecraftVersion.V1_5, null);
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-                            response.func_151322_c().func_151304_b(),
-                            response.func_151322_c().func_151303_a(),
+                            response.getVersion().getProtocol(),
+                            response.getVersion().getName(),
                             SpongeStatusResponse.getMotd(response),
-                            response.func_151318_b().func_151333_b(),
-                            response.func_151318_b().func_151332_a()));
+                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
                 }
@@ -183,11 +183,11 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
                                 InetSocketAddress.createUnresolved(NetworkUtil.cleanVirtualHost(host), port));
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-                            response.func_151322_c().func_151304_b(),
-                            response.func_151322_c().func_151303_a(),
+                            response.getVersion().getProtocol(),
+                            response.getVersion().getName(),
                             SpongeStatusResponse.getMotd(response),
-                            response.func_151318_b().func_151333_b(),
-                            response.func_151318_b().func_151332_a()));
+                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
                 }

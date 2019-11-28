@@ -35,7 +35,7 @@ public class ItemPlainPagedDataProcessor extends AbstractItemBookPagesProcessor<
         ImmutablePlainPagedData> {
 
     public ItemPlainPagedDataProcessor() {
-        super(input -> input.func_77973_b() == Items.field_151099_bA, Keys.PLAIN_BOOK_PAGES);
+        super(input -> input.getItem() == Items.WRITABLE_BOOK, Keys.PLAIN_BOOK_PAGES);
     }
 
     @Override

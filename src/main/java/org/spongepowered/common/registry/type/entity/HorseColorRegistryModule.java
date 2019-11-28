@@ -62,7 +62,7 @@ public class HorseColorRegistryModule extends AbstractPrefixAlternateCatalogType
     }
 
     public static HorseColor getHorseColor(HorseEntity horse) {
-        return HORSE_COLOR_IDMAP.get(horse.func_110202_bQ() & 255);
+        return HORSE_COLOR_IDMAP.get(horse.getHorseVariant() & 255);
     }
 
     public static HorseColor getHorseColor(DataView container) {

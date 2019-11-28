@@ -47,7 +47,7 @@ public class PassablePropertyStore extends AbstractBlockPropertyStore<PassablePr
 
     @Override
     protected Optional<PassableProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
-        return Optional.of(block.func_185904_a().func_76230_c() ? FALSE : TRUE);
+        return Optional.of(block.getMaterial().blocksMovement() ? FALSE : TRUE);
     }
 
     @Override

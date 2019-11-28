@@ -51,13 +51,13 @@ public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<AgeableE
 
     @Override
     protected boolean set(AgeableEntity container, Boolean adult) {
-        container.func_70873_a(adult ? Constants.Entity.Ageable.ADULT : Constants.Entity.Ageable.CHILD);
+        container.setGrowingAge(adult ? Constants.Entity.Ageable.ADULT : Constants.Entity.Ageable.CHILD);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(AgeableEntity container) {
-        return OptBool.of((Boolean) !container.func_70631_g_());
+        return OptBool.of((Boolean) !container.isChild());
     }
 
     @Override

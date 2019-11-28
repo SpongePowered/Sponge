@@ -135,7 +135,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new CompoundNBT();
-        ((net.minecraft.entity.Entity) entity).func_189511_e(this.compound);
+        ((net.minecraft.entity.Entity) entity).writeWithoutTypeId(this.compound);
         return this;
     }
 
@@ -215,7 +215,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     public SpongeEntitySnapshotBuilder from(net.minecraft.entity.Entity minecraftEntity) {
         this.entityType = ((Entity) minecraftEntity).getType();
         this.worldId = ((Entity) minecraftEntity).getWorld().getUniqueId();
-        this.entityId = minecraftEntity.func_110124_au();
+        this.entityId = minecraftEntity.getUniqueID();
         final Transform<World> transform = ((Entity) minecraftEntity).getTransform();
         this.position = transform.getPosition();
         this.rotation = transform.getRotation();
@@ -225,12 +225,12 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new CompoundNBT();
-        minecraftEntity.func_189511_e(this.compound);
+        minecraftEntity.writeWithoutTypeId(this.compound);
         return this;
     }
 
     public SpongeEntitySnapshotBuilder unsafeCompound(CompoundNBT compound) {
-        this.compound = checkNotNull(compound).func_74737_b();
+        this.compound = checkNotNull(compound).copy();
         return this;
     }
 

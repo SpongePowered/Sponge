@@ -50,13 +50,13 @@ public abstract class WorldGenEndIslandMixin extends WorldGeneratorMixin {
         double radius = ((EndIsland) this).getStartingRadius().getFlooredAmount(rand);
 
         for (int y = 0; radius > 0.5F; --y) {
-            for (int x = MathHelper.func_76128_c(-radius); x <= MathHelper.func_76143_f(radius); ++x) {
-                for (int z = MathHelper.func_76128_c(-radius); z <= MathHelper.func_76143_f(radius); ++z) {
+            for (int x = MathHelper.floor(-radius); x <= MathHelper.ceil(radius); ++x) {
+                for (int z = MathHelper.floor(-radius); z <= MathHelper.ceil(radius); ++z) {
                     if (x * x + z * z <= (radius + 1.0F) * (radius + 1.0F)) {
                         // this.setBlockAndNotifyAdequately(worldIn,
                         // position.add(k, j, l),
                         // Blocks.end_stone.getDefaultState());
-                        this.setBlockAndNotifyAdequately(worldIn, position.func_177982_a(x, y, z), (BlockState) ((EndIsland) this).getIslandBlock());
+                        this.setBlockAndNotifyAdequately(worldIn, position.add(x, y, z), (BlockState) ((EndIsland) this).getIslandBlock());
                     }
                 }
             }

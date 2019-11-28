@@ -46,7 +46,7 @@ public abstract class EntityItemMixin_Activation extends EntityMixin_Activation 
             --this.pickupDelay;
         }
 
-        if (!this.world.field_72995_K && this.age >= ((WorldInfoBridge) this.world.func_72912_H()).bridge$getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
+        if (!this.world.isRemote && this.age >= ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
             this.setDead();
         }
     }

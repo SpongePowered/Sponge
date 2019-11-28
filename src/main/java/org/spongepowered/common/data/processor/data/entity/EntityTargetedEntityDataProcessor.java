@@ -55,12 +55,12 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
         if (!value.getUniqueId().isPresent()) {
             return false;
         }
-        final Entity newTarget = ((ServerWorld) ((ShulkerBulletEntity) dataHolder).field_70170_p).func_175733_a(value.getUniqueId().get());
+        final Entity newTarget = ((ServerWorld) ((ShulkerBulletEntity) dataHolder).world).func_175733_a(value.getUniqueId().get());
         if (newTarget == null) {
             return false;
         }
         dataHolder.accessor$setTarget(newTarget);
-        dataHolder.accessor$setTargetId(newTarget.func_110124_au());
+        dataHolder.accessor$setTargetId(newTarget.getUniqueID());
         return true;
     }
 

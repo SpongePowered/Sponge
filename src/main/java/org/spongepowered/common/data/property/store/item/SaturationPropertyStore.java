@@ -35,8 +35,8 @@ public class SaturationPropertyStore extends AbstractItemStackPropertyStore<Satu
 
     @Override
     protected Optional<SaturationProperty> getFor(ItemStack itemStack) {
-        if (itemStack.func_77973_b() instanceof ItemFood) {
-            final ItemFood food = (ItemFood) itemStack.func_77973_b();
+        if (itemStack.getItem() instanceof ItemFood) {
+            final ItemFood food = (ItemFood) itemStack.getItem();
             // Translate's Minecraft's weird internal value to the actual saturation value
             final double saturationModifier = food.func_150906_h(itemStack) * food.func_150905_g(itemStack) * 2.0;
             return Optional.of(new SaturationProperty(saturationModifier));

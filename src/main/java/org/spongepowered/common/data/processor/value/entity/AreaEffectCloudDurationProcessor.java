@@ -53,13 +53,13 @@ public class AreaEffectCloudDurationProcessor extends AbstractSpongeValueProcess
 
     @Override
     protected boolean set(AreaEffectCloudEntity container, Integer value) {
-        container.func_184486_b(value);
+        container.setDuration(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(AreaEffectCloudEntity container) {
-        return Optional.of(container.func_184489_o());
+        return Optional.of(container.getDuration());
     }
 
     @Override

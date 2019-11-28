@@ -41,7 +41,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Value<SlabType>, SlabData, ImmutableSlabData> {
 
     public SlabDataProcessor() {
-        super(Keys.SLAB_TYPE, input -> input.func_77973_b() == ItemTypes.STONE_SLAB || input.func_77973_b() == ItemTypes.STONE_SLAB2);
+        super(Keys.SLAB_TYPE, input -> input.getItem() == ItemTypes.STONE_SLAB || input.getItem() == ItemTypes.STONE_SLAB2);
     }
 
     @Override
@@ -63,12 +63,12 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
     protected boolean set(ItemStack stack, SlabType value) {
         // TODO - the API needs to be refactored, as it's no longer possible to change the type of an ItemStack
         Object oValue = value;
-        if (stack.func_77973_b() == ItemTypes.STONE_SLAB) {
+        if (stack.getItem() == ItemTypes.STONE_SLAB) {
             if (oValue instanceof BlockStoneSlab.EnumType) {
                 stack.func_77964_b(((BlockStoneSlab.EnumType) oValue).func_176624_a());
                 return true;
             }
-        } else if (stack.func_77973_b() == ItemTypes.STONE_SLAB2) {
+        } else if (stack.getItem() == ItemTypes.STONE_SLAB2) {
             if (oValue instanceof BlockStoneSlabNew.EnumType) {
                 stack.func_77964_b(((BlockStoneSlabNew.EnumType) oValue).func_176915_a());
                 return true;

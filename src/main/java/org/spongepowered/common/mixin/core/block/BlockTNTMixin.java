@@ -113,7 +113,7 @@ public abstract class BlockTNTMixin extends BlockMixin {
     @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
     private boolean impl$removeActivated(final World world, final BlockPos pos, final BlockState state, final int flag) {
         // Called when player manually ignites TNT
-        final boolean removed = !this.primeCancelled && world.func_180501_a(pos, state, flag);
+        final boolean removed = !this.primeCancelled && world.setBlockState(pos, state, flag);
         this.primeCancelled = false;
         return removed;
     }

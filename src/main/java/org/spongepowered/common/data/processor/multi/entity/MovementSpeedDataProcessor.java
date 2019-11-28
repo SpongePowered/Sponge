@@ -57,15 +57,15 @@ public class MovementSpeedDataProcessor extends AbstractEntityDataProcessor<Play
     @Override
     protected boolean set(final PlayerEntity entity, final Map<Key<?>, Object> keyValues) {
         WalkingSpeedValueProcessor.setWalkSpeed(entity, (Double) keyValues.get(Keys.WALKING_SPEED));
-        ((PlayerCapabilitiesAccessor) entity.field_71075_bZ).accessor$setFlySpeed(((Double) keyValues.get(Keys.FLYING_SPEED)).floatValue());
-        entity.func_71016_p();
+        ((PlayerCapabilitiesAccessor) entity.abilities).accessor$setFlySpeed(((Double) keyValues.get(Keys.FLYING_SPEED)).floatValue());
+        entity.sendPlayerAbilities();
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(final PlayerEntity entity) {
-        final double walkSpeed = entity.field_71075_bZ.func_75094_b();
-        final double flySpeed = entity.field_71075_bZ.func_75093_a();
+        final double walkSpeed = entity.abilities.getWalkSpeed();
+        final double flySpeed = entity.abilities.getFlySpeed();
         return ImmutableMap.<Key<?>, Object>of(Keys.WALKING_SPEED, walkSpeed,
                 Keys.FLYING_SPEED, flySpeed);
     }

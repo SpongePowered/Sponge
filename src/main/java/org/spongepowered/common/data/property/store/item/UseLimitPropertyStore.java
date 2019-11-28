@@ -35,9 +35,9 @@ public class UseLimitPropertyStore extends AbstractItemStackPropertyStore<UseLim
 
     @Override
     protected Optional<UseLimitProperty> getFor(ItemStack itemStack) {
-        final Item item = itemStack.func_77973_b();
-        if (item.func_77645_m()) {
-            return Optional.of(new UseLimitProperty(item.func_77612_l()));
+        final Item item = itemStack.getItem();
+        if (item.isDamageable()) {
+            return Optional.of(new UseLimitProperty(item.getMaxDamage()));
         }
         return Optional.empty();
     }

@@ -50,7 +50,7 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected boolean set(final VanishableBridge container, final Boolean value) {
-        if (container instanceof Entity && ((Entity) container).field_70170_p.field_72995_K) {
+        if (container instanceof Entity && ((Entity) container).world.isRemote) {
             return false;
         }
         if (!container.bridge$isVanished()) {

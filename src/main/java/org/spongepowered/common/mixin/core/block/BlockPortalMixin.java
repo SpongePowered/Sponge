@@ -61,7 +61,7 @@ public abstract class BlockPortalMixin extends BlockMixin {
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.func_177226_a(NetherPortalBlock.field_176550_a, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.func_177226_a(NetherPortalBlock.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -73,13 +73,13 @@ public abstract class BlockPortalMixin extends BlockMixin {
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.func_177226_a(NetherPortalBlock.field_176550_a, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.func_177226_a(NetherPortalBlock.AXIS, Constants.DirectionFunctions.convertAxisToMinecraft(axis)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableAxisData impl$getAxisData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                Constants.DirectionFunctions.convertAxisToSponge(blockState.func_177229_b(NetherPortalBlock.field_176550_a)));
+                Constants.DirectionFunctions.convertAxisToSponge(blockState.get(NetherPortalBlock.AXIS)));
     }
 }

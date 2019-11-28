@@ -84,11 +84,11 @@ public abstract class BlockStateContainerMixin implements BlockStateContainerBri
             int x = i & 15;
             int y = i >> 8 & 15;
             int z = i >> 4 & 15;
-            int idAdd = add == null ? 0 : add.func_76582_a(x, y, z);
+            int idAdd = add == null ? 0 : add.get(x, y, z);
             int blockId = idAdd << 8 | (id[i] & 255);
             Block block = Block.field_149771_c.func_148754_a(blockId);
             if (block != null) {
-                newState = block.func_176223_P();
+                newState = block.getDefaultState();
             } else {
                 newState = null;
             }
@@ -115,15 +115,15 @@ public abstract class BlockStateContainerMixin implements BlockStateContainerBri
      */
     @Redirect(method = "getSerializedSize", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/BitArray;size()I"))
     private int onGetStorageSize$FixVanillaBug(BitArray bits) {
-        return bits.func_188143_a().length;
+        return bits.getBackingLongArray().length;
     }
 
     @Redirect(method = "write", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IBlockStatePalette;write(Lnet/minecraft/network/PacketBuffer;)V"))
     private void onPaletteWrite(IBlockStatePalette palette, PacketBuffer buffer) {
-        final int serializedSize = palette.func_186040_a();
+        final int serializedSize = palette.getSerializedSize();
         final int index = buffer.writerIndex();
         try {
-            palette.func_186037_b(buffer);
+            palette.write(buffer);
         } catch (Exception e) {
             throw new RuntimeException("Attempted to serialize a block palette of size: " + serializedSize);
         }
@@ -146,12 +146,12 @@ public abstract class BlockStateContainerMixin implements BlockStateContainerBri
      */
     @Redirect(method = "write", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;writeLongArray([J)Lnet/minecraft/network/PacketBuffer;"))
     private PacketBuffer onSpongeWriteLongArrayPacketBuffer(PacketBuffer buffer, long[] backingArray) {
-        final int expectedSize = PacketBuffer.func_150790_a(backingArray.length);
+        final int expectedSize = PacketBuffer.getVarIntSize(backingArray.length);
         final int lengthIndex = buffer.writerIndex();
 
         try {
             // This is what is written first, the long array length as a var int.
-            buffer.func_150787_b(backingArray.length);
+            buffer.writeVarInt(backingArray.length);
         } catch (Exception e) { // If there was an exception, at least we'll be making sure it's logged where...
             throw new RuntimeException("Attempted to serialize the backing long array size but couldn't! Expected writer index("
                                        + lengthIndex + ") with expected size("+ expectedSize + ") and current writer index(" + buffer.writerIndex() +")");

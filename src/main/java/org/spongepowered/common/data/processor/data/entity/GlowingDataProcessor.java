@@ -51,13 +51,13 @@ public class GlowingDataProcessor extends AbstractEntitySingleDataProcessor<Enti
 
     @Override
     protected boolean set(Entity dataHolder, Boolean value) {
-        dataHolder.func_184195_f(checkNotNull(value, "value"));
+        dataHolder.setGlowing(checkNotNull(value, "value"));
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity dataHolder) {
-        return OptBool.of(dataHolder.func_184202_aL());
+        return OptBool.of(dataHolder.isGlowing());
     }
 
     @Override

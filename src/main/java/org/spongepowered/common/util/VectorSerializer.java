@@ -32,14 +32,14 @@ public class VectorSerializer {
 
     public static CompoundNBT toNbt(Vector3d vector) {
         CompoundNBT compound = new CompoundNBT();
-        compound.func_74780_a("x", vector.getX());
-        compound.func_74780_a("y", vector.getY());
-        compound.func_74780_a("z", vector.getZ());
+        compound.putDouble("x", vector.getX());
+        compound.putDouble("y", vector.getY());
+        compound.putDouble("z", vector.getZ());
         return compound;
     }
 
     public static Vector3d fromNbt(CompoundNBT compound) {
-        return new Vector3d(compound.func_74769_h("x"), compound.func_74769_h("y"), compound.func_74769_h("z"));
+        return new Vector3d(compound.getDouble("x"), compound.getDouble("y"), compound.getDouble("z"));
     }
 
 }

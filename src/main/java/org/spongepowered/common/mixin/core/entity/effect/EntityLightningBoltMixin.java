@@ -71,11 +71,11 @@ public abstract class EntityLightningBoltMixin extends EntityMixin {
     }
 
     private boolean spongeImpl$strikeBlockAndAddSnapshot(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
-        if (!this.effect && ((World) world).containsBlock(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())) {
+        if (!this.effect && ((World) world).containsBlock(pos.getX(), pos.getY(), pos.getZ())) {
             final Vector3i pos3i = VecHelper.toVector3i(pos);
             final Transaction<BlockSnapshot> transaction = new Transaction<>(
                 SpongeBlockSnapshotBuilder.pooled()
-                    .blockState(world.func_180495_p(pos))
+                    .blockState(world.getBlockState(pos))
                     .world(((World) world).getProperties())
                     .position(pos3i)
                     .build(),
@@ -105,7 +105,7 @@ public abstract class EntityLightningBoltMixin extends EntityMixin {
 
     @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;setDead()V"))
     private void spongeImpl$ThrowEventAndProcess(final CallbackInfo ci) {
-        if (this.isDead || this.world.field_72995_K) {
+        if (this.isDead || this.world.isRemote) {
             return;
         }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -120,11 +120,11 @@ public abstract class EntityLightningBoltMixin extends EntityMixin {
                 for (final Transaction<BlockSnapshot> bt : strike.getTransactions()) {
                     if (bt.isValid()) {
                         final BlockSnapshot bs = bt.getFinal();
-                        this.world.func_175656_a(VecHelper.toBlockPos(bs.getLocation().get()), ((BlockState) bs.getState()));
+                        this.world.setBlockState(VecHelper.toBlockPos(bs.getLocation().get()), ((BlockState) bs.getState()));
                     }
                 }
                 for (final Entity e : strike.getEntities()) {
-                    ((net.minecraft.entity.Entity) e).func_70077_a((LightningBoltEntity) (Object) this);
+                    ((net.minecraft.entity.Entity) e).onStruckByLightning((LightningBoltEntity) (Object) this);
                 }
                 SpongeImpl.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
             }
@@ -134,15 +134,15 @@ public abstract class EntityLightningBoltMixin extends EntityMixin {
     @Override
     public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.func_74764_b(Constants.Entity.LIGHTNING_EFFECT)) {
-            this.effect = compound.func_74767_n(Constants.Entity.LIGHTNING_EFFECT);
+        if (compound.contains(Constants.Entity.LIGHTNING_EFFECT)) {
+            this.effect = compound.getBoolean(Constants.Entity.LIGHTNING_EFFECT);
         }
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.func_74757_a(Constants.Entity.LIGHTNING_EFFECT, this.effect);
+        compound.putBoolean(Constants.Entity.LIGHTNING_EFFECT, this.effect);
     }
 
 }

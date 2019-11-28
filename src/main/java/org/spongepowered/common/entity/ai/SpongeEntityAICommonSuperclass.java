@@ -29,27 +29,27 @@ import net.minecraft.entity.ai.goal.Goal;
 public abstract class SpongeEntityAICommonSuperclass extends Goal {
 
     @Override
-    public boolean func_75250_a() {
+    public boolean shouldExecute() {
         return this.shouldUpdate();
     }
 
     @Override
-    public boolean func_75253_b() {
+    public boolean shouldContinueExecuting() {
         return this.continueUpdating();
     }
 
     @Override
-    public void func_75249_e() {
+    public void startExecuting() {
         this.start();
     }
 
     @Override
-    public void func_75251_c() {
+    public void resetTask() {
         this.reset();
     }
 
     @Override
-    public void func_75246_d() {
+    public void tick() {
         this.update();
     }
 

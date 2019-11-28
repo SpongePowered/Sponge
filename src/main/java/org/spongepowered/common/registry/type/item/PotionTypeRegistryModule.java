@@ -83,7 +83,7 @@ public final class PotionTypeRegistryModule implements SpongeAdditionalCatalogRe
             if (potion != null) {
                 PotionType potionType = (PotionType) potion;
                 this.potionList.add(potionType);
-                this.potionTypeMap.put(net.minecraft.potion.Potion.field_185176_a.func_177774_c(potion).toString(), potionType);
+                this.potionTypeMap.put(net.minecraft.potion.Potion.field_185176_a.getKey(potion).toString(), potionType);
             }
         }
     }
@@ -95,7 +95,7 @@ public final class PotionTypeRegistryModule implements SpongeAdditionalCatalogRe
                 PotionType potionType = (PotionType) potion;
                 if (!this.potionList.contains(potionType)) {
                     this.potionList.add(potionType);
-                    this.potionTypeMap.put(net.minecraft.potion.Potion.field_185176_a.func_177774_c(potion).toString(), potionType);
+                    this.potionTypeMap.put(net.minecraft.potion.Potion.field_185176_a.getKey(potion).toString(), potionType);
                 }
             }
         }

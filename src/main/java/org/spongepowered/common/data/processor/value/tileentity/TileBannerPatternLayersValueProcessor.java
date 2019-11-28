@@ -52,7 +52,7 @@ public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValuePr
 
     @Override
     protected boolean set(BannerTileEntity container, List<PatternLayer> value) {
-        if (!container.func_145831_w().field_72995_K) { // This avoids a client crash because clientside.
+        if (!container.getWorld().isRemote) { // This avoids a client crash because clientside.
             ((TileEntityBannerBridge) container).bridge$setLayers(value);
             return true;
         }

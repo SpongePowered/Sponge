@@ -64,7 +64,7 @@ public abstract class BlockRedstoneComparatorMixin extends BlockMixin {
         if (manipulator instanceof ImmutableComparatorData) {
             final ComparatorBlock.Mode comparatorType =
                     (ComparatorBlock.Mode) (Object) ((ImmutableComparatorData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(ComparatorBlock.field_176463_b, comparatorType));
+            return Optional.of((BlockState) blockState.func_177226_a(ComparatorBlock.MODE, comparatorType));
         }
         if (manipulator instanceof ImmutablePoweredData) {
             return Optional.of((BlockState) blockState.func_177226_a(ComparatorBlock.field_176464_a, ((ImmutablePoweredData) manipulator).powered()
@@ -77,7 +77,7 @@ public abstract class BlockRedstoneComparatorMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.COMPARATOR_TYPE)) {
             final ComparatorBlock.Mode comparatorType = (ComparatorBlock.Mode) value;
-            return Optional.of((BlockState) blockState.func_177226_a(ComparatorBlock.field_176463_b, comparatorType));
+            return Optional.of((BlockState) blockState.func_177226_a(ComparatorBlock.MODE, comparatorType));
         }
         if (key.equals(Keys.POWERED)) {
             return Optional.of((BlockState) blockState.func_177226_a(ComparatorBlock.field_176464_a, (Boolean) value));
@@ -88,11 +88,11 @@ public abstract class BlockRedstoneComparatorMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableComparatorData impl$getComparatorTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeComparatorData.class,
-                (ComparatorType) (Object) blockState.func_177229_b(ComparatorBlock.field_176463_b));
+                (ComparatorType) (Object) blockState.get(ComparatorBlock.MODE));
     }
 
     private ImmutablePoweredData impl$getIsPoweredFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.func_177229_b(ComparatorBlock.field_176464_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(ComparatorBlock.field_176464_a));
     }
 
 }

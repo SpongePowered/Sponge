@@ -184,7 +184,7 @@ public interface DefaultedExtent extends Extent {
                 if (archetype instanceof SpongeTileEntityArchetype) {
                     final int[] apos = new int[] {(x - ox) - tmin.getX(), y - tmin.getY(), (z - oz) - tmin.getZ()};
                     final SpongeTileEntityArchetype sponge = (SpongeTileEntityArchetype) archetype;
-                    sponge.getCompound().func_74783_a(Constants.Sponge.TileEntityArchetype.TILE_ENTITY_POS, apos);
+                    sponge.getCompound().putIntArray(Constants.Sponge.TileEntityArchetype.TILE_ENTITY_POS, apos);
                 }
                 tiles.put(new Vector3i(x - ox, y - oy, z - oz), archetype);
             }
@@ -201,15 +201,15 @@ public interface DefaultedExtent extends Extent {
         for (final Entity hit : intersectingEntities) {
             final net.minecraft.entity.Entity nms = (net.minecraft.entity.Entity) hit;
             final SpongeEntityArchetype archetype = (SpongeEntityArchetype) hit.createArchetype();
-            final ListNBT tagList = archetype.getData().func_150295_c(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+            final ListNBT tagList = archetype.getData().getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             if (tagList.func_82582_d()) {
-                tagList.func_74742_a(new DoubleNBT(nms.field_70165_t - ox));
-                tagList.func_74742_a(new DoubleNBT(nms.field_70163_u - oy));
-                tagList.func_74742_a(new DoubleNBT(nms.field_70161_v - oz));
+                tagList.func_74742_a(new DoubleNBT(nms.posX - ox));
+                tagList.func_74742_a(new DoubleNBT(nms.posY - oy));
+                tagList.func_74742_a(new DoubleNBT(nms.posZ - oz));
             } else {
-                tagList.func_150304_a(0, new DoubleNBT(nms.field_70165_t - ox));
-                tagList.func_150304_a(1, new DoubleNBT(nms.field_70163_u - oy));
-                tagList.func_150304_a(2, new DoubleNBT(nms.field_70161_v - oz));
+                tagList.func_150304_a(0, new DoubleNBT(nms.posX - ox));
+                tagList.func_150304_a(1, new DoubleNBT(nms.posY - oy));
+                tagList.func_150304_a(2, new DoubleNBT(nms.posZ - oz));
             }
             entities.add(archetype);
         }

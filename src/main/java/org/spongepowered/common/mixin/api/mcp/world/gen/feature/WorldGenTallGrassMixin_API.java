@@ -81,8 +81,8 @@ public abstract class WorldGenTallGrassMixin_API extends Feature implements Shru
         // divide the total count into batches of 128.
         final int n = (int) Math.ceil(this.count.getFlooredAmount(random) / 128f);
         for (int i = 0; i < n; i++) {
-            BlockPos pos = position.func_177982_a(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
-            pos = world.func_175672_r(pos).func_177982_a(0, 1, 0);
+            BlockPos pos = position.add(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
+            pos = world.func_175672_r(pos).add(0, 1, 0);
             if (this.override != null) {
                 final Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
                 stype = this.override.apply(pos2);
@@ -94,7 +94,7 @@ public abstract class WorldGenTallGrassMixin_API extends Feature implements Shru
                 stype = result.get(0);
             }
             final TallGrassBlock.EnumType type = (TallGrassBlock.EnumType) (Object) stype;
-            this.tallGrassState = Blocks.field_150329_H.func_176223_P().func_177226_a(TallGrassBlock.field_176497_a, type);
+            this.tallGrassState = Blocks.field_150329_H.getDefaultState().func_177226_a(TallGrassBlock.field_176497_a, type);
             func_180709_b(world, random, pos);
         }
     }

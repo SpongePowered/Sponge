@@ -56,8 +56,8 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
             Sponge.getEventManager().unregisterListeners(this);
             return;
         }
-        for (net.minecraft.inventory.container.Slot slot : nativeContainer.field_75151_b) {
-            if (slot.field_75224_c == inventory) {
+        for (net.minecraft.inventory.container.Slot slot : nativeContainer.inventorySlots) {
+            if (slot.inventory == inventory) {
                 // This container does contain our inventory
                 for (Consumer<InteractInventoryEvent> consumer : this.consumers) {
                     consumer.accept(event);

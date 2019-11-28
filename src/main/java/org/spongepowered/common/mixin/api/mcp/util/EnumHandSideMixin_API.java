@@ -48,7 +48,7 @@ public abstract class EnumHandSideMixin_API implements HandPreference {
     @Override
     public String getId() {
         if (this.api$id == null) {
-            this.api$id = ((TranslationTextComponent) this.handName).func_150268_i().replace("options.mainHand.", "");
+            this.api$id = ((TranslationTextComponent) this.handName).getKey().replace("options.mainHand.", "");
         }
         return this.api$id;
     }
@@ -64,7 +64,7 @@ public abstract class EnumHandSideMixin_API implements HandPreference {
     @Override
     public Translation getTranslation() {
         if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(((TranslationTextComponent) this.handName).func_150268_i());
+            this.api$translation = new SpongeTranslation(((TranslationTextComponent) this.handName).getKey());
         }
         return this.api$translation;
     }

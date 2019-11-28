@@ -56,7 +56,7 @@ public class HorseStyleRegistryModule extends AbstractPrefixAlternateCatalogType
     }
 
     public static HorseStyle getHorseStyle(HorseEntity horse) {
-        return HORSE_STYLE_IDMAP.get((horse.func_110202_bQ() & 65280) >> 8);
+        return HORSE_STYLE_IDMAP.get((horse.getHorseVariant() & 65280) >> 8);
     }
 
     public static HorseStyle getHorseStyle(DataView container) {

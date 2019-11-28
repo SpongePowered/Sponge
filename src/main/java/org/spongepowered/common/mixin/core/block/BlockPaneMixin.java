@@ -75,10 +75,10 @@ public abstract class BlockPaneMixin extends BlockMixin {
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final net.minecraft.block.BlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.func_177229_b(PaneBlock.field_176241_b);
-        final Boolean east = blockState.func_177229_b(PaneBlock.field_176242_M);
-        final Boolean west = blockState.func_177229_b(PaneBlock.field_176244_O);
-        final Boolean south = blockState.func_177229_b(PaneBlock.field_176243_N);
+        final Boolean north = blockState.get(PaneBlock.field_176241_b);
+        final Boolean east = blockState.get(PaneBlock.field_176242_M);
+        final Boolean west = blockState.get(PaneBlock.field_176244_O);
+        final Boolean south = blockState.get(PaneBlock.field_176243_N);
         if (north) {
             directions.add(Direction.NORTH);
         }

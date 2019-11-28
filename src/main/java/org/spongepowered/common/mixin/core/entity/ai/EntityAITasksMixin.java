@@ -142,7 +142,7 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
 
                     if (entityaitaskentry.field_188524_c) {
                         entityaitaskentry.field_188524_c = false;
-                        otherAiBase.func_75251_c();
+                        otherAiBase.resetTask();
                         this.executingTaskEntries.remove(entityaitaskentry);
                     }
 

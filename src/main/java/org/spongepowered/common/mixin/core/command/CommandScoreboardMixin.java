@@ -107,7 +107,7 @@ public abstract class CommandScoreboardMixin extends CommandBase implements ICom
         if (this.bridge$isExpandedSelector()) {
             try {
                 final UUID uuid = UUID.fromString(entityName);
-                final Entity entity = sender.func_184102_h().func_175576_a(uuid);
+                final Entity entity = sender.getServer().func_175576_a(uuid);
                 if (entity != null && entity instanceof EntityHuman) {
                     return entity.func_95999_t();
                 }

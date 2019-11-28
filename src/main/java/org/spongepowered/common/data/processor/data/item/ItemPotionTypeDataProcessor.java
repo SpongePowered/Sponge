@@ -48,24 +48,24 @@ import java.util.Optional;
 public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor<PotionType, Value<PotionType>, PotionTypeData, ImmutablePotionTypeData> {
 
     public ItemPotionTypeDataProcessor() {
-        super(itemStack -> itemStack.func_77973_b() == Items.field_151068_bn || itemStack.func_77973_b() == Items.field_185155_bH ||
-                itemStack.func_77973_b() == Items.field_185156_bI || itemStack.func_77973_b() == Items.field_185167_i, Keys.POTION_TYPE);
+        super(itemStack -> itemStack.getItem() == Items.POTION || itemStack.getItem() == Items.SPLASH_POTION ||
+                itemStack.getItem() == Items.LINGERING_POTION || itemStack.getItem() == Items.TIPPED_ARROW, Keys.POTION_TYPE);
     }
 
     @Override
     protected boolean set(ItemStack dataHolder, PotionType value) {
-        if (!dataHolder.func_77942_o()) {
-            dataHolder.func_77982_d(new CompoundNBT());
+        if (!dataHolder.hasTag()) {
+            dataHolder.setTag(new CompoundNBT());
         }
 
-        PotionUtils.func_185188_a(dataHolder, ((net.minecraft.potion.Potion) value));
+        PotionUtils.addPotionToItemStack(dataHolder, ((net.minecraft.potion.Potion) value));
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected Optional<PotionType> getVal(ItemStack dataHolder) {
-        return Optional.of((PotionType) PotionUtils.func_185191_c(dataHolder));
+        return Optional.of((PotionType) PotionUtils.getPotionFromItem(dataHolder));
     }
 
     @Override
@@ -90,15 +90,15 @@ public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor
         }
 
         ItemStack itemStack = (ItemStack) container;
-        Item item = itemStack.func_77973_b();
+        Item item = itemStack.getItem();
         // TODO check if this is correct - also for the PotionEffect Processors
-        if (item != Items.field_151068_bn) {
+        if (item != Items.POTION) {
             return DataTransactionResult.failNoData();
         }
 
         Optional<PotionType> val = getVal(itemStack);
         if (val.isPresent()) {
-            PotionUtils.func_185188_a(itemStack, Potions.field_185229_a);
+            PotionUtils.addPotionToItemStack(itemStack, Potions.EMPTY);
             return DataTransactionResult.successRemove(constructImmutableValue(val.get()));
         }
         return DataTransactionResult.successNoData();

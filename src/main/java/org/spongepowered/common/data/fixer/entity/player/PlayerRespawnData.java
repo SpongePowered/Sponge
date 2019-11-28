@@ -46,21 +46,21 @@ public class PlayerRespawnData implements IFixableData {
     public CompoundNBT func_188217_a(CompoundNBT compound) {
         final Map<UUID, RespawnLocation> spawnLocations = Maps.newHashMap();
 
-        if (compound.func_150297_b(Constants.Sponge.User.USER_SPAWN_X, Constants.NBT.TAG_ANY_NUMERIC)
-            && compound.func_150297_b(Constants.Sponge.User.USER_SPAWN_Y, Constants.NBT.TAG_ANY_NUMERIC)
-            && compound.func_150297_b(Constants.Sponge.User.USER_SPAWN_Z, Constants.NBT.TAG_ANY_NUMERIC)) {
-            Vector3d pos = new Vector3d(compound.func_74762_e(Constants.Sponge.User.USER_SPAWN_X),
-                    compound.func_74762_e(Constants.Sponge.User.USER_SPAWN_Y),
-                    compound.func_74762_e(Constants.Sponge.User.USER_SPAWN_Z));
+        if (compound.contains(Constants.Sponge.User.USER_SPAWN_X, Constants.NBT.TAG_ANY_NUMERIC)
+            && compound.contains(Constants.Sponge.User.USER_SPAWN_Y, Constants.NBT.TAG_ANY_NUMERIC)
+            && compound.contains(Constants.Sponge.User.USER_SPAWN_Z, Constants.NBT.TAG_ANY_NUMERIC)) {
+            Vector3d pos = new Vector3d(compound.getInt(Constants.Sponge.User.USER_SPAWN_X),
+                    compound.getInt(Constants.Sponge.User.USER_SPAWN_Y),
+                    compound.getInt(Constants.Sponge.User.USER_SPAWN_Z));
 //            final UUID key = WorldPropertyRegistryModule.dimIdToUuid(0);
 //            spawnLocations.put(key, RespawnLocation.builder().world(key).position(pos).build());
             // This is the point where we need to check the old data, if it is available.
         }
-        ListNBT spawnlist = compound.func_150295_c(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
+        ListNBT spawnlist = compound.getList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
         // This is legacy forge versions, not sure how forge is going to be saving it from now on, but
         // we can at least start moving all of this to our own compound and overwrite as necessary
         for (int i = 0; i < spawnlist.func_74745_c(); i++) {
-            CompoundNBT spawndata = spawnlist.func_150305_b(i);
+            CompoundNBT spawndata = spawnlist.getCompound(i);
 //            UUID uuid = WorldPropertyRegistryModule.dimIdToUuid(spawndata.getInteger(NbtDataUtil.USER_SPAWN_DIM));
 //            if (uuid != null) {
 //                spawnLocations.put(uuid, RespawnLocation.builder().world(uuid).position(

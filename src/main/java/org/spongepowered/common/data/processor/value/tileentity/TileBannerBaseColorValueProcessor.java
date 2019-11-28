@@ -52,7 +52,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected boolean set(BannerTileEntity container, DyeColor value) {
-        if (!container.func_145831_w().field_72995_K) {
+        if (!container.getWorld().isRemote) {
             ((TileEntityBannerBridge) container).bridge$setBaseColor(value);
             return true;
         }

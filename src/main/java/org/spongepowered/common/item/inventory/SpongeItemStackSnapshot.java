@@ -82,7 +82,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "ConstantConditions"})
     public SpongeItemStackSnapshot(ItemStack itemStack) {
         checkNotNull(itemStack);
-        if (itemStack == net.minecraft.item.ItemStack.field_190927_a) {
+        if (itemStack == net.minecraft.item.ItemStack.EMPTY) {
             this.itemType = (ItemType) null; // Empty itemstack has an invalid item type that we have to have null.
             this.quantity = 0;
             this.damageValue = 0;
@@ -103,20 +103,20 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
         }
-        this.damageValue = ((net.minecraft.item.ItemStack) itemStack).func_77952_i();
+        this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getDamage();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
-        @Nullable CompoundNBT compound = ((net.minecraft.item.ItemStack) this.privateStack).func_77978_p();
+        @Nullable CompoundNBT compound = ((net.minecraft.item.ItemStack) this.privateStack).getTag();
         if (compound != null) {
-            compound = compound.func_74737_b();
+            compound = compound.copy();
         }
         if (compound != null) {
-            if (compound.func_74764_b(Constants.Sponge.SPONGE_DATA)) {
-                final CompoundNBT spongeCompound = compound.func_74775_l(Constants.Sponge.SPONGE_DATA);
-                if (spongeCompound.func_74764_b(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.func_82580_o(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
+            if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
+                final CompoundNBT spongeCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
+                if (spongeCompound.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.remove(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             Constants.NBT.filterSpongeCustomData(compound);
@@ -149,12 +149,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         }
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
-        this.compound = compound == null ? null : compound.func_74737_b();
+        this.compound = compound == null ? null : compound.copy();
     }
 
     @Override
     public ItemType getType() {
-        return this.itemType == null ? (ItemType) net.minecraft.item.ItemStack.field_190927_a.func_77973_b() : this.itemType;
+        return this.itemType == null ? (ItemType) net.minecraft.item.ItemStack.EMPTY.getItem() : this.itemType;
     }
 
     @Override
@@ -180,7 +180,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStack createStack() {
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
         if(this.compound != null) {
-            nativeStack.func_77982_d(this.compound.func_74737_b());
+            nativeStack.setTag(this.compound.copy());
         }
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
             ((ItemStack) nativeStack).offer(manipulator.asMutable());
@@ -378,7 +378,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     public Optional<CompoundNBT> getCompound() {
         if (this.compound != null) {
-            return Optional.of(this.compound.func_74737_b());
+            return Optional.of(this.compound.copy());
         }
         return Optional.empty();
     }

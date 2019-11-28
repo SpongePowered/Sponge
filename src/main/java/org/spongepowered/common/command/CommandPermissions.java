@@ -93,7 +93,7 @@ public final class CommandPermissions {
             if (command.getCallable() instanceof MinecraftCommandWrapper) {
                 MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
                 data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
-                        Tristate.fromBoolean(wrapper.command.func_184882_a(sender.func_184102_h(), sender)));
+                        Tristate.fromBoolean(wrapper.command.func_184882_a(sender.getServer(), sender)));
             }
         }
     }

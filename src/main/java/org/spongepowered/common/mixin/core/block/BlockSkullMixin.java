@@ -83,12 +83,12 @@ public abstract class BlockSkullMixin extends BlockMixin {
     }
 
     private ImmutableDropData impl$getShouldDropFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !blockState.func_177229_b(SkullBlock.field_176417_b));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !blockState.get(SkullBlock.field_176417_b));
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(SkullBlock.field_176418_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(SkullBlock.field_176418_a)));
     }
 
 }

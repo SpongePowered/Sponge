@@ -46,32 +46,32 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Value<BlockState> constructValue(final BlockState value) {
-        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.field_150350_a.func_176223_P(), value);
+        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
     }
 
     @Override
     protected boolean set(final AbstractMinecartEntity container, final BlockState value) {
-        container.func_174899_a((net.minecraft.block.BlockState) value);
+        container.setDisplayTile((net.minecraft.block.BlockState) value);
         return true;
     }
 
     @Override
     protected Optional<BlockState> getVal(final AbstractMinecartEntity container) {
-        if(!container.func_94100_s()) return Optional.empty();
-        return Optional.of((BlockState) container.func_174897_t());
+        if(!container.hasDisplayTile()) return Optional.empty();
+        return Optional.of((BlockState) container.getDisplayTile());
     }
 
     @Override
     protected ImmutableValue<BlockState> constructImmutableValue(final BlockState value) {
-        return new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.field_150350_a.func_176223_P(), value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
     }
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if(container instanceof AbstractMinecartEntity) {
             final AbstractMinecartEntity cart = (AbstractMinecartEntity) container;
-            final ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.func_174897_t());
-            cart.func_94096_e(false);
+            final ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
+            cart.setHasDisplayTile(false);
             return DataTransactionResult.builder().replace(block).build();
         }
         return DataTransactionResult.failNoData();

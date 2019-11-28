@@ -47,14 +47,14 @@ public abstract class EntityOcelotMixin extends EntityAgeableMixin {
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     private int impl$ThrowTameEvent(Random rand, int bound, PlayerEntity player, Hand hand) {
-        ItemStack stack = player.func_184586_b(hand);
+        ItemStack stack = player.getHeldItem(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {
-            stack.func_190920_e(stack.func_190916_E() + 1);
+            stack.setCount(stack.getCount() + 1);
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Ocelot) this))) {
-                    stack.func_190920_e(stack.func_190916_E() - 1);
+                    stack.setCount(stack.getCount() - 1);
                     return random;
                 }
             }
@@ -64,7 +64,7 @@ public abstract class EntityOcelotMixin extends EntityAgeableMixin {
 
     @Inject(method = "setupTamedAI", at = @At(value = "HEAD"), cancellable = true)
     private void impl$IgnoreAISetupOnClientWorld(CallbackInfo ci) {
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             // Because ocelot AI tasks are added on the client, for whatever reason
             ci.cancel();
         }

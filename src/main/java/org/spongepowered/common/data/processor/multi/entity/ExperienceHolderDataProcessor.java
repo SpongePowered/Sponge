@@ -61,19 +61,19 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<P
 
     @Override
     protected boolean set(PlayerEntity entity, Map<Key<?>, Object> keyValues) {
-        entity.field_71068_ca = (Integer) keyValues.get(Keys.EXPERIENCE_LEVEL);
-        entity.field_71067_cb = (Integer) keyValues.get(Keys.TOTAL_EXPERIENCE);
-        entity.field_71106_cc = (float) (Integer) keyValues.get(Keys.EXPERIENCE_SINCE_LEVEL) / entity.func_71050_bK();
+        entity.experienceLevel = (Integer) keyValues.get(Keys.EXPERIENCE_LEVEL);
+        entity.experienceTotal = (Integer) keyValues.get(Keys.TOTAL_EXPERIENCE);
+        entity.experience = (float) (Integer) keyValues.get(Keys.EXPERIENCE_SINCE_LEVEL) / entity.xpBarCap();
         ((EntityPlayerMPBridge) entity).bridge$refreshExp();
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(PlayerEntity entity) {
-        final int level = entity.field_71068_ca;
-        final int totalExp = entity.field_71067_cb;
+        final int level = entity.experienceLevel;
+        final int totalExp = entity.experienceTotal;
         final int expSinceLevel = ((EntityPlayerBridge) entity).bridge$getExperienceSinceLevel();
-        final int expBetweenLevels = entity.func_71050_bK();
+        final int expBetweenLevels = entity.xpBarCap();
         return ImmutableMap.<Key<?>, Object>of(Keys.EXPERIENCE_LEVEL, level,
                 Keys.TOTAL_EXPERIENCE, totalExp,
                 Keys.EXPERIENCE_SINCE_LEVEL, expSinceLevel,

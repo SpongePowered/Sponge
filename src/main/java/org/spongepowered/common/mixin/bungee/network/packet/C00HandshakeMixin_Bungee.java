@@ -42,8 +42,8 @@ public abstract class C00HandshakeMixin_Bungee {
     private String bungee$patchReadStringForPortForwarding(final PacketBuffer buf, final int value) {
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord()
                 || !SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding()) {
-            return buf.func_150789_c(255);
+            return buf.readString(255);
         }
-        return buf.func_150789_c(Short.MAX_VALUE);
+        return buf.readString(Short.MAX_VALUE);
     }
 }

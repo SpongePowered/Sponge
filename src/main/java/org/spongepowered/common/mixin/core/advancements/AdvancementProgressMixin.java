@@ -187,11 +187,11 @@ public class AdvancementProgressMixin implements AdvancementProgressBridge {
 
     private boolean spongeGrantCriterion(final String criterionIn) {
         final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(criterionIn);
-        if (criterionProgress == null || criterionProgress.func_192151_a()) {
+        if (criterionProgress == null || criterionProgress.isObtained()) {
             return false;
         }
         if (SpongeScoreCriterion.BYPASS_EVENT) {
-            criterionProgress.func_192153_b();
+            criterionProgress.obtain();
             return true;
         }
         final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
@@ -223,7 +223,7 @@ public class AdvancementProgressMixin implements AdvancementProgressBridge {
         if (SpongeImpl.postEvent(event)) {
             return false;
         }
-        criterionProgress.func_192153_b();
+        criterionProgress.obtain();
         return true;
     }
 
@@ -242,11 +242,11 @@ public class AdvancementProgressMixin implements AdvancementProgressBridge {
 
     private boolean spongeRevokeCriterion(final String criterionIn) {
         final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(criterionIn);
-        if (criterionProgress == null || !criterionProgress.func_192151_a()) {
+        if (criterionProgress == null || !criterionProgress.isObtained()) {
             return false;
         }
         if (SpongeScoreCriterion.BYPASS_EVENT) {
-            criterionProgress.func_192154_c();
+            criterionProgress.reset();
             return true;
         }
         final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
@@ -278,7 +278,7 @@ public class AdvancementProgressMixin implements AdvancementProgressBridge {
         if (SpongeImpl.postEvent(event)) {
             return false;
         }
-        criterionProgress.func_192154_c();
+        criterionProgress.reset();
         return true;
     }
 

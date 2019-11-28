@@ -51,13 +51,13 @@ public class BedDyeColorDataProcessor extends AbstractTileEntitySingleDataProces
 
     @Override
     protected boolean set(BedTileEntity dataHolder, DyeColor value) {
-        dataHolder.func_193052_a((net.minecraft.item.DyeColor) (Object) value);
+        dataHolder.setColor((net.minecraft.item.DyeColor) (Object) value);
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(BedTileEntity dataHolder) {
-        return Optional.of((DyeColor) (Object) dataHolder.func_193048_a());
+        return Optional.of((DyeColor) (Object) dataHolder.getColor());
     }
 
     @Override

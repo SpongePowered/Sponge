@@ -101,7 +101,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
     )
     private Entity impl$ThrowEventAndConstruct(
         final CompoundNBT compound, final World world, final double x, final double y, final double z, final boolean doesNotForceSpawn) {
-        final String entityTypeString = compound.func_74779_i(Constants.Entity.ENTITY_TYPE_ID);
+        final String entityTypeString = compound.getString(Constants.Entity.ENTITY_TYPE_ID);
         final Class<? extends Entity> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString));
         if (clazz == null) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Unknown Entity for MobSpawners").centre().hr()
@@ -142,20 +142,20 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
             return null;
         }
 
-        entity.func_70012_b(x, y, z, entity.field_70177_z, entity.field_70125_A);
+        entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
 
-        if (doesNotForceSpawn && !world.func_72838_d(entity)) {
+        if (doesNotForceSpawn && !world.addEntity0(entity)) {
             return null;
         }
 
 
-        if (compound.func_150297_b(Constants.Entity.PASSENGERS, Constants.NBT.TAG_LIST)) {
-            final ListNBT passengerList = compound.func_150295_c(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
+        if (compound.contains(Constants.Entity.PASSENGERS, Constants.NBT.TAG_LIST)) {
+            final ListNBT passengerList = compound.getList(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
 
             for (int i = 0; i < passengerList.func_74745_c(); i++) {
-                final Entity passenger = impl$ThrowEventAndConstruct(passengerList.func_150305_b(i), world, x, y, z, doesNotForceSpawn);
+                final Entity passenger = impl$ThrowEventAndConstruct(passengerList.getCompound(i), world, x, y, z, doesNotForceSpawn);
                 if (passenger != null) {
-                    passenger.func_184205_a(entity, true);
+                    passenger.startRiding(entity, true);
                 }
             }
         }

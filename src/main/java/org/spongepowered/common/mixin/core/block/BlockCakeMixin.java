@@ -59,7 +59,7 @@ public abstract class BlockCakeMixin extends BlockMixin {
             if (layers > 6) {
                 layers = 6;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(CakeBlock.field_176589_a, layers));
+            return Optional.of((BlockState) blockState.func_177226_a(CakeBlock.BITES, layers));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -71,13 +71,13 @@ public abstract class BlockCakeMixin extends BlockMixin {
             if (layers > 6) {
                 layers = 6;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(CakeBlock.field_176589_a, layers));
+            return Optional.of((BlockState) blockState.func_177226_a(CakeBlock.BITES, layers));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableLayeredData impl$getLayerData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.func_177229_b(CakeBlock.field_176589_a), 0, 6);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.get(CakeBlock.BITES), 0, 6);
     }
 
 }

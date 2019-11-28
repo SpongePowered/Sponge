@@ -61,7 +61,7 @@ public abstract class AbstractCatalogDataProcessor<T, V extends BaseValue<T>, M 
 
     @Override
     protected Optional<T> getVal(ItemStack itemStack) {
-        return Optional.of(this.getFromMeta(itemStack.func_77952_i()));
+        return Optional.of(this.getFromMeta(itemStack.getDamage()));
     }
 
     protected abstract T getDefaultValue();

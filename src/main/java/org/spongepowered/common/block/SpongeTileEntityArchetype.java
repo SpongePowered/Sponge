@@ -76,25 +76,25 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     @Override
     public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location<World> location) {
         final BlockState currentState = location.getBlock();
-        final Block currentBlock = ((net.minecraft.block.BlockState) currentState).func_177230_c();
-        final Block newBlock = ((net.minecraft.block.BlockState) this.blockState).func_177230_c();
+        final Block currentBlock = ((net.minecraft.block.BlockState) currentState).getBlock();
+        final Block newBlock = ((net.minecraft.block.BlockState) this.blockState).getBlock();
         final net.minecraft.world.World minecraftWorld = (net.minecraft.world.World) location.getExtent();
 
         BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
-            ((World) minecraftWorld).setBlock(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p(), this.blockState, BlockChangeFlags.ALL);
+            ((World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState, BlockChangeFlags.ALL);
         }
-        final CompoundNBT compound = this.data.func_74737_b();
+        final CompoundNBT compound = this.data.copy();
 
-        TileEntity tileEntity = minecraftWorld.func_175625_s(blockpos);
+        TileEntity tileEntity = minecraftWorld.getTileEntity(blockpos);
         if (tileEntity == null) {
             return Optional.empty();
         }
-        compound.func_74768_a("x", blockpos.func_177958_n());
-        compound.func_74768_a("y", blockpos.func_177956_o());
-        compound.func_74768_a("z", blockpos.func_177952_p());
-        tileEntity.func_145839_a(compound);
-        tileEntity.func_70296_d();
+        compound.putInt("x", blockpos.getX());
+        compound.putInt("y", blockpos.getY());
+        compound.putInt("z", blockpos.getZ());
+        tileEntity.read(compound);
+        tileEntity.markDirty();
         return Optional.of((org.spongepowered.api.block.tileentity.TileEntity) tileEntity);
     }
 
@@ -102,7 +102,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     public BlockSnapshot toSnapshot(Location<World> location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState = this.blockState;
-        builder.compound = this.data.func_74737_b();
+        builder.compound = this.data.copy();
         builder.worldUuid = location.getExtent().getUniqueId();
         builder.coords = location.getBlockPosition();
         return builder.build();

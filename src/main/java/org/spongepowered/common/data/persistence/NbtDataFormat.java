@@ -54,7 +54,7 @@ public class NbtDataFormat extends SpongeCatalogType implements DataFormat {
             dis = new DataInputStream(input);
         }
         try {
-            CompoundNBT tag = CompressedStreamTools.func_74794_a(dis);
+            CompoundNBT tag = CompressedStreamTools.read(dis);
             return NbtTranslator.getInstance().translateFrom(tag);
         } finally {
             dis.close();
@@ -72,7 +72,7 @@ public class NbtDataFormat extends SpongeCatalogType implements DataFormat {
             dos = new DataOutputStream(output);
         }
         try {
-            CompressedStreamTools.func_74800_a(tag, dos);
+            CompressedStreamTools.write(tag, dos);
         } finally {
             dos.close();
         }

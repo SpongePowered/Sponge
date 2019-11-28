@@ -44,6 +44,6 @@ public abstract class EntitySilverfish_AIHideInStoneMixin extends RandomWalkingG
     @Redirect(method = "shouldExecute",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockSilverfish;canContainSilverfish(Lnet/minecraft/block/state/IBlockState;)Z"))
     private boolean onCanGrief(final BlockState blockState) {
-        return SilverfishBlock.func_176377_d(blockState) && ((GrieferBridge) this.field_75457_a).bridge$CanGrief();
+        return SilverfishBlock.func_176377_d(blockState) && ((GrieferBridge) this.creature).bridge$CanGrief();
     }
 }

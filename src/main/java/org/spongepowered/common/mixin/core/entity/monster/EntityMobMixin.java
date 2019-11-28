@@ -75,20 +75,20 @@ public abstract class EntityMobMixin extends EntityLivingMixin {
     public boolean attackEntityAsMob(Entity targetEntity) {
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
-        final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.field_111264_e).func_111126_e();
+        final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
         final List<DamageFunction> originalFunctions = new ArrayList<>();
         // Sponge End
         int knockbackModifier = 0;
 
         if (targetEntity instanceof LivingEntity) {
             // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), ((LivingEntity) targetEntity).func_70668_bt(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), ((LivingEntity) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
-            knockbackModifier += EnchantmentHelper.func_77501_a((MonsterEntity) (Object) this);
+            knockbackModifier += EnchantmentHelper.getKnockbackModifier((MonsterEntity) (Object) this);
         }
 
         // Sponge Start - Throw our event and handle appropriately
-        final DamageSource damageSource = DamageSource.func_76358_a((MonsterEntity) (Object) this);
+        final DamageSource damageSource = DamageSource.causeMobDamage((MonsterEntity) (Object) this);
         Sponge.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions,
             (org.spongepowered.api.entity.Entity) targetEntity, knockbackModifier, originalBaseDamage);
@@ -99,32 +99,32 @@ public abstract class EntityMobMixin extends EntityLivingMixin {
         }
         knockbackModifier = event.getKnockbackModifier();
         // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
-        boolean attackSucceeded = targetEntity.func_70097_a(damageSource, (float) event.getFinalOutputDamage());
+        boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
         // Sponge End
         if (attackSucceeded) {
             if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {
-                ((LivingEntity) targetEntity).func_70653_a((MonsterEntity) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper.func_76126_a(this.rotationYaw * 0.017453292F), (double) (-MathHelper.func_76134_b(this.rotationYaw * 0.017453292F)));
+                ((LivingEntity) targetEntity).knockBack((MonsterEntity) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper.sin(this.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                 this.motionX *= 0.6D;
                 this.motionZ *= 0.6D;
             }
 
-            int j = EnchantmentHelper.func_90036_a((MonsterEntity) (Object) this);
+            int j = EnchantmentHelper.getFireAspectModifier((MonsterEntity) (Object) this);
 
             if (j > 0) {
-                targetEntity.func_70015_d(j * 4);
+                targetEntity.setFire(j * 4);
             }
 
             if (targetEntity instanceof PlayerEntity) {
                 PlayerEntity entityplayer = (PlayerEntity) targetEntity;
                 ItemStack itemstack = this.getHeldItemMainhand();
-                ItemStack itemstack1 = entityplayer.func_184587_cr() ? entityplayer.func_184607_cu() : ItemStack.field_190927_a;
+                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : ItemStack.EMPTY;
 
-                if (!itemstack.func_190926_b() && !itemstack1.func_190926_b() && itemstack.func_77973_b() instanceof AxeItem && itemstack1.func_77973_b() == Items.field_185159_cQ) {
-                    float f1 = 0.25F + (float) EnchantmentHelper.func_185293_e((MonsterEntity) (Object) this) * 0.05F;
+                if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof AxeItem && itemstack1.getItem() == Items.SHIELD) {
+                    float f1 = 0.25F + (float) EnchantmentHelper.getEfficiencyModifier((MonsterEntity) (Object) this) * 0.05F;
 
                     if (this.rand.nextFloat() < f1) {
-                        entityplayer.func_184811_cZ().func_185145_a(Items.field_185159_cQ, 100);
-                        this.world.func_72960_a(entityplayer, (byte) 30);
+                        entityplayer.getCooldownTracker().setCooldown(Items.SHIELD, 100);
+                        this.world.setEntityState(entityplayer, (byte) 30);
                     }
                 }
             }
@@ -146,13 +146,13 @@ public abstract class EntityMobMixin extends EntityLivingMixin {
     @Overwrite
     protected boolean isValidLightLevel()
     {
-        final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().field_72338_b, this.posZ);
-        final Chunk chunk = ((ChunkProviderBridge) this.world.func_72863_F()).bridge$getLoadedChunkWithoutMarkingActive(blockpos.func_177958_n() >> 4, blockpos.func_177952_p() >> 4);
+        final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+        final Chunk chunk = ((ChunkProviderBridge) this.world.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
         if (chunk == null || !((ChunkBridge) chunk).bridge$isActive()) {
             return false;
         }
 
-        if (this.world.func_175642_b(LightType.SKY, blockpos) > this.rand.nextInt(32))
+        if (this.world.getLightFor(LightType.SKY, blockpos) > this.rand.nextInt(32))
         {
             return false;
         } 
@@ -160,8 +160,8 @@ public abstract class EntityMobMixin extends EntityLivingMixin {
         {
             //int i = this.worldObj.getLightFromNeighbors(blockpos);
             boolean passes; // Sponge
-            if (this.world.func_72911_I()) {
-                int j = this.world.func_175657_ab();;
+            if (this.world.isThundering()) {
+                int j = this.world.getSkylightSubtracted();;
                 this.world.func_175692_b(10);
                 passes = !((WorldServerBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
                 this.world.func_175692_b(j);

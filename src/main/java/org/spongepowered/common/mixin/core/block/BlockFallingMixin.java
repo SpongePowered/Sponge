@@ -54,12 +54,12 @@ public class BlockFallingMixin {
         )
     )
     private boolean impl$CheckIfAreaIsLoadedAndIfThrownEventIsntCancelled(final World world, final BlockPos pos, final BlockPos to) {
-        if (world.func_175707_a(pos, to) && !((WorldBridge) world).bridge$isFake()) {
+        if (world.isAreaLoaded(pos, to) && !((WorldBridge) world).bridge$isFake()) {
 
-            final BlockPos actualPos = pos.func_177982_a(32, 32, 32);
+            final BlockPos actualPos = pos.add(32, 32, 32);
             final EntityType fallingBlock = EntityTypes.FALLING_BLOCK;
-            final Vector3d position = new Vector3d(actualPos.func_177958_n() + 0.5D, actualPos.func_177956_o(), actualPos.func_177952_p() + 0.5D);
-            final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.func_177958_n(), actualPos.func_177956_o(), actualPos.func_177952_p());
+            final Vector3d position = new Vector3d(actualPos.getX() + 0.5D, actualPos.getY(), actualPos.getZ() + 0.5D);
+            final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(snapshot);
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);

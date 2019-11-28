@@ -47,7 +47,7 @@ public abstract class EntityEndermanMixin extends EntityMobMixin {
 
     @Redirect(method = "teleportTo", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityEnderman;attemptTeleport(DDD)Z"))
     private boolean impl$CheckContextWithTeleport(EndermanEntity entityEnderman, double x, double y, double z) {
-        if (entityEnderman.field_70170_p.field_72995_K) {
+        if (entityEnderman.world.isRemote) {
             return entityEnderman.func_184595_k(x, y, z);
         }
         

@@ -127,23 +127,23 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
             {
                 final CompoundNBT nbttagcompound = this.structureData.func_143041_a();
 
-                for (final String s : nbttagcompound.func_150296_c())
+                for (final String s : nbttagcompound.keySet())
                 {
-                    final NBTBase nbtbase = nbttagcompound.func_74781_a(s);
+                    final NBTBase nbtbase = nbttagcompound.get(s);
 
-                    if (nbtbase.func_74732_a() == 10)
+                    if (nbtbase.getId() == 10)
                     {
                         final CompoundNBT nbttagcompound1 = (CompoundNBT)nbtbase;
 
-                        if (nbttagcompound1.func_74764_b("ChunkX") && nbttagcompound1.func_74764_b("ChunkZ"))
+                        if (nbttagcompound1.contains("ChunkX") && nbttagcompound1.contains("ChunkZ"))
                         {
-                            final int i = nbttagcompound1.func_74762_e("ChunkX");
-                            final int j = nbttagcompound1.func_74762_e("ChunkZ");
+                            final int i = nbttagcompound1.getInt("ChunkX");
+                            final int j = nbttagcompound1.getInt("ChunkZ");
                             final StructureStart structurestart = StructureIO.func_143035_a(nbttagcompound1, worldIn);
 
                             if (structurestart != null)
                             {
-                                this.structureMap.put(ChunkPos.func_77272_a(i, j), structurestart);
+                                this.structureMap.put(ChunkPos.asLong(i, j), structurestart);
                             }
                         }
                     }

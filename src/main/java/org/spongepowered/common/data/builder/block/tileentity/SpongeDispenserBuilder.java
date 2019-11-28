@@ -44,7 +44,7 @@ public class SpongeDispenserBuilder extends SpongeLockableBuilder<Dispenser> {
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
                 ((DispenserTileEntity) dispenser).func_190575_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
-            ((DispenserTileEntity) dispenser).func_145829_t();
+            ((DispenserTileEntity) dispenser).validate();
             return dispenser;
         });
     }

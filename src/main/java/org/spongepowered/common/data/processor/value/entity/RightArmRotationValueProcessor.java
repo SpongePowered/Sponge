@@ -57,7 +57,7 @@ public class RightArmRotationValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected boolean set(final ArmorStandEntity container, final Vector3d value) {
-        container.func_175428_d(VecHelper.toRotation(value));
+        container.setRightArmRotation(VecHelper.toRotation(value));
         return true;
     }
 

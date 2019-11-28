@@ -70,7 +70,7 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
 
     @Override
     protected Optional<Integer> getVal(PlayerEntity container) {
-        return Optional.of(container.func_71050_bK());
+        return Optional.of(container.xpBarCap());
     }
 
     @Override

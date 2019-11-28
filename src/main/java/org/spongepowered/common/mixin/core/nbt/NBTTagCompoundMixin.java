@@ -58,7 +58,7 @@ public abstract class NBTTagCompoundMixin extends NBTBase {
     @Nullable
     private NBTBase onTagCopy(@Nullable final NBTBase base) {
         try {
-            return base == null ? null : base.func_74737_b();
+            return base == null ? null : base.copy();
         } catch (StackOverflowError e) {
             final PrettyPrinter printer = new PrettyPrinter(60)
                 .add("StackOverflow from trying to copy this compound")

@@ -91,7 +91,7 @@ public abstract class EntityXPOrbMixin_RealTime extends EntityMixin_RealTime {
             this.xpOrbAge = modifier;
             return;
         }
-        final int ticks = (int) ((RealTimeTrackingBridge) self.func_130014_f_()).realTimeBridge$getRealTimeTicks();
+        final int ticks = (int) ((RealTimeTrackingBridge) self.getEntityWorld()).realTimeBridge$getRealTimeTicks();
         this.xpOrbAge += ticks;
     }
 

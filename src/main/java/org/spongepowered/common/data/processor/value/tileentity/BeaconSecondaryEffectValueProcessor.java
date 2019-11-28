@@ -56,7 +56,7 @@ public class BeaconSecondaryEffectValueProcessor
             return false;
         }
         ((TileEntityBeaconBridge) container).bridge$forceSetSecondaryEffect((Effect) value.orElse(null));
-        container.func_70296_d();
+        container.markDirty();
         return true;
     }
 
@@ -67,7 +67,7 @@ public class BeaconSecondaryEffectValueProcessor
         }
         int id = container.func_174887_a_(2);
         if (id > 0) {
-            return Optional.of(Optional.of((PotionEffectType) Effect.func_188412_a(id)));
+            return Optional.of(Optional.of((PotionEffectType) Effect.get(id)));
         }
         return Optional.of(Optional.empty());
     }

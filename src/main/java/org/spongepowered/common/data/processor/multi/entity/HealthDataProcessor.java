@@ -61,19 +61,19 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<LivingEntit
 
     @Override
     protected boolean set(LivingEntity entity, Map<Key<?>, Object> keyValues) {
-        entity.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111128_a(((Double) keyValues.get(Keys.MAX_HEALTH)).floatValue());
+        entity.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(((Double) keyValues.get(Keys.MAX_HEALTH)).floatValue());
         float health = ((Double) keyValues.get(Keys.HEALTH)).floatValue();
-        entity.func_70606_j(health);
+        entity.setHealth(health);
         if (health == 0) {
-            entity.func_70097_a(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 10000F);
+            entity.attackEntityFrom(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 10000F);
         }
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(LivingEntity entity) {
-        final double health = entity.func_110143_aJ();
-        final double maxHealth = entity.func_110138_aP();
+        final double health = entity.getHealth();
+        final double maxHealth = entity.getMaxHealth();
         return ImmutableMap.<Key<?>, Object>of(Keys.HEALTH, health,
                                                Keys.MAX_HEALTH, maxHealth);
     }

@@ -40,7 +40,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
 
     static {
         DAMAGE_SOURCE_CTOR = (id) -> {
-            final net.minecraft.util.DamageSource source = net.minecraft.util.DamageSource.func_188405_b((LivingEntity) null);
+            final net.minecraft.util.DamageSource source = net.minecraft.util.DamageSource.causeExplosionDamage((LivingEntity) null);
             ((DamageSourceAccessor) source).accessor$setId(id);
             ((DamageSourceBridge) source).bridge$resetDamageType();
             return source;
@@ -63,13 +63,13 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
             accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.magical) {
-            source.func_82726_p();
+            source.setMagicDamage();
         }
         if (this.scales) {
-            source.func_76351_m();
+            source.setDifficultyScaled();
         }
         if (this.explosion) {
-            source.func_94540_d();
+            source.setExplosion();
         }
         if (this.exhaustion != null) {
             accessor.accessor$setHungerDamage(this.exhaustion.floatValue());

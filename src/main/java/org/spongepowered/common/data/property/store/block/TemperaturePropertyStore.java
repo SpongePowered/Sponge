@@ -39,8 +39,8 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
     @Override
     public Optional<TemperatureProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final Biome biome = world.func_180494_b(VecHelper.toBlockPos(location));
-        return Optional.of(new TemperatureProperty(biome.func_185353_n())); // TODO: do we want to use pos-sensitive?
+        final Biome biome = world.getBiome(VecHelper.toBlockPos(location));
+        return Optional.of(new TemperatureProperty(biome.getDefaultTemperature())); // TODO: do we want to use pos-sensitive?
     }
 
     @Override

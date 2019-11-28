@@ -84,19 +84,19 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
     @Override
     public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InteractionPacketContext context) {
-        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.func_184614_ca());
+        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
             context.itemUsed(stack);
         }
-        final ItemStack itemInUse = ItemStackUtil.cloneDefensive(playerMP.func_184607_cu());
+        final ItemStack itemInUse = ItemStackUtil.cloneDefensive(playerMP.getActiveItemStack());
         if (itemInUse != null) {
             context.activeItem(itemInUse);
         }
-        final BlockPos target = ((CPlayerDiggingPacket) packet).func_179715_a();
-        if (!playerMP.field_70170_p.func_175667_e(target)) {
+        final BlockPos target = ((CPlayerDiggingPacket) packet).getPosition();
+        if (!playerMP.world.isBlockLoaded(target)) {
             context.targetBlock(BlockSnapshot.NONE);
         } else {
-            context.targetBlock(((WorldServerBridge) playerMP.field_70170_p).bridge$createSnapshot(target, BlockChangeFlags.NONE));
+            context.targetBlock(((WorldServerBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
         context.handUsed(HandTypes.MAIN_HAND);
     }
@@ -152,7 +152,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final Entity spongePlayer = (Entity) player;
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
         
-        final net.minecraft.item.ItemStack endActiveItem = player.func_184607_cu();
+        final net.minecraft.item.ItemStack endActiveItem = player.getActiveItemStack();
         ((EntityLivingBaseAccessor) player).accessor$setActiveItemStack((net.minecraft.item.ItemStack) phaseContext.getActiveItem());
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -232,10 +232,10 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
             phaseContext.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((multimap -> {
                 for (final Map.Entry<UUID, Collection<ItemEntity>> entry : multimap.asMap().entrySet()) {
-                    if (entry.getKey().equals(player.func_110124_au())) {
+                    if (entry.getKey().equals(player.getUniqueID())) {
                         throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                     } else {
-                        final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.field_70170_p).func_175733_a(entry.getKey());
+                        final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.world).func_175733_a(entry.getKey());
                         if (spawnedEntity != null) {
                             try (final CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 entityFrame.pushCause(spawnedEntity);
@@ -246,7 +246,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                 }
             }));
 
-            final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.field_71070_bA;
+            final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
             trackedInventory.bridge$setCaptureInventory(false);
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
         }

@@ -66,9 +66,9 @@ public class EntityVillager_ItemAndEmeraldToItemMixin_API implements TradeOfferG
             sellingCount = this.sellingPriceInfo.func_179412_a(random);
         }
 
-        final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.func_77973_b(), buyingCount, this.buyingItemStack.func_77960_j());
-        final ItemStack emeraldStack = new ItemStack(Items.field_151166_bC);
-        final ItemStack itemStackSelling = new ItemStack(this.sellingItemstack.func_77973_b(), sellingCount, this.sellingItemstack.func_77960_j());
+        final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.getItem(), buyingCount, this.buyingItemStack.func_77960_j());
+        final ItemStack emeraldStack = new ItemStack(Items.EMERALD);
+        final ItemStack itemStackSelling = new ItemStack(this.sellingItemstack.getItem(), sellingCount, this.sellingItemstack.func_77960_j());
         return (TradeOffer) new MerchantRecipe(itemStackBuying, emeraldStack, itemStackSelling);
     }
 

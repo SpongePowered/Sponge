@@ -45,22 +45,22 @@ import java.util.function.Supplier;
 public abstract class AbstractSpongeCraftingRecipe implements CraftingRecipe, IRecipe {
 
     @Override
-    public boolean func_77569_a(CraftingInventory inv, net.minecraft.world.World worldIn) {
+    public boolean matches(CraftingInventory inv, net.minecraft.world.World worldIn) {
         return matches(this::isValid, inv, worldIn);
     }
 
     @Override
-    public ItemStack func_77572_b(CraftingInventory inv) {
+    public ItemStack getCraftingResult(CraftingInventory inv) {
         return getCraftingResult(this::getResult, inv);
     }
 
     @Override
-    public ItemStack func_77571_b() {
+    public ItemStack getRecipeOutput() {
         return getRecipeOutput(this::getExemplaryResult);
     }
 
     @Override
-    public NonNullList<ItemStack> func_179532_b(CraftingInventory inv) {
+    public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
         return getRemainingItems(this::getRemainingItems, inv);
     }
 
@@ -83,16 +83,16 @@ public abstract class AbstractSpongeCraftingRecipe implements CraftingRecipe, IR
     public static NonNullList<ItemStack> getRemainingItems(Function<CraftingGridInventory, List<ItemStackSnapshot>> getRemainingItems, CraftingInventory inv) {
         List<ItemStackSnapshot> spongeResult = getRemainingItems.apply(toSpongeInventory(inv));
 
-        if (spongeResult.size() != inv.func_70302_i_()) {
+        if (spongeResult.size() != inv.getSizeInventory()) {
             throw new IllegalStateException("The number of ItemStackSnapshots returned by getRemainingItems must be equal to the size of the GridInventory.");
         }
 
-        NonNullList<ItemStack> result = NonNullList.func_191197_a(inv.func_70302_i_(), ItemStack.field_190927_a);
+        NonNullList<ItemStack> result = NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
 
         for(int i = 0; i < spongeResult.size(); i++) {
             ItemStack item = ItemStackUtil.fromSnapshotToNative(spongeResult.get(i));
 
-            result.set(i, item != null ? item : ItemStack.field_190927_a);
+            result.set(i, item != null ? item : ItemStack.EMPTY);
         }
 
         return result;

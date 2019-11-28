@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static net.minecraft.inventory.container.FurnaceFuelSlot.func_178173_c_;
+import static net.minecraft.inventory.container.FurnaceFuelSlot.isBucket;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
@@ -83,10 +83,10 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
 
     private SlotProvider impl$generateSlotProvider() {
         return new SlotCollection.Builder().add(InputSlotAdapter.class, InputSlotLensImpl::new)
-                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> FurnaceTileEntity.func_145954_b((ItemStack) s) || func_178173_c_(
+                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> FurnaceTileEntity.func_145954_b((ItemStack) s) || isBucket(
                         (ItemStack) s), t -> {
                     final ItemStack nmsStack = (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1);
-                    return FurnaceTileEntity.func_145954_b(nmsStack) || func_178173_c_(nmsStack);
+                    return FurnaceTileEntity.func_145954_b(nmsStack) || isBucket(nmsStack);
                 }))
                 // TODO represent the filtering in the API somehow
                 .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> true, (t) -> true))
@@ -108,7 +108,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
 
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(itemStack);
-        final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.func_190916_E() - 1));
+        final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
 
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(fuel, shrinkedFuel);
         final SmeltEvent.ConsumeFuel event = SpongeEventFactory.createSmeltEventConsumeFuel(cause, fuel, (Furnace) this, Collections.singletonList(transaction));
@@ -125,7 +125,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         if (transaction.getCustom().isPresent()) {
             this.furnaceItemStacks.set(1, ItemStackUtil.fromSnapshotToNative(transaction.getFinal()));
         } else { // vanilla
-            itemStack.func_190918_g(quantity);
+            itemStack.shrink(quantity);
         }
     }
 
@@ -154,7 +154,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
     // Tick down
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;clamp(III)I"))
     private int impl$resetCookTimeIfCancelled(final int newCookTime, final int zero, final int totalCookTime) {
-        final int clampedCookTime = MathHelper.func_76125_a(newCookTime, zero, totalCookTime);
+        final int clampedCookTime = MathHelper.clamp(newCookTime, zero, totalCookTime);
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         final SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, (Furnace) this, Collections.emptyList());

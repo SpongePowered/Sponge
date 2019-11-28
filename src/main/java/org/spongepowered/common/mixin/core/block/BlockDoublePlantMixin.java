@@ -65,7 +65,7 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
                     (DoublePlantBlock.EnumPlantType) (Object) ((ImmutableDoublePlantData) manipulator).type().get();
             return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176493_a, doublePlantType));
         } else if (manipulator instanceof ImmutablePortionData) {
-            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176492_b,
+            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.HALF,
                     impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
@@ -78,7 +78,7 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176493_a, doublePlantType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.field_176492_b, impl$convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(DoublePlantBlock.HALF, impl$convertPortionType((PortionType) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
@@ -90,11 +90,11 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
     @SuppressWarnings("ConstantConditions")
     private ImmutableDoublePlantData impl$getDoublePlantTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDoublePlantData.class,
-                (DoublePlantType) (Object) blockState.func_177229_b(DoublePlantBlock.field_176493_a));
+                (DoublePlantType) (Object) blockState.get(DoublePlantBlock.field_176493_a));
     }
 
     private ImmutablePortionData impl$getPortionData(final net.minecraft.block.BlockState blockState) {
-        final DoublePlantBlock.EnumBlockHalf half = blockState.func_177229_b(DoublePlantBlock.field_176492_b);
+        final DoublePlantBlock.EnumBlockHalf half = blockState.get(DoublePlantBlock.HALF);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
                 half == DoublePlantBlock.EnumBlockHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
     }

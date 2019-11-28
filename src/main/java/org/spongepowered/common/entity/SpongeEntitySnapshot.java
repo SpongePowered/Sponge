@@ -111,7 +111,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             this.keys = keyBuilder.build();
             this.values = valueBuilder.build();
         }
-        this.compound = builder.compound == null ? null : builder.compound.func_74737_b();
+        this.compound = builder.compound == null ? null : builder.compound.copy();
         this.worldUuid = builder.worldId;
         this.position = builder.position;
         this.rotation = builder.rotation;
@@ -382,8 +382,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         final SpongeEntitySnapshotBuilder builder = createBuilder();
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
-        CompoundNBT newCompound = this.compound.func_74737_b();
-        newCompound.func_74768_a("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
+        CompoundNBT newCompound = this.compound.copy();
+        newCompound.putInt("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
         builder.compound = newCompound;
         return builder.build();
     }
@@ -399,7 +399,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         if (this.compound == null) {
             return Optional.empty();
         }
-        return Optional.of(this.compound.func_74737_b());
+        return Optional.of(this.compound.copy());
     }
 
     @Override
@@ -426,7 +426,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             if (newEntity != null) {
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
                 if (this.compound != null) {
-                    nmsEntity.func_70020_e(this.compound);
+                    nmsEntity.read(this.compound);
                 }
     
                 boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);

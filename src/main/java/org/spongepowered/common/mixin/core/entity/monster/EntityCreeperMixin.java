@@ -107,7 +107,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(final int state, final CallbackInfo ci) {
         bridge$setFuseDuration(this.fuseDuration);
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 
@@ -122,7 +122,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
 
     @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
     private void postStateChange(final int state, final CallbackInfo ci) {
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 

@@ -42,8 +42,8 @@ public abstract class CommandGameRuleMixin_MultiWorldCommand {
     private static int currentDimension;
 
     private static GameRules multiWorldcommand$getGameRules(final ICommandSender sender) {
-        currentDimension = ((WorldServerBridge) sender.func_130014_f_()).bridge$getDimensionId();
-        return sender.func_130014_f_().func_82736_K();
+        currentDimension = ((WorldServerBridge) sender.getEntityWorld()).bridge$getDimensionId();
+        return sender.getEntityWorld().getGameRules();
     }
 
     @Redirect(method = "execute",
@@ -64,8 +64,8 @@ public abstract class CommandGameRuleMixin_MultiWorldCommand {
     @Redirect(method = "notifyGameRuleChange",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
     private static void multiWorldCommand$sendCurrentDimensionPacket(final ServerPlayNetHandler connection, final IPacket<?> packet) {
-        if (connection.field_147369_b.field_71093_bK == currentDimension) {
-            connection.func_147359_a(packet);
+        if (connection.player.dimension == currentDimension) {
+            connection.sendPacket(packet);
         }
     }
 

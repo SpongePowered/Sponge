@@ -88,7 +88,7 @@ public class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
     private boolean impl$onUnregisterListenersGetProgress(final CriterionProgress progress) {
         final CriterionProgressBridge mixinCriterionProgress = (CriterionProgressBridge) progress;
         if (SpongeImplHooks.isFakePlayer(this.player) || !mixinCriterionProgress.bridge$isCriterionAvailable()) {
-            return progress.func_192151_a();
+            return progress.isObtained();
         }
 
         final AdvancementCriterion criterion = ((org.spongepowered.api.advancement.criteria.CriterionProgress) progress).getCriterion();
@@ -98,7 +98,7 @@ public class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
             return ((CriterionProgressBridge) progress).bridge$getAdvancementProgress()
                     .get(mixinCriterion.bridge$getScoreCriterion()).get().achieved();
         }
-        return progress.func_192151_a();
+        return progress.isObtained();
     }
 
     @Nullable
@@ -109,19 +109,19 @@ public class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
             target = "Lnet/minecraft/advancements/AdvancementProgress;getCriterionProgress(Ljava/lang/String;)Lnet/minecraft/advancements/CriterionProgress;"))
     private CriterionProgress impl$updateProgressOnUnregister(final AdvancementProgress advancementProgress, final String criterion) {
         if (SpongeImplHooks.isFakePlayer(this.player)) {
-            return advancementProgress.func_192106_c(criterion);
+            return advancementProgress.getCriterionProgress(criterion);
         }
 
         final org.spongepowered.api.advancement.Advancement advancement =
                 ((org.spongepowered.api.advancement.AdvancementProgress) advancementProgress).getAdvancement();
-        final AdvancementCriterion advancementCriterion = (AdvancementCriterion) ((Advancement) advancement).func_192073_f().get(criterion);
+        final AdvancementCriterion advancementCriterion = (AdvancementCriterion) ((Advancement) advancement).getCriteria().get(criterion);
         final CriterionBridge mixinCriterion = (CriterionBridge) advancementCriterion;
         // Only remove the trigger once the goal is reached
         if (mixinCriterion.bridge$getScoreCriterion() != null && !((org.spongepowered.api.advancement.AdvancementProgress) advancementProgress)
                 .get(mixinCriterion.bridge$getScoreCriterion()).get().achieved()) {
             return null;
         }
-        return advancementProgress.func_192106_c(criterion);
+        return advancementProgress.getCriterionProgress(criterion);
     }
 
     @Override

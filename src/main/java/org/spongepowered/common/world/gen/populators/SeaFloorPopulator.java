@@ -70,26 +70,26 @@ public class SeaFloorPopulator implements SeaFloor {
         int n = this.count.getFlooredAmount(random);
         BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         for (int i = 0; i < n; i++) {
-            BlockPos pos = position.func_177982_a(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
+            BlockPos pos = position.add(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
             // This method is incorrectly named, it simply gets the top block
             // that blocks movement and isn't leaves
             pos = world.func_175672_r(pos);
-            if (world.func_180495_p(pos).func_185904_a() != Material.field_151586_h) {
+            if (world.getBlockState(pos).getMaterial() != Material.WATER) {
                 continue;
             }
             int radius = this.radius.getFlooredAmount(random);
             int depth = this.depth.getFlooredAmount(random);
-            for (int x = pos.func_177958_n() - radius; x <= pos.func_177958_n() + radius; ++x) {
-                int x0 = x - pos.func_177958_n();
-                for (int z = pos.func_177952_p() - radius; z <= pos.func_177952_p() + radius; ++z) {
-                    int z0 = z - pos.func_177952_p();
+            for (int x = pos.getX() - radius; x <= pos.getX() + radius; ++x) {
+                int x0 = x - pos.getX();
+                for (int z = pos.getZ() - radius; z <= pos.getZ() + radius; ++z) {
+                    int z0 = z - pos.getZ();
                     if (x0 * x0 + z0 * z0 > radius * radius) {
                         continue;
                     }
-                    for (int y = pos.func_177956_o() - depth; y <= pos.func_177956_o() + depth; ++y) {
+                    for (int y = pos.getY() - depth; y <= pos.getY() + depth; ++y) {
                         BlockPos blockpos1 = new BlockPos(x, y, z);
-                        if (this.check.test((BlockState) world.func_180495_p(blockpos1))) {
-                            world.func_180501_a(blockpos1, (net.minecraft.block.BlockState) this.block, 2);
+                        if (this.check.test((BlockState) world.getBlockState(blockpos1))) {
+                            world.setBlockState(blockpos1, (net.minecraft.block.BlockState) this.block, 2);
                         }
                     }
                 }

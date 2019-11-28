@@ -65,8 +65,8 @@ public final class BiomeTypeRegistryModule
             if (biome != null) {
                 String id = ((BiomeType) biome).getId();
                 if (id == null) {
-                    ResourceLocation reg_id = Biome.field_185377_q.func_177774_c(biome);
-                    ((BiomeBridge) biome).bridge$setModId(reg_id.func_110624_b());
+                    ResourceLocation reg_id = Biome.field_185377_q.getKey(biome);
+                    ((BiomeBridge) biome).bridge$setModId(reg_id.getNamespace());
                     id = reg_id.toString();
                     ((BiomeBridge) biome).bridge$setId(id);
                 }
@@ -82,8 +82,8 @@ public final class BiomeTypeRegistryModule
             if (biome != null && !this.biomeTypes.contains(biome)) {
                 String id = ((BiomeType) biome).getId();
                 if (id == null) {
-                    ResourceLocation reg_id = Biome.field_185377_q.func_177774_c(biome);
-                    ((BiomeBridge) biome).bridge$setModId(reg_id.func_110624_b());
+                    ResourceLocation reg_id = Biome.field_185377_q.getKey(biome);
+                    ((BiomeBridge) biome).bridge$setModId(reg_id.getNamespace());
                     id = reg_id.toString();
                     ((BiomeBridge) biome).bridge$setId(id);
                 }

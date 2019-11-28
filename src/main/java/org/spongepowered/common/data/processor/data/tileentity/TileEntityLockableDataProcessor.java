@@ -57,13 +57,13 @@ public final class TileEntityLockableDataProcessor
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        tile.func_174892_a(LockCode.field_180162_a);
+        tile.func_174892_a(LockCode.EMPTY_CODE);
         return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
 
     @Override
     protected boolean set(LockableTileEntity tile, String value) {
-        tile.func_174892_a(value.length() == 0 ? LockCode.field_180162_a : new LockCode(value));
+        tile.func_174892_a(value.length() == 0 ? LockCode.EMPTY_CODE : new LockCode(value));
         return true;
     }
 

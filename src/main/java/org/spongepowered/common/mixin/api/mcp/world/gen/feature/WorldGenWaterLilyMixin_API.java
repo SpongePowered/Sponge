@@ -66,7 +66,7 @@ public abstract class WorldGenWaterLilyMixin_API extends Feature implements Wate
         for (int i = 0; i < n; i++) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            BlockPos pos = position.func_177982_a(x, 0, z);
+            BlockPos pos = position.add(x, 0, z);
             pos = world.func_175672_r(pos);
             func_180709_b(world, random, pos);
         }

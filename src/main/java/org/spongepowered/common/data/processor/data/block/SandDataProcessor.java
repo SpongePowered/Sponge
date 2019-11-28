@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class SandDataProcessor extends AbstractCatalogDataProcessor<SandType, Value<SandType>, SandData, ImmutableSandData> {
 
     public SandDataProcessor() {
-        super(Keys.SAND_TYPE, input -> input.func_77973_b() == ItemTypes.SAND);
+        super(Keys.SAND_TYPE, input -> input.getItem() == ItemTypes.SAND);
     }
 
     @Override

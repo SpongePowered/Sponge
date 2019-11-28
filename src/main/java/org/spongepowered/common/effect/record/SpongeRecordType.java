@@ -56,7 +56,7 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
     }
 
     public int getInternalId() {
-        return Item.field_150901_e.func_148757_b((Item) recordItem);
+        return Item.field_150901_e.getId((Item) recordItem);
     }
 
     @Override

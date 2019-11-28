@@ -76,7 +76,7 @@ public abstract class WorldGenCanopyTreeMixin extends AbstractTreeFeature implem
                 for (k = x - b0; k <= x + b0 && flag; ++k) {
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
-                            if (!this.func_150523_a(worldIn.func_180495_p(new BlockPos(k, j, l)).func_177230_c())) {
+                            if (!this.func_150523_a(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
                                 flag = false;
                             }
                         } else {
@@ -89,9 +89,9 @@ public abstract class WorldGenCanopyTreeMixin extends AbstractTreeFeature implem
             if (!flag) {
                 return false;
             }
-            Block block = worldIn.func_180495_p(new BlockPos(x, y - 1, z)).func_177230_c();
+            Block block = worldIn.getBlockState(new BlockPos(x, y - 1, z)).getBlock();
 
-            if ((block == Blocks.field_150349_c || block == Blocks.field_150346_d) && y < 256 - i - 1) {
+            if ((block == Blocks.GRASS || block == Blocks.DIRT) && y < 256 - i - 1) {
                 return true;
             }
         }
@@ -103,7 +103,7 @@ public abstract class WorldGenCanopyTreeMixin extends AbstractTreeFeature implem
         BlockPos pos = new BlockPos(x, y, z);
         func_175904_e();
         if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
-            func_180711_a((net.minecraft.world.World) world, random, pos);
+            generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }
 

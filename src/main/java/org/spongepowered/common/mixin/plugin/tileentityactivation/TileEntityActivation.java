@@ -61,11 +61,11 @@ public class TileEntityActivation {
      * @param tileEntity The tileentity to check
      */
     public static void initializeTileEntityActivationState(final TileEntity tileEntity) {
-        if (tileEntity.func_145831_w() == null || tileEntity.func_145831_w().field_72995_K || !(tileEntity instanceof ITickable)) {
+        if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote || !(tileEntity instanceof ITickable)) {
             return;
         }
 
-        final TileEntityActivationCategory tileEntityActCat = ((WorldInfoBridge) tileEntity.func_145831_w().func_72912_H()).bridge$getConfigAdapter().getConfig().getTileEntityActivationRange();
+        final TileEntityActivationCategory tileEntityActCat = ((WorldInfoBridge) tileEntity.getWorld().getWorldInfo()).bridge$getConfigAdapter().getConfig().getTileEntityActivationRange();
         final TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
 
         final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
@@ -149,9 +149,9 @@ public class TileEntityActivation {
      * @param chunk Chunk to check for activation
      */
     private static void activateChunkTileEntities(final PlayerEntity player, final Chunk chunk) {
-        final Vector3i playerPos = VecHelper.toVector3i(player.func_180425_c());
-        final long currentTick = SpongeImpl.getServer().func_71259_af();
-        for (final Map.Entry<BlockPos, TileEntity> mapEntry : chunk.func_177434_r().entrySet()) {
+        final Vector3i playerPos = VecHelper.toVector3i(player.getPosition());
+        final long currentTick = SpongeImpl.getServer().getTickCounter();
+        for (final Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
             final TileEntity tileEntity = mapEntry.getValue();
             final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
             if (spongeTileEntity.activation$getSpongeTickRate() <= 0 || !((TileEntityBridge) tileEntity).bridge$shouldTick()) {
@@ -163,7 +163,7 @@ public class TileEntityActivation {
                 continue;
             }
 
-            final Vector3i tilePos = VecHelper.toVector3i(tileEntity.func_174877_v());
+            final Vector3i tilePos = VecHelper.toVector3i(tileEntity.getPos());
             if (currentTick > ((ActivationCapability) tileEntity).activation$getActivatedTick()) {
                 if (spongeTileEntity.activation$getDefaultActivationState()) {
                     ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
@@ -192,11 +192,11 @@ public class TileEntityActivation {
      * @return Whether the given tileentity should be active
      */
     public static boolean checkIfActive(final TileEntity tileEntity) {
-        if (tileEntity.func_145831_w() == null || tileEntity.func_145831_w().field_72995_K || !(tileEntity instanceof ITickable)) {
+        if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote || !(tileEntity instanceof ITickable)) {
             return true;
         }
 
-        final World world = tileEntity.func_145831_w();
+        final World world = tileEntity.getWorld();
         final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) tileEntity).bridge$getActiveChunk();
         if (activeChunk == null) {
             // Should never happen but just in case for mods, always tick
@@ -207,7 +207,7 @@ public class TileEntityActivation {
             return false;
         }
 
-        final long currentTick = SpongeImpl.getServer().func_71259_af();
+        final long currentTick = SpongeImpl.getServer().getTickCounter();
         final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
         boolean isActive = activeChunk.bridge$isPersistedChunk() || spongeTileEntity.activation$getActivatedTick() >= currentTick || spongeTileEntity.activation$getDefaultActivationState();
 
@@ -220,7 +220,7 @@ public class TileEntityActivation {
         }
 
         // check tick rate
-        if (isActive && world.func_72912_H().func_82573_f() % spongeTileEntity.activation$getSpongeTickRate() != 0L) {
+        if (isActive && world.getWorldInfo().getGameTime() % spongeTileEntity.activation$getSpongeTickRate() != 0L) {
             isActive = false;
         }
 
@@ -228,7 +228,7 @@ public class TileEntityActivation {
     }
 
     public static void addTileEntityToConfig(final World world, final SpongeTileEntityType type) {
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.func_72912_H()).bridge$getConfigAdapter();
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
         if (!worldConfigAdapter.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;

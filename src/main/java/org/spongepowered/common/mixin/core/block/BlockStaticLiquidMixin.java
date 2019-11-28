@@ -63,7 +63,7 @@ public class BlockStaticLiquidMixin {
             if (!((WorldBridge) world).bridge$isFake()) {
                 return PhaseTracker.getInstance().setBlockState(((WorldServerBridge) world), pos, blockState, BlockChangeFlags.ALL);
             }
-            return world.func_175656_a(pos, blockState);
+            return world.setBlockState(pos, blockState);
         }
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

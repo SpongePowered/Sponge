@@ -69,6 +69,6 @@ public abstract class BlockPressurePlateWeightedMixin extends BlockMixin {
     }
 
     private ImmutableRedstonePoweredData impl$getPowerFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.func_177229_b(WeightedPressurePlateBlock.field_176579_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.get(WeightedPressurePlateBlock.POWER));
     }
 }

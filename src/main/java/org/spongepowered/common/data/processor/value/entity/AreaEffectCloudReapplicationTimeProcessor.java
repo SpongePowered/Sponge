@@ -53,13 +53,13 @@ public class AreaEffectCloudReapplicationTimeProcessor extends AbstractSpongeVal
 
     @Override
     protected boolean set(AreaEffectCloudEntity container, Integer value) {
-        container.field_70173_aa = value;
+        container.ticksExisted = value;
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(AreaEffectCloudEntity container) {
-        return Optional.of(container.field_70173_aa);
+        return Optional.of(container.ticksExisted);
     }
 
     @Override

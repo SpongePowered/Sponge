@@ -136,10 +136,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
         if (itemStack instanceof net.minecraft.item.ItemStack) {
-            this.damageValue = ((net.minecraft.item.ItemStack) itemStack).func_77952_i();
-            final CompoundNBT itemCompound = ((net.minecraft.item.ItemStack) itemStack).func_77978_p();
+            this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getDamage();
+            final CompoundNBT itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTag();
             if (itemCompound != null) {
-                this.compound = itemCompound.func_74737_b();
+                this.compound = itemCompound.copy();
             }
             this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators());
 
@@ -168,8 +168,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.damageValue = getData(container, Constants.ItemStack.DAMAGE_VALUE, Integer.class);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
-            if (compound.func_150297_b(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-                compound.func_82580_o(Constants.Sponge.SPONGE_DATA);
+            if (compound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+                compound.remove(Constants.Sponge.SPONGE_DATA);
             }
             this.compound = compound;
         }
@@ -241,7 +241,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             return this;
         }
         itemType(item.get());
-        this.damageValue = minecraftState.func_177230_c().func_180651_a(minecraftState);
+        this.damageValue = minecraftState.getBlock().func_180651_a(minecraftState);
         return this;
     }
 
@@ -279,7 +279,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             fixEnchantmentData(itemType, compound);
-            itemStack.func_77982_d(compound);
+            itemStack.setTag(compound);
         }
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
@@ -312,12 +312,12 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
         if (this.type == ItemTypes.NONE || this.quantity <= 0) {
             // If either type is none(air) or quantity is 0 return the vanilla EMPTY item
-            return ((ItemStack) net.minecraft.item.ItemStack.field_190927_a);
+            return ((ItemStack) net.minecraft.item.ItemStack.EMPTY);
         }
 
         final ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, this.damageValue);
         if (this.compound != null) {
-            ((net.minecraft.item.ItemStack) stack).func_77982_d(this.compound.func_74737_b());
+            ((net.minecraft.item.ItemStack) stack).setTag(this.compound.copy());
         }
         if (this.itemDataSet != null) {
             this.itemDataSet.forEach(stack::offer);
@@ -326,8 +326,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (this.keyValues != null) {
             this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
-        if (this.compound != null && this.compound.func_150297_b(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundNBT compoundTag = this.compound.func_74775_l(Constants.Forge.FORGE_CAPS);
+        if (this.compound != null && this.compound.contains(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
+            final CompoundNBT compoundTag = this.compound.getCompound(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
                 SpongeImplHooks.setCapabilitiesFromSpongeBuilder(stack, compoundTag);
             }
@@ -345,19 +345,19 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
      */
     public static void fixEnchantmentData(ItemType itemType, CompoundNBT compound) {
         ListNBT nbttaglist;
-        if (itemType == Items.field_151134_bR) {
-            nbttaglist = compound.func_150295_c(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
+        if (itemType == Items.ENCHANTED_BOOK) {
+            nbttaglist = compound.getList(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND);
         } else {
-            nbttaglist = compound.func_150295_c(Constants.Item.ITEM_ENCHANTMENT_LIST, Constants.NBT.TAG_COMPOUND);
+            nbttaglist = compound.getList(Constants.Item.ITEM_ENCHANTMENT_LIST, Constants.NBT.TAG_COMPOUND);
         }
         for (int i = 0; i < nbttaglist.func_74745_c(); ++i)
         {
-            CompoundNBT nbttagcompound = nbttaglist.func_150305_b(i);
-            short id = nbttagcompound.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_ID);
-            short lvl = nbttagcompound.func_74765_d(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
+            CompoundNBT nbttagcompound = nbttaglist.getCompound(i);
+            short id = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
+            short lvl = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
-            nbttagcompound.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_ID, id);
-            nbttagcompound.func_74777_a(Constants.Item.ITEM_ENCHANTMENT_LEVEL, lvl);
+            nbttagcompound.putShort(Constants.Item.ITEM_ENCHANTMENT_ID, id);
+            nbttagcompound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, lvl);
         }
     }
 }

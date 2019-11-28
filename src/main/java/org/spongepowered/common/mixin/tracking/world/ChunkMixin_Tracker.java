@@ -121,7 +121,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             }
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.world.func_72912_H()).bridge$getConfigAdapter();
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().blockTrackLogging()) {
             if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
@@ -130,9 +130,9 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             }
         }
 
-        final WorldInfoBridge worldInfo = (WorldInfoBridge) this.world.func_72912_H();
+        final WorldInfoBridge worldInfo = (WorldInfoBridge) this.world.getWorldInfo();
         final int indexForUniqueId = worldInfo.bridge$getIndexForUniqueId(user.getUniqueId());
-        if (pos.func_177956_o() <= 255) {
+        if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
             final PlayerTracker playerTracker = this.trackerImpl$trackedShortBlockPositions.get(blockPos);
             if (playerTracker != null) {
@@ -271,7 +271,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     }
 
     private Optional<UUID> tracker$getValidatedUUID(final int key, final int ownerIndex) {
-        final UUID uuid = (((WorldInfoBridge) this.world.func_72912_H()).bridge$getUniqueIdForIndex(ownerIndex)).orElse(null);
+        final UUID uuid = (((WorldInfoBridge) this.world.getWorldInfo()).bridge$getUniqueIdForIndex(ownerIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
             if (SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
@@ -308,24 +308,24 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
-        if (pos.func_177956_o() <= 255) {
+        if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
-                shortTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.func_72912_H()).bridge$getIndexForUniqueId(uuid);
+                shortTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
                 this.trackerImpl$trackedShortBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.func_72912_H()).bridge$getIndexForUniqueId(uuid),
+                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         } else {
             final int blockPos = Constants.Sponge.blockPosToInt(pos);
             final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
-                intTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.func_72912_H()).bridge$getIndexForUniqueId(uuid);
+                intTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
                 this.trackerImpl$trackedIntBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.func_72912_H()).bridge$getIndexForUniqueId(uuid),
+                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         }
@@ -337,22 +337,22 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
-        if (pos.func_177956_o() <= 255) {
+        if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
-                shortTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.func_72912_H()).bridge$getIndexForUniqueId(uuid);
+                shortTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
-                this.trackerImpl$trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.func_72912_H())
+                this.trackerImpl$trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo())
                         .bridge$getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         } else {
             final int blockPos = Constants.Sponge.blockPosToInt(pos);
             final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
-                intTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.func_72912_H()).bridge$getIndexForUniqueId(uuid);
+                intTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
-                this.trackerImpl$trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.func_72912_H())
+                this.trackerImpl$trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo())
                         .bridge$getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         }

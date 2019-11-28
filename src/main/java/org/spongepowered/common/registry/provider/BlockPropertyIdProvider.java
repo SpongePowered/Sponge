@@ -78,16 +78,16 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         }
         final String lowerCasedBlockId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, blockId);
         final String modId = lowerCasedBlockId.split(":")[0];
-        final String propertyName = property.func_177701_a();
-        final String lastAttemptId = lowerCasedBlockId + "_" + property.func_177701_a();
+        final String propertyName = property.getName();
+        final String lastAttemptId = lowerCasedBlockId + "_" + property.getName();
         try { // Seriously, don't look past this try state. just continue on with your day...
               // I warned you...
             final String originalClass = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, block.getClass().getSimpleName());
             Class<?> blockClass = block.getClass();
             while (true) {
                 if (blockClass == Object.class) {
-                    final String propertyId = modId + ":" + originalClass + "_" + property.func_177701_a();
-                    LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}", property.func_177701_a(),
+                    final String propertyId = modId + ":" + originalClass + "_" + property.getName();
+                    LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}", property.getName(),
                             propertyId);
                     instance.register(property, propertyId);
                     return propertyId;
@@ -124,7 +124,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
 
         } catch (Exception e) {
             LogManager.getLogger("Sponge").warn("An exception was thrown while trying to resolve the property "
-                                                + property.func_177701_a() +"'s owning class, assigning "
+                                                + property.getName() +"'s owning class, assigning "
                                                 + "fallback id: " + lastAttemptId, e);
             instance.register(property, lastAttemptId);
             return lastAttemptId;
@@ -132,57 +132,57 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
     }
 
     private void register(IProperty<?> property, String id) {
-        checkArgument(!this.propertyIdMap.containsKey(property), "Property is already registered! Property: " + property.func_177701_a()
+        checkArgument(!this.propertyIdMap.containsKey(property), "Property is already registered! Property: " + property.getName()
                                                                  + " is registered as : " + this.propertyIdMap.get(property));
         this.propertyIdMap.put(property, id.toLowerCase(Locale.ENGLISH));
         this.idPropertyMap.put(id.toLowerCase(Locale.ENGLISH), property);
     }
 
     BlockPropertyIdProvider() {
-        register(HorizontalBlock.field_185512_D, "minecraft:horizontal_facing");
-        register(RotatedPillarBlock.field_176298_M, "minecraft:pillar_axis");
-        register(DirectionalBlock.field_176387_N, "minecraft:directional_facing");
+        register(HorizontalBlock.HORIZONTAL_FACING, "minecraft:horizontal_facing");
+        register(RotatedPillarBlock.AXIS, "minecraft:pillar_axis");
+        register(DirectionalBlock.FACING, "minecraft:directional_facing");
         register(LogBlock.field_176299_a, "minecraft:log_axis");
         register(BlockNewLog.field_176300_b, "minecraft:new_log_variant");
         register(BlockOldLog.field_176301_b, "minecraft:log_variant");
-        register(FarmlandBlock.field_176531_a, "minecraft:farmland_moisture");
-        register(PistonBlock.field_176320_b, "minecraft:piston_extended");
-        register(VineBlock.field_176273_b, "minecraft:vine_north");
-        register(VineBlock.field_176278_M, "minecraft:vine_east");
-        register(VineBlock.field_176279_N, "minecraft:vine_south");
-        register(VineBlock.field_176280_O, "minecraft:vine_west");
-        register(VineBlock.field_176277_a, "minecraft:vine_up");
+        register(FarmlandBlock.MOISTURE, "minecraft:farmland_moisture");
+        register(PistonBlock.EXTENDED, "minecraft:piston_extended");
+        register(VineBlock.NORTH, "minecraft:vine_north");
+        register(VineBlock.EAST, "minecraft:vine_east");
+        register(VineBlock.SOUTH, "minecraft:vine_south");
+        register(VineBlock.WEST, "minecraft:vine_west");
+        register(VineBlock.UP, "minecraft:vine_up");
         register(BlockRedSandstone.field_176336_a, "minecraft:red_sandstone_type");
-        register(BlockLiquid.field_176367_b, "minecraft:liquid_level");
-        register(SugarCaneBlock.field_176355_a, "minecraft:reed_age");
+        register(BlockLiquid.LEVEL, "minecraft:liquid_level");
+        register(SugarCaneBlock.AGE, "minecraft:reed_age");
         register(MyceliumBlock.field_176384_a, "minecraft:mycelium_snowy");
         register(BlockColored.field_176581_a, "minecraft:dyed_color");
         register(TorchBlock.field_176596_a, "minecraft:torch_facing");
         register(BlockDirt.field_176385_b, "minecraft:dirt_snowy");
         register(BlockDirt.field_176386_a, "minecraft:dirt_variant");
-        register(EndPortalFrameBlock.field_176507_b, "minecraft:end_portal_eye");
+        register(EndPortalFrameBlock.EYE, "minecraft:end_portal_eye");
         register(CarpetBlock.field_176330_a, "minecraft:carpet_color");
         register(BlockStone.field_176247_a, "minecraft:stone_variant");
         register(HugeMushroomBlock.field_176380_a, "minecraft:huge_mushroom_variant");
-        register(SnowBlock.field_176315_a, "minecraft:snow_layer");
-        register(WallBlock.field_176256_a, "minecraft:wall_up");
+        register(SnowBlock.LAYERS, "minecraft:snow_layer");
+        register(WallBlock.UP, "minecraft:wall_up");
         register(WallBlock.field_176254_b, "minecraft:wall_north");
         register(WallBlock.field_176257_M, "minecraft:wall_east");
         register(WallBlock.field_176258_N, "minecraft:wall_south");
         register(WallBlock.field_176259_O, "minecraft:wall_west");
         register(WallBlock.field_176255_P, "minecraft:wall_variant");
-        register(StairsBlock.field_176308_b, "minecraft:stairs_half");
-        register(StairsBlock.field_176310_M, "minecraft:stairs_shape");
-        register(AbstractButtonBlock.field_176584_b, "minecraft:button_powered");
-        register(CactusBlock.field_176587_a, "minecraft:cactus_age");
-        register(CropsBlock.field_176488_a, "minecraft:crops_age");
-        register(NetherWartBlock.field_176486_a, "minecraft:nether_wart_age");
+        register(StairsBlock.HALF, "minecraft:stairs_half");
+        register(StairsBlock.SHAPE, "minecraft:stairs_shape");
+        register(AbstractButtonBlock.POWERED, "minecraft:button_powered");
+        register(CactusBlock.AGE, "minecraft:cactus_age");
+        register(CropsBlock.AGE, "minecraft:crops_age");
+        register(NetherWartBlock.AGE, "minecraft:nether_wart_age");
         register(DoublePlantBlock.field_176493_a, "minecraft:double_plant_variant");
-        register(DoublePlantBlock.field_176492_b, "minecraft:double_plant_half");
-        register(StemBlock.field_176484_a, "minecraft:stem_age");
+        register(DoublePlantBlock.HALF, "minecraft:double_plant_half");
+        register(StemBlock.AGE, "minecraft:stem_age");
         register(TallGrassBlock.field_176497_a, "minecraft:tall_grass_type");
         register(SaplingBlock.field_176480_a, "minecraft:sapling_type");
-        register(SaplingBlock.field_176479_b, "minecraft:sapling_stage");
+        register(SaplingBlock.STAGE, "minecraft:sapling_stage");
         register(BlockPrismarine.field_176332_a, "minecraft:prismarine_variant");
         register(FenceBlock.field_176526_a, "minecraft:fence_north");
         register(FenceBlock.field_176525_b, "minecraft:fence_east");
@@ -195,45 +195,45 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(PaneBlock.field_176244_O, "minecraft:pane_west");
         register(StainedGlassPaneBlock.field_176245_a, "minecraft:stained_dyed_color");
         register(BlockQuartz.field_176335_a, "minecraft:quartz_variant");
-        register(PistonHeadBlock.field_176325_b, "minecraft:piston_extension_type");
-        register(PistonHeadBlock.field_176327_M, "minecraft:piston_extension_short");
+        register(PistonHeadBlock.TYPE, "minecraft:piston_extension_type");
+        register(PistonHeadBlock.SHORT, "minecraft:piston_extension_short");
         register(BlockSandStone.field_176297_a, "minecraft:sand_stone_type");
         register(BlockPlanks.field_176383_a, "minecraft:plank_variant");
-        register(NetherPortalBlock.field_176550_a, "minecraft:portal_axis");
+        register(NetherPortalBlock.AXIS, "minecraft:portal_axis");
         register(StainedGlassBlock.field_176547_a, "minecraft:stained_glass_color");
-        register(RailBlock.field_176565_b, "minecraft:rail_shape");
-        register(PoweredRailBlock.field_176569_M, "minecraft:powered_rail_powered");
-        register(PoweredRailBlock.field_176568_b, "minecraft:powered_rail_shape");
-        register(DetectorRailBlock.field_176574_M, "minecraft:detector_rail_powered");
-        register(DetectorRailBlock.field_176573_b, "minecraft:detector_rail_shape");
+        register(RailBlock.SHAPE, "minecraft:rail_shape");
+        register(PoweredRailBlock.POWERED, "minecraft:powered_rail_powered");
+        register(PoweredRailBlock.SHAPE, "minecraft:powered_rail_shape");
+        register(DetectorRailBlock.POWERED, "minecraft:detector_rail_powered");
+        register(DetectorRailBlock.SHAPE, "minecraft:detector_rail_shape");
         register(LeavesBlock.field_176237_a, "minecraft:leaves_decay");
         register(LeavesBlock.field_176236_b, "minecraft:leaves_check_decay");
         register(BlockOldLeaf.field_176239_P, "minecraft:old_leaves_variant");
         register(BlockNewLeaf.field_176240_P, "minecraft:new_leaves_variant");
         register(GrassBlock.field_176498_a, "minecraft:grass_snowy");
-        register(CauldronBlock.field_176591_a, "minecraft:cauldron_level");
-        register(BannerBlock.field_176448_b, "minecraft:banner_rotation");
+        register(CauldronBlock.LEVEL, "minecraft:cauldron_level");
+        register(BannerBlock.ROTATION, "minecraft:banner_rotation");
         register(SkullBlock.field_176417_b, "minecraft:skull_no_drop");
-        register(StandingSignBlock.field_176413_a, "minecraft:standing_sign_rotation");
-        register(BrewingStandBlock.field_176451_a[0], "minecraft:brewing_stand_1_has_bottle");
-        register(BrewingStandBlock.field_176451_a[1], "minecraft:brewing_stand_2_has_bottle");
-        register(BrewingStandBlock.field_176451_a[2], "minecraft:brewing_stand_3_has_bottle");
-        register(HopperBlock.field_176429_b, "minecraft:hopper_enabled");
-        register(HopperBlock.field_176430_a, "minecraft:hopper_facing");
+        register(StandingSignBlock.ROTATION, "minecraft:standing_sign_rotation");
+        register(BrewingStandBlock.HAS_BOTTLE[0], "minecraft:brewing_stand_1_has_bottle");
+        register(BrewingStandBlock.HAS_BOTTLE[1], "minecraft:brewing_stand_2_has_bottle");
+        register(BrewingStandBlock.HAS_BOTTLE[2], "minecraft:brewing_stand_3_has_bottle");
+        register(HopperBlock.ENABLED, "minecraft:hopper_enabled");
+        register(HopperBlock.FACING, "minecraft:hopper_facing");
         register(FlowerPotBlock.field_176444_a, "minecraft:flower_pot_legacy");
         register(FlowerPotBlock.field_176443_b, "minecraft:flower_pot_contents");
-        register(DaylightDetectorBlock.field_176436_a, "minecraft:daylight_detector_power");
-        register(DispenserBlock.field_176440_b, "minecraft:dispenser_triggered");
-        register(JukeboxBlock.field_176432_a, "minecraft:jukebox_has_record");
+        register(DaylightDetectorBlock.POWER, "minecraft:daylight_detector_power");
+        register(DispenserBlock.TRIGGERED, "minecraft:dispenser_triggered");
+        register(JukeboxBlock.HAS_RECORD, "minecraft:jukebox_has_record");
         register(SandBlock.field_176504_a, "minecraft:sand_variant");
         register(AnvilBlock.field_176505_b, "minecraft:anvil_damage");
-        register(CakeBlock.field_176589_a, "minecraft:cake_bites");
-        register(FireBlock.field_176543_a, "minecraft:fire_age");
-        register(FireBlock.field_176545_N, "minecraft:fire_north");
-        register(FireBlock.field_176546_O, "minecraft:fire_east");
-        register(FireBlock.field_176541_P, "minecraft:fire_south");
-        register(FireBlock.field_176539_Q, "minecraft:fire_west");
-        register(FireBlock.field_176542_R, "minecraft:fire_upper");
+        register(CakeBlock.BITES, "minecraft:cake_bites");
+        register(FireBlock.AGE, "minecraft:fire_age");
+        register(FireBlock.NORTH, "minecraft:fire_north");
+        register(FireBlock.EAST, "minecraft:fire_east");
+        register(FireBlock.SOUTH, "minecraft:fire_south");
+        register(FireBlock.WEST, "minecraft:fire_west");
+        register(FireBlock.UP, "minecraft:fire_upper");
         register(SlabBlock.field_176554_a, "minecraft:slab_half");
         register(BlockStoneSlabNew.field_176558_b, "minecraft:stone_slab_new_seamless");
         register(BlockStoneSlabNew.field_176559_M, "minecraft:stone_slab_new_variant");
@@ -241,42 +241,42 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockStoneSlab.field_176556_M, "minecraft:stone_slab_variant");
         register(BlockWoodSlab.field_176557_b, "minecraft:wood_slab_variant");
         register(SpongeBlock.field_176313_a, "minecraft:sponge_wet");
-        register(TripWireHookBlock.field_176265_M, "minecraft:trip_wire_hook_attached");
-        register(TripWireHookBlock.field_176263_b, "minecraft:trip_wire_hook_powered");
-        register(DoorBlock.field_176519_b, "minecraft:door_open");
-        register(DoorBlock.field_176521_M, "minecraft:door_hinge");
-        register(DoorBlock.field_176522_N, "minecraft:door_powered");
-        register(DoorBlock.field_176523_O, "minecraft:door_half");
+        register(TripWireHookBlock.ATTACHED, "minecraft:trip_wire_hook_attached");
+        register(TripWireHookBlock.POWERED, "minecraft:trip_wire_hook_powered");
+        register(DoorBlock.OPEN, "minecraft:door_open");
+        register(DoorBlock.HINGE, "minecraft:door_hinge");
+        register(DoorBlock.POWERED, "minecraft:door_powered");
+        register(DoorBlock.HALF, "minecraft:door_half");
         register(BlockStoneBrick.field_176249_a, "minecraft:stone_brick_variant");
         register(LeverBlock.field_176360_a, "minecraft:lever_variant");
-        register(LeverBlock.field_176359_b, "minecraft:lever_powered");
+        register(LeverBlock.POWERED, "minecraft:lever_powered");
         register(TNTBlock.field_176246_a, "minecraft:tnt_explode");
-        register(BedBlock.field_176472_a, "minecraft:bed_part");
-        register(BedBlock.field_176471_b, "minecraft:bed_occupied");
-        register(ComparatorBlock.field_176463_b, "minecraft:comparator_mode");
+        register(BedBlock.PART, "minecraft:bed_part");
+        register(BedBlock.OCCUPIED, "minecraft:bed_occupied");
+        register(ComparatorBlock.MODE, "minecraft:comparator_mode");
         register(ComparatorBlock.field_176464_a, "minecraft:comparator_powered");
-        register(CocoaBlock.field_176501_a, "minecraft:cocoa_age");
-        register(FenceGateBlock.field_176467_M, "minecraft:fence_gate_in_wall");
-        register(FenceGateBlock.field_176466_a, "minecraft:fence_gate_open");
-        register(FenceGateBlock.field_176465_b, "minecraft:fence_gate_powered");
-        register(RedstoneWireBlock.field_176348_a, "minecraft:redstone_north");
-        register(RedstoneWireBlock.field_176347_b, "minecraft:redstone_east");
-        register(RedstoneWireBlock.field_176349_M, "minecraft:redstone_south");
-        register(RedstoneWireBlock.field_176350_N, "minecraft:redstone_west");
-        register(RedstoneWireBlock.field_176351_O, "minecraft:redstone_power");
-        register(TripWireBlock.field_176293_a, "minecraft:trip_wire_powered");
-        register(TripWireBlock.field_176294_M, "minecraft:trip_wire_attached");
-        register(TripWireBlock.field_176295_N, "minecraft:trip_wire_disarmed");
-        register(TripWireBlock.field_176296_O, "minecraft:trip_wire_north");
-        register(TripWireBlock.field_176291_P, "minecraft:trip_wire_east");
-        register(TripWireBlock.field_176289_Q, "minecraft:trip_wire_south");
-        register(TripWireBlock.field_176292_R, "minecraft:trip_wire_west");
-        register(WeightedPressurePlateBlock.field_176579_a, "minecraft:weighted_pressure_plate_power");
-        register(PressurePlateBlock.field_176580_a, "minecraft:pressure_plate_power");
-        register(TrapDoorBlock.field_176283_b, "minecraft:trap_door_open");
-        register(TrapDoorBlock.field_176285_M, "minecraft:trap_door_half");
-        register(RepeaterBlock.field_176410_b, "minecraft:redstone_repeater_delay");
-        register(RepeaterBlock.field_176411_a, "minecraft:redstone_repeater_locked");
+        register(CocoaBlock.AGE, "minecraft:cocoa_age");
+        register(FenceGateBlock.IN_WALL, "minecraft:fence_gate_in_wall");
+        register(FenceGateBlock.OPEN, "minecraft:fence_gate_open");
+        register(FenceGateBlock.POWERED, "minecraft:fence_gate_powered");
+        register(RedstoneWireBlock.NORTH, "minecraft:redstone_north");
+        register(RedstoneWireBlock.EAST, "minecraft:redstone_east");
+        register(RedstoneWireBlock.SOUTH, "minecraft:redstone_south");
+        register(RedstoneWireBlock.WEST, "minecraft:redstone_west");
+        register(RedstoneWireBlock.POWER, "minecraft:redstone_power");
+        register(TripWireBlock.POWERED, "minecraft:trip_wire_powered");
+        register(TripWireBlock.ATTACHED, "minecraft:trip_wire_attached");
+        register(TripWireBlock.DISARMED, "minecraft:trip_wire_disarmed");
+        register(TripWireBlock.NORTH, "minecraft:trip_wire_north");
+        register(TripWireBlock.EAST, "minecraft:trip_wire_east");
+        register(TripWireBlock.SOUTH, "minecraft:trip_wire_south");
+        register(TripWireBlock.WEST, "minecraft:trip_wire_west");
+        register(WeightedPressurePlateBlock.POWER, "minecraft:weighted_pressure_plate_power");
+        register(PressurePlateBlock.POWERED, "minecraft:pressure_plate_power");
+        register(TrapDoorBlock.OPEN, "minecraft:trap_door_open");
+        register(TrapDoorBlock.HALF, "minecraft:trap_door_half");
+        register(RepeaterBlock.DELAY, "minecraft:redstone_repeater_delay");
+        register(RepeaterBlock.LOCKED, "minecraft:redstone_repeater_locked");
         register(ConcretePowderBlock.field_192426_a, "minecraft:concrete_powder_color");
     }
 

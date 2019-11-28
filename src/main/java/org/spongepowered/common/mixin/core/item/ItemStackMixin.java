@@ -142,7 +142,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
             spongeCompound.func_74782_a(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
         } else {
             if (hasTagCompound()) {
-                this.getTagCompound().func_82580_o(Constants.Sponge.SPONGE_DATA);
+                this.getTagCompound().remove(Constants.Sponge.SPONGE_DATA);
                 if (this.getTagCompound().func_82582_d()) {
                     this.setTagCompound(null);
                 }
@@ -272,8 +272,8 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void onRead(CompoundNBT compound, CallbackInfo info) {
-        if (hasTagCompound() && getTagCompound().func_150297_b(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            DataUtil.readCustomData(getTagCompound().func_74775_l(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        if (hasTagCompound() && getTagCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            DataUtil.readCustomData(getTagCompound().getCompound(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
         }
     }
 
@@ -282,8 +282,8 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
         if (this.stackTagCompound != compound) {
             this.manipulators.clear();
         }
-        if (hasTagCompound() && getTagCompound().func_150297_b(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            DataUtil.readCustomData(getTagCompound().func_74775_l(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        if (hasTagCompound() && getTagCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            DataUtil.readCustomData(getTagCompound().getCompound(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
         }
     }
 

@@ -80,7 +80,7 @@ public class SpongeScore implements Score {
             if (j != this.score || ((ScoreAccessor) score).accessor$getForceUpdate())
             {
                 ((ScoreAccessor) score).accessor$setForceUpdate(false);
-                score.func_96650_f().func_96536_a(score);
+                score.getScoreScoreboard().onScoreChanged(score);
             }
         }
     }

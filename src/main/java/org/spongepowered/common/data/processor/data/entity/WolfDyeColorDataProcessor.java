@@ -53,13 +53,13 @@ public class WolfDyeColorDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected boolean set(WolfEntity container, DyeColor value) {
-        container.func_175547_a((net.minecraft.item.DyeColor) (Object) value);
+        container.setCollarColor((net.minecraft.item.DyeColor) (Object) value);
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(WolfEntity container) {
-        return Optional.of((DyeColor) (Object) container.func_175546_cu());
+        return Optional.of((DyeColor) (Object) container.getCollarColor());
     }
 
     @Override

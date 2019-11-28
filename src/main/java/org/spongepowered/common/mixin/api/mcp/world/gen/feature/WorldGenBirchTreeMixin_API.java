@@ -94,7 +94,7 @@ public abstract class WorldGenBirchTreeMixin_API extends AbstractTreeFeature imp
                 for (k = x - b0; k <= x + b0 && flag; ++k) {
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
-                            if (!this.func_150523_a(worldIn.func_180495_p(new BlockPos(k, j, l)).func_177230_c())) {
+                            if (!this.func_150523_a(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
                                 flag = false;
                             }
                         } else {
@@ -106,7 +106,7 @@ public abstract class WorldGenBirchTreeMixin_API extends AbstractTreeFeature imp
 
             if (flag) {
                 final BlockPos down = new BlockPos(x, y - 1, z);
-                final Block block1 = worldIn.func_180495_p(down).func_177230_c();
+                final Block block1 = worldIn.getBlockState(down).getBlock();
                 return ((WorldGeneratorBridge) this).bridge$canSustainPlant(block1, worldIn, down, Direction.UP, Blocks.field_150345_g) && y < 256 - i - 1;
             }
         }
@@ -118,7 +118,7 @@ public abstract class WorldGenBirchTreeMixin_API extends AbstractTreeFeature imp
         final BlockPos pos = new BlockPos(x, y, z);
         func_175904_e();
         if (func_180709_b((net.minecraft.world.World) world, random, pos)) {
-            func_180711_a((net.minecraft.world.World) world, random, pos);
+            generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }
 

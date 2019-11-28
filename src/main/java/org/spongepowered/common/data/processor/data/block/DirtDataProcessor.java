@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class DirtDataProcessor extends AbstractCatalogDataProcessor<DirtType, Value<DirtType>, DirtData, ImmutableDirtData> {
 
     public DirtDataProcessor() {
-        super(Keys.DIRT_TYPE, input -> input.func_77973_b() == ItemTypes.DIRT);
+        super(Keys.DIRT_TYPE, input -> input.getItem() == ItemTypes.DIRT);
     }
 
     @Override

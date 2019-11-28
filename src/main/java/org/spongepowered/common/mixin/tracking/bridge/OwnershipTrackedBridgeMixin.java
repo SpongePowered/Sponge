@@ -154,18 +154,18 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         if (((DataCompoundHolder) this).data$hasRootCompound()) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
             if (uuid == null) {
-                if (spongeData.func_74764_b(type.compoundKey)) {
-                    spongeData.func_82580_o(type.compoundKey);
+                if (spongeData.contains(type.compoundKey)) {
+                    spongeData.remove(type.compoundKey);
                 }
                 return;
             }
-            if (!spongeData.func_74764_b(type.compoundKey)) {
+            if (!spongeData.contains(type.compoundKey)) {
                 final CompoundNBT sourceNbt = new CompoundNBT();
-                sourceNbt.func_186854_a(Constants.UUID, uuid);
+                sourceNbt.putUniqueId(Constants.UUID, uuid);
                 spongeData.func_74782_a(type.compoundKey, sourceNbt);
             } else {
-                final CompoundNBT compoundTag = spongeData.func_74775_l(type.compoundKey);
-                compoundTag.func_186854_a(Constants.UUID, uuid);
+                final CompoundNBT compoundTag = spongeData.getCompound(type.compoundKey);
+                compoundTag.putUniqueId(Constants.UUID, uuid);
             }
         }
     }
@@ -177,26 +177,26 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         }
         if (this instanceof IEntityOwnable) {
             final IEntityOwnable ownable = (IEntityOwnable) this;
-            final Entity owner = ownable.func_70902_q();
+            final Entity owner = ownable.getOwner();
             if (owner instanceof PlayerEntity) {
-                this.tracked$setTrackedUUID(PlayerTracker.Type.OWNER, owner.func_110124_au());
-                return owner.func_110124_au();
+                this.tracked$setTrackedUUID(PlayerTracker.Type.OWNER, owner.getUniqueID());
+                return owner.getUniqueID();
             }
         } else if (this.tracked$notifier != null && PlayerTracker.Type.NOTIFIER == nbtKey) {
             return this.tracked$notifier;
         }
         final CompoundNBT nbt = ((DataCompoundHolder) this).data$getSpongeCompound();
-        if (!nbt.func_74764_b(nbtKey.compoundKey)) {
+        if (!nbt.contains(nbtKey.compoundKey)) {
             return null;
         }
-        final CompoundNBT creatorNbt = nbt.func_74775_l(nbtKey.compoundKey);
+        final CompoundNBT creatorNbt = nbt.getCompound(nbtKey.compoundKey);
 
 
-        if (!creatorNbt.func_74764_b(Constants.UUID_MOST) && !creatorNbt.func_74764_b(Constants.UUID_LEAST)) {
+        if (!creatorNbt.contains(Constants.UUID_MOST) && !creatorNbt.contains(Constants.UUID_LEAST)) {
             return null;
         }
 
-        final UUID uniqueId = creatorNbt.func_186857_a(Constants.UUID);
+        final UUID uniqueId = creatorNbt.getUniqueId(Constants.UUID);
         if (PlayerTracker.Type.OWNER == nbtKey) {
             this.tracked$owner = uniqueId;
         } else if (PlayerTracker.Type.NOTIFIER == nbtKey) {

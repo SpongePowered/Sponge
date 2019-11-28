@@ -52,7 +52,7 @@ public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<Unbreak
         }
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final BlockPos blockPos = VecHelper.toBlockPos(location);
-        final float blockHardness = block.func_185887_b(world, blockPos);
+        final float blockHardness = block.getBlockHardness(world, blockPos);
         return Optional.of(blockHardness < 0 ? TRUE : FALSE);
     }
 
@@ -60,7 +60,7 @@ public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<Unbreak
     public Optional<UnbreakableProperty> getFor(Location<World> location) {
         final BlockState blockState = (BlockState) location.getBlock();
         final net.minecraft.world.World extent = (net.minecraft.world.World) location.getExtent();
-        final float hardness = blockState.func_185887_b(extent, VecHelper.toBlockPos(location));
+        final float hardness = blockState.getBlockHardness(extent, VecHelper.toBlockPos(location));
         return Optional.of(hardness < 0 ? TRUE : FALSE);
     }
 

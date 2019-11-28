@@ -59,8 +59,8 @@ public abstract class EntityTrackerEntryMixin_MapOptimization {
             target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;",
             ordinal = 0))
     private Item mapOptimization$onGetItem(final ItemStack itemStack) {
-        if (itemStack.func_77973_b() instanceof FilledMapItem) {
-            ((OptimizedMapDataBridge) ((FilledMapItem) itemStack.func_77973_b()).func_77873_a(itemStack, this.trackedEntity.field_70170_p)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) this.trackedEntity);
+        if (itemStack.getItem() instanceof FilledMapItem) {
+            ((OptimizedMapDataBridge) ((FilledMapItem) itemStack.getItem()).func_77873_a(itemStack, this.trackedEntity.world)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) this.trackedEntity);
         }
         return null;
     }

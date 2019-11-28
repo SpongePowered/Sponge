@@ -91,7 +91,7 @@ public abstract class EntityFishHookMixin extends EntityMixin {
      */
     @Overwrite
     public int handleHookRetraction() {
-        if (!this.world.field_72995_K && this.angler != null) {
+        if (!this.world.isRemote && this.angler != null) {
             int i = 0;
 
             // Sponge start
@@ -99,8 +99,8 @@ public abstract class EntityFishHookMixin extends EntityMixin {
             if (this.ticksCatchable > 0) {
                 // Moved from below
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerWorld) this.world);
-                lootcontext$builder.func_186469_a(this.luck + this.angler.func_184817_da());
-                transactions = this.world.func_184146_ak().func_186521_a(LootTables.field_186387_al)
+                lootcontext$builder.withLuck(this.luck + this.angler.getLuck());
+                transactions = this.world.func_184146_ak().getLootTableFromLocation(LootTables.GAMEPLAY_FISHING)
                         .func_186462_a(this.rand, lootcontext$builder.func_186471_a())
                         .stream()
                         .map(s -> {
@@ -120,7 +120,7 @@ public abstract class EntityFishHookMixin extends EntityMixin {
 
             if (this.caughtEntity != null) {
                 this.bringInHookedEntity();
-                this.world.func_72960_a((net.minecraft.entity.Entity) (Object) this, (byte) 31);
+                this.world.setEntityState((net.minecraft.entity.Entity) (Object) this, (byte) 31);
                 i = this.caughtEntity instanceof ItemEntity ? 3 : 5;
             } // Sponge: Remove else
 
@@ -138,21 +138,21 @@ public abstract class EntityFishHookMixin extends EntityMixin {
                     // Sponge end
 
                     ItemEntity entityitem = new ItemEntity(this.world, this.posX, this.posY, this.posZ, itemstack);
-                    double d0 = this.angler.field_70165_t - this.posX;
-                    double d1 = this.angler.field_70163_u - this.posY;
-                    double d2 = this.angler.field_70161_v - this.posZ;
-                    double d3 = MathHelper.func_76133_a(d0 * d0 + d1 * d1 + d2 * d2);
+                    double d0 = this.angler.posX - this.posX;
+                    double d1 = this.angler.posY - this.posY;
+                    double d2 = this.angler.posZ - this.posZ;
+                    double d3 = MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
                     entityitem.field_70159_w = d0 * 0.1D;
-                    entityitem.field_70181_x = d1 * 0.1D + MathHelper.func_76133_a(d3) * 0.08D;
+                    entityitem.field_70181_x = d1 * 0.1D + MathHelper.sqrt(d3) * 0.08D;
                     entityitem.field_70179_y = d2 * 0.1D;
-                    this.world.func_72838_d(entityitem);
-                    this.angler.field_70170_p.func_72838_d(new ExperienceOrbEntity(this.angler.field_70170_p, this.angler.field_70165_t, this.angler.field_70163_u + 0.5D, this.angler.field_70161_v + 0.5D,
+                    this.world.addEntity0(entityitem);
+                    this.angler.world.addEntity0(new ExperienceOrbEntity(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
                             this.rand.nextInt(6) + 1));
-                    Item item = itemstack.func_77973_b();
+                    Item item = itemstack.getItem();
 
                     if (item == Items.field_151115_aP || item == Items.field_179566_aV) {
-                        this.angler.func_71064_a(Stats.field_188071_E, 1);
+                        this.angler.addStat(Stats.FISH_CAUGHT, 1);
                     }
                 }
                 Sponge.getCauseStackManager().popCause();

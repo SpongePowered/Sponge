@@ -85,7 +85,7 @@ public class DelegateSpongeCraftingRecipe extends AbstractSpongeCraftingRecipe {
     }
 
     @Override
-    public boolean func_192399_d() {
+    public boolean isDynamic() {
         return true; // For RecipeBook
     }
 }

@@ -63,18 +63,18 @@ public abstract class EntityTrackerEntryMixin {
     public void onSendSpawnPacket(final ServerPlayNetHandler thisCtx, final IPacket<?> spawnPacket, final ServerPlayerEntity playerIn) {
         if (!(this.trackedEntity instanceof EntityHuman)) {
             // This is the method call that was @Redirected
-            thisCtx.func_147359_a(spawnPacket);
+            thisCtx.sendPacket(spawnPacket);
             return;
         }
         final EntityHuman human = (EntityHuman) this.trackedEntity;
         // Adds the GameProfile to the client
-        thisCtx.func_147359_a(human.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
+        thisCtx.sendPacket(human.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
         // Actually spawn the human (a player)
-        thisCtx.func_147359_a(spawnPacket);
+        thisCtx.sendPacket(spawnPacket);
         // Remove from tab list
         final SPlayerListItemPacket removePacket = human.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER);
         if (human.canRemoveFromListImmediately()) {
-            thisCtx.func_147359_a(removePacket);
+            thisCtx.sendPacket(removePacket);
         } else {
             human.removeFromTabListDelayed(playerIn, removePacket);
         }
@@ -104,13 +104,13 @@ public abstract class EntityTrackerEntryMixin {
         for (ServerPlayerEntity player : this.trackingPlayers) {
             if (packets != null) {
                 for (IPacket<?> packet : packets) {
-                    player.field_71135_a.func_147359_a(packet);
+                    player.connection.sendPacket(packet);
                 }
             }
             IPacket<?>[] playerPackets = human.popQueuedPackets(player);
             if (playerPackets != null) {
                 for (IPacket<?> packet : playerPackets) {
-                    player.field_71135_a.func_147359_a(packet);
+                    player.connection.sendPacket(packet);
                 }
             }
         }

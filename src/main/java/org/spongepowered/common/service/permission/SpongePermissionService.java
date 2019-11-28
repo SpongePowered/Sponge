@@ -98,11 +98,11 @@ public class SpongePermissionService implements PermissionService {
     }
 
     static OpList getOps() {
-        return SpongeImpl.getServer().func_184103_al().func_152603_m();
+        return SpongeImpl.getServer().getPlayerList().getOppedPlayers();
     }
 
     static int getServerOpLevel() {
-        return SpongeImpl.getServer().func_110455_j();
+        return SpongeImpl.getServer().getOpPermissionLevel();
     }
 
     public Subject getGroupForOpLevel(int level) {

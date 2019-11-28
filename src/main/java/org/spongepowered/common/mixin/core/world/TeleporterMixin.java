@@ -81,7 +81,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
             }
         } else {
             this.createEndPortal(targetLocation); // Sponge - move end portal create logic to its own method
-            entityIn.func_70012_b(targetLocation.getX(), targetLocation.getY() - 1, targetLocation.getZ(), entityIn.field_70177_z, 0.0F);
+            entityIn.setLocationAndAngles(targetLocation.getX(), targetLocation.getY() - 1, targetLocation.getZ(), entityIn.rotationYaw, 0.0F);
             entityIn.field_70159_w = entityIn.field_70181_x = entityIn.field_70179_y = 0.0D;
         }
     }
@@ -119,8 +119,8 @@ public abstract class TeleporterMixin implements TeleporterBridge {
                     int y = yTarget + l1;
                     int z = zTarget + k1 * i1 - j1 * l;
                     boolean flag = l1 < 0;
-                    this.world.func_175656_a(new BlockPos(x, y, z),
-                            flag ? Blocks.field_150343_Z.func_176223_P() : Blocks.field_150350_a.func_176223_P());
+                    this.world.setBlockState(new BlockPos(x, y, z),
+                            flag ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState());
                 }
             }
         }
@@ -152,23 +152,23 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         double xTarget = portalLocation.getX() + 0.5D;
         double yTarget;
         double zTarget = portalLocation.getZ() + 0.5D;
-        BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.field_150427_aO.func_181089_f(this.world, blockPos);
-        boolean flag1 = blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c() == Direction.AxisDirection.NEGATIVE;
-        double d2 = blockpattern$patternhelper.func_177669_b().func_176740_k() == Direction.Axis.X ? (double) blockpattern$patternhelper.func_181117_a().func_177952_p()
-                : (double) blockpattern$patternhelper.func_181117_a().func_177958_n();
-        yTarget = blockpattern$patternhelper.func_181117_a().func_177956_o() + 1
-                - entityIn.func_181014_aG().field_72448_b * blockpattern$patternhelper.func_181119_e();
+        BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.NETHER_PORTAL.createPatternHelper(this.world, blockPos);
+        boolean flag1 = blockpattern$patternhelper.getForwards().rotateY().getAxisDirection() == Direction.AxisDirection.NEGATIVE;
+        double d2 = blockpattern$patternhelper.getForwards().getAxis() == Direction.Axis.X ? (double) blockpattern$patternhelper.getFrontTopLeft().getZ()
+                : (double) blockpattern$patternhelper.getFrontTopLeft().getX();
+        yTarget = blockpattern$patternhelper.getFrontTopLeft().getY() + 1
+                - entityIn.getLastPortalVec().y * blockpattern$patternhelper.getHeight();
 
         if (flag1) {
             ++d2;
         }
 
-        if (blockpattern$patternhelper.func_177669_b().func_176740_k() == Direction.Axis.X) {
-            zTarget = d2 + (1.0D - entityIn.func_181014_aG().field_72450_a) * blockpattern$patternhelper.func_181118_d()
-                    * blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c().func_179524_a();
+        if (blockpattern$patternhelper.getForwards().getAxis() == Direction.Axis.X) {
+            zTarget = d2 + (1.0D - entityIn.getLastPortalVec().x) * blockpattern$patternhelper.getWidth()
+                    * blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
         } else {
-            xTarget = d2 + (1.0D - entityIn.func_181014_aG().field_72450_a) * blockpattern$patternhelper.func_181118_d()
-                    * blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c().func_179524_a();
+            xTarget = d2 + (1.0D - entityIn.getLastPortalVec().x) * blockpattern$patternhelper.getWidth()
+                    * blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
         }
 
         float f = 0.0F;
@@ -176,13 +176,13 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         float f2 = 0.0F;
         float f3 = 0.0F;
 
-        if (blockpattern$patternhelper.func_177669_b().func_176734_d() == entityIn.func_181012_aH()) {
+        if (blockpattern$patternhelper.getForwards().getOpposite() == entityIn.getTeleportDirection()) {
             f = 1.0F;
             f1 = 1.0F;
-        } else if (blockpattern$patternhelper.func_177669_b().func_176734_d() == entityIn.func_181012_aH().func_176734_d()) {
+        } else if (blockpattern$patternhelper.getForwards().getOpposite() == entityIn.getTeleportDirection().getOpposite()) {
             f = -1.0F;
             f1 = -1.0F;
-        } else if (blockpattern$patternhelper.func_177669_b().func_176734_d() == entityIn.func_181012_aH().func_176746_e()) {
+        } else if (blockpattern$patternhelper.getForwards().getOpposite() == entityIn.getTeleportDirection().rotateY()) {
             f2 = 1.0F;
             f3 = -1.0F;
         } else {
@@ -194,9 +194,9 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         double d4 = entityIn.field_70179_y;
         entityIn.field_70159_w = d3 * f + d4 * f3;
         entityIn.field_70179_y = d3 * f2 + d4 * f1;
-        entityIn.field_70177_z = rotationYaw - entityIn.func_181012_aH().func_176734_d().func_176736_b() * 90
-                + blockpattern$patternhelper.func_177669_b().func_176736_b() * 90;
-        entityIn.func_70012_b(xTarget, yTarget, zTarget, entityIn.field_70177_z, entityIn.field_70125_A);
+        entityIn.rotationYaw = rotationYaw - entityIn.getTeleportDirection().getOpposite().getHorizontalIndex() * 90
+                + blockpattern$patternhelper.getForwards().getHorizontalIndex() * 90;
+        entityIn.setLocationAndAngles(xTarget, yTarget, zTarget, entityIn.rotationYaw, entityIn.rotationPitch);
     }
 
     /**
@@ -237,7 +237,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
                 .add("type", this.impl$portalAgentType)
                 .add("searchRadius", ((PortalAgent) this).getSearchRadius())
                 .add("creationRadius", ((PortalAgent) this).getCreationRadius())
-                .add("world", this.world.func_72912_H().func_76065_j())
+                .add("world", this.world.getWorldInfo().getWorldName())
                 .add("dimensionId", ((WorldServerBridge) this.world).bridge$getDimensionId())
                 .toString();
     }

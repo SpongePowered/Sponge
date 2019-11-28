@@ -56,19 +56,19 @@ public class BreathingDataProcessor extends AbstractEntityDataProcessor<LivingEn
 
     @Override
     protected boolean doesDataExist(LivingEntity entity) {
-        return entity.func_70090_H();
+        return entity.isInWater();
     }
 
     @Override
     protected boolean set(LivingEntity entity, Map<Key<?>, Object> keyValues) {
         final int air = (Integer) keyValues.get(Keys.REMAINING_AIR);
-        entity.func_70050_g(air);
+        entity.setAir(air);
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(LivingEntity entity) {
-        return ImmutableMap.<Key<?>, Object>of(Keys.MAX_AIR, ((LivingEntityBaseBridge) entity).bridge$getMaxAir(), Keys.REMAINING_AIR, entity.func_70086_ai());
+        return ImmutableMap.<Key<?>, Object>of(Keys.MAX_AIR, ((LivingEntityBaseBridge) entity).bridge$getMaxAir(), Keys.REMAINING_AIR, entity.getAir());
     }
 
     @Override

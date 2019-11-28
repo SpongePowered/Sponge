@@ -50,7 +50,7 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Abst
 
     @Override
     protected boolean doesDataExist(AbstractMinecartEntity entity) {
-        return entity.func_94100_s();
+        return entity.hasDisplayTile();
     }
 
     @Override
@@ -58,16 +58,16 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Abst
         BlockState type = (BlockState) keyValues.get(Keys.REPRESENTED_BLOCK);
         int offset = (Integer) keyValues.get(Keys.OFFSET);
 
-        entity.func_94086_l(offset);
-        entity.func_174899_a((net.minecraft.block.BlockState) type);
+        entity.setDisplayTileOffset(offset);
+        entity.setDisplayTile((net.minecraft.block.BlockState) type);
 
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(AbstractMinecartEntity entity) {
-        BlockState state = (BlockState) entity.func_174897_t();
-        int offset = entity.func_94099_q();
+        BlockState state = (BlockState) entity.getDisplayTile();
+        int offset = entity.getDisplayTileOffset();
         return ImmutableMap.of(Keys.REPRESENTED_BLOCK, state, Keys.OFFSET, offset);
     }
 
@@ -97,10 +97,10 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Abst
         if(dataHolder instanceof AbstractMinecartEntity) {
             AbstractMinecartEntity cart = (AbstractMinecartEntity) dataHolder;
             DataTransactionResult.Builder builder = DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS);
-            if(cart.func_94100_s()) {
-                ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.func_174897_t());
-                ImmutableValue<Integer> offset = new ImmutableSpongeValue<>(Keys.OFFSET, cart.func_94099_q());
-                cart.func_94096_e(false);
+            if(cart.hasDisplayTile()) {
+                ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
+                ImmutableValue<Integer> offset = new ImmutableSpongeValue<>(Keys.OFFSET, cart.getDisplayTileOffset());
+                cart.setHasDisplayTile(false);
                 builder.replace(block).replace(offset);
             }
             return builder.build();

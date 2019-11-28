@@ -138,7 +138,7 @@ public class ItemFireworkMixin extends Item {
      */
     private boolean spongeImpl$ThrowConstructPreEvent(World world, PlayerEntity player, ItemStack usedItem) {
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).bridge$isFake()) {
-            final Vector3d targetPosition = new Vector3d(player.field_70165_t, player.field_70163_u , player.field_70161_v);
+            final Vector3d targetPosition = new Vector3d(player.posX, player.posY , player.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) world,
                 targetPosition);
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

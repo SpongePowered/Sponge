@@ -51,22 +51,22 @@ public abstract class WorldGenBlockBlobMixin extends WorldGeneratorMixin {
     public boolean generate(final World worldIn, final Random rand, BlockPos position) {
         // TODO cleanup this decompiler spaghetti
         while (true) {
-            if (position.func_177956_o() > 3) {
+            if (position.getY() > 3) {
                 label47: {
-                    if (!worldIn.func_175623_d(position.func_177977_b())) {
-                        final Block block = worldIn.func_180495_p(position.func_177977_b()).func_177230_c();
+                    if (!worldIn.isAirBlock(position.down())) {
+                        final Block block = worldIn.getBlockState(position.down()).getBlock();
 
-                        if (block == Blocks.field_150349_c || block == Blocks.field_150346_d || block == Blocks.field_150348_b) {
+                        if (block == Blocks.GRASS || block == Blocks.DIRT || block == Blocks.STONE) {
                             break label47;
                         }
                     }
 
-                    position = position.func_177977_b();
+                    position = position.down();
                     continue;
                 }
             }
 
-            if (position.func_177956_o() <= 3) {
+            if (position.getY() <= 3) {
                 return false;
             }
 
@@ -83,15 +83,15 @@ public abstract class WorldGenBlockBlobMixin extends WorldGeneratorMixin {
                 final int l = impl$getRadiusInstance(rand);
                 final float f = (j + k + l) * 0.333F + 0.5F;
 
-                for (final BlockPos blockpos1 : BlockPos.func_177980_a(position.func_177982_a(-j, -k, -l), position.func_177982_a(j, k, l))) {
-                    if (blockpos1.func_177951_i(position) <= f * f) {
+                for (final BlockPos blockpos1 : BlockPos.func_177980_a(position.add(-j, -k, -l), position.add(j, k, l))) {
+                    if (blockpos1.distanceSq(position) <= f * f) {
 //                        worldIn.setBlockState(blockpos1, this.field_150545_a.getDefaultState(), 4);
-                        worldIn.func_180501_a(blockpos1, (BlockState) ((BlockBlob) this).getBlock(), 4);
+                        worldIn.setBlockState(blockpos1, (BlockState) ((BlockBlob) this).getBlock(), 4);
                     }
                 }
 
 //                position = position.add(-(i1 + 1) + rand.nextInt(2 + i1 * 2), 0 - rand.nextInt(2), -(i1 + 1) + rand.nextInt(2 + i1 * 2));
-                position = position.func_177982_a(-(j + 1) + rand.nextInt(2 + j * 2), 0 - rand.nextInt(2), -(l + 1) + rand.nextInt(2 + l * 2));
+                position = position.add(-(j + 1) + rand.nextInt(2 + j * 2), 0 - rand.nextInt(2), -(l + 1) + rand.nextInt(2 + l * 2));
                 // SPONGE end
             }
 

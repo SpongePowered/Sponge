@@ -107,7 +107,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     public void associateNeighborStateNotifier(final CommandPhaseContext context, @Nullable final BlockPos sourcePos, final Block block,
         final BlockPos notifyPos, final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
-            .ifPresent(player -> ((ChunkBridge) minecraftWorld.func_175726_f(notifyPos))
+            .ifPresent(player -> ((ChunkBridge) minecraftWorld.getChunkAt(notifyPos))
                 .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
     }
 
@@ -117,11 +117,11 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final CauseStackManager csm = Sponge.getCauseStackManager();
         if (playerSource.isPresent()) {
             // Post event for inventory changes
-            ((TrackedInventoryBridge) playerSource.get().field_71071_by).bridge$setCaptureInventory(false);
-            final List<SlotTransaction> list = ((TrackedInventoryBridge) playerSource.get().field_71071_by).bridge$getCapturedSlotTransactions();
+            ((TrackedInventoryBridge) playerSource.get().inventory).bridge$setCaptureInventory(false);
+            final List<SlotTransaction> list = ((TrackedInventoryBridge) playerSource.get().inventory).bridge$getCapturedSlotTransactions();
             if (!list.isEmpty()) {
                 final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
-                        ((Inventory) playerSource.get().field_71071_by), list);
+                        ((Inventory) playerSource.get().inventory), list);
                 SpongeImpl.postEvent(event);
                 PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
                 list.clear();

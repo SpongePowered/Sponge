@@ -202,7 +202,7 @@ public class ItemDropData {
         @Override
         public ItemEntity create(ServerWorld worldServer) {
             final ItemEntity entityItem = super.create(worldServer);
-            entityItem.func_174867_a(40);
+            entityItem.setPickupDelay(40);
             if (this.trace) {
                 entityItem.func_145799_b(this.playerName);
             }

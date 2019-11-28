@@ -71,7 +71,7 @@ public abstract class ChunkProviderServerMixin_API implements WorldStorage {
 
     @Override
     public WorldProperties getWorldProperties() {
-        return (WorldProperties) this.world.func_72912_H();
+        return (WorldProperties) this.world.getWorldInfo();
     }
 
 

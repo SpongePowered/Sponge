@@ -61,7 +61,7 @@ public class SpongeUserListBans extends BanList {
     }
 
     @Override
-    public String[] func_152685_a() {
+    public String[] getKeys() {
         List<String> names = new ArrayList<>();
         for (Ban.Profile ban : getService().getProfileBans()) {
             ban.getProfile().getName().ifPresent(names::add);
@@ -75,7 +75,7 @@ public class SpongeUserListBans extends BanList {
     }
 
     @Override
-    public boolean func_152690_d() {
+    public boolean isEmpty() {
         return getService().getProfileBans().isEmpty();
     }
 

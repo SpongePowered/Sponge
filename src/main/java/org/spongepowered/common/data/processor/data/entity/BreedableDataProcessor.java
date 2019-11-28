@@ -47,20 +47,20 @@ public class BreedableDataProcessor extends AbstractSingleDataSingleTargetProces
 
     @Override
     protected boolean set(AgeableEntity entity, Boolean value) {
-        if (entity.func_70874_b() < 0) {
+        if (entity.getGrowingAge() < 0) {
             return false;
         }
         else if (value) {
-            entity.func_70873_a(0);
+            entity.setGrowingAge(0);
         } else {
-            entity.func_70873_a(6000);
+            entity.setGrowingAge(6000);
         }
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(AgeableEntity entity) {
-        return Optional.of(entity.func_70874_b() == 0);
+        return Optional.of(entity.getGrowingAge() == 0);
     }
 
     @Override

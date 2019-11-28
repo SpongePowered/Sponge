@@ -56,8 +56,8 @@ public abstract class WorldGenDeadBushMixin_API extends Feature implements DeadB
         BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         int n = (int) Math.ceil(this.api$count.getFlooredAmount(random) / 16f);
         for (int i = 0; i < n; i++) {
-            BlockPos pos = position.func_177982_a(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
-            pos = world.func_175672_r(pos).func_177982_a(0, 1, 0);
+            BlockPos pos = position.add(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
+            pos = world.func_175672_r(pos).add(0, 1, 0);
             func_180709_b(world, random, pos);
         }
     }

@@ -133,7 +133,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             ((CommandHandlerBridge) handler).bridge$setExpandedSelector(true);
 
             for (Entity entity : list) {
-                splitArgs[usernameIndex] = entity.func_189512_bd();
+                splitArgs[usernameIndex] = entity.getCachedUniqueIdString();
 
                 if (tryExecute(handler, mcSender, splitArgs, arguments)) {
                     ++successCount;
@@ -188,7 +188,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getCommands().isEnforcePermissionChecksOnNonSpongeCommands()
             || source.hasPermission(getCommandPermission())) {
             ICommandSender sender = WrapperICommandSender.of(source);
-            return this.command.func_184882_a(sender.func_184102_h(), sender);
+            return this.command.func_184882_a(sender.getServer(), sender);
         }
 
         return false;

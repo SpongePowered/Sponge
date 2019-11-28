@@ -49,8 +49,8 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
 
     @Override
     public void playRecord() {
-        if (!getRecord().func_190926_b()) {
-            this.world.func_180498_a(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, Item.func_150891_b(getRecord().func_77973_b()));
+        if (!getRecord().isEmpty()) {
+            this.world.func_180498_a(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(getRecord().getItem()));
         }
     }
 
@@ -63,25 +63,25 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
     @SuppressWarnings("deprecation")
     @Override
     public void ejectRecord() {
-        final BlockState block = this.world.func_180495_p(this.pos);
-        if (block.func_177230_c() == Blocks.field_150421_aI) {
+        final BlockState block = this.world.getBlockState(this.pos);
+        if (block.getBlock() == Blocks.JUKEBOX) {
             // TODO - Mixin 0.8 accessors
-            ((BlockJukeboxBridge) block.func_177230_c()).accessor$dropRecordItem(this.world, this.pos, block);
-            this.world.func_180501_a(this.pos, block.func_177226_a(JukeboxBlock.field_176432_a, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
+            ((BlockJukeboxBridge) block.getBlock()).accessor$dropRecordItem(this.world, this.pos, block);
+            this.world.setBlockState(this.pos, block.func_177226_a(JukeboxBlock.HAS_RECORD, false), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 
     @Override
     public void insertRecord(final ItemStack record) {
         final net.minecraft.item.ItemStack itemStack = ItemStackUtil.toNative(record);
-        if (!(itemStack.func_77973_b() instanceof MusicDiscItem)) {
+        if (!(itemStack.getItem() instanceof MusicDiscItem)) {
             return;
         }
-        final BlockState block = this.world.func_180495_p(this.pos);
-        if (block.func_177230_c() == Blocks.field_150421_aI) {
+        final BlockState block = this.world.getBlockState(this.pos);
+        if (block.getBlock() == Blocks.JUKEBOX) {
             // Don't use BlockJukebox#insertRecord - it looses item data
             this.setRecord(itemStack);
-            this.world.func_180501_a(this.pos, block.func_177226_a(JukeboxBlock.field_176432_a, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
+            this.world.setBlockState(this.pos, block.func_177226_a(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }
 

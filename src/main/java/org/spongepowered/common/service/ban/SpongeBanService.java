@@ -100,7 +100,7 @@ public class SpongeBanService implements BanService {
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
 
         accessor.accessor$removeExpired();
-        return Optional.ofNullable((Ban.Ip) accessor.accessor$getValues().get(accessor.accessor$getObjectKey(((IPBanList) accessor).func_152707_c(new InetSocketAddress(address, 0)))));
+        return Optional.ofNullable((Ban.Ip) accessor.accessor$getValues().get(accessor.accessor$getObjectKey(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0)))));
     }
 
     @SuppressWarnings("unchecked")
@@ -119,7 +119,7 @@ public class SpongeBanService implements BanService {
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
 
         accessor.accessor$removeExpired();
-        return accessor.accessor$getValues().containsKey(accessor.accessor$getObjectKey(((IPBanList) accessor).func_152707_c(new InetSocketAddress(address, 0))));
+        return accessor.accessor$getValues().containsKey(accessor.accessor$getObjectKey(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0))));
     }
 
     @SuppressWarnings("unchecked")
@@ -156,7 +156,7 @@ public class SpongeBanService implements BanService {
             Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
 
             final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.Ip) ban).getAddress(), 0);
-            UserListUtils.removeEntry(this.getIPBanList(), this.getIPBanList().func_152707_c(inetSocketAddress));
+            UserListUtils.removeEntry(this.getIPBanList(), this.getIPBanList().addressToString(inetSocketAddress));
             return true;
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
@@ -196,11 +196,11 @@ public class SpongeBanService implements BanService {
     }
 
     private BanList getUserBanList() {
-        return SpongeImpl.getServer().func_184103_al().func_152608_h();
+        return SpongeImpl.getServer().getPlayerList().getBannedPlayers();
     }
 
     private IPBanList getIPBanList() {
-        return SpongeImpl.getServer().func_184103_al().func_72363_f();
+        return SpongeImpl.getServer().getPlayerList().getBannedIPs();
     }
 
 }

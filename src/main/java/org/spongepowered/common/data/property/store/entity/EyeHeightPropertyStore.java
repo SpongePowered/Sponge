@@ -34,7 +34,7 @@ public class EyeHeightPropertyStore extends AbstractEntityPropertyStore<EyeHeigh
 
     @Override
     protected Optional<EyeHeightProperty> getForEntity(Entity entity) {
-        final double eyeHeight = entity.func_70047_e();
+        final double eyeHeight = entity.getEyeHeight();
         return Optional.of(new EyeHeightProperty(eyeHeight));
     }
 

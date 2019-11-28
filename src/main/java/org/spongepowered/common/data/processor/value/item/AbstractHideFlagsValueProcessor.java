@@ -54,22 +54,22 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
 
     @Override
     protected boolean set(ItemStack container, Boolean value) {
-        if (!container.func_77942_o()) {
-            container.func_77982_d(new CompoundNBT());
+        if (!container.hasTag()) {
+            container.setTag(new CompoundNBT());
         }
-        if (container.func_77978_p().func_150297_b(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
-            int flag = container.func_77978_p().func_74762_e(Constants.Item.ITEM_HIDE_FLAGS);
+        if (container.getTag().contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
+            int flag = container.getTag().getInt(Constants.Item.ITEM_HIDE_FLAGS);
             if (value) {
-                container.func_77978_p()
-                        .func_74768_a(Constants.Item.ITEM_HIDE_FLAGS, flag | this.flag);
+                container.getTag()
+                        .putInt(Constants.Item.ITEM_HIDE_FLAGS, flag | this.flag);
             } else {
-                container.func_77978_p()
-                        .func_74768_a(Constants.Item.ITEM_HIDE_FLAGS,
+                container.getTag()
+                        .putInt(Constants.Item.ITEM_HIDE_FLAGS,
                                 flag & ~this.flag);
             }
         } else {
             if (value) {
-                container.func_77978_p().func_74768_a(Constants.Item.ITEM_HIDE_FLAGS, this.flag);
+                container.getTag().putInt(Constants.Item.ITEM_HIDE_FLAGS, this.flag);
             }
         }
         return true;
@@ -77,8 +77,8 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
 
     @Override
     protected Optional<Boolean> getVal(ItemStack container) {
-        if (container.func_77942_o() && container.func_77978_p().func_150297_b(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
-            int flag = container.func_77978_p().func_74762_e(Constants.Item.ITEM_HIDE_FLAGS);
+        if (container.hasTag() && container.getTag().contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
+            int flag = container.getTag().getInt(Constants.Item.ITEM_HIDE_FLAGS);
             if ((flag & this.flag) != 0) {
                 return OptBool.TRUE;
             }

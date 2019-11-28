@@ -63,7 +63,7 @@ public abstract class BlockStemMixin extends BlockMixin {
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.field_176484_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.AGE, growth));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
@@ -79,7 +79,7 @@ public abstract class BlockStemMixin extends BlockMixin {
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.field_176484_a, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(StemBlock.AGE, growth));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotDown((Direction) value);
@@ -89,12 +89,12 @@ public abstract class BlockStemMixin extends BlockMixin {
     }
 
     private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(StemBlock.field_176484_a), 0, 7);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(StemBlock.AGE), 0, 7);
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(StemBlock.field_176483_b)));
+                Constants.DirectionFunctions.getFor(blockState.get(StemBlock.field_176483_b)));
     }
 
 }

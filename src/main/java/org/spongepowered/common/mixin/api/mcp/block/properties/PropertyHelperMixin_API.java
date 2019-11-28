@@ -58,7 +58,7 @@ public abstract class PropertyHelperMixin_API<T extends Comparable<T>> implement
     @SuppressWarnings("unchecked")
     @Override
     public Optional<T> parseValue(String value) {
-        return Optional.ofNullable(((IProperty<T>) this).func_185929_b(value).orNull());
+        return Optional.ofNullable(((IProperty<T>) this).parseValue(value).orNull());
     }
 
 }

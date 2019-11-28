@@ -69,11 +69,11 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.field_176285_M, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.field_176283_b, isOpen));
+            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
@@ -85,11 +85,11 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.field_176285_M, impl$convertType((SlabBlock.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.field_176283_b, isOpen));
+            return Optional.of((BlockState) blockState.func_177226_a(TrapDoorBlock.OPEN, isOpen));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);
@@ -100,24 +100,24 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
 
     private ImmutablePortionData impl$getPortionTypeFor(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
-                impl$convertType(blockState.func_177229_b(TrapDoorBlock.field_176285_M)));
+                impl$convertType(blockState.get(TrapDoorBlock.HALF)));
     }
 
     private ImmutableOpenData impl$getIsOpenFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.func_177229_b(TrapDoorBlock.field_176283_b));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.get(TrapDoorBlock.OPEN));
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.func_177229_b(TrapDoorBlock.field_176284_a)));
+                Constants.DirectionFunctions.getFor(blockState.get(TrapDoorBlock.field_176284_a)));
     }
 
     @SuppressWarnings("ConstantConditions")
     private PortionType impl$convertType(final TrapDoorBlock.DoorHalf type) {
-        return (PortionType) (Object) SlabBlock.EnumBlockHalf.valueOf(type.func_176610_l().toUpperCase());
+        return (PortionType) (Object) SlabBlock.EnumBlockHalf.valueOf(type.getName().toUpperCase());
     }
 
     private TrapDoorBlock.DoorHalf impl$convertType(final SlabBlock.EnumBlockHalf type) {
-        return TrapDoorBlock.DoorHalf.valueOf(type.func_176610_l().toUpperCase());
+        return TrapDoorBlock.DoorHalf.valueOf(type.getName().toUpperCase());
     }
 }

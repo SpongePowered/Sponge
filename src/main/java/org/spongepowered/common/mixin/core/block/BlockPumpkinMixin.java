@@ -38,8 +38,8 @@ public abstract class BlockPumpkinMixin extends BlockHorizontalMixin {
 
     @Inject(method = "trySpawnGolem", at = @At("HEAD"), cancellable = true)
     private void impl$checkChunkBeforeTrySpawnGolem(final World world, final BlockPos pos, final CallbackInfo callbackInfo) {
-        final Chunk chunk = world.func_175726_f(pos);
-        if (chunk == null || chunk.func_76621_g() || !chunk.func_177419_t()) {
+        final Chunk chunk = world.getChunkAt(pos);
+        if (chunk == null || chunk.isEmpty() || !chunk.func_177419_t()) {
             callbackInfo.cancel();
         }
     }

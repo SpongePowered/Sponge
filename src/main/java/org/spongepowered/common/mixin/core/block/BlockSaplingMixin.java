@@ -68,7 +68,7 @@ public abstract class BlockSaplingMixin extends BlockMixin {
             if (growth > 1) {
                 growth = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.field_176479_b, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.STAGE, growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -84,18 +84,18 @@ public abstract class BlockSaplingMixin extends BlockMixin {
             if (growth > 1) {
                 growth = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.field_176479_b, growth));
+            return Optional.of((BlockState) blockState.func_177226_a(SaplingBlock.STAGE, growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     @SuppressWarnings("ConstantConditions")
     private ImmutableSpongeTreeData impl$getTreeTypeFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.func_177229_b(SaplingBlock.field_176480_a));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.get(SaplingBlock.field_176480_a));
     }
 
     private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.func_177229_b(SaplingBlock.field_176479_b), 0, 1);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(SaplingBlock.STAGE), 0, 1);
     }
 
 }

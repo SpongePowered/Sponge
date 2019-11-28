@@ -102,8 +102,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.inv = new net.minecraft.inventory.Inventory(title, isCustom, count);
 
         // Updates the Inventory for all viewers on any change
-        this.inv.func_110134_a(i -> this.viewers.forEach(v -> {
-            v.field_71070_bA.func_75142_b();
+        this.inv.addListener(i -> this.viewers.forEach(v -> {
+            v.openContainer.detectAndSendChanges();
         }));
 
 
@@ -185,8 +185,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     // IInventory delegation
 
     @Override
-    public ITextComponent func_145748_c_() {
-        return this.inv.func_145748_c_();
+    public ITextComponent getDisplayName() {
+        return this.inv.getDisplayName();
     }
 
     @Override
@@ -195,66 +195,66 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean func_145818_k_() {
-        return this.inv.func_145818_k_();
+    public boolean hasCustomName() {
+        return this.inv.hasCustomName();
     }
 
     @Override
-    public int func_70302_i_() {
-        return this.inv.func_70302_i_();
+    public int getSizeInventory() {
+        return this.inv.getSizeInventory();
     }
 
     @Override
-    public boolean func_191420_l() {
-        return this.inv.func_191420_l();
+    public boolean isEmpty() {
+        return this.inv.isEmpty();
     }
 
     @Override
-    public ItemStack func_70301_a(final int index) {
-        return this.inv.func_70301_a(index);
+    public ItemStack getStackInSlot(final int index) {
+        return this.inv.getStackInSlot(index);
     }
 
     @Override
-    public ItemStack func_70298_a(final int index, final int count) {
-        return this.inv.func_70298_a(index, count);
+    public ItemStack decrStackSize(final int index, final int count) {
+        return this.inv.decrStackSize(index, count);
     }
 
     @Override
-    public ItemStack func_70304_b(final int index) {
-        return this.inv.func_70304_b(index);
+    public ItemStack removeStackFromSlot(final int index) {
+        return this.inv.removeStackFromSlot(index);
     }
 
     @Override
-    public void func_70299_a(final int index, final ItemStack stack) {
-        this.inv.func_70299_a(index, stack);
+    public void setInventorySlotContents(final int index, final ItemStack stack) {
+        this.inv.setInventorySlotContents(index, stack);
     }
 
     @Override
-    public int func_70297_j_() {
-        return this.inv.func_70297_j_();
+    public int getInventoryStackLimit() {
+        return this.inv.getInventoryStackLimit();
     }
 
     @Override
-    public void func_70296_d() {
-        this.inv.func_70296_d();
+    public void markDirty() {
+        this.inv.markDirty();
     }
 
     @Override
-    public boolean func_70300_a(final PlayerEntity player) {
-        return this.inv.func_70300_a(player);
+    public boolean isUsableByPlayer(final PlayerEntity player) {
+        return this.inv.isUsableByPlayer(player);
     }
 
     @Override
-    public void func_174889_b(final PlayerEntity player) {
+    public void openInventory(final PlayerEntity player) {
         this.viewers.add(player);
-        this.inv.func_174889_b(player);
+        this.inv.openInventory(player);
         this.ensureListenersRegistered();
     }
 
     @Override
-    public void func_174886_c(final PlayerEntity player) {
+    public void closeInventory(final PlayerEntity player) {
         this.viewers.remove(player);
-        this.inv.func_174886_c(player);
+        this.inv.closeInventory(player);
         if (this.viewers.isEmpty()) {
             Task.builder().execute(() -> {
                 if (this.viewers.isEmpty()) {
@@ -266,8 +266,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean func_94041_b(final int index, final ItemStack stack) {
-        return this.inv.func_94041_b(index, stack);
+    public boolean isItemValidForSlot(final int index, final ItemStack stack) {
+        return this.inv.isItemValidForSlot(index, stack);
     }
 
     @Override
@@ -286,8 +286,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public void func_174888_l() {
-        this.inv.func_174888_l();
+    public void clear() {
+        this.inv.clear();
     }
 
     public Map<String, InventoryProperty<?, ?>> getProperties() {

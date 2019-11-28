@@ -67,7 +67,7 @@ public class MatchSmeltingVanillaItemStack implements Predicate<ItemStackSnapsho
         checkNotNull(stack1, "stack1");
         checkNotNull(stack2, "stack2");
 
-        return stack2.func_77973_b() == stack1.func_77973_b() && (stack2.func_77960_j() == Short.MAX_VALUE || stack2.func_77960_j() == stack1.func_77960_j());
+        return stack2.getItem() == stack1.getItem() && (stack2.func_77960_j() == Short.MAX_VALUE || stack2.func_77960_j() == stack1.func_77960_j());
     }
 
 }

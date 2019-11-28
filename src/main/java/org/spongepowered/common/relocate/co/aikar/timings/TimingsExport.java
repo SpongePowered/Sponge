@@ -125,7 +125,7 @@ class TimingsExport extends Thread {
             builder.add("server", getServerName())
                     .add("motd", Sponge.getServer().getMotd().toPlain())
                     .add("online-mode", Sponge.getServer().getOnlineMode())
-                    .add("icon", SpongeImpl.getServer().func_147134_at().func_151316_d());
+                    .add("icon", SpongeImpl.getServer().getServerStatusResponse().getFavicon());
         }
 
         final Runtime runtime = Runtime.getRuntime();

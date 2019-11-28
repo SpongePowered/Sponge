@@ -43,11 +43,11 @@ public class BehaviorProjectileDispenseMixin extends DefaultDispenseItemBehavior
     @Redirect(method = "dispenseStack", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private boolean impl$spawnEntityAndSetShooter(final World world, final Entity entity, final IBlockSource source, final ItemStack stack) {
-        final TileEntity tileEntity = source.func_150835_j();
+        final TileEntity tileEntity = source.getBlockTileEntity();
         if (entity instanceof Projectile && tileEntity instanceof ProjectileSource) {
             ((Projectile) entity).setShooter((ProjectileSource) tileEntity);
         }
-        return world.func_72838_d(entity);
+        return world.addEntity0(entity);
     }
 
 }

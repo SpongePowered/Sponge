@@ -142,7 +142,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public Path getDirectory() {
-        final File worldDirectory = this.saveHandler.func_75765_b();
+        final File worldDirectory = this.saveHandler.getWorldDirectory();
         if (worldDirectory == null) {
             new PrettyPrinter(60).add("A Server World has a null save directory!").centre().hr()
                 .add("%s : %s", "World Name", this.getName())
@@ -162,7 +162,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(final int x, final int y, final int z, final int priority, final int ticks) {
         final BlockPos pos = new BlockPos(x, y, z);
-        this.updateBlockTick(pos, getBlockState(pos).func_177230_c(), ticks, priority);
+        this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
         final ScheduledBlockUpdate sbu = ((WorldServerBridge) this).bridge$getScheduledBlockUpdate();
         ((WorldServerBridge) this).bridge$setScheduledBlockUpdate(null);
         return sbu;
@@ -196,7 +196,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         final BlockPos position = new BlockPos(x, y, z);
         final ImmutableList.Builder<ScheduledBlockUpdate> builder = ImmutableList.builder();
         for (final NextTickListEntry sbu : this.pendingTickListEntriesTreeSet) {
-            if (sbu.field_180282_a.equals(position)) {
+            if (sbu.position.equals(position)) {
                 builder.add((ScheduledBlockUpdate) sbu);
             }
         }
@@ -233,7 +233,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             .chunk(chunk)) {
             context.buildAndSwitch();
             // If we reached this point, an existing chunk was found so we need to regen
-            for (final ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.func_177429_s()) {
+            for (final ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.getEntityLists()) {
                 for (final net.minecraft.entity.Entity entity : multiEntityList) {
                     if (entity instanceof ServerPlayerEntity) {
                         playerList.add((ServerPlayerEntity) entity);
@@ -245,32 +245,32 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             }
 
             for (final net.minecraft.entity.Entity entity : entityList) {
-                chunk.func_76622_b(entity);
+                chunk.removeEntity(entity);
             }
 
-            final ServerChunkProvider chunkProviderServer = (ServerChunkProvider) chunk.func_177412_p().func_72863_F();
+            final ServerChunkProvider chunkProviderServer = (ServerChunkProvider) chunk.getWorld().getChunkProvider();
             ((ChunkProviderServerBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
             // TODO - Move to accessor with Mixin 0.8
             final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerBridge) chunkProviderServer).accessor$getChunkGenerator().func_185932_a(cx, cz);
-            final PlayerChunkMapEntry playerChunk = ((ServerWorld) chunk.func_177412_p()).func_184164_w().func_187301_b(cx, cz);
+            final PlayerChunkMapEntry playerChunk = ((ServerWorld) chunk.getWorld()).func_184164_w().func_187301_b(cx, cz);
             if (playerChunk != null) {
                 ((PlayerChunkMapEntryBridge) playerChunk).bridge$setChunk(newChunk);
             }
 
             if (newChunk != null) {
-                final ServerWorld world = (ServerWorld) newChunk.func_177412_p();
-                ((ChunkProviderServerBridge) world.func_72863_F()).accessor$getLoadedChunks().put(ChunkPos.func_77272_a(cx, cz), newChunk);
+                final ServerWorld world = (ServerWorld) newChunk.getWorld();
+                ((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
                 newChunk.func_76631_c();
-                ((ChunkBridge) newChunk).accessor$populate(((ChunkProviderServerBridge) world.func_72863_F()).accessor$getChunkGenerator());
+                ((ChunkBridge) newChunk).accessor$populate(((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getChunkGenerator());
                 for (final net.minecraft.entity.Entity entity: entityList) {
-                    newChunk.func_76612_a(entity);
+                    newChunk.addEntity(entity);
                 }
 
                 if (((ChunkProviderBridge) chunkProviderServer).bridge$getLoadedChunkWithoutMarkingActive(cx, cz) == null) {
                     return Optional.of((org.spongepowered.api.world.Chunk) newChunk);
                 }
 
-                final PlayerChunkMapEntry playerChunkMapEntry = ((ServerWorld) newChunk.func_177412_p()).func_184164_w().func_187301_b(cx, cz);
+                final PlayerChunkMapEntry playerChunkMapEntry = ((ServerWorld) newChunk.getWorld()).func_184164_w().func_187301_b(cx, cz);
                 if (playerChunkMapEntry != null) {
                     final List<ServerPlayerEntity> chunkPlayers = ((PlayerChunkMapEntryBridge) playerChunkMapEntry).accessor$getPlayers();
                     // We deliberately send two packets, to avoid sending a 'fullChunk' packet
@@ -280,8 +280,8 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
                     // for a new chunk)
                     // - Aaron1011
                     for (final ServerPlayerEntity playerMP: chunkPlayers) {
-                        playerMP.field_71135_a.func_147359_a(new SChunkDataPacket(newChunk, 65534));
-                        playerMP.field_71135_a.func_147359_a(new SChunkDataPacket(newChunk, 1));
+                        playerMP.connection.sendPacket(new SChunkDataPacket(newChunk, 65534));
+                        playerMP.connection.sendPacket(new SChunkDataPacket(newChunk, 1));
                     }
                 }
             }
@@ -330,7 +330,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         } catch (Throwable throwable) {
             // do nothing
         }
-        final net.minecraft.tileentity.TileEntity tile = chunk.func_177424_a(pos, Chunk.CreateEntityType.CHECK);
+        final net.minecraft.tileentity.TileEntity tile = chunk.getTileEntity(pos, Chunk.CreateEntityType.CHECK);
         if (tile != null) {
             TrackingUtil.addTileEntityToBuilder(tile, builder);
         }
@@ -398,11 +398,11 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             final boolean damagesTerrain = explosion.shouldBreakBlocks();
             // Sponge End
 
-            mcExplosion.func_77278_a();
-            mcExplosion.func_77279_a(false);
+            mcExplosion.doExplosionA();
+            mcExplosion.doExplosionB(false);
 
             if (!damagesTerrain) {
-                mcExplosion.func_180342_d();
+                mcExplosion.clearAffectedBlockPositions();
             }
 
             // Sponge Start - end processing
@@ -433,7 +433,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public WorldStorage getWorldStorage() {
-        return (WorldStorage) ((ServerWorld) (Object) this).func_72863_F();
+        return (WorldStorage) ((ServerWorld) (Object) this).getChunkProvider();
     }
 
     @Override
@@ -499,7 +499,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     private void apiImpl$stopSounds(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
-        this.server.func_184103_al().func_148537_a(
+        this.server.getPlayerList().sendPacketToAllPlayersInDimension(
                 SoundEffectHelper.createStopSoundPacket(sound, category), ((WorldServerBridge) this).bridge$getDimensionId());
     }
 
@@ -518,14 +518,14 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         final List<IPacket<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
-            final PlayerList playerList = this.server.func_184103_al();
+            final PlayerList playerList = this.server.getPlayerList();
 
             final double x = position.getX();
             final double y = position.getY();
             final double z = position.getZ();
 
             for (final IPacket<?> packet : packets) {
-                playerList.func_148543_a(null, x, y, z, radius, ((WorldServerBridge) this).bridge$getDimensionId(), packet);
+                playerList.sendToAllNearExcept(null, x, y, z, radius, ((WorldServerBridge) this).bridge$getDimensionId(), packet);
             }
         }
     }
@@ -541,16 +541,16 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     private void api$playRecord(final Vector3i position, @Nullable final RecordType recordType) {
-        this.server.func_184103_al().func_148537_a(
+        this.server.getPlayerList().sendPacketToAllPlayersInDimension(
                 SpongeRecordType.createPacket(position, recordType), ((WorldServerBridge) this).bridge$getDimensionId());
     }
 
     @Override
     public Weather getWeather() {
-        if (this.worldInfo.func_76061_m()) {
+        if (this.worldInfo.isThundering()) {
             return Weathers.THUNDER_STORM;
         }
-        if (this.worldInfo.func_76059_o()) {
+        if (this.worldInfo.isRaining()) {
             return Weathers.RAIN;
         }
         return Weathers.CLEAR;
@@ -560,23 +560,23 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     public long getRemainingDuration() {
         final Weather weather = getWeather();
         if (weather.equals(Weathers.CLEAR)) {
-            if (this.worldInfo.func_176133_A() > 0) {
-                return this.worldInfo.func_176133_A();
+            if (this.worldInfo.getClearWeatherTime() > 0) {
+                return this.worldInfo.getClearWeatherTime();
             }
-            return Math.min(this.worldInfo.func_76071_n(), this.worldInfo.func_76083_p());
+            return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
         }
         if (weather.equals(Weathers.THUNDER_STORM)) {
-            return this.worldInfo.func_76071_n();
+            return this.worldInfo.getThunderTime();
         }
         if (weather.equals(Weathers.RAIN)) {
-            return this.worldInfo.func_76083_p();
+            return this.worldInfo.getRainTime();
         }
         return 0;
     }
 
     @Override
     public long getRunningDuration() {
-        return this.worldInfo.func_82573_f() - ((WorldServerBridge) this).bridge$getWeatherStartTime();
+        return this.worldInfo.getGameTime() - ((WorldServerBridge) this).bridge$getWeatherStartTime();
     }
 
     @Override
@@ -588,23 +588,23 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     public void setWeather(final Weather weather, final long duration) {
         ((WorldServerBridge) this).bridge$setPreviousWeather(this.getWeather());
         if (weather.equals(Weathers.CLEAR)) {
-            this.worldInfo.func_176142_i((int) duration);
-            this.worldInfo.func_76080_g(0);
-            this.worldInfo.func_76090_f(0);
-            this.worldInfo.func_76084_b(false);
-            this.worldInfo.func_76069_a(false);
+            this.worldInfo.setClearWeatherTime((int) duration);
+            this.worldInfo.setRainTime(0);
+            this.worldInfo.setThunderTime(0);
+            this.worldInfo.setRaining(false);
+            this.worldInfo.setThundering(false);
         } else if (weather.equals(Weathers.RAIN)) {
-            this.worldInfo.func_176142_i(0);
-            this.worldInfo.func_76080_g((int) duration);
-            this.worldInfo.func_76090_f((int) duration);
-            this.worldInfo.func_76084_b(true);
-            this.worldInfo.func_76069_a(false);
+            this.worldInfo.setClearWeatherTime(0);
+            this.worldInfo.setRainTime((int) duration);
+            this.worldInfo.setThunderTime((int) duration);
+            this.worldInfo.setRaining(true);
+            this.worldInfo.setThundering(false);
         } else if (weather.equals(Weathers.THUNDER_STORM)) {
-            this.worldInfo.func_176142_i(0);
-            this.worldInfo.func_76080_g((int) duration);
-            this.worldInfo.func_76090_f((int) duration);
-            this.worldInfo.func_76084_b(true);
-            this.worldInfo.func_76069_a(true);
+            this.worldInfo.setClearWeatherTime(0);
+            this.worldInfo.setRainTime((int) duration);
+            this.worldInfo.setThunderTime((int) duration);
+            this.worldInfo.setRaining(true);
+            this.worldInfo.setThundering(true);
         }
     }
 
@@ -627,7 +627,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public void resetViewDistance() {
-        this.setViewDistance(this.server.func_184103_al().func_72395_o());
+        this.setViewDistance(this.server.getPlayerList().getViewDistance());
     }
 
 }

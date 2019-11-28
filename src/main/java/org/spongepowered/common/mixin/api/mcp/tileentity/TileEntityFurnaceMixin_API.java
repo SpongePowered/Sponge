@@ -68,8 +68,8 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
         return new SpongeFurnaceData(
             this.isBurning() ? this.getField(Constants.TileEntity.Furnace.PASSED_BURN_FIELD) - this.getField(0) : 0,
             this.getField(Constants.TileEntity.Furnace.PASSED_BURN_FIELD),
-            this.getStackInSlot(0).func_190926_b() ? 0 : this.getField(Constants.TileEntity.Furnace.PASSED_COOK_FIELD),
-            this.getStackInSlot(0).func_190926_b() ? 0 : this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD)
+            this.getStackInSlot(0).isEmpty() ? 0 : this.getField(Constants.TileEntity.Furnace.PASSED_COOK_FIELD),
+            this.getStackInSlot(0).isEmpty() ? 0 : this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD)
             );
     }
 
@@ -97,7 +97,7 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
             .minimum(0)
             .maximum(Integer.MAX_VALUE) //TODO
             .defaultValue(Constants.TileEntity.Furnace.DEFAULT_COOK_TIME)
-            .actualValue(this.getStackInSlot(0).func_190926_b() ? 0 : this.getField(Constants.TileEntity.Furnace.PASSED_COOK_FIELD))
+            .actualValue(this.getStackInSlot(0).isEmpty() ? 0 : this.getField(Constants.TileEntity.Furnace.PASSED_COOK_FIELD))
             .build();
     }
 
@@ -107,7 +107,7 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Furnace.DEFAULT_COOK_TIME)
-            .actualValue(this.getStackInSlot(0).func_190926_b() ? 0 : this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD))
+            .actualValue(this.getStackInSlot(0).isEmpty() ? 0 : this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD))
             .build();
     }
 

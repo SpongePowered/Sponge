@@ -48,7 +48,7 @@ public abstract class BiomeTaigaMixin extends BiomeMixin {
         if (this.type == TaigaBiome.Type.MEGA || this.type == TaigaBiome.Type.MEGA_SPRUCE) {
             final BlockBlob blob = BlockBlob.builder()
                     .blobCount(VariableAmount.baseWithRandomAddition(0, 3))
-                    .block((BlockState) Blocks.field_150341_Y.func_176223_P())
+                    .block((BlockState) Blocks.MOSSY_COBBLESTONE.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(0, 2))
                     .build();
             gensettings.getPopulators().add(blob);

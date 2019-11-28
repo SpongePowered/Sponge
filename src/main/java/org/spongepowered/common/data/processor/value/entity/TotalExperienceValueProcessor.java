@@ -84,16 +84,16 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
         // Once we're here, we have the correct level. The experience is the decimal fraction that we are through the
         // current level. This is why we require the experienceForCurrentLevel variable, we need the difference between
         // the current value and the beginning of the level.
-        container.field_71106_cc = (float)(value - experienceForCurrentLevel) / ExperienceHolderUtils.getExpBetweenLevels(level);
-        container.field_71068_ca = level;
-        container.field_71067_cb = value;
+        container.experience = (float)(value - experienceForCurrentLevel) / ExperienceHolderUtils.getExpBetweenLevels(level);
+        container.experienceLevel = level;
+        container.experienceTotal = value;
         ((EntityPlayerMPBridge) container).bridge$refreshExp();
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(final PlayerEntity container) {
-        return Optional.of(container.field_71067_cb);
+        return Optional.of(container.experienceTotal);
     }
 
     @Override

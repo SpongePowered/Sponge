@@ -55,14 +55,14 @@ public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<Play
 
     @Override
     protected boolean set(PlayerEntity container, Double value) {
-        ((PlayerCapabilitiesAccessor) container.field_71075_bZ).accessor$setFlySpeed(value.floatValue());
-        container.func_71016_p();
+        ((PlayerCapabilitiesAccessor) container.abilities).accessor$setFlySpeed(value.floatValue());
+        container.sendPlayerAbilities();
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(PlayerEntity container) {
-        return Optional.of(((double)container.field_71075_bZ.func_75093_a()));
+        return Optional.of(((double)container.abilities.getFlySpeed()));
     }
 
     @Override

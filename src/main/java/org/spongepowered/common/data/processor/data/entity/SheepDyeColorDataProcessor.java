@@ -54,13 +54,13 @@ public class SheepDyeColorDataProcessor extends AbstractEntitySingleDataProcesso
 
     @Override
     protected boolean set(SheepEntity container, DyeColor value) {
-        container.func_175512_b((net.minecraft.item.DyeColor) (Object) value);
+        container.setFleeceColor((net.minecraft.item.DyeColor) (Object) value);
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(SheepEntity container) {
-        return Optional.of((DyeColor) (Object) container.func_175509_cj());
+        return Optional.of((DyeColor) (Object) container.getFleeceColor());
     }
 
     @Override

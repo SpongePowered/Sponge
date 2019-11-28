@@ -67,7 +67,7 @@ public abstract class BlockFarmlandMixin extends BlockMixin {
             if (moisture > 7) {
                 moisture = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(FarmlandBlock.field_176531_a, moisture));
+            return Optional.of((BlockState) blockState.func_177226_a(FarmlandBlock.MOISTURE, moisture));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -79,13 +79,13 @@ public abstract class BlockFarmlandMixin extends BlockMixin {
             if (moisture > 7) {
                 moisture = 7;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(FarmlandBlock.field_176531_a, moisture));
+            return Optional.of((BlockState) blockState.func_177226_a(FarmlandBlock.MOISTURE, moisture));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableMoistureData impl$getMoistureData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeMoistureData.class, blockState.func_177229_b(FarmlandBlock.field_176531_a), 0, 7);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeMoistureData.class, blockState.get(FarmlandBlock.MOISTURE), 0, 7);
     }
 
     @Redirect(method = "onFallenUpon",

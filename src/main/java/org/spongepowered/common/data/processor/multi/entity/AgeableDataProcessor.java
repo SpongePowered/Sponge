@@ -64,14 +64,14 @@ public class AgeableDataProcessor extends AbstractEntityDataProcessor<AgeableEnt
         boolean adult = (Boolean) keyValues.get(Keys.IS_ADULT);
 
         if (age != null) {
-            entity.func_70873_a(age);
+            entity.setGrowingAge(age);
             return true;
         }
 
         if (adult) {
-            entity.func_70873_a(Constants.Entity.Ageable.ADULT);
+            entity.setGrowingAge(Constants.Entity.Ageable.ADULT);
         } else {
-            entity.func_70873_a(Constants.Entity.Ageable.CHILD);
+            entity.setGrowingAge(Constants.Entity.Ageable.CHILD);
         }
         return true;
 
@@ -79,7 +79,7 @@ public class AgeableDataProcessor extends AbstractEntityDataProcessor<AgeableEnt
 
     @Override
     protected Map<Key<?>, ?> getValues(AgeableEntity entity) {
-        return ImmutableMap.<Key<?>, Object>of(Keys.AGE, entity.func_70654_ax(), Keys.IS_ADULT, !entity.func_70631_g_());
+        return ImmutableMap.<Key<?>, Object>of(Keys.AGE, entity.getIdleTime(), Keys.IS_ADULT, !entity.isChild());
     }
 
     @Override

@@ -52,13 +52,13 @@ public class DominantHandDataProcessor extends AbstractEntitySingleDataProcessor
     @Override
     protected boolean set(MobEntity dataHolder, HandPreference value) {
         // What happens with custom EnumHandSide?
-        dataHolder.func_184641_n(value.equals(HandPreferences.LEFT));
+        dataHolder.setLeftHanded(value.equals(HandPreferences.LEFT));
         return true;
     }
 
     @Override
     protected Optional<HandPreference> getVal(MobEntity dataHolder) {
-        return Optional.of((HandPreference) (Object) dataHolder.func_184591_cq());
+        return Optional.of((HandPreference) (Object) dataHolder.getPrimaryHand());
     }
 
     @Override

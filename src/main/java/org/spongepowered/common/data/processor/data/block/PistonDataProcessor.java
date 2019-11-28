@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 public class PistonDataProcessor extends AbstractCatalogDataProcessor<PistonType, Value<PistonType>, PistonData, ImmutablePistonData> {
 
     public PistonDataProcessor() {
-        super(Keys.PISTON_TYPE, input -> input.func_77973_b() == ItemTypes.PISTON);
+        super(Keys.PISTON_TYPE, input -> input.getItem() == ItemTypes.PISTON);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class PistonDataProcessor extends AbstractCatalogDataProcessor<PistonType
 
     @Override
     protected boolean set(ItemStack itemStack, PistonType value) {
-        int oldMeta = itemStack.func_77952_i();
+        int oldMeta = itemStack.getDamage();
         boolean isSticky = (oldMeta & 8) > 0;
         boolean isStickyValue = value.equals(PistonTypes.STICKY);
         if (isSticky && !isStickyValue) {

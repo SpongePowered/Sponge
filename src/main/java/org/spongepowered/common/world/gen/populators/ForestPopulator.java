@@ -85,8 +85,8 @@ public class ForestPopulator implements Forest {
                 }
                 type = result.get(0);
             }
-            if (type.canPlaceAt(world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p())) {
-                type.placeObject(world, random, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
+            if (type.canPlaceAt(world, pos.getX(), pos.getY(), pos.getZ())) {
+                type.placeObject(world, random, pos.getX(), pos.getY(), pos.getZ());
             }
         }
     }

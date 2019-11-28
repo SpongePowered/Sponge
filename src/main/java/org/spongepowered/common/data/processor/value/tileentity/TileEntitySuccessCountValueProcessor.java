@@ -58,15 +58,15 @@ public class TileEntitySuccessCountValueProcessor extends AbstractSpongeValuePro
 
     @Override
     protected boolean set(final CommandBlockTileEntity container, final Integer value) {
-        container.func_145993_a().func_184167_a(value);
-        container.func_145993_a().func_145756_e();
-        container.func_70296_d();
+        container.getCommandBlockLogic().setSuccessCount(value);
+        container.getCommandBlockLogic().updateCommand();
+        container.markDirty();
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(final CommandBlockTileEntity container) {
-        return Optional.of(container.func_145993_a().func_145760_g());
+        return Optional.of(container.getCommandBlockLogic().getSuccessCount());
     }
 
     @Override

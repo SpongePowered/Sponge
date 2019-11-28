@@ -56,13 +56,13 @@ public class GameModeDataProcessor extends
 
     @Override
     protected boolean set(ServerPlayerEntity entity, GameMode value) {
-        entity.func_71033_a((GameType) (Object) value);
+        entity.setGameType((GameType) (Object) value);
         return true;
     }
 
     @Override
     protected Optional<GameMode> getVal(ServerPlayerEntity entity) {
-        return Optional.of((GameMode) (Object) entity.field_71134_c.func_73081_b());
+        return Optional.of((GameMode) (Object) entity.interactionManager.getGameType());
     }
 
     @Override

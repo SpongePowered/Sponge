@@ -126,7 +126,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     @Inject(method = "processInitialInteract", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashHolder(Lnet/minecraft/entity/Entity;Z)V"))
     private void callLeashEvent(final PlayerEntity playerIn, final Hand hand, final CallbackInfoReturnable<Boolean> ci) {
-        if (!playerIn.field_70170_p.field_72995_K) {
+        if (!playerIn.world.isRemote) {
             Sponge.getCauseStackManager().pushCause(playerIn);
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (Living) this);
             SpongeImpl.postEvent(event);
@@ -142,7 +142,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
         cancellable = true)
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
         final net.minecraft.entity.Entity entity = getLeashHolder();
-        if (!this.world.field_72995_K) {
+        if (!this.world.isRemote) {
             final CauseStackManager csm = Sponge.getCauseStackManager();
             if(entity == null) {
                 csm.pushCause(this);
@@ -160,8 +160,8 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
 
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(final double value) {
-        if (!this.world.field_72995_K) {
-            return Math.pow(((WorldInfoBridge) this.world.func_72912_H()).bridge$getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
+        if (!this.world.isRemote) {
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -169,16 +169,16 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     // Note that this should inject twice.
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(final double value) {
-        if (!this.world.field_72995_K) {
-            return Math.pow(((WorldInfoBridge) this.world.func_72912_H()).bridge$getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
+        if (!this.world.isRemote) {
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
 
     @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(final int value) {
-        if (!this.world.field_72995_K) {
-            return ((WorldInfoBridge) this.world.func_72912_H()).bridge$getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
+        if (!this.world.isRemote) {
+            return ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
         }
         return value;
     }
@@ -195,11 +195,11 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
 
         for (final Object entity1 : world.field_73010_i) {
             final PlayerEntity player = (PlayerEntity) entity1;
-            if (player == null || player.field_70128_L || !((EntityPlayerBridge) player).bridge$affectsSpawning()) {
+            if (player == null || player.removed || !((EntityPlayerBridge) player).bridge$affectsSpawning()) {
                 continue;
             }
 
-            final double playerDistance = player.func_70092_e(entity.field_70165_t, entity.field_70163_u, entity.field_70161_v);
+            final double playerDistance = player.getDistanceSq(entity.posX, entity.posY, entity.posZ);
 
             if ((distance < 0.0D || playerDistance < distance * distance) && (bestDistance == -1.0D || playerDistance < bestDistance)) {
                 bestDistance = playerDistance;
@@ -220,7 +220,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
     private void onSetAttackTarget(@Nullable final LivingEntity entitylivingbaseIn, final CallbackInfo ci) {
-        if (this.world.field_72995_K || entitylivingbaseIn == null) {
+        if (this.world.isRemote || entitylivingbaseIn == null) {
             return;
         }
         //noinspection ConstantConditions
@@ -269,7 +269,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
      */
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;canPickUpLoot()Z"))
     private boolean onCanGrief(final MobEntity thisEntity) {
-        return thisEntity.func_98052_bS() && ((GrieferBridge) this).bridge$CanGrief();
+        return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$CanGrief();
     }
 
 

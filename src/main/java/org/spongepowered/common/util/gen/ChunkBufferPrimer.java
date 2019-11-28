@@ -36,7 +36,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
  */
 public class ChunkBufferPrimer extends ChunkPrimer {
 
-    private static final net.minecraft.block.BlockState defaultState = Blocks.field_150350_a.func_176223_P();
+    private static final net.minecraft.block.BlockState defaultState = Blocks.AIR.getDefaultState();
     private final MutableBlockVolume buffer;
     private final Vector3i min;
 

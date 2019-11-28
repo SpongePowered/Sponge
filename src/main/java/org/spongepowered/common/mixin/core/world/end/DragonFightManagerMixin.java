@@ -81,14 +81,14 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
      */
     @Overwrite
     public void tick() {
-        this.bossInfo.func_186758_d(!this.dragonKilled);
+        this.bossInfo.setVisible(!this.dragonKilled);
 
         if (++this.ticksSinceLastPlayerScan >= 20) {
             this.updatePlayers();
             this.ticksSinceLastPlayerScan = 0;
         }
 
-        if (!this.bossInfo.func_186757_c().isEmpty()) {
+        if (!this.bossInfo.getPlayers().isEmpty()) {
             if (this.scanForLegacyFight) {
                 LOGGER.info("Scanning for legacy world dragon fight...");
                 this.loadChunks();
@@ -104,19 +104,19 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
                     this.generatePortal(false);
                 }
 
-                final List<EnderDragonEntity> list = this.world.func_175644_a(EnderDragonEntity.class, EntityPredicates.field_94557_a);
+                final List<EnderDragonEntity> list = this.world.func_175644_a(EnderDragonEntity.class, EntityPredicates.IS_ALIVE);
 
                 if (list.isEmpty()) {
                     this.dragonKilled = true;
                 } else {
                     final EnderDragonEntity entitydragon = list.get(0);
-                    this.dragonUniqueId = entitydragon.func_110124_au();
+                    this.dragonUniqueId = entitydragon.getUniqueID();
                     LOGGER.info("Found that there\'s a dragon still alive ({})", entitydragon);
                     this.dragonKilled = false;
 
                     if (!flag) {
                         LOGGER.info("But we didn\'t have a portal, let\'s remove it.");
-                        entitydragon.func_70106_y();
+                        entitydragon.remove();
                         this.dragonUniqueId = null;
                     }
                 }
@@ -137,21 +137,21 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
                     context.buildAndSwitch();
                     // Sponge End
                     this.respawnState
-                        .func_186079_a(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);
+                        .process(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);
                 }// Sponge - Complete cause tracker
             }
 
             if (!this.dragonKilled) {
                 if (this.dragonUniqueId == null || ++this.ticksSinceDragonSeen >= 1200) {
                     this.loadChunks();
-                    final List<EnderDragonEntity> list1 = this.world.func_175644_a(EnderDragonEntity.class, EntityPredicates.field_94557_a);
+                    final List<EnderDragonEntity> list1 = this.world.func_175644_a(EnderDragonEntity.class, EntityPredicates.IS_ALIVE);
 
                     if (list1.isEmpty()) {
                         LOGGER.debug("Haven\'t seen the dragon, respawning it");
                         this.createNewDragon();
                     } else {
                         LOGGER.debug("Haven\'t seen our dragon, but found another one to use.");
-                        this.dragonUniqueId = list1.get(0).func_110124_au();
+                        this.dragonUniqueId = list1.get(0).getUniqueID();
                     }
 
                     this.ticksSinceDragonSeen = 0;

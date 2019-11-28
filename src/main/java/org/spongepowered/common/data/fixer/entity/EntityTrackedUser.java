@@ -40,10 +40,10 @@ public class EntityTrackedUser implements IFixableData {
 
     @Override
     public CompoundNBT func_188217_a(CompoundNBT compound) {
-        final NBTBase forgeCompound = compound.func_74781_a(Constants.Forge.FORGE_DATA);
+        final NBTBase forgeCompound = compound.get(Constants.Forge.FORGE_DATA);
         if (forgeCompound != null) {
             final CompoundNBT forgeData = (CompoundNBT) forgeCompound;
-            final NBTBase spongeCompound = forgeData.func_74781_a(Constants.Sponge.SPONGE_DATA);
+            final NBTBase spongeCompound = forgeData.get(Constants.Sponge.SPONGE_DATA);
             if (spongeCompound != null) {
                 final CompoundNBT spongeData = (CompoundNBT) spongeCompound;
                 process(spongeData, Constants.Sponge.SPONGE_ENTITY_CREATOR);
@@ -54,14 +54,14 @@ public class EntityTrackedUser implements IFixableData {
     }
 
     private static void process(CompoundNBT spongeData, String type) {
-        if (spongeData.func_150297_b(type, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundNBT creatorTag = spongeData.func_74775_l(type);
-            final long least = creatorTag.func_74763_f(Constants.Legacy.Entity.UUID_LEAST_1_8);
-            final long most = creatorTag.func_74763_f(Constants.Legacy.Entity.UUID_MOST_1_8);
+        if (spongeData.contains(type, Constants.NBT.TAG_COMPOUND)) {
+            final CompoundNBT creatorTag = spongeData.getCompound(type);
+            final long least = creatorTag.getLong(Constants.Legacy.Entity.UUID_LEAST_1_8);
+            final long most = creatorTag.getLong(Constants.Legacy.Entity.UUID_MOST_1_8);
             final UUID creator = new UUID(most, least);
-            creatorTag.func_82580_o(Constants.Legacy.Entity.UUID_LEAST_1_8);
-            creatorTag.func_82580_o(Constants.Legacy.Entity.UUID_MOST_1_8);
-            creatorTag.func_186854_a(Constants.UUID, creator);
+            creatorTag.remove(Constants.Legacy.Entity.UUID_LEAST_1_8);
+            creatorTag.remove(Constants.Legacy.Entity.UUID_MOST_1_8);
+            creatorTag.putUniqueId(Constants.UUID, creator);
         }
     }
 }

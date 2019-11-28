@@ -58,7 +58,7 @@ public class ImmutableItemEnchantmentDataBuilder extends AbstractDataBuilder<Imm
     @Override
     public Optional<ImmutableEnchantmentData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
-            if (((ItemStack) dataHolder).func_77948_v()) {
+            if (((ItemStack) dataHolder).isEnchanted()) {
                 final List<Enchantment> enchantments = Constants.NBT.getItemEnchantments((ItemStack) dataHolder);
                 return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
             }

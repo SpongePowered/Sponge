@@ -225,7 +225,7 @@ public abstract class WorldMixin_API implements World {
             return Optional.empty();
         }
         final ServerWorld worldserver = (ServerWorld) (Object) this;
-        return Optional.ofNullable((Chunk) worldserver.func_72863_F().func_186026_b(x, z));
+        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().func_186026_b(x, z));
     }
 
     @Override
@@ -236,9 +236,9 @@ public abstract class WorldMixin_API implements World {
         final ServerWorld worldserver = (ServerWorld) (Object) this;
         // If we aren't generating, return the chunk
         if (!shouldGenerate) {
-            return Optional.ofNullable((Chunk) worldserver.func_72863_F().func_186028_c(x, z));
+            return Optional.ofNullable((Chunk) worldserver.getChunkProvider().func_186028_c(x, z));
         }
-        return Optional.ofNullable((Chunk) worldserver.func_72863_F().func_186025_d(x, z));
+        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().func_186025_d(x, z));
     }
 
     @Override
@@ -253,7 +253,7 @@ public abstract class WorldMixin_API implements World {
 
     @Override
     public int getPrecipitationLevelAt(int x, int z) {
-        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).func_177956_o();
+        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
     }
 
     @Override
@@ -264,7 +264,7 @@ public abstract class WorldMixin_API implements World {
     @Override
     public BlockType getBlockType(int x, int y, int z) {
         // avoid intermediate object creation from using BlockState
-        return (BlockType) getChunk(x >> 4, z >> 4).func_177435_g(new BlockPos(x, y, z)).func_177230_c();
+        return (BlockType) getChunk(x >> 4, z >> 4).func_177435_g(new BlockPos(x, y, z)).getBlock();
     }
 
     @Override
@@ -332,7 +332,7 @@ public abstract class WorldMixin_API implements World {
             entity = (Entity) new LightningBoltEntity(world, x, y, z, false);
         } else if (entityClass.isAssignableFrom(EnderPearlEntity.class)) {
             ArmorStandEntity tempEntity = new ArmorStandEntity(world, x, y, z);
-            tempEntity.field_70163_u -= tempEntity.func_70047_e();
+            tempEntity.posY -= tempEntity.getEyeHeight();
             entity = (Entity) new EnderPearlEntity(world, tempEntity);
             ((EnderPearl) entity).setShooter(ProjectileSource.UNKNOWN);
         }
@@ -340,15 +340,15 @@ public abstract class WorldMixin_API implements World {
         // Some entities need to have non-null fields (and the easiest way to
         // set them is to use the more specialised constructor).
         if (entityClass.isAssignableFrom(FallingBlockEntity.class)) {
-            entity = (Entity) new FallingBlockEntity(world, x, y, z, Blocks.field_150354_m.func_176223_P());
+            entity = (Entity) new FallingBlockEntity(world, x, y, z, Blocks.SAND.getDefaultState());
         } else if (entityClass.isAssignableFrom(ItemEntity.class)) {
-            entity = (Entity) new ItemEntity(world, x, y, z, new ItemStack(Blocks.field_150348_b));
+            entity = (Entity) new ItemEntity(world, x, y, z, new ItemStack(Blocks.STONE));
         }
 
         if (entity == null) {
             try {
                 entity = ConstructorUtils.invokeConstructor(entityClass, this);
-                ((net.minecraft.entity.Entity) entity).func_70107_b(x, y, z);
+                ((net.minecraft.entity.Entity) entity).setPosition(x, y, z);
             } catch (Exception e) {
                 throw new RuntimeException("There was an issue attempting to construct " + type.getId(), e);
             }
@@ -369,13 +369,13 @@ public abstract class WorldMixin_API implements World {
 
         if (naturally && entity instanceof MobEntity) {
             // Adding the default equipment
-            ((MobEntity)entity).func_180482_a(world.func_175649_E(new BlockPos(x, y, z)), null);
+            ((MobEntity)entity).func_180482_a(world.getDifficultyForLocation(new BlockPos(x, y, z)), null);
         }
 
         if (entity instanceof PaintingEntity) {
             // This is default when art is null when reading from NBT, could
             // choose a random art instead?
-            ((PaintingEntity) entity).field_70522_e = EnumArt.KEBAB;
+            ((PaintingEntity) entity).art = EnumArt.KEBAB;
         }
 
         return entity;
@@ -422,7 +422,7 @@ public abstract class WorldMixin_API implements World {
     public Optional<Entity> getEntity(UUID uuid) {
         // Note that WorldServerMixin is properly overriding this to use it's own mapping.
         for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
-            if (entity.func_110124_au().equals(uuid)) {
+            if (entity.getUniqueID().equals(uuid)) {
                 return Optional.of((Entity) entity);
             }
         }
@@ -435,7 +435,7 @@ public abstract class WorldMixin_API implements World {
         if (((WorldBridge) this).bridge$isFake()) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
             return Collections.emptyList();
         }
-        return (List<Chunk>) (List<?>) Lists.newArrayList(((ServerWorld) (Object) this).func_72863_F().func_189548_a());
+        return (List<Chunk>) (List<?>) Lists.newArrayList(((ServerWorld) (Object) this).getChunkProvider().func_189548_a());
     }
 
     @Override
@@ -456,9 +456,9 @@ public abstract class WorldMixin_API implements World {
             if (worldInfo == null) {
                 // We still have to consider some mods are making dummy worlds that
                 // override getWorldInfo with a null, or submit a null value.
-                worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.field_77137_b), "sponge$dummy_World");
+                worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
             }
-            this.worldContext = new Context(Context.WORLD_KEY, worldInfo.func_76065_j());
+            this.worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
         }
         return this.worldContext;
     }
@@ -569,8 +569,8 @@ public abstract class WorldMixin_API implements World {
     @Override
     public void triggerExplosion(Explosion explosion) {
         checkNotNull(explosion, "explosion");
-        ((net.minecraft.world.Explosion) explosion).func_77278_a();
-        ((net.minecraft.world.Explosion) explosion).func_77279_a(true);
+        ((net.minecraft.world.Explosion) explosion).doExplosionA();
+        ((net.minecraft.world.Explosion) explosion).doExplosionB(true);
     }
 
     @Override
@@ -614,7 +614,7 @@ public abstract class WorldMixin_API implements World {
                 builder.add(manipulator);
             }
             final CompoundNBT compound = new CompoundNBT();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).func_189515_b(compound);
+            ((net.minecraft.tileentity.TileEntity) tileEntity).write(compound);
             builder.unsafeNbt(compound);
         }
         return builder.build();
@@ -891,12 +891,12 @@ public abstract class WorldMixin_API implements World {
     public void sendBlockChange(int x, int y, int z, BlockState state) {
         checkNotNull(state, "state");
         SChangeBlockPacket packet = new SChangeBlockPacket();
-        packet.field_179828_a = new BlockPos(x, y, z);
+        packet.pos = new BlockPos(x, y, z);
         packet.field_148883_d = (net.minecraft.block.BlockState) state;
 
         for (PlayerEntity player : this.playerEntities) {
             if (player instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntity) player).field_71135_a.func_147359_a(packet);
+                ((ServerPlayerEntity) player).connection.sendPacket(packet);
             }
         }
     }
@@ -907,7 +907,7 @@ public abstract class WorldMixin_API implements World {
 
         for (PlayerEntity player : this.playerEntities) {
             if (player instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntity) player).field_71135_a.func_147359_a(packet);
+                ((ServerPlayerEntity) player).connection.sendPacket(packet);
             }
         }
     }

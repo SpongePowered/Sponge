@@ -90,15 +90,15 @@ public class WorldStorageUtil {
         if (stream == null) {
             return null;
         }
-        CompoundNBT data = CompressedStreamTools.func_74794_a(stream);
+        CompoundNBT data = CompressedStreamTools.read(stream);
 
         // Checks are based on AnvilChunkLoader#checkedReadChunkFromNBT
 
-        if (!data.func_150297_b(Constants.Chunk.CHUNK_DATA_LEVEL, Constants.NBT.TAG_COMPOUND)) {
+        if (!data.contains(Constants.Chunk.CHUNK_DATA_LEVEL, Constants.NBT.TAG_COMPOUND)) {
             return null;
         }
-        CompoundNBT level = data.func_74775_l(Constants.Chunk.CHUNK_DATA_LEVEL);
-        if (!level.func_150297_b(Constants.Chunk.CHUNK_DATA_SECTIONS, Constants.NBT.TAG_LIST)) {
+        CompoundNBT level = data.getCompound(Constants.Chunk.CHUNK_DATA_LEVEL);
+        if (!level.contains(Constants.Chunk.CHUNK_DATA_SECTIONS, Constants.NBT.TAG_LIST)) {
             return null;
         }
         return NbtTranslator.getInstance().translateFrom(level);

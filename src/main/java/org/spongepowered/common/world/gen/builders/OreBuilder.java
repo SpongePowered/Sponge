@@ -89,7 +89,7 @@ public class OreBuilder implements Ore.Builder {
 
     @Override
     public Builder reset() {
-        this.block = (BlockState) Blocks.field_150366_p.func_176223_P();
+        this.block = (BlockState) Blocks.IRON_ORE.getDefaultState();
         this.size = VariableAmount.fixed(9);
         this.count = VariableAmount.fixed(20);
         this.height = VariableAmount.baseWithRandomAddition(0, 64);

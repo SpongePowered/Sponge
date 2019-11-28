@@ -48,13 +48,13 @@ public class SittingDataProcessor
 
     @Override
     protected boolean set(TameableEntity entity, Boolean value) {
-        entity.func_70904_g(value);
+        entity.setSitting(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(TameableEntity entity) {
-        return Optional.of(entity.func_70906_o());
+        return Optional.of(entity.isSitting());
     }
 
     @Override

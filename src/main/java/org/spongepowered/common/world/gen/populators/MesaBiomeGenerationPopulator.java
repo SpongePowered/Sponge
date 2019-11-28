@@ -99,11 +99,11 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
         if (this.hasHills) {
             k = (p_180622_4_ & -16) + (p_180622_5_ & 15);
             l = (p_180622_5_ & -16) + (p_180622_4_ & 15);
-            double d1 = Math.min(Math.abs(p_180622_6_), this.noise1.func_151601_a(k * 0.25D, l * 0.25D));
+            double d1 = Math.min(Math.abs(p_180622_6_), this.noise1.getValue(k * 0.25D, l * 0.25D));
 
             if (d1 > 0.0D) {
                 double d2 = 0.001953125D;
-                double d3 = Math.abs(this.noise2.func_151601_a(k * d2, l * d2));
+                double d3 = Math.abs(this.noise2.getValue(k * d2, l * d2));
                 d5 = d1 * d1 * 2.5D;
                 double d4 = Math.ceil(d3 * 50.0D) + 14.0D;
 
@@ -118,26 +118,26 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
         k = p_180622_5_;
         l = p_180622_4_;
         int seaLevel = world.getSeaLevel();
-        net.minecraft.block.BlockState iblockstate = Blocks.field_150406_ce.func_176223_P();
-        net.minecraft.block.BlockState iblockstate3 = Blocks.field_150406_ce.func_176223_P();
+        net.minecraft.block.BlockState iblockstate = Blocks.field_150406_ce.getDefaultState();
+        net.minecraft.block.BlockState iblockstate3 = Blocks.field_150406_ce.getDefaultState();
         int i1 = (int) (p_180622_6_ / 3.0D + 3.0D + p_180622_2_.nextDouble() * 0.25D);
         boolean flag1 = Math.cos(p_180622_6_ / 3.0D * Math.PI) > 0.0D;
         int j1 = -1;
         boolean flag2 = false;
 
         for (int k1 = 255; k1 >= 0; --k1) {
-            if (((net.minecraft.block.BlockState) p_180622_3_.getBlock(l, k1, k)).func_185904_a() == Material.field_151579_a && k1 < (int) d5) {
-                p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.field_150348_b.func_176223_P());
+            if (((net.minecraft.block.BlockState) p_180622_3_.getBlock(l, k1, k)).getMaterial() == Material.AIR && k1 < (int) d5) {
+                p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.STONE.getDefaultState());
             }
 
             if (k1 <= p_180622_2_.nextInt(5)) {
-                p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.field_150357_h.func_176223_P());
+                p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.BEDROCK.getDefaultState());
             } else {
                 net.minecraft.block.BlockState iblockstate1 = (net.minecraft.block.BlockState) p_180622_3_.getBlock(l, k1, k);
 
-                if (iblockstate1.func_185904_a() == Material.field_151579_a) {
+                if (iblockstate1.getMaterial() == Material.AIR) {
                     j1 = -1;
-                } else if (iblockstate1.func_177230_c() == Blocks.field_150348_b) {
+                } else if (iblockstate1.getBlock() == Blocks.STONE) {
                     net.minecraft.block.BlockState iblockstate2;
 
                     if (j1 == -1) {
@@ -145,14 +145,14 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
                         if (i1 <= 0) {
                             iblockstate = null;
-                            iblockstate3 = Blocks.field_150348_b.func_176223_P();
+                            iblockstate3 = Blocks.STONE.getDefaultState();
                         } else if (k1 >= seaLevel - 4 && k1 <= seaLevel + 1) {
-                            iblockstate = Blocks.field_150406_ce.func_176223_P();
-                            iblockstate3 = Blocks.field_150406_ce.func_176223_P();
+                            iblockstate = Blocks.field_150406_ce.getDefaultState();
+                            iblockstate3 = Blocks.field_150406_ce.getDefaultState();
                         }
 
-                        if (k1 < seaLevel && (iblockstate == null || iblockstate.func_185904_a() == Material.field_151579_a)) {
-                            iblockstate = Blocks.field_150355_j.func_176223_P();
+                        if (k1 < seaLevel && (iblockstate == null || iblockstate.getMaterial() == Material.AIR)) {
+                            iblockstate = Blocks.WATER.getDefaultState();
                         }
 
                         j1 = i1 + Math.max(0, k1 - seaLevel);
@@ -161,42 +161,42 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                             if (this.hasTrees && k1 > 86 + i1 * 2) {
                                 if (flag1) {
                                     p_180622_3_.setBlock(l, k1, k,
-                                            (BlockState) Blocks.field_150346_d.func_176223_P()
+                                            (BlockState) Blocks.DIRT.getDefaultState()
                                                     .func_177226_a(BlockDirt.field_176386_a, BlockDirt.DirtType.COARSE_DIRT));
                                 } else {
-                                    p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.field_150349_c.func_176223_P());
+                                    p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.GRASS.getDefaultState());
                                 }
                             } else if (k1 > seaLevel + 3 + i1) {
                                 if (k1 >= 64 && k1 <= 127) {
                                     if (flag1) {
-                                        iblockstate2 = Blocks.field_150405_ch.func_176223_P();
+                                        iblockstate2 = Blocks.TERRACOTTA.getDefaultState();
                                     } else {
                                         iblockstate2 = this.func_180629_a(p_180622_4_, k1, p_180622_5_);
                                     }
                                 } else {
                                     iblockstate2 =
-                                            Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
+                                            Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
                                 }
 
                                 p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate2);
                             } else {
                                 p_180622_3_.setBlock(l, k1, k,
-                                        (BlockState) Blocks.field_150354_m.func_176223_P().func_177226_a(SandBlock.field_176504_a, SandBlock.EnumType.RED_SAND));
+                                        (BlockState) Blocks.SAND.getDefaultState().func_177226_a(SandBlock.field_176504_a, SandBlock.EnumType.RED_SAND));
                                 flag2 = true;
                             }
                         } else {
                             p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate3);
 
-                            if (iblockstate3.func_177230_c() == Blocks.field_150406_ce) {
+                            if (iblockstate3.getBlock() == Blocks.field_150406_ce) {
                                 p_180622_3_.setBlock(l, k1, k,
-                                        (BlockState) iblockstate3.func_177230_c().func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE));
+                                        (BlockState) iblockstate3.getBlock().getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE));
                             }
                         }
                     } else if (j1 > 0) {
                         --j1;
 
                         if (flag2) {
-                            net.minecraft.block.BlockState clay = Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
+                            net.minecraft.block.BlockState clay = Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
                             p_180622_3_ .setBlock(l, k1, k, (BlockState) clay);
                         } else {
                             iblockstate2 = this.func_180629_a(p_180622_4_, k1, p_180622_5_);
@@ -211,13 +211,13 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
     public net.minecraft.block.BlockState func_180629_a(int p_180629_1_, int p_180629_2_, int p_180629_3_) {
         int l =
                 (int) Math
-                        .round(this.noise3.func_151601_a(p_180629_1_ * 1.0D / 512.0D, p_180629_1_ * 1.0D / 512.0D) * 2.0D);
+                        .round(this.noise3.getValue(p_180629_1_ * 1.0D / 512.0D, p_180629_1_ * 1.0D / 512.0D) * 2.0D);
         return (net.minecraft.block.BlockState) this.possibleBlocks[(p_180629_2_ + l + 64) % 64];
     }
 
     public void func_150619_a(long p_150619_1_) {
         this.possibleBlocks = new BlockState[64];
-        Arrays.fill(this.possibleBlocks, Blocks.field_150405_ch.func_176223_P());
+        Arrays.fill(this.possibleBlocks, Blocks.TERRACOTTA.getDefaultState());
         Random random = new Random(p_150619_1_);
         this.noise3 = new PerlinNoiseGenerator(random, 1);
         int j;
@@ -227,7 +227,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             if (j < 64) {
                 this.possibleBlocks[j] =
-                        (BlockState) Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
+                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.ORANGE);
             }
         }
 
@@ -243,7 +243,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             for (j1 = 0; i1 + j1 < 64 && j1 < l; ++j1) {
                 this.possibleBlocks[i1 + j1] =
-                        (BlockState) Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.YELLOW);
+                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.YELLOW);
             }
         }
 
@@ -256,7 +256,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             for (k1 = 0; j1 + k1 < 64 && k1 < i1; ++k1) {
                 this.possibleBlocks[j1 + k1] =
-                        (BlockState) Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.BROWN);
+                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.BROWN);
             }
         }
 
@@ -268,7 +268,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             for (int l1 = 0; k1 + l1 < 64 && l1 < j1; ++l1) {
                 this.possibleBlocks[k1 + l1] =
-                        (BlockState) Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.RED);
+                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.RED);
             }
         }
 
@@ -281,16 +281,16 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
             for (int i2 = 0; j1 + i2 < 64 && i2 < b0; ++i2) {
                 this.possibleBlocks[j1 + i2] =
-                        (BlockState) Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.WHITE);
+                        (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.WHITE);
 
                 if (j1 + i2 > 1 && random.nextBoolean()) {
                     this.possibleBlocks[j1 + i2 - 1] =
-                            (BlockState) Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.SILVER);
+                            (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.SILVER);
                 }
 
                 if (j1 + i2 < 63 && random.nextBoolean()) {
                     this.possibleBlocks[j1 + i2 + 1] =
-                            (BlockState) Blocks.field_150406_ce.func_176223_P().func_177226_a(BlockColored.field_176581_a, DyeColor.SILVER);
+                            (BlockState) Blocks.field_150406_ce.getDefaultState().func_177226_a(BlockColored.field_176581_a, DyeColor.SILVER);
                 }
             }
         }

@@ -129,8 +129,8 @@ public class SpongeBanBuilder implements Ban.Builder {
         checkState(this.address != null, "Address cannot be null!");
 
         // This *should* be a static method, but apparently not...
-        IPBanList ipBans = SpongeImpl.getServer().func_184103_al().func_72363_f();
-        return (Ban) new IPBanEntry(ipBans.func_152707_c(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
+        IPBanList ipBans = SpongeImpl.getServer().getPlayerList().getBannedIPs();
+        return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
                 this.toDate(this.end), this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
     }
 

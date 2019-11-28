@@ -41,7 +41,7 @@ public class SpongeSkullBuilder extends AbstractTileBuilder<Skull> {
     protected Optional<Skull> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(skull1 -> {
             // TODO actually write the skull serialization code and deserialization code.
-            ((SkullTileEntity) skull1).func_145829_t();
+            ((SkullTileEntity) skull1).validate();
             return skull1;
         });
 

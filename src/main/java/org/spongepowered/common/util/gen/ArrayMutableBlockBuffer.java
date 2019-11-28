@@ -311,7 +311,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
             this.bits = bits;
 
             this.maxValue = (1 << bits) - 1;
-            this.longArray = new long[MathHelper.func_154354_b(size * bits, Long.SIZE) / Long.SIZE];
+            this.longArray = new long[MathHelper.roundUp(size * bits, Long.SIZE) / Long.SIZE];
         }
 
         private PackedBackingData(int size, int bits, long[] array) {

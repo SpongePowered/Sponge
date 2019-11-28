@@ -48,7 +48,7 @@ public abstract class TileEntityEnderChestMixin extends TileEntityMixin {
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     private void impl$IgnoreTicking(CallbackInfo ci) {
-        if (this.world == null || !this.world.field_72995_K) {
+        if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
         }
@@ -65,17 +65,17 @@ public abstract class TileEntityEnderChestMixin extends TileEntityMixin {
             ci.cancel();
             return;
         }
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 
         if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F) {
             this.lidAngle = 0.7F;
-            double posX = (double)this.pos.func_177958_n() + 0.5D;
-            double posY = (double)this.pos.func_177956_o() + 0.5D;
-            double posZ = (double)this.pos.func_177952_p() + 0.5D;
+            double posX = (double)this.pos.getX() + 0.5D;
+            double posY = (double)this.pos.getY() + 0.5D;
+            double posZ = (double)this.pos.getZ() + 0.5D;
 
-            this.world.func_184148_a(null, posX, posY, posZ, SoundEvents.field_187520_aJ, SoundCategory.BLOCKS, 0.5F, this.world.field_73012_v.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDER_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
@@ -90,17 +90,17 @@ public abstract class TileEntityEnderChestMixin extends TileEntityMixin {
             ci.cancel();
             return;
         }
-        if (this.world.field_72995_K) {
+        if (this.world.isRemote) {
             return;
         }
 
         if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F) {
-            double posX = (double)this.pos.func_177958_n() + 0.5D;
-            double posY = (double)this.pos.func_177956_o() + 0.5D;
-            double posZ = (double)this.pos.func_177952_p() + 0.5D;
+            double posX = (double)this.pos.getX() + 0.5D;
+            double posY = (double)this.pos.getY() + 0.5D;
+            double posZ = (double)this.pos.getZ() + 0.5D;
 
 
-            this.world.func_184148_a(null, posX, posY, posZ, SoundEvents.field_187519_aI, SoundCategory.BLOCKS, 0.5F, this.world.field_73012_v.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDER_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 }

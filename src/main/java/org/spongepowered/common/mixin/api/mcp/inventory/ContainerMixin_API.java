@@ -65,7 +65,7 @@ public abstract class ContainerMixin_API implements org.spongepowered.api.item.i
     @Override
     public boolean isViewedSlot(final org.spongepowered.api.item.inventory.Slot slot) {
         if (slot instanceof Slot) {
-            final Set<Slot> set = ((ContainerBridge) this).bridge$getInventories().get(((Slot) slot).field_75224_c);
+            final Set<Slot> set = ((ContainerBridge) this).bridge$getInventories().get(((Slot) slot).inventory);
             if (set != null) {
                 if (set.contains(slot)) {
                     if (((ContainerBridge) this).bridge$getInventories().size() == 1) {
@@ -73,7 +73,7 @@ public abstract class ContainerMixin_API implements org.spongepowered.api.item.i
                     }
                     // TODO better detection of viewer inventory - needs tracking of who views a container
                     // For now assume that a player inventory is always the viewers inventory
-                    if (((Slot) slot).field_75224_c.getClass() != PlayerInventory.class) {
+                    if (((Slot) slot).inventory.getClass() != PlayerInventory.class) {
                         return true;
                     }
                 }

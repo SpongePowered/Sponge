@@ -73,7 +73,7 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     }
 
     @Override
-    public ResourceLocation func_192163_a() {
+    public ResourceLocation getId() {
         return this.id;
     }
 
@@ -82,17 +82,17 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     }
 
     @Override
-    public void func_192165_a(final PlayerAdvancements playerAdvancementsIn, final Listener listener) {
+    public void addListener(final PlayerAdvancements playerAdvancementsIn, final Listener listener) {
         this.listeners.put(playerAdvancementsIn, listener);
     }
 
     @Override
-    public void func_192164_b(final PlayerAdvancements playerAdvancementsIn, final Listener listener) {
+    public void removeListener(final PlayerAdvancements playerAdvancementsIn, final Listener listener) {
         this.listeners.remove(playerAdvancementsIn, listener);
     }
 
     @Override
-    public void func_192167_a(final PlayerAdvancements playerAdvancementsIn) {
+    public void removeAllListeners(final PlayerAdvancements playerAdvancementsIn) {
         this.listeners.removeAll(playerAdvancementsIn);
     }
 
@@ -103,16 +103,16 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
 
     @Override
     public void bridge$trigger(final Player player) {
-        final PlayerAdvancements playerAdvancements = ((ServerPlayerEntity) player).func_192039_O();
+        final PlayerAdvancements playerAdvancements = ((ServerPlayerEntity) player).getAdvancements();
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         final TypeToken<FilteredTriggerConfiguration> typeToken = TypeToken.of(this.triggerConfigurationClass);
         for (final Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {
             final ICriterionTrigger_ListenerBridge mixinListener = (ICriterionTrigger_ListenerBridge) listener;
             final Advancement advancement = (Advancement) mixinListener.bridge$getAdvancement();
             final AdvancementCriterion advancementCriterion = (AdvancementCriterion)
-                    ((net.minecraft.advancements.Advancement) advancement).func_192073_f().get(mixinListener.bridge$getCriterionName());
+                    ((net.minecraft.advancements.Advancement) advancement).getCriteria().get(mixinListener.bridge$getCriterionName());
             final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause, advancement, advancementCriterion,
-                    typeToken, player, (FilteredTrigger) listener.func_192158_a(), this.eventHandler == null);
+                    typeToken, player, (FilteredTrigger) listener.getCriterionInstance(), this.eventHandler == null);
             if (this.eventHandler != null) {
                 this.eventHandler.accept(event);
                 if (!event.getResult()) {
@@ -121,7 +121,7 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
             }
             SpongeImpl.postEvent(event);
             if (event.getResult()) {
-                listener.func_192159_a(playerAdvancements);
+                listener.grantCriterion(playerAdvancements);
             }
         }
     }

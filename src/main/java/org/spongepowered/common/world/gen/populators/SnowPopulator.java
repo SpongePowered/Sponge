@@ -50,15 +50,15 @@ public class SnowPopulator implements Populator {
         BlockPos blockpos = new BlockPos(min.getX(), min.getY(), min.getZ());
         for (int x = 0; x < size.getX(); ++x) {
             for (int y = 0; y < size.getZ(); ++y) {
-                BlockPos blockpos1 = worldObj.func_175725_q(blockpos.func_177982_a(x, 0, y));
-                BlockPos blockpos2 = blockpos1.func_177977_b();
+                BlockPos blockpos1 = worldObj.func_175725_q(blockpos.add(x, 0, y));
+                BlockPos blockpos2 = blockpos1.down();
 
                 if (worldObj.func_175675_v(blockpos2)) {
-                    worldObj.func_180501_a(blockpos2, Blocks.field_150432_aD.func_176223_P(), 2);
+                    worldObj.setBlockState(blockpos2, Blocks.ICE.getDefaultState(), 2);
                 }
 
                 if (worldObj.func_175708_f(blockpos1, true)) {
-                    worldObj.func_180501_a(blockpos1, Blocks.field_150431_aC.func_176223_P(), 2);
+                    worldObj.setBlockState(blockpos1, Blocks.field_150431_aC.getDefaultState(), 2);
                 }
             }
         }

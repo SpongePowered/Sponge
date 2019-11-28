@@ -44,7 +44,7 @@ public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<Enchantme
             if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
                 ((EnchantingTableTileEntity) enchantmentTable).func_145920_a(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
             }
-            ((EnchantingTableTileEntity) enchantmentTable).func_145829_t();
+            ((EnchantingTableTileEntity) enchantmentTable).validate();
             return enchantmentTable;
         });
 

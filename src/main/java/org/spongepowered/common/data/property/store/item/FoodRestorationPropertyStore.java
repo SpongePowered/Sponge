@@ -35,8 +35,8 @@ public class FoodRestorationPropertyStore extends AbstractItemStackPropertyStore
 
     @Override
     protected Optional<FoodRestorationProperty> getFor(ItemStack itemStack) {
-        if (itemStack.func_77973_b() instanceof ItemFood) {
-            final int food = ((ItemFood) itemStack.func_77973_b()).func_150905_g(itemStack);
+        if (itemStack.getItem() instanceof ItemFood) {
+            final int food = ((ItemFood) itemStack.getItem()).func_150905_g(itemStack);
             return Optional.of(new FoodRestorationProperty(food));
         }
         return Optional.empty();

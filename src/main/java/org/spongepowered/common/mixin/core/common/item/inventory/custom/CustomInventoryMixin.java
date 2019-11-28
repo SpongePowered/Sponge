@@ -50,7 +50,7 @@ public abstract class CustomInventoryMixin implements InventoryAdapter, Inventor
 
     @Override
     public SlotProvider bridge$generateSlotProvider() {
-        return new SlotCollection.Builder().add(this.inv.func_70302_i_()).build();
+        return new SlotCollection.Builder().add(this.inv.getSizeInventory()).build();
     }
 
     @SuppressWarnings("Unchecked")

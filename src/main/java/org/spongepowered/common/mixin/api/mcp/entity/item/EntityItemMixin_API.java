@@ -55,7 +55,7 @@ public abstract class EntityItemMixin_API extends EntityMixin_API implements Ite
 
     @Override
     public ItemType getItemType() {
-        return (ItemType) getItem().func_77973_b();
+        return (ItemType) getItem().getItem();
     }
 
     @Override

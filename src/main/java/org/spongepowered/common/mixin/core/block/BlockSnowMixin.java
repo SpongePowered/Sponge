@@ -59,7 +59,7 @@ public abstract class BlockSnowMixin extends BlockMixin {
             if (layers < 1) {
                 layers = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(SnowBlock.field_176315_a, layers));
+            return Optional.of((BlockState) blockState.func_177226_a(SnowBlock.LAYERS, layers));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -71,13 +71,13 @@ public abstract class BlockSnowMixin extends BlockMixin {
             if (layers < 1) {
                 layers = 1;
             }
-            return Optional.of((BlockState) blockState.func_177226_a(SnowBlock.field_176315_a, layers));
+            return Optional.of((BlockState) blockState.func_177226_a(SnowBlock.LAYERS, layers));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableLayeredData impl$getLayerData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.func_177229_b(SnowBlock.field_176315_a), 1, 8);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.get(SnowBlock.LAYERS), 1, 8);
     }
 
 }

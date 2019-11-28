@@ -100,7 +100,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
             return;
         }
         this.impl$EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
-        final WorldCategory worldCategory = ((WorldInfoBridge) this.world.func_72912_H()).bridge$getConfigAdapter().getConfig().getWorld();
+        final WorldCategory worldCategory = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld();
 
         ((WorldServerBridge) worldObjIn).bridge$updateConfigCache();
 
@@ -138,7 +138,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     @Overwrite
     public void queueUnload(final Chunk chunkIn)
     {
-        if (!((ChunkBridge) chunkIn).bridge$isPersistedChunk() && this.world.field_73011_w.func_186056_c(chunkIn.field_76635_g, chunkIn.field_76647_h))
+        if (!((ChunkBridge) chunkIn).bridge$isPersistedChunk() && this.world.dimension.func_186056_c(chunkIn.field_76635_g, chunkIn.field_76647_h))
         {
             // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
             //this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.x, chunkIn.z)));
@@ -203,8 +203,8 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
         @Coerce final Object provider, final int someVar, final int someOther) {
 
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
-        report.func_85057_a("Current PhaseState", 1)
-            .func_189529_a(currentContext.state.toString(), () -> {
+        report.makeCategoryDepth("Current PhaseState", 1)
+            .addDetail(currentContext.state.toString(), () -> {
 
                 final PrettyPrinter printer = new PrettyPrinter(50);
                 PhaseTracker.CONTEXT_PRINTER.accept(printer, currentContext);
@@ -267,7 +267,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     @Overwrite
     public boolean tick()
     {
-        if (!this.world.field_73058_d && !((WorldBridge) this.world).bridge$isFake())
+        if (!this.world.disableLevelSaving && !((WorldBridge) this.world).bridge$isFake())
         {
             ((WorldServerBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
             final Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
@@ -301,27 +301,27 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     // This allows the chunk to unload if currently queued.
     @Override
     public Chunk bridge$getLoadedChunkWithoutMarkingActive(final int x, final int z){
-        final long i = ChunkPos.func_77272_a(x, z);
+        final long i = ChunkPos.asLong(x, z);
         return this.loadedChunks.get(i);
     }
 
     @Inject(method = "canSave", at = @At("HEAD"), cancellable = true)
     private void impl$IgnoreIfWorldSaveDisabled(final CallbackInfoReturnable<Boolean> cir) {
-        if (((WorldProperties)this.world.func_72912_H()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+        if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             cir.setReturnValue(false);
         }
     }
 
     @Inject(method = "saveChunkData", at = @At("HEAD"), cancellable = true)
     private void impl$IgnoreIfWorldSaveDisabled(final Chunk chunkIn, final CallbackInfo ci) {
-        if (((WorldProperties)this.world.func_72912_H()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+        if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             ci.cancel();
         }
     }
 
     @Inject(method = "flushToDisk", at = @At("HEAD"), cancellable = true)
     private void impl$IgnoreIfWorldSaveDisabled(final CallbackInfo ci) {
-        if (((WorldProperties)this.world.func_72912_H()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+        if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             ci.cancel();
         }
     }
@@ -339,7 +339,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
             this.saveChunkData(chunk);
         }
 
-        this.loadedChunks.remove(ChunkPos.func_77272_a(chunk.field_76635_g, chunk.field_76647_h));
+        this.loadedChunks.remove(ChunkPos.asLong(chunk.field_76635_g, chunk.field_76647_h));
         ((ChunkBridge) chunk).bridge$setScheduledForUnload(-1);
     }
 }

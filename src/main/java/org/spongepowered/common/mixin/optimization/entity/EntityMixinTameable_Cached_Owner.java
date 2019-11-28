@@ -53,7 +53,7 @@ public abstract class EntityMixinTameable_Cached_Owner extends EntityAgeableMixi
     @Overwrite
     public UUID getOwnerId() {
         if (this.cachedOwner$OwnerId == null) {
-            this.cachedOwner$OwnerId = this.dataManager.func_187225_a(OWNER_UNIQUE_ID).orNull();
+            this.cachedOwner$OwnerId = this.dataManager.get(OWNER_UNIQUE_ID).orNull();
         }
         return this.cachedOwner$OwnerId;
     }
@@ -67,7 +67,7 @@ public abstract class EntityMixinTameable_Cached_Owner extends EntityAgeableMixi
     @Overwrite
     public void setOwnerId(@Nullable final UUID ownerUuid) {
         this.cachedOwner$OwnerId = ownerUuid;
-        this.dataManager.func_187227_b(OWNER_UNIQUE_ID, Optional.fromNullable(ownerUuid));
+        this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(ownerUuid));
     }
 
 }

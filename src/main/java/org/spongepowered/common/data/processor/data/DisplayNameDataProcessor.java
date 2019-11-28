@@ -87,26 +87,26 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             return Optional.empty();
         } else if (holder instanceof ItemStack) {
             final ItemStack stack = (ItemStack) holder;
-            if (!stack.func_82837_s()) {
+            if (!stack.hasDisplayName()) {
                 return Optional.empty();
             }
 
-            if (stack.func_77973_b() == Items.field_151164_bB) {
-                final CompoundNBT compound = stack.func_77978_p();
+            if (stack.getItem() == Items.WRITTEN_BOOK) {
+                final CompoundNBT compound = stack.getTag();
                 if (compound == null) {
                     return Optional.empty(); // The book wasn't initialized.
                 }
 
-                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.func_74779_i(Constants.Item.Book.ITEM_BOOK_TITLE))));
+                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(Constants.Item.Book.ITEM_BOOK_TITLE))));
             }
 
-            final CompoundNBT compound = ((ItemStack) holder).func_179543_a(Constants.Item.ITEM_DISPLAY);
-            if (compound != null && compound.func_150297_b(Constants.Item.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
-                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.func_74779_i(Constants.Item.ITEM_DISPLAY_NAME))));
+            final CompoundNBT compound = ((ItemStack) holder).getChildTag(Constants.Item.ITEM_DISPLAY);
+            if (compound != null && compound.contains(Constants.Item.ITEM_DISPLAY_NAME, Constants.NBT.TAG_STRING)) {
+                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(Constants.Item.ITEM_DISPLAY_NAME))));
             }
             return Optional.empty();
         } else if (holder instanceof INameable) {
-            if (((INameable) holder).func_145818_k_()) {
+            if (((INameable) holder).hasCustomName()) {
                 final String customName = ((INameable) holder).func_70005_c_();
                 final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(customName));
                 return Optional.of(data);
@@ -142,8 +142,8 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
                 ((EntityBridge) holder).bridge$setDisplayName(newValue);
             } else {
                 final ItemStack stack = (ItemStack) holder;
-                if (stack.func_77973_b() == Items.field_151164_bB) {
-                    stack.func_77983_a(Constants.Item.Book.ITEM_BOOK_TITLE, new StringNBT(SpongeTexts.toLegacy(newValue)));
+                if (stack.getItem() == Items.WRITTEN_BOOK) {
+                    stack.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, new StringNBT(SpongeTexts.toLegacy(newValue)));
                 } else {
                     stack.func_151001_c(SpongeTexts.toLegacy(newValue));
                 }
@@ -187,7 +187,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             final Optional<DisplayNameData> optional = this.from(holder);
             if (optional.isPresent()) {
                 try {
-                    ((ItemStack) holder).func_135074_t();
+                    ((ItemStack) holder).clearCustomName();
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (final Exception e) {
                     SpongeImpl.getLogger().error("There was an issue removing the display name from an ItemStack!", e);

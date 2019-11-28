@@ -75,20 +75,20 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
 
     @Override
     public void registerDefaults() {
-        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.field_185264_b.func_148742_b()) {
-            this.enchantmentMappings.put(key.toString(), (EnchantmentType) net.minecraft.enchantment.Enchantment.field_185264_b.func_82594_a(key));
+        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.field_185264_b.keySet()) {
+            this.enchantmentMappings.put(key.toString(), (EnchantmentType) net.minecraft.enchantment.Enchantment.field_185264_b.getOrDefault(key));
         }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.field_185264_b.func_148742_b()) {
-            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.field_185264_b.func_82594_a(key);
+        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.field_185264_b.keySet()) {
+            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.field_185264_b.getOrDefault(key);
             if (enchantment == null) {
                 continue;
             }
             if (!this.enchantmentMappings.containsValue(enchantment)) {
-                final String name = enchantment.func_77320_a().replace("enchantment.", "");
+                final String name = enchantment.getName().replace("enchantment.", "");
                 this.enchantmentMappings.put(name.toLowerCase(Locale.ENGLISH), (EnchantmentType) enchantment);
             }
         }

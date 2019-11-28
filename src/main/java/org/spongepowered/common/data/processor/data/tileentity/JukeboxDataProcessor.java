@@ -54,7 +54,7 @@ public class JukeboxDataProcessor extends
 
     @Override
     protected boolean set(JukeboxBlock.TileEntityJukebox jukebox, ItemStackSnapshot stackSnapshot) {
-        BlockState block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
+        BlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
         if (stackSnapshot == ItemStackSnapshot.NONE) {
             if (jukebox.func_145856_a() == null) {
                 return true;
@@ -65,8 +65,8 @@ public class JukeboxDataProcessor extends
             return false;
         }
         ((Jukebox) jukebox).insertRecord(stackSnapshot.createStack());
-        block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
-        return block.func_177230_c() instanceof JukeboxBlock && block.func_177229_b(JukeboxBlock.field_176432_a);
+        block = jukebox.getWorld().getBlockState(jukebox.getPos());
+        return block.getBlock() instanceof JukeboxBlock && block.get(JukeboxBlock.HAS_RECORD);
     }
 
     @Override
@@ -79,8 +79,8 @@ public class JukeboxDataProcessor extends
 
     private boolean remove(JukeboxBlock.TileEntityJukebox jukebox) {
         ((Jukebox) jukebox).ejectRecord();
-        BlockState block = jukebox.func_145831_w().func_180495_p(jukebox.func_174877_v());
-        return block.func_177230_c() instanceof JukeboxBlock && !block.func_177229_b(JukeboxBlock.field_176432_a);
+        BlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
+        return block.getBlock() instanceof JukeboxBlock && !block.get(JukeboxBlock.HAS_RECORD);
     }
 
     @Override
