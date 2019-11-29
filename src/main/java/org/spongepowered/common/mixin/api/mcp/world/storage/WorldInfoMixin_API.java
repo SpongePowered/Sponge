@@ -245,12 +245,12 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public boolean areCommandsAllowed() {
+    public boolean areCommandsEnabled() {
         return this.allowCommands;
     }
 
     @Override
-    public void setCommandsAllowed(final boolean state) {
+    public void setCommandsEnabled(final boolean state) {
         this.allowCommands = state;
     }
 

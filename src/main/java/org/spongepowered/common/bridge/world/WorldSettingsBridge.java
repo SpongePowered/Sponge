@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.world;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -37,9 +38,7 @@ import javax.annotation.Nullable;
 
 public interface WorldSettingsBridge {
 
-    String bridge$getId();
-
-    String bridge$getName();
+    String bridge$getKey();
 
     DimensionType bridge$getDimensionType();
 
@@ -67,9 +66,7 @@ public interface WorldSettingsBridge {
 
     Collection<TerrainGeneratorConfig> bridge$getGeneratorModifiers();
 
-    void bridge$setId(String id);
-
-    void bridge$setName(String name);
+    void bridge$setKey(CatalogKey key);
 
     void bridge$setDimensionType(DimensionType dimensionType);
 

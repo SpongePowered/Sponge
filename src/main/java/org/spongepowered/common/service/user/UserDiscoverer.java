@@ -47,7 +47,6 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.mixin.core.server.management.UserLIstEntryAccessor;
 import org.spongepowered.common.mixin.core.server.management.UserListAccessor;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
-import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.util.Collection;

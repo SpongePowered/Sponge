@@ -34,7 +34,6 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.world.WorldManager;
 
 import java.io.InputStream;
 import java.io.OutputStream;

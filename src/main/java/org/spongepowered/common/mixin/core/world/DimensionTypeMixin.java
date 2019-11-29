@@ -36,7 +36,6 @@ import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
-import org.spongepowered.common.world.WorldManager;
 
 import java.nio.file.Path;
 import net.minecraft.world.dimension.Dimension;

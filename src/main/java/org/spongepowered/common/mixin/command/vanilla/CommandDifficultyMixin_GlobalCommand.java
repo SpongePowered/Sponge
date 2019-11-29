@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.world.WorldManager;
 
 @Mixin(CommandDifficulty.class)
 public abstract class CommandDifficultyMixin_GlobalCommand {

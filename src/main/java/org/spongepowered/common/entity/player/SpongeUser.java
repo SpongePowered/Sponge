@@ -59,7 +59,6 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.math.vector.Vector3d;
 import java.io.File;
 import java.io.FileInputStream;

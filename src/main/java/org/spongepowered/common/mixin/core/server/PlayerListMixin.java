@@ -104,7 +104,6 @@ import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeUserListWhitelist;
 import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import org.spongepowered.math.vector.Vector3d;
 import java.io.File;

@@ -50,7 +50,7 @@ public final class MultiWorldTest implements LoadableModule {
                 WorldArchetype.builder().
                     from(WorldArchetypes.THE_NETHER)
                     .serializationBehavior(SerializationBehaviors.NONE)
-                    .generator(GeneratorTypes.OVERWORLD)
+                    .generatorType(GeneratorTypes.OVERWORLD)
                     .build("multi-world-test:overnether", "Overnether")
             );
             final WorldProperties worldProperties = Sponge.getServer().createWorldProperties("temp", archetype);

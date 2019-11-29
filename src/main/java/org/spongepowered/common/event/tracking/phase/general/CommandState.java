@@ -53,7 +53,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
 import java.util.Collection;

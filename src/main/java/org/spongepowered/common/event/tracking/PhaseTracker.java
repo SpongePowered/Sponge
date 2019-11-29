@@ -88,7 +88,6 @@ import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
-import org.spongepowered.common.world.WorldManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

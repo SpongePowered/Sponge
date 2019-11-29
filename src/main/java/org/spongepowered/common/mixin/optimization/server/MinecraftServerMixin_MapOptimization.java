@@ -34,7 +34,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.mixin.core.world.storage.MapStorageAccessor;
-import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
 import java.util.List;

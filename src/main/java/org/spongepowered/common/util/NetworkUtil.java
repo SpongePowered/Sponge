@@ -72,7 +72,6 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.mixin.core.server.PlayerListAccessor;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.net.InetSocketAddress;

@@ -32,9 +32,7 @@ import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.common.SpongeImpl;
 
 import java.io.IOException;
-import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;

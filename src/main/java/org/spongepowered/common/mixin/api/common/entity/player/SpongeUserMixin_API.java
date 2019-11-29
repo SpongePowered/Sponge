@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import java.util.UUID;

@@ -65,7 +65,6 @@ import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
 import java.util.Collection;

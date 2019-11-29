@@ -98,7 +98,6 @@ import org.spongepowered.common.mixin.core.world.storage.WorldInfoMixin;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.WorldManager;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
