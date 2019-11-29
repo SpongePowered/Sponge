@@ -141,7 +141,7 @@ import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.bridge.world.WorldTypeBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -465,7 +465,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 final ChunkGenerator current = ((ChunkProviderServerBridge) this.getChunkProvider()).accessor$getChunkGenerator();
                 if (current == null) {
                     final Dimension worldProvider = worldServer.dimension;
-                    ((WorldProviderBridge) worldProvider).accessor$setGeneratorSettings(settings);
+                    ((DimensionBridge) worldProvider).accessor$setGeneratorSettings(settings);
                     return worldProvider.createChunkGenerator();
                 }
                 return current;
@@ -2504,7 +2504,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         return MoreObjects.toStringHelper(this)
                 .add("Name", this.worldInfo.getWorldName())
                 .add("DimensionId", this.bridge$getDimensionId())
-                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getType()).getId())
+                .add("DimensionType", ((org.spongepowered.api.world.dimension.DimensionType) (Object) this.provider.getType()).getId())
                 .toString();
     }
 

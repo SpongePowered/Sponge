@@ -63,7 +63,7 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;

@@ -22,40 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.mixin.core.world.dimension;
 
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
-import org.spongepowered.common.world.SpongeDimensionType;
-import org.spongepowered.common.world.server.SpongeWorldRegistration;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 
-import java.nio.file.Path;
+@Mixin(net.minecraft.world.dimension.Dimension.class)
+public abstract class DimensionMixin implements DimensionBridge {
 
-public interface DimensionTypeBridge {
-
-    CatalogKey bridge$getKey();
-
-    void bridge$setKey(CatalogKey key);
-
-    SpongeDimensionType bridge$getSpongeDimensionType();
-
-    void setSpongeDimensionType(SpongeDimensionType dimensionType);
-
-    SpongeWorldRegistration bridge$getWorldRegistration();
-
-    void bridge$setWorldRegistration(SpongeWorldRegistration worldRegistration);
-
-    SpongeConfig<DimensionConfig> bridge$getDimensionConfig();
-
-    void bridge$setDimensionConfig(SpongeConfig<DimensionConfig> config);
-
-    Path bridge$getConfigPath();
-
-    void bridge$getConfigPath(Path path);
-
-    Context bridge$getContext();
-
-    void bridge$setContext(Context context);
+    @Override
+    public float bridge$getMovementFactor() {
+        return 1.0f;
+    }
 }

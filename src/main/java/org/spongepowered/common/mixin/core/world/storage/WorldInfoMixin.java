@@ -37,8 +37,8 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Level;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
@@ -54,7 +54,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.world.DimensionTypeBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.config.SpongeConfig;
@@ -365,7 +365,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         this.impl$uuid = nbtUniqueId;
         this.impl$dimensionId = nbt.getInt(Constants.Sponge.World.DIMENSION_ID);
         final String dimensionTypeId = nbt.getString(Constants.Sponge.World.DIMENSION_TYPE);
-        final DimensionType dimensionType = (org.spongepowered.api.world.DimensionType)(Object) WorldManager.getDimensionType(this.impl$dimensionId).orElse(null);
+        final DimensionType dimensionType = (DimensionType)(Object) WorldManager.getDimensionType(this.impl$dimensionId).orElse(null);
         this.bridge$setDimensionType(dimensionType != null ? dimensionType : DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
                 .orElseThrow(() -> new IllegalArgumentException(
                     "Could not find a DimensionType registered for world '" + this.getWorldName() + "' with dim id: " + this.impl$dimensionId)));

@@ -22,14 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.bridge.world.dimension;
 
-import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+public interface DimensionBridge {
 
-@Mixin(DimensionType.class)
-public interface DimensionTypeAccessor {
-
-    @Accessor("directory") String accessor$getDirectory();
+    float bridge$getMovementFactor();
 }

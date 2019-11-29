@@ -29,13 +29,11 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.GeneratorType;
-import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -44,22 +42,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 
-import java.util.Collection;
-
-@NonnullByDefault
 @Mixin(WorldSettings.class)
 @Implements(value = @Interface(iface = WorldArchetype.class, prefix = "archetype$"))
 public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
-    @Shadow private boolean commandsAllowed;
-    @Shadow private String generatorOptions;
-
     @Shadow public abstract long shadow$getSeed();
-    @Shadow public abstract GameType getGameType();
-    @Shadow public abstract boolean getHardcoreEnabled();
-    @Shadow public abstract boolean isMapFeaturesEnabled();
-    @Shadow public abstract WorldType getTerrainType();
+    @Shadow public abstract GameType shadow$getGameType();
+    @Shadow public abstract boolean shadow$getHardcoreEnabled();
+    @Shadow public abstract boolean shadow$isMapFeaturesEnabled();
+    @Shadow public abstract WorldType shadow$getTerrainType();
     @Shadow public abstract boolean shadow$areCommandsAllowed();
+    @Shadow private boolean bonusChestEnabled;
 
     @Intrinsic
     public long archetype$getSeed() {
@@ -71,35 +64,34 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
         return ((WorldSettingsBridge) this).bridge$isSeedRandomized();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public GameMode getGameMode() {
-        return (GameMode) (Object) this.getGameType();
+        return (GameMode) (Object) this.shadow$getGameType();
     }
 
     @Override
     public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.getTerrainType();
+        return (GeneratorType) this.shadow$getTerrainType();
     }
 
     @Override
-    public boolean usesMapFeatures() {
-        return this.isMapFeaturesEnabled();
+    public boolean areStructuresEnabled() {
+        return this.shadow$isMapFeaturesEnabled();
     }
 
     @Override
     public boolean isHardcore() {
-        return this.getHardcoreEnabled();
+        return this.shadow$getHardcoreEnabled();
     }
 
-    @Intrinsic
-    public boolean archetype$areCommandsAllowed() {
+    @Override
+    public boolean areCommandsEnabled() {
         return this.shadow$areCommandsAllowed();
     }
 
     @Override
     public boolean doesGenerateBonusChest() {
-        return ((WorldSettingsBridge) this).bridge$getGeneratesBonusChest();
+        return this.bonusChestEnabled;
     }
 
     @Override
@@ -133,7 +125,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
     }
 
     @Override
-    public boolean loadOnStartup() {
+    public boolean doesLoadOnStartup() {
         return ((WorldSettingsBridge) this).bridge$loadOnStartup();
     }
 
@@ -151,20 +143,4 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
     public boolean isPVPEnabled() {
         return ((WorldSettingsBridge) this).bridge$isPVPEnabled();
     }
-
-    @Override
-    public Collection<TerrainGeneratorConfig> getGeneratorModifiers() {
-        return ((WorldSettingsBridge) this).bridge$getGeneratorModifiers();
-    }
-
-    @Override
-    public String getId() {
-        return ((WorldSettingsBridge) this).bridge$getId();
-    }
-
-    @Override
-    public String getName() {
-        return ((WorldSettingsBridge) this).bridge$getName();
-    }
-
 }

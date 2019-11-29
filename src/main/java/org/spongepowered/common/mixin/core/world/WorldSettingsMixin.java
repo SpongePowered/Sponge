@@ -24,22 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonParseException;
-import net.minecraft.world.GameType;
+import com.google.gson.JsonElement;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.teleport.PortalAgentTypes;
@@ -51,12 +46,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
-import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
-import org.spongepowered.common.util.Constants;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -64,54 +53,36 @@ import javax.annotation.Nullable;
 public abstract class WorldSettingsMixin implements WorldSettingsBridge {
 
     @Shadow private boolean commandsAllowed;
-    @Shadow private String generatorOptions;
+    @Shadow private boolean bonusChestEnabled;
 
-    @Shadow public abstract GameType getGameType();
-
-    @Nullable private String id;
-    @Nullable private String name;
-    private DimensionType dimensionType = DimensionTypes.OVERWORLD;
-    private Difficulty difficulty = Difficulties.NORMAL;
-    private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
-    private DataContainer generatorSettings = DataContainer.createNew();
+    @Nullable private CatalogKey key;
+    @Nullable private DimensionType dimensionType = DimensionTypes.OVERWORLD;
+    @Nullable private Difficulty difficulty = Difficulties.NORMAL;
+    @Nullable private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
     @Nullable private Boolean keepSpawnLoaded = null;
     private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled = true;
-    private boolean generateBonusChest = false;
     @Nullable private PortalAgentType portalAgentType;
-    private Collection<TerrainGeneratorConfig> generatorModifiers = ImmutableList.of();
     private boolean seedRandomized = false;
+    @Nullable private DataContainer generatorSettings;
 
-    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
-        if (((WorldInfoBridge) info).bridge$getConfigAdapter() != null) {
+        if (((WorldInfoBridge) info).bridge$isValid()) {
             this.dimensionType = properties.getDimensionType();
             this.difficulty = properties.getDifficulty();
             this.serializationBehavior = properties.getSerializationBehavior();
-            this.generatorSettings = properties.getGeneratorSettings().copy();
             this.isEnabled = properties.isEnabled();
-            this.loadOnStartup = properties.loadOnStartup();
+            this.loadOnStartup = properties.doesLoadOnStartup();
             this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
             this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
             this.pvpEnabled = properties.isPVPEnabled();
-            this.generateBonusChest = properties.doesGenerateBonusChest();
-            WorldGeneratorModifierRegistryModule.getInstance().checkAllRegistered(properties.getGeneratorModifiers());
-            this.generatorModifiers = ImmutableList.copyOf(properties.getGeneratorModifiers());
+            this.bonusChestEnabled = properties.doesGenerateBonusChest();
+            this.generatorSettings = properties.getGeneratorSettings();
         }
-    }
-
-    @Override
-    public String bridge$getId() {
-        return this.id;
-    }
-
-    @Override
-    public String bridge$getName() {
-        return this.name;
     }
 
     @Override
@@ -125,25 +96,13 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
-    private void onSetGeneratorOptions(String generatorOptions, CallbackInfoReturnable<WorldSettings> cir) {
-        // Minecraft uses a String, we want to return a fancy DataContainer
-        // Parse the world generator settings as JSON
-        DataContainer settings = null;
-        try {
-            settings = DataFormats.JSON.read(generatorOptions);
-        } catch (JsonParseException | IOException ignored) {
-        }
-        // If null, assume custom
-        if (settings == null) {
-            settings = DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, generatorOptions);
-        }
-        this.generatorSettings = settings;
+    private void onSetGeneratorOptions(JsonElement element, CallbackInfoReturnable<WorldSettings> cir) {
+        // TODO 1.14 - JsonElement -> DataContainer
     }
 
-
     @Override
-    public boolean bridge$getGeneratesBonusChest() {
-        return this.generateBonusChest;
+    public CatalogKey bridge$getKey() {
+        return this.key;
     }
 
     @Override
@@ -208,28 +167,8 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public Collection<TerrainGeneratorConfig> bridge$getGeneratorModifiers() {
-        return this.generatorModifiers;
-    }
-
-    @Override
-    public void bridge$setId(String id) {
-        checkNotNull(id);
-        if (this.id != null) {
-            throw new IllegalStateException("Attempt made to set id twice!");
-        }
-
-        this.id = id;
-    }
-
-    @Override
-    public void bridge$setName(String name) {
-        checkNotNull(name);
-        if (this.name != null) {
-            throw new IllegalStateException("Attempt made to set name twice!");
-        }
-
-        this.name = name;
+    public void bridge$setKey(CatalogKey key) {
+        this.key = key;
     }
 
     @Override
@@ -249,23 +188,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
 
     @Override
     public void bridge$setGeneratorSettings(DataContainer generatorSettings) {
-        // Update the generatorOptions string
-        Optional<String> optCustomSettings = generatorSettings.getString(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS);
-        if (optCustomSettings.isPresent()) {
-            this.generatorOptions = optCustomSettings.get();
-        } else {
-            try {
-                this.generatorOptions = DataFormats.JSON.write(generatorSettings);
-            } catch (IOException e) {
-                // ignore
-            }
-        }
-        this.generatorSettings = generatorSettings;
-    }
-
-    @Override
-    public void bridge$setGeneratorModifiers(ImmutableList<TerrainGeneratorConfig> generatorModifiers) {
-        this.generatorModifiers = generatorModifiers;
+        // TODO DataContainer -> JsonElement
     }
 
     @Override
@@ -294,13 +217,13 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public void bridge$setCommandsAllowed(boolean state) {
+    public void bridge$setCommandsEnabled(boolean state) {
         this.commandsAllowed = state;
     }
 
     @Override
     public void bridge$setGenerateBonusChest(boolean state) {
-        this.generateBonusChest = state;
+        this.bonusChestEnabled = state;
     }
 
     @Override

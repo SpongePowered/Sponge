@@ -55,7 +55,7 @@ import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.World;

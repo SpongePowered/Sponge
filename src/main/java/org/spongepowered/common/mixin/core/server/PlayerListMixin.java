@@ -70,7 +70,7 @@ import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.Dimension;
+import org.spongepowered.api.world.dimension.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gamerule.GameRules;

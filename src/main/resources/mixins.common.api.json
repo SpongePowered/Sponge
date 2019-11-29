@@ -309,7 +309,7 @@
         "mcp.world.TeleporterMixin_API",
         "mcp.world.WorldBorderMixin_API",
         "mcp.world.WorldMixin_API",
-        "mcp.world.WorldProviderMixin_API",
+        "mcp.world.dimension.DimensionMixin_API",
         "mcp.world.WorldServerMixin_API",
         "mcp.world.WorldSettingsMixin_API",
         "mcp.world.WorldTypeMixin_API",

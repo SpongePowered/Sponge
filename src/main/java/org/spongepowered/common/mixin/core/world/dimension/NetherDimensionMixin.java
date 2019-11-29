@@ -22,21 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.core.world.dimension;
 
-import net.minecraft.world.dimension.OverworldDimension;
+import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.dimension.NetherDimension;
 import org.spongepowered.asm.mixin.Mixin;
 
+@Mixin(NetherDimension.class)
+public abstract class NetherDimensionMixin extends DimensionMixin {
 
-@Mixin(OverworldDimension.class)
-public abstract class WorldProviderSurfaceMixin extends WorldProviderMixin {
+    @Override
+    public float bridge$getMovementFactor() {
+        return 8.0f;
+    }
 
     /**
-     * @author Zidane
-     * @reason Have overworld respect our configs for keeping spawn chunks loaded
+     * Since each World has a WorldBorder in Sponge, let the Nether
+     * based worlds use local coordinates, not adjusted ones based on Overworld's.
+     *
+     * @return The server world border
      */
     @Override
-    public boolean canDropChunk(int x, int z) {
-        return super.canDropChunk(x, z);
+    public WorldBorder bridge$createServerWorldBorder() {
+        return new WorldBorder();
     }
+
 }

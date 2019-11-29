@@ -81,7 +81,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.PopulatorPhaseContext;
-import org.spongepowered.common.mixin.core.world.WorldProviderAccessor;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
@@ -136,7 +135,7 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
         this.noise4 = new PerlinNoiseGenerator(this.rand, 4);
         this.stoneNoise = new double[256];
 
-        ((WorldProviderAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(this.biomeGenerator));
+        ((DimensionAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(this.biomeGenerator));
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
         }
@@ -201,7 +200,7 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
     @Override
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = biomeGenerator;
-        ((WorldProviderAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
+        ((DimensionAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }

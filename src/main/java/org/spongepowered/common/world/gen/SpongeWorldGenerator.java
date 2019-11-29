@@ -37,7 +37,6 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
-import org.spongepowered.common.mixin.core.world.WorldProviderAccessor;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 import java.util.List;
@@ -72,7 +71,7 @@ public final class SpongeWorldGenerator implements TerrainGenerator {
         this.populators = Lists.newArrayList();
         this.generationPopulators = Lists.newArrayList();
         this.biomeSettings = Maps.newHashMap();
-        ((WorldProviderAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
+        ((DimensionAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }
@@ -107,7 +106,7 @@ public final class SpongeWorldGenerator implements TerrainGenerator {
     public void setBiomeGenerator(final BiomeGenerator biomeGenerator) {
         this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
         // Replace biome generator with possible modified one
-        ((WorldProviderAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
+        ((DimensionAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
         if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
             ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }

@@ -22,17 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+@DefaultQualifier(NonNull.class)
+package org.spongepowered.common.bridge.world.dimension;
 
-import net.minecraft.world.border.WorldBorder;
-
-public interface WorldProviderBridge {
-
-    WorldBorder bridge$createServerWorldBorder();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    void accessor$setGeneratorSettings(String generatorSettings);
-
-    float bridge$getMovementFactor();
-}
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;

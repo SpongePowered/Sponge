@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -61,6 +61,7 @@ public interface WorldInfoBridge {
 
     void bridge$setIsMod(boolean isMod);
 
+    @Nullable
     SpongeConfig<WorldConfig> bridge$getConfigAdapter();
 
     PortalAgentType bridge$getPortalAgent();

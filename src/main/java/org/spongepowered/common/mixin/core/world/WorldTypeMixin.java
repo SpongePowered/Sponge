@@ -85,7 +85,7 @@ public abstract class WorldTypeMixin implements WorldTypeBridge {
         return MoreObjects.toStringHelper(this)
                 .add("id", ((GeneratorType) this).getId())
                 .add("name", this.name)
-                .add("settings", ((GeneratorType) this).getGeneratorSettings())
+                .add("settings", ((GeneratorType) this).getDefaultGeneratorSettings())
                 .toString();
     }
 

@@ -24,27 +24,22 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.teleport.PortalAgentType;
-import java.util.Collection;
 
 import javax.annotation.Nullable;
 
 public interface WorldSettingsBridge {
 
-    String bridge$getKey();
+    CatalogKey bridge$getKey();
 
     DimensionType bridge$getDimensionType();
 
     Difficulty bridge$getDifficulty();
-
-    boolean bridge$getGeneratesBonusChest();
 
     boolean bridge$isSeedRandomized();
 
@@ -64,8 +59,6 @@ public interface WorldSettingsBridge {
 
     boolean bridge$isPVPEnabled();
 
-    Collection<TerrainGeneratorConfig> bridge$getGeneratorModifiers();
-
     void bridge$setKey(CatalogKey key);
 
     void bridge$setDimensionType(DimensionType dimensionType);
@@ -75,8 +68,6 @@ public interface WorldSettingsBridge {
     void bridge$setSerializationBehavior(SerializationBehavior behavior);
 
     void bridge$setGeneratorSettings(DataContainer generatorSettings);
-
-    void bridge$setGeneratorModifiers(ImmutableList<TerrainGeneratorConfig> generatorModifiers);
 
     void bridge$setEnabled(boolean state);
 
@@ -88,7 +79,7 @@ public interface WorldSettingsBridge {
 
     void bridge$setPVPEnabled(boolean state);
 
-    void bridge$setCommandsAllowed(boolean state);
+    void bridge$setCommandsEnabled(boolean state);
 
     void bridge$setGenerateBonusChest(boolean state);
 

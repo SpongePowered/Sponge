@@ -22,19 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.bridge.world.dimension;
 
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.provider.BiomeProvider;
-import net.minecraft.world.dimension.Dimension;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.service.context.Context;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
+import org.spongepowered.common.world.SpongeDimensionType;
+import org.spongepowered.common.world.server.SpongeWorldRegistration;
 
-@Mixin(Dimension.class)
-public interface WorldProviderAccessor {
+import java.nio.file.Path;
 
-    @Accessor("terrainType") WorldType accessor$getTerrainType();
+public interface DimensionTypeBridge {
 
-    @Accessor("biomeProvider") void accessor$setBiomeProvider(BiomeProvider biomeProvider);
+    CatalogKey bridge$getKey();
 
+    void bridge$setKey(CatalogKey key);
+
+    SpongeDimensionType bridge$getSpongeDimensionType();
+
+    void setSpongeDimensionType(SpongeDimensionType dimensionType);
+
+    SpongeWorldRegistration bridge$getWorldRegistration();
+
+    void bridge$setWorldRegistration(SpongeWorldRegistration worldRegistration);
+
+    SpongeConfig<DimensionConfig> bridge$getDimensionConfig();
+
+    void bridge$setDimensionConfig(SpongeConfig<DimensionConfig> config);
+
+    Path bridge$getConfigPath();
+
+    void bridge$getConfigPath(Path path);
+
+    Context bridge$getContext();
+
+    void bridge$setContext(Context context);
 }
