@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.dimension;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.dimension.NetherDimension;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 
 @Mixin(NetherDimension.class)
 public abstract class NetherDimensionMixin extends DimensionMixin {
@@ -37,14 +38,11 @@ public abstract class NetherDimensionMixin extends DimensionMixin {
     }
 
     /**
-     * Since each World has a WorldBorder in Sponge, let the Nether
-     * based worlds use local coordinates, not adjusted ones based on Overworld's.
-     *
-     * @return The server world border
+     * @author Zidane
+     * @reason Each world has a WorldBorder in Sponge so have the Nether worlds use local coordinates for their border
      */
-    @Override
-    public WorldBorder bridge$createServerWorldBorder() {
+    @Overwrite
+    public WorldBorder createWorldBorder() {
         return new WorldBorder();
     }
-
 }
