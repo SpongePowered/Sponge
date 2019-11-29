@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.world.server;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
@@ -46,7 +46,7 @@ import java.util.List;
 /**
  * Used to migrate Worlds from Bukkit -> Sponge and fix core world errors
  */
-public class WorldMigrator {
+public final class WorldMigrator {
 
     /**
      * Gets the old world container used when this server used to be running Bukkit.

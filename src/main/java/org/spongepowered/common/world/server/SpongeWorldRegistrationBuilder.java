@@ -22,29 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.server;
+package org.spongepowered.common.world.server;
 
-import net.minecraft.server.dedicated.DedicatedServer;
-import org.spongepowered.api.Server;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
-import java.net.InetSocketAddress;
-import java.util.Optional;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.world.server.WorldRegistration;
 
-@Mixin(DedicatedServer.class)
-public abstract class DedicatedServerMixin_API extends MinecraftServerMixin_API implements Server {
+import javax.annotation.Nullable;
 
-    @Shadow public abstract String getHostname();
-    @Shadow public abstract int getPort();
+public final class SpongeWorldRegistrationBuilder implements WorldRegistration.Builder {
+
+    @Nullable private CatalogKey key;
+    @Nullable private String directoryName;
 
     @Override
-    public Optional<InetSocketAddress> getBoundAddress() {
-        //noinspection ConstantConditions
-        if (this.getHostname() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new InetSocketAddress(this.getHostname(), this.getPort()));
+    public WorldRegistration.Builder key(CatalogKey key) {
+        this.key = checkNotNull(key);
+        return this;
     }
 
+    @Override
+    public WorldRegistration.Builder directoryName(String name) {
+        this.directoryName = checkNotNull(name);
+        return this;
+    }
+
+    @Override
+    public WorldRegistration.Builder reset() {
+        this.directoryName = "World A";
+        return this;
+    }
+
+    @Override
+    public WorldRegistration build() throws IllegalStateException {
+        checkNotNull(this.key);
+        checkNotNull(this.directoryName);
+        checkState(!this.directoryName.isEmpty(), "Directory name cannot be empty!");
+
+        return new SpongeWorldRegistration(this.key, this.directoryName);
+    }
 }

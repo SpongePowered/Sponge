@@ -24,28 +24,38 @@
  */
 package org.spongepowered.common.bridge.world;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
+import org.spongepowered.common.world.SpongeDimensionType;
+import org.spongepowered.common.world.server.SpongeWorldRegistration;
 
 import java.nio.file.Path;
 
 public interface DimensionTypeBridge {
 
+    CatalogKey bridge$getKey();
+
+    void bridge$setKey(CatalogKey key);
+
+    SpongeDimensionType bridge$getSpongeDimensionType();
+
+    void setSpongeDimensionType(SpongeDimensionType dimensionType);
+
+    SpongeWorldRegistration bridge$getWorldRegistration();
+
+    void bridge$setWorldRegistration(SpongeWorldRegistration worldRegistration);
+
     SpongeConfig<DimensionConfig> bridge$getDimensionConfig();
 
-    Context bridge$getContext();
+    void bridge$setDimensionConfig(SpongeConfig<DimensionConfig> config);
 
     Path bridge$getConfigPath();
 
-    boolean bridge$shouldGenerateSpawnOnLoad();
+    void bridge$getConfigPath(Path path);
 
-    boolean bridge$shouldLoadSpawn();
+    Context bridge$getContext();
 
-    boolean bridge$shouldKeepSpawnLoaded();
-
-    // TODO - migrate this to DimensionTypeBridge_Forge
-    void setShouldLoadSpawn(boolean keepSpawnLoaded);
-
-    String bridge$getSanitizedId();
+    void bridge$setContext(Context context);
 }

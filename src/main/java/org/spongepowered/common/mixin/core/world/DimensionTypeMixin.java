@@ -24,71 +24,98 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
-import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 
 import java.nio.file.Path;
-import net.minecraft.world.dimension.Dimension;
+
 import net.minecraft.world.dimension.DimensionType;
+import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
+import org.spongepowered.common.registry.type.world.WorldRegistrationRegistryModule;
+import org.spongepowered.common.world.SpongeDimensionType;
+import org.spongepowered.common.world.server.SpongeWorldRegistration;
+
+import javax.annotation.Nullable;
 
 @Mixin(DimensionType.class)
 public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
-    private String impl$sanitizedId;
-    private Path impl$configPath;
-    private SpongeConfig<DimensionConfig> impl$config;
-    private volatile Context impl$context;
-    private boolean impl$generateSpawnOnLoad;
-    private boolean impl$loadSpawn;
+    @Nullable private CatalogKey impl$key;
+    @Nullable private SpongeDimensionType impl$spongeDimensionType;
+    @Nullable private SpongeWorldRegistration impl$spongeWorldRegistration;
+    @Nullable private Path impl$configPath;
+    @Nullable private SpongeConfig<DimensionConfig> impl$config;
+    @Nullable private volatile Context impl$context;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setUpBridgeFields(
-        final String enumName, final int ordinal, final int idIn, final String nameIn, final String suffixIn, final Class <? extends Dimension > clazzIn,
-            final CallbackInfo ci) {
-        final String dimName = enumName.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
-        final String modId = SpongeImplHooks.getModIdFromClass(clazzIn);
-        this.impl$configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(modId).resolve(dimName);
-        this.impl$config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.impl$configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID,
-            SpongeImpl.getGlobalConfigAdapter(), false);
-        this.impl$generateSpawnOnLoad = idIn == 0;
-        this.impl$loadSpawn = this.impl$generateSpawnOnLoad;
-        this.impl$config.getConfig().getWorld().setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
-        this.impl$sanitizedId = modId + ":" + dimName;
-        final String contextId = this.impl$sanitizedId.replace(":", ".");
-        this.impl$context = new Context(Context.DIMENSION_KEY, contextId);
-        if (!WorldManager.isDimensionRegistered(idIn)) {
-            DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType) this);
+    @Inject(method = "register", at = @At("RETURN"))
+    private static void impl$setupBridgeFields(String id, DimensionType dimensionType, CallbackInfoReturnable<DimensionType> cir) {
+        final DimensionTypeBridge dimensionTypeBridge = (DimensionTypeBridge) dimensionType;
+
+        final String dimName = id.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
+        // TODO This may not work out, we'll see.
+        final String modId = SpongeImplHooks.getActiveModContainer().getId();
+
+        final Path configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(modId).resolve(dimName);
+        dimensionTypeBridge.bridge$getConfigPath(configPath);
+        dimensionTypeBridge.bridge$setDimensionConfig(new SpongeConfig<>(SpongeConfig.Type.DIMENSION, configPath.resolve("dimension.conf"),
+            SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfigAdapter(), false));
+
+        // Make sure the overworld generates the spawn
+        if (dimensionType.getId() == 0) {
+            dimensionTypeBridge.bridge$getDimensionConfig().getConfig().getWorld().setGenerateSpawnOnLoad(true);
         }
+
+        final CatalogKey key = CatalogKey.of(modId, dimName);
+        dimensionTypeBridge.bridge$setKey(key);
+
+        final SpongeDimensionType spongeDimensionType = new SpongeDimensionType(dimensionType);
+        dimensionTypeBridge.setSpongeDimensionType(spongeDimensionType);
+        DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog(spongeDimensionType);
+
+        final SpongeWorldRegistration spongeWorldRegistration = new SpongeWorldRegistration(dimensionType);
+        dimensionTypeBridge.bridge$setWorldRegistration(spongeWorldRegistration);
+        WorldRegistrationRegistryModule.getInstance().registerAdditionalCatalog(spongeWorldRegistration);
+
+        dimensionTypeBridge.bridge$setContext(new Context(Context.DIMENSION_KEY, modId + "." + dimName));
     }
 
     @Override
-    public boolean bridge$shouldGenerateSpawnOnLoad() {
-        return this.impl$generateSpawnOnLoad;
+    public CatalogKey bridge$getKey() {
+        return this.impl$key;
     }
 
     @Override
-    public boolean bridge$shouldLoadSpawn() {
-        return this.impl$loadSpawn;
+    public void bridge$setKey(CatalogKey key) {
+        this.impl$key = key;
     }
 
     @Override
-    public void setShouldLoadSpawn(final boolean keepSpawnLoaded) {
-        this.impl$loadSpawn = keepSpawnLoaded;
+    public SpongeDimensionType bridge$getSpongeDimensionType() {
+        return this.impl$spongeDimensionType;
     }
 
     @Override
-    public String bridge$getSanitizedId() {
-        return this.impl$sanitizedId;
+    public void setSpongeDimensionType(SpongeDimensionType dimensionType) {
+        this.impl$spongeDimensionType = dimensionType;
+    }
+
+    @Override
+    public SpongeWorldRegistration bridge$getWorldRegistration() {
+        return this.impl$spongeWorldRegistration;
+    }
+
+    @Override
+    public void bridge$setWorldRegistration(SpongeWorldRegistration worldRegistration) {
+        this.impl$spongeWorldRegistration = worldRegistration;
     }
 
     @Override
@@ -97,8 +124,18 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     }
 
     @Override
+    public void bridge$getConfigPath(Path path) {
+        this.impl$configPath = path;
+    }
+
+    @Override
     public SpongeConfig<DimensionConfig> bridge$getDimensionConfig() {
         return this.impl$config;
+    }
+
+    @Override
+    public void bridge$setDimensionConfig(SpongeConfig<DimensionConfig> config) {
+        this.impl$config = config;
     }
 
     @Override
@@ -106,14 +143,8 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
         return this.impl$context;
     }
 
-    /**
-     * @author Zidane - March 30th, 2016
-     * @reason This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla. I change this assumption to dimension
-     * instance ids. Since the WorldManager tracks dimension instance ids by dimension type ids and Vanilla keeps
-     * their ids 1:1, this is a safe change that ensures a mixup can't happen.
-     */
-    @Overwrite
-    public static DimensionType getById(final int dimensionTypeId) {
-        return WorldManager.getDimensionTypeByTypeId(dimensionTypeId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
+    @Override
+    public void bridge$setContext(Context context) {
+        this.impl$context = context;
     }
 }

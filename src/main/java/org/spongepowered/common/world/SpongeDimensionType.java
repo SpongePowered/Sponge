@@ -22,29 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.server;
+package org.spongepowered.common.world;
 
-import net.minecraft.server.dedicated.DedicatedServer;
-import org.spongepowered.api.Server;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.common.bridge.world.DimensionTypeBridge;
 
-import java.net.InetSocketAddress;
-import java.util.Optional;
+public final class SpongeDimensionType implements DimensionType {
 
-@Mixin(DedicatedServer.class)
-public abstract class DedicatedServerMixin_API extends MinecraftServerMixin_API implements Server {
+    private final net.minecraft.world.dimension.DimensionType dimensionType;
 
-    @Shadow public abstract String getHostname();
-    @Shadow public abstract int getPort();
-
-    @Override
-    public Optional<InetSocketAddress> getBoundAddress() {
-        //noinspection ConstantConditions
-        if (this.getHostname() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new InetSocketAddress(this.getHostname(), this.getPort()));
+    public SpongeDimensionType(net.minecraft.world.dimension.DimensionType dimensionType) {
+        this.dimensionType = dimensionType;
     }
 
+    @Override
+    public CatalogKey getKey() {
+        return ((DimensionTypeBridge) this.dimensionType).bridge$getKey();
+    }
+
+    @Override
+    public boolean hasSkylight() {
+        return this.dimensionType.hasSkyLight();
+    }
+
+    @Override
+    public Context getContext() {
+        return ((DimensionTypeBridge) this.dimensionType).bridge$getContext();
+    }
+
+    public net.minecraft.world.dimension.DimensionType getMinecraftDimensionType() {
+        return this.dimensionType;
+    }
 }

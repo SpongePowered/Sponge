@@ -26,60 +26,49 @@ package org.spongepowered.common.registry.type.world;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Maps;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.registry.util.AdditionalRegistration;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.api.world.server.WorldRegistration;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<DimensionType> {
+public final class WorldRegistrationRegistryModule implements SpongeAdditionalCatalogRegistryModule<WorldRegistration> {
 
-    @RegisterCatalog(DimensionTypes.class)
-    private final Map<CatalogKey, DimensionType> dimensionTypeMappings = Maps.newHashMap();
+    private final Map<CatalogKey, WorldRegistration> worldRegistrationMappings = new HashMap<>();
 
-    public static DimensionTypeRegistryModule getInstance() {
+    public static WorldRegistrationRegistryModule getInstance() {
         return Holder.instance;
     }
 
     @Override
     public boolean allowsApiRegistration() {
-        return false;
+        return true;
     }
 
     @Override
-    public void registerAdditionalCatalog(DimensionType dimensionType) {
-        this.dimensionTypeMappings.put(dimensionType.getKey(), dimensionType);
+    public void registerAdditionalCatalog(WorldRegistration worldRegistration) {
+        this.worldRegistrationMappings.put(worldRegistration.getKey(), worldRegistration);
     }
 
     @Override
-    public Optional<DimensionType> get(CatalogKey key) {
-        return Optional.ofNullable(this.dimensionTypeMappings.get(checkNotNull(key)));
+    public Optional<WorldRegistration> get(CatalogKey key) {
+        return Optional.ofNullable(this.worldRegistrationMappings.get(checkNotNull(key)));
     }
 
     @Override
-    public Collection<DimensionType> getAll() {
-        return Collections.unmodifiableCollection(this.dimensionTypeMappings.values());
+    public Collection<WorldRegistration> getAll() {
+        return Collections.unmodifiableCollection(this.worldRegistrationMappings.values());
     }
 
-    @AdditionalRegistration
-    public void reApplyDimensionTypes() {
-        // Re-map fields in case mods have changed vanilla providers
-        RegistryHelper.mapFields(DimensionTypes.class, this.dimensionTypeMappings);
-    }
-
-    private DimensionTypeRegistryModule() {
+    private WorldRegistrationRegistryModule() {
     }
 
     private static final class Holder {
 
-        private static final DimensionTypeRegistryModule instance = new DimensionTypeRegistryModule();
+        private static final WorldRegistrationRegistryModule instance = new WorldRegistrationRegistryModule();
     }
 }

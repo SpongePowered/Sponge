@@ -22,39 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world;
+package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.api.world.Dimension;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.DimensionTypeBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(DimensionType.class)
-@Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
-public abstract class DimensionTypeMixin_API implements org.spongepowered.api.world.DimensionType {
+public interface DimensionTypeAccessor {
 
-    @Shadow @Final private Class <? extends net.minecraft.world.dimension.Dimension> clazz;
-    @Shadow public abstract String getName();
-
-    @Intrinsic
-    public String dimensionType$getId() {
-        return ((DimensionTypeBridge) this).bridge$getSanitizedId();
-    }
-
-    @Intrinsic
-    public String dimensionType$getName() {
-        return this.getName();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<? extends Dimension> getDimensionClass() {
-        return (Class<? extends Dimension>) this.clazz;
-    }
-
+    @Accessor("directory") String accessor$getDirectory();
 }
