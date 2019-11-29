@@ -169,7 +169,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
-    private final User impl$user = bridge$getUserObject();
+    private final User impl$user = impl$getUserObjectOnConstruction();
     private ImmutableSet<SkinPart> impl$skinParts = ImmutableSet.of();
     private int impl$viewDistance;
     @Nullable private GameType impl$pendingGameType;
@@ -371,6 +371,15 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
         }
         return service.getOrCreate((GameProfile) this.getGameProfile());
+    }
+
+    private User impl$getUserObjectOnConstruction() {
+        final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        if (this.isFake || !(service instanceof SpongeUserStorageService)) {
+            return bridge$getUserObject();
+        }
+        // Emnsure that the game profile is up to date.
+        return ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
     }
 
     @Override
