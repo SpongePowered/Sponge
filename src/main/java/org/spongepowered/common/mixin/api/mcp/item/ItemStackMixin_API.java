@@ -50,7 +50,7 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.item.ItemBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.Constants;
 

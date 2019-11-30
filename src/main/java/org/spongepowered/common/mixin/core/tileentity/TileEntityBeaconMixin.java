@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.data.CustomNameableBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBeaconBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.InputSlotAdapter;
@@ -38,8 +39,7 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.bridge.data.CustomNameableBridge;
-import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
+import org.spongepowered.common.inventory.lens.slots.InputSlotLens;
 
 import javax.annotation.Nullable;
 

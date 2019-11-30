@@ -27,34 +27,34 @@ package org.spongepowered.common.registry.type.item;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.item.inventory.property.GuiId;
-import org.spongepowered.api.item.inventory.property.GuiIds;
+import org.spongepowered.api.item.inventory.ContainerType;
+import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeContainerType;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class ContainerTypeRegistryModule implements CatalogRegistryModule<GuiId>, AdditionalCatalogRegistryModule<GuiId> {
+public class ContainerTypeRegistryModule implements CatalogRegistryModule<ContainerType>, AdditionalCatalogRegistryModule<ContainerType> {
 
     public static ContainerTypeRegistryModule getInstance() {
         return org.spongepowered.common.registry.type.item.ContainerTypeRegistryModule.Holder.INSTANCE;
     }
 
-    @RegisterCatalog(GuiIds.class)
-    private final Map<String, GuiId> guiIdMap = new HashMap<>();
+    @RegisterCatalog(ContainerTypes.class)
+    private final Map<String, ContainerType> guiIdMap = new HashMap<>();
 
     @Override
-    public Optional<GuiId> getById(String id) {
+    public Optional<ContainerType> getById(String id) {
         return Optional.ofNullable(this.guiIdMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<GuiId> getAll() {
+    public Collection<ContainerType> getAll() {
         return ImmutableList.copyOf(this.guiIdMap.values());
     }
 
@@ -83,7 +83,7 @@ public class ContainerTypeRegistryModule implements CatalogRegistryModule<GuiId>
     }
 
     @Override
-    public void registerAdditionalCatalog(GuiId guiId) {
+    public void registerAdditionalCatalog(ContainerType guiId) {
         if (this.guiIdMap.containsKey(guiId.getId())) {
             throw new IllegalArgumentException("GuiId is already registered");
         }

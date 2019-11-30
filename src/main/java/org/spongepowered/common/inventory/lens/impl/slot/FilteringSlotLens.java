@@ -30,7 +30,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.FilteringSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.FilteringSlotLens;
+import org.spongepowered.common.inventory.lens.slots.FilteringSlotLens;
 
 import java.util.function.Predicate;
 

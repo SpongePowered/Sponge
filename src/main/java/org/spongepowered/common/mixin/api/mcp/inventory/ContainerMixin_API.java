@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.inventory;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
@@ -38,24 +40,20 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.inventory.util.InventoryUtil;
+import org.spongepowered.common.inventory.util.ItemStackUtil;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@NonnullByDefault
 @Mixin(value = Container.class, priority = 998)
 public abstract class ContainerMixin_API implements org.spongepowered.api.item.inventory.Container, CarriedInventory<Carrier> {
 
     @Shadow public List<Slot> inventorySlots;
     @Shadow protected List<IContainerListener> listeners;
     @Shadow public abstract NonNullList<ItemStack> getInventory();
-
-    @Override
-    public InventoryArchetype getArchetype() {
-        return ((ContainerBridge) this).bridge$getArchetype();
-    }
 
     @Override
     public Optional<Carrier> getCarrier() {
@@ -91,6 +89,30 @@ public abstract class ContainerMixin_API implements org.spongepowered.api.item.i
     }
 
     @Override
+    public Optional<org.spongepowered.api.item.inventory.ItemStack> getCursor() {
+        return this.listeners().stream().findFirst()
+                .map(p -> p.inventory.getItemStack())
+                .map(ItemStackUtil::fromNative);
+    }
+
+    @Override
+    public Player getViewer() {
+        return this.listeners().stream().filter(Player.class::isInstance).map(Player.class::cast).findFirst().orElseThrow(() -> new IllegalStateException("Container without viewer"));
+    }
+
+    @Override
+    public boolean isOpen() {
+        org.spongepowered.api.item.inventory.Container thisContainer = this;
+        return this.getViewer().getOpenInventory().map(c -> c == thisContainer).orElse(false);
+    }
+
+    public List<ServerPlayerEntity> listeners() {
+        return this.listeners.stream()
+                .filter(ServerPlayerEntity.class::isInstance)
+                .map(ServerPlayerEntity.class::cast)
+                .collect(Collectors.toList());
+    }
+
     public boolean hasViewers() {
         return !this.listeners.isEmpty();
     }

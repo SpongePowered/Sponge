@@ -123,6 +123,7 @@ import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.bridge.text.TitleBridge;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.Constants;

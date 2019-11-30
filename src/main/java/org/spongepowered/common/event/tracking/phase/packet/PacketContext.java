@@ -30,7 +30,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.ServerPlayerEntity;

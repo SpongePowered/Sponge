@@ -75,9 +75,13 @@ import org.spongepowered.common.inventory.adapter.impl.slots.CraftingOutputAdapt
 import org.spongepowered.common.inventory.custom.CustomContainer;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.comp.CraftingInventoryLens;
+import org.spongepowered.common.inventory.lens.comp.GridInventoryLens;
+import org.spongepowered.common.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
@@ -86,11 +90,7 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLen
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.mixin.core.inventory.accessor.ContainerAccessor;
 import org.spongepowered.common.mixin.core.inventory.accessor.ContainerBrewingStandAccessor;
 import org.spongepowered.common.mixin.core.inventory.accessor.ContainerDispenserAccessor;
@@ -100,6 +100,7 @@ import org.spongepowered.common.mixin.core.inventory.accessor.ContainerHorseInve
 import org.spongepowered.common.mixin.core.inventory.accessor.ContainerMerchantAccessor;
 import org.spongepowered.common.mixin.core.inventory.accessor.ContainerRepairAccessor;
 import org.spongepowered.common.mixin.core.inventory.accessor.SlotCraftingAccessor;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -350,7 +351,7 @@ public final class ContainerUtil {
     /**
      * Calculates the slot count for the passed {@link Container}
      *
-     * @return The {@link SlotCollection} with the amount of slots for this container.
+     * @return The {@link SlotLensCollection} with the amount of slots for this container.
      */
     public static SlotLensProvider countSlots(final net.minecraft.inventory.container.Container container, final Fabric fabric) {
         if (container instanceof LensProviderBridge) {

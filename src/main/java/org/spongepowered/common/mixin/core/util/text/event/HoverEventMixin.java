@@ -41,6 +41,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;

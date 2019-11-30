@@ -34,8 +34,9 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.custom.CustomLens;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.slots.SlotLensProvider;
+
 import java.util.Map;
 
 @Mixin(CustomInventory.class)

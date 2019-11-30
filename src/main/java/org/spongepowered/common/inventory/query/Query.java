@@ -24,18 +24,16 @@
  */
 package org.spongepowered.common.inventory.query;
 
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.lens.MutableLensSet;
-import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensSetImpl;
-import org.spongepowered.common.item.inventory.query.result.MinecraftResultAdapterProvider;
-import org.spongepowered.common.item.inventory.query.result.QueryResult;
+import org.spongepowered.common.inventory.lens.MutableLensSet;
+import org.spongepowered.common.inventory.lens.impl.collections.MutableLensSetImpl;
+import org.spongepowered.common.inventory.query.result.MinecraftResultAdapterProvider;
+import org.spongepowered.common.inventory.query.result.QueryResult;
 
 import java.util.Collection;
 

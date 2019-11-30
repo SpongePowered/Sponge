@@ -35,6 +35,7 @@ import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

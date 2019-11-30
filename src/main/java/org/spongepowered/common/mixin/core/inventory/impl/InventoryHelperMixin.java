@@ -29,14 +29,11 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.inventory.util.ContainerUtil;
-import java.util.Random;
 
 @Mixin(InventoryHelper.class)
 public class InventoryHelperMixin {

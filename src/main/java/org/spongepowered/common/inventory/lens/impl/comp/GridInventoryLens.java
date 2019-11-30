@@ -30,9 +30,7 @@ import org.spongepowered.common.inventory.adapter.impl.comp.GridInventoryAdapter
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.struct.LensHandle;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
-import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
+
 import java.util.ArrayList;
 import java.util.List;
 

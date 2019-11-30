@@ -28,7 +28,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SidedSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.SidedSlotLens;
+import org.spongepowered.common.inventory.lens.slots.SidedSlotLens;
 
 
 public abstract class AbstractSidedSlotLens extends BasicSlotLens implements SidedSlotLens {

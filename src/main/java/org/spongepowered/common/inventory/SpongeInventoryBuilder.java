@@ -35,11 +35,11 @@ import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.common.inventory.custom.CustomInventory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class SpongeInventoryBuilder implements Inventory.Builder {
 

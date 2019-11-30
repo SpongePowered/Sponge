@@ -31,9 +31,6 @@ import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInvento
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
-import org.spongepowered.common.item.inventory.lens.comp.MainPlayerInventoryLens;
 
 public class PrimaryPlayerInventoryLens extends org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens implements MainPlayerInventoryLens {
 

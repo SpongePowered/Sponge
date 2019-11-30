@@ -63,6 +63,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
 import java.util.Collections;
 
 @Mixin(FurnaceTileEntity.class)

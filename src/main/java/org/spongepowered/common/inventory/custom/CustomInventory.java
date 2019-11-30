@@ -25,9 +25,7 @@
 package org.spongepowered.common.inventory.custom;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IInteractionObject;
@@ -37,10 +35,9 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.gui.ContainerType;
+import org.spongepowered.api.item.inventory.gui.ContainerTypes;
 import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
-import org.spongepowered.api.item.inventory.property.GuiId;
-import org.spongepowered.api.item.inventory.property.GuiIdProperty;
-import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.item.inventory.property.InventoryCapacity;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
@@ -50,13 +47,13 @@ import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.type.SpongeContainerType;
-import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
-import org.spongepowered.common.item.inventory.custom.CustomInventoryListener;
+import org.spongepowered.common.inventory.archetype.CompositeInventoryArchetype;
+import org.spongepowered.common.inventory.custom.CustomInventoryListener;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -167,15 +164,15 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @Override
     public String getGuiID() {
-        final String key = AbstractInventoryProperty.getDefaultKey(GuiIdProperty.class).toString();
+        final String key = AbstractInventoryProperty.getDefaultKey(ContainerType.class).toString();
         final InventoryProperty<?, ?> property = this.properties.get(key);
-        if (property instanceof GuiIdProperty) {
+        if (property instanceof ContainerType) {
             if (property.getValue() instanceof SpongeContainerType) {
                 return ((SpongeContainerType) property.getValue()).getInternalId(); // Handle Vanilla EntityHorse GuiId
             }
-            return ((GuiIdProperty) property).getValue().getId();
+            return ((ContainerType) property).getValue().getId();
         }
-        final GuiId guiId = this.archetype.getProperty(GuiIdProperty.class, key).map(GuiIdProperty::getValue).orElse(GuiIds.CHEST);
+        final ContainerType guiId = this.archetype.getProperty(ContainerType.class, key).map(ContainerType::getValue).orElse(ContainerTypes.GENERIC_9x3);
         if (guiId instanceof SpongeContainerType) {
             return ((SpongeContainerType) guiId).getInternalId(); // Handle Vanilla EntityHorse GuiId
         }

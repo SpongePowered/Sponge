@@ -31,6 +31,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.EnchantmentContainer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IntReferenceHolder;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -53,7 +54,7 @@ import java.util.Random;
 public abstract class ContainerEnchantmentMixin {
 
     @Shadow @Final private Random rand;
-    @Shadow public int xpSeed;
+    @Shadow public IntReferenceHolder xpSeed;
     @Shadow public IInventory tableInventory;
 
     private ItemStackSnapshot prevItem;
@@ -62,14 +63,14 @@ public abstract class ContainerEnchantmentMixin {
     @Redirect(method = "onCraftMatrixChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;calcItemStackEnchantability(Ljava/util/Random;IILnet/minecraft/item/ItemStack;)I"))
     private int impl$onCalcItemStackEnchantability(Random random, int option, int power, ItemStack itemStack) {
         int levelRequirement = EnchantmentHelper.calcItemStackEnchantability(random, option, power, itemStack);
-        levelRequirement = SpongeCommonEventFactory.callEnchantEventLevelRequirement((EnchantmentContainer)(Object) this, this.xpSeed, option, power, itemStack, levelRequirement);
+        levelRequirement = SpongeCommonEventFactory.callEnchantEventLevelRequirement((EnchantmentContainer)(Object) this, this.xpSeed.get(), option, power, itemStack, levelRequirement);
         return levelRequirement;
     }
 
     @Inject(method = "getEnchantmentList", cancellable = true, at = @At(value = "RETURN"))
     private void impl$onBuildEnchantmentList(ItemStack stack, int enchantSlot, int level, CallbackInfoReturnable<List<EnchantmentData>> cir) {
         List<EnchantmentData> newList = SpongeCommonEventFactory
-                .callEnchantEventEnchantmentList((EnchantmentContainer) (Object) this, this.xpSeed, stack, enchantSlot, level, cir.getReturnValue());
+                .callEnchantEventEnchantmentList((EnchantmentContainer) (Object) this, this.xpSeed.get(), stack, enchantSlot, level, cir.getReturnValue());
 
         if (cir.getReturnValue() != newList) {
             cir.setReturnValue(newList);
@@ -96,7 +97,7 @@ public abstract class ContainerEnchantmentMixin {
                 SpongeCommonEventFactory.callEnchantEventEnchantPost(playerIn, (EnchantmentContainer) (Object) this,
                         new SlotTransaction(slotItem, this.prevItem, newItem),
                         new SlotTransaction(slotLapis, this.prevLapis, newLapis),
-                        option, this.xpSeed);
+                        option, this.xpSeed.get());
 
         if (event.isCancelled()) {
             cir.setReturnValue(false);

@@ -26,11 +26,12 @@ package org.spongepowered.common.inventory.lens.impl;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 
 /**
  * Lenses for inventory concepts like {@link OrderedInventory} or {@link GridInventory}.
  *
- * <p>This lenses will usually return a new matching adapter (usually extending {@link AbstractInventoryAdapter})</p>
+ * <p>This lenses will usually return a new matching adapter (usually extending {@link BasicInventoryAdapter})</p>
  */
 @SuppressWarnings("rawtypes")
 public abstract class SlotBasedLens extends AbstractLens {

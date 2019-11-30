@@ -34,8 +34,7 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
 
 @Mixin(value = {Inventory.class, CraftResultInventory.class})
 public abstract class InventoryBasicMixin implements IInventory, LensProviderBridge {

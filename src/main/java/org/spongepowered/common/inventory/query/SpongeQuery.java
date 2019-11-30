@@ -29,7 +29,7 @@ import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 
-public abstract class SpongeQuery<T> implements org.spongepowered.common.inventory.query.Query<T> {
+public abstract class SpongeQuery<T> implements Query<T> {
 
     protected final QueryOperationType<T> type;
 

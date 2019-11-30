@@ -34,7 +34,7 @@ import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResu
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.item.util.ItemStackUtil;import java.util.List;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;

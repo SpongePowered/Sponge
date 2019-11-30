@@ -31,7 +31,7 @@ import org.spongepowered.common.inventory.adapter.impl.comp.OrderedInventoryAdap
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.impl.slots.SlotLensProvider;
 import org.spongepowered.common.mixin.core.inventory.accessor.InventoryLargeChestAccessor;
 
 /**
