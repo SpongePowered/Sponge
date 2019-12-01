@@ -140,7 +140,7 @@ import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
-import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.bridge.world.WorldTypeBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;

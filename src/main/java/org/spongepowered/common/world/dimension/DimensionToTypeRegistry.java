@@ -22,8 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@DefaultQualifier(NonNull.class)
-package org.spongepowered.common.bridge.world.storage;
+package org.spongepowered.common.world.dimension;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import net.minecraft.world.dimension.Dimension;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public final class DimensionToTypeRegistry {
+
+    private static final DimensionToTypeRegistry instance = new DimensionToTypeRegistry();
+
+    private final Map<Class<Dimension>, SpongeDimensionType> dimensionTypeMappings;
+
+    public DimensionToTypeRegistry() {
+        this.dimensionTypeMappings = new HashMap<>();
+    }
+
+    public void registerTypeMapping(Class<? extends Dimension> dimensionClass, SpongeDimensionType dimensionType) {
+        this.dimensionTypeMappings.put((Class<Dimension>) dimensionClass, dimensionType);
+    }
+
+    @Nullable
+    public SpongeDimensionType getDimensionType(Class<? extends Dimension> dimensionClass) {
+        return this.dimensionTypeMappings.get(dimensionClass);
+    }
+
+    public static DimensionToTypeRegistry getInstance() {
+        return instance;
+    }
+}

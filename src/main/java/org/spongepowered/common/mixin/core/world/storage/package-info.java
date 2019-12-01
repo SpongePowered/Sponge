@@ -22,37 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
-
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-
-public final class SpongeDimensionType implements DimensionType {
-
-    private final net.minecraft.world.dimension.DimensionType dimensionType;
-
-    public SpongeDimensionType(net.minecraft.world.dimension.DimensionType dimensionType) {
-        this.dimensionType = dimensionType;
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return ((DimensionTypeBridge) this.dimensionType).bridge$getKey();
-    }
-
-    @Override
-    public boolean hasSkylight() {
-        return this.dimensionType.hasSkyLight();
-    }
-
-    @Override
-    public Context getContext() {
-        return ((DimensionTypeBridge) this.dimensionType).bridge$getContext();
-    }
-
-    public net.minecraft.world.dimension.DimensionType getMinecraftDimensionType() {
-        return this.dimensionType;
-    }
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package org.spongepowered.common.mixin.core.world.storage;

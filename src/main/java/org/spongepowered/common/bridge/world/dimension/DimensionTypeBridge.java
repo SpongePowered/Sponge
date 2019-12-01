@@ -24,20 +24,10 @@
  */
 package org.spongepowered.common.bridge.world.dimension;
 
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
-import org.spongepowered.common.world.SpongeDimensionType;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.server.SpongeWorldRegistration;
 
-import java.nio.file.Path;
-
 public interface DimensionTypeBridge {
-
-    CatalogKey bridge$getKey();
-
-    void bridge$setKey(CatalogKey key);
 
     SpongeDimensionType bridge$getSpongeDimensionType();
 
@@ -46,16 +36,4 @@ public interface DimensionTypeBridge {
     SpongeWorldRegistration bridge$getWorldRegistration();
 
     void bridge$setWorldRegistration(SpongeWorldRegistration worldRegistration);
-
-    SpongeConfig<DimensionConfig> bridge$getDimensionConfig();
-
-    void bridge$setDimensionConfig(SpongeConfig<DimensionConfig> config);
-
-    Path bridge$getConfigPath();
-
-    void bridge$getConfigPath(Path path);
-
-    Context bridge$getContext();
-
-    void bridge$setContext(Context context);
 }

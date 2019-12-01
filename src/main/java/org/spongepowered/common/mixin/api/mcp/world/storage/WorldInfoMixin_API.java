@@ -43,7 +43,6 @@ import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -55,7 +54,8 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.mixin.core.world.GameRulesAccessor;
 import org.spongepowered.common.mixin.core.world.GameRules_RuleValueAccessor;
@@ -119,11 +119,19 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow public abstract void shadow$setClearWeatherTime(int time);
     @Shadow public abstract int shadow$getClearWeatherTime();
 
-    private SerializationBehavior api$serializationBehavior = SerializationBehaviors.AUTOMATIC;
+    @Override
+    public String getDirectoryName() {
+        return this.shadow$getWorldName();
+    }
 
     @Intrinsic
     public String worldproperties$getWorldName() {
         return ((WorldInfoBridge) this).bridge$getWorldName();
+    }
+
+    @Intrinsic
+    public void worldproperties$setWorldName(String worldName) {
+        ((WorldInfoBridge) this).bridge$setWorldName(worldName);
     }
 
     @Override
@@ -132,7 +140,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setSpawnPosition(final Vector3i position) {
+    public void setSpawnPosition(Vector3i position) {
         checkNotNull(position);
         this.shadow$setSpawn(VecHelper.toBlockPos(position));
     }
@@ -154,7 +162,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setSeed(final long seed) {
+    public void setSeed(long seed) {
         this.randomSeed = seed;
     }
 
@@ -175,7 +183,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public DimensionType getDimensionType() {
-        return ((WorldInfoBridge) this).bridge$getDimensionType();
+        return ((DimensionTypeBridge) ((WorldInfoBridge) this).bridge$getDimensionType()).bridge$getSpongeDimensionType();
     }
 
     @Override
@@ -234,19 +242,18 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setDifficulty(final org.spongepowered.api.world.difficulty.Difficulty difficulty) {
+    public void setDifficulty(org.spongepowered.api.world.difficulty.Difficulty difficulty) {
         this.shadow$setDifficulty((Difficulty) (Object) difficulty);
     }
 
     @Override
     public boolean isPVPEnabled() {
-        return ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getPVPEnabled();
+        return ((WorldInfoBridge) this).bridge$isPVPEnabled();
     }
 
     @Override
-    public void setPVPEnabled(final boolean enabled) {
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setPVPEnabled(enabled);
-        ((WorldInfoBridge) this).bridge$saveConfig();
+    public void setPVPEnabled(boolean state) {
+        ((WorldInfoBridge) this).bridge$setPVPEnabled(state);
     }
 
     @Override
@@ -265,19 +272,13 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public String getDirectoryName() {
-        return this.shadow$getWorldName();
-    }
-
-    @Override
     public boolean isEnabled() {
-        return ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().isWorldEnabled();
+        return ((WorldInfoBridge) this).bridge$isEnabled();
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setWorldEnabled(enabled);
-        ((WorldInfoBridge) this).bridge$saveConfig();
+    public void setEnabled(boolean state) {
+        ((WorldInfoBridge) this).bridge$setEnabled(state);
     }
 
     @Override
@@ -287,8 +288,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setLoadOnStartup(boolean state) {
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setLoadOnStartup(state);
-        ((WorldInfoBridge) this).bridge$saveConfig();
+        ((WorldInfoBridge) this).bridge$setLoadOnStartup(state);
     }
 
     @Override
@@ -298,8 +298,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setKeepSpawnLoaded(boolean state) {
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setKeepSpawnLoaded(state);
-        ((WorldInfoBridge) this).bridge$saveConfig();
+        ((WorldInfoBridge) this).bridge$setKeepSpawnLoaded(state);
     }
 
     @Override
@@ -309,8 +308,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setGenerateSpawnOnLoad(boolean state) {
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setGenerateSpawnOnLoad(state);
-        ((WorldInfoBridge) this).bridge$saveConfig();
+        ((WorldInfoBridge) this).bridge$setGenerateSpawnOnLoad(state);
     }
 
     @Override
@@ -341,12 +339,12 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public SerializationBehavior getSerializationBehavior() {
-        return this.api$serializationBehavior;
+        return ((WorldInfoBridge) this).bridge$getSerializationBehavior();
     }
 
     @Override
     public void setSerializationBehavior(SerializationBehavior behavior) {
-        this.api$serializationBehavior = behavior;
+        ((WorldInfoBridge) this).bridge$setSerializationBehavior(checkNotNull(behavior));
     }
 
     @Intrinsic
@@ -402,7 +400,17 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public Duration getRemainingWeatherDuration() {
-        // TODO 1.14 - Weather has no finite maximum so....I guess I'll hardcode it? How do I implement this??
+        if (this.shadow$isRaining()) {
+            return Duration.ofSeconds(this.shadow$getRainTime());
+        } else if (this.shadow$isThundering()) {
+            return Duration.ofSeconds(this.shadow$getThunderTime());
+        }
+        return Duration.ofSeconds(this.shadow$getClearWeatherTime());
+    }
+
+    @Override
+    public Duration getRunningWeatherDuration() {
+        // TODO 1.14 - Weather has no finite maximum and we don't know how much it started with so....I guess I'll hardcode it? How do I implement this??
         if (this.shadow$isRaining()) {
             return Duration.ofSeconds(6000 - this.shadow$getRainTime());
         } else if (this.shadow$isThundering()) {
@@ -410,16 +418,6 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         } else {
             return Duration.ofSeconds(6000 - this.shadow$getClearWeatherTime());
         }
-    }
-
-    @Override
-    public Duration getRunningWeatherDuration() {
-        if (this.shadow$isRaining()) {
-            return Duration.ofSeconds(this.shadow$getRainTime());
-        } else if (this.shadow$isThundering()) {
-            return Duration.ofSeconds(this.shadow$getThunderTime());
-        }
-        return Duration.ofSeconds(this.shadow$getClearWeatherTime());
     }
 
     @Override

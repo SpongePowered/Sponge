@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.world;
 
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.dimension.DimensionType;
@@ -89,4 +90,6 @@ public interface WorldSettingsBridge {
 
     @Nullable
     Boolean bridge$internalKeepSpawnLoaded();
+
+    void bridge$populateInfo(WorldInfo info);
 }

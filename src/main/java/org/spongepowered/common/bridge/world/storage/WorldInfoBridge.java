@@ -22,19 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.bridge.world.storage;
 
-import org.spongepowered.api.world.dimension.DimensionType;
+import net.minecraft.world.dimension.DimensionType;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.teleport.PortalAgentType;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.Difficulty;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 
 public interface WorldInfoBridge {
 
@@ -42,28 +43,43 @@ public interface WorldInfoBridge {
 
     void bridge$setDimensionType(DimensionType type);
 
-    PortalAgentType bridge$getPortalAgent();
-    
     UUID bridge$getUniqueId();
 
     void bridge$setUniqueId(UUID uniqueId);
-    
-    CompoundNBT bridge$getSpongeLevelCompound();
 
-    void bridge$setSpongeLevelCompound(CompoundNBT compound);
+    String bridge$getWorldName();
 
-    void bridge$readSpongeDataCompound(CompoundNBT compound);
-    
+    void bridge$setWorldName(String worldName);
+
+    boolean bridge$isEnabled();
+
+    void bridge$setEnabled(boolean state);
+
+    boolean bridge$isPVPEnabled();
+
+    void bridge$setPVPEnabled(boolean state);
+
     boolean bridge$doesGenerateBonusChest();
-    
-    int bridge$getIndexForUniqueId(UUID uuid);
 
-    Optional<UUID> bridge$getUniqueIdForIndex(int index);
+    void bridge$setGenerateBonusChest(boolean state);
 
-    @Nullable
-    SpongeConfig<WorldConfig> bridge$getConfigAdapter();
+    boolean bridge$doesLoadOnStartup();
 
-    boolean bridge$createWorldConfig();
+    void bridge$setLoadOnStartup(boolean state);
+
+    boolean bridge$doesKeepSpawnLoaded();
+
+    void bridge$setKeepSpawnLoaded(boolean state);
+
+    boolean bridge$doesGenerateSpawnOnLoad();
+
+    void bridge$setGenerateSpawnOnLoad(boolean state);
+
+    SerializationBehavior bridge$getSerializationBehavior();
+
+    void bridge$setSerializationBehavior(SerializationBehavior behavior);
+
+    PortalAgentType bridge$getPortalAgent();
 
     boolean bridge$isValid();
 
@@ -76,15 +92,17 @@ public interface WorldInfoBridge {
 
     void bridge$updatePlayersForDifficulty();
 
+    void bridge$writeSpongeLevelData(CompoundNBT compound);
+
+    void bridge$readSpongeLevelData(CompoundNBT compound);
+
+    int bridge$getIndexForUniqueId(UUID uuid);
+
+    Optional<UUID> bridge$getUniqueIdForIndex(int index);
+
+    @Nullable SpongeConfig<WorldConfig> bridge$getConfigAdapter();
+
+    boolean bridge$createWorldConfig();
+
     void bridge$saveConfig();
-
-    boolean bridge$doesLoadOnStartup();
-
-    boolean bridge$doesKeepSpawnLoaded();
-
-    boolean bridge$doesGenerateSpawnOnLoad();
-
-    void bridge$setGenerateBonusChest(boolean state);
-
-    String bridge$getWorldName();
 }

@@ -29,6 +29,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -44,7 +45,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 
 import javax.annotation.Nullable;
@@ -229,5 +230,20 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     @Override
     public Boolean bridge$internalKeepSpawnLoaded() {
         return this.keepSpawnLoaded;
+    }
+
+    @Override
+    public void bridge$populateInfo(WorldInfo info) {
+        final WorldArchetype this$ = (WorldArchetype) (Object) this;
+        final WorldInfoBridge infoBridge = (WorldInfoBridge) info;
+
+        // TODO 1.14 - Add all the property setters
+        infoBridge.bridge$setEnabled(this$.isEnabled());
+        infoBridge.bridge$setLoadOnStartup(this$.doesLoadOnStartup());
+        infoBridge.bridge$setGenerateSpawnOnLoad(this$.doesGenerateSpawnOnLoad());
+        infoBridge.bridge$setKeepSpawnLoaded(this$.doesKeepSpawnLoaded());
+        infoBridge.bridge$setGenerateBonusChest(this$.doesGenerateBonusChest());
+        infoBridge.bridge$setSerializationBehavior(this$.getSerializationBehavior());
+        infoBridge.bridge$forceSetDifficulty((net.minecraft.world.Difficulty) (Object) this$.getDifficulty());
     }
 }
