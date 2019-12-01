@@ -24,34 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.inventory.impl;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.CraftResultInventory;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.NonNullList;
-import net.minecraft.world.World;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -62,148 +50,37 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
-import org.spongepowered.common.bridge.inventory.LensProviderBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.SlotCollection;
-import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.SlotCollection;
-import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.inventory.lens.Fabric;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.SlotProvider;
-import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.inventory.util.ContainerUtil;
-import org.spongepowered.common.inventory.util.ItemStackUtil;
 import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(value = Container.class, priority = 998)
-public abstract class ContainerMixin implements ContainerBridge, InventoryAdapter, TrackedInventoryBridge, InventoryAdapterBridge {
+public abstract class ContainerMixin implements TrackedInventoryBridge, TrackedContainerBridge {
 
-    @Shadow public List<Slot> inventorySlots;
-    @Shadow public NonNullList<ItemStack> inventoryItemStacks;
-    @Shadow protected List<IContainerListener> listeners;
+    @Final @Shadow public List<Slot> inventorySlots;
+    @Final @Shadow private NonNullList<ItemStack> inventoryItemStacks;
+    @Final @Shadow private List<IContainerListener> listeners;
     @Shadow public abstract NonNullList<ItemStack> getInventory();
     @Shadow public abstract Slot shadow$getSlot(int slotId);
     @Shadow public ItemStack slotClick(final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player) {
         throw new IllegalStateException("Shadowed.");
     }
 
-    @Shadow public int windowId;
-    private boolean impl$spectatorChest;
+    @Shadow public abstract Slot getSlot(int slotId);
+
     private boolean impl$dropCancelled = false;
     private ItemStackSnapshot impl$itemStackSnapshot = ItemStackSnapshot.empty();
     @Nullable private Slot impl$lastSlotUsed = null;
-    @Nullable private CraftItemEvent.Craft impl$lastCraft = null;
-    @Nullable private Location impl$lastOpenLocation;
-    private boolean impl$firePreview = true;
-    private boolean impl$inUse = false;
-    private boolean impl$captureSuccess = false;
-    @Nullable private SpongeInventoryMenu impl$menu;
-    private boolean impl$captureInventory = false;
-    private boolean impl$shiftCraft = false;
-    //private boolean postPreCraftEvent = true; // used to prevent multiple craft events to fire when setting multiple slots simultaneously
-    private List<SlotTransaction> impl$capturedSlotTransactions = new ArrayList<>();
-    private List<SlotTransaction> impl$capturedCraftShiftTransactions = new ArrayList<>();
-    private List<SlotTransaction> impl$capturedCraftPreviewTransactions = new ArrayList<>();
-    private boolean impl$isLensInitialized;
-    @Nullable private Map<Integer, SlotAdapter> impl$adapters;
-    @Nullable private Carrier impl$carrier;
-    @Nullable Predicate<PlayerEntity> impl$canInteractWithPredicate;
-    @Nullable private LinkedHashMap<IInventory, Set<Slot>> impl$allInventories;
-    @Nullable private ItemStack impl$previousCursor;
-
-    @Override
-    public SlotLensProvider bridge$generateSlotProvider() {
-        return ContainerUtil.countSlots((Container) (Object) this, bridge$getFabric());
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public Lens bridge$generateLens(SlotLensProvider slots) {
-        if (this.impl$isLensInitialized) {
-            return null; // Means that we've tried to generate a lens before, but it was null. And because the lens is null,
-            // the generate will try again. So, we stop trying to generate it.
-        }
-        this.impl$isLensInitialized = true;
-        final Fabric fabric = bridge$getFabric();
-        final Lens lens;
-        if (this.impl$spectatorChest) {
-            lens = null;
-        } else {
-            if (this instanceof LensProviderBridge) {
-                // TODO LensProviders for all Vanilla Containers
-                lens = ((LensProviderBridge) this).bridge$rootLens(fabric, this);
-            } else if (getInventory().size() == 0) {
-                lens = new DefaultEmptyLens(this); // Empty Container
-            } else {
-                lens = ContainerUtil.generateLens((Container) (Object) this, slots);
-            }
-        }
-        return lens;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private Map<Integer, SlotAdapter> impl$getAdapters() {
-        if (this.impl$adapters == null) {
-            this.impl$adapters = new Int2ObjectArrayMap<>();
-            // If we know the lens, we can cache the adapters now
-
-            final Lens lens = bridge$getRootLens();
-            if (lens != null) {
-                final SlotCollection iter = new SlotCollection((Inventory) this, bridge$getFabric(), lens, bridge$getSlotProvider());
-                for (final org.spongepowered.api.item.inventory.Slot slot : iter.slots()) {
-                    this.impl$adapters.put(((SlotAdapter) slot).getOrdinal(), (SlotAdapter) slot);
-                }
-            }
-        }
-        return this.impl$adapters;
-    }
-
-    @Override
-    public Optional<Carrier> bridge$getCarrier() {
-        if (this.impl$carrier == null) {
-            this.impl$carrier = ContainerUtil.getCarrier((org.spongepowered.api.item.inventory.Container) this);
-        }
-        return Optional.ofNullable(this.impl$carrier);
-    }
-
-    @SuppressWarnings("unused")
-    @Override
-    public LinkedHashMap<IInventory, Set<Slot>> bridge$getInventories() {
-        if (this.impl$allInventories == null) {
-            this.impl$allInventories = new LinkedHashMap<>();
-            this.inventorySlots.forEach(slot -> this.impl$allInventories.computeIfAbsent(slot.inventory, (i) -> new HashSet<>()).add(slot));
-        }
-        return this.impl$allInventories;
-    }
 
     /**
      * @author bloodmc
@@ -236,19 +113,14 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     @Overwrite
     public void detectAndSendChanges() {
         this.bridge$detectAndSendChanges(false);
-        this.impl$captureSuccess = true; // Detect mod overrides
-    }
-
-    @Override
-    public boolean bridge$capturePossible() {
-        return this.impl$captureSuccess;
+        this.bridge$setCapturePossible(); // Detect mod overrides
     }
 
     @Override
     public void bridge$detectAndSendChanges(final boolean captureOnly) {
-
         // Code-Flow changed from vanilla completely!
 
+        SpongeInventoryMenu menu = this.bridge$getMenu();
         // We first collect all differences and check if cancelled for readonly menu changes
         boolean readOnlyCancel = false;
         List<Integer> changes = new ArrayList<>();
@@ -259,8 +131,8 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
             ItemStack oldStack = this.inventoryItemStacks.get(i);
             if (!ItemStack.areItemStacksEqual(oldStack, newStack)) {
                 changes.add(i);
-                if (this.impl$menu != null) {
-                    if (this.impl$menu.isReadOnly()) { // readonly menu cancels if there is any change outside of the players inventory
+                if (menu != null) {
+                    if (menu.isReadOnly()) { // readonly menu cancels if there is any change outside of the players inventory
                         if (!(slot.inventory instanceof PlayerInventory)) {
                             readOnlyCancel = true;
                         }
@@ -288,7 +160,8 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
                 ItemStack oldStack = this.inventoryItemStacks.get(i);
 
                 // Check for on change menu callbacks
-                if (this.impl$menu != null && !this.impl$menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
+                if (menu != null && !menu
+                        .onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
                     slot.putStack(oldStack); // revert changes
                 } else {
                     // Capture changes for inventory events
@@ -314,25 +187,26 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     }
 
     private void capture(Integer index, ItemStack itemstack, ItemStack itemstack1) {
-        if (this.impl$captureInventory) {
+        if (this.bridge$capturingInventory()) {
             final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(itemstack1);
             final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(itemstack);
 
             org.spongepowered.api.item.inventory.Slot adapter = null;
             try {
-                adapter = this.getContainerSlot(index);
+                adapter = ((InventoryAdapter) this).bridge$getSlot(index).get();
                 SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
-                if (this.impl$shiftCraft) {
-                    this.impl$capturedCraftPreviewTransactions.add(newTransaction);
+                List<SlotTransaction> previewTransactions = this.bridge$getPreviewTransactions();
+                if (this.bridge$isShiftCrafting()) {
+                    previewTransactions.add(newTransaction);
                 } else {
-                    if (!this.impl$capturedCraftPreviewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
-                        SlotTransaction previewTransaction = this.impl$capturedCraftPreviewTransactions.get(0);
+                    if (!previewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
+                        SlotTransaction previewTransaction = previewTransactions.get(0);
                         if (previewTransaction.equals(newTransaction)) {
                             newTransaction = null;
                         }
                     }
                     if (newTransaction != null) {
-                        this.impl$capturedSlotTransactions.add(newTransaction);
+                        previewTransactions.add(newTransaction);
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -344,33 +218,24 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     protected void impl$markClean() {
     }
 
-    @Inject(method = "addSlot", at = @At(value = "HEAD"))
-    private void impl$onAddSlotToContainer(final Slot slotIn, final CallbackInfoReturnable<Slot> cir) {
-        this.impl$isLensInitialized = false;
-        // Reset the lense and slot provider
-        this.bridge$setSlotProvider(null);
-        this.bridge$setLens(null);
-        this.impl$adapters = null;
-    }
-
     @Inject(method = "putStackInSlot", at = @At(value = "HEAD") )
     private void impl$addTransaction(final int slotId, final ItemStack itemstack, final CallbackInfo ci) {
-        if (this.impl$captureInventory) {
+        if (this.bridge$capturingInventory()) {
             final Slot slot = this.shadow$getSlot(slotId);
             if (slot != null) {
                 final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(slot.getStack());
                 final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(itemstack);
 
-                final org.spongepowered.api.item.inventory.Slot adapter = this.bridge$getContainerSlot(slotId);
-                this.impl$capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+                final org.spongepowered.api.item.inventory.Slot adapter = ((InventoryAdapter) this).bridge$getSlot(slotId).get();
+                this.bridge$getCapturedSlotTransactions().add(new SlotTransaction(adapter, originalItem, newItem));
             }
         }
     }
 
     @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player, CallbackInfoReturnable<ItemStack> cir) {
-        if (this.impl$menu != null) {
-            if (!this.impl$menu.onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
+        if (this.bridge$getMenu() != null) {
+            if (!this.bridge$getMenu().onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
                 cir.setReturnValue(ItemStack.EMPTY);
                 // TODO maybe need to send rollback packets to client
             }
@@ -379,17 +244,12 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
 
     @Inject(method = "onContainerClosed", at = @At(value = "HEAD"))
     private void onOnContainerClosed(PlayerEntity player, CallbackInfo ci) {
-        this.unTrackInteractable(this.impl$viewed);
-        if (this.impl$menu != null) {
-            this.impl$menu.onClose(player, (org.spongepowered.api.item.inventory.Container) this);
+        SpongeInventoryMenu menu = this.bridge$getMenu();
+        if (menu != null) {
+            menu.onClose(player, (org.spongepowered.api.item.inventory.Container) this);
         }
-        this.impl$menu = null;
-        this.impl$viewed = null;
-    }
-
-    @Override
-    public void bridge$setMenu(SpongeInventoryMenu menu) {
-        this.impl$menu = menu;
+        this.bridge$setViewed(null);
+        this.bridge$setMenu(null);
     }
 
     @Nullable
@@ -480,76 +340,30 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
         return entityItem;
     }
 
-    @Redirect(method = "slotChangedCraftingGrid",
-            at = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/inventory/InventoryCraftResult;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
-    private void beforeSlotChangedCraftingGrid(final CraftResultInventory output, final int index, final ItemStack itemstack)
-    {
-        if (!this.impl$captureInventory) {
-            // Capture Inventory is true when caused by a vanilla inventory packet
-            // This is to prevent infinite loops when a client mod re-requests the recipe result after we modified/cancelled it
-            output.setInventorySlotContents(index, itemstack);
-            return;
-        }
-        this.impl$capturedCraftPreviewTransactions.clear();
-
-        final ItemStackSnapshot orig = ItemStackUtil.snapshotOf(output.getStackInSlot(index));
-        output.setInventorySlotContents(index, itemstack);
-        final ItemStackSnapshot repl = ItemStackUtil.snapshotOf(output.getStackInSlot(index));
-
-        final SlotAdapter slot = this.impl$getAdapters().get(index);
-        this.impl$capturedCraftPreviewTransactions.add(new SlotTransaction(slot, orig, repl));
-    }
-
-    @Inject(method = "slotChangedCraftingGrid", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
-    private void afterSlotChangedCraftingGrid(
-        final World world, final PlayerEntity player, final net.minecraft.inventory.CraftingInventory craftingInventory, final CraftResultInventory output, final CallbackInfo ci)
-    {
-        if (this.impl$firePreview && !this.impl$capturedCraftPreviewTransactions.isEmpty()) {
-            final Inventory inv = ((CarriedInventory<?>) this).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
-            if (!(inv instanceof CraftingInventory)) {
-                SpongeImpl.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + this.getClass().getName());
-                return;
-            }
-            final SlotTransaction previewTransaction = this.impl$capturedCraftPreviewTransactions.get(this.impl$capturedCraftPreviewTransactions.size() - 1);
-
-            final IRecipe recipe = world.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, craftingInventory, world);
-            SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) inv), previewTransaction, ((CraftingRecipe) recipe),
-                    ((Container)(Object) this), this.impl$capturedCraftPreviewTransactions);
-            this.impl$capturedCraftPreviewTransactions.clear();
-        }
-    }
-
-
-    @Override
-    public ItemStack bridge$getPreviousCursor() {
-        return this.impl$previousCursor;
-    }
 
     @Inject(method = "slotClick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;grow(I)V", ordinal = 1))
     private void beforeOnTakeClickWithItem(
         final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player, final CallbackInfoReturnable<Integer> cir) {
-       this.impl$previousCursor = player.inventory.getItemStack().copy(); // capture previous cursor for CraftItemEvent.Craft
+       this.bridge$setPreviousCursor(player.inventory.getItemStack().copy()); // capture previous cursor for CraftItemEvent.Craft
     }
 
     @Inject(method = "slotClick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;setItemStack(Lnet/minecraft/item/ItemStack;)V", ordinal = 3))
     private void beforeOnTakeClick(
         final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player, final CallbackInfoReturnable<Integer> cir) {
-        this.impl$previousCursor = player.inventory.getItemStack().copy(); // capture previous cursor for CraftItemEvent.Craft
+        this.bridge$setPreviousCursor(player.inventory.getItemStack().copy()); // capture previous cursor for CraftItemEvent.Craft
     }
 
     @Redirect(method = "slotClick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Slot;onTake(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;", ordinal = 5))
     private ItemStack redirectOnTakeThrow(final Slot slot, final PlayerEntity player, final ItemStack stackOnCursor) {
-        this.impl$lastCraft = null;
+        this.bridge$setLastCraft(null);
         final ItemStack result = slot.onTake(player, stackOnCursor);
-        if (this.impl$lastCraft != null) {
+        CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
+        if (lastCraft != null) {
             if (slot instanceof CraftingResultSlot) {
-                if (this.impl$lastCraft.isCancelled()) {
+                if (lastCraft.isCancelled()) {
                     stackOnCursor.setCount(0); // do not drop crafted item when cancelled
                 }
             }
@@ -560,8 +374,8 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     @Inject(method = "slotClick", at = @At("RETURN"))
     private void onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final PlayerEntity player, final CallbackInfoReturnable<ItemStack> cir) {
         // Reset variables needed for CraftItemEvent.Craft
-        this.impl$lastCraft = null;
-        this.impl$previousCursor = null;
+        this.bridge$setLastCraft(null);
+        this.bridge$setPreviousCursor(null);
     }
 
 
@@ -572,128 +386,19 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
         if (!(slot instanceof CraftingResultSlot)) {
             return thisContainer.transferStackInSlot(player, slotId);
         }
-        this.impl$lastCraft = null;
-        this.impl$shiftCraft = true;
+        this.bridge$setLastCraft(null);
+        this.bridge$setShiftCrafting(true);
         ItemStack result = thisContainer.transferStackInSlot(player, slotId);
-        if (this.impl$lastCraft != null) {
-            if (this.impl$lastCraft.isCancelled()) {
+        CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
+        if (lastCraft != null) {
+            if (lastCraft.isCancelled()) {
                 result = ItemStack.EMPTY; // Return empty to stop shift-crafting
             }
         }
 
-        this.impl$shiftCraft = false;
+        this.bridge$setShiftCrafting(false);
 
         return result;
-    }
-
-    @Override
-    public boolean bridge$capturingInventory() {
-        return this.impl$captureInventory;
-    }
-
-    @Override
-    public void bridge$setCaptureInventory(final boolean flag) {
-        this.impl$captureInventory = flag;
-    }
-
-    @Override
-    public void bridge$setSpectatorChest(final boolean spectatorChest) {
-        this.impl$spectatorChest = spectatorChest;
-    }
-
-    @Override
-    public List<SlotTransaction> bridge$getCapturedSlotTransactions() {
-        return this.impl$capturedSlotTransactions;
-    }
-
-    @Override
-    public List<SlotTransaction> bridge$getPreviewTransactions() {
-        return this.impl$capturedCraftPreviewTransactions;
-    }
-
-    @Override
-    public void bridge$setLastCraft(final CraftItemEvent.Craft event) {
-        this.impl$lastCraft = event;
-    }
-
-    @Override
-    public void bridge$setFirePreview(final boolean firePreview) {
-        this.impl$firePreview = firePreview;
-    }
-
-    @Override
-    public void bridge$setShiftCrafting(final boolean flag) {
-        this.impl$shiftCraft = flag;
-    }
-
-    @Override
-    public boolean bridge$isShiftCrafting() {
-        return this.impl$shiftCraft;
-    }
-
-    @Override
-    public void bridge$setCanInteractWith(@Nullable final Predicate<PlayerEntity> predicate) {
-        this.impl$canInteractWithPredicate = predicate;
-    }
-
-    @Override
-    public org.spongepowered.api.item.inventory.Slot bridge$getContainerSlot(final int slot) {
-        final org.spongepowered.api.item.inventory.Slot adapter = this.impl$getAdapters().get(slot);
-        if (adapter == null) // Slot is not in Lens
-        {
-            if (slot >= this.inventorySlots.size()) {
-                SpongeImpl.getLogger().warn("Could not find slot #{} in Container {}", slot, getClass().getName());
-                return null;
-            }
-            final Slot mcSlot = this.inventorySlots.get(slot); // Try falling back to vanilla slot
-            if (mcSlot == null)
-            {
-                SpongeImpl.getLogger().warn("Could not find slot #{} in Container {}", slot, getClass().getName());
-                return null;
-            }
-            return ((org.spongepowered.api.item.inventory.Slot) mcSlot);
-        }
-        return adapter;
-    }
-
-    @Override
-    public Location bridge$getOpenLocation() {
-        return this.impl$lastOpenLocation;
-    }
-
-    @Override
-    public void bridge$setOpenLocation(final Location loc) {
-        this.impl$lastOpenLocation = loc;
-    }
-
-    @Override
-    public void bridge$setInUse(final boolean inUse) {
-        this.impl$inUse = inUse;
-    }
-
-    @Override
-    public boolean bridge$isInUse() {
-        return this.impl$inUse;
-    }
-
-    @Nullable private Object impl$viewed;
-
-    @Override
-    public void setViewed(@Nullable Object viewed) {
-        if (viewed == null) {
-            this.unTrackInteractable(this.impl$viewed);
-        }
-        this.impl$viewed = viewed;
-    }
-
-    private void unTrackInteractable(@Nullable Object inventory) {
-        if (inventory instanceof Carrier) {
-            inventory = ((Carrier) inventory).getInventory();
-        }
-        if (inventory instanceof Inventory) {
-            ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).bridge$removeContainer(((Container)(Object) this)));
-        }
-        // TODO else unknown inventory - try to provide wrapper Interactable
     }
 
 }

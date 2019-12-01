@@ -31,7 +31,6 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -51,9 +50,7 @@ import java.util.stream.Collectors;
 @Mixin(value = Container.class, priority = 998)
 public abstract class ContainerMixin_API implements org.spongepowered.api.item.inventory.Container, CarriedInventory<Carrier> {
 
-    @Shadow public List<Slot> inventorySlots;
-    @Shadow protected List<IContainerListener> listeners;
-    @Shadow public abstract NonNullList<ItemStack> getInventory();
+    @Shadow private List<IContainerListener> listeners;
 
     @Override
     public Optional<Carrier> getCarrier() {

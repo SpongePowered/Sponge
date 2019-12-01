@@ -46,6 +46,7 @@ import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -58,7 +59,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
     @Override
     public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InventoryPacketContext context) {
         ((TrackedInventoryBridge) playerMP.openContainer).bridge$setCaptureInventory(true);
-        ((ContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
+        ((TrackedContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
     }
 
     @Override
@@ -69,9 +70,9 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
         final IRecipe recipe = recipeManager.getRecipe(packet.getRecipeId());
 
         final ServerPlayerEntity player = context.getPacketPlayer();
-        ((ContainerBridge)player.openContainer).bridge$detectAndSendChanges(true);
+        ((TrackedContainerBridge)player.openContainer).bridge$detectAndSendChanges(true);
         ((TrackedInventoryBridge) player.openContainer).bridge$setCaptureInventory(false);
-        ((ContainerBridge) player.openContainer).bridge$setFirePreview(true);
+        ((TrackedContainerBridge) player.openContainer).bridge$setFirePreview(true);
 
         final Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
@@ -79,7 +80,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
             return;
         }
 
-        final List<SlotTransaction> previewTransactions = ((ContainerBridge) player.openContainer).bridge$getPreviewTransactions();
+        final List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) player.openContainer).bridge$getPreviewTransactions();
         if (previewTransactions.isEmpty()) {
             final CraftingOutput slot = ((CraftingInventory) craftInv).getResult();
             final SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.empty(), slot.peek().createSnapshot());

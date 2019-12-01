@@ -64,4 +64,8 @@ public interface InventoryAdapter {
         final SlotLens slotLens = this.bridge$getRootLens().getSlotLens(ordinal);
         return BasicInventoryAdapter.forSlot(this.bridge$getFabric(), slotLens, (Inventory) this);
     }
+
+    // TODO check if this is needed?
+    default void bridge$setSpectatorChest(boolean spectatorChest) {}
+
 }

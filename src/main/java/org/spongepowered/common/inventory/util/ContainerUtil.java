@@ -51,6 +51,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -113,15 +114,7 @@ public final class ContainerUtil {
         return (net.minecraft.inventory.container.Container) container;
     }
 
-    public static ContainerBridge toMixin(final net.minecraft.inventory.container.Container container) {
-        return (ContainerBridge) container;
-    }
-
-    public static net.minecraft.inventory.container.Container fromMixin(final ContainerBridge container) {
-        return (net.minecraft.inventory.container.Container) container;
-    }
-
-    /**
+     /**
      * Replacement helper method for {@code InventoryHelperMixin#spongeDropInventoryItems(World, double, double, double, IInventory)}
      * to perform cause tracking related drops. This is specific for blocks, not for any other cases.
      *
@@ -414,7 +407,4 @@ public final class ContainerUtil {
         return null;
     }
 
-    public static org.spongepowered.api.item.inventory.Slot getSlot(final net.minecraft.inventory.container.Container container, final int slot) {
-        return ((ContainerBridge) container).bridge$getContainerSlot(slot);
-    }
 }

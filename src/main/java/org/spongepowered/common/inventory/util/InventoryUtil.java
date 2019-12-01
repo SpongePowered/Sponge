@@ -31,6 +31,7 @@ import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
@@ -59,7 +60,7 @@ public final class InventoryUtil {
 
     @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(CraftingInventory inv) {
-        CraftingGridInventoryLens lens = new CraftingGridInventoryLens(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), BasicSlotLens::new);
+        CraftingGridInventoryLens lens = new CraftingGridInventoryLens(0, inv.getWidth(), inv.getHeight(), BasicSlotLens::new);
 
         return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }
@@ -92,7 +93,7 @@ public final class InventoryUtil {
 
             TileEntity tileentity1 = chest.getWorld().getTileEntity(blockpos);
 
-            if (tileentity1 instanceof ChestTileEntity && tileentity1.getBlockType() == chest.getBlockType()) {
+            if (tileentity1 instanceof ChestTileEntity && tileentity1.getBlockState().getBlock() == chest.getBlockState().getBlock()) {
 
                 DoubleSidedInventory inventory;
 
@@ -144,6 +145,7 @@ public final class InventoryUtil {
     }
 
     public static PluginContainer getPluginContainer(Object inventory) {
+        // TODO maybe caching?
         PluginContainer container;
 
         if (inventory instanceof CustomInventory) {
@@ -160,13 +162,13 @@ public final class InventoryUtil {
         final Object base = inventory;
 
         if (base instanceof BlockEntity) {
-            final String id = ((BlockEntity) base).getBlock().getType().getId();
-            final String pluginId = id.substring(0, id.indexOf(":"));
+            CatalogKey key = ((BlockEntity) base).getBlock().getType().getKey();
+            final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId)
-                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
+                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + key.getNamespace() + ":" + key.getValue()));
         } else if (base instanceof Entity) {
-            final String id = ((Entity) base).getType().getId();
-            final String pluginId = id.substring(0, id.indexOf(":"));
+            CatalogKey key = ((Entity) base).getType().getKey();
+            final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
                 SpongeImpl.getLogger().debug("Unknown plugin for [{}]", base);
                 return SpongeImpl.getMinecraftPlugin(); 

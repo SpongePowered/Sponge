@@ -41,11 +41,13 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
@@ -203,7 +205,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
         Slot slot = null;
         if (packetIn.getSlotId() >= 0) {
-            slot = ((ContainerBridge) trackedInventory).bridge$getContainerSlot(packetIn.getSlotId());
+            slot = ((InventoryAdapter) trackedInventory).bridge$getSlot(packetIn.getSlotId()).orElse(null);
         }
         // else TODO slot for ClickInventoryEvent.Drag
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -218,7 +220,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (player.openContainer.windowId != packetIn.getWindowId()) {
                     return; // Container mismatch - ignore this.
                 }
-                if (!((ContainerBridge) trackedInventory).bridge$capturePossible()) {
+                if (!((TrackedContainerBridge) trackedInventory).bridge$capturePossible()) {
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
                     if (!containersFailedCapture.contains(trackedInventory.getClass())) {

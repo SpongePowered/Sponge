@@ -35,7 +35,6 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.tileentity.LockableTileEntity;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
@@ -45,7 +44,6 @@ import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.util.InventoryUtil;
 
 import javax.annotation.Nullable;
 
@@ -70,7 +68,6 @@ public abstract class TraitInventoryAdapterMixin implements InventoryAdapter, In
 
     @Nullable private SlotLensProvider impl$provider;
     @Nullable private Lens impl$lens;
-    @Nullable private PluginContainer impl$PluginParent;
 
     @Override
     public Fabric bridge$getFabric() {
@@ -101,19 +98,6 @@ public abstract class TraitInventoryAdapterMixin implements InventoryAdapter, In
     @Override
     public void bridge$setLens(final Lens lens) {
         this.impl$lens = lens;
-    }
-
-    @Override
-    public PluginContainer bridge$getPlugin() {
-        if (this.impl$PluginParent == null) {
-            this.impl$PluginParent = InventoryUtil.getPluginContainer(this);
-        }
-        return this.impl$PluginParent;
-    }
-
-    @Override
-    public void bridge$setPlugin(final PluginContainer container) {
-        this.impl$PluginParent = container;
     }
 
 }

@@ -121,6 +121,7 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
@@ -135,6 +136,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.SkinPartRegistryModule;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
@@ -706,7 +708,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     private void onSetContainer(final IInventory chestInventory, final CallbackInfo ci) {
         if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ChestContainer && this.isSpectator()) {
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
-            ((ContainerBridge) this.openContainer).bridge$setSpectatorChest(true);
+            ((InventoryAdapter) this.openContainer).bridge$setSpectatorChest(true);
         }
     }
 
@@ -737,7 +739,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         if (inventory instanceof Inventory) {
             ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).bridge$addContainer(this.openContainer));
         }
-        ((ContainerBridge) this.openContainer).setViewed(inventory);
+        ((TrackedContainerBridge) this.openContainer).bridge$setViewed(inventory);
         // TODO else unknown inventory - try to provide wrapper Interactable
     }
 

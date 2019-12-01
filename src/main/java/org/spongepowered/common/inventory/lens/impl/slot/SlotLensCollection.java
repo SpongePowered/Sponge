@@ -86,6 +86,9 @@ public class SlotLensCollection implements SlotLensProvider {
             return new SlotLensCollection(lenses);
         }
 
+        public int size() {
+            return this.slotTypes.size();
+        }
     }
 
     private final List<SlotLens> lenses;

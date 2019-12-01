@@ -24,35 +24,39 @@
  */
 package org.spongepowered.common.bridge.inventory;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-public interface ContainerBridge {
+public interface TrackedContainerBridge {
 
-    Optional<Carrier> bridge$getCarrier();
+    void bridge$setShiftCrafting(boolean flag);
+    boolean bridge$isShiftCrafting();
 
-    LinkedHashMap<IInventory, Set<net.minecraft.inventory.container.Slot>> bridge$getInventories();
+    void bridge$setLastCraft(@Nullable CraftItemEvent.Craft event);
+    @Nullable CraftItemEvent.Craft bridge$getLastCraft();
 
-    void bridge$setCanInteractWith(@Nullable Predicate<PlayerEntity> predicate);
-    @Nullable Predicate<PlayerEntity> bridge$getCanInteractWith();
 
-    @Nullable Location bridge$getOpenLocation();
-    void bridge$setOpenLocation(@Nullable Location loc);
+    void bridge$setPreviousCursor(@Nullable net.minecraft.item.ItemStack stack);
+    @Nullable net.minecraft.item.ItemStack bridge$getPreviousCursor();
 
-    void bridge$setInUse(boolean inUse);
-    boolean bridge$isInUse();
+    void bridge$setFirePreview(boolean firePreview);
+    boolean bridge$firePreview();
 
-    List<ServerPlayerEntity> listeners();
+    List<SlotTransaction> bridge$getPreviewTransactions();
 
+    boolean bridge$capturePossible();
+    void bridge$setCapturePossible();
+
+    void bridge$setMenu(@Nullable SpongeInventoryMenu menu);
+    @Nullable SpongeInventoryMenu bridge$getMenu();
+
+    void bridge$setViewed(Object viewed);
+
+    void bridge$detectAndSendChanges(boolean captureOnly);
 }

@@ -41,6 +41,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
+
+import java.util.function.Predicate;
 
 @Mixin(value = {
         ChestContainer.class,
@@ -56,12 +59,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
         PlayerContainer.class,
         WorkbenchContainer.class
 })
-public abstract class InteractableContainerMixin extends ContainerMixin {
+public abstract class InteractableContainerMixin implements ContainerBridge {
 
     @Inject(method = "canInteractWith", at = @At("HEAD"), cancellable = true)
     private void impl$canInteractWith(final PlayerEntity playerIn, final CallbackInfoReturnable<Boolean> cir) {
-        if (this.impl$canInteractWithPredicate != null) {
-            cir.setReturnValue(this.impl$canInteractWithPredicate.test(playerIn));
+        Predicate<PlayerEntity> predicate = this.bridge$getCanInteractWith();
+        if (predicate != null) {
+            cir.setReturnValue(predicate.test(playerIn));
         }
     }
 

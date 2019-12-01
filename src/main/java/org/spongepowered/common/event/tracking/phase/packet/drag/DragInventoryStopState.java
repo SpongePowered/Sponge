@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
 
 public abstract class DragInventoryStopState extends NamedInventoryState {
 
@@ -49,7 +49,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
     @Override
     public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        ((ContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
+        ((TrackedContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
     }
 
     @Override
@@ -60,11 +60,11 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
 
     public static void unwindCraftPreview(InventoryPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
-        ((ContainerBridge) player.openContainer).bridge$setFirePreview(true);
+        ((TrackedContainerBridge) player.openContainer).bridge$setFirePreview(true);
 
         Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (craftInv instanceof CraftingInventory) {
-            List<SlotTransaction> previewTransactions = ((ContainerBridge) player.openContainer).bridge$getPreviewTransactions();
+            List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) player.openContainer).bridge$getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {
                 CraftingRecipe recipe = SpongeCraftingRecipeRegistry
                         .getInstance().findMatchingRecipe(((CraftingInventory) craftInv).getCraftingGrid(), ((World) player.world)).orElse(null);

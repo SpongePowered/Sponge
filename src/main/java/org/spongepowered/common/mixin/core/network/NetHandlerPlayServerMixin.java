@@ -117,6 +117,7 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.ContainerPlayerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.bridge.packet.SPacketResourcePackSendBridge;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
@@ -358,7 +359,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
         // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
         // Passing 'captureOnly' as 'true' allows capturing to happen for event firing, but doesn't send any pointless packets
-        ((ContainerBridge) this.player.openContainer).bridge$detectAndSendChanges(true);
+        ((TrackedContainerBridge) this.player.openContainer).bridge$detectAndSendChanges(true);
     }
 
     @Redirect(method = "processChatMessage",
@@ -824,10 +825,10 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
                             if (hand == Hand.OFF_HAND) {
                                 // A window id of -2 can be used to set the off hand, even if a container is open.
-                                sendPacket(new SSetSlotPacket(-2, ((ContainerPlayerBridge) this.player.container).bridge$getOffHandSlot(), itemstack));
-                            } else {
-                                final Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
-                                sendPacket(new SSetSlotPacket(this.player.openContainer.windowId, slot.slotNumber, itemstack));
+                                this.sendPacket(new SSetSlotPacket(-2, ((ContainerPlayerBridge) this.player.container).bridge$getOffHandSlot(), itemstack));
+                            } else { // MAIN_HAND
+                                // TODO correct?
+                                this.sendPacket(new SSetSlotPacket(this.player.openContainer.windowId, this.player.inventory.currentItem, itemstack));
                             }
 
 
@@ -835,7 +836,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                             // which means that we need to force an update
                             if (itemstack.getItem() == Items.LEAD) {
                                 // Detach entity again
-                                sendPacket(new SMountEntityPacket(entity, null));
+                                this.sendPacket(new SMountEntityPacket(entity, null));
                             } else {
                                 // Other cases may involve a specific DataParameter of the entity
                                 // We fix the client state by marking it as dirty so it will be updated on the client the next tick

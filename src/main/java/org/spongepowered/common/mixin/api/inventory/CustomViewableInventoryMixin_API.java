@@ -22,16 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.item.inventory;
+package org.spongepowered.common.mixin.api.inventory;
 
 import org.spongepowered.api.item.inventory.ContainerType;
-import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.player.SpongeUserInventory;
-import org.spongepowered.common.inventory.custom.CustomInventory;
-import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 
 @Mixin(ViewableCustomInventory.class)
