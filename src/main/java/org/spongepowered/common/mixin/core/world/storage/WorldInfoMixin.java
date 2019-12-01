@@ -375,6 +375,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             saveBehavior = 0;
         }
         spongeDataCompound.putShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
+        spongeDataCompound.putBoolean(Constants.Sponge.World.IS_MOD_CREATED, this.impl$modCreated);
         spongeDataCompound.putBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.impl$hasCustomDifficulty);
 
         final Iterator<UUID> iter = this.impl$pendingUniqueIds.iterator();
@@ -409,7 +410,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             .validatePortalAgent(spongeDataCompound.getString(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
         this.impl$hasCustomDifficulty = spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
         this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC;
-
+        this.impl$modCreated = spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED);
         if (spongeDataCompound.contains(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR)) {
             final short saveBehavior = spongeDataCompound.getShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR);
             if (saveBehavior == 0) {

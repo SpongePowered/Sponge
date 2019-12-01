@@ -258,6 +258,7 @@ public final class Constants {
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
             public static final String PORTAL_AGENT_TYPE = "portalAgentType";
             public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
+            public static final String IS_MOD_CREATED = "isModCreated";
             public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
             public static final String LEVEL_SPONGE_DAT_OLD = "level_sponge.dat_old";
