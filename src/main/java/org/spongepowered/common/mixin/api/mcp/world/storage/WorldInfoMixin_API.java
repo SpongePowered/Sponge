@@ -26,120 +26,131 @@ package org.spongepowered.common.mixin.api.mcp.world.storage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonParseException;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.boss.BossBar;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.trader.WanderingTrader;
+import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
-import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.gen.GeneratorType;
-import org.spongepowered.api.world.gen.TerrainGeneratorConfig;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.bridge.world.GameRulesBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
+import org.spongepowered.common.mixin.core.world.GameRulesAccessor;
+import org.spongepowered.common.mixin.core.world.GameRules_RuleValueAccessor;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 import java.io.IOException;
-import java.util.Collection;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
+@SuppressWarnings("ConstantConditions")
 @Mixin(WorldInfo.class)
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
 public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Shadow private long randomSeed;
-    @Shadow private WorldType terrainType;
-    @Shadow private String generatorOptions;
-    @Shadow private int spawnX;
-    @Shadow private int spawnY;
-    @Shadow private int spawnZ;
-    @Shadow private long totalTime;
-    @Shadow private long worldTime;
-    @Shadow private long lastTimePlayed;
-    @Shadow private long sizeOnDisk;
-    @Shadow private CompoundNBT playerTag;
-    @Shadow private String levelName;
-    @Shadow private int saveVersion;
-    @Shadow private int cleanWeatherTime;
-    @Shadow private boolean raining;
-    @Shadow private int rainTime;
-    @Shadow private boolean thundering;
-    @Shadow private int thunderTime;
-    @Shadow private GameType gameType;
-    @Shadow private boolean mapFeaturesEnabled;
-    @Shadow private boolean hardcore;
-    @Shadow private boolean allowCommands;
-    @Shadow private boolean initialized;
-    @Shadow private net.minecraft.world.Difficulty difficulty;
-    @Shadow private boolean difficultyLocked;
-    @Shadow private double borderCenterX;
-    @Shadow private double borderCenterZ;
-    @Shadow private double borderSize;
-    @Shadow private long borderSizeLerpTime;
-    @Shadow private double borderSizeLerpTarget;
-    @Shadow private double borderSafeZone;
-    @Shadow private double borderDamagePerBlock;
-    @Shadow private int borderWarningDistance;
-    @Shadow private int borderWarningTime;
-    @Shadow private GameRules gameRules;
-
-    @Shadow public abstract void setDifficulty(net.minecraft.world.Difficulty newDifficulty);
-    @Shadow public abstract CompoundNBT cloneNBTCompound(@Nullable CompoundNBT nbt);
+    @Shadow @Nullable private String legacyCustomOptions;
+    @Shadow private UUID wanderingTraderId;
+    @Shadow public abstract int shadow$getSpawnX();
+    @Shadow public abstract int shadow$getSpawnY();
+    @Shadow public abstract int shadow$getSpawnZ();
+    @Shadow public abstract void shadow$setSpawn(BlockPos pos);
+    @Shadow public abstract WorldType shadow$getGenerator();
+    @Shadow public abstract void shadow$setGenerator(WorldType worldType);
+    @Shadow public abstract long shadow$getSeed();
+    @Shadow public abstract long shadow$getGameTime();
+    @Shadow public abstract long shadow$getDayTime();
+    @Shadow public abstract void shadow$setDayTime(long time);
+    @Shadow public abstract GameType shadow$getGameType();
+    @Shadow public abstract void shadow$setGameType(GameType gameType);
+    @Shadow public abstract boolean shadow$isMapFeaturesEnabled();
+    @Shadow public abstract void shadow$setMapFeaturesEnabled(boolean state);
+    @Shadow public abstract boolean shadow$isHardcore();
+    @Shadow public abstract void shadow$setHardcore(boolean state);
+    @Shadow public abstract boolean shadow$areCommandsAllowed();
+    @Shadow public abstract void shadow$setAllowCommands(boolean state);
+    @Shadow public abstract boolean shadow$isInitialized();
+    @Shadow public abstract Difficulty shadow$getDifficulty();
+    @Shadow public abstract void shadow$setDifficulty(Difficulty difficulty);
+    @Shadow public abstract CompoundNBT shadow$getGeneratorOptions();
+    @Shadow public abstract void shadow$setGeneratorOptions(CompoundNBT compound);
+    @Shadow public abstract GameRules shadow$getGameRulesInstance();
+    @Shadow public abstract int shadow$getWanderingTraderSpawnChance();
+    @Shadow public abstract void shadow$setWanderingTraderSpawnChance(int chance);
+    @Shadow public abstract int shadow$getWanderingTraderSpawnDelay();
+    @Shadow public abstract void shadow$setWanderingTraderSpawnDelay(int delay);
+    @Shadow public abstract void shadow$setWanderingTraderId(UUID uniqueId);
     @Shadow public abstract String shadow$getWorldName();
+    @Shadow public abstract boolean shadow$isRaining();
+    @Shadow public abstract void shadow$setRaining(boolean state);
+    @Shadow public abstract int shadow$getRainTime();
+    @Shadow public abstract void shadow$setRainTime(int time);
+    @Shadow public abstract boolean shadow$isThundering();
+    @Shadow public abstract void shadow$setThundering(boolean state);
+    @Shadow public abstract int shadow$getThunderTime();
+    @Shadow public abstract void shadow$setThunderTime(int time);
+    @Shadow public abstract void shadow$setClearWeatherTime(int time);
+    @Shadow public abstract int shadow$getClearWeatherTime();
 
     private SerializationBehavior api$serializationBehavior = SerializationBehaviors.AUTOMATIC;
 
+    @Intrinsic
+    public String worldproperties$getWorldName() {
+        return ((WorldInfoBridge) this).bridge$getWorldName();
+    }
+
     @Override
     public Vector3i getSpawnPosition() {
-        return new Vector3i(this.spawnX, this.spawnY, this.spawnZ);
+        return new Vector3i(this.shadow$getSpawnX(), this.shadow$getSpawnY(), this.shadow$getSpawnZ());
     }
 
     @Override
     public void setSpawnPosition(final Vector3i position) {
         checkNotNull(position);
-        this.spawnX = position.getX();
-        this.spawnY = position.getY();
-        this.spawnZ = position.getZ();
+        this.shadow$setSpawn(VecHelper.toBlockPos(position));
     }
 
     @Override
     public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.terrainType;
+        return (GeneratorType) this.shadow$getGenerator();
     }
 
     @Override
     public void setGeneratorType(final GeneratorType type) {
-        this.terrainType = (WorldType) type;
+        checkNotNull(type);
+        this.shadow$setGenerator((WorldType) type);
     }
 
     @Intrinsic
     public long worldproperties$getSeed() {
-        return this.randomSeed;
+        return this.shadow$getSeed();
     }
 
     @Override
@@ -148,18 +159,18 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public long getTotalTime() {
-        return this.totalTime;
-    }
-
-    @Intrinsic
-    public long worldproperties$getWorldTime() {
-        return this.worldTime;
+    public Duration getGameTime() {
+        return Duration.ofMillis(this.shadow$getGameTime());
     }
 
     @Override
-    public void setWorldTime(final long time) {
-        this.worldTime = time;
+    public Duration getDayTime() {
+        return Duration.ofMillis(this.shadow$getDayTime());
+    }
+
+    @Override
+    public void setDayTime(Duration time) {
+        this.shadow$setDayTime(time.toMillis());
     }
 
     @Override
@@ -172,335 +183,160 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         return ((WorldInfoBridge) this).bridge$getPortalAgent();
     }
 
-    @Intrinsic
-    public boolean worldproperties$isRaining() {
-        return this.raining;
-    }
-
-    @Override
-    public void setRaining(final boolean state) {
-        this.raining = state;
-    }
-
-    @Intrinsic
-    public int worldproperties$getRainTime() {
-        return this.rainTime;
-    }
-
-    @Intrinsic
-    public void worldproperties$setRainTime(final int time) {
-        this.rainTime = time;
-    }
-
-    @Intrinsic
-    public boolean worldproperties$isThundering() {
-        return this.thundering;
-    }
-
-    @Intrinsic
-    public void worldproperties$setThundering(final boolean state) {
-        this.thundering = state;
-    }
-
-    @Override
-    public int getThunderTime() {
-        return this.thunderTime;
-    }
-
-    @Override
-    public void setThunderTime(final int time) {
-        this.thunderTime = time;
-    }
-
-    @SuppressWarnings("ConstantConditions")
     @Override
     public GameMode getGameMode() {
-        return (GameMode) (Object) this.gameType;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public void setGameMode(final GameMode gamemode) {
-        this.gameType = (GameType) (Object) gamemode;
+        return (GameMode) (Object) this.shadow$getGameType();
     }
 
     @Override
-    public boolean usesMapFeatures() {
-        return this.mapFeaturesEnabled;
+    public void setGameMode(GameMode gamemode) {
+        this.shadow$setGameType((GameType) (Object) gamemode);
     }
 
     @Override
-    public void setMapFeaturesEnabled(final boolean state) {
-        this.mapFeaturesEnabled = state;
+    public boolean areStructuresEnabled() {
+        return this.shadow$isMapFeaturesEnabled();
     }
 
     @Override
-    public boolean isHardcore() {
-        return this.hardcore;
+    public void setStructuresEnabled(boolean state) {
+        this.shadow$setMapFeaturesEnabled(state);
     }
 
-    @Override
-    public void setHardcore(final boolean state) {
-        this.hardcore = state;
+    @Intrinsic
+    public boolean worldproperties$isHardcore() {
+        return this.shadow$isHardcore();
+    }
+
+    @Intrinsic
+    public void worldproperties$setHardcore(boolean state) {
+        this.shadow$setHardcore(state);
     }
 
     @Override
     public boolean areCommandsEnabled() {
-        return this.allowCommands;
+        return this.shadow$areCommandsAllowed();
     }
 
     @Override
-    public void setCommandsEnabled(final boolean state) {
-        this.allowCommands = state;
+    public void setCommandsEnabled(boolean state) {
+        this.shadow$setAllowCommands(state);
+    }
+
+    @Intrinsic
+    public boolean worldproperties$isInitialized() {
+        return this.shadow$isInitialized();
     }
 
     @Override
-    public boolean isInitialized() {
-        return this.initialized;
+    public org.spongepowered.api.world.difficulty.Difficulty getDifficulty() {
+        return (org.spongepowered.api.world.difficulty.Difficulty) (Object) this.shadow$getDifficulty();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public Difficulty getDifficulty() {
-        return (Difficulty) (Object) this.difficulty;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public void setDifficulty(final Difficulty difficulty) {
-        this.setDifficulty((net.minecraft.world.Difficulty) (Object) difficulty);
+    public void setDifficulty(final org.spongepowered.api.world.difficulty.Difficulty difficulty) {
+        this.shadow$setDifficulty((Difficulty) (Object) difficulty);
     }
 
     @Override
     public boolean isPVPEnabled() {
-        return  ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getPVPEnabled();
+        return ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getPVPEnabled();
     }
 
     @Override
     public void setPVPEnabled(final boolean enabled) {
         ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setPVPEnabled(enabled);
+        ((WorldInfoBridge) this).bridge$saveConfig();
     }
 
     @Override
     public boolean doesGenerateBonusChest() {
-        return ((WorldInfoBridge) this).bridge$getSpawnsBonusChest();
+        return ((WorldInfoBridge) this).bridge$doesGenerateBonusChest();
     }
 
     @Override
-    public Vector3d getWorldBorderCenter() {
-        return new Vector3d(this.borderCenterX, 0, this.borderCenterZ);
-    }
-
-    @Override
-    public void setWorldBorderCenter(final double x, final double z) {
-        this.borderCenterX = x;
-        this.borderCenterZ = z;
-    }
-
-    @Override
-    public double getWorldBorderDiameter() {
-        return this.borderSize;
-    }
-
-    @Override
-    public void setWorldBorderDiameter(final double diameter) {
-        this.borderSize = diameter;
-    }
-
-    @Override
-    public double getWorldBorderTargetDiameter() {
-        return this.borderSizeLerpTarget;
-    }
-
-    @Override
-    public void setWorldBorderTargetDiameter(final double diameter) {
-        this.borderSizeLerpTarget = diameter;
-    }
-
-    @Override
-    public double getWorldBorderDamageThreshold() {
-        return this.borderSafeZone;
-    }
-
-    @Override
-    public void setWorldBorderDamageThreshold(final double distance) {
-        this.borderSafeZone = distance;
-    }
-
-    @Override
-    public double getWorldBorderDamageAmount() {
-        return this.borderDamagePerBlock;
-    }
-
-    @Override
-    public void setWorldBorderDamageAmount(final double damage) {
-        this.borderDamagePerBlock = damage;
-    }
-
-    @Override
-    public int getWorldBorderWarningTime() {
-        return this.borderWarningTime;
-    }
-
-    @Override
-    public void setWorldBorderWarningTime(final int time) {
-        this.borderWarningTime = time;
-    }
-
-    @Override
-    public int getWorldBorderWarningDistance() {
-        return this.borderWarningDistance;
-    }
-
-    @Override
-    public void setWorldBorderWarningDistance(final int distance) {
-        this.borderWarningDistance = distance;
-    }
-
-    @Override
-    public long getWorldBorderTimeRemaining() {
-        return this.borderSizeLerpTime;
-    }
-
-    @Override
-    public void setWorldBorderTimeRemaining(final long time) {
-        this.borderSizeLerpTime = time;
-    }
-
-    @Override
-    public Optional<String> getGameRule(final String gameRule) {
-        checkNotNull(gameRule, "The gamerule cannot be null!");
-        if (this.gameRules.hasRule(gameRule)) {
-            return Optional.of(this.gameRules.getString(gameRule));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Map<String, String> getGameRules() {
-        final ImmutableMap.Builder<String, String> ruleMap = ImmutableMap.builder();
-        for (final String rule : this.gameRules.getRules()) {
-            ruleMap.put(rule, this.gameRules.getString(rule));
-        }
-        return ruleMap.build();
-    }
-
-    @Override
-    public void setGameRule(final String gameRule, final String value) {
-        checkNotNull(gameRule, "The gamerule cannot be null!");
-        checkNotNull(value, "The gamerule value cannot be null!");
-        this.gameRules.setOrCreateGameRule(gameRule, value);
-    }
-
-    @Override
-    public boolean removeGameRule(final String gameRule) {
-        checkNotNull(gameRule, "The gamerule cannot be null!");
-        return ((GameRulesBridge) this.gameRules).bridge$removeGameRule(gameRule);
+    public void setGenerateBonusChest(boolean state) {
+        ((WorldInfoBridge) this).bridge$setGenerateBonusChest(state);
     }
 
     @Override
     public UUID getUniqueId() {
-        return ((WorldInfoBridge) this).bridge$getAssignedId();
+        return ((WorldInfoBridge) this).bridge$getUniqueId();
     }
 
     @Override
-    public int getContentVersion() {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return NbtTranslator.getInstance().translateFrom(this.cloneNBTCompound(null));
+    public String getDirectoryName() {
+        return this.shadow$getWorldName();
     }
 
     @Override
     public boolean isEnabled() {
-        return  ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().isWorldEnabled();
+        return ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().isWorldEnabled();
     }
 
     @Override
-    public void setEnabled(final boolean enabled) {
+    public void setEnabled(boolean enabled) {
         ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setWorldEnabled(enabled);
+        ((WorldInfoBridge) this).bridge$saveConfig();
     }
 
     @Override
-    public boolean loadOnStartup() {
-        Boolean loadOnStartup =  ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().loadOnStartup();
-        if (loadOnStartup == null) {
-           loadOnStartup = ((DimensionTypeBridge) ((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldGenerateSpawnOnLoad();
-           this.setLoadOnStartup(loadOnStartup);
-        }
-        return loadOnStartup;
+    public boolean doesLoadOnStartup() {
+        return ((WorldInfoBridge) this).bridge$doesLoadOnStartup();
     }
 
     @Override
-    public void setLoadOnStartup(final boolean state) {
+    public void setLoadOnStartup(boolean state) {
         ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setLoadOnStartup(state);
         ((WorldInfoBridge) this).bridge$saveConfig();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public boolean doesKeepSpawnLoaded() {
-        Boolean keepSpawnLoaded =  ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getKeepSpawnLoaded();
-        if (keepSpawnLoaded == null) {
-            keepSpawnLoaded = ((DimensionTypeBridge) ((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldLoadSpawn();
-        } else if (((WorldInfoBridge) this).bridge$getIsMod() && !keepSpawnLoaded) { // If disabled and a mod dimension, validate
-            final Integer dimensionId = ((WorldInfoBridge) this).bridge$getDimensionId();
-
-            if (dimensionId != null && dimensionId == ((net.minecraft.world.dimension.DimensionType)(Object) ((WorldInfoBridge) this).bridge$getDimensionType()).getId()) {
-                if (((DimensionTypeBridge)((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldKeepSpawnLoaded()) {
-                    this.setKeepSpawnLoaded(true);
-                    keepSpawnLoaded = true;
-                }
-            }
-        }
-        return keepSpawnLoaded;
+        return ((WorldInfoBridge) this).bridge$doesKeepSpawnLoaded();
     }
 
     @Override
-    public void setKeepSpawnLoaded(final boolean loaded) {
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setKeepSpawnLoaded(loaded);
+    public void setKeepSpawnLoaded(boolean state) {
+        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setKeepSpawnLoaded(state);
         ((WorldInfoBridge) this).bridge$saveConfig();
     }
 
     @Override
     public boolean doesGenerateSpawnOnLoad() {
-        Boolean shouldGenerateSpawn =  ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().getGenerateSpawnOnLoad();
-        if (shouldGenerateSpawn == null) {
-            shouldGenerateSpawn = ((DimensionTypeBridge) ((WorldInfoBridge) this).bridge$getDimensionType()).bridge$shouldGenerateSpawnOnLoad();
-            this.setGenerateSpawnOnLoad(shouldGenerateSpawn);
-        }
-        return shouldGenerateSpawn;
+        return ((WorldInfoBridge) this).bridge$doesGenerateSpawnOnLoad();
     }
 
     @Override
-    public void setGenerateSpawnOnLoad(final boolean state) {
+    public void setGenerateSpawnOnLoad(boolean state) {
         ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorld().setGenerateSpawnOnLoad(state);
-    }
-
-    @Override
-    public Collection<TerrainGeneratorConfig> getGeneratorModifiers() {
-        return WorldGeneratorModifierRegistryModule.getInstance().toModifiers( ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorldGenModifiers());
-    }
-
-    @Override
-    public void setGeneratorModifiers(final Collection<TerrainGeneratorConfig> modifiers) {
-        checkNotNull(modifiers, "modifiers");
-
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorldGenModifiers().clear();
-        ((WorldInfoBridge) this).bridge$getConfigAdapter().getConfig().getWorldGenModifiers().addAll(WorldGeneratorModifierRegistryModule.getInstance().toIds(modifiers));
+        ((WorldInfoBridge) this).bridge$saveConfig();
     }
 
     @Override
     public DataContainer getGeneratorSettings() {
-        // Minecraft uses a String, we want to return a fancy DataContainer
-        // Parse the world generator settings as JSON
-        try {
-            return DataFormats.JSON.read(this.generatorOptions);
-        } catch (JsonParseException | IOException ignored) {
+        // TODO 1.14 - This may not be correct...
+        if (this.legacyCustomOptions != null) {
+            try {
+                return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, DataFormats.JSON.read(this.legacyCustomOptions));
+            } catch (JsonParseException | IOException ignored) {
+                return DataContainer.createNew();
+            }
+        } else {
+            return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS,
+                NbtTranslator.getInstance().translateFrom(this.shadow$getGeneratorOptions()));
         }
-        return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
+    }
+
+    @Override
+    public void setGeneratorSettings(DataContainer generatorSettings) {
+        this.shadow$setGeneratorOptions(NbtTranslator.getInstance().translate(generatorSettings));
+    }
+
+    @Override
+    public WorldBorder getWorldBorder() {
+        // TODO 1.14 - Fetch the WorldBorder if a live world instance, return a dummy if it isn't?
+        return null;
     }
 
     @Override
@@ -509,41 +345,152 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setSerializationBehavior(final SerializationBehavior behavior) {
+    public void setSerializationBehavior(SerializationBehavior behavior) {
         this.api$serializationBehavior = behavior;
     }
 
-    @Override
-    public Optional<DataView> getPropertySection(final DataQuery path) {
-        if ( ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().contains(path.toString())) {
-            try {
-                final CompoundNBT property = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().getCompound(path.toString());
-                return Optional.of(NbtTranslator.getInstance().translateFrom(property));
-            } catch (Exception e) {
-                e.printStackTrace();
-                return Optional.empty();
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public void setPropertySection(final DataQuery path, final DataView data) {
-        final CompoundNBT nbt = NbtTranslator.getInstance().translateData(data);
-        ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().setTag(path.toString(), nbt);
+    @Intrinsic
+    public int worldproperties$getWanderingTraderSpawnDelay() {
+        return this.shadow$getWanderingTraderSpawnDelay();
     }
 
     @Intrinsic
-    public String worldproperties$getWorldName() {
-        return this.shadow$getWorldName();
+    public void worldproperties$setWanderingTraderSpawnDelay(int delay) {
+        this.shadow$setWanderingTraderSpawnDelay(delay);
     }
 
+    @Intrinsic
+    public int worldproperties$getWanderingTraderSpawnChance() {
+        return this.shadow$getWanderingTraderSpawnChance();
+    }
+
+    @Intrinsic
+    public void worldproperties$setWanderingTraderSpawnChance(int chance) {
+        this.shadow$setWanderingTraderSpawnChance(chance);
+    }
 
     @Override
-    public DataContainer getAdditionalProperties() {
-        final CompoundNBT additionalProperties = ((WorldInfoBridge) this).bridge$getSpongeRootLevelNbt().copy();
-        additionalProperties.remove(SpongeImpl.ECOSYSTEM_NAME);
-        return NbtTranslator.getInstance().translateFrom(additionalProperties);
+    public Optional<UUID> getWanderTraderUniqueId() {
+        return Optional.ofNullable(this.wanderingTraderId);
     }
 
+    @Override
+    public void setWanderingTrader(@Nullable WanderingTrader trader) {
+        this.shadow$setWanderingTraderId(trader == null ? null : trader.getUniqueId());
+    }
+
+    @Override
+    public List<BossBar> getCustomBossBars() {
+        // TODO 1.14 - Fetch the boss bars if a live world instance, return dummies if they aren't?
+        return null;
+    }
+
+    @Override
+    public void setCustomBossBars(@Nullable List<BossBar> bars) {
+
+    }
+
+    @Override
+    public Weather getWeather() {
+        if (this.shadow$isRaining()) {
+            return Weathers.RAIN;
+        } else if (this.shadow$isThundering()) {
+            return Weathers.THUNDER_STORM;
+        }
+        return Weathers.CLEAR;
+    }
+
+    @Override
+    public Duration getRemainingWeatherDuration() {
+        // TODO 1.14 - Weather has no finite maximum so....I guess I'll hardcode it? How do I implement this??
+        if (this.shadow$isRaining()) {
+            return Duration.ofSeconds(6000 - this.shadow$getRainTime());
+        } else if (this.shadow$isThundering()) {
+            return Duration.ofSeconds(6000 - this.shadow$getThunderTime());
+        } else {
+            return Duration.ofSeconds(6000 - this.shadow$getClearWeatherTime());
+        }
+    }
+
+    @Override
+    public Duration getRunningWeatherDuration() {
+        if (this.shadow$isRaining()) {
+            return Duration.ofSeconds(this.shadow$getRainTime());
+        } else if (this.shadow$isThundering()) {
+            return Duration.ofSeconds(this.shadow$getThunderTime());
+        }
+        return Duration.ofSeconds(this.shadow$getClearWeatherTime());
+    }
+
+    @Override
+    public void setWeather(Weather weather) {
+        this.setWeather(weather, Duration.ofSeconds(6000));
+    }
+
+    @Override
+    public void setWeather(Weather weather, Duration duration) {
+        if (weather == Weathers.CLEAR) {
+            this.shadow$setClearWeatherTime((int) (duration.toMillis() / 1000));
+            this.shadow$setRaining(false);
+            this.shadow$setRainTime(0);
+            this.shadow$setThundering(false);
+            this.shadow$setThunderTime(0);
+        } else if (weather == Weathers.RAIN) {
+            this.shadow$setRaining(true);
+            this.shadow$setRainTime((int) (duration.toMillis() / 1000));
+            this.shadow$setThundering(false);
+            this.shadow$setThunderTime(0);
+            this.shadow$setClearWeatherTime(0);
+        } else if (weather == Weathers.THUNDER_STORM) {
+            this.shadow$setRaining(true);
+            this.shadow$setRainTime((int) (duration.toMillis() / 1000));
+            this.shadow$setThundering(true);
+            this.shadow$setThunderTime((int) (duration.toMillis() / 1000));
+            this.shadow$setClearWeatherTime(0);
+        }
+    }
+
+    @Override
+    public <V> V getGameRule(GameRule<V> gameRule) {
+        // TODO 1.14 - Boy, this is baaaad....
+        final GameRules.RuleValue<?> value = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
+        if (value instanceof GameRules.BooleanValue) {
+            return (V) Boolean.valueOf(((GameRules.BooleanValue) value).get());
+        } else if (value instanceof GameRules.IntegerValue) {
+            return (V) Integer.valueOf(((GameRules.IntegerValue) value).get());
+        }
+        return null;
+    }
+
+    @Override
+    public <V> void setGameRule(GameRule<V> gameRule, V value) {
+        // TODO 1.14 - Boy, this is baaaad....
+        final GameRules.RuleValue<?> mValue = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
+        ((GameRules_RuleValueAccessor) mValue).accessor$deserialize(value.toString());
+    }
+
+    @Override
+    public Map<GameRule<?>, ?> getGameRules() {
+        // TODO 1.14 - Boy, this is baaaad....
+        final Map<GameRules.RuleKey<?>, GameRules.RuleValue<?>> rules =
+            ((GameRulesAccessor) this.shadow$getGameRulesInstance()).accessor$getRules();
+
+        final Map<GameRule<?>, Object> apiRules = new HashMap<>();
+        for (Map.Entry<GameRules.RuleKey<?>, GameRules.RuleValue<?>> rule : rules.entrySet()) {
+            final GameRule<?> key = (GameRule<?>) (Object) rule.getKey();
+            final GameRules.RuleValue<?> mValue = rule.getValue();
+            Object value = null;
+            if (mValue instanceof GameRules.BooleanValue) {
+                value = ((GameRules.BooleanValue) mValue).get();
+            } else if (mValue instanceof GameRules.IntegerValue) {
+                value = ((GameRules.IntegerValue) mValue).get();
+            }
+
+            if (value != null) {
+                apiRules.put(key, value);
+            }
+        }
+
+        return apiRules;
+    }
 }

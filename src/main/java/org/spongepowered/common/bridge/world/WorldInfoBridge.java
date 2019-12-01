@@ -38,46 +38,32 @@ import net.minecraft.world.Difficulty;
 
 public interface WorldInfoBridge {
 
-    CompoundNBT bridge$getSpongeRootLevelNbt();
+    DimensionType bridge$getDimensionType();
 
-    boolean bridge$getSpawnsBonusChest();
+    void bridge$setDimensionType(DimensionType type);
 
-    void bridge$setSpongeRootLevelNBT(CompoundNBT nbt);
+    PortalAgentType bridge$getPortalAgent();
+    
+    UUID bridge$getUniqueId();
 
-    void bridge$readSpongeNbt(CompoundNBT spongeNbt);
+    void bridge$setUniqueId(UUID uniqueId);
+    
+    CompoundNBT bridge$getSpongeLevelCompound();
 
+    void bridge$setSpongeLevelCompound(CompoundNBT compound);
+
+    void bridge$readSpongeDataCompound(CompoundNBT compound);
+    
+    boolean bridge$doesGenerateBonusChest();
+    
     int bridge$getIndexForUniqueId(UUID uuid);
 
     Optional<UUID> bridge$getUniqueIdForIndex(int index);
 
-    UUID bridge$getAssignedId();
-
-    @Nullable
-    Integer bridge$getDimensionId();
-
-    void bridge$setDimensionId(int id);
-
-    boolean bridge$getIsMod();
-
-    void bridge$setIsMod(boolean isMod);
-
     @Nullable
     SpongeConfig<WorldConfig> bridge$getConfigAdapter();
 
-    PortalAgentType bridge$getPortalAgent();
-
-    DimensionType bridge$getDimensionType();
-
-    /**
-     * Creates the world config.
-     *
-     * @return True if the config was wrote to disk, false otherwise
-     */
     boolean bridge$createWorldConfig();
-
-    void bridge$setUniqueId(UUID uniqueId);
-
-    void bridge$setDimensionType(DimensionType type);
 
     boolean bridge$isValid();
 
@@ -91,4 +77,14 @@ public interface WorldInfoBridge {
     void bridge$updatePlayersForDifficulty();
 
     void bridge$saveConfig();
+
+    boolean bridge$doesLoadOnStartup();
+
+    boolean bridge$doesKeepSpawnLoaded();
+
+    boolean bridge$doesGenerateSpawnOnLoad();
+
+    void bridge$setGenerateBonusChest(boolean state);
+
+    String bridge$getWorldName();
 }

@@ -90,7 +90,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
     private void impl$saveLevelSpongeDataFile(final WorldInfo worldInformation, final CompoundNBT tagCompound, final CallbackInfo ci) {
         try {
             // If the returned NBT is empty, then we should warn the user.
-            CompoundNBT spongeRootLevelNBT = ((WorldInfoBridge) worldInformation).bridge$getSpongeRootLevelNbt();
+            CompoundNBT spongeRootLevelNBT = ((WorldInfoBridge) worldInformation).bridge$getSpongeLevelCompound();
             if (spongeRootLevelNBT.isEmpty()) {
                 Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
                 String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
@@ -103,9 +103,9 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
-                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getAssignedId())
+                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getUniqueId())
                         .add("Dimension ID: ", dimensionIdString)
-                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsMod())
+                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsModCreated())
                         .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
                         .add()
                         .add("Stack trace:")
@@ -132,9 +132,9 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
-                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getAssignedId())
+                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getUniqueId())
                         .add("Dimension ID: ", dimensionIdString)
-                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsMod())
+                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsModCreated())
                         .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
                         .add()
                         .add("Stack trace:")
@@ -330,11 +330,11 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
                     .print(System.err);
             return false;
         }
-        ((WorldInfoBridge) info).bridge$setSpongeRootLevelNBT(compound);
+        ((WorldInfoBridge) info).bridge$setSpongeLevelCompound(compound);
         if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
             final CompoundNBT spongeCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
             DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
-            ((WorldInfoBridge) info).bridge$readSpongeNbt(spongeCompound);
+            ((WorldInfoBridge) info).bridge$readSpongeDataCompound(spongeCompound);
         }
 
         return true;

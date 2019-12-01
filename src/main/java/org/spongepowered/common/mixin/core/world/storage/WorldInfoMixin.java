@@ -34,7 +34,6 @@ import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.dimension.DimensionType;
@@ -78,7 +77,6 @@ import javax.annotation.Nullable;
 @Mixin(WorldInfo.class)
 public abstract class WorldInfoMixin implements WorldInfoBridge {
 
-    @Shadow private WorldType terrainType;
     @Shadow private int spawnX;
     @Shadow private int spawnY;
     @Shadow private int spawnZ;
@@ -285,22 +283,22 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public boolean bridge$getIsMod() {
+    public boolean bridge$getIsModCreated() {
         return this.impl$isMod;
     }
 
     @Override
-    public void bridge$setIsMod(final boolean flag) {
+    public void bridge$setIsModCreated(final boolean flag) {
         this.impl$isMod = flag;
     }
 
     @Override
-    public UUID bridge$getAssignedId() {
+    public UUID bridge$getUniqueId() {
         return this.impl$uuid;
     }
 
     @Override
-    public boolean bridge$getSpawnsBonusChest() {
+    public boolean bridge$doesGenerateBonusChest() {
         return this.impl$generateBonusChest;
     }
 
@@ -343,13 +341,13 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public CompoundNBT bridge$getSpongeRootLevelNbt() {
+    public CompoundNBT bridge$getSpongeLevelCompound() {
         this.writeSpongeNbt();
         return this.impl$spongeRootLevelNbt;
     }
 
     @Override
-    public void bridge$setSpongeRootLevelNBT(final CompoundNBT nbt) {
+    public void bridge$setSpongeLevelCompound(final CompoundNBT nbt) {
         this.impl$spongeRootLevelNbt = nbt;
         if (nbt.contains(Constants.Sponge.SPONGE_DATA)) {
             this.impl$spongeNbt = nbt.getCompound(Constants.Sponge.SPONGE_DATA);
@@ -357,7 +355,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public void bridge$readSpongeNbt(final CompoundNBT nbt) {
+    public void bridge$readSpongeDataCompound(final CompoundNBT nbt) {
         final UUID nbtUniqueId = nbt.getUniqueId(Constants.UUID);
         if (UUID.fromString("00000000-0000-0000-0000-000000000000").equals(nbtUniqueId)) {
             return;
