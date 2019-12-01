@@ -27,12 +27,12 @@ package org.spongepowered.common.mixin.core.world.storage;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Final;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,12 +40,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -62,51 +62,51 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
-@NonnullByDefault
 @Mixin(SaveHandler.class)
-public abstract class SaveHandlerMixin implements SaveHandlerBridge {
+public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFileData {
 
-    @Shadow @Final private File worldDirectory;
+    @Shadow public abstract File shadow$getWorldDirectory();
 
     @Nullable private Exception impl$capturedException;
-    // player join stuff
     @Nullable private Path impl$file;
 
     @ModifyArg(method = "checkSessionLock",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
-    private String modifyMinecraftExceptionOutputIfNotInitializationTime(final String message) {
-        return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
+    private String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
+        return "The save folder for world " + this.shadow$getWorldDirectory() + " is being accessed from another location, aborting";
     }
 
     @ModifyArg(method = "checkSessionLock",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V", ordinal = 1, remap = false))
-    private String modifyMinecraftExceptionOutputIfIOException(final String message) {
-        return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
+    private String modifyMinecraftExceptionOutputIfIOException(String message) {
+        return "Failed to check session lock for world " + this.shadow$getWorldDirectory() + ", aborting";
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
-    private void impl$saveLevelSpongeDataFile(final WorldInfo worldInformation, final CompoundNBT tagCompound, final CallbackInfo ci) {
-        try {
-            // If the returned NBT is empty, then we should warn the user.
-            CompoundNBT spongeRootLevelNBT = ((WorldInfoBridge) worldInformation).bridge$getSpongeLevelCompound();
-            if (spongeRootLevelNBT.isEmpty()) {
-                Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
-                String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
+    private void impl$saveSpongeLevelData(WorldInfo info, CompoundNBT compound, CallbackInfo ci) {
+        if (!((WorldInfoBridge) info).bridge$isValid()) {
+            return;
+        }
 
-                // We should warn the user about the NBT being empty, but not saving it.
-                new PrettyPrinter().add("Sponge Root Level NBT for world %s is empty!", worldInformation.getWorldName()).centre().hr()
+        try {
+            final CompoundNBT spongeLevelCompound = new CompoundNBT();
+            ((WorldInfoBridge) info).bridge$writeSpongeLevelData(spongeLevelCompound);
+
+            @Nullable final DimensionType dimensionType = ((WorldInfoBridge) info).bridge$getDimensionType();
+            final String dimensionIdString = dimensionType == null ? "unknown" : String.valueOf(dimensionType.getId());
+
+            // If the returned compound is empty then we should warn the user.
+            if (spongeLevelCompound.isEmpty()) {
+                new PrettyPrinter().add("Sponge Level NBT for world %s is empty!", info.getWorldName()).centre().hr()
                         .add("When trying to save Sponge data for the world %s, an empty NBT compound was provided. The old Sponge data file was "
-                                        + "left intact.",
-                                worldInformation.getWorldName())
+                                        + "left intact.", info.getWorldName())
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
-                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getUniqueId())
+                        .add("UUID: ", ((WorldInfoBridge) info).bridge$getUniqueId())
                         .add("Dimension ID: ", dimensionIdString)
-                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsModCreated())
-                        .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
+                        .add("Is Mod Created: ", ((WorldInfoBridge) info).bridge$isModCreated())
+                        .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
                         .add()
                         .add("Stack trace:")
                         .add(new Exception())
@@ -114,28 +114,26 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
                 return;
             }
 
-            final File newDataFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT_NEW);
-            final File oldDataFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
-            final File dataFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT);
+            final File newDataFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT_NEW);
+            final File oldDataFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
+            final File dataFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT);
             try (final FileOutputStream stream = new FileOutputStream(newDataFile)) {
-                CompressedStreamTools.writeCompressed(spongeRootLevelNBT, stream);
+                CompressedStreamTools.writeCompressed(spongeLevelCompound, stream);
             }
 
             // Before we continue, is the file zero length?
             if (newDataFile.length() == 0) {
-                Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
-                String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
                 // Then we just delete the file and tell the user that we didn't save properly.
-                new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", worldInformation.getWorldName()).centre().hr()
+                new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", info.getWorldName()).centre().hr()
                         .add("When saving the data file for the world %s, a zero length file was written. Sponge has discarded this file.",
-                                worldInformation.getWorldName())
+                                info.getWorldName())
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
-                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getUniqueId())
+                        .add("UUID: ", ((WorldInfoBridge) info).bridge$getUniqueId())
                         .add("Dimension ID: ", dimensionIdString)
-                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsModCreated())
-                        .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
+                        .add("Is Mod Created: ", ((WorldInfoBridge) info).bridge$isModCreated())
+                        .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
                         .add()
                         .add("Stack trace:")
                         .add(new Exception())
@@ -163,14 +161,16 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         }
     }
 
-    @Override
-    public void bridge$loadSpongeDatData(final WorldInfo info) {
-        final File spongeFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT);
-        final File spongeOldFile = new File(this.worldDirectory, Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
+    @Inject(method = "loadWorldInfo", at = @At("RETURN"))
+    private void loadSpongeLevelData(CallbackInfoReturnable<WorldInfo> cir) {
+        final WorldInfo info = cir.getReturnValue();
+
+        final File spongeFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT);
+        final File spongeOldFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
 
         boolean exceptionRaised = false;
         if (spongeFile.exists()) {
-            if (impl$loadSpongeDatFile(info, spongeFile, true)) {
+            if (this.impl$loadSpongeDatFile(info, spongeFile, true)) {
                 return;
             }
 
@@ -181,7 +181,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
             if (impl$loadSpongeDatFile(info, spongeOldFile, false)) {
                 if (exceptionRaised) {
                     // Tell the user we successfully loaded a backup
-                    SpongeImpl.getLogger().warn("Successfully loaded backup data file {} for world {}.", spongeFile.getName(), info.getWorldName());
+                    SpongeImpl.getLogger().warn("Successfully loaded backup data file {} for world '{}'.", spongeFile.getName(), info.getWorldName());
 
                     // Delete the "current" file so we don't accidentally make it the backup file.
                     spongeFile.delete();
@@ -201,14 +201,13 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
      * Redirects the {@link File#exists()} checking that if the file exists, grab
      * the file for later usage to read the file attributes for pre-existing data.
      *
-     * @param localfile The local file
+     * @param localFile The local file
      * @return True if the file exists
      */
-    @Redirect(method = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;",
-        at = @At(value = "INVOKE", target = "Ljava/io/File;isFile()Z", remap = false))
-    private boolean impl$grabFileToField(final File localfile) {
-        final boolean isFile = localfile.isFile();
-        this.impl$file = isFile ? localfile.toPath() : null;
+    @Redirect(method = "readPlayerData", at = @At(value = "INVOKE", target = "Ljava/io/File;isFile()Z", remap = false))
+    private boolean impl$grabFileToField(File localFile) {
+        final boolean isFile = localFile.isFile();
+        this.impl$file = isFile ? localFile.toPath() : null;
         return isFile;
     }
 
@@ -221,10 +220,8 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
      * @return The compound that may be modified
      * @throws IOException for reasons
      */
-    @Redirect(method = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At(value = "INVOKE", target =
-        "Lnet/minecraft/nbt/CompressedStreamTools;readCompressed(Ljava/io/InputStream;)"
-            + "Lnet/minecraft/nbt/NBTTagCompound;"))
-    private CompoundNBT impl$readLegacyDataAndOrSpongeData(final InputStream inputStream) throws IOException {
+    @Redirect(method = "readPlayerData", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompressedStreamTools;readCompressed(Ljava/io/InputStream;)Lnet/minecraft/nbt/CompoundNBT;"))
+    private CompoundNBT impl$readLegacyDataAndOrSpongeData(InputStream inputStream) throws IOException {
         Instant creation = this.impl$file == null ? Instant.now() : Files.readAttributes(this.impl$file, BasicFileAttributes.class).creationTime().toInstant();
         final CompoundNBT compound = CompressedStreamTools.readCompressed(inputStream);
         Instant lastPlayed = Instant.now();
@@ -240,7 +237,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
             creation = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.FIRST_JOINED));
             lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
         }
-        UUID playerId = null;
+        @Nullable UUID playerId = null;
         if (compound.hasUniqueId(Constants.UUID)) {
             playerId = compound.getUniqueId(Constants.UUID);
         }
@@ -261,9 +258,9 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
 
     @Inject(method = "writePlayerData",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed(Lnet/minecraft/nbt/NBTTagCompound;Ljava/io/OutputStream;)V",
+            target = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed(Lnet/minecraft/nbt/CompoundNBT;Ljava/io/OutputStream;)V",
             shift = At.Shift.AFTER))
-    private void impl$saveSpongePlayerData(final PlayerEntity player, final CallbackInfo callbackInfo) {
+    private void impl$saveSpongePlayerData(PlayerEntity player, CallbackInfo callbackInfo) {
         SpongePlayerDataHandler.savePlayer(player.getUniqueID());
     }
 
@@ -273,7 +270,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
             target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
             remap = false),
         locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$trackExceptionForLogging(final PlayerEntity player, final CallbackInfo ci, final Exception exception) {
+    private void impl$trackExceptionForLogging(PlayerEntity player, CallbackInfo ci, Exception exception) {
         this.impl$capturedException = exception;
     }
 
@@ -285,7 +282,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
             remap = false
         )
     )
-    private void impl$useStoredException(final Logger logger, final String message, final Object param) {
+    private void impl$useStoredException(Logger logger, String message, Object param) {
         logger.warn(message, param, this.impl$capturedException);
         this.impl$capturedException = null;
     }
@@ -295,11 +292,11 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
     // the sponge world directory is returned for the corresponding save handler.
     // AnvilSaveHandlerMixin#getChunkLoader is one example where we must use this method.
     @Override
-    public File bridge$getSpongeWorldDirectory() {
-        return this.worldDirectory;
+    public File bridge$getWorldDirectory() {
+        return this.shadow$getWorldDirectory();
     }
 
-    private boolean impl$loadSpongeDatFile(final WorldInfo info, final File file, boolean isCurrent) {
+    private boolean impl$loadSpongeDatFile(WorldInfo info, File file, boolean isCurrent) {
         final CompoundNBT compound;
         try (final FileInputStream stream = new FileInputStream(file)) {
             compound = CompressedStreamTools.readCompressed(stream);
@@ -330,14 +327,8 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
                     .print(System.err);
             return false;
         }
-        ((WorldInfoBridge) info).bridge$setSpongeLevelCompound(compound);
-        if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
-            final CompoundNBT spongeCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
-            DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
-            ((WorldInfoBridge) info).bridge$readSpongeDataCompound(spongeCompound);
-        }
 
+        ((WorldInfoBridge) info).bridge$readSpongeLevelData(compound);
         return true;
     }
-
 }

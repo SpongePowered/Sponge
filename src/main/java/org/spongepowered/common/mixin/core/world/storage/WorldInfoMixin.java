@@ -93,6 +93,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     private boolean impl$keepSpawnLoaded;
     private boolean impl$generateSpawnOnLoad;
     private boolean impl$generateBonusChest;
+    private boolean impl$modCreated;
     @Nullable private PortalAgentType impl$portalAgentType;
     @Nullable private SerializationBehavior impl$serializationBehavior;
 
@@ -299,6 +300,16 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
+    public boolean bridge$isModCreated() {
+        return this.impl$modCreated;
+    }
+
+    @Override
+    public void bridge$setModCreated(boolean state) {
+        this.impl$modCreated = state;
+    }
+
+    @Override
     public SpongeConfig<WorldConfig> bridge$getConfigAdapter() {
         if (this.impl$configAdapter == null) {
             this.bridge$createWorldConfig();
@@ -383,6 +394,8 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             return;
         }
 
+        // TODO 1.14 - Run DataFixer on the SpongeData compound
+
         final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
         if (!spongeDataCompound.contains(Constants.UUID_MOST) || !spongeDataCompound.contains(Constants.UUID_LEAST)) {
             // TODO 1.14 - Bad Sponge level data...warn/crash?
@@ -445,9 +458,10 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         return MoreObjects.toStringHelper(this)
             .add("directoryName", this.shadow$getWorldName())
             .add("worldName", this.impl$worldName)
-            .add("generator", this.shadow$getGenerator())
             .add("uuid", this.impl$uniqueId)
             .add("dimensionType", this.impl$dimensionType)
+            .add("generator", this.shadow$getGenerator())
+            .add("modCreated", this.impl$modCreated)
             .add("spawnX", this.shadow$getSpawnX())
             .add("spawnY", this.shadow$getSpawnY())
             .add("spawnZ", this.shadow$getSpawnZ())

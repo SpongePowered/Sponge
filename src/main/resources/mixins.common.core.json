@@ -532,7 +532,7 @@
         "world.storage.MapStorageMixin",
         "world.storage.SaveHandlerAccessor",
         "world.storage.SaveHandlerMixin",
-        "world.storage.ThreadedFileIOBaseMixin",
+        "invalid.world.storage.ThreadedFileIOBaseMixin",
         "world.storage.WorldInfoMixin"
     ],
     "server": [

@@ -39,6 +39,7 @@ import org.spongepowered.common.config.type.WorldConfig;
 
 public interface WorldInfoBridge {
 
+    @Nullable
     DimensionType bridge$getDimensionType();
 
     void bridge$setDimensionType(DimensionType type);
@@ -80,6 +81,10 @@ public interface WorldInfoBridge {
     void bridge$setSerializationBehavior(SerializationBehavior behavior);
 
     PortalAgentType bridge$getPortalAgent();
+
+    boolean bridge$isModCreated();
+
+    void bridge$setModCreated(boolean state);
 
     boolean bridge$isValid();
 
