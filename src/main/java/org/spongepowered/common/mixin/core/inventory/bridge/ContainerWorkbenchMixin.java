@@ -46,7 +46,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
@@ -62,21 +61,22 @@ import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.inventory.impl.ContainerMixin;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Mixin(WorkbenchContainer.class)
-public abstract class ContainerWorkbenchMixin extends ContainerMixin implements LensProviderBridge {
+public abstract class ContainerWorkbenchMixin implements LensProviderBridge {
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
         final List<Lens> lenses = new ArrayList<>();
-        lenses.add(new CraftingInventoryLens(0, 1, 3, 3, adapter.bridge$getSlotProvider()));
-        lenses.add(new PrimaryPlayerInventoryLens(3 * 3 + 1, adapter.bridge$getSlotProvider(), true));
-        return new ContainerLens(adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), bridge$getSlotProvider(), lenses);
+        SlotLensProvider slotLensProvider = adapter.bridge$getSlotProvider();
+        lenses.add(new CraftingInventoryLens(0, 1, 3, 3, slotLensProvider));
+        lenses.add(new PrimaryPlayerInventoryLens(3 * 3 + 1, slotLensProvider, true));
+        return new ContainerLens(adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(),
+                slotLensProvider, lenses);
     }
 
     @Override
@@ -85,7 +85,7 @@ public abstract class ContainerWorkbenchMixin extends ContainerMixin implements 
                 .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLens(i, (t) -> false, (t) -> false))
                 .add(9)
                 .add(36);
-        builder.add(this.inventorySlots.size() - 46);
+        builder.add(((WorkbenchContainer) (Object) this).inventorySlots.size() - 46);
         return builder.build();
     }
     /**

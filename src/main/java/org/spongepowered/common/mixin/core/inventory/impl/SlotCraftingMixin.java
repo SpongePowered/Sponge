@@ -124,8 +124,8 @@ public abstract class SlotCraftingMixin extends Slot {
 
     /**
      * Create CraftItemEvent.Post result is also handled by
-     * {@link ContainerMixin#redirectTransferStackInSlot} or
-     * {@link ContainerMixin#redirectOnTakeThrow}
+     * {@link ContainerMixin_TrackedBridge#redirectTransferStackInSlot} or
+     * {@link ContainerMixin_TrackedBridge#redirectOnTakeThrow}
      */
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
     private void afterTake(final PlayerEntity thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {

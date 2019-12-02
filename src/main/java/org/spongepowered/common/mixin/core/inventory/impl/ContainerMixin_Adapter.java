@@ -31,9 +31,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(Container.class)
-public abstract class ContainerMixin_Adapter implements
-        InventoryAdapterBridge,
-        InventoryAdapter {
+public abstract class ContainerMixin_Adapter implements InventoryAdapterBridge, InventoryAdapter {
 
     @Shadow public abstract NonNullList<ItemStack> getInventory();
     @Shadow @Final public List<Slot> inventorySlots;

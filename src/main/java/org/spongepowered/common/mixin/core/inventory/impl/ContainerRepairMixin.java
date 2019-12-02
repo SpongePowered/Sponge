@@ -29,7 +29,6 @@ import net.minecraft.inventory.container.RepairContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IntReferenceHolder;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,48 +40,16 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.InputSlotAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.OutputSlotAdapter;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
-import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
-import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Mixin(RepairContainer.class)
-public abstract class ContainerRepairMixin extends ContainerMixin implements LensProviderBridge {
+public abstract class ContainerRepairMixin implements LensProviderBridge {
 
     @Shadow private String repairedItemName;
     @Shadow @Final private IInventory outputSlot;
-    @Shadow public IntReferenceHolder maximumCost;
+    @Shadow @Final private IntReferenceHolder maximumCost;
     @Shadow private int materialCost;
     @Shadow @Final private IInventory inputSlots;
-
-    @Override
-    public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
-        final List<Lens> lenses = new ArrayList<>();
-        lenses.add(new DefaultIndexedLens(0, 3, bridge$getSlotProvider()));
-        lenses.add(new PrimaryPlayerInventoryLens(3, bridge$getSlotProvider(), true));
-        return new ContainerLens(adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), bridge$getSlotProvider(), lenses);
-    }
-
-    @Override
-    public SlotLensProvider bridge$slotProvider(final Fabric fabric, final InventoryAdapter adapter) {
-        final SlotLensCollection.Builder builder = new SlotLensCollection.Builder()
-                .add(2, InputSlotAdapter.class, i -> new InputSlotLens(i, s -> true, t -> true))
-                .add(1, OutputSlotAdapter.class, i -> new OutputSlotLens(i, s -> false, t -> false))
-                .add(36);
-        return builder.build();
-    }
 
     @Inject(method = "updateRepairOutput", at = @At(value = "RETURN"))
     private void impl$throwUpdateAnvilEvent(final CallbackInfo ci) {
@@ -102,15 +69,15 @@ public abstract class ContainerRepairMixin extends ContainerMixin implements Len
             this.outputSlot.setInventorySlotContents(0, ItemStack.EMPTY);
             this.maximumCost.set(0);
             this.materialCost = 0;
-            this.detectAndSendChanges();
+            ((RepairContainer)(Object) this).detectAndSendChanges();
             return;
         }
 
         this.outputSlot.setInventorySlotContents(0, ItemStackUtil.fromSnapshotToNative(event.getResult().getFinal()));
         this.maximumCost.set(event.getCosts().getFinal().getLevelCost());
         this.materialCost = event.getCosts().getFinal().getMaterialCost();
-        this.listeners.forEach(l -> l.sendWindowProperty(((RepairContainer)(Object) this), 0, this.maximumCost.get()));
-        this.detectAndSendChanges();
+
+        ((RepairContainer)(Object) this).detectAndSendChanges();
     }
 
 }
