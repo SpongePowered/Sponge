@@ -25,16 +25,10 @@
 package org.spongepowered.common.bridge.inventory;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,39 +40,19 @@ import javax.annotation.Nullable;
 
 public interface ContainerBridge {
 
-    InventoryArchetype bridge$getArchetype();
-
     Optional<Carrier> bridge$getCarrier();
 
     LinkedHashMap<IInventory, Set<net.minecraft.inventory.container.Slot>> bridge$getInventories();
 
-    void bridge$detectAndSendChanges(boolean captureOnly);
-
     void bridge$setCanInteractWith(@Nullable Predicate<PlayerEntity> predicate);
-    
-    void bridge$setSpectatorChest(boolean spectatorChest);
+    @Nullable Predicate<PlayerEntity> bridge$getCanInteractWith();
 
-    Slot bridge$getContainerSlot(int slot);
-
-    void bridge$setShiftCrafting(boolean flag);
-
-    boolean bridge$isShiftCrafting();
-
-    void bridge$setLastCraft(CraftItemEvent.Craft event);
-
-    net.minecraft.item.ItemStack bridge$getPreviousCursor();
-
-    void bridge$setFirePreview(boolean firePreview);
-
-    List<SlotTransaction> bridge$getPreviewTransactions();
-
-    @Nullable Location<World> bridge$getOpenLocation();
-
-    void bridge$setOpenLocation(@Nullable Location<World> loc);
+    @Nullable Location bridge$getOpenLocation();
+    void bridge$setOpenLocation(@Nullable Location loc);
 
     void bridge$setInUse(boolean inUse);
-
     boolean bridge$isInUse();
 
-    boolean bridge$capturePossible();
+    List<ServerPlayerEntity> listeners();
+
 }

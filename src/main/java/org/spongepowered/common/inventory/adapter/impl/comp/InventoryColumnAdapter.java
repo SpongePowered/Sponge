@@ -27,14 +27,14 @@ package org.spongepowered.common.inventory.adapter.impl.comp;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
+import org.spongepowered.common.inventory.lens.impl.comp.InventoryColumnLens;
 
 public class InventoryColumnAdapter extends Inventory2DAdapter implements InventoryColumn {
 
     protected InventoryColumnLens columnLens;
     
-    public InventoryColumnAdapter(Fabric inventory, InventoryColumnLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public InventoryColumnAdapter(Fabric fabric, InventoryColumnLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.columnLens = root;
     }
 

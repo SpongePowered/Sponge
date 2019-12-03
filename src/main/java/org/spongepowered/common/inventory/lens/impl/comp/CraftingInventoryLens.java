@@ -26,86 +26,55 @@ package org.spongepowered.common.inventory.lens.impl.comp;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
-import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
 
-public class CraftingInventoryLens extends DefaultIndexedLens implements CraftingInventoryLens {
+public class CraftingInventoryLens extends DefaultIndexedLens {
 
     private final int outputSlotIndex;
 
     private final CraftingOutputSlotLens outputSlot;
-
     private final CraftingGridInventoryLens craftingGrid;
 
-
     public CraftingInventoryLens(int outputSlotIndex, int gridBase, int width, int height, SlotLensProvider slots) {
-        this(outputSlotIndex, gridBase, width, height, CraftingInventoryAdapter.class, slots);
-    }
-
-    public CraftingInventoryLens(int outputSlotIndex, int gridBase, int width, int height, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
-        super(gridBase, width * height, 1, adapterType, slots);
+        super(gridBase, width * height + 1, slots);
         this.outputSlotIndex = outputSlotIndex;
-        this.outputSlot = (CraftingOutputSlotLens)slots.getSlot(this.outputSlotIndex);
-        this.craftingGrid = new org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens(this.base, width, height, width, slots);
+        this.outputSlot = (CraftingOutputSlotLens)slots.getSlotLens(this.outputSlotIndex);
+        this.craftingGrid = new CraftingGridInventoryLens(this.base, width, height, slots);
         this.size += 1; // output slot
         // Avoid the init() method in the superclass calling our init() too early
-        this.initOther();
+        this.init(slots);
     }
 
-    @Override
-    protected void init(SlotLensProvider slots) {
-        for (int ord = 0, slot = this.base; ord < this.size; ord++, slot += this.stride) {
-            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
-        }
-    }
-
-    private void initOther() {
-        this.addSpanningChild(this.outputSlot, new SlotIndex(0));
+    private void init(SlotLensProvider slots) {
+        this.addSpanningChild(this.outputSlot);
         this.addSpanningChild(this.craftingGrid);
-        this.cache();
+        this.addChild(new DefaultIndexedLens(0, this.size, slots));
     }
 
-    @Override
     public CraftingGridInventoryLens getCraftingGrid() {
         return this.craftingGrid;
     }
 
-    @Override
     public CraftingOutputSlotLens getOutputSlot() {
         return this.outputSlot;
     }
 
-    @Override
-    public ItemStack getOutputStack(Fabric inv) {
-        return this.outputSlot.getStack(inv);
+    public ItemStack getOutputStack(Fabric fabric) {
+        return this.outputSlot.getStack(fabric);
+    }
+
+    public boolean setOutputStack(Fabric fabric, ItemStack stack) {
+        return this.outputSlot.setStack(fabric, stack);
     }
 
     @Override
-    public boolean setOutputStack(Fabric inv, ItemStack stack) {
-        return this.outputSlot.setStack(inv, stack);
-    }
-
-    @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        if (!this.checkOrdinal(ordinal)) {
-            return -1;
-        }
-        if (ordinal < this.size - 1) {
-            return super.getRealIndex(inv, ordinal);
-        }
-        return this.outputSlotIndex;
-    }
-
-    @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new CraftingInventoryAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new CraftingInventoryAdapter(fabric, this, parent);
     }
 
 }

@@ -26,21 +26,21 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
-import net.minecraft.world.ILockableContainer;
-import net.minecraft.world.storage.loot.ILootContainer;
+import net.minecraft.inventory.IInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
+import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import javax.annotation.Nullable;
 
 @Mixin(ContainerMinecartEntity.class)
-public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin implements ILockableContainer, ILootContainer, InventoryAdapter, InventoryAdapterBridge {
+public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin implements IInventory, InventoryAdapter, InventoryAdapterBridge {
 
     @Shadow private boolean dropContentsWhenDead;
 
@@ -70,7 +70,7 @@ public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin i
     public Lens bridge$generateLens(SlotLensProvider slots) {
         return this.getSizeInventory() == 0
                 ? new DefaultEmptyLens(this)
-                : new DefaultIndexedLens(0, this.getSizeInventory(), 1, slots);
+                : new DefaultIndexedLens(0, this.getSizeInventory(), slots);
     }
 
 }

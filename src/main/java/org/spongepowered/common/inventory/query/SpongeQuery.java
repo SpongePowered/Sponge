@@ -24,25 +24,21 @@
  */
 package org.spongepowered.common.inventory.query;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 
-public abstract class SpongeQuery<T> implements org.spongepowered.common.inventory.query.Query<T> {
-
-    protected final QueryOperationType<T> type;
-
-    protected SpongeQuery(QueryOperationType<T> type) {
-        this.type = type;
-    }
+public abstract class SpongeQuery implements Query {
 
     @Override
-    public final QueryOperationType<T> getType() {
-        return this.type;
+    public Inventory execute(Inventory inventory) {
+        if (!(inventory instanceof InventoryBridge)) {
+            throw new IllegalArgumentException("Unsupported Inventory! " + inventory.getClass().getName());
+        }
+        return this.execute(inventory, ((InventoryBridge) inventory).bridge$getAdapter());
     }
 
-    public abstract boolean matches(Lens lens, Lens parent,
-            Fabric inventory);
-
+    public abstract Inventory execute(Inventory inventory, InventoryAdapter adapter);
 }
+

@@ -24,17 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.inventory.bridge;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
-import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
-import org.spongepowered.common.inventory.adapter.ReusableLensInventoryAdapaterBridge;
-import org.spongepowered.common.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.bridge.inventory.LensProviderBridge;
-import javax.annotation.Nullable;
 import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.tileentity.LockableTileEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.inventory.LensProviderBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.ReusableLensInventoryAdapaterBridge;
+import org.spongepowered.common.inventory.lens.ReusableLensProvider;
+import org.spongepowered.common.inventory.lens.impl.ReusableLens;
+
+import javax.annotation.Nullable;
 
 /**
  * Implement {@link InventoryAdapter#bridge$getSlotProvider()}

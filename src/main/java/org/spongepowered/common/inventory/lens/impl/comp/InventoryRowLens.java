@@ -29,39 +29,20 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.InventoryRowAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
 
+public class InventoryRowLens extends Inventory2DLens {
 
-public class InventoryRowLens extends Inventory2DLens implements InventoryRowLens {
-
-    public InventoryRowLens(int base, int width, SlotLensProvider slots) {
-        this(base, width, 0, 0, InventoryRowAdapter.class, slots);
-    }
-
-    public InventoryRowLens(int base, int width, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
-        this(base, width, 0, 0, adapterType, slots);
-    }
-    
     public InventoryRowLens(int base, int width, int xBase, int yBase, SlotLensProvider slots) {
         this(base, width, xBase, yBase, InventoryRowAdapter.class, slots);
     }
-    
+
     public InventoryRowLens(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
-        super(base, width, 1, width, xBase, yBase, adapterType, slots);
-    }
-    
-    @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        if (!this.checkOrdinal(ordinal)) {
-            return -1;
-        }
-
-        return this.base + ordinal;
+        super(base, width, 1, 1, xBase, yBase, adapterType, slots);
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new InventoryRowAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new InventoryRowAdapter(fabric, this, parent);
     }
 
 }

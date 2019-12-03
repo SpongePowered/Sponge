@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
@@ -42,15 +42,12 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Base Lens for Slots
  */
 public class BasicSlotLens extends AbstractLens implements SlotLens {
-
-    public static final Translation SLOT_NAME = new SpongeTranslation("slot.name");
-
-    protected int maxStackSize = -1;
 
     public BasicSlotLens(int index) {
         this(index, SlotAdapter.class);
@@ -58,17 +55,11 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
 
     public BasicSlotLens(int index, Class<? extends Inventory> adapterType) {
         super(index, 1, adapterType);
-        this.availableSlots.add(this.getOrdinal(null));
     }
 
     @Override
-    public Translation getName(Fabric inv) {
-        return BasicSlotLens.SLOT_NAME;
-    }
-
-    @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new SlotAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new SlotAdapter(fabric, this, parent);
     }
 
     @Override
@@ -82,39 +73,34 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public int getOrdinal(Fabric inv) {
+    public int getOrdinal(Fabric fabric) {
         return this.base;
     }
 
     @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        return (ordinal != 0) ? -1 : this.getOrdinal(inv);
-    }
-
-    @Override
-    public ItemStack getStack(Fabric inv, int ordinal) {
+    public ItemStack getStack(Fabric fabric, int ordinal) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
-        return this.getStack(inv);
+        return this.getStack(fabric);
     }
 
     @Override
-    public ItemStack getStack(Fabric inv) {
-        return checkNotNull(inv, "Target inventory").fabric$getStack(this.base);
+    public ItemStack getStack(Fabric fabric) {
+        return checkNotNull(fabric, "Target inventory").fabric$getStack(this.base);
     }
 
     @Override
-    public boolean setStack(Fabric inv, int ordinal, ItemStack stack) {
+    public boolean setStack(Fabric fabric, int ordinal, ItemStack stack) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
-        return this.setStack(inv, stack);
+        return this.setStack(fabric, stack);
     }
 
     @Override
-    public boolean setStack(Fabric inv, ItemStack stack) {
-        checkNotNull(inv, "Target inventory").fabric$setStack(this.base, stack);
+    public boolean setStack(Fabric fabric, ItemStack stack) {
+        checkNotNull(fabric, "Target inventory").fabric$setStack(this.base, stack);
         return true;
     }
 
@@ -124,8 +110,8 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(int index) {
-        return Collections.emptyList();
+    public Map<Property<?>, Object> getProperties(int index) {
+        return Collections.emptyMap();
     }
 
     @Override
@@ -145,4 +131,20 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
         }
         return this;
     }
+
+    @Override
+    public List<SlotLens> getSlots() {
+        return Collections.singletonList(this);
+    }
+
+    @Override
+    public String toString(int deep) {
+        return "[" + this.base + "]";
+    }
+
+    @Override
+    public String toString() {
+        return this.toString(0);
+    }
+
 }

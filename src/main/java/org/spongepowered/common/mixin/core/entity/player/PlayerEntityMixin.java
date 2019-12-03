@@ -117,6 +117,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseMixin;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -942,7 +943,7 @@ public abstract class PlayerEntityMixin extends EntityLivingBaseMixin implements
         if (((TrackedInventoryBridge) this.inventory).bridge$capturingInventory()) {
             if (slotIn == EquipmentSlotType.MAINHAND) {
                 final ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
-                final Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
+                final Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(this.inventory.currentItem).get();
                 ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EquipmentSlotType.OFFHAND) {
                 final ItemStack orig = this.inventory.offHandInventory.get(0);
@@ -950,7 +951,7 @@ public abstract class PlayerEntityMixin extends EntityLivingBaseMixin implements
                 ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR) {
                 final ItemStack orig = this.inventory.armorInventory.get(slotIn.getIndex());
-                final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(SlotIndex.of(slotIn.getIndex())).get();
+                final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(slotIn.getIndex()).get();
                 ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }

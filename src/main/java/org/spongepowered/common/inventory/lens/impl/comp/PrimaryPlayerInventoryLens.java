@@ -24,24 +24,21 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
-import org.spongepowered.common.item.inventory.lens.comp.MainPlayerInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
-public class PrimaryPlayerInventoryLens extends org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens implements MainPlayerInventoryLens {
+public class PrimaryPlayerInventoryLens extends GridInventoryLens {
 
     private static final int MAIN_INVENTORY_HEIGHT = 3;
     private static final int INVENTORY_WIDTH = 9;
 
-    private org.spongepowered.common.inventory.lens.impl.comp.HotbarLens hotbar;
-    private org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens grid;
+    private HotbarLens hotbar;
+    private GridInventoryLens mainGrid;
+    private GridInventoryLens fullGrid;
     private boolean isContainer;
 
     public PrimaryPlayerInventoryLens(int base, SlotLensProvider slots, boolean isContainer) {
@@ -52,22 +49,17 @@ public class PrimaryPlayerInventoryLens extends org.spongepowered.common.invento
         super(base, 9, 4, adapterType, slots);
         this.isContainer = isContainer;
 
-        this.lateInit(slots);
+        this.init(slots);
     }
 
     @Override
     protected void init(SlotLensProvider slots) {
-    }
-
-    private void lateInit(SlotLensProvider slots) {
         int base = this.base;
 
-        int hotbarSize = PlayerInventory.getHotbarSize();
-
         if (this.isContainer) {
-            this.grid = new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+            this.mainGrid = new GridInventoryLens(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, slots);
             base += INVENTORY_WIDTH * 3;
-            this.hotbar = new org.spongepowered.common.inventory.lens.impl.comp.HotbarLens(base - (hotbarSize - INVENTORY_WIDTH), hotbarSize, slots);
+            this.hotbar = new HotbarLens(base, INVENTORY_WIDTH, slots);
             /*
             1 |G|G|G|G|G|G|G|G|G|
             2 |G|G|G|G|G|G|G|G|G|
@@ -75,15 +67,16 @@ public class PrimaryPlayerInventoryLens extends org.spongepowered.common.invento
             4 |H|H|H|H|H|H|H|H|H|
             */
 
-            this.addSpanningChild(this.grid);
+            this.addSpanningChild(this.mainGrid);
             this.addSpanningChild(this.hotbar);
 
-            this.addChild(new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, INVENTORY_WIDTH, slots));
+            this.fullGrid = new GridInventoryLens(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, slots);
+            this.addChild(this.fullGrid);
 
         } else {
-            this.hotbar = new org.spongepowered.common.inventory.lens.impl.comp.HotbarLens(base, hotbarSize, slots);
+            this.hotbar = new HotbarLens(base, INVENTORY_WIDTH, slots);
             base += INVENTORY_WIDTH;
-            this.grid = new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+            this.mainGrid = new GridInventoryLens(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, slots);
 
             /*
             2 |G|G|G|G|G|G|G|G|G|
@@ -93,17 +86,16 @@ public class PrimaryPlayerInventoryLens extends org.spongepowered.common.invento
             */
 
             this.addSpanningChild(this.hotbar);
-            this.addSpanningChild(this.grid);
+            this.addSpanningChild(this.mainGrid);
 
             // Shift slots so that Hotbar is always after the MainGrid
-            org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens.ShiftedSlotProvider shiftedSlots = new org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens.ShiftedSlotProvider(slots, INVENTORY_WIDTH, INVENTORY_WIDTH * 4);
-            this.addChild(new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, INVENTORY_WIDTH, shiftedSlots));
+            ShiftedSlotProvider shiftedSlots = new ShiftedSlotProvider(slots, INVENTORY_WIDTH, INVENTORY_WIDTH * 4);
+            this.fullGrid = new GridInventoryLens(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, shiftedSlots);
+            this.addChild(this.fullGrid);
         }
-
-        this.cache();
     }
 
-    private class ShiftedSlotProvider implements SlotLensProvider {
+    private static class ShiftedSlotProvider implements SlotLensProvider {
 
         private final SlotLensProvider provider;
         private final int shiftBy;
@@ -116,17 +108,13 @@ public class PrimaryPlayerInventoryLens extends org.spongepowered.common.invento
         }
 
         @Override
-        public SlotLens getSlot(int index) {
+        public SlotLens getSlotLens(int index) {
             index = index + this.shiftBy;
             if (index >= this.shiftAt) {
                 index -= this.shiftAt;
             }
-            return this.provider.getSlot(index);
+            return this.provider.getSlotLens(index);
         }
-    }
-
-    @Override
-    protected void init(SlotLensProvider slots, boolean spanning) {
     }
 
     @Override
@@ -134,13 +122,15 @@ public class PrimaryPlayerInventoryLens extends org.spongepowered.common.invento
         return new PrimaryPlayerInventoryAdapter(fabric, this, parent);
     }
 
-    @Override
     public HotbarLens getHotbar() {
         return this.hotbar;
     }
 
-    @Override
     public GridInventoryLens getGrid() {
-        return this.grid;
+        return this.mainGrid;
+    }
+
+    public GridInventoryLens getFullGrid() {
+        return this.fullGrid;
     }
 }

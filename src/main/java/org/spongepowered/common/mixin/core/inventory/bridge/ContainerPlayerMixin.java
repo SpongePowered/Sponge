@@ -44,10 +44,9 @@ import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.EquipmentSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.mixin.core.inventory.impl.ContainerMixin;
 
 @Mixin(PlayerContainer.class)
-public abstract class ContainerPlayerMixin extends ContainerMixin implements ContainerPlayerBridge, LensProviderBridge {
+public abstract class ContainerPlayerMixin implements ContainerPlayerBridge, LensProviderBridge, InventoryAdapter {
 
     @Shadow @Final private PlayerEntity player;
 
@@ -55,7 +54,7 @@ public abstract class ContainerPlayerMixin extends ContainerMixin implements Con
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return new ContainerPlayerInventoryLens(fabric.fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), bridge$getSlotProvider());
+        return new ContainerPlayerInventoryLens(fabric.fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), this.bridge$getSlotProvider());
     }
 
     @Override
@@ -81,12 +80,12 @@ public abstract class ContainerPlayerMixin extends ContainerMixin implements Con
             this.impl$offHandSlot = builder.size() - 1;
         }
 
-        builder.add(this.inventorySlots.size() - 46); // Add additional slots (e.g. from mods)
+        builder.add(((PlayerContainer) (Object) this).inventorySlots.size() - 46); // Add additional slots (e.g. from mods)
         return builder.build();
     }
 
     @Override
-    protected void impl$markClean() {
+    public void bridge$markClean() {
         ((InventoryPlayerBridge) this.player.inventory).bridge$markClean();
     }
 }

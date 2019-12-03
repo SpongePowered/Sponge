@@ -33,7 +33,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,17 +49,17 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(HopperTileEntity.class)
 public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin implements TrackedInventoryBridge {
 
@@ -92,7 +91,7 @@ public abstract class TileEntityHopperMixin extends TileEntityLockableLootMixin 
 
     @SuppressWarnings("unchecked")
     private GridInventoryLens impl$generateRootLens(final SlotLensProvider slots) {
-        return new org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens(0, 5, 1, 5, (Class<? extends Inventory>) this.getClass(), slots);
+        return new GridInventoryLens(0, 5, 1, (Class<? extends Inventory>) this.getClass(), slots);
     }
 
     @Inject(method = "putDropInInventoryAllSlots",

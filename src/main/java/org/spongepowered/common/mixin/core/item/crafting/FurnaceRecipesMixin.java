@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item.crafting;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.item.ItemStack;

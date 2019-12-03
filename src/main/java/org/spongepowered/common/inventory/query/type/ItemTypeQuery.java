@@ -26,12 +26,11 @@ package org.spongepowered.common.inventory.query.type;
 
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
 
 public final class ItemTypeQuery extends ItemStackQuery<ItemType> {
 
     public ItemTypeQuery(ItemType type) {
-        super(QueryTypes.ITEM_TYPE, type);
+        super(type);
     }
 
     @Override

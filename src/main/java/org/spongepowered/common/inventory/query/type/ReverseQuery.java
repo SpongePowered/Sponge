@@ -24,14 +24,17 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryTransformation;
-import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
-import org.spongepowered.common.inventory.query.Query;
+import org.spongepowered.common.inventory.query.SpongeQuery;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,28 +42,33 @@ import java.util.List;
 /**
  * Reverses the slot order of an inventory.
  */
-public class ReverseQuery implements InventoryTransformation {
+public class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    private CatalogKey key = CatalogKey.sponge("reverse");
+
     @Override
-    public Inventory transform(final Inventory inventory) {
+    public CatalogKey getKey() {
+        return this.key;
+    }
 
-        final List<InventoryAdapter> slots = new ArrayList<>();
-        for (final Inventory slot : inventory.slots()) {
-            slots.add(((InventoryAdapter) slot));
-        }
+    @Override
+    public Inventory execute(Inventory parent, InventoryAdapter inventory) {
+
+        List<Slot> slots = new ArrayList<>(((Inventory) inventory).slots());
         Collections.reverse(slots);
 
-        final CompoundSlotProvider slotProvider = new CompoundSlotProvider();
-        slots.forEach(slotProvider::add);
+        CompoundSlotProvider slotProvider = new CompoundSlotProvider();
+        slots.forEach(s -> slotProvider.add((InventoryAdapter) s));
 
-        final InventoryAdapter adapter = ((InventoryBridge) inventory).bridge$getAdapter();
+        InventoryAdapter adapter = ((InventoryBridge) inventory).bridge$getAdapter();
 
-        final CompoundLens lens = CompoundLens.builder().add(adapter.bridge$getRootLens()).build(slotProvider);
+        CompoundLens lens = CompoundLens.builder().add(adapter.bridge$getRootLens()).build(slotProvider);
 
-        final InventoryAdapter newAdapter = lens.getAdapter(adapter.bridge$getFabric(), inventory);
+        return (Inventory) lens.getAdapter(adapter.bridge$getFabric(), (Inventory) inventory);
+    }
 
-        return Query.compile(newAdapter,
-                new SlotLensQuery(ImmutableSet.of((Inventory) newAdapter))).execute();
+    @Override
+    public Query toQuery() {
+        return this;
     }
 }

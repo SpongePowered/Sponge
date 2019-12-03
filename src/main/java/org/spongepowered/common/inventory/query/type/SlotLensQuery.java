@@ -27,26 +27,23 @@ package org.spongepowered.common.inventory.query.type;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.query.SpongeQuery;
-import org.spongepowered.common.inventory.query.SpongeQueryTypes;
+import org.spongepowered.common.inventory.query.SpongeDepthQuery;
 
-public final class SlotLensQuery extends SpongeQuery<ImmutableSet<Inventory>> {
+public final class SlotLensQuery extends SpongeDepthQuery {
 
     private final ImmutableSet<Inventory> inventories;
 
     public SlotLensQuery(ImmutableSet<Inventory> inventories) {
-        super(SpongeQueryTypes.SLOT_LENS);
         this.inventories = inventories;
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
         for (Inventory inv : this.inventories) {
             for (Inventory slot : inv.slots()) {
-                if (((SlotAdapter) slot).bridge$getRootLens().equals(lens)) {
+                if (((SlotAdapter) slot).impl$getLens().equals(lens)) {
                     return true;
                 }
             }

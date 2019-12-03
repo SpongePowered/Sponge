@@ -26,8 +26,9 @@ package org.spongepowered.common.inventory.lens.impl.slot;
 
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
+@FunctionalInterface
 public interface SlotLensProvider {
-    
-    SlotLens getSlot(int index);
+
+    SlotLens getSlotLens(int index);
 
 }

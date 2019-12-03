@@ -32,9 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -244,38 +242,6 @@ public class SpongeUserInventory implements IInventory {
     }
 
     /**
-     * Get the name of this object. For players this returns their username
-     */
-    @Override
-    public String getName() {
-        return "container.inventory";
-    }
-
-    /**
-     * Returns true if this thing is named
-     */
-    @Override
-    public boolean hasCustomName() {
-        return false;
-    }
-
-    /**
-     * Get the formatted ChatComponent that will be used for the sender's username in chat
-     */
-    @Override
-    public ITextComponent getDisplayName() {
-        return this.hasCustomName() ? new StringTextComponent(this.getName()) : new TranslationTextComponent(this.getName());
-    }
-
-    /**
-     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
-     */
-    @Override
-    public int getInventoryStackLimit() {
-        return 64;
-    }
-
-    /**
      * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it
      * hasn't changed and skip it.
      */
@@ -291,37 +257,6 @@ public class SpongeUserInventory implements IInventory {
     @Override
     public boolean isUsableByPlayer(PlayerEntity player) {
         return true;
-    }
-
-    @Override
-    public void openInventory(PlayerEntity player) {
-    }
-
-    @Override
-    public void closeInventory(PlayerEntity player) {
-    }
-
-    /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
-     * guis use Slot.isItemValid
-     */
-    @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack) {
-        return true;
-    }
-
-    @Override
-    public int getField(int id) {
-        return 0;
-    }
-
-    @Override
-    public void setField(int id, int value) {
-    }
-
-    @Override
-    public int getFieldCount() {
-        return 0;
     }
 
     @Override

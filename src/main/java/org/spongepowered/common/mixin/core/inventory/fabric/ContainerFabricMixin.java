@@ -25,17 +25,14 @@
 package org.spongepowered.common.mixin.core.inventory.fabric;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.text.translation.FixedTranslation;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.fabric.Fabric;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -49,14 +46,13 @@ public abstract class ContainerFabricMixin implements Fabric, InventoryBridge {
     @Shadow public List<Slot> inventorySlots;
     @Shadow public abstract void detectAndSendChanges();
 
-    @Nullable private Translation displayName;
     @Nullable private Set<InventoryBridge> all;
 
     @Override
     public Collection<InventoryBridge> fabric$allInventories() {
         if (this.all == null) {
             ImmutableSet.Builder<InventoryBridge> builder = ImmutableSet.builder();
-            for (Slot slot : inventorySlots) {
+            for (Slot slot : this.inventorySlots) {
                 if (slot.inventory != null) {
                     builder.add((InventoryBridge) slot.inventory);
                 }
@@ -91,14 +87,6 @@ public abstract class ContainerFabricMixin implements Fabric, InventoryBridge {
     }
 
     @Override
-    public Translation fabric$getDisplayName() {
-        if (this.displayName == null) {
-            this.displayName = this.getFirstDisplayName();
-        }
-        return this.displayName;
-    }
-
-    @Override
     public int fabric$getSize() {
         return this.inventorySlots.size();
     }
@@ -113,26 +101,6 @@ public abstract class ContainerFabricMixin implements Fabric, InventoryBridge {
     @Override
     public void fabric$markDirty() {
         this.detectAndSendChanges();
-    }
-
-    private Translation getFirstDisplayName() {
-        if (this.inventorySlots.size() == 0) {
-            return new FixedTranslation("Container");
-        }
-
-        try
-        {
-            Slot slot = this.getSlot(0);
-            return slot.inventory != null && slot.inventory.getDisplayName() != null ?
-                    new FixedTranslation(slot.inventory.getDisplayName().getUnformattedText()) :
-                    new FixedTranslation("UNKNOWN: " + this.getClass().getName());
-        }
-        catch (AbstractMethodError e)
-        {
-            SpongeImpl.getLogger().warn("AbstractMethodError! Could not find displayName for " +
-                    this.getSlot(0).inventory.getClass().getName(), e);
-            return new FixedTranslation("UNKNOWN: " + this.getClass().getName());
-        }
     }
 
 }

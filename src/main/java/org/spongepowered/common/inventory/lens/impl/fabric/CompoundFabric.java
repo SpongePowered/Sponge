@@ -26,7 +26,7 @@ package org.spongepowered.common.inventory.lens.impl.fabric;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,12 +37,10 @@ public class CompoundFabric implements Fabric {
 
     private final Fabric fabric1;
     private final Fabric fabric2;
-    private Translation displayName;
 
     public CompoundFabric(Fabric fabric1, Fabric fabric2) {
         this.fabric1 = fabric1;
         this.fabric2 = fabric2;
-        this.displayName = fabric1.fabric$getDisplayName();
     }
 
     @Override
@@ -82,11 +80,6 @@ public class CompoundFabric implements Fabric {
     @Override
     public int fabric$getMaxStackSize() {
         return Math.max(this.fabric1.fabric$getMaxStackSize(), this.fabric2.fabric$getMaxStackSize());
-    }
-
-    @Override
-    public Translation fabric$getDisplayName() {
-        return this.displayName;
     }
 
     @Override

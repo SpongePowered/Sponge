@@ -34,27 +34,23 @@ import org.spongepowered.api.item.inventory.type.InventoryRow;
 import org.spongepowered.common.inventory.adapter.impl.AdapterLogic;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
-import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
+import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.comp.InventoryColumnLens;
+import org.spongepowered.common.inventory.lens.impl.comp.InventoryRowLens;
 import org.spongepowered.math.vector.Vector2i;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Optional;
 
 public class GridInventoryAdapter extends Inventory2DAdapter implements GridInventory {
     
     protected final GridInventoryLens gridLens;
     
-    protected final List<InventoryRow> rows = new ArrayList<InventoryRow>();
-    protected final List<InventoryColumn> columns = new ArrayList<InventoryColumn>();
-
-    public GridInventoryAdapter(Fabric inventory, GridInventoryLens root) {
-        this(inventory, root, null);
+    public GridInventoryAdapter(Fabric fabric, GridInventoryLens root) {
+        this(fabric, root, null);
     }
 
-    public GridInventoryAdapter(Fabric inventory, GridInventoryLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public GridInventoryAdapter(Fabric fabric, GridInventoryLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.gridLens = root;
     }
     
@@ -99,23 +95,18 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     }
 
     @Override
-    public Optional<ItemStack> poll(int x, int y) {
-        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(x, y));
+    public InventoryTransactionResult.Poll poll(int x, int y) {
+        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(x, y), null);
     }
 
     @Override
-    public Optional<ItemStack> poll(int x, int y, int limit) {
+    public InventoryTransactionResult.Poll poll(int x, int y, int limit) {
         return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(x, y), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(int x, int y) {
         return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(x, y));
-    }
-
-    @Override
-    public Optional<ItemStack> peek(int x, int y, int limit) {
-        return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(x, y), limit);
     }
 
     @Override

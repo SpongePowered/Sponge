@@ -25,13 +25,12 @@
 package org.spongepowered.common.inventory.query.type;
 
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 public final class ItemStackIgnoreQuantityQuery extends ItemStackQuery<ItemStack> {
 
     public ItemStackIgnoreQuantityQuery(ItemStack itemStack) {
-        super(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, itemStack.copy());
+        super(itemStack.copy());
     }
 
     @Override

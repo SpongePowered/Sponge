@@ -27,30 +27,31 @@ package org.spongepowered.common.inventory.adapter.impl.comp;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.Inventory2D;
 import org.spongepowered.common.inventory.adapter.impl.AdapterLogic;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.impl.comp.Inventory2DLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
+import org.spongepowered.math.vector.Vector2i;
+
 import java.util.Optional;
 
-public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inventory2D {
+public class Inventory2DAdapter extends BasicInventoryAdapter implements Inventory2D {
 
     protected Inventory2DLens lens2d;
 
-    public Inventory2DAdapter(Fabric inventory, Inventory2DLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public Inventory2DAdapter(Fabric fabric, Inventory2DLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.lens2d = root;
     }
     
-    protected SlotLens getSlotLens(int x, int y) {
-        return this.getSlotLens(SlotPos.of(x, y));
+    public SlotLens getSlotLens(int x, int y) {
+        return this.getSlotLens(Vector2i.from(x, y));
     }
 
-    protected SlotLens getSlotLens(SlotPos pos) {
+    protected SlotLens getSlotLens(Vector2i pos) {
         try {
             return this.lens2d.getSlot(pos);
         } catch (IndexOutOfBoundsException ex) {
@@ -58,33 +59,24 @@ public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inven
         }
     }
 
-    @Override
-    public Optional<Slot> getSlot(SlotPos pos) {
+    public Optional<Slot> getSlot(Vector2i pos) {
         return BasicInventoryAdapter.forSlot(this.bridge$getFabric(), this.getSlotLens(pos), this);
     }
 
-    @Override
-    public Optional<ItemStack> poll(SlotPos pos) {
-        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(pos));
+    public InventoryTransactionResult.Poll poll(Vector2i pos) {
+        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(pos), null);
     }
 
-    @Override
-    public Optional<ItemStack> poll(SlotPos pos, int limit) {
+    public InventoryTransactionResult.Poll poll(Vector2i pos, int limit) {
         return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(pos), limit);
     }
 
-    @Override
-    public Optional<ItemStack> peek(SlotPos pos) {
+    public Optional<ItemStack> peek(Vector2i pos) {
         return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(pos));
     }
 
     @Override
-    public Optional<ItemStack> peek(SlotPos pos, int limit) {
-        return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(pos), limit);
-    }
-
-    @Override
-    public InventoryTransactionResult set(SlotPos pos, ItemStack stack) {
+    public InventoryTransactionResult set(Vector2i pos, ItemStack stack) {
         return AdapterLogic.insertSequential(this.bridge$getFabric(), this.getSlotLens(pos), stack);
     }
 

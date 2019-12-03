@@ -24,22 +24,20 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.query.SpongeQuery;
-import org.spongepowered.common.inventory.query.SpongeQueryTypes;
+import org.spongepowered.common.inventory.query.SpongeDepthQuery;
 
-public final class LensQuery extends SpongeQuery<Lens> {
+public final class LensQuery extends SpongeDepthQuery {
 
     private final Lens lens;
 
     public LensQuery(Lens lens) {
-        super(SpongeQueryTypes.LENS);
         this.lens = lens;
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
         return this.lens.equals(lens);
     }
 

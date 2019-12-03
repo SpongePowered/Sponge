@@ -59,6 +59,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -87,7 +88,7 @@ public final class PacketPhaseUtil {
             if (openContainer == null) {
                 slot.set(((org.spongepowered.api.item.inventory.ItemStack) originalStack));
             } else {
-                final int slotNumber = slot.slotNumber;
+                final int slotNumber = slot.getOrdinal();
                 final Slot nmsSlot = openContainer.getSlot(slotNumber);
                 if (nmsSlot != null) {
                     nmsSlot.putStack(originalStack);
@@ -119,8 +120,9 @@ public final class PacketPhaseUtil {
         if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.inventorySlots.size()) {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
-                final ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
-                final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlot(openContainer, slotId), snapshot, snapshot);
+                final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(slot.getStack());
+                final SlotTransaction slotTransaction = new SlotTransaction(
+                        ((InventoryAdapter) openContainer).bridge$getSlot(slotId).get(), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
         }

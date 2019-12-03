@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
+import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -49,6 +49,7 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -64,7 +65,8 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     @Shadow public abstract int getSizeInventory();
 
     @Nullable private User impl$carrier;
-    @Nullable private PrimaryPlayerInventoryAdapter impl$main;
+    @Nullable private PrimaryPlayerInventoryAdapter impl$grid;
+    @Nullable private EquipmentInventoryAdapter impl$armor;
     @Nullable private EquipmentInventoryAdapter impl$equipment;
     @Nullable private SlotAdapter offhand;
 
@@ -95,11 +97,19 @@ public abstract class SpongeUserInventoryMixin implements InventoryAdapter, User
     }
 
     @Override
-    public PrimaryPlayerInventory getMain() {
-        if (this.impl$main == null) {
-            this.impl$main = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getMainLens().getAdapter(this.bridge$getFabric(), this);
+    public PrimaryPlayerInventory getPrimary() {
+        if (this.impl$grid == null) {
+            this.impl$grid = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getPrimaryInventoryLens().getAdapter(this.bridge$getFabric(), this);
         }
-        return this.impl$main;
+        return this.impl$grid;
+    }
+
+    @Override
+    public EquipmentInventory getArmor() {
+        if (this.impl$equipment == null) {
+            this.impl$equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.bridge$getRootLens()).getArmorLens().getAdapter(this.bridge$getFabric(), this);
+        }
+        return this.impl$equipment;
     }
 
     @Override

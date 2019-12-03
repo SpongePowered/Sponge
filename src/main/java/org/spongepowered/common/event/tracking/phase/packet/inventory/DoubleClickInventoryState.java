@@ -24,16 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
 import org.spongepowered.common.util.Constants;
@@ -42,8 +44,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
 
 public final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
@@ -57,16 +57,16 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(ServerPlayerEntity playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+    public ClickContainerEvent createInventoryEvent(ServerPlayerEntity playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
-        return SpongeEventFactory.createClickInventoryEventDouble(Sponge.getCauseStackManager().getCurrentCause(), transaction,
-                Optional.ofNullable(slot), openContainer, slotTransactions);
+        return SpongeEventFactory.createClickContainerEventDouble(Sponge.getCauseStackManager().getCurrentCause(), openContainer, transaction,
+                Optional.ofNullable(slot), slotTransactions);
     }
 
     @Override
     public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        ((ContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
+        ((TrackedContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
     }
 
     @Override

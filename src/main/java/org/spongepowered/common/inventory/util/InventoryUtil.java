@@ -31,7 +31,9 @@ import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -39,13 +41,15 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
+import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -56,7 +60,7 @@ public final class InventoryUtil {
 
     @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(CraftingInventory inv) {
-        CraftingGridInventoryLens lens = new CraftingGridInventoryLens(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), BasicSlotLens::new);
+        CraftingGridInventoryLens lens = new CraftingGridInventoryLens(0, inv.getWidth(), inv.getHeight(), BasicSlotLens::new);
 
         return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }
@@ -74,7 +78,6 @@ public final class InventoryUtil {
         sb.append("Invalid CraftingGridInventory. Could not find InventoryCrafting.\n")
           .append("Fabric was: ")
           .append(fabric.getClass().getSimpleName()).append(" Name: ")
-          .append(fabric.fabric$getDisplayName() == null ? "unknown" : fabric.fabric$getDisplayName().get())
           .append("Viewed:");
         for (Object iInventory : fabric.fabric$allInventories()) {
             sb.append("\n").append(iInventory.getClass().getName());
@@ -90,14 +93,14 @@ public final class InventoryUtil {
 
             TileEntity tileentity1 = chest.getWorld().getTileEntity(blockpos);
 
-            if (tileentity1 instanceof ChestTileEntity && tileentity1.getBlockType() == chest.getBlockType()) {
+            if (tileentity1 instanceof ChestTileEntity && tileentity1.getBlockState().getBlock() == chest.getBlockState().getBlock()) {
 
                 DoubleSidedInventory inventory;
 
                 if (enumfacing != Direction.WEST && enumfacing != Direction.NORTH) {
-                    inventory = new DoubleSidedInventory("container.chestDouble", chest, (ChestTileEntity) tileentity1);
+                    inventory = new DoubleSidedInventory( chest, (ChestTileEntity) tileentity1);
                 } else {
-                    inventory = new DoubleSidedInventory("container.chestDouble", (ChestTileEntity) tileentity1, chest);
+                    inventory = new DoubleSidedInventory((ChestTileEntity) tileentity1, chest);
                 }
 
                 return Optional.of((Inventory) inventory);
@@ -142,7 +145,12 @@ public final class InventoryUtil {
     }
 
     public static PluginContainer getPluginContainer(Object inventory) {
+        // TODO maybe caching?
         PluginContainer container;
+
+        if (inventory instanceof CustomInventory) {
+            return ((CustomInventory)inventory).getPlugin();
+        }
 
         if (inventory instanceof CarriedInventory) {
             final Optional<?> carrier = ((CarriedInventory<?>) inventory).getCarrier();
@@ -153,14 +161,14 @@ public final class InventoryUtil {
 
         final Object base = inventory;
 
-        if (base instanceof org.spongepowered.api.block.entity.BlockEntity) {
-            final String id = ((org.spongepowered.api.block.entity.BlockEntity) base).getBlock().getType().getId();
-            final String pluginId = id.substring(0, id.indexOf(":"));
+        if (base instanceof BlockEntity) {
+            CatalogKey key = ((BlockEntity) base).getBlock().getType().getKey();
+            final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId)
-                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
+                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + key.getNamespace() + ":" + key.getValue()));
         } else if (base instanceof Entity) {
-            final String id = ((Entity) base).getType().getId();
-            final String pluginId = id.substring(0, id.indexOf(":"));
+            CatalogKey key = ((Entity) base).getType().getKey();
+            final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
                 SpongeImpl.getLogger().debug("Unknown plugin for [{}]", base);
                 return SpongeImpl.getMinecraftPlugin(); 

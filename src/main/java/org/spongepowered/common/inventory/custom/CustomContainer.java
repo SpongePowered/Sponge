@@ -33,10 +33,10 @@ public class CustomContainer extends Container {
 
     public CustomInventory inv;
 
-    public CustomContainer(final PlayerEntity player, final CustomInventory inventory) {
+    public CustomContainer(int id, final PlayerEntity player, final CustomInventory inventory) {
+        super(null, id); // TODO check if null ContainerType is ok
         this.inv = inventory;
 
-        // TODO what significance has the x/y coord on the Slots?
         for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
             this.addSlot(new Slot(inventory, slot, 0, 0));
         }
@@ -95,23 +95,5 @@ public class CustomContainer extends Container {
         }
 
         return itemstack;
-    }
-
-    @Override
-    public void detectAndSendChanges() {
-        super.detectAndSendChanges();
-        // Resend the whole inventory to prevent visual glitches due to client-prediction
-        // This would not be needed if the Container enforces the same restrictions on slots as vanilla
-
-        // Cursor Item
-        /*for (IContainerListener crafter : listeners) {
-            crafter.updateCraftingInventory(this, this.getInventory());
-        }
-        // Inventory
-        for (int i = 0; i < this.inventorySlots.size(); ++i) {
-            for (IContainerListener crafter : listeners) {
-                crafter.sendSlotContents(this, i, this.inventorySlots.get(i).getStack());
-            }
-        }*/
     }
 }

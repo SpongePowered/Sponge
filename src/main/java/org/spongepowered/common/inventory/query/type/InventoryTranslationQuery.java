@@ -24,25 +24,28 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.query.SpongeQuery;
-import java.util.Objects;
+import org.spongepowered.common.inventory.query.SpongeDepthQuery;
 
-public final class InventoryTranslationQuery extends SpongeQuery<Translation> {
+import java.util.Optional;
+
+public final class InventoryTranslationQuery extends SpongeDepthQuery {
 
     private final Translation translation;
 
     public InventoryTranslationQuery(Translation translation) {
-        super(QueryTypes.INVENTORY_TRANSLATION);
         this.translation = translation;
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        return Objects.equals(lens.getName(inventory), translation);
+    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
+        Optional<Text> title = InventoryPropertyProvider.getRootProperty(inventory, InventoryProperties.TITLE);
+        return false; // TODO translation or title?
     }
 
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.inventory.bridge;
 
 import net.minecraft.inventory.DoubleSidedInventory;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;

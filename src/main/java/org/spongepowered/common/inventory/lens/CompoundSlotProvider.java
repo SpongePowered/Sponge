@@ -27,15 +27,26 @@ package org.spongepowered.common.inventory.lens;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A custom slot provider without duplicate slot-lenses.
+ */
 public class CompoundSlotProvider implements SlotLensProvider {
 
     private final List<SlotLens> slotList = new ArrayList<>();
 
+    /**
+     * Adds all slots from this inventory adapter.
+     *
+     * @param adapter The adapter
+     *
+     * @return this provider for chaining
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public CompoundSlotProvider add(InventoryAdapter adapter) {
         for (Inventory slot : ((Inventory) adapter).slots()) {
@@ -47,8 +58,22 @@ public class CompoundSlotProvider implements SlotLensProvider {
         return this;
     }
 
+    /**
+     * Adds a single slot-lens.
+     *
+     * @param slotLens The slot-lens
+     *
+     * @return This provider for chaining
+     */
+    public CompoundSlotProvider add(SlotLens slotLens) {
+        if (!this.slotList.contains(slotLens)) {
+            this.slotList.add(slotLens);
+        }
+        return this;
+    }
+
     @Override
-    public SlotLens getSlot(int index) {
+    public SlotLens getSlotLens(int index) {
         return this.slotList.get(index);
     }
 

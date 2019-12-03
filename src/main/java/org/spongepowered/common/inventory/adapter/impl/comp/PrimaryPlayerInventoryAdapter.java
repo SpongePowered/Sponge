@@ -35,8 +35,8 @@ public class PrimaryPlayerInventoryAdapter extends GridInventoryAdapter implemen
 
     private final PrimaryPlayerInventoryLens root;
 
-    public PrimaryPlayerInventoryAdapter(Fabric inv, PrimaryPlayerInventoryLens lens, Inventory parent) {
-        super(inv, lens, parent);
+    public PrimaryPlayerInventoryAdapter(Fabric fabric, PrimaryPlayerInventoryLens lens, Inventory parent) {
+        super(fabric, lens, parent);
         this.root = lens;
     }
 
@@ -46,7 +46,13 @@ public class PrimaryPlayerInventoryAdapter extends GridInventoryAdapter implemen
     }
 
     @Override
-    public GridInventory getGrid() {
+    public GridInventory asGrid() {
+        return ((GridInventory) this.root.getFullGrid().getAdapter(this.bridge$getFabric(), this));
+    }
+
+    @Override
+    public GridInventory getStorage() {
         return ((GridInventory) this.root.getGrid().getAdapter(this.bridge$getFabric(), this));
     }
+
 }

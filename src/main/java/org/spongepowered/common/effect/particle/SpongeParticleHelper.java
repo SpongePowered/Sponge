@@ -52,7 +52,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.mixin.core.entity.EntityAccessor;
 import org.spongepowered.common.mixin.core.entity.item.EntityFireworkRocketAccessor;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketEntityMetadataAccessor;

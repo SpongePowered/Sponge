@@ -27,14 +27,14 @@ package org.spongepowered.common.inventory.adapter.impl.comp;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
+import org.spongepowered.common.inventory.lens.impl.comp.HotbarLens;
 
 public class HotbarAdapter extends InventoryRowAdapter implements Hotbar {
 
     private HotbarLens hotbarLens;
 
-    public HotbarAdapter(Fabric inventory, HotbarLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public HotbarAdapter(Fabric fabric, HotbarLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.hotbarLens = root;
     }
 

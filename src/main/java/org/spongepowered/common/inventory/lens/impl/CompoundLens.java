@@ -25,13 +25,14 @@
 package org.spongepowered.common.inventory.lens.impl;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.common.inventory.PropertyEntry;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class CompoundLens extends SlotBasedLens {
     protected final List<Lens> inventories;
 
     private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotLensProvider slots, List<Lens> lenses) {
-        super(0, size, adapterType);
+        super(0, size, 1, adapterType, slots);
         this.inventories = lenses;
         this.init(slots);
     }
@@ -53,15 +54,15 @@ public class CompoundLens extends SlotBasedLens {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            if (!this.children.contains(slots.getSlot(slot))) {
-                this.addSpanningChild(slots.getSlot(slot), new SlotIndex(ord));
+            if (!this.children.contains(slots.getSlotLens(slot))) {
+                this.addSpanningChild(slots.getSlotLens(slot), PropertyEntry.slotIndex(ord));
             }
         }
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        return new BasicInventoryAdapter(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+        return new BasicInventoryAdapter(fabric, this, parent);
     }
 
     public static Builder builder() {

@@ -30,7 +30,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.slot.FilteringSlot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.FilteringSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.function.Predicate;
 
@@ -38,23 +38,24 @@ public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
     
     protected final FilteringSlotLens filteringSlot;
 
-    public FilteringSlotAdapter(Fabric inventory, FilteringSlotLens lens, Inventory parent) {
-        super(inventory, lens, parent);
+    public FilteringSlotAdapter(Fabric fabric, FilteringSlotLens lens, Inventory parent) {
+        super(fabric, lens, parent);
         this.filteringSlot = lens;
     }
 
     @Override
     public boolean isValidItem(ItemStack stack) {
         Predicate<ItemStack> filter = this.filteringSlot.getItemStackFilter();
-        return filter == null ? true : filter.test(stack);
+        return filter == null || filter.test(stack);
     }
 
     @Override
     public boolean isValidItem(ItemType type) {
         Predicate<ItemType> filter = this.filteringSlot.getItemTypeFilter();
-        return filter == null ? true : filter.test(type);
+        return filter == null || filter.test(type);
     }
 
+    /*
     @Override
     public InventoryTransactionResult offer(ItemStack stack) {
         final boolean canOffer = isValidItem(stack);
@@ -66,10 +67,11 @@ public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
 
         return super.offer(stack);
     }
+    */
 
     @Override
     public InventoryTransactionResult set(ItemStack stack) {
-        final boolean canSet = isValidItem(stack);
+        final boolean canSet = this.isValidItem(stack);
         if (!canSet) {
             final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE);
             result.reject(ItemStackUtil.cloneDefensive(stack));

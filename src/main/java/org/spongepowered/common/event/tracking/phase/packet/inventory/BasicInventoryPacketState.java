@@ -32,7 +32,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -41,11 +41,13 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
@@ -106,7 +108,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Nullable
-    public ClickInventoryEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
+    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
             final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
         return null;
     }
@@ -203,13 +205,13 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
         Slot slot = null;
         if (packetIn.getSlotId() >= 0) {
-            slot = ((ContainerBridge) trackedInventory).bridge$getContainerSlot(packetIn.getSlotId());
+            slot = ((InventoryAdapter) trackedInventory).bridge$getSlot(packetIn.getSlotId()).orElse(null);
         }
         // else TODO slot for ClickInventoryEvent.Drag
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(openContainer);
             Sponge.getCauseStackManager().pushCause(player);
-            final ClickInventoryEvent inventoryEvent;
+            final ClickContainerEvent inventoryEvent;
 
             // We can only proceed with normal if and only if there are no entities spawned,
             // slot transactions exist, and or the slot id being touched is greater than
@@ -218,7 +220,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (player.openContainer.windowId != packetIn.getWindowId()) {
                     return; // Container mismatch - ignore this.
                 }
-                if (!((ContainerBridge) trackedInventory).bridge$capturePossible()) {
+                if (!((TrackedContainerBridge) trackedInventory).bridge$capturePossible()) {
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
                     if (!containersFailedCapture.contains(trackedInventory.getClass())) {
@@ -229,7 +231,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 }
                 // No SlotTransaction was captured. So we add the clicked slot as a transaction
                 if (slot != null) {
-                    final ItemStackSnapshot item = slot.peek().map(ItemStack::createSnapshot).orElse(ItemStackSnapshot.NONE);
+                    final ItemStackSnapshot item = slot.peek().createSnapshot();
                     slotTransactions.add(new SlotTransaction(slot, item, item));
                 }
             }
@@ -243,7 +245,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 // we only care about the last one.
                 // Therefore, we never add any 'fake' transactions, as the final
                 // packet has everything we want.
-                if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
+                if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
                     PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, inventoryEvent.getTransactions());
                 }
 
@@ -266,7 +268,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
                         SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
                     }
-                } else if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
+                } else if (inventoryEvent instanceof ClickContainerEvent.Drop) {
                     capturedItems.clear();
                 }
 

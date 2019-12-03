@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.inventory.lens;
 
-import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 /**
  * Base Lens interface. A lens presents an indexed view of a number of child
@@ -64,12 +65,7 @@ public interface Lens extends LensCollection {
      * 
      * @return adapter for this lens
      */
-    InventoryAdapter getAdapter(Fabric inv, Inventory parent);
-    
-    /**
-     * Returns the display name of this lens 
-     */
-    Translation getName(Fabric inv);
+    InventoryAdapter getAdapter(Fabric fabric, Inventory parent);
     
     /**
      * Get the number of slots referenced by this lens
@@ -77,51 +73,14 @@ public interface Lens extends LensCollection {
      * @return
      */
     int slotCount();
-    
-    /**
-     * Used by parent lenses when marshalling their spanning tree, queries
-     * whether this lens has access to a slot with the specified absolute index.
-     * 
-     * @param inv Inventory
-     * @param index Absolute slot index
-     * @return true if this lens has a path to the specified slot index
-     */
-//    @Deprecated // TODO deprecate
-    boolean hasSlot(int index); //TInventory inv, int index);
-    
-//    @Deprecated // TODO deprecate
-    IntSet getSlots(); //TInventory inv);
-    
-    /**
-     * Returns the "real" underlying slot index in the target inventory for the
-     * specified slot ordinal. This method returns -1 if the ordinal is less
-     * than 0 or greater than or equal to the value returned by
-     * {@link #slotCount()}.
-     * 
-     * @param inv inventory
-     * @param ordinal 
-     * @return the "real" slot index (ordinal), or -1 for invalid indices
-     */
-    int getRealIndex(Fabric inv, int ordinal);
-    
-    /**
-     * Gets the itemstack for the specified slot ordinal. Returns null if the
-     * slot is empty, or if the specified ordinal is outside the range of this
-     * lens.
-     * 
-     * @param inv inventory
-     * @param ordinal slot ordinal
-     * @return the item stack in the specified slot
-     */
-    ItemStack getStack(Fabric inv, int ordinal);
-    
+
     /**
      * Get the maximum stack size from the target inventory
      * 
-     * @param inv
+     * @param fabric
      * @return
      */
-    int getMaxStackSize(Fabric inv);
+    int getMaxStackSize(Fabric fabric);
 
     /**
      * Get child lenses of this lens
@@ -140,13 +99,38 @@ public interface Lens extends LensCollection {
     /**
      * Set the stack at the specified offset 
      * 
-     * @param inv
+     * @param fabric
      * @param ordinal
      * @param stack
      * @return
      */
-    boolean setStack(Fabric inv, int ordinal, ItemStack stack);
-    
+    default boolean setStack(Fabric fabric, int ordinal, ItemStack stack) {
+        SlotLens slot = this.getSlotLens(ordinal);
+        if (slot != null) {
+            return slot.setStack(fabric, stack);
+        }
+        return false;
+    }
+
+    /**
+     * Gets the itemstack for the specified slot ordinal. Returns null if
+     * the specified ordinal is outside the range of this lens.
+     *
+     * @param fabric inventory
+     * @param ordinal slot ordinal
+     * @return the item stack in the specified slot
+     */
+    @Nullable default ItemStack getStack(Fabric fabric, int ordinal) {
+        SlotLens slot = this.getSlotLens(ordinal);
+        if (slot != null) {
+            return slot.getStack(fabric);
+        }
+        return null;
+    }
+
+    List<SlotLens> getSlots();
     SlotLens getSlotLens(int ordinal);
+
+    String toString(int deep);
 
 }

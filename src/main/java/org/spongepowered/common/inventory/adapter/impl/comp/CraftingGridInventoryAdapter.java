@@ -32,7 +32,7 @@ import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 
 import java.util.Optional;
 
@@ -40,12 +40,12 @@ public class CraftingGridInventoryAdapter extends GridInventoryAdapter implement
 
     protected final CraftingGridInventoryLens craftingLens;
 
-    public CraftingGridInventoryAdapter(Fabric inventory, CraftingGridInventoryLens root) {
-        this(inventory, root, null);
+    public CraftingGridInventoryAdapter(Fabric fabric, CraftingGridInventoryLens root) {
+        this(fabric, root, null);
     }
 
-    public CraftingGridInventoryAdapter(Fabric inventory, CraftingGridInventoryLens root, Inventory parent) {
-        super(inventory, root, parent);
+    public CraftingGridInventoryAdapter(Fabric fabric, CraftingGridInventoryLens root, Inventory parent) {
+        super(fabric, root, parent);
         this.craftingLens = root;
     }
 

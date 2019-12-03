@@ -102,14 +102,15 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.comp.HotbarLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -914,11 +915,11 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                             slotLens = ((PlayerInventoryLens) inventoryLens).getOffhandLens();
                             break;
                         case MAINHAND:
-                            final HotbarLens hotbarLens = ((PlayerInventoryLens) inventoryLens).getMainLens().getHotbar();
-                            slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).bridge$getFabric()));
+                            final HotbarLens hotbarLens = ((PlayerInventoryLens) inventoryLens).getPrimaryInventoryLens().getHotbar();
+                            slotLens = hotbarLens.getSlotLens(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).bridge$getFabric()));
                             break;
                         default:
-                            slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
+                            slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlotLens(entityEquipmentSlot.getIndex());
                     }
                 } else {
                     slotLens = inventoryLens.getSlotLens(entityEquipmentSlot.getIndex());

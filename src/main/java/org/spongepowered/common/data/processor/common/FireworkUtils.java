@@ -40,7 +40,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeFireworkShape;
-import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.mixin.core.entity.item.EntityFireworkRocketAccessor;
 import org.spongepowered.common.util.Constants;
 

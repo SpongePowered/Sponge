@@ -31,6 +31,7 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+
 import java.util.Optional;
 
 /**
@@ -63,4 +64,8 @@ public interface InventoryAdapter {
         final SlotLens slotLens = this.bridge$getRootLens().getSlotLens(ordinal);
         return BasicInventoryAdapter.forSlot(this.bridge$getFabric(), slotLens, (Inventory) this);
     }
+
+    // TODO check if this is needed?
+    default void bridge$setSpectatorChest(boolean spectatorChest) {}
+
 }

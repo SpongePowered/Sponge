@@ -32,48 +32,47 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import java.util.Iterator;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import java.util.List;
 
-public class SlotCollection implements Iterable<Slot> {
+public class SlotCollection {
     
     private Inventory parent;
 
-    private final Fabric inv;
+    private final Fabric fabric;
     
     private final List<Slot> slots;
 
-    public SlotCollection(Inventory parent, Fabric inv, Lens lens, SlotLensProvider slots) {
+    public SlotCollection(Inventory parent, Fabric fabric, Lens lens, SlotLensProvider slots) {
         this.parent = parent;
-        this.inv = inv;
-        this.slots = this.traverseSpanningTree(inv, lens, slots, ImmutableList.<Slot>builder()).build();
+        this.fabric = fabric;
+        this.slots = this.traverseSpanningTree(fabric, lens, ImmutableList.<Slot>builder()).build();
     }
     
     @SuppressWarnings("rawtypes")
-    private Builder<Slot> traverseSpanningTree(Fabric inv, Lens lens, SlotLensProvider slots, Builder<Slot> list) {
+    private Builder<Slot> traverseSpanningTree(Fabric fabric, Lens lens, Builder<Slot> list) {
         if (lens instanceof SlotLens) {
-            list.add(((SlotAdapter) lens.getAdapter(inv, this.parent)));
+            list.add(((SlotAdapter) lens.getAdapter(fabric, this.parent)));
             return list;
         }
         for (Lens child : lens.getSpanningChildren()) {
             if (child instanceof SlotLens) {
-                list.add((SlotAdapter) child.getAdapter(inv, this.parent));
+                list.add((SlotAdapter) child.getAdapter(fabric, this.parent));
             } else if (child.getSpanningChildren().size() > 0) {
-                this.traverseSpanningTree(inv, child, slots, list);
+                this.traverseSpanningTree(fabric, child, list);
             }
         }
         return list;
     }
 
     public Fabric getFabric() {
-        return this.inv;
+        return this.fabric;
     }
 
-    @Override
-    public Iterator<Slot> iterator() {
-        return this.slots.iterator();
+    public List<Slot> slots() {
+        return this.slots;
     }
 
     public static SlotCollection of(Inventory parent, InventoryAdapter adapter) {

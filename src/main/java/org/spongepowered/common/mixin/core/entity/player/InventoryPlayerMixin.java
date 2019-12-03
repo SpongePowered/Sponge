@@ -35,7 +35,6 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,8 +45,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -57,6 +56,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.EquipmentSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +70,6 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     @Shadow @Final public NonNullList<ItemStack> offHandInventory;
     @Shadow @Final private List<NonNullList<ItemStack>> allInventories;
 
-    @Shadow public abstract int getInventoryStackLimit();
     @Shadow public abstract int getSizeInventory();
     @Shadow public abstract ItemStack getStackInSlot(int index);
     @Shadow protected abstract int addResource(int p_191973_1_, ItemStack p_191973_2_);
@@ -124,7 +123,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
         if ((Class<?>) this.getClass() == net.minecraft.entity.player.PlayerInventory.class) { // Build Player Lens
             return new PlayerInventoryLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slots);
         }
-        return new DefaultIndexedLens(0, this.getSizeInventory(), 1, slots);
+        return new DefaultIndexedLens(0, this.getSizeInventory(), slots);
     }
 
     @Override
@@ -166,18 +165,18 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
 
     private Slot impl$getSpongeSlotByIndex(int index) {
         if (index < getHotbarSize()) {
-            return ((PlayerInventory) this).getMain().getHotbar().getSlot(SlotIndex.of(index)).get();
+            return ((PlayerInventory) this).getPrimary().getHotbar().getSlot(index).get();
         }
         index -= getHotbarSize();
-        return ((PlayerInventory) this).getMain().getGrid().getSlot(SlotIndex.of(index)).get();
+        return ((PlayerInventory) this).getPrimary().getStorage().getSlot(index).get();
     }
 
     @Inject(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
     private void impl$ifCaptureDoTransactions(final int index, final ItemStack stack, final CallbackInfoReturnable<Boolean> cir) {
         if (this.impl$doCapture) {
             // Capture "damaged" items picked up
-            final Slot slot = impl$getSpongeSlotByIndex(index);
-            this.impl$capturedTransactions.add(new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(stack)));
+            final Slot slot = this.impl$getSpongeSlotByIndex(index);
+            this.impl$capturedTransactions.add(new SlotTransaction(slot, ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(stack)));
         }
     }
 

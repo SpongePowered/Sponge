@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.BrewingStandTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
@@ -38,6 +37,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(BrewingStandTileEntity.class)
 public abstract class TileEntityBrewingStandMixin extends TileEntityLockableMixin implements CustomNameableBridge {
@@ -49,16 +49,16 @@ public abstract class TileEntityBrewingStandMixin extends TileEntityLockableMixi
 
     private SlotLensProvider impl$generateBrewingSlotProvider() {
         return new SlotLensCollection.Builder().add(5)
-                .add(InputSlotAdapter.class, (i) -> new InputSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) s), t
-                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
-                .add(InputSlotAdapter.class, (i) -> new InputSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) s), t
-                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
-                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) s), t
-                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
-                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) s), t
-                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
-                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) s), t
-                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
+                .add(InputSlotAdapter.class, (i) -> new InputSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(s)), t
+                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(t, 1)))))
+                .add(InputSlotAdapter.class, (i) -> new InputSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(s)), t
+                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(t, 1)))))
+                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(s)), t
+                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(t, 1)))))
+                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(s)), t
+                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(t, 1)))))
+                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLens(i, (s) -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(s)), t
+                        -> ((BrewingStandTileEntity) (Object) this).isItemValidForSlot(i, ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(t, 1)))))
                 .build();
     }
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.inventory.fabric;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
 
 import java.util.Collection;
 
@@ -53,8 +53,6 @@ public interface Fabric {
     void fabric$setStack(int index, ItemStack stack);
 
     int fabric$getMaxStackSize();
-
-    Translation fabric$getDisplayName();
 
     int fabric$getSize();
 

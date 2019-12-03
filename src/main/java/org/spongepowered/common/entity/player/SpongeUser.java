@@ -60,6 +60,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -503,12 +504,12 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public boolean canEquip(final EquipmentType type) {
-        return getForInventory(p -> p.canEquip(type), u -> true); // TODO Inventory API
+        return getForInventory(p -> p.canEquip(type), u -> true);
     }
 
     @Override
     public boolean canEquip(final EquipmentType type, @Nullable final ItemStack equipment) {
-        return getForInventory(p -> p.canEquip(type, equipment), u -> true); // TODO Inventory API
+        return this.getForInventory(p -> p.canEquip(type, equipment), u -> true);
     }
 
     @Override
@@ -532,13 +533,52 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public Optional<ItemStack> getItemInHand(final HandType handType) {
+    public ItemStack getItemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND) {
-            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.MAIN_HAND));
+            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new));
         } else if (handType == HandTypes.OFF_HAND) {
-            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.OFF_HAND));
+            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new));
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
+    }
+    @Override
+    public ItemStack getHelmet() {
+        return this.getEquipped(EquipmentTypes.HEADWEAR).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setHelmet(ItemStack helmet) {
+        this.equip(EquipmentTypes.HEADWEAR, helmet);
+    }
+
+    @Override
+    public ItemStack getChestplate() {
+        return this.getEquipped(EquipmentTypes.CHESTPLATE).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setChestplate(ItemStack chestplate) {
+        this.equip(EquipmentTypes.CHESTPLATE, chestplate);
+    }
+
+    @Override
+    public ItemStack getLeggings() {
+        return this.getEquipped(EquipmentTypes.LEGGINGS).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setLeggings(ItemStack leggings) {
+        this.equip(EquipmentTypes.LEGGINGS, leggings);
+    }
+
+    @Override
+    public ItemStack getBoots() {
+        return this.getEquipped(EquipmentTypes.BOOTS).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setBoots(ItemStack boots) {
+        this.equip(EquipmentTypes.BOOTS, boots);
     }
 
     @Override

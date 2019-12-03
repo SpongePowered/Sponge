@@ -46,13 +46,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.EntityVillagerBridge;
-import org.spongepowered.common.bridge.item.inventory.InventoryAdapterBridge;
+import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
+import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.mixin.core.entity.EntityAgeableMixin;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
@@ -89,7 +89,7 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
 
     @Override
     public Lens bridge$generateLens(SlotLensProvider slots) {
-        return new DefaultIndexedLens(0, 8, 1, slots);
+        return new DefaultIndexedLens(0, 8, slots);
     }
 
     @Override
