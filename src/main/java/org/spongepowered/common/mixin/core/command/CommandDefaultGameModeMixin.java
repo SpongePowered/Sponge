@@ -30,7 +30,7 @@ import net.minecraft.world.GameType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 
 @Mixin(CommandDefaultGameMode.class)
 public abstract class CommandDefaultGameModeMixin {
@@ -38,7 +38,7 @@ public abstract class CommandDefaultGameModeMixin {
     @Redirect(method = "setDefaultGameType",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/GameType;)V"))
     private void onSetGameType(final ServerPlayerEntity entityPlayerMP, final GameType gameType) {
-        if (!((EntityPlayerMPBridge) entityPlayerMP).bridge$hasForcedGamemodeOverridePermission()) {
+        if (!((ServerPlayerEntityBridge) entityPlayerMP).bridge$hasForcedGamemodeOverridePermission()) {
             entityPlayerMP.setGameType(gameType);
         }
     }

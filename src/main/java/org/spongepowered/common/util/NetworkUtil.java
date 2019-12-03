@@ -49,6 +49,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.Sponge;
@@ -67,10 +68,10 @@ import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.mixin.core.server.PlayerListAccessor;
+import org.spongepowered.common.mixin.core.server.management.PlayerListAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -146,13 +147,13 @@ public final class NetworkUtil {
      */
     public static void initializeConnectionToPlayer(final PlayerList playerList, final NetworkManager netManager, final ServerPlayerEntity playerIn, @Nullable ServerPlayNetHandler handler) {
         final GameProfile gameprofile = playerIn.getGameProfile();
-        final PlayerProfileCache playerprofilecache = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().getPlayerProfileCache();
+        final PlayerProfileCache playerprofilecache = ((PlayerListAccessor) playerList).accessor$getServer().getPlayerProfileCache();
         final GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
         final String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
         playerprofilecache.addEntry(gameprofile);
         
         // Sponge start - save changes to offline User before reading player data
-        final SpongeUser user = (SpongeUser) ((EntityPlayerMPBridge) playerIn).bridge$getUserObject();
+        final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).bridge$getUserObject();
         if (SpongeUser.dirtyUsers.contains(user)) {
             user.save();
         } else {
@@ -161,7 +162,7 @@ public final class NetworkUtil {
         // Sponge end
 
         final CompoundNBT nbttagcompound = playerList.readPlayerDataFromFile(playerIn);
-        ServerWorld worldServer = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().getWorld(playerIn.dimension);
+        ServerWorld worldServer = ((PlayerListAccessor) playerList).accessor$getServer().getWorld(playerIn.dimension);
         final int actualDimensionId = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
         final BlockPos spawnPos;
         // Join data
@@ -216,11 +217,11 @@ public final class NetworkUtil {
                 }
 
                 try {
-                    ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
+                    ((PlayerListAccessor) playerList).accessor$getLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
                     netManager.sendPacket(new SDisconnectPacket(reason));
                     netManager.closeChannel(reason);
                 } catch (Exception exception) {
-                    ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().error("Error whilst disconnecting player", exception);
+                    ((PlayerListAccessor) playerList).accessor$getLogger().error("Error whilst disconnecting player", exception);
                 }
                 return;
             }
@@ -251,12 +252,12 @@ public final class NetworkUtil {
 
         final WorldInfo worldinfo = worldServer.getWorldInfo();
         final BlockPos spawnBlockPos = worldServer.getSpawnPoint();
-        ((PlayerListAccessor) playerList).accessor$setPlayerGameType(playerIn, null, worldServer);
+        ((PlayerListAccessor) playerList).accessor$setPlayerGameTypeBasedOnOther(playerIn, null, worldServer);
 
         // Sponge start
         if (handler == null) {
             // Create the handler here (so the player's gets set)
-            handler = new ServerPlayNetHandler(((PlayerListAccessor) playerList).accessor$getPlayerListServer(), netManager, playerIn);
+            handler = new ServerPlayNetHandler(((PlayerListAccessor) playerList).accessor$getServer(), netManager, playerIn);
         }
         playerIn.connection = handler;
         SpongeImplHooks.fireServerConnectionEvent(netManager);
@@ -279,13 +280,13 @@ public final class NetworkUtil {
         playerList.updatePermissionLevel(playerIn);
         playerIn.getStats().markAllDirty();
         playerIn.getRecipeBook().init(playerIn);
-        ((PlayerListAccessor) playerList).accessor$getPlayerListServer().refreshStatusNextTick();
+        ((PlayerListAccessor) playerList).accessor$getServer().refreshStatusNextTick();
 
         handler.setPlayerLocation(x, y, z, yaw, pitch);
         playerList.playerLoggedIn(playerIn);
 
         // Sponge start - add world name to message
-        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
+        ((PlayerListAccessor) playerList).accessor$getLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
             worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.dimension.getType()).getId(),
             ((ServerWorldBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
         // Sponge end
@@ -293,7 +294,7 @@ public final class NetworkUtil {
         playerList.sendWorldInfo(playerIn, worldServer);
 
         // Sponge Start - Use the server's ResourcePack object
-        final Optional<ResourcePack> pack = ((Server) ((PlayerListAccessor) playerList).accessor$getPlayerListServer()).getDefaultResourcePack();
+        final Optional<ResourcePack> pack = ((Server) ((PlayerListAccessor) playerList).accessor$getServer()).getDefaultResourcePack();
         pack.ifPresent(((Player) playerIn)::sendResourcePack);
         // Sponge End
 
@@ -305,7 +306,7 @@ public final class NetworkUtil {
         // This allows #getWorldScoreboard to function
         // as normal, without causing issues when it is initialized on the client.
 
-        ((EntityPlayerMPBridge) playerIn).bridge$initScoreboard();
+        ((ServerPlayerEntityBridge) playerIn).bridge$initScoreboard();
 
         for (final EffectInstance potioneffect : playerIn.getActivePotionEffects()) {
             handler.sendPacket(new SPlayEntityEffectPacket(playerIn.getEntityId(), potioneffect));
@@ -331,7 +332,7 @@ public final class NetworkUtil {
                     }
 
                     if (!playerIn.isPassenger()) {
-                        ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().warn("Couldn\'t reattach entity to player");
+                        ((PlayerListAccessor) playerList).accessor$getLogger().warn("Couldn\'t reattach entity to player");
                         worldServer.removeEntityDangerously(entity2);
 
                         for (final Entity entity3 : entity2.getRecursivePassengers()) {
@@ -378,5 +379,9 @@ public final class NetworkUtil {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
         }
         // Sponge end
+    }
+
+    public static void sendDimensionRegistration(ServerPlayerEntity player, Dimension dimension) {
+
     }
 }

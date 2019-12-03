@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.mixin.core.network.datasync.EntityDataManagerAccessor;
 import org.spongepowered.common.network.SpoofedEntityDataManager;
@@ -133,8 +133,8 @@ public abstract class EntityTrackerEntryMixin {
     @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityProperties;<init>(ILjava/util/Collection;)V"))
     private Collection<IAttributeInstance> spongeInjectHealth(Collection<IAttributeInstance> set) {
         if (this.trackedEntity instanceof ServerPlayerEntity) {
-            if (((EntityPlayerMPBridge) this.trackedEntity).bridge$isHealthScaled()) {
-                ((EntityPlayerMPBridge) this.trackedEntity).bridge$injectScaledHealth(set);
+            if (((ServerPlayerEntityBridge) this.trackedEntity).bridge$isHealthScaled()) {
+                ((ServerPlayerEntityBridge) this.trackedEntity).bridge$injectScaledHealth(set);
             }
         }
         return set;
@@ -143,8 +143,8 @@ public abstract class EntityTrackerEntryMixin {
     @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityMetadata;<init>(ILnet/minecraft/network/datasync/EntityDataManager;Z)V"))
     private EntityDataManager spongeRelocateDataManager(EntityDataManager manager) {
         final Entity player = ((EntityDataManagerAccessor) manager).accessor$getEntity();
-        if (player instanceof EntityPlayerMPBridge) {
-            if (((EntityPlayerMPBridge) player).bridge$isHealthScaled()) {
+        if (player instanceof ServerPlayerEntityBridge) {
+            if (((ServerPlayerEntityBridge) player).bridge$isHealthScaled()) {
                 return new SpoofedEntityDataManager(manager, player);
             }
         }
@@ -154,8 +154,8 @@ public abstract class EntityTrackerEntryMixin {
     @ModifyArg(method = "updatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityProperties;<init>(ILjava/util/Collection;)V"))
     private Collection<IAttributeInstance> spongeInjectHealthForUpdate(Collection<IAttributeInstance> set) {
         if (this.trackedEntity instanceof ServerPlayerEntity) {
-            if (((EntityPlayerMPBridge) this.trackedEntity).bridge$isHealthScaled()) {
-                ((EntityPlayerMPBridge) this.trackedEntity).bridge$injectScaledHealth(set);
+            if (((ServerPlayerEntityBridge) this.trackedEntity).bridge$isHealthScaled()) {
+                ((ServerPlayerEntityBridge) this.trackedEntity).bridge$injectScaledHealth(set);
             }
         }
         return set;

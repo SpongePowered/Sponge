@@ -85,8 +85,8 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.LivingEntityBaseBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -954,8 +954,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
     @Redirect(method = "onDeathUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getExperiencePoints(Lnet/minecraft/entity/player/EntityPlayer;)I"))
     private int onGetExperiencePoints(final LivingEntity entity, final PlayerEntity attackingPlayer) {
-        if (entity instanceof EntityPlayerBridge) {
-            if (((EntityPlayerBridge) entity).bridge$keepInventory()) {
+        if (entity instanceof PlayerEntityBridge) {
+            if (((PlayerEntityBridge) entity).bridge$keepInventory()) {
                 return 0;
             }
         }
@@ -971,8 +971,8 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
     @Inject(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;resetActiveHand()V"))
     private void updateHealthForUseFinish(final CallbackInfo ci) {
-        if (this instanceof EntityPlayerMPBridge) {
-            ((EntityPlayerMPBridge) this).bridge$refreshScaledHealth();
+        if (this instanceof ServerPlayerEntityBridge) {
+            ((ServerPlayerEntityBridge) this).bridge$refreshScaledHealth();
         }
     }
 

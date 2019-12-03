@@ -22,38 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.entity.player;
+package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import net.minecraft.network.play.server.SWorldBorderPacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.packet.SWorldBorderPacketBridge;
 
-import java.util.UUID;
+@Mixin(SWorldBorderPacket.class)
+public abstract class SWorldBorderPacketMixin implements SWorldBorderPacketBridge {
 
-import javax.annotation.Nullable;
+    @Shadow private double centerX;
+    @Shadow private double centerZ;
 
-public interface EntityPlayerBridge {
-
-    @Nullable BlockPos bridge$getBedLocation(int dim);
-
-    boolean bridge$isSpawnForced(int dim);
-
-    /**
-     * {@link EntityPlayer#addExperienceLevel(int)} doesn't update the total
-     * experience. This recalculates it for plugins to properly make use of it.
-     */
-    void bridge$recalculateTotalExperience();
-
-    boolean bridge$affectsSpawning();
-
-    void bridge$setAffectsSpawning(boolean affectsSpawning);
-
-    boolean bridge$keepInventory();
-
-    void bridge$shouldRestoreInventory(boolean flag);
-
-    boolean bridge$shouldRestoreInventory();
-
-    int bridge$getExperienceSinceLevel();
-
-    void bridge$setExperienceSinceLevel(int experience);
+    @Override
+    public void bridge$changeCoordinatesForMovementFactor(float movementFactor) {
+        this.centerX *= movementFactor;
+        this.centerZ *= movementFactor;
+    }
 }

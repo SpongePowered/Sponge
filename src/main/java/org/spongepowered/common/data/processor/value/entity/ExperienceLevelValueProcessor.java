@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 
 import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
@@ -52,7 +52,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
             player.experienceTotal = ExperienceHolderUtils.xpAtLevel(value);
             player.experience = 0;
             player.experienceLevel = value;
-            ((EntityPlayerMPBridge) container).bridge$refreshExp();
+            ((ServerPlayerEntityBridge) container).bridge$refreshExp();
             final ImmutableBoundedValue<Integer> oldImmutableValue = constructImmutableValue(oldValue);
             return DataTransactionResult.successReplaceResult(newValue, oldImmutableValue);
         }

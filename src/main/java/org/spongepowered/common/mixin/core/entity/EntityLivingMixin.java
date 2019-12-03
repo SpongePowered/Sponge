@@ -59,7 +59,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityAITasksBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
@@ -195,7 +195,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
 
         for (final Object entity1 : world.playerEntities) {
             final PlayerEntity player = (PlayerEntity) entity1;
-            if (player == null || player.removed || !((EntityPlayerBridge) player).bridge$affectsSpawning()) {
+            if (player == null || player.removed || !((PlayerEntityBridge) player).bridge$affectsSpawning()) {
                 continue;
             }
 

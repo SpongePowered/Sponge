@@ -55,7 +55,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -214,7 +214,7 @@ public final class PacketPhaseUtil {
                         // update the reference of player
                         packetPlayer = ((ServerPlayNetHandler) netHandler).player;
                     }
-                    ((EntityPlayerMPBridge) packetPlayer).bridge$setPacketItem(ItemStack.EMPTY);
+                    ((ServerPlayerEntityBridge) packetPlayer).bridge$setPacketItem(ItemStack.EMPTY);
                 }
             }
         } else { // client

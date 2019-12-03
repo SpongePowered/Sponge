@@ -22,22 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.play.server;
+package org.spongepowered.common.bridge.entity.player;
 
-import net.minecraft.network.play.server.SWorldBorderPacket;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.packet.SPacketWorldBorderBridge;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.dimension.DimensionType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Mixin(SWorldBorderPacket.class)
-public abstract class SPacketWorldBorderMixin implements SPacketWorldBorderBridge {
+public interface PlayerEntityBridge {
 
-    @Shadow private double centerX;
-    @Shadow private double centerZ;
+    @Nullable BlockPos bridge$getBedLocation(DimensionType dimensionType);
 
-    @Override
-    public void bridge$changeCoordinatesForNether() {
-        this.centerX *= 8;
-        this.centerZ *= 8;
-    }
+    boolean bridge$isSpawnForced(DimensionType dimensionType);
+
+    /**
+     * {@link PlayerEntity#addExperienceLevel(int)} doesn't update the total
+     * experience. This recalculates it for plugins to properly make use of it.
+     */
+    void bridge$recalculateTotalExperience();
+
+    boolean bridge$affectsSpawning();
+
+    void bridge$setAffectsSpawning(boolean affectsSpawning);
+
+    boolean bridge$keepInventory();
+
+    void bridge$shouldRestoreInventory(boolean flag);
+
+    boolean bridge$shouldRestoreInventory();
+
+    int bridge$getExperienceSinceLevel();
+
+    void bridge$setExperienceSinceLevel(int experience);
 }

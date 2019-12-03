@@ -29,7 +29,7 @@ import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
@@ -45,8 +45,8 @@ public class EntityLivingBaseHealthConverter extends DataParameterConverter<Floa
 
     @Override
     public Optional<DataTransactionResult> createTransaction(final Entity entity, final Float currentValue, final Float value) {
-        final float maxHealth = entity instanceof EntityPlayerMPBridge
-                                ? (float) ((EntityPlayerMPBridge) entity).bridge$getHealthScale()
+        final float maxHealth = entity instanceof ServerPlayerEntityBridge
+                                ? (float) ((ServerPlayerEntityBridge) entity).bridge$getHealthScale()
                                 // Players scale their health and send it through the
                                 // data provider, only the server knows their actual max health
                                 : ((LivingEntity) entity).getMaxHealth();

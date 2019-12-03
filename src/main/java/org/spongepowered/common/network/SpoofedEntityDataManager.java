@@ -28,7 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
 import org.spongepowered.common.mixin.core.network.datasync.EntityDataManagerAccessor;
 
@@ -79,7 +79,7 @@ public class SpoofedEntityDataManager extends EntityDataManager {
         final List<DataEntry<?>> dirty = new ArrayList<>(dirtyEntries.size());
         for (DataEntry<?> dataEntry : dirtyEntries) {
             if (dataEntry.getKey() == EntityLivingBaseAccessor.accessor$getHealthParameter()) {
-                dirty.add(new DataEntry<>(EntityLivingBaseAccessor.accessor$getHealthParameter(), ((EntityPlayerMPBridge) ((EntityDataManagerAccessor) this).accessor$getEntity()).bridge$getInternalScaledHealth()));
+                dirty.add(new DataEntry<>(EntityLivingBaseAccessor.accessor$getHealthParameter(), ((ServerPlayerEntityBridge) ((EntityDataManagerAccessor) this).accessor$getEntity()).bridge$getInternalScaledHealth()));
             } else {
                 dirty.add(dataEntry);
             }

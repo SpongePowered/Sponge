@@ -53,7 +53,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -119,7 +119,7 @@ public abstract class WorldEntitySpawnerMixin {
 
             for (final PlayerEntity entityplayer : world.playerEntities) {
                 // We treat players who do not affect spawning as "spectators"
-                if (!((EntityPlayerBridge) entityplayer).bridge$affectsSpawning() || entityplayer.isSpectator()) {
+                if (!((PlayerEntityBridge) entityplayer).bridge$affectsSpawning() || entityplayer.isSpectator()) {
                     continue;
                 }
 

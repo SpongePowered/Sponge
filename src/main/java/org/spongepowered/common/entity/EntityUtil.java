@@ -83,7 +83,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
@@ -415,7 +415,7 @@ public final class EntityUtil {
 
         final int dimensionId;
 
-        if (!((EntityPlayerMPBridge) player).bridge$usesCustomClient()) {
+        if (!((ServerPlayerEntityBridge) player).bridge$usesCustomClient()) {
 
             // Check if the world we're going to matches our provider type. if so, we need to send a fake respawn packet to clear chunks
             final int fromClientDimId = WorldManager.getClientDimensionId(player, fromWorld);

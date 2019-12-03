@@ -112,8 +112,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.ContainerPlayerBridge;
@@ -211,7 +211,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             this.netManager.sendPacket(new SKeepAlivePacket(now));
         } else if (packet instanceof SSetExperiencePacket) {
             // Ensures experience is in sync server-side.
-            ((EntityPlayerBridge) this.player).bridge$recalculateTotalExperience();
+            ((PlayerEntityBridge) this.player).bridge$recalculateTotalExperience();
         }
 
         packet = packet;
@@ -394,7 +394,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
             // Sponge Start - Movement event
             final Player player = (Player) this.player;
-            final EntityPlayerMPBridge mixinPlayer = (EntityPlayerMPBridge) this.player;
+            final ServerPlayerEntityBridge mixinPlayer = (ServerPlayerEntityBridge) this.player;
             final Vector3d fromRotation = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
@@ -627,7 +627,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         if (!event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
         }
-        ((EntityPlayerMPBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
+        ((ServerPlayerEntityBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
     }
 
     @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
@@ -688,7 +688,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             final int size = stack.getCount();
             item = this.player.dropItem(dropAll);
             // force client itemstack update if drop event was cancelled
-            if (item == null && ((EntityPlayerBridge) player).bridge$shouldRestoreInventory()) {
+            if (item == null && ((PlayerEntityBridge) player).bridge$shouldRestoreInventory()) {
                 final Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, this.player.inventory.currentItem);
                 final int windowId = this.player.openContainer.windowId;
                 stack.setCount(size);
@@ -732,7 +732,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
     private void onProcessPlayerDiggingDropItem(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
         final ItemStack stack = this.player.getHeldItemMainhand();
         if (!stack.isEmpty()) {
-            ((EntityPlayerMPBridge) this.player).bridge$setPacketItem(stack.copy());
+            ((ServerPlayerEntityBridge) this.player).bridge$setPacketItem(stack.copy());
         }
     }
 
@@ -868,7 +868,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                     }
 
                     if (SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, itemstack, hand, hitVec, entity).isCancelled()) {
-                        ((EntityPlayerMPBridge) this.player).bridge$restorePacketItem(hand);
+                        ((ServerPlayerEntityBridge) this.player).bridge$restorePacketItem(hand);
                         return;
                     }
                     // Sponge end
@@ -881,7 +881,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
                     // Sponge start
                     if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, itemstack, entity, hand, hitVec).isCancelled()) {
-                        ((EntityPlayerMPBridge) this.player).bridge$restorePacketItem(hand);
+                        ((ServerPlayerEntityBridge) this.player).bridge$restorePacketItem(hand);
                         return;
                     }
                     // Sponge end

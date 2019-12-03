@@ -68,9 +68,11 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
@@ -85,7 +87,7 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.entity.SpongeProfession;
@@ -110,8 +112,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.FutureTask;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 /**
  * Contains default Vanilla implementations for features that are only
@@ -236,16 +236,16 @@ public final class SpongeImplHooks {
 
     // World provider
 
-    public static boolean canDoLightning(final Dimension provider, final net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoLightning(final Dimension dimension, final net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
 
-    public static boolean canDoRainSnowIce(final Dimension provider, final net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoRainSnowIce(final Dimension dimension, final net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
 
-    public static int getRespawnDimension(final Dimension targetDimension, final ServerPlayerEntity player) {
-        return 0;
+    public static DimensionType getRespawnDimensionType(final Dimension dimension, final ServerPlayerEntity player) {
+        return DimensionType.OVERWORLD;
     }
 
     public static BlockPos getRandomizedSpawnPoint(final ServerWorld world) {
@@ -430,12 +430,13 @@ public final class SpongeImplHooks {
         // This is only used in SpongeForge
     }
 
-    public static BlockPos getBedLocation(final PlayerEntity playerIn, final int dimension) {
-        return ((EntityPlayerBridge) playerIn).bridge$getBedLocation(dimension);
+    @Nullable
+    public static BlockPos getBedLocation(final PlayerEntity player, final DimensionType dimensionType) {
+        return ((PlayerEntityBridge) player).bridge$getBedLocation(dimensionType);
     }
 
-    public static boolean isSpawnForced(final PlayerEntity playerIn, final int dimension) {
-        return ((EntityPlayerBridge) playerIn).bridge$isSpawnForced(dimension);
+    public static boolean isSpawnForced(final PlayerEntity player, final DimensionType dimensionType) {
+        return ((PlayerEntityBridge) player).bridge$isSpawnForced(dimensionType);
     }
 
     public static Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {

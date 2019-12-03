@@ -43,7 +43,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public interface EntityPlayerMPBridge {
+public interface ServerPlayerEntityBridge {
 
     default boolean bridge$usesCustomClient() {
         return false;

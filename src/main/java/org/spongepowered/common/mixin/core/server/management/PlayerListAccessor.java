@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server;
+package org.spongepowered.common.mixin.core.server.management;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -36,10 +36,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(PlayerList.class)
 public interface PlayerListAccessor {
 
-    @Accessor("server") MinecraftServer accessor$getPlayerListServer();
+    @Accessor("server") MinecraftServer accessor$getServer();
 
-    @Accessor("LOGGER") Logger accessor$getPlayerListLogger();
+    @Accessor("LOGGER") Logger accessor$getLogger();
 
-    @Invoker("setPlayerGameTypeBasedOnOther") void accessor$setPlayerGameType(ServerPlayerEntity target, ServerPlayerEntity source, World worldIn);
-
+    @Invoker("setPlayerGameTypeBasedOnOther") void accessor$setPlayerGameTypeBasedOnOther(ServerPlayerEntity target, ServerPlayerEntity source, World worldIn);
 }

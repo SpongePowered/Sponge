@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.packet;
 
-public interface SPacketWorldBorderBridge {
+public interface SWorldBorderPacketBridge {
 
-    void bridge$changeCoordinatesForNether();
+    void bridge$changeCoordinatesForMovementFactor(float movementFactor);
 }

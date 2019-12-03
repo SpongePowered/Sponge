@@ -117,8 +117,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
@@ -153,7 +153,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(ServerPlayerEntity.class)
-public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements SubjectBridge, EntityPlayerMPBridge, CommandSenderBridge,
+public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, ServerPlayerEntityBridge, CommandSenderBridge,
     CommandSourceBridge {
 
     @Shadow @Final public MinecraftServer server;
@@ -320,7 +320,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean impl$useKeepFromBridge(final GameRules gameRules, final String key, final ServerPlayerEntity corpse, final boolean keepEverything) {
-        final boolean keep = ((EntityPlayerBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
+        final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
             this.inventory.copyInventory(corpse.inventory);

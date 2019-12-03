@@ -24,7 +24,12 @@
  */
 package org.spongepowered.common.bridge.world.dimension;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
+
 public interface DimensionBridge {
+
+    SpongeDimensionType bridge$getClientDimensionType(ServerPlayerEntity player);
 
     float bridge$getMovementFactor();
 }

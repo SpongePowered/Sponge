@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthScaleData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -59,14 +59,14 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<Se
         if (value > Float.MAX_VALUE) {
             return false;
         }
-        final EntityPlayerMPBridge mixinPlayer = (EntityPlayerMPBridge) dataHolder;
+        final ServerPlayerEntityBridge mixinPlayer = (ServerPlayerEntityBridge) dataHolder;
         mixinPlayer.bridge$setHealthScale(value);
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(ServerPlayerEntity dataHolder) {
-        final EntityPlayerMPBridge mixinPlayer = (EntityPlayerMPBridge) dataHolder;
+        final ServerPlayerEntityBridge mixinPlayer = (ServerPlayerEntityBridge) dataHolder;
         return Optional.ofNullable(mixinPlayer.bridge$isHealthScaled() ? mixinPlayer.bridge$getHealthScale() : null);
     }
 
@@ -93,11 +93,11 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<Se
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof EntityPlayerMPBridge)) {
+        if (!(container instanceof ServerPlayerEntityBridge)) {
             return DataTransactionResult.failNoData();
         }
-        final Immutable<Double> current = constructImmutableValue(((EntityPlayerMPBridge) container).bridge$getHealthScale());
-        ((EntityPlayerMPBridge) container).bridge$setHealthScale(Constants.Entity.Player.DEFAULT_HEALTH_SCALE);
+        final Immutable<Double> current = constructImmutableValue(((ServerPlayerEntityBridge) container).bridge$getHealthScale());
+        ((ServerPlayerEntityBridge) container).bridge$setHealthScale(Constants.Entity.Player.DEFAULT_HEALTH_SCALE);
         return DataTransactionResult.successRemove(current);
     }
 }

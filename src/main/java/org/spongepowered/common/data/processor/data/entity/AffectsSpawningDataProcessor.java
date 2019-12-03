@@ -35,7 +35,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpa
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 
 import java.util.Optional;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -49,13 +49,13 @@ public class AffectsSpawningDataProcessor extends
 
     @Override
     protected boolean set(ServerPlayerEntity entity, Boolean value) {
-        ((EntityPlayerBridge) entity).bridge$setAffectsSpawning(value);
+        ((PlayerEntityBridge) entity).bridge$setAffectsSpawning(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(ServerPlayerEntity entity) {
-        return Optional.of(((EntityPlayerBridge) entity).bridge$affectsSpawning());
+        return Optional.of(((PlayerEntityBridge) entity).bridge$affectsSpawning());
     }
 
     @Override
