@@ -27,10 +27,17 @@ package org.spongepowered.common.world.server;
 import com.google.gson.JsonElement;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldManager;
-import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 
 public interface SpongeWorldManager extends WorldManager {
+
+    MinecraftServer getServer();
+
+    default ServerWorld getWorld(DimensionType dimensionType) {
+        return this.getServer().getWorld(dimensionType);
+    }
 
     void loadAllWorlds(MinecraftServer server, String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions);
 }

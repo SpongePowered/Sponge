@@ -38,24 +38,23 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -64,31 +63,27 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
-import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -118,7 +113,7 @@ import java.util.function.Predicate;
  * available in Forge. SpongeForge overwrites the methods in this class
  * with calls to the Forge methods.
  */
-public final class SpongeImplHooks {
+public class SpongeImplHooks {
 
     public static boolean isVanilla() {
         return true;
@@ -132,8 +127,8 @@ public final class SpongeImplHooks {
         return true;
     }
 
-    public static String getModIdFromClass(final Class<?> clazz) {
-        final String className = clazz.getName();
+    public static String getModIdFromClass(Class<?> clazz) {
+        String className = clazz.getName();
         if (className.startsWith("net.minecraft.")) {
             return "minecraft";
         }
@@ -145,110 +140,110 @@ public final class SpongeImplHooks {
 
     // Entity
 
-    public static boolean isCreatureOfType(final Entity entity, final EntityClassification type) {
+    public static boolean isCreatureOfType(Entity entity, EntityClassification type) {
         return type.getCreatureClass().isAssignableFrom(entity.getClass());
     }
 
-    public static boolean isFakePlayer(final Entity entity) {
+    public static boolean isFakePlayer(Entity entity) {
         return false;
     }
 
-    public static void fireServerConnectionEvent(final NetworkManager netManager) {
+    public static void fireServerConnectionEvent(NetworkManager manager) {
         // Implemented in SF
     }
 
-    public static void firePlayerJoinSpawnEvent(final ServerPlayerEntity playerMP) {
+    public static void firePlayerJoinSpawnEvent(ServerPlayerEntity player) {
         // Overwritten in SpongeForge
     }
 
-    public static void handlePostChangeDimensionEvent(final ServerPlayerEntity playerIn, final ServerWorld fromWorld, final ServerWorld toWorld) {
+    public static void handlePostChangeDimensionEvent(ServerPlayerEntity player, ServerWorld fromWorld, ServerWorld toWorld) {
         // Overwritten in SpongeForge
     }
 
-    public static boolean checkAttackEntity(final PlayerEntity entityPlayer, final Entity targetEntity) {
+    public static boolean checkAttackEntity(PlayerEntity player, Entity victim) {
         return true;
     }
 
-    public static double getBlockReachDistance(final ServerPlayerEntity player) {
+    public static double getBlockReachDistance(ServerPlayerEntity player) {
         return 5.0d;
     }
 
     // Entity registry
 
     @Nullable
-    public static Class<? extends Entity> getEntityClass(final ResourceLocation name) {
+    public static Class<? extends Entity> getEntityClass(ResourceLocation name) {
         return EntityList.REGISTRY.getOrDefault(name);
     }
 
     @Nullable
-    public static String getEntityTranslation(final ResourceLocation name) {
+    public static String getEntityTranslation(ResourceLocation name) {
         return EntityList.getTranslationName(name);
     }
 
-    public static int getEntityId(final Class<? extends Entity> entityClass) {
+    public static int getEntityId(Class<? extends Entity> entityClass) {
         return EntityList.REGISTRY.getId(entityClass);
     }
 
     // Block
 
-    public static boolean isBlockFlammable(final Block block, final IBlockAccess world, final BlockPos pos, final Direction face) {
+    public static boolean isBlockFlammable(Block block, IBlockAccess world, BlockPos pos, Direction face) {
         return ((BlockFireAccessor) Blocks.FIRE).accessor$getBlockFlamability(block) > 0;
     }
 
-    public static int getBlockLightOpacity(final BlockState state, final IBlockAccess world, final BlockPos pos) {
+    public static int getBlockLightOpacity(BlockState state, IBlockAccess world, BlockPos pos) {
         return state.getLightOpacity();
     }
 
-	public static int getChunkPosLight(final BlockState blockState, final World world, final BlockPos pos) {
+	public static int getChunkPosLight(BlockState blockState, World world, BlockPos pos) {
 		return blockState.getLightValue();
 	}
     // Tile entity
 
     @Nullable
-    public static TileEntity createTileEntity(final Block block, final net.minecraft.world.World world, final BlockState state) {
+    public static TileEntity createTileEntity(Block block, World world, BlockState state) {
         if (block instanceof ITileEntityProvider) {
             return ((ITileEntityProvider) block).createNewTileEntity(world, block.getMetaFromState(state));
         }
         return null;
     }
 
-    public static boolean hasBlockTileEntity(final Block block, final BlockState state) {
+    public static boolean hasBlockTileEntity(Block block, BlockState state) {
         return block instanceof ITileEntityProvider;
     }
 
-    public static boolean shouldRefresh(final TileEntity tile, final net.minecraft.world.World world, final BlockPos pos, final BlockState oldState, final BlockState newState) {
+    public static boolean shouldRefresh(TileEntity tileEntity, World world, BlockPos pos, BlockState oldState, BlockState newState) {
         return oldState.getBlock() != newState.getBlock();
     }
 
-    public static void onTileChunkUnload(final TileEntity te) {
+    public static void onTileChunkUnload(TileEntity tileEntity) {
         // Overwritten in SpongeForge
     }
 
     // World
 
-    public static Iterator<Chunk> getChunkIterator(final ServerWorld world) {
+    public static Iterator<Chunk> getChunkIterator(ServerWorld world) {
         return world.getPlayerChunkMap().getChunkIterator();
     }
 
-    public static void registerPortalAgentType(@Nullable final ForgeITeleporterBridge teleporter) {
+    public static void registerPortalAgentType(@Nullable ForgeITeleporterBridge teleporter) {
         // Overwritten in SpongeForge
     }
 
     // World provider
 
-    public static boolean canDoLightning(final Dimension dimension, final net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoLightning(Dimension dimension, Chunk chunk) {
         return true;
     }
 
-    public static boolean canDoRainSnowIce(final Dimension dimension, final net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoRainSnowIce(Dimension dimension, Chunk chunk) {
         return true;
     }
 
-    public static DimensionType getRespawnDimensionType(final Dimension dimension, final ServerPlayerEntity player) {
+    public static DimensionType getRespawnDimensionType(Dimension dimension, ServerPlayerEntity player) {
         return DimensionType.OVERWORLD;
     }
 
-    public static BlockPos getRandomizedSpawnPoint(final ServerWorld world) {
+    public static BlockPos getRandomizedSpawnPoint(ServerWorld world) {
         BlockPos ret = world.getSpawnPoint();
 
         final boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
@@ -263,7 +258,7 @@ public final class SpongeImplHooks {
             if (spawnFuzz < 2) {
                 spawnFuzz = 2;
             }
-            final int spawnFuzzHalf = spawnFuzz / 2;
+            int spawnFuzzHalf = spawnFuzz / 2;
             ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }
 
@@ -272,39 +267,39 @@ public final class SpongeImplHooks {
 
     // Item stack merging
 
-    public static void addItemStackToListForSpawning(final Collection<ItemDropData> itemStacks, @Nullable final ItemDropData itemStack) {
+    public static void addItemStackToListForSpawning(Collection<ItemDropData> dropData, @Nullable ItemDropData drop) {
         // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
-        if (itemStack != null) {
-            itemStacks.add(itemStack);
+        if (drop != null) {
+            dropData.add(drop);
         }
     }
 
-    public static MapStorage getWorldMapStorage(final World world) {
+    public static MapStorage getWorldMapStorage(World world) {
         return world.getMapStorage();
     }
 
-    public static int countEntities(final ServerWorld worldServer, final net.minecraft.entity.EntityClassification type, final boolean forSpawnCount) {
-        return worldServer.countEntities(type.getCreatureClass());
+    public static int countEntities(ServerWorld world, EntityClassification type, boolean forSpawnCount) {
+        return world.countEntities(type.getCreatureClass());
     }
 
-    public static int getMaxSpawnPackSize(final MobEntity entityLiving) {
-        return entityLiving.getMaxSpawnedInChunk();
+    public static int getMaxSpawnPackSize(MobEntity mob) {
+        return mob.getMaxSpawnedInChunk();
     }
 
-    public static SpawnerSpawnType canEntitySpawnHere(final MobEntity entityLiving, final boolean entityNotColliding) {
-        if (entityLiving.getCanSpawnHere() && entityNotColliding) {
+    public static SpawnerSpawnType canEntitySpawnHere(MobEntity mob, boolean entityNotColliding) {
+        if (mob.getCanSpawnHere() && entityNotColliding) {
             return SpawnerSpawnType.NORMAL;
         }
         return SpawnerSpawnType.NONE;
     }
 
     @Nullable
-    public static Object onUtilRunTask(final FutureTask<?> task, final Logger logger) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+    public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
+        PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
                 .source(task))  {
             context.buildAndSwitch();
-            final Object o = Util.runTask(task, logger);
+            Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {
             phaseTracker
@@ -314,15 +309,15 @@ public final class SpongeImplHooks {
         }
     }
 
-    public static void onEntityError(final Entity entity, final CrashReport crashReport) {
+    public static void onEntityError(Entity entity, CrashReport crashReport) {
         throw new ReportedException(crashReport);
     }
 
-    public static void onTileEntityError(final TileEntity tileEntity, final CrashReport crashReport) {
+    public static void onTileEntityError(TileEntity tileEntity, CrashReport crashReport) {
         throw new ReportedException(crashReport);
     }
 
-    public static void blockExploded(final Block block, final World world, final BlockPos blockpos, final Explosion explosion) {
+    public static void blockExploded(Block block, World world, BlockPos blockpos, Explosion explosion) {
         world.setBlockToAir(blockpos);
         block.onExplosionDestroy(world, blockpos, explosion);
     }
@@ -336,36 +331,35 @@ public final class SpongeImplHooks {
      * @return True if the current phase state is restoring, or the world is restoring in forge.
      */
     @SuppressWarnings("unused") // overridden to be used in MixinSpongeImplHooks.
-    public static boolean isRestoringBlocks(final World world) {
+    public static boolean isRestoringBlocks(World world) {
         return PhaseTracker.getInstance().getCurrentState().isRestoring();
 
     }
 
-    public static void onTileEntityChunkUnload(final net.minecraft.tileentity.TileEntity tileEntity) {
+    public static void onTileEntityChunkUnload(TileEntity tileEntity) {
         // forge only method
     }
 
-    public static boolean canConnectRedstone(
-        final Block block, final BlockState state, final IBlockAccess world, final BlockPos pos, @Nullable final Direction side) {
+    public static boolean canConnectRedstone(Block block, BlockState state, IBlockAccess world, BlockPos pos, @Nullable Direction side) {
         return state.canProvidePower() && side != null;
     }
     // Crafting
 
-    public static Optional<ItemStack> getContainerItem(final ItemStack itemStack) {
+    public static Optional<ItemStack> getContainerItem(ItemStack itemStack) {
         checkNotNull(itemStack, "The itemStack must not be null");
 
-        final net.minecraft.item.ItemStack nmsStack = ItemStackUtil.toNative(itemStack);
+        net.minecraft.item.ItemStack nmsStack = ItemStackUtil.toNative(itemStack);
 
         if (nmsStack.isEmpty()) {
             return Optional.empty();
         }
 
-        final Item nmsItem = nmsStack.getItem();
+        Item nmsItem = nmsStack.getItem();
 
         if (nmsItem.hasContainerItem()) {
-            final Item nmsContainerItem = nmsItem.getContainerItem();
-            final net.minecraft.item.ItemStack nmsContainerStack = new net.minecraft.item.ItemStack(nmsContainerItem);
-            final ItemStack containerStack = ItemStackUtil.fromNative(nmsContainerStack);
+            Item nmsContainerItem = nmsItem.getContainerItem();
+            net.minecraft.item.ItemStack nmsContainerStack = new net.minecraft.item.ItemStack(nmsContainerItem);
+            ItemStack containerStack = ItemStackUtil.fromNative(nmsContainerStack);
 
             return Optional.of(containerStack);
         } else {
@@ -373,8 +367,8 @@ public final class SpongeImplHooks {
         }
     }
 
-    public static Optional<CraftingRecipe> findMatchingRecipe(final CraftingGridInventory inventory, final org.spongepowered.api.world.World world) {
-        final IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
+    public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {
+        IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
         return Optional.ofNullable(((CraftingRecipe) recipe));
     }
 
@@ -382,15 +376,15 @@ public final class SpongeImplHooks {
         return Streams.stream(CraftingManager.REGISTRY.iterator()).map(CraftingRecipe.class::cast).collect(ImmutableList.toImmutableList());
     }
 
-    public static Optional<CraftingRecipe> getRecipeById(final String id) {
-        final IRecipe recipe = CraftingManager.REGISTRY.getOrDefault(new ResourceLocation(id));
+    public static Optional<CraftingRecipe> getRecipeById(String id) {
+        IRecipe recipe = CraftingManager.REGISTRY.getOrDefault(new ResourceLocation(id));
         if (recipe == null) {
             return Optional.empty();
         }
         return Optional.of(((CraftingRecipe) recipe));
     }
 
-    public static void register(final ResourceLocation name, final IRecipe recipe) {
+    public static void register(ResourceLocation name, IRecipe recipe) {
         CraftingManager.register(name, recipe);
     }
 
@@ -403,7 +397,7 @@ public final class SpongeImplHooks {
         return Text.EMPTY;
     }
 
-    public static void registerAdditionalCommands(final ChildCommandElementExecutor flagChildren, final ChildCommandElementExecutor nonFlagChildren) {
+    public static void registerAdditionalCommands(ChildCommandElementExecutor flagChildren, ChildCommandElementExecutor nonFlagChildren) {
         // Overwritten in SpongeForge
     }
 
@@ -414,64 +408,57 @@ public final class SpongeImplHooks {
     // Borrowed from Forge, with adjustments by us
 
     @Nullable
-    public static RayTraceResult rayTraceEyes(final LivingEntity entity, final double length) {
-        final Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
-        final Vec3d endPos = startPos.add(entity.getLookVec().scale(length));
+    public static RayTraceResult rayTraceEyes(LivingEntity entity, double length) {
+        Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
+        Vec3d endPos = startPos.add(entity.getLookVec().scale(length));
         return entity.world.rayTraceBlocks(startPos, endPos);
     }
 
-    public static boolean shouldKeepSpawnLoaded(final net.minecraft.world.dimension.DimensionType dimensionType, final int dimensionId) {
-        final ServerWorld worldServer = WorldManager.getWorldByDimensionId(dimensionId).orElse(null);
-        return worldServer != null && ((WorldProperties) worldServer.getWorldInfo()).doesKeepSpawnLoaded();
+    public static boolean shouldKeepSpawnLoaded(DimensionType dimensionType) {
+        final ServerWorld world = SpongeImpl.getWorldManager().getWorld(dimensionType);
+        return world != null && ((WorldInfoBridge) world.getWorldInfo()).bridge$doesKeepSpawnLoaded();
 
     }
 
-    public static void setShouldLoadSpawn(final net.minecraft.world.dimension.DimensionType dimensionType, final boolean keepSpawnLoaded) {
+    public static void setKeepSpawnLoaded(DimensionType dimensionType, boolean keepSpawnLoaded) {
         // This is only used in SpongeForge
     }
 
     @Nullable
-    public static BlockPos getBedLocation(final PlayerEntity player, final DimensionType dimensionType) {
+    public static BlockPos getBedLocation(PlayerEntity player, DimensionType dimensionType) {
         return ((PlayerEntityBridge) player).bridge$getBedLocation(dimensionType);
     }
 
-    public static boolean isSpawnForced(final PlayerEntity player, final DimensionType dimensionType) {
+    public static boolean isSpawnForced(PlayerEntity player, DimensionType dimensionType) {
         return ((PlayerEntityBridge) player).bridge$isSpawnForced(dimensionType);
     }
 
-    public static Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {
+    public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
         SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         return null;
     }
 
-    public static InventoryAdapter findInventoryAdapter(final Object inventory) {
+    public static InventoryAdapter findInventoryAdapter(Object inventory) {
         SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         throw new IllegalArgumentException("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
     }
 
-    public static void onTileEntityInvalidate(final TileEntity te) {
+    public static void onTileEntityInvalidate(TileEntity tileEntity) {
         te.remove();
     }
 
-    public static void capturePerEntityItemDrop(final PhaseContext<?> phaseContext, final Entity owner,
-        final ItemEntity entityitem) {
-        phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), entityitem);
+    public static void capturePerEntityItemDrop(PhaseContext<?> phaseContext, Entity owner, ItemEntity item) {
+        phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), item);
     }
 
     /**
-     * @author gabizou - April 21st, 2018
      * Gets the enchantment modifier for looting on the entity living base from the damage source, but in forge cases, we need to use their hooks.
-     *
-     * @param target
-     * @param entity
-     * @param cause
-     * @return
      */
-    public static int getLootingEnchantmentModifier(final LivingEntity target, final LivingEntity entity, final DamageSource cause) {
+    public static int getLootingEnchantmentModifier(LivingEntity target, LivingEntity entity, DamageSource cause) {
         return EnchantmentHelper.getLootingModifier(entity);
     }
 
-    public static double getWorldMaxEntityRadius(final ServerWorld worldServer) {
+    public static double getWorldMaxEntityRadius(ServerWorld world) {
         return 2.0D;
     }
 
@@ -482,9 +469,9 @@ public final class SpongeImplHooks {
      * @param professionId
      * @return
      */
-    public static Profession validateProfession(final int professionId) {
-        final List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
-        for (final Profession profession : professions) {
+    public static Profession validateProfession(int professionId) {
+        List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
+        for (Profession profession : professions) {
             if (profession instanceof SpongeProfession) {
                 if (professionId == ((SpongeProfession) profession).type) {
                     return profession;
@@ -496,22 +483,22 @@ public final class SpongeImplHooks {
 
     }
 
-    public static void onUseItemTick(final LivingEntity entity, final net.minecraft.item.ItemStack stack, final int activeItemStackUseCount) {
+    public static void onUseItemTick(LivingEntity living, ItemStack stack, int activeItemStackUseCount) {
     }
 
-    public static void onTETickStart(final TileEntity te) {
-
-    }
-
-    public static void onTETickEnd(final TileEntity te) {
+    public static void onTETickStart(TileEntity tileEntity) {
 
     }
 
-    public static void onEntityTickStart(final Entity entity) {
+    public static void onTETickEnd(TileEntity tileEntity) {
 
     }
 
-    public static void onEntityTickEnd(final Entity entity) {
+    public static void onEntityTickStart(Entity entity) {
+
+    }
+
+    public static void onEntityTickEnd(Entity entity) {
 
     }
 
@@ -519,11 +506,11 @@ public final class SpongeImplHooks {
         // Return true when the server isn't yet initialized, this means on a client
         // that the game is still being loaded. This is needed to support initialization
         // events with cause tracking.
-        return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
+        return !Sponge.isServerAvailable() || Sponge.getServer().onMainThread();
     }
 
     // Overridden by SpongeImplHooksMixin_ItemNameOverflowPrevention for exploit check
-    public static boolean creativeExploitCheck(final IPacket<?> packetIn, final ServerPlayerEntity playerMP) {
+    public static boolean creativeExploitCheck(IPacket<?> packet, ServerPlayerEntity player) {
         return false;
     }
 
@@ -531,19 +518,15 @@ public final class SpongeImplHooks {
         throw new UnsupportedOperationException("SpongeCommon does not have it's own ecosystem, this needs to be mixed into for implementations depending on SpongeCommon");
     }
 
-    public static BlockEntityType getTileEntityType(final Class<? extends TileEntity> aClass) {
-        return SpongeImpl.getRegistry().getTranslated(aClass, BlockEntityType.class);
+    public static BlockEntityType getTileEntityType(Class<? extends TileEntity> tileEntityClass) {
+        return SpongeImpl.getRegistry().getTranslated(tileEntityClass, BlockEntityType.class);
     }
 
     /**
-     * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
-     *
-     * @param spongeEvent The sponge event
-     * @return The forge event
+     * Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      */
     @Nullable
-    public static Object postForgeEventDataCompatForSponge(final InteractBlockEvent.Secondary spongeEvent) {
+    public static Object postForgeEventDataCompatForSponge(InteractBlockEvent.Secondary spongeEvent) {
         SpongeImpl.postEvent(spongeEvent);
         return null;
     }
@@ -556,7 +539,7 @@ public final class SpongeImplHooks {
     // since we don't want to undo that
 
     // * If the event was cancelled by a Forge mod. In this case, we adhere to Forge's normal
-    // bheavior, which is to leave any GUIs open on the client. Some mods, like Quark, modify
+    // behavior, which is to leave any GUIs open on the client. Some mods, like Quark, modify
     // Vanilla blocks (such as noteblocks) by opening a custom GUI on the client interaction event,
     // and then cancelling the interaction event on the server.
     //
@@ -572,31 +555,23 @@ public final class SpongeImplHooks {
     // by a Forge event listener.
     // SpongeForge - end
     /**
-     * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
-     *
-     * @param worldIn The world
-     * @param pos The position
-     * @param eventData The event data, if it was created
-     * @param player The player
+     * Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      */
-    public static void shouldCloseScreen(final World worldIn, final BlockPos pos, @Nullable final Object eventData, final ServerPlayerEntity player) {
+    public static void shouldCloseScreen(World world, BlockPos pos, @Nullable Object eventData, ServerPlayerEntity player) {
     }
 
     /**
-     * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
+     * Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      *
      * @param forgeEventObject The forge event object, if it was created
      * @return The result as a result of the event data
      */
-    public static ActionResultType getInteractionCancellationResult(@Nullable final Object forgeEventObject) {
+    public static ActionResultType getInteractionCancellationResult(@Nullable Object forgeEventObject) {
         return ActionResultType.FAIL;
     }
 
     /**
-     * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
+     * Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      *
      * @param worldIn The world in
      * @param pos The position
@@ -605,137 +580,106 @@ public final class SpongeImplHooks {
      * @param heldItemOffhand The offhand item
      * @return Whether to bypass sneaking state, forge has an extra hook on the item class
      */
-    public static boolean doesItemSneakBypass(final World worldIn, final BlockPos pos, final PlayerEntity player, final net.minecraft.item.ItemStack heldItemMainhand,
-        final net.minecraft.item.ItemStack heldItemOffhand) {
+    public static boolean doesItemSneakBypass(World worldIn, BlockPos pos, PlayerEntity player, net.minecraft.item.ItemStack heldItemMainhand,
+        net.minecraft.item.ItemStack heldItemOffhand) {
         return heldItemMainhand.isEmpty() && heldItemOffhand.isEmpty();
     }
 
     /**
-     * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
-     *
-     * @param player The player interacting
-     * @param event The sponge event
-     * @param result The current result
-     * @param worldIn The world
-     * @param pos the position
-     * @param hand the hand used
-     * @return Null so that the rest of the method continues processing? TODO - Zidane and Morph, please check this...
+     * Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      */
     @Nullable
-    public static ActionResultType getEnumResultForProcessRightClickBlock(final ServerPlayerEntity player,
-        final InteractBlockEvent.Secondary event, final ActionResultType result, final World worldIn, final BlockPos pos,
-        final Hand hand) {
+    public static ActionResultType getEnumResultForProcessRightClickBlock(ServerPlayerEntity player, InteractBlockEvent.Secondary event,
+        ActionResultType result, World world, BlockPos pos, Hand hand) {
         return ActionResultType.FAIL;
     }
 
     /**
-     * @author gabizou - April 23rd, 2019 - 1.12.2
-     * @reason Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
-     *
-     * @param player The player
-     * @param stack The item stack to check
-     * @param worldIn The world
-     * @param pos the position
-     * @param hand the hand used
-     * @param facing Facing direction
-     * @param hitX hit x pos
-     * @param hitY hit y pos
-     * @param hitZ hit z pos
-     * @return The result of the item stack's hook method
+     * Eliminate an extra overwrite for SpongeForge for PlayerInteractionManagerMixin#processRightClickBlock.
      */
-    public static ActionResultType onForgeItemUseFirst(
-        final PlayerEntity player, final net.minecraft.item.ItemStack stack, final World worldIn, final BlockPos pos,
-        final Hand hand, final Direction facing, final float hitX,
-        final float hitY, final float hitZ) {
+    public static ActionResultType onForgeItemUseFirst(PlayerEntity player, ItemStack stack, World world, BlockPos pos,
+        Hand hand, Direction facing, float hitX, float hitY, float hitZ) {
         return ActionResultType.PASS;
     }
 
     /**
-     * @author gabizou - May 10th, 2019 - 1.12.2
-     * @reason Forge events are getting wrapped in various cases that end up causing corner cases where the effective side
-     * @param object The event
-     * @return False by default, means all server sided events or common events are allowed otherwise.
+     * Forge events are getting wrapped in various cases that end up causing corner cases where the effective side ends up being the client.
+     *
+     * <p>
+     *     If this returns true, the event manager will handle the client event differently (or not at all)
+     * </p>>
      */
-    public static boolean isEventClientEvent(final Object object) {
+    public static boolean isClientEvent(Object object) {
         return false;
     }
 
 
     /**
-     * @author gabizou - May 28th, 2019 - 1.12.2
-     * @reason Forge has custom items, and normally, we throw an event for any
-     * and all listeners. The problem is that since Forge just blindly calls
-     * events, and Sponge only throws events if there are listeners, the custom
-     * item hook does not get called for direct spawned entities, so, we need
-     * to explicitly call the custom item creation hooks here.
-     *
-     * @param entity The vanilla entity item
-     * @return The custom item entity for the dropped item
+     * Forge has custom items, and normally, we throw an event for any and all listeners. The problem is that since Forge just blindly calls
+     * events, and Sponge only throws events if there are listeners, the custom item hook does not get called for direct spawned entities,
+     * so we need to explicitly call the custom item creation hooks here.
      */
-    @SuppressWarnings("ConstantConditions")
     @Nullable
-    public static Entity getCustomEntityIfItem(final Entity entity) {
+    public static Entity getCustomEntityIfItem(Entity entity) {
         return null;
     }
 
     /**
      * For use with {@link TileEntityActivation}.
      *
-     * @param tile The tile to tick
+     * @param tileEntity The tile to tick
      * @return True whether to tick or false, not to
      */
-    public static boolean shouldTickTile(final ITickable tile) {
+    public static boolean shouldTickTile(ITickableTileEntity tileEntity) {
         return true;
     }
 
     /**
-     * Used for compatibility with Forge where Forge uses wrapped Items
-     * since they allow for registry replacements.
+     * Used for compatibility with Forge where Forge uses wrapped Items since they allow for registry replacements.
      *
-     * @param mixinItem_api The item
+     * @param item The item
      * @return The resource location id
      */
     @Nullable
-    public static ResourceLocation getItemResourceLocation(final Item mixinItem_api) {
+    public static ResourceLocation getItemResourceLocation(Item item) {
         return Item.REGISTRY.getKey(mixinItem_api);
     }
 
-    public static void registerItemForSpongeRegistry(final int id, final ResourceLocation textualID, final Item itemIn) {
-        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) itemIn);
+    public static void registerItemForSpongeRegistry(int id, ResourceLocation textualID, Item item) {
+        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) item);
     }
 
-    public static void writeItemStackCapabilitiesToDataView(final DataContainer container, final net.minecraft.item.ItemStack stack) {
+    public static void writeItemStackCapabilitiesToDataView(DataContainer container, ItemStack stack) {
 
     }
 
-    public static boolean canEnchantmentBeAppliedToItem(final Enchantment enchantment, final net.minecraft.item.ItemStack stack) {
+    public static boolean canEnchantmentBeAppliedToItem(Enchantment enchantment, ItemStack stack) {
         return enchantment.canApply(stack);
     }
 
-    public static void setCapabilitiesFromSpongeBuilder(final ItemStack stack, final CompoundNBT compoundTag) {
+    public static void setCapabilitiesFromSpongeBuilder(ItemStack stack, CompoundNBT compound) {
 
     }
 
-    public static TileEntity onChunkGetTileDuringRemoval(final ServerWorld worldServer, final BlockPos pos) {
-        if (((WorldAccessor) worldServer).accessor$getIsOutsideBuildHeight(pos)) {
+    public static TileEntity onChunkGetTileDuringRemoval(ServerWorld world, BlockPos pos) {
+        if (((WorldAccessor) world).accessor$getIsOutsideBuildHeight(pos)) {
             return null;
         } else {
             TileEntity tileentity2 = null;
 
-            if (((WorldAccessor) worldServer).accessor$getProcessingLoadedTiles()) {
-                tileentity2 = ((WorldAccessor) worldServer).accessPendingTileEntityAt(pos);
+            if (((WorldAccessor) world).accessor$getProcessingLoadedTiles()) {
+                tileentity2 = ((WorldAccessor) world).accessPendingTileEntityAt(pos);
             }
 
             if (tileentity2 == null) {
                 // Sponge - Instead of creating the tile entity, just check if it's there. If the
                 // tile entity doesn't exist, don't create it since we're about to just wholesale remove it...
                 // tileentity2 = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
-                tileentity2 = worldServer.getChunkAt(pos).getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+                tileentity2 = world.getChunkAt(pos).getTileEntity(pos, Chunk.CreateEntityType.CHECK);
             }
 
             if (tileentity2 == null) {
-                tileentity2 =  ((WorldAccessor) worldServer).accessPendingTileEntityAt(pos);
+                tileentity2 =  ((WorldAccessor) world).accessPendingTileEntityAt(pos);
             }
 
             return tileentity2;
