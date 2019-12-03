@@ -34,7 +34,7 @@ import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.Melon;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.world.gen.feature.WorldGeneratorMixin;
+import org.spongepowered.common.mixin.invalid.core.world.gen.feature.WorldGeneratorMixin;
 import org.spongepowered.math.vector.Vector3i;
 import java.util.Random;
 

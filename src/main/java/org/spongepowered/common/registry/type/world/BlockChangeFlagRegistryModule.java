@@ -77,6 +77,13 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
     private BlockChangeFlagRegistryModule() {
     }
 
+    public static int toNative(BlockChangeFlag flag) {
+        if (flag instanceof SpongeBlockChangeFlag) {
+            return ((SpongeBlockChangeFlag) flag).getRawFlag();
+        }
+        return 0;
+    }
+
     @Override
     public void registerDefaults() {
         // A documentation note:

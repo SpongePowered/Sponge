@@ -83,7 +83,7 @@ import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.mixin.core.world.WorldServerAccessor;
+import org.spongepowered.common.mixin.core.world.ServerWorldAccessor;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -1037,7 +1037,7 @@ public final class PhaseTracker {
         final int chunkX = MathHelper.floor(entity.posX / 16.0D);
         final int chunkZ = MathHelper.floor(entity.posZ / 16.0D);
 
-        if (!isForced && !((WorldServerAccessor) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
+        if (!isForced && !((ServerWorldAccessor) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
         if (entity instanceof PlayerEntity) {
@@ -1109,7 +1109,7 @@ public final class PhaseTracker {
         world.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
         world.loadedEntityList.add(finalEntityToSpawn);
         // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
-        ((WorldServerAccessor) world).accessor$onEntityAdded(finalEntityToSpawn);
+        ((ServerWorldAccessor) world).accessor$onEntityAdded(finalEntityToSpawn);
         return true;
 
     }
@@ -1139,7 +1139,7 @@ public final class PhaseTracker {
         final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof PlayerEntity;
 
-        if (!isForced && !((WorldServerAccessor) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
+        if (!isForced && !((ServerWorldAccessor) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
         // Sponge Start - throw an event

@@ -24,607 +24,373 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.MultiPartEntityPart;
-import net.minecraft.entity.effect.LightningBoltEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.item.EnderPearlEntity;
-import net.minecraft.entity.item.FallingBlockEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.item.PaintingEntity;
-import net.minecraft.entity.item.PaintingEntity.EnumArt;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.material.Material;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.play.server.SChangeBlockPacket;
-import net.minecraft.profiler.Profiler;
+import net.minecraft.fluid.IFluidState;
+import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.network.IPacket;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.profiler.IProfiler;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.NetworkTagManager;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameType;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.IWorldEventListener;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.LightType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.chunk.AbstractChunkProvider;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.gen.Heightmap;
+import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.WorldInfo;
-import org.apache.commons.lang3.reflect.ConstructorUtils;
-import org.spongepowered.api.Sponge;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.data.property.provider.PropertyProvider;
-import org.spongepowered.api.data.value.MergeFunction;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.EnderPearl;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.title.Title;
-import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.Functional;
-import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
-import org.spongepowered.api.world.dimension.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.volume.biome.workerMutableBiomeVolumeStream;
-import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
+import org.spongepowered.api.world.storage.WorldStorage;
+import org.spongepowered.api.world.teleport.PortalAgent;
+import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
+import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.extent.ExtentViewDownsize;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
-import org.spongepowered.common.world.pregen.SpongeChunkPreGenerateTask;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
-import org.spongepowered.math.GenericMath;
-import org.spongepowered.math.vector.Vector2d;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
-import java.util.ArrayList;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.World.class)
-public abstract class WorldMixin_API implements World {
+public abstract class WorldMixin_API implements IWorldMixin_API<World>, World, IEnvironmentBlockReaderMixin_API, AutoCloseable {
+    @Shadow protected static @Final Logger LOGGER;
+    @Shadow private static @Final Direction[] FACING_VALUES;
+    @Shadow public@Final List<TileEntity> loadedTileEntityList;
+    @Shadow public@Final List<TileEntity> tickableTileEntities;
+    @Shadow protected@Final List<TileEntity> addedTileEntityList;
+    @Shadow protected @Final List<TileEntity> tileEntitiesToBeRemoved;
+    @Shadow private @Final long cloudColour;
+    @Shadow private @Final Thread mainThread;
+    @Shadow private int skylightSubtracted;
+    @Shadow protected int updateLCG;
+    @Shadow protected @Final int DIST_HASH_MAGIC;
+    @Shadow protected float prevRainingStrength;
+    @Shadow protected float rainingStrength;
+    @Shadow protected float prevThunderingStrength;
+    @Shadow protected float thunderingStrength;
+    @Shadow private int lastLightningBolt;
+    @Shadow public @Final Random rand;
+    @Shadow public @Final Dimension dimension;
+    @Shadow protected @Final AbstractChunkProvider chunkProvider;
+    @Shadow protected @Final WorldInfo worldInfo;
+    @Shadow private @Final IProfiler profiler;
+    @Shadow public @Final boolean isRemote;
+    @Shadow protected boolean processingLoadedTiles;
+    @Shadow private @Final WorldBorder worldBorder;
+    // Shadowed methods and fields for reference. All should be prefixed with 'shadow$' to avoid confusion
 
-    // @formatter:off
-    @Shadow @Final public boolean isRemote;
-    @Shadow @Final public net.minecraft.world.dimension.Dimension provider;
-    @Shadow @Final public Random rand;
-    @Shadow @Final public Profiler profiler;
-    @Shadow @Final public List<PlayerEntity> playerEntities;
-    @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
-    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
-    @Shadow @Final protected SaveHandler saveHandler;
-    @Shadow protected List<IWorldEventListener> eventListeners;
-    @Shadow private int seaLevel;
-    @Shadow protected WorldInfo worldInfo;
-
-    @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
-    @Shadow public net.minecraft.world.World init() { throw new RuntimeException("Bad things have happened"); }
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
-    @Shadow public abstract WorldInfo getWorldInfo();
-    @Shadow public abstract Biome getBiome(BlockPos pos);
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(int chunkX, int chunkZ);
-    @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
-            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
-    @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
-            com.google.common.base.Predicate<? super T > filter);
-    @Shadow public abstract MinecraftServer getMinecraftServer();
-    @Shadow public abstract boolean setBlockState(BlockPos pos, net.minecraft.block.BlockState state);
-    @Shadow public abstract boolean setBlockState(BlockPos pos, net.minecraft.block.BlockState state, int flags);
-    @Shadow public abstract void playSound(PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
-    @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
-    @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
-    @Shadow public abstract int getHeight(int x, int z);
-    @Shadow public abstract net.minecraft.block.BlockState getBlockState(BlockPos pos);
-    @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
-
-    @Nullable private Context worldContext;
-    boolean processingExplosion = false;
-    @Nullable private SpongeDimension api$dimension;
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<Player> getPlayers() {
-        return ImmutableList.copyOf((Collection<Player>) (Object) this.playerEntities);
+    @Shadow public abstract Biome shadow$getBiome(BlockPos p_180494_1_);
+    @Shadow public abstract boolean shadow$isRemote();
+    @Shadow public abstract @javax.annotation.Nullable MinecraftServer shadow$getServer();
+    @Shadow public abstract BlockState shadow$getGroundAboveSeaLevel(BlockPos p_184141_1_);
+    @Shadow public static boolean shadow$isValid(BlockPos p_175701_0_) {
+        throw new UnsupportedOperationException("Shadowed isInWorldBounds");
     }
-
-    /**
-     * Specifically verify the {@link UUID} for this world is going to be valid, in
-     * certain cases, there are mod worlds that are extending {@link net.minecraft.world.World}
-     * and have custom {@link WorldInfo}s, which ends up causing issues with
-     * plugins expecting a valid uuid for each world.
-     *
-     * <p>TODO There may be some issues with plugins somehow picking up these "fake"
-     * worlds with regards to their block changes, and therefor cause issues when
-     * those plugins are finding those worlds, instead of traditional
-     * {@link WorldServer} instances.</p>
-     *
-     * @return The world id, verified from the properties
-     */
-    @Override
-    public UUID getUniqueId() {
-        final WorldProperties properties = this.getProperties();
-        final UUID worldId = properties.getUniqueId();
-        if (worldId == null) {
-            // Some mod worlds make their own WorldInfos for "fake" worlds.
-            // Specifically fixes https://github.com/SpongePowered/SpongeForge/issues/1527
-            // and https://github.com/BuildCraft/BuildCraft/issues/3594
-            final WorldInfoBridge mixinWorldInfo = (WorldInfoBridge) properties;
-            mixinWorldInfo.bridge$setUniqueId(UUID.randomUUID());
-            return properties.getUniqueId();
-        }
-        return worldId;
+    @Shadow public static boolean shadow$isOutsideBuildHeight(BlockPos p_189509_0_) {
+        throw new UnsupportedOperationException("Shadowed isOutisdeBuildheight");
     }
-
-    @Override
-    public Optional<Chunk> getChunk(int x, int y, int z) {
-        if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.empty();
-        }
-        final ServerWorld worldserver = (ServerWorld) (Object) this;
-        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().getLoadedChunk(x, z));
+    @Shadow public static boolean shadow$isYOutOfBounds(int p_217405_0_) {
+        throw new UnsupportedOperationException("Shadowed isOutsideBuildHeight");
     }
-
-    @Override
-    public Optional<Chunk> loadChunk(int x, int y, int z, boolean shouldGenerate) {
-        if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.empty();
-        }
-        final ServerWorld worldserver = (ServerWorld) (Object) this;
-        // If we aren't generating, return the chunk
-        if (!shouldGenerate) {
-            return Optional.ofNullable((Chunk) worldserver.getChunkProvider().loadChunk(x, z));
-        }
-        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().provideChunk(x, z));
+    @Shadow public abstract net.minecraft.world.chunk.Chunk shadow$getChunkAt(BlockPos p_175726_1_);
+    @Shadow public abstract net.minecraft.world.chunk.Chunk shadow$getChunk(int p_212866_1_, int p_212866_2_);
+    @Shadow public abstract IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
+    @Shadow public abstract boolean shadow$setBlockState(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
+    @Shadow public abstract void shadow$func_217393_a(BlockPos p_217393_1_, BlockState p_217393_2_, BlockState p_217393_3_);
+    @Shadow public abstract boolean shadow$removeBlock(BlockPos p_217377_1_, boolean p_217377_2_);
+    @Shadow public abstract boolean shadow$destroyBlock(BlockPos p_175655_1_, boolean p_175655_2_);
+    @Shadow public abstract boolean shadow$setBlockState(BlockPos p_175656_1_, BlockState p_175656_2_);
+    @Shadow public abstract void shadow$notifyBlockUpdate(BlockPos p_184138_1_, BlockState p_184138_2_, BlockState p_184138_3_, int p_184138_4_);
+    @Shadow public abstract void shadow$notifyNeighbors(BlockPos p_195592_1_, Block p_195592_2_);
+    @Shadow public abstract void shadow$func_225319_b(BlockPos p_225319_1_, BlockState p_225319_2_, BlockState p_225319_3_);
+    @Shadow public abstract void shadow$notifyNeighborsOfStateChange(BlockPos p_195593_1_, Block p_195593_2_);
+    @Shadow public abstract void shadow$notifyNeighborsOfStateExcept(BlockPos p_175695_1_, Block p_175695_2_, Direction p_175695_3_);
+    @Shadow public abstract void shadow$neighborChanged(BlockPos p_190524_1_, Block p_190524_2_, BlockPos p_190524_3_);
+    @Shadow public abstract int shadow$getLightSubtracted(BlockPos p_201669_1_, int p_201669_2_);
+    @Shadow public abstract int shadow$getHeight(Heightmap.Type p_201676_1_, int p_201676_2_, int p_201676_3_);
+    @Shadow public abstract int shadow$getLightFor(LightType p_175642_1_, BlockPos p_175642_2_);
+    @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
+    @Shadow public abstract IFluidState getFluidState(BlockPos p_204610_1_);
+    @Shadow public abstract boolean shadow$isDaytime();
+    @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable PlayerEntity p_184133_1_, BlockPos p_184133_2_, SoundEvent p_184133_3_, SoundCategory p_184133_4_, float p_184133_5_, float p_184133_6_);
+    @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
+    @Shadow public abstract void shadow$playMovingSound(@javax.annotation.Nullable PlayerEntity p_217384_1_, Entity p_217384_2_, SoundEvent p_217384_3_, SoundCategory p_217384_4_, float p_217384_5_, float p_217384_6_);
+    @Shadow public abstract void shadow$playSound(double p_184134_1_, double p_184134_3_, double p_184134_5_, SoundEvent p_184134_7_, SoundCategory p_184134_8_, float p_184134_9_, float p_184134_10_, boolean p_184134_11_);
+    @Shadow public abstract void shadow$addParticle(IParticleData p_195594_1_, double p_195594_2_, double p_195594_4_, double p_195594_6_, double p_195594_8_, double p_195594_10_, double p_195594_12_);
+    @Shadow public abstract void shadow$addOptionalParticle(IParticleData p_195589_1_, double p_195589_2_, double p_195589_4_, double p_195589_6_, double p_195589_8_, double p_195589_10_, double p_195589_12_);
+    @Shadow public abstract void shadow$addOptionalParticle(IParticleData p_217404_1_, boolean p_217404_2_, double p_217404_3_, double p_217404_5_, double p_217404_7_, double p_217404_9_, double p_217404_11_, double p_217404_13_);
+    @Shadow public abstract float shadow$getCelestialAngleRadians(float p_72929_1_);
+    @Shadow public abstract boolean shadow$addTileEntity(TileEntity p_175700_1_);
+    @Shadow public abstract void shadow$addTileEntities(Collection<TileEntity> p_147448_1_);
+    @Shadow public abstract void shadow$func_217391_K(); // tileTileEntities
+    @Shadow public abstract void shadow$func_217390_a(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
+    @Shadow public abstract boolean shadow$checkBlockCollision(AxisAlignedBB p_72829_1_);
+    @Shadow public abstract boolean shadow$isFlammableWithin(AxisAlignedBB p_147470_1_);
+    @Shadow public abstract boolean shadow$isMaterialInBB(AxisAlignedBB p_72875_1_, Material p_72875_2_);
+    @Shadow public abstract net.minecraft.world.Explosion shadow$createExplosion(@javax.annotation.Nullable Entity p_217385_1_, double p_217385_2_, double p_217385_4_, double p_217385_6_, float p_217385_8_, net.minecraft.world.Explosion.Mode p_217385_9_);
+    @Shadow public abstract net.minecraft.world.Explosion shadow$createExplosion(@javax.annotation.Nullable Entity p_217398_1_, double p_217398_2_, double p_217398_4_, double p_217398_6_, float p_217398_8_, boolean p_217398_9_, net.minecraft.world.Explosion.Mode p_217398_10_);
+    @Shadow public abstract net.minecraft.world.Explosion shadow$createExplosion(@javax.annotation.Nullable Entity p_217401_1_, @javax.annotation.Nullable DamageSource p_217401_2_, double p_217401_3_, double p_217401_5_, double p_217401_7_, float p_217401_9_, boolean p_217401_10_, net.minecraft.world.Explosion.Mode p_217401_11_);
+    @Shadow public abstract boolean shadow$extinguishFire(@javax.annotation.Nullable PlayerEntity p_175719_1_, BlockPos p_175719_2_, Direction p_175719_3_);
+    @Shadow public abstract @javax.annotation.Nullable TileEntity shadow$getTileEntity(BlockPos p_175625_1_);
+    @Shadow private @javax.annotation.Nullable TileEntity shadow$getPendingTileEntityAt(BlockPos p_189508_1_) {
+        // Shadowed
+        return null;
     }
-
-    @Override
-    public Optional<Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
-        return Optional.empty(); // World does not do this, WorldServer can, but not WorldClient.
-    }
-
-    @Override
-    public int getHighestYAt(int x, int z) {
-        return this.getHeight(x, z);
-    }
-
-    @Override
-    public int getPrecipitationLevelAt(int x, int z) {
-        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
-    }
-
-    @Override
-    public BlockState getBlock(int x, int y, int z) {
-        return (BlockState) getBlockState(new BlockPos(x, y, z));
-    }
-
-    @Override
-    public BlockType getBlockType(int x, int y, int z) {
-        // avoid intermediate object creation from using BlockState
-        return (BlockType) getChunk(x >> 4, z >> 4).getBlockState(new BlockPos(x, y, z)).getBlock();
-    }
-
-    @Override
-    public boolean setBlock(int x, int y, int z, BlockState block) {
-        return setBlock(x, y, z, block, BlockChangeFlags.ALL);
-    }
-
-
-    @Override
-    public BiomeType getBiome(int x, int y, int z) {
-        return (BiomeType) this.getBiome(new BlockPos(x, y, z));
-    }
-
-    @Override
-    public void setBiome(int x, int y, int z, BiomeType biome) {
-        checkBiomeBounds(x, y, z);
-        ((Chunk) getChunk(x >> 4, z >> 4)).setBiome(x, y, z, biome);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<Entity> getEntities() {
-        return Lists.newArrayList((Collection<Entity>) (Object) this.loadedEntityList);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<Entity> getEntities(Predicate<Entity> filter) {
-        // This already returns a new copy
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
-                Functional.java8ToGuava((Predicate<net.minecraft.entity.Entity>) (Object) filter));
-    }
-
-    @Override
-    public Entity createEntity(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        return this.createEntity(type, position, false);
-    }
+    @Shadow public abstract void shadow$setTileEntity(BlockPos p_175690_1_, @javax.annotation.Nullable TileEntity p_175690_2_);
+    @Shadow public abstract void shadow$removeTileEntity(BlockPos p_175713_1_);
+    @Shadow public abstract boolean shadow$isBlockPresent(BlockPos p_195588_1_);
+    @Shadow public abstract boolean shadow$isTopSolid(BlockPos p_217400_1_, Entity p_217400_2_) ;
+    @Shadow public abstract void shadow$calculateInitialSkylight();
+    @Shadow public abstract void shadow$setAllowedSpawnTypes(boolean p_72891_1_, boolean p_72891_2_);
+    @Shadow protected abstract void shadow$calculateInitialWeather();
+    @Shadow public abstract void shadow$close() throws IOException;
+    @Shadow public abstract ChunkStatus shadow$getChunkStatus();
+    @Shadow public abstract List<Entity> shadow$getEntitiesInAABBexcluding(@javax.annotation.Nullable Entity p_175674_1_, AxisAlignedBB p_175674_2_, @javax.annotation.Nullable Predicate<? super Entity> p_175674_3_);
+    @Shadow public abstract List<Entity> shadow$getEntitiesWithinAABB(@javax.annotation.Nullable EntityType<?> p_217394_1_, AxisAlignedBB p_217394_2_, Predicate<? super Entity> p_217394_3_);
+    @Shadow public abstract <T extends Entity> List<T> shadow$getEntitiesWithinAABB(Class<? extends T> p_175647_1_, AxisAlignedBB p_175647_2_, @javax.annotation.Nullable Predicate<? super T> p_175647_3_);
+    @Shadow public abstract <T extends Entity> List<T> shadow$func_225316_b(Class<? extends T> p_225316_1_, AxisAlignedBB p_225316_2_, @javax.annotation.Nullable Predicate<? super T> p_225316_3_);
+    @Shadow public abstract @javax.annotation.Nullable Entity shadow$getEntityByID(int p_73045_1_);
+    @Shadow public abstract void shadow$markChunkDirty(BlockPos p_175646_1_, TileEntity p_175646_2_);
+    @Shadow public abstract int shadow$getSeaLevel();
+    @Shadow public abstract net.minecraft.world.World shadow$getWorld();
+    @Shadow public abstract WorldType shadow$getWorldType();
+    @Shadow public abstract int shadow$getStrongPower(BlockPos p_175676_1_);
+    @Shadow public abstract boolean shadow$isSidePowered(BlockPos p_175709_1_, Direction p_175709_2_);
+    @Shadow public abstract int shadow$getRedstonePower(BlockPos p_175651_1_, Direction p_175651_2_);
+    @Shadow public abstract boolean shadow$isBlockPowered(BlockPos p_175640_1_);
+    @Shadow public abstract int shadow$getRedstonePowerFromNeighbors(BlockPos p_175687_1_);
+    @Shadow public abstract void shadow$setGameTime(long gametime);
+    @Shadow public abstract long shadow$getSeed();
+    @Shadow public abstract long shadow$getGameTime();
+    @Shadow public abstract long shadow$getDayTime();
+    @Shadow public abstract void shadow$setDayTime(long delay);
+    @Shadow protected abstract void shadow$advanceTime();
+    @Shadow public abstract BlockPos shadow$getSpawnPoint();
+    @Shadow public abstract void shadow$setSpawnPoint(BlockPos p_175652_1_);
+    @Shadow public abstract boolean shadow$isBlockModifiable(PlayerEntity p_175660_1_, BlockPos p_175660_2_);
+    @Shadow public abstract void shadow$setEntityState(Entity p_72960_1_, byte p_72960_2_);
+    @Shadow public abstract AbstractChunkProvider shadow$getChunkProvider();
+    @Shadow public abstract void shadow$addBlockEvent(BlockPos p_175641_1_, Block p_175641_2_, int p_175641_3_, int p_175641_4_);
+    @Shadow public abstract WorldInfo shadow$getWorldInfo();
+    @Shadow public abstract GameRules shadow$getGameRules();
+    @Shadow public abstract float shadow$getThunderStrength(float p_72819_1_);
+    @Shadow public abstract float shadow$getRainStrength(float p_72867_1_);
+    @Shadow public abstract boolean shadow$isThundering();
+    @Shadow public abstract boolean shadow$isRaining();
+    @Shadow public abstract boolean shadow$isRainingAt(BlockPos p_175727_1_);
+    @Shadow public abstract boolean shadow$isBlockinHighHumidity(BlockPos p_180502_1_);
+    @Shadow public abstract @javax.annotation.Nullable MapData shadow$getMapData(String p_217406_1_);
+    @Shadow public abstract void shadow$registerMapData(MapData p_217399_1_);
+    @Shadow public abstract int shadow$getNextMapId();
+    @Shadow public abstract void shadow$playBroadcastSound(int p_175669_1_, BlockPos p_175669_2_, int p_175669_3_);
+    @Shadow public abstract int shadow$getActualHeight();
+    @Shadow public abstract CrashReportCategory shadow$fillCrashReport(CrashReport p_72914_1_);
+    @Shadow public abstract void shadow$sendBlockBreakProgress(int p_175715_1_, BlockPos p_175715_2_, int p_175715_3_);
+    @Shadow public abstract Scoreboard shadow$getScoreboard();
+    @Shadow public abstract void shadow$updateComparatorOutputLevel(BlockPos p_175666_1_, Block p_175666_2_);
+    @Shadow public abstract DifficultyInstance shadow$getDifficultyForLocation(BlockPos p_175649_1_);
+    @Shadow public abstract int shadow$getSkylightSubtracted();
+    @Shadow public abstract void shadow$setLastLightningBolt(int p_175702_1_);
+    @Shadow public abstract WorldBorder shadow$getWorldBorder();
+    @Shadow public abstract void shadow$sendPacketToServer(IPacket<?> p_184135_1_);
+    @Shadow public abstract @javax.annotation.Nullable BlockPos shadow$findNearestStructure(String p_211157_1_, BlockPos p_211157_2_, int p_211157_3_, boolean p_211157_4_);
+    @Shadow public abstract Dimension shadow$getDimension();
+    @Shadow public abstract Random shadow$getRandom();
+    @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
+    @Shadow public abstract RecipeManager shadow$getRecipeManager();
+    @Shadow public abstract NetworkTagManager shadow$getTags();
+    @Shadow public abstract BlockPos shadow$func_217383_a(int p_217383_1_, int p_217383_2_, int p_217383_3_, int p_217383_4_);
+    @Shadow public abstract boolean shadow$isSaveDisabled();
+    @Shadow public abstract IProfiler shadow$getProfiler();
+    @Shadow public abstract BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
 
     @Override
-    public Entity createEntityNaturally(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        return this.createEntity(type, position, true);
-    }
-
-    private Entity createEntity(EntityType type, Vector3d position, boolean naturally) throws IllegalArgumentException, IllegalStateException {
-        checkNotNull(type, "The entity type cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-
-        Entity entity = null;
-
-        Class<? extends Entity> entityClass = type.getEntityClass();
-        double x = position.getX();
-        double y = position.getY();
-        double z = position.getZ();
-
-        if (entityClass.isAssignableFrom(ServerPlayerEntity.class) || entityClass.isAssignableFrom(MultiPartEntityPart.class)) {
-            // Unable to construct these
-            throw new IllegalArgumentException("Cannot construct " + type.getId() + " please look to using entity types correctly!");
-        }
-
-        net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
-
-        // TODO - archetypes should solve the problem of calling the correct constructor
-        // Not all entities have a single World parameter as their constructor
-        if (entityClass.isAssignableFrom(LightningBoltEntity.class)) {
-            entity = (Entity) new LightningBoltEntity(world, x, y, z, false);
-        } else if (entityClass.isAssignableFrom(EnderPearlEntity.class)) {
-            ArmorStandEntity tempEntity = new ArmorStandEntity(world, x, y, z);
-            tempEntity.posY -= tempEntity.getEyeHeight();
-            entity = (Entity) new EnderPearlEntity(world, tempEntity);
-            ((EnderPearl) entity).setShooter(ProjectileSource.UNKNOWN);
-        }
-
-        // Some entities need to have non-null fields (and the easiest way to
-        // set them is to use the more specialised constructor).
-        if (entityClass.isAssignableFrom(FallingBlockEntity.class)) {
-            entity = (Entity) new FallingBlockEntity(world, x, y, z, Blocks.SAND.getDefaultState());
-        } else if (entityClass.isAssignableFrom(ItemEntity.class)) {
-            entity = (Entity) new ItemEntity(world, x, y, z, new ItemStack(Blocks.STONE));
-        }
-
-        if (entity == null) {
-            try {
-                entity = ConstructorUtils.invokeConstructor(entityClass, this);
-                ((net.minecraft.entity.Entity) entity).setPosition(x, y, z);
-            } catch (Exception e) {
-                throw new RuntimeException("There was an issue attempting to construct " + type.getId(), e);
-            }
-        }
-
-        // TODO - replace this with an actual check
-        /*
-        if (entity instanceof EntityHanging) {
-            if (((EntityHanging) entity).facingDirection == null) {
-                // TODO Some sort of detection of a valid direction?
-                // i.e scan immediate blocks for something to attach onto.
-                ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
-            }
-            if (!((EntityHanging) entity).onValidSurface()) {
-                return Optional.empty();
-            }
-        }*/
-
-        if (naturally && entity instanceof MobEntity) {
-            // Adding the default equipment
-            ((MobEntity)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(x, y, z)), null);
-        }
-
-        if (entity instanceof PaintingEntity) {
-            // This is default when art is null when reading from NBT, could
-            // choose a random art instead?
-            ((PaintingEntity) entity).art = EnumArt.KEBAB;
-        }
-
-        return entity;
-    }
-
-    @Override
-    public Optional<Entity> createEntity(DataContainer entityContainer) {
-        // TODO once entity containers are implemented
+    public Optional<Player> getClosestPlayer(int x, int y, int z, double distance, Predicate<? super Player> predicate) {
         return Optional.empty();
-    }
-
-    @Override
-    public Optional<Entity> createEntity(DataContainer entityContainer, Vector3d position) {
-        // TODO once entity containers are implemented
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Entity> restoreSnapshot(EntitySnapshot snapshot, Vector3d position) {
-        EntitySnapshot entitySnapshot = snapshot.withLocation(new Location<>(this, position));
-        return entitySnapshot.restore();
-    }
-
-    @Override
-    public WorldBorder getWorldBorder() {
-        return (WorldBorder) shadow$getWorldBorder();
-    }
-
-    @Override
-    public ChunkPreGenerate.Builder newChunkPreGenerate(Vector3d center, double diameter) {
-        return new SpongeChunkPreGenerateTask.Builder(this, center, diameter);
-    }
-
-
-    @Override
-    public Dimension getDimension() {
-        if (this.api$dimension == null) {
-            this.api$dimension = new SpongeDimension(this.provider);
-        }
-        return this.api$dimension;
-    }
-
-    @Override
-    public Optional<Entity> getEntity(UUID uuid) {
-        // Note that WorldServerMixin is properly overriding this to use it's own mapping.
-        for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
-            if (entity.getUniqueID().equals(uuid)) {
-                return Optional.of((Entity) entity);
-            }
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings({"unchecked"})
-    @Override
-    public Iterable<Chunk> getLoadedChunks() {
-        if (((WorldBridge) this).bridge$isFake()) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
-            return Collections.emptyList();
-        }
-        return (List<Chunk>) (List<?>) Lists.newArrayList(((ServerWorld) (Object) this).getChunkProvider().getLoadedChunks());
-    }
-
-    @Override
-    public boolean unloadChunk(Chunk chunk) {
-        checkArgument(chunk != null, "Chunk cannot be null!");
-        return chunk.unloadChunk();
-    }
-
-    @Override
-    public WorldProperties getProperties() {
-        return (WorldProperties) this.worldInfo;
-    }
-
-    @Override
-    public Context getContext() {
-        if (this.worldContext == null) {
-            WorldInfo worldInfo = getWorldInfo();
-            if (worldInfo == null) {
-                // We still have to consider some mods are making dummy worlds that
-                // override getWorldInfo with a null, or submit a null value.
-                worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
-            }
-            this.worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
-        }
-        return this.worldContext;
-    }
-    @Override
-    public Optional<BlockEntity> getTileEntity(int x, int y, int z) {
-        net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x, y, z));
-        if (tileEntity == null) {
-            return Optional.empty();
-        }
-        return Optional.of((BlockEntity) tileEntity);
-    }
-
-    @Override
-    public Vector3i getBiomeMin() {
-        return Constants.World.BIOME_MIN;
-    }
-
-    @Override
-    public Vector3i getBiomeMax() {
-        return Constants.World.BIOME_MAX;
-    }
-
-    @Override
-    public Vector3i getBiomeSize() {
-        return Constants.World.BIOME_SIZE;
-    }
-
-    @Override
-    public Vector3i getBlockMin() {
-        return Constants.World.BLOCK_MIN;
-    }
-
-    @Override
-    public Vector3i getBlockMax() {
-        return Constants.World.BLOCK_MAX;
-    }
-
-    @Override
-    public Vector3i getBlockSize() {
-        return Constants.World.BLOCK_SIZE;
-    }
-
-    @Override
-    public boolean containsBiome(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, Constants.World.BIOME_MIN, Constants.World.BIOME_MAX);
-    }
-
-    @Override
-    public boolean containsBlock(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
-    }
-
-    private void checkBiomeBounds(int x, int y, int z) {
-        if (!containsBiome(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BIOME_MIN, Constants.World.BIOME_MAX);
-        }
-    }
-
-    protected void checkBlockBounds(int x, int y, int z) {
-        if (!containsBlock(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
-        }
-    }
-
-    @Override
-    public void sendMessage(ChatType type, Text message) {
-        checkNotNull(type, "type");
-        checkNotNull(message, "message");
-
-        for (Player player : this.getPlayers()) {
-            player.sendMessage(type, message);
-        }
-    }
-
-    @Override
-    public void sendTitle(Title title) {
-        checkNotNull(title, "title");
-
-        for (Player player : getPlayers()) {
-            player.sendTitle(title);
-        }
-    }
-
-    @Override
-    public void resetTitle() {
-        getPlayers().forEach(Player::resetTitle);
-    }
-
-    @Override
-    public void clearTitle() {
-        getPlayers().forEach(Player::clearTitle);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<BlockEntity> getTileEntities() {
-        return Lists.newArrayList((List<BlockEntity>) (Object) this.loadedTileEntityList);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<BlockEntity> getTileEntities(Predicate<BlockEntity> filter) {
-        return ((List<BlockEntity>) (Object) this.loadedTileEntityList).stream()
-                .filter(filter)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void triggerExplosion(Explosion explosion) {
-        checkNotNull(explosion, "explosion");
-        ((net.minecraft.world.Explosion) explosion).doExplosionA();
-        ((net.minecraft.world.Explosion) explosion).doExplosionB(true);
-    }
-
-    @Override
-    public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
-        return new ExtentViewDownsize(this, newMin, newMax);
-    }
-
-    @Override
-    public workerMutableBiomeVolumeStream<World> getBiomeWorker() {
-        return new SpongeMutableBiomeVolumeWorker<>(this);
-    }
-
-    @Override
-    public MutableBlockVolumeStream<World> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
-        if (!containsBlock(x, y, z)) {
-            return BlockSnapshot.NONE;
-        }
-        World world = this;
-        BlockState state = world.getBlock(x, y, z);
-        Optional<BlockEntity> te = world.getTileEntity(x, y, z);
-        SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
-                .blockState(state)
-                .worldId(world.getUniqueId())
-                .position(new Vector3i(x, y, z));
-        Optional<UUID> creator = getCreator(x, y, z);
-        Optional<UUID> notifier = getNotifier(x, y, z);
-        if (creator.isPresent()) {
-            builder.creator(creator.get());
-        }
-        if (notifier.isPresent()) {
-            builder.notifier(notifier.get());
-        }
-        if (te.isPresent()) {
-            final BlockEntity tileEntity = te.get();
-            for (Mutable<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
-                builder.add(manipulator);
-            }
-            final CompoundNBT compound = new CompoundNBT();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).write(compound);
-            builder.unsafeNbt(compound);
-        }
-        return builder.build();
+        return null;
     }
 
     @Override
     public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
-        return snapshot.restore(force, flag);
+        return false;
     }
 
     @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
-        snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
-        return snapshot.restore(force, flag);
+        return false;
+    }
+
+    @Override
+    public Chunk getChunkAtBlock(Vector3i blockPosition) {
+        return null;
+    }
+
+    @Override
+    public Chunk getChunkAtBlock(int bx, int by, int bz) {
+        return null;
+    }
+
+    @Override
+    public Chunk getChunk(Vector3i chunkPos) {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends Player> getPlayers() {
+        return IWorldMixin_API.super.getPlayers();
+    }
+
+    @Override
+    public Chunk getChunk(int cx, int cy, int cz) {
+        return (Chunk) IWorldMixin_API.super.getChunk(cx, cy, cz);
+    }
+
+    @Override
+    public Optional<Chunk> loadChunk(int cx, int cy, int cz, boolean shouldGenerate) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean unloadChunk(Chunk chunk) {
+        return false;
+    }
+
+    @Override
+    public Iterable<Chunk> getLoadedChunks() {
+        return null;
+    }
+
+    @Override
+    public Path getDirectory() {
+        return null;
+    }
+
+    @Override
+    public WorldStorage getWorldStorage() {
+        return null;
+    }
+
+    @Override
+    public void triggerExplosion(Explosion explosion) {
+
+    }
+
+    @Override
+    public PortalAgent getPortalAgent() {
+        return null;
+    }
+
+    @Override
+    public boolean save() throws IOException {
+        return false;
+    }
+
+    @Override
+    public int getViewDistance() {
+        return 0;
+    }
+
+    @Override
+    public void setViewDistance(int viewDistance) {
+
+    }
+
+    @Override
+    public void resetViewDistance() {
+
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return false;
+    }
+
+    @Override
+    public Context getContext() {
+        return null;
+    }
+
+    @Override
+    public void sendMessage(ChatType type, Text message) {
+
+    }
+
+    @Override
+    public MessageChannel getMessageChannel() {
+        return null;
+    }
+
+    @Override
+    public void setMessageChannel(MessageChannel channel) {
+
+    }
+
+    @Override
+    public Location getLocation(Vector3i position) {
+        return null;
+    }
+
+    @Override
+    public Location getLocation(Vector3d position) {
+        return null;
+    }
+
+    @Override
+    public ArchetypeVolume createArchetypeVolume(Vector3i min, Vector3i max, Vector3i origin) {
+        return null;
     }
 
     @Override
@@ -639,509 +405,37 @@ public abstract class WorldMixin_API implements World {
 
     @Override
     public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
+
     }
 
     @Override
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
+
     }
 
     @Override
-    public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
-        final BlockPos pos = new BlockPos(x, y, z);
-        final net.minecraft.block.BlockState state = getBlockState(pos);
-        final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
-        try {
-            return Optional.of(VecHelper.toSpongeAABB(box).offset(x, y, z));
-        } catch (IllegalArgumentException exception) {
-            // Box is degenerate
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
-        checkNotNull(box, "box");
-        checkNotNull(filter, "filter");
-        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMinecraftAABB(box), entity -> filter.test((Entity) entity))
-                .stream()
-                .map(entity -> (Entity) entity)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
-        checkNotNull(box, "box");
-        return getCollisionBoxes(null, VecHelper.toMinecraftAABB(box)).stream()
-                .map(VecHelper::toSpongeAABB)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
-        checkNotNull(owner, "owner");
-        checkNotNull(box, "box");
-        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMinecraftAABB(box)).stream()
-                .map(VecHelper::toSpongeAABB)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
-        checkNotNull(start, "start");
-        checkNotNull(end, "end");
-        final Vector3d diff = end.sub(start);
-        return getIntersectingEntities(start, diff.normalize(), diff.length(), filter);
-    }
-
-    @Override
-    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
-        checkNotNull(start, "start");
-        checkNotNull(direction, "direction");
-        checkNotNull(filter, "filter");
-        // Ensure that the direction has unit length
-        direction = direction.normalize();
-        // If the direction is vertical only, we don't need to do any chunk tracing, just defer immediately to the containing chunk
-        if (direction.getX() == 0 && direction.getZ() == 0) {
-            return getIntersectingEntities(start, direction.getY(), distance, filter);
-
-        }
-        // Adapted from BlockRay
-        final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
-        // Figure out the direction of the ray for each axis
-        final int xPlaneIncrement = direction.getX() >= 0 ? chunkWidth : -chunkWidth;
-        final int zPlaneIncrement = direction.getZ() >= 0 ? chunkWidth : -chunkWidth;
-        // First planes are for the chunk that contains the coordinates
-        double xInChunk = GenericMath.mod(start.getX(), chunkWidth);
-        double zInChunk = GenericMath.mod(start.getZ(), chunkWidth);
-        int xPlaneNext = (int) (start.getX() - xInChunk);
-        int zPlaneNext = (int) (start.getZ() - zInChunk);
-        // Correct the next planes to they start just behind the starting position
-        if (xInChunk != 0 && direction.getX() < 0) {
-            xPlaneNext += chunkWidth;
-        }
-        if (zInChunk != 0 && direction.getZ() < 0) {
-            zPlaneNext += chunkWidth;
-        }
-        // Compute the first intersection solutions for each plane
-        double xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
-        double zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
-        // Keep track of the last distance using the t multiplier
-        double currentT = 0;
-        // Keep tack of the last intersection y coordinate
-        double xCurrent = start.getX();
-        double yCurrent = start.getY();
-        double zCurrent = start.getZ();
-        // Trace each chunks until the remaining distance goes below 0
-        double remainingDistance = distance;
-        // Trace the chunks in 2D to find which contain possibly intersecting entities
-        final Set<EntityHit> intersecting = new HashSet<>();
-        do {
-            final double nextT;
-            final double xNext;
-            final double yNext;
-            final double zNext;
-            // Find the closest intersection and its coordinates
-            if (xPlaneT < zPlaneT) {
-                nextT = xPlaneT;
-                // Update current position
-                xNext = xPlaneNext;
-                zNext = direction.getZ() * nextT + start.getZ();
-                // Prepare next intersection
-                xPlaneNext += xPlaneIncrement;
-                xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
-            } else {
-                nextT = zPlaneT;
-                // Update current position
-                xNext = direction.getX() * nextT + start.getX();
-                zNext = zPlaneNext;
-                // Prepare next intersection
-                zPlaneNext += zPlaneIncrement;
-                zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
-            }
-            // Don't go over the distance when calculating the next intersection y
-            yNext = direction.getY() * Math.min(nextT, distance) + start.getY();
-            // Ignore the first few intersections behind the starting position
-            // although we still use them to position the current coordinates on a chunk boundary
-            if (nextT >= 0) {
-                // Get the coordinates of the chunk that was last entered (correct for entering from the back plane)
-                xInChunk = GenericMath.mod(xCurrent, chunkWidth);
-                zInChunk = GenericMath.mod(zCurrent, chunkWidth);
-                final int xChunk = (int) (xCurrent - (xInChunk == 0 && direction.getX() < 0 ? chunkWidth : xInChunk));
-                final int zChunk = (int) (zCurrent - (zInChunk == 0 && direction.getZ() < 0 ? chunkWidth : zInChunk));
-                // Make sure the start position in the chunk is not before the world start position
-                final Vector3d chunkStart = currentT <= 0 ? start : new Vector3d(xCurrent, yCurrent, zCurrent);
-                // Get the chunk and call the intersection method to perform the task locally
-                final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
-                if (chunk.isPresent()) {
-                    ((ChunkBridge) chunk.get())
-                            .bridge$getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
-                }
-                // If the intersections are near another chunk, its entities might be partially in the current chunk, so include it also
-                final ChunkBridge nearIntersections = getChunkNearIntersections(xChunk, zChunk, xCurrent, zCurrent, xNext, zNext);
-                if (nearIntersections != null) {
-                    nearIntersections
-                            .bridge$getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
-                }
-                // Remove the chunk from the distance
-                remainingDistance -= nextT - Math.max(0, currentT);
-            }
-            // Update the current intersection to the new one
-            currentT = nextT;
-            xCurrent = xNext;
-            yCurrent = yNext;
-            zCurrent = zNext;
-        } while (remainingDistance >= 0);
-        return intersecting;
-    }
-
-    private ChunkBridge getChunkNearIntersections(int xChunk, int zChunk, double xCurrent, double zCurrent, double xNext, double zNext) {
-        final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
-        // Chunk corner coordinates
-        final Vector2d c1 = new Vector2d(xChunk, zChunk);
-        final Vector2d c2 = new Vector2d(xChunk + chunkWidth, zChunk);
-        final Vector2d c3 = new Vector2d(xChunk, zChunk + chunkWidth);
-        final Vector2d c4 = new Vector2d(xChunk + chunkWidth, zChunk + chunkWidth);
-        // The square of the distance we consider as being near
-        final int nearDistance2 = 2 * 2;
-        // Under the assumption that both intersections aren't on the same face
-        // Look for two intersection being near the same corner
-        final boolean d11 = c1.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
-        final boolean d21 = c1.distanceSquared(xNext, zNext) <= nearDistance2;
-        if (d11 && d21) {
-            // Near corner -x, -z
-            return (ChunkBridge) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk - chunkWidth).orElse(null);
-        }
-        final boolean d12 = c2.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
-        final boolean d22 = c2.distanceSquared(xNext, zNext) <= nearDistance2;
-        if (d12 && d22) {
-            // Near corner +x, -z
-            return (ChunkBridge) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk - chunkWidth).orElse(null);
-        }
-        final boolean d13 = c3.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
-        final boolean d23 = c3.distanceSquared(xNext, zNext) <= nearDistance2;
-        if (d13 && d23) {
-            // Near corner -x, +z
-            return (ChunkBridge) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk + chunkWidth).orElse(null);
-        }
-        final boolean d14 = c4.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
-        final boolean d24 = c4.distanceSquared(xNext, zNext) <= nearDistance2;
-        if (d14 && d24) {
-            // Near corner +x, +z
-            return (ChunkBridge) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk + chunkWidth).orElse(null);
-        }
-        // Look for two intersections being near the corners on the same face
-        if (d11 && d23 || d21 && d13) {
-            // Near face -x
-            return (ChunkBridge) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk).orElse(null);
-        }
-        if (d11 && d22 || d21 && d12) {
-            // Near face -z
-            return (ChunkBridge) getChunkAtBlock(xChunk, 0, zChunk - chunkWidth).orElse(null);
-        }
-        if (d14 && d22 || d24 && d12) {
-            // Near face +x
-            return (ChunkBridge) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk).orElse(null);
-        }
-        if (d14 && d23 || d24 && d13) {
-            // Near face +z
-            return (ChunkBridge) getChunkAtBlock(xChunk, 0, zChunk + chunkWidth).orElse(null);
-        }
+    public Weather getWeather() {
         return null;
     }
 
-    private Set<EntityHit> getIntersectingEntities(Vector3d start, double yDirection, double distance, Predicate<EntityHit> filter) {
-        final Set<EntityHit> intersecting = new HashSet<>();
-        // Current chunk
-        final Vector3d direction = yDirection < 0 ? Vector3d.UNIT_Y.negate() : Vector3d.UNIT_Y;
-        final double endY = start.getY() + yDirection * distance;
-        final Vector3i chunkPos = SpongeChunkLayout.instance.forceToChunk(start.toInt());
-        ((ChunkBridge) getChunk(chunkPos).get()).bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        // Check adjacent chunks if near them
-        final int nearDistance = 2;
-        // Neighbour -x chunk
-        final Vector3i chunkBlockPos = SpongeChunkLayout.instance.forceToWorld(chunkPos);
-        if (start.getX() - chunkBlockPos.getX() <= nearDistance) {
-            ((ChunkBridge) getChunk(chunkPos.add(-1, 0, 0)).get())
-                    .bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        }
-        // Neighbour -z chunk
-        if (start.getZ() - chunkBlockPos.getZ() <= nearDistance) {
-            ((ChunkBridge) getChunk(chunkPos.add(0, 0, -1)).get())
-                    .bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        }
-        // Neighbour +x chunk
-        final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
-        if (chunkBlockPos.getX() + chunkWidth - start.getX() <= nearDistance) {
-            ((ChunkBridge) getChunk(chunkPos.add(1, 0, 0)).get())
-                    .bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        }
-        // Neighbour +z chunk
-        if (chunkBlockPos.getZ() + chunkWidth - start.getZ() <= nearDistance) {
-            ((ChunkBridge) getChunk(chunkPos.add(0, 0, 1)).get())
-                    .bridge$getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        }
-        return intersecting;
+    @Override
+    public Duration getRemainingWeatherDuration() {
+        return null;
     }
 
     @Override
-    public void sendBlockChange(int x, int y, int z, BlockState state) {
-        checkNotNull(state, "state");
-        SChangeBlockPacket packet = new SChangeBlockPacket();
-        packet.pos = new BlockPos(x, y, z);
-        packet.blockState = (net.minecraft.block.BlockState) state;
-
-        for (PlayerEntity player : this.playerEntities) {
-            if (player instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntity) player).connection.sendPacket(packet);
-            }
-        }
+    public Duration getRunningWeatherDuration() {
+        return null;
     }
 
     @Override
-    public void resetBlockChange(int x, int y, int z) {
-        SChangeBlockPacket packet = new SChangeBlockPacket((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
+    public void setWeather(Weather weather) {
 
-        for (PlayerEntity player : this.playerEntities) {
-            if (player instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntity) player).connection.sendPacket(packet);
-            }
-        }
-    }
-
-
-    @Override
-    public int getSeaLevel() {
-        return this.seaLevel;
-    }
-
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
-        final Optional<PropertyProvider<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
-        return optional.flatMap(tPropertyStore -> tPropertyStore.getFor(new Location<>(this, x, y, z)));
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
-        final Optional<PropertyProvider<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
-        return optional.flatMap(tPropertyStore -> tPropertyStore.getFor(new Location<>(this, x, y, z), direction));
+    public void setWeather(Weather weather, Duration duration) {
+
     }
 
-    @Override
-    public Collection<Property<?, ?>> getProperties(int x, int y, int z) {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location<World>(this, x, y, z));
-    }
-
-    @Override
-    public Collection<Direction> getFacesWithProperty(int x, int y, int z, Class<? extends Property<?, ?>> propertyClass) {
-        final Optional<? extends PropertyProvider<? extends Property<?, ?>>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
-        if (!optional.isPresent()) {
-            return Collections.emptyList();
-        }
-        final PropertyProvider<? extends Property<?, ?>> store = optional.get();
-        final Location<World> loc = new Location<>(this, x, y, z);
-        ImmutableList.Builder<Direction> faces = ImmutableList.builder();
-        for (net.minecraft.util.Direction facing : net.minecraft.util.Direction.values()) {
-            Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-            if (store.getFor(loc, direction).isPresent()) {
-                faces.add(direction);
-            }
-        }
-        return faces.build();
-    }
-
-    @Override
-    public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
-        final Optional<E> optional = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z)).get(key);
-        if (optional.isPresent()) {
-            return optional;
-        }
-        final Optional<BlockEntity> tileEntityOptional = getTileEntity(x, y, z);
-        return tileEntityOptional.flatMap(tileEntity -> tileEntity.get(key));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Mutable<?, ?>> Optional<T> get(int x, int y, int z, Class<T> manipulatorClass) {
-        final Collection<Mutable<?, ?>> manipulators = getManipulators(x, y, z);
-        for (Mutable<?, ?> manipulator : manipulators) {
-            if (manipulatorClass.isInstance(manipulator)) {
-                return Optional.of((T) manipulator);
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public <T extends Mutable<?, ?>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
-        final Optional<T> optional = get(x, y, z, manipulatorClass);
-        if (optional.isPresent()) {
-            return optional;
-        }
-        final Optional<BlockEntity> tileEntity = getTileEntity(x, y, z);
-        return tileEntity.flatMap(tileEntity1 -> tileEntity1.getOrCreate(manipulatorClass));
-    }
-
-    @Override
-    public <E, V extends Value<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
-        if (blockState.supports(key)) {
-            return blockState.getValue(key);
-        }
-        final Optional<BlockEntity> tileEntity = getTileEntity(x, y, z);
-        if (tileEntity.isPresent() && tileEntity.get().supports(key)) {
-            return tileEntity.get().getValue(key);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(int x, int y, int z, Key<?> key) {
-        final BlockState blockState = getBlock(x, y, z);
-        final boolean blockSupports = blockState.supports(key);
-        final Optional<BlockEntity> tileEntity = getTileEntity(x, y, z);
-        final boolean tileEntitySupports = tileEntity.isPresent() && tileEntity.get().supports(key);
-        return blockSupports || tileEntitySupports;
-    }
-
-    @Override
-    public boolean supports(int x, int y, int z, Class<? extends Mutable<?, ?>> manipulatorClass) {
-        final BlockState blockState = getBlock(x, y, z);
-        final List<Immutable<?, ?>> immutableDataManipulators = blockState.getManipulators();
-        boolean blockSupports = false;
-        for (Immutable<?, ?> manipulator : immutableDataManipulators) {
-            if (manipulator.asMutable().getClass().isAssignableFrom(manipulatorClass)) {
-                blockSupports = true;
-                break;
-            }
-        }
-        if (!blockSupports) {
-            final Optional<BlockEntity> tileEntity = getTileEntity(x, y, z);
-            final boolean tileEntitySupports;
-            tileEntitySupports = tileEntity.isPresent() && tileEntity.get().supports(manipulatorClass);
-            return tileEntitySupports;
-        }
-        return true;
-    }
-
-    @Override
-    public Set<Key<?>> getKeys(int x, int y, int z) {
-        final ImmutableSet.Builder<Key<?>> builder = ImmutableSet.builder();
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
-        builder.addAll(blockState.getKeys());
-        final Optional<BlockEntity> tileEntity = getTileEntity(x, y, z);
-        tileEntity.ifPresent(tileEntity1 -> builder.addAll(tileEntity1.getKeys()));
-        return builder.build();
-    }
-
-    @Override
-    public Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues(int x, int y, int z) {
-        final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> builder = ImmutableSet.builder();
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
-        builder.addAll(blockState.getValues());
-        final Optional<BlockEntity> tileEntity = getTileEntity(x, y, z);
-        tileEntity.ifPresent(tileEntity1 -> builder.addAll(tileEntity1.getValues()));
-        return builder.build();
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
-        if (blockState.supports(key)) {
-            // The cast to (Key) must be there because of a silly capture generic failure of some JDK's. The
-            // Generics used will likely succeed in some IDE compilers, but occasionally fails for some javac
-            // Refer to https://gist.github.com/gabizou/c14ade79b02deeddd8f9bd17a43a4b20 for example of compiler error
-            org.spongepowered.api.data.value.Value.Immutable<E> old = getValue(x, y, z, key).map(v -> (org.spongepowered.api.data.value.Value.Mutable<E>) v).get().asImmutable();
-            setBlock(x, y, z, blockState.with(key, value).get());
-            org.spongepowered.api.data.value.Value.Immutable<E> newVal = getValue(x, y, z, key).map(v -> (org.spongepowered.api.data.value.Value.Mutable<E>) v).get().asImmutable();
-            return DataTransactionResult.successReplaceResult(newVal, old);
-        }
-        return getTileEntity(x, y, z)
-            .map(tileEntity ->  tileEntity.offer(key, value))
-            .orElseGet(DataTransactionResult::failNoData);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public DataTransactionResult offer(int x, int y, int z, Mutable<?, ?> manipulator, MergeFunction function) {
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
-        final Immutable<?, ?> immutableDataManipulator = manipulator.asImmutable();
-        if (blockState.supports((Class) immutableDataManipulator.getClass())) {
-            final List<org.spongepowered.api.data.value.Value.Immutable<?>> old = new ArrayList<>(blockState.getValues());
-            final BlockState newState = blockState.with(immutableDataManipulator).get();
-            old.removeAll(newState.getValues());
-            setBlock(x, y, z, newState);
-            return DataTransactionResult.successReplaceResult(old, manipulator.getValues());
-        }
-        return getTileEntity(x, y, z)
-            .map(tileEntity -> tileEntity.offer(manipulator, function))
-            .orElseGet(() -> DataTransactionResult.failResult(manipulator.getValues()));
-    }
-
-    @Override
-    public DataTransactionResult remove(int x, int y, int z, Class<? extends Mutable<?, ?>> manipulatorClass) {
-        final Optional<BlockEntity> tileEntityOptional = getTileEntity(x, y, z);
-        return tileEntityOptional
-            .map(tileEntity -> tileEntity.remove(manipulatorClass))
-            .orElseGet(DataTransactionResult::failNoData);
-    }
-
-    @Override
-    public DataTransactionResult remove(int x, int y, int z, Key<?> key) {
-        final Optional<BlockEntity> tileEntityOptional = getTileEntity(x, y, z);
-        return tileEntityOptional
-            .map(tileEntity -> tileEntity.remove(key))
-            .orElseGet(DataTransactionResult::failNoData);
-    }
-
-    @Override
-    public DataTransactionResult undo(int x, int y, int z, DataTransactionResult result) {
-        return DataTransactionResult.failNoData(); // todo
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, DataHolder from) {
-        return copyFrom(xTo, yTo, zTo, from, MergeFunction.IGNORE_ALL);
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, DataHolder from, MergeFunction function) {
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        final Collection<Mutable<?, ?>> manipulators = from.getContainers();
-        for (Mutable<?, ?> manipulator : manipulators) {
-            builder.absorbResult(offer(xTo, yTo, zTo, manipulator, function));
-        }
-        return builder.build();
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, int xFrom, int yFrom, int zFrom, MergeFunction function) {
-        return copyFrom(xTo, yTo, zTo, new Location<World>(this, xFrom, yFrom, zFrom), function);
-    }
-
-    @Override
-    public Collection<Mutable<?, ?>> getManipulators(int x, int y, int z) {
-        final List<Mutable<?, ?>> list = new ArrayList<>();
-        final Collection<Immutable<?, ?>> manipulators = this.getBlock(x, y, z)
-            .withExtendedProperties(new Location<>(this, x, y, z))
-            .getManipulators();
-        for (Immutable<?, ?> immutableDataManipulator : manipulators) {
-            list.add(immutableDataManipulator.asMutable());
-        }
-        final Optional<BlockEntity> optional = getTileEntity(x, y, z);
-        optional
-            .ifPresent(tileEntity -> list.addAll(tileEntity.getContainers()));
-        return list;
-    }
-
-    @Override
-    public boolean validateRawData(int x, int y, int z, DataView container) {
-        throw new UnsupportedOperationException(); // TODO Data API
-    }
-
-    @Override
-    public void setRawData(int x, int y, int z, DataView container) throws InvalidDataException {
-        throw new UnsupportedOperationException(); // TODO Data API
-    }
 }
