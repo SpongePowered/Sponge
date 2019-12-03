@@ -72,7 +72,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.util.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -399,7 +399,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                                              ? null
                                              : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
         final BlockTransaction.ChangeBlock transaction;
-        final WorldServerBridge mixinWorld = isFake ? null : (WorldServerBridge) this.world;
+        final ServerWorldBridge mixinWorld = isFake ? null : (ServerWorldBridge) this.world;
 
         final int modifiedY = yPos & 15;
 
@@ -510,7 +510,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         // Sponge Start - Handle block physics only if we're actually the server world
         if (!isFake && currentState != newState) {
             // Reset the proxy access or add to the proxy state during processing.
-            ((WorldServerBridge) this.world).bridge$getProxyAccess().onChunkChanged(pos, newState);
+            ((ServerWorldBridge) this.world).bridge$getProxyAccess().onChunkChanged(pos, newState);
         }
         if (!isFake && currentBlock != newBlock) {
             final boolean isBulkCapturing = ShouldFire.CHANGE_BLOCK_EVENT && state.doesBulkBlockCapture(peek);

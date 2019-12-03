@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.bridge.server;
 
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.resourcepack.ResourcePack;
 
 import javax.annotation.Nullable;
@@ -31,16 +33,18 @@ import net.minecraft.world.server.ServerWorld;
 
 public interface MinecraftServerBridge {
 
-    long[] bridge$getWorldTickTimes(int dimensionId);
+    long[] bridge$getWorldTickTimes(DimensionType dimensionType);
 
-    void bridge$putWorldTickTimes(int dimensionId, long[] tickTimes);
+    void bridge$putWorldTickTimes(DimensionType dimensionType, long[] tickTimes);
 
-    void bridge$removeWorldTickTimes(int dimensionId);
+    void bridge$removeWorldTickTimes(DimensionType dimensionType);
 
-    void bridge$prepareSpawnArea(ServerWorld worldServer);
+    void bridge$loadInitialChunks(ServerWorld world);
 
     void bridge$setSaveEnabled(boolean enabled);
 
     @Nullable
     ResourcePack bridge$getResourcePack();
+
+    void bridge$updateWorldForDifficulty(ServerWorld world, Difficulty difficulty, boolean isCustom);
 }

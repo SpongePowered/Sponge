@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.world.dimension;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.server.SpongeWorldRegistration;
 
@@ -36,4 +37,8 @@ public interface DimensionTypeBridge {
     SpongeWorldRegistration bridge$getWorldRegistration();
 
     void bridge$setWorldRegistration(SpongeWorldRegistration worldRegistration);
+
+    default CatalogKey bridge$getKey() {
+        return this.bridge$getSpongeDimensionType().getKey();
+    }
 }

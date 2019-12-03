@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
 @Mixin(ServerMultiWorld.class)
-public abstract class WorldServerMultiMixin extends WorldServerMixin {
+public abstract class ServerWorldMultiMixin extends ServerWorldMixin {
 
     /**
      * @author bloodmc

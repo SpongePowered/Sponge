@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.server.ServerWorld;
@@ -44,7 +44,7 @@ public final class DimensionContext extends TickContext<DimensionContext> {
         return this;
     }
 
-    public DimensionContext world(WorldServerBridge worldServer) {
+    public DimensionContext world(ServerWorldBridge worldServer) {
         this.world = ((World) worldServer);
         return this;
     }

@@ -59,7 +59,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCauseStackManager;
@@ -210,7 +210,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * </p>
      *
      * <p>Note that the {@link PhaseTracker} is only provided for easy access
-     * to the {@link WorldServer}, {@link WorldServerBridge}, and
+     * to the {@link WorldServer}, {@link ServerWorldBridge}, and
      * {@link World} instances.</p>
      *
      * @param phaseContext The context of the current state being unwound
@@ -720,7 +720,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(final WorldServerBridge mixinWorld, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
+    default void appendNotifierPreBlockTick(final ServerWorldBridge mixinWorld, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
         final Chunk chunk = ((ServerWorld) mixinWorld).getChunkAt(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
@@ -738,7 +738,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param blockEvent
      */
     default void appendNotifierToBlockEvent(final C context, final PhaseContext<?> currentContext,
-                                            final WorldServerBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
+                                            final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
 
     }
 

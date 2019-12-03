@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -56,7 +56,7 @@ import java.util.function.BiConsumer;
 public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, WorldServerBridge> bridge$getTickFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> bridge$getTickFrameModifier() {
         return (frame, world) -> frame.addContext(EventContextKeys.LIQUID_FLOW, (World) world);
     }
 
@@ -64,7 +64,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
     private void impl$throwPreForFlowingInto(final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state,
         final CallbackInfoReturnable<Boolean> cir) {
         if (!((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE &&
-            SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) worldIn, pos).isCancelled()) {
+            SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos).isCancelled()) {
             cir.setReturnValue(false);
         }
     }
@@ -73,7 +73,7 @@ public abstract class BlockDynamicLiquidMixin extends BlockLiquidMixin {
     private void impl$throwPreOnUpdate(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final Random rand, final CallbackInfo ci) {
         if (!((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) worldIn, pos).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos).isCancelled()) {
                 ci.cancel();
             }
         }

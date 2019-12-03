@@ -28,7 +28,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 public final class CaptureBlockPos implements AutoCloseable {
 
     @Nullable private BlockPos pos;
-    @Nullable private WeakReference<WorldServerBridge> mixinWorldReference;
+    @Nullable private WeakReference<ServerWorldBridge> mixinWorldReference;
 
     public Optional<BlockPos> getPos() {
         return Optional.ofNullable(this.pos);
@@ -49,7 +49,7 @@ public final class CaptureBlockPos implements AutoCloseable {
         return this;
     }
 
-    public void setWorld(@Nullable final WorldServerBridge world) {
+    public void setWorld(@Nullable final ServerWorldBridge world) {
         if (world == null) {
             this.mixinWorldReference = null;
         } else {
@@ -61,11 +61,11 @@ public final class CaptureBlockPos implements AutoCloseable {
         if (world == null) {
             this.mixinWorldReference = null;
         } else {
-            this.mixinWorldReference = new WeakReference<>((WorldServerBridge) world);
+            this.mixinWorldReference = new WeakReference<>((ServerWorldBridge) world);
         }
     }
 
-    public Optional<WorldServerBridge> getMixinWorld() {
+    public Optional<ServerWorldBridge> getMixinWorld() {
         return this.mixinWorldReference == null ? Optional.empty() : Optional.ofNullable(this.mixinWorldReference.get());
     }
 

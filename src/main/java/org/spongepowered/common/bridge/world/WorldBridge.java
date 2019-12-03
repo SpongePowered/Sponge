@@ -30,11 +30,11 @@ public interface WorldBridge {
 
     /**
      * Gets whether this world is a usable world in the context of using
-     * as {@link WorldServerBridge} and an active server world. This
+     * as {@link ServerWorldBridge} and an active server world. This
      * lazy loads the flag if {@link World#isRemote} is {@code true},
      * {@link World#getWorldInfo()} returns {@code null},
      * {@link World#getWorldInfo()} has a null name, or
-     * if this world is not an instance of {@link WorldServerBridge}.
+     * if this world is not an instance of {@link ServerWorldBridge}.
      * By that point, if all those checks succeed, this world is usable,
      * and can be passed through to create snapshots and perform other
      * internal tasks that Sponge needs to operate on said world.

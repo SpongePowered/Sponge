@@ -45,7 +45,7 @@ import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.event.damage.DamageEventHandler;
@@ -163,10 +163,10 @@ public abstract class EntityMobMixin extends EntityLivingMixin {
             if (this.world.isThundering()) {
                 int j = this.world.getSkylightSubtracted();;
                 this.world.setSkylightSubtracted(10);
-                passes = !((WorldServerBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
+                passes = !((ServerWorldBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
                 this.world.setSkylightSubtracted(j);
             } else { 
-                passes = !((WorldServerBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
+                passes = !((ServerWorldBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
             }
 
             return passes;

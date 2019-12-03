@@ -49,12 +49,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -73,7 +73,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 
 @Mixin(ServerChunkProvider.class)
-public abstract class ChunkProviderServerMixin implements ChunkProviderServerBridge, ChunkProviderBridge {
+public abstract class ServerChunkProviderMixin implements ServerChunkProviderBridge, ChunkProviderBridge {
 
     @Nullable private SpongeEmptyChunk impl$EMPTY_CHUNK;
     private boolean impl$denyChunkRequests = true;
@@ -101,7 +101,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
         this.impl$EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
         final WorldCategory worldCategory = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld();
 
-        ((WorldServerBridge) worldObjIn).bridge$updateConfigCache();
+        ((ServerWorldBridge) worldObjIn).bridge$updateConfigCache();
 
         this.impl$denyChunkRequests = worldCategory.getDenyChunkRequests();
         this.impl$chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
@@ -268,7 +268,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     {
         if (!this.world.disableLevelSaving && !((WorldBridge) this.world).bridge$isFake())
         {
-            ((WorldServerBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
+            ((ServerWorldBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
             final Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
             int chunksUnloaded = 0;
             final long now = System.currentTimeMillis();
@@ -289,7 +289,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
                     chunksUnloaded++;
                 }
             }
-            ((WorldServerBridge) this.world).bridge$getTimingsHandler().doChunkUnload.stopTiming();
+            ((ServerWorldBridge) this.world).bridge$getTimingsHandler().doChunkUnload.stopTiming();
         }
 
         this.chunkLoader.chunkTick();

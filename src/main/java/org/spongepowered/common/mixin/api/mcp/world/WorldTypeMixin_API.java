@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 
@@ -67,6 +67,6 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
     @Override
     public TerrainGenerator createGenerator(ServerWorld world) {
         checkNotNull(world);
-        return ((WorldServerBridge) world).bridge$createWorldGenerator(this.getDefaultGeneratorSettings());
+        return ((ServerWorldBridge) world).bridge$createWorldGenerator(this.getDefaultGeneratorSettings());
     }
 }

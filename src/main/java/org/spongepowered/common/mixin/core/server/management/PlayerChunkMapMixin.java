@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
 import javax.annotation.Nullable;
@@ -71,8 +71,8 @@ public abstract class PlayerChunkMapMixin implements PlayerChunkMapBridge {
         // and queue the chunk to be unloaded.
         // -- blood
 
-        if (((WorldServerBridge) this.world).bridge$getChunkGCTickInterval() <= 0
-                || ((WorldServerBridge) this.world).bridge$getChunkUnloadDelay() <= 0) {
+        if (((ServerWorldBridge) this.world).bridge$getChunkGCTickInterval() <= 0
+                || ((ServerWorldBridge) this.world).bridge$getChunkUnloadDelay() <= 0) {
             chunkProvider.queueUnload(chunk);
         } else if (!((ChunkBridge) chunk).bridge$isPersistedChunk() && this.world.dimension.canDropChunk(chunk.x, chunk.z)) {
             ((ChunkBridge) chunk).bridge$setScheduledForUnload(System.currentTimeMillis());

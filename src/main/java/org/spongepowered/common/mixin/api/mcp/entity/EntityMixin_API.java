@@ -71,9 +71,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
@@ -212,7 +212,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 this.rotationYaw = (float) event.getToTransform().getYaw();
             }
 
-            final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge) ((ServerWorld) this.world).getChunkProvider();
+            final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) ((ServerWorld) this.world).getChunkProvider();
             final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
             chunkProviderServer.bridge$setForceChunkRequests(true);
             try {
@@ -403,7 +403,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
             if (!this.world.isRemote) { // We can't set the rotation update on client worlds.
-                ((WorldServerBridge) getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
+                ((ServerWorldBridge) getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
             // Let the entity tracker do its job, this just updates the variables

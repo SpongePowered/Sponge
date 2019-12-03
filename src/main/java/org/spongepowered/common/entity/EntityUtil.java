@@ -85,7 +85,7 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
@@ -444,13 +444,13 @@ public final class EntityUtil {
             // We're a custom client, their problem to handle the client provider
             WorldManager.sendDimensionRegistration(player, toWorld.dimension);
 
-            dimensionId = ((WorldServerBridge) toWorld).bridge$getDimensionId();
+            dimensionId = ((ServerWorldBridge) toWorld).bridge$getDimensionId();
         }
 
         player.connection.sendPacket(new SRespawnPacket(dimensionId, toWorld.getDifficulty(), toWorld.getWorldType(),
             player.interactionManager.getGameType()));
 
-        player.dimension = ((WorldServerBridge) toWorld).bridge$getDimensionId(); // If a Vanilla client, dimensionId could be a provider id.
+        player.dimension = ((ServerWorldBridge) toWorld).bridge$getDimensionId(); // If a Vanilla client, dimensionId could be a provider id.
         player.setWorld(toWorld);
 
         playerList.updatePermissionLevel(player);
@@ -526,7 +526,7 @@ public final class EntityUtil {
         final Transform<World> fromTransform = sEntity.getTransform();
         final ServerWorld fromWorld = ((ServerWorld) entity.world);
 
-        int toDimensionId = ((WorldServerBridge) toWorld).bridge$getDimensionId();
+        int toDimensionId = ((ServerWorldBridge) toWorld).bridge$getDimensionId();
 
         // Entering End Portal in End goes to Overworld in Vanilla
         if (toDimensionId == 1 && fromWorld.dimension instanceof EndDimension) {
@@ -725,7 +725,7 @@ public final class EntityUtil {
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    ((WorldServerBridge) entityToSpawn.world).bridge$forceSpawnEntity(entityToSpawn);
+                    ((ServerWorldBridge) entityToSpawn.world).bridge$forceSpawnEntity(entityToSpawn);
                     return true;
                 }
             }
@@ -738,7 +738,7 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((WorldServerBridge) entity.getWorld()).bridge$forceSpawnEntity((Entity) entity);
+        ((ServerWorldBridge) entity.getWorld()).bridge$forceSpawnEntity((Entity) entity);
         return true;
     }
 

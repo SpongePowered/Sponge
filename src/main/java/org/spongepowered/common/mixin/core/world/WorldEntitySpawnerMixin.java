@@ -54,7 +54,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -106,7 +106,7 @@ public abstract class WorldEntitySpawnerMixin {
                 chunkIterator.remove();
             }
 
-            final WorldServerBridge spongeWorld = (WorldServerBridge) world;
+            final ServerWorldBridge spongeWorld = (ServerWorldBridge) world;
             spongeWorld.bridge$getTimingsHandler().mobSpawn.startTiming();
 
             int chunkSpawnCandidates = 0;

@@ -24,7 +24,13 @@
  */
 package org.spongepowered.common.world.server;
 
+import com.google.gson.JsonElement;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldType;
 import org.spongepowered.api.world.server.WorldManager;
+import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 
 public interface SpongeWorldManager extends WorldManager {
+
+    void loadAllWorlds(MinecraftServer server, String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions);
 }

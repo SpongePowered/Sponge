@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
  * Specific bridge for the {@link ChunkProviderServer}, with a direct
  * pairing to {@link WorldServer} as a hard requirement.
  */
-public interface ChunkProviderServerBridge {
+public interface ServerChunkProviderBridge {
 
     // TODO Mixin 0.8
     @Nullable

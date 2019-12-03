@@ -79,7 +79,7 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -137,7 +137,7 @@ public final class TrackingUtil {
     static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
         (blockSnapshot) -> blockSnapshot.getWorldServer().map(worldServer -> {
             final BlockPos targetPos = blockSnapshot.getBlockPos();
-            final SpongeBlockSnapshot replacement = ((WorldServerBridge) worldServer).bridge$createSnapshot(targetPos, BlockChangeFlags.NONE);
+            final SpongeBlockSnapshot replacement = ((ServerWorldBridge) worldServer).bridge$createSnapshot(targetPos, BlockChangeFlags.NONE);
             return new Transaction<>(blockSnapshot, replacement);
         });
     public static final int WIDTH = 40;
@@ -202,7 +202,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings({"unused", "try"})
-    public static void tickTileEntity(final WorldServerBridge mixinWorldServer, final ITickable tile) {
+    public static void tickTileEntity(final ServerWorldBridge mixinWorldServer, final ITickable tile) {
         checkArgument(tile instanceof BlockEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
@@ -245,7 +245,7 @@ public final class TrackingUtil {
 
     @SuppressWarnings("rawtypes")
     public static void updateTickBlock(
-            final WorldServerBridge mixinWorld, final Block block, final BlockPos pos, final net.minecraft.block.BlockState state, final Random random) {
+            final ServerWorldBridge mixinWorld, final Block block, final BlockPos pos, final net.minecraft.block.BlockState state, final Random random) {
         final ServerWorld world = (ServerWorld) mixinWorld;
         final World apiWorld = (World) world;
 
@@ -279,7 +279,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static void randomTickBlock(final WorldServerBridge mixinWorld, final Block block,
+    public static void randomTickBlock(final ServerWorldBridge mixinWorld, final Block block,
                                        final BlockPos pos, final net.minecraft.block.BlockState state, final Random random) {
         final ServerWorld world = (ServerWorld) mixinWorld;
         final World apiWorld = (World) world;
@@ -312,7 +312,7 @@ public final class TrackingUtil {
     }
 
 
-    public static void tickWorldProvider(final WorldServerBridge worldServer) {
+    public static void tickWorldProvider(final ServerWorldBridge worldServer) {
         final Dimension worldProvider = ((ServerWorld) worldServer).dimension;
         try (final DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider)) {
             context.buildAndSwitch();
@@ -637,7 +637,7 @@ public final class TrackingUtil {
             SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
             return;
         }
-        final WorldServerBridge mixinWorld = (WorldServerBridge) worldServer.get();
+        final ServerWorldBridge mixinWorld = (ServerWorldBridge) worldServer.get();
         // Reset any previously set transactions
         final BlockPos pos = oldBlockSnapshot.getBlockPos();
         performBlockEntitySpawns( phaseContext.state, phaseContext, oldBlockSnapshot, pos);
@@ -707,7 +707,7 @@ public final class TrackingUtil {
     }
 
     public static void performNeighborAndClientNotifications(final PhaseContext<?> phaseContext, final int currentDepth,
-                                                             final SpongeBlockSnapshot newBlockSnapshot, final WorldServerBridge mixinWorld, final BlockPos pos,
+                                                             final SpongeBlockSnapshot newBlockSnapshot, final ServerWorldBridge mixinWorld, final BlockPos pos,
                                                              final net.minecraft.block.BlockState newState, final SpongeBlockChangeFlag changeFlag) {
         final Block newBlock = newState.getBlock();
         final IPhaseState phaseState = phaseContext.state;

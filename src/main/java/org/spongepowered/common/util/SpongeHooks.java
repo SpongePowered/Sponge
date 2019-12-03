@@ -54,7 +54,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.LoggingCategory;
 import org.spongepowered.common.config.type.DimensionConfig;
@@ -114,7 +114,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().entityDeathLogging()) {
-            logInfo("Dim: {0} setDead(): {1}", ((WorldServerBridge) entity.world).bridge$getDimensionId(), entity);
+            logInfo("Dim: {0} setDead(): {1}", ((ServerWorldBridge) entity.world).bridge$getDimensionId(), entity);
             logStack(configAdapter);
         }
     }
@@ -126,7 +126,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().entityDespawnLogging()) {
-            logInfo("Dim: {0} Despawning ({1}): {2}", ((WorldServerBridge) entity.world).bridge$getDimensionId(), reason, entity);
+            logInfo("Dim: {0} Despawning ({1}): {2}", ((ServerWorldBridge) entity.world).bridge$getDimensionId(), reason, entity);
             logStack(configAdapter);
         }
     }
@@ -146,7 +146,7 @@ public class SpongeHooks {
         if (configAdapter.getConfig().getLogging().entitySpawnLogging()) {
             logInfo("SPAWNED " + spawnName + " [World: {2}][DimId: {3}]",
                     entity.world.getWorldInfo().getWorldName(),
-                    ((WorldServerBridge) entity.world).bridge$getDimensionId());
+                    ((ServerWorldBridge) entity.world).bridge$getDimensionId());
             logStack(configAdapter);
         }
     }
@@ -160,7 +160,7 @@ public class SpongeHooks {
         if (configAdapter.getConfig().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
-                world.getWorldInfo().getWorldName() + "(" + ((WorldServerBridge) world).bridge$getDimensionId() + ")",
+                world.getWorldInfo().getWorldName() + "(" + ((ServerWorldBridge) world).bridge$getDimensionId() + ")",
                     ((BlockType) block).getId(),
                     pos);
             logStack(configAdapter);
@@ -168,7 +168,7 @@ public class SpongeHooks {
             logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][World: {1}][DimId: {2}][Block: {3}][Pos: {4}]",
                     user.getName(),
                     world.getWorldInfo().getWorldName(),
-                    ((WorldServerBridge) world).bridge$getDimensionId(),
+                    ((ServerWorldBridge) world).bridge$getDimensionId(),
                     ((BlockType) block).getId(),
                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
         }
@@ -185,7 +185,7 @@ public class SpongeHooks {
         if (type != null && type.allowsLogging(logging)) {
             logInfo("Block " + type.name() + " [World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
                     world.getWorldInfo().getWorldName(),
-                    ((WorldServerBridge) world).bridge$getDimensionId(),
+                    ((ServerWorldBridge) world).bridge$getDimensionId(),
                     transaction.getOriginal().getState(),
                     transaction.getFinal().getState());
             logStack(configAdapter);
@@ -199,7 +199,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().chunkLoadLogging()) {
-            logInfo("Load Chunk At [{0}] ({1}, {2})", ((WorldServerBridge) world).bridge$getDimensionId(), chunkPos.getX(),
+            logInfo("Load Chunk At [{0}] ({1}, {2})", ((ServerWorldBridge) world).bridge$getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(configAdapter);
         }
@@ -212,7 +212,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().chunkUnloadLogging()) {
-            logInfo("Unload Chunk At [{0}] ({1}, {2})", ((WorldServerBridge) world).bridge$getDimensionId(), chunkPos.getX(),
+            logInfo("Unload Chunk At [{0}] ({1}, {2})", ((ServerWorldBridge) world).bridge$getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(configAdapter);
         }
@@ -225,7 +225,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
-            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((WorldServerBridge) world).bridge$getDimensionId(), chunk.x, chunk.z);
+            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((ServerWorldBridge) world).bridge$getDimensionId(), chunk.x, chunk.z);
             logStack(configAdapter);
         }
     }
@@ -392,7 +392,7 @@ public class SpongeHooks {
         public int dimensionId;
 
         public CollisionWarning(final World world, final Entity entity) {
-            this.dimensionId = ((WorldServerBridge) world).bridge$getDimensionId();
+            this.dimensionId = ((ServerWorldBridge) world).bridge$getDimensionId();
             this.blockPos = new BlockPos(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
         }
 
@@ -482,7 +482,7 @@ public class SpongeHooks {
             final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
             // Reload before updating world config cache
             configAdapter.load();
-            ((WorldServerBridge) world).bridge$updateConfigCache();
+            ((ServerWorldBridge) world).bridge$updateConfigCache();
             for (final Entity entity : world.loadedEntityList) {
                 if (entity instanceof ActivationCapability) {
                     ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);

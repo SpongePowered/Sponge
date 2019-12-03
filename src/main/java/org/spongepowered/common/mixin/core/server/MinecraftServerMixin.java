@@ -24,42 +24,41 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import net.minecraft.command.ICommandManager;
-import net.minecraft.command.ICommandSender;
+import com.google.gson.JsonElement;
+import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Unit;
+import net.minecraft.util.Util;
+import net.minecraft.util.concurrent.RecursiveEventLoop;
+import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameType;
+import net.minecraft.world.ForcedChunksSaveData;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.chunk.listener.IChunkStatusListener;
+import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.server.TicketType;
 import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Logger;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -73,15 +72,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.command.CommandSenderBridge;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
-import org.spongepowered.common.command.SpongeCommandManager;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -94,50 +89,37 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.mixin.core.world.storage.WorldInfoMixin;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
-import org.spongepowered.common.util.VecHelper;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin implements SubjectBridge, CommandSourceBridge, CommandSenderBridge,
-    MinecraftServerBridge {
+public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements MinecraftServerBridge, SubjectBridge {
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final public Profiler profiler;
-    @Shadow private boolean serverStopped;
+    @Shadow @Final protected IChunkStatusListenerFactory chunkStatusListenerFactory;
+    @Shadow private long serverTime;
     @Shadow private int tickCounter;
-    @Shadow public ServerWorld[] worlds;
+    @Shadow protected abstract void shadow$convertMapIfNeeded(String directoryName);
+    @Shadow protected abstract void shadow$setUserMessage(ITextComponent translationKey);
+    @Shadow public abstract Difficulty shadow$getDifficulty();
+    @Shadow protected abstract void shadow$runScheduledTasks();
+    @Shadow public abstract boolean shadow$isDedicatedServer();
+    @Shadow public abstract boolean shadow$isServerRunning();
+    @Shadow public abstract PlayerList shadow$getPlayerList();
+    @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
+    @Shadow public abstract boolean shadow$isServerStopped();
 
-    @Shadow public abstract void sendMessage(ITextComponent message);
-    @Shadow public abstract boolean isServerRunning();
-    @Shadow public abstract PlayerList getPlayerList();
-    @Shadow public abstract Difficulty getDifficulty();
-    @Shadow public abstract GameType getGameType();
-    @Shadow protected abstract void setUserMessage(String message);
-    @Shadow protected abstract void outputPercentRemaining(String message, int percent);
-    @Shadow protected abstract void clearCurrentTask();
-    @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
-    @Shadow public abstract boolean isDedicatedServer();
-    @Shadow public abstract String shadow$getName();
-    @Shadow public abstract PlayerProfileCache getPlayerProfileCache();
-
-    @Nullable private List<String> impl$currentTabCompletionOptions;
     @Nullable private ResourcePack impl$resourcePack;
     private boolean impl$enableSaving = true;
 
-    @Override
-    public String bridge$getIdentifier() {
-        return shadow$getName();
+    public MinecraftServerMixin(String name) {
+        super(name);
     }
 
     @Override
@@ -146,101 +128,84 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     }
 
     @Override
-    public Tristate bridge$permDefault(final String permission) {
+    public Tristate bridge$permDefault(String permission) {
         return Tristate.TRUE;
     }
 
-    @Override
-    public ICommandSender bridge$asICommandSender() {
-        return (MinecraftServer) (Object) this;
-    }
-
-    @Override
-    public CommandSource bridge$asCommandSource() {
-        return (CommandSource) this;
-    }
-
     /**
-     * @author blood - December 23rd, 2015
-     * @author Zidane - March 13th, 2016
-     * @author gabizou - April 22nd, 2019 - Minecraft 1.12.2
-     *
+     * @author Zidane - Minecraft 1.14.4
      * @reason Sponge rewrites the method to use the Sponge {@link WorldManager} to load worlds,
-     * migrating old worlds, upgrading worlds to our standard, and configuration loading. Also
-     * validates that the {@link WorldInfoMixin onConstruction} will not be doing anything
-     * silly during map conversions.
+     * migrating old worlds, upgrading worlds to our standard, and configuration loading.
      */
     @Overwrite
-    public void loadAllWorlds(final String overworldFolder, final String worldName, final long seed, final WorldType type,
-        final String generatorOptions) {
+    public void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions) {
         try (final MapConversionContext context = GeneralPhase.State.MAP_CONVERSION.createPhaseContext()
             .source(this)
-            .world(overworldFolder)) {
+            .world(directoryName)) {
             context.buildAndSwitch();
-            this.convertMapIfNeeded(overworldFolder);
+            this.shadow$convertMapIfNeeded(directoryName);
         }
-        this.setUserMessage("menu.loadingLevel");
 
-        WorldManager.loadAllWorlds(seed, type, generatorOptions);
+        this.shadow$setUserMessage(new TranslationTextComponent("menu.loadingLevel"));
 
-        this.getPlayerList().setPlayerManager(this.worlds);
-        this.setDifficultyForAllWorlds(this.getDifficulty());
-    }
+        SpongeImpl.getWorldManager().loadAllWorlds((MinecraftServer) (Object) this, directoryName, levelName, seed, type, generatorOptions);
 
-    /**
-     * @author Zidane - March 13th, 2016
-     *
-     * @reason Sponge has a config option for determining if we'll
-     * generate spawn on server start. I enforce that here.
-     */
-    @Overwrite
-    public void initialWorldChunkLoad() {
-        for (final ServerWorld worldServer: this.worlds) {
-            this.bridge$prepareSpawnArea(worldServer);
-        }
-        this.clearCurrentTask();
+        this.setDifficultyForAllWorlds(this.shadow$getDifficulty(), true);
     }
 
     @Override
-    public void bridge$prepareSpawnArea(final ServerWorld worldServer) {
-        final WorldProperties worldProperties = (WorldProperties) worldServer.getWorldInfo();
-        if (!((WorldInfoBridge) worldProperties).bridge$isValid() || !worldProperties.doesGenerateSpawnOnLoad()) {
+    public void bridge$loadInitialChunks(ServerWorld world) {
+
+        final WorldInfoBridge infoBridge = (WorldInfoBridge) world.getWorldInfo();
+        if (!infoBridge.bridge$isValid() || !infoBridge.bridge$doesGenerateSpawnOnLoad()) {
             return;
         }
 
-        final ChunkProviderServerBridge chunkProviderServer = (ChunkProviderServerBridge) worldServer.getChunkProvider();
-        chunkProviderServer.bridge$setForceChunkRequests(true);
-
         try (final GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
-            .source(worldServer)
-            .world( worldServer)) {
+            .source(world)
+            .world( world)) {
             context.buildAndSwitch();
-            int i = 0;
-            this.setUserMessage("menu.generatingTerrain");
-            LOGGER.info("Preparing start region for world {} ({}/{})", worldServer.getWorldInfo().getWorldName(),
-                ((DimensionType) (Object) worldServer.dimension.getType()).getId(), ((WorldServerBridge) worldServer).bridge$getDimensionId());
-            final BlockPos blockpos = worldServer.getSpawnPoint();
-            long j = MinecraftServer.getCurrentTimeMillis();
-            for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
-                for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
-                    final long i1 = MinecraftServer.getCurrentTimeMillis();
 
-                    if (i1 - j > 1000L) {
-                        this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
-                        j = i1;
-                    }
+            final IChunkStatusListener chunkStatusListener = this.chunkStatusListenerFactory.create(11);
 
-                    ++i;
-                    worldServer.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
+            this.shadow$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
+            LOGGER.info("Preparing start region for world '[{}}]'...", ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
+            final BlockPos blockpos = world.getSpawnPoint();
+            chunkStatusListener.start(new ChunkPos(blockpos));
+            final ServerChunkProvider serverChunkProvider = world.getChunkProvider();
+            serverChunkProvider.getLightManager().func_215598_a(500);
+            this.serverTime = Util.milliTime();
+            serverChunkProvider.func_217228_a(TicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
+
+            while (serverChunkProvider.func_217229_b() != 441) {
+                this.serverTime = Util.milliTime() + 10L;
+                this.shadow$runScheduledTasks();
+            }
+
+            this.serverTime = Util.milliTime() + 10L;
+            this.shadow$runScheduledTasks();
+
+            final ForcedChunksSaveData forcedChunksData = world.getSavedData().get(ForcedChunksSaveData::new, "chunks");
+
+            if (forcedChunksData != null) {
+                final LongIterator longiterator = forcedChunksData.getChunks().iterator();
+
+                while (longiterator.hasNext()) {
+                    final long i = longiterator.nextLong();
+                    final ChunkPos chunkpos = new ChunkPos(i);
+                    serverChunkProvider.forceChunk(chunkpos, true);
                 }
             }
-            this.clearCurrentTask();
+
+            this.serverTime = Util.milliTime() + 10L;
+            this.shadow$runScheduledTasks();
+            chunkStatusListener.stop();
+            serverChunkProvider.getLightManager().func_215598_a(5);
         }
-        chunkProviderServer.bridge$setForceChunkRequests(false);
     }
 
     @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
-    private void impl$updateResourcePack(final String url, final String hash, final CallbackInfo ci) {
+    private void impl$createSpongeResourcePackWrapper(String url, String hash, CallbackInfo ci) {
         if (url.length() == 0) {
             this.impl$resourcePack = null;
         } else {
@@ -259,52 +224,8 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     }
 
     @Override
-    public void bridge$setSaveEnabled(final boolean enabled) {
+    public void bridge$setSaveEnabled(boolean enabled) {
         this.impl$enableSaving = enabled;
-    }
-
-    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE",
-            target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;", remap = false))
-    private ArrayList<String> impl$useSpongeTabCompletionList() {
-        final ArrayList<String> list = new ArrayList<>();
-        this.impl$currentTabCompletionOptions = list;
-        return list;
-    }
-
-    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 0))
-    private void impl$throwEventForTabCompletion(final ICommandSender sender, final String input, final BlockPos pos, final boolean usingBlock,
-            final CallbackInfoReturnable<List<String>> cir) {
-
-        final List<String> completions = checkNotNull(this.impl$currentTabCompletionOptions, "currentTabCompletionOptions");
-        this.impl$currentTabCompletionOptions = null;
-
-        Sponge.getCauseStackManager().pushCause(sender);
-        final TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Sponge.getCauseStackManager().getCurrentCause(),
-                ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(getTarget(sender, pos)), usingBlock);
-        Sponge.getEventManager().post(event);
-        Sponge.getCauseStackManager().popCause();
-        if (event.isCancelled()) {
-            completions.clear();
-        }
-    }
-
-    @Redirect(method = "getTabCompletions",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/command/ICommandManager;getTabCompletions(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
-    private List<String> impl$useSpongeCommandManagerForSuggestions(
-        final ICommandManager manager, final ICommandSender sender, final String input, @Nullable final BlockPos pos, final ICommandSender sender_,
-        final String input_, final BlockPos pos_, final boolean hasTargetBlock) {
-        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, getTarget(sender, pos), hasTargetBlock);
-    }
-
-    @Nullable
-    private static Location<World> getTarget(final ICommandSender sender, @Nullable final BlockPos pos) {
-        @Nullable Location<World> targetPos = null;
-        if (pos != null) {
-            targetPos = new Location<>((World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
-        }
-        return targetPos;
     }
 
     @Override
@@ -313,12 +234,12 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     }
 
     @Inject(method = "tick", at = @At(value = "HEAD"))
-    private void onServerTickStart(final CallbackInfo ci) {
+    private void impl$onServerTickStart(CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "RETURN"))
-    private void impl$copmleteTickCheckAnimationAndPhaseTracker(final CallbackInfo ci) {
+    private void impl$completeTickCheckAnimationAndPhaseTracker(CallbackInfo ci) {
         final int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
         final int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
         final int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
@@ -328,8 +249,9 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                 final BlockSnapshot blockSnapshot = BlockSnapshot.NONE;
 
                 final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player) + 1);
+
                 // Hit non-air block
-                if (result != null && result.getBlockPos() != null) {
+                if (result instanceof BlockRayTraceResult) {
                     return;
                 }
 
@@ -350,79 +272,54 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 
-    @Nullable private Integer dimensionId;
-
-    @Redirect(method = "addServerStatsToSnooper",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;",
-            opcode = Opcodes.GETFIELD))
-    private Dimension impl$getWorldProviderAndMaybeSetDimensionId(final ServerWorld world) {
-        //noinspection ConstantConditions
-        if (((WorldBridge) world).bridge$isFake() || world.getWorldInfo() == null) {
-            // Return overworld provider
-            return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).dimension;
-        }
-        this.dimensionId = ((WorldServerBridge) world).bridge$getDimensionId();
-        return world.dimension;
-    }
-
-    @Redirect(method = "addServerStatsToSnooper",
-        at = @At(value = "INVOKE", target = "Ljava/lang/Integer;valueOf(I)Ljava/lang/Integer;", ordinal = 5))
-    @Nullable private Integer onValueOfInteger(final int original) {
-        return this.dimensionId;
-    }
-
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 900))
-    private int getSaveTickInterval(final int tickInterval) {
-        if (!isDedicatedServer()) {
+    private int getSaveTickInterval(int tickInterval) {
+        if (!this.shadow$isDedicatedServer()) {
             return tickInterval;
-        } else if (!this.isServerRunning()) {
+        } else if (!this.shadow$isServerRunning()) {
             // Don't autosave while server is stopping
             return this.tickCounter + 1;
         }
 
         final int autoPlayerSaveInterval = SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getAutoPlayerSaveInterval();
         if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
-            this.getPlayerList().saveAllPlayerData();
+            this.shadow$getPlayerList().saveAllPlayerData();
         }
 
-        this.saveAllWorlds(true);
+        this.save(true, true, false);
         // force check to fail as we handle everything above
         return this.tickCounter + 1;
     }
 
     /**
-     * @author blood - June 2nd, 2016
-     *
+     * @author Zidane - Minecraft 1.14.4
      * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
-     *
-     * @param dontLog Whether to log during saving
      */
     @Overwrite
-    public void saveAllWorlds(final boolean dontLog) {
+    public boolean save(boolean suppressLog, boolean flush, boolean forced) {
         if (!this.impl$enableSaving) {
-            return;
+            return false;
         }
-        for (final ServerWorld world : this.worlds) {
-            final boolean save = world.getChunkProvider().canSave() && ((WorldProperties) world.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.NONE;
-            boolean log = !dontLog;
+
+        for (final ServerWorld world : this.shadow$getWorlds()) {
+            final SerializationBehavior serializationBehavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
+            final boolean save = serializationBehavior != SerializationBehaviors.NONE;
+            boolean log = !suppressLog;
 
             if (save) {
                 // Sponge start - check auto save interval in world config
-                if (this.isDedicatedServer() && this.isServerRunning()) {
+                if (this.shadow$isDedicatedServer() && this.shadow$isServerRunning()) {
                     final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
                     final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
                     if (log) {
                         log = configAdapter.getConfig().getLogging().logWorldAutomaticSaving();
                     }
-                    if (autoSaveInterval <= 0
-                            || ((WorldProperties) world.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
+                    if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehaviors.AUTOMATIC) {
                         if (log) {
-                            LOGGER.warn("Auto-saving has been disabled for level \'" + world.getWorldInfo().getWorldName() + "\'/"
-                                    + world.dimension.getType().getName() + ". "
+                            LOGGER.warn("Auto-saving has been disabled for world \'" + world.getWorldInfo().getWorldName() + "\'/"
+                                    + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey() + ". "
                                     + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
-                                    + " zero in the corresponding world config.");
+                                    + " zero in the corresponding serverWorld config.");
                         }
                         continue;
                     }
@@ -430,49 +327,30 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                         continue;
                     }
                     if (log) {
-                        LOGGER.info("Auto-saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
-                                + ((WorldServerBridge) world).bridge$getDimensionId());
+                        LOGGER.info("Auto-saving chunks for world \'" + world.getWorldInfo().getWorldName() + "\'/"
+                                + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
                     }
                 } else if (log) {
-                    LOGGER.info("Saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
-                        + ((WorldServerBridge) world).bridge$getDimensionId());
+                    LOGGER.info("Saving chunks for world \'" + world.getWorldInfo().getWorldName() + "\'/"
+                        + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
                 }
 
-                // Sponge end
                 try {
-                    WorldManager.saveWorld(world, false);
-                } catch (SessionLockException ex) {
-                    ex.printStackTrace();
+                    ((ServerWorldBridge) world).bridge$saveChunksAndProperties(null, flush, world.disableLevelSaving && !forced);
+                } catch (SessionLockException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
-    private void onStopServer(final CallbackInfo ci) {
+    private void impl$dontExecuteServerStopOffThread(CallbackInfo ci) {
         // If the server is already stopping, don't allow stopServer to be called off the main thread
         // (from the shutdown handler thread in MinecraftServer)
-        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !Sponge.getServer().isMainThread())) {
+        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !Sponge.getServer().onMainThread())) {
             ci.cancel();
         }
-    }
-
-    /**
-     * @author Zidane - June 2nd
-     * @reason Tells the server to use our WorldManager instead of the arrays, this will
-     * work in Forge as well as our WorldManagement system is intended to work with Forge
-     * modded worlds.
-     *
-     * @param dimensionId The dimension id requested
-     * @return The world server, or else the overworld.
-     */
-    @Overwrite
-    public ServerWorld getWorld(final int dimensionId) {
-        return WorldManager.getWorldByDimensionId(dimensionId)
-                .orElse(WorldManager.getWorldByDimensionId(0)
-                        .orElseThrow(() -> new RuntimeException("Attempt made to get world before overworld is loaded!")
-                        )
-                );
     }
 
     @Redirect(method = "callFromMainThread",
@@ -480,9 +358,9 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
             value = "INVOKE",
             target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;",
             remap = false))
-    private Object impl$callOnMainThreadWithPhaseState(final Callable<?> callable) throws Exception {
+    private Object impl$callOnMainThreadWithPhaseState(Callable<?> callable) throws Exception {
         // This method can be called async while server is stopping
-        if (this.serverStopped && !SpongeImplHooks.isMainThread()) {
+        if (this.shadow$isServerStopped() && !SpongeImplHooks.isMainThread()) {
             return callable.call();
         }
 
@@ -491,30 +369,30 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
                 .source(callable)) {
             context.buildAndSwitch();
             value = callable.call();
-        } catch (Exception e) {
-            throw e;
         }
         return value;
     }
 
     @Nullable
     @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
-    private Object onRun(final FutureTask<?> task, final Logger logger) {
+    private Object impl$trackUtilTaskRun(FutureTask<?> task, Logger logger) {
         return SpongeImplHooks.onUtilRunTask(task, logger);
     }
 
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
-    private void onCrashReport(final CrashReport report, final CallbackInfoReturnable<CrashReport> cir) {
+    private void impl$addPhaseTrackerToCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
         report.makeCategory("Sponge PhaseTracker").addDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
     }
 
     /**
-     * @author unknown
-     * @reason uses the world manager to update.
+     * @author Zidane - Minecraft 1.14.4
+     * @reason Set the difficulty without marking as custom
      */
     @Overwrite
-    public void setDifficultyForAllWorlds(final Difficulty difficulty) {
-        WorldManager.updateServerDifficulty();
+    public void setDifficultyForAllWorlds(Difficulty difficulty, boolean forceDifficulty) {
+        for (ServerWorld world : this.shadow$getWorlds()) {
+            this.bridge$updateWorldForDifficulty(world, difficulty, false);
+        }
     }
 }

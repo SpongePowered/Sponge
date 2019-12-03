@@ -29,10 +29,12 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.storage.SessionLockException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -48,11 +50,7 @@ import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
-public interface WorldServerBridge {
-
-    int bridge$getDimensionId();
+public interface ServerWorldBridge {
 
     void bridge$setPreviousWeather(Weather weather);
 
@@ -149,4 +147,6 @@ public interface WorldServerBridge {
     void bridge$setWeatherStartTime(long start);
 
     void bridge$setProviderGenerator(SpongeChunkGenerator newGenerator);
+
+    void bridge$saveChunksAndProperties(@Nullable IProgressUpdate update, boolean flush, boolean saveChunks) throws SessionLockException;
 }

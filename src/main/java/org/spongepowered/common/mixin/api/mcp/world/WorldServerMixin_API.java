@@ -78,12 +78,12 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
@@ -152,15 +152,15 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public TerrainGenerator getWorldGenerator() {
-        return ((WorldServerBridge) this).bridge$getSpongeGenerator();
+        return ((ServerWorldBridge) this).bridge$getSpongeGenerator();
     }
 
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(final int x, final int y, final int z, final int priority, final int ticks) {
         final BlockPos pos = new BlockPos(x, y, z);
         this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
-        final ScheduledBlockUpdate sbu = ((WorldServerBridge) this).bridge$getScheduledBlockUpdate();
-        ((WorldServerBridge) this).bridge$setScheduledBlockUpdate(null);
+        final ScheduledBlockUpdate sbu = ((ServerWorldBridge) this).bridge$getScheduledBlockUpdate();
+        ((ServerWorldBridge) this).bridge$setScheduledBlockUpdate(null);
         return sbu;
     }
 
@@ -245,9 +245,9 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             }
 
             final ServerChunkProvider chunkProviderServer = (ServerChunkProvider) chunk.getWorld().getChunkProvider();
-            ((ChunkProviderServerBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
+            ((ServerChunkProviderBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
             // TODO - Move to accessor with Mixin 0.8
-            final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerBridge) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
+            final net.minecraft.world.chunk.Chunk newChunk = ((ServerChunkProviderBridge) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
             final PlayerChunkMapEntry playerChunk = ((ServerWorld) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
             if (playerChunk != null) {
                 ((PlayerChunkMapEntryBridge) playerChunk).bridge$setChunk(newChunk);
@@ -255,9 +255,9 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
             if (newChunk != null) {
                 final ServerWorld world = (ServerWorld) newChunk.getWorld();
-                ((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
+                ((ServerChunkProviderBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
                 newChunk.onLoad();
-                ((ChunkBridge) newChunk).accessor$populate(((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getChunkGenerator());
+                ((ChunkBridge) newChunk).accessor$populate(((ServerChunkProviderBridge) world.getChunkProvider()).accessor$getChunkGenerator());
                 for (final net.minecraft.entity.Entity entity: entityList) {
                     newChunk.addEntity(entity);
                 }
@@ -496,7 +496,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     private void apiImpl$stopSounds(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SoundEffectHelper.createStopSoundPacket(sound, category), ((WorldServerBridge) this).bridge$getDimensionId());
+                SoundEffectHelper.createStopSoundPacket(sound, category), ((ServerWorldBridge) this).bridge$getDimensionId());
     }
 
     @Override
@@ -521,7 +521,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
             final double z = position.getZ();
 
             for (final IPacket<?> packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, ((WorldServerBridge) this).bridge$getDimensionId(), packet);
+                playerList.sendToAllNearExcept(null, x, y, z, radius, ((ServerWorldBridge) this).bridge$getDimensionId(), packet);
             }
         }
     }
@@ -538,7 +538,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     private void api$playRecord(final Vector3i position, @Nullable final MusicDisc recordType) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SpongeRecordType.createPacket(position, recordType), ((WorldServerBridge) this).bridge$getDimensionId());
+                SpongeRecordType.createPacket(position, recordType), ((ServerWorldBridge) this).bridge$getDimensionId());
     }
 
     @Override
@@ -572,7 +572,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public long getRunningDuration() {
-        return this.worldInfo.getGameTime() - ((WorldServerBridge) this).bridge$getWeatherStartTime();
+        return this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime();
     }
 
     @Override
@@ -582,7 +582,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public void setWeather(final Weather weather, final long duration) {
-        ((WorldServerBridge) this).bridge$setPreviousWeather(this.getWeather());
+        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
         if (weather.equals(Weathers.CLEAR)) {
             this.worldInfo.setClearWeatherTime((int) duration);
             this.worldInfo.setRainTime(0);

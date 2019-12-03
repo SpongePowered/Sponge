@@ -92,7 +92,7 @@ import org.spongepowered.common.bridge.packet.SPacketWorldBorderBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -211,7 +211,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             toLocation = temp;
         } else {
             final Dimension toDimension = (Dimension) worldServer.dimension;
-            int toDimensionId = ((WorldServerBridge) worldServer).bridge$getDimensionId();
+            int toDimensionId = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
             // Cannot respawn in requested world, use the fallback dimension for
             // that world. (Usually overworld unless a mod says otherwise).
             if (!toDimension.allowsPlayerRespawns()) {
@@ -235,7 +235,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         }
 
         Transform<World> toTransform = new Transform<>(toLocation, Vector3d.ZERO, Vector3d.ZERO);
-        targetDimension = ((WorldServerBridge) toTransform.getExtent()).bridge$getDimensionId();
+        targetDimension = ((ServerWorldBridge) toTransform.getExtent()).bridge$getDimensionId();
         Location<World> location = toTransform.getLocation();
 
         // If coming from end, fire a teleport event for plugins
@@ -324,7 +324,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         }
         worldServer = (ServerWorld) location.getExtent();
 
-        final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
+        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
         // Set the dimension again in case a plugin changed the target world during RespawnPlayerEvent
         newPlayer.dimension = mixinWorldServer.bridge$getDimensionId();
         newPlayer.setWorld(worldServer);

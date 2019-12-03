@@ -71,7 +71,7 @@ import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
 import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
@@ -148,7 +148,7 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
                 chunkGeneratorName = "chunkGenerator (" + base.getClass().getName() + ")";
             }
             this.chunkGeneratorTiming =
-                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((WorldServerBridge) world).bridge$getTimingsHandler().chunkPopulate);
+                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((ServerWorldBridge) world).bridge$getTimingsHandler().chunkPopulate);
         }
 
     }
@@ -289,7 +289,7 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
 
     @Override
     public void populate(int chunkX, int chunkZ) {
-        WorldServerBridge world = (WorldServerBridge) this.world;
+        ServerWorldBridge world = (ServerWorldBridge) this.world;
         world.bridge$getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();

@@ -43,7 +43,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
@@ -92,7 +92,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         final IPhaseState<?> phaseState = PhaseTracker.getInstance().getCurrentState();
         if (!phaseState.isInteraction()) {
             // TODO BLOCK_PROTECTED flag
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) worldIn, pos, playerIn).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos, playerIn).isCancelled()) {
                 return true;
             }
         }

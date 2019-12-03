@@ -41,7 +41,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3d;
@@ -116,7 +116,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
         // This results in a extremely noticeable speed improvement.
         //
         // This also allows us to catch non Anvil file formats too.
-        if (world.getWorldStorage() instanceof ChunkProviderServerBridge) {
+        if (world.getWorldStorage() instanceof ServerChunkProviderBridge) {
             this.doesChunkExistCheck = this::checkChunkExistsAnvil;
         } else {
             this.doesChunkExistCheck = v -> false;
@@ -352,7 +352,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
     }
 
     private boolean checkChunkExistsAnvil(Vector3i v) {
-        CompletableFuture<Boolean> ret = ((ChunkProviderServerBridge) this.world.getWorldStorage()).bridge$doesChunkExistSync(v);
+        CompletableFuture<Boolean> ret = ((ServerChunkProviderBridge) this.world.getWorldStorage()).bridge$doesChunkExistSync(v);
         try {
             return ret.get();
         } catch (InterruptedException | ExecutionException e) {

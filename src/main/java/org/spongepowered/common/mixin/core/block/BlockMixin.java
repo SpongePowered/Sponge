@@ -70,7 +70,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockTrackerCategory;
@@ -163,7 +163,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
-        final SpongeProxyBlockAccess proxyAccess = ((WorldServerBridge) worldIn).bridge$getProxyAccess();
+        final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldIn).bridge$getProxyAccess();
         if (proxyAccess.hasProxy() && proxyAccess.isProcessingTransactionWithNextHavingBreak(pos, state)) {
             ci.cancel();
         }
@@ -254,7 +254,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
                 return;
             }
 
-            final WorldServerBridge mixinWorld = (WorldServerBridge) worldIn;
+            final ServerWorldBridge mixinWorld = (ServerWorldBridge) worldIn;
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final IPhaseState<?> currentState = phaseTracker.getCurrentState();
             final PhaseContext<?> currentContext = phaseTracker.getCurrentContext();
