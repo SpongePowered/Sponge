@@ -62,13 +62,13 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
 
     @Override
     public Goal<O> addTask(final int priority, final AITask<? extends O> task) {
-        shadow$addTask(priority, (net.minecraft.entity.ai.goal.Goal) task);
+        this.shadow$addTask(priority, (net.minecraft.entity.ai.goal.Goal) task);
         return this;
     }
 
     @Override
     public Goal<O> removeTask(final AITask<? extends O> task) {
-        shadow$removeTask((net.minecraft.entity.ai.goal.Goal) task);
+        this.shadow$removeTask((net.minecraft.entity.ai.goal.Goal) task);
         return  this;
     }
 

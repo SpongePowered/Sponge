@@ -171,7 +171,7 @@ abstract class SchedulerBase {
         if (threshold <= (now - task.getTimestamp())) {
             task.setState(ScheduledTask.ScheduledTaskState.SWITCHING);
             task.setTimestamp(this.getTimestamp(task));
-            startTask(task);
+            this.startTask(task);
             // If task is one time shot, remove it from the map.
             if (task.period == 0L) {
                 this.removeTask(task);
@@ -187,7 +187,7 @@ abstract class SchedulerBase {
     protected void startTask(final ScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
             task.setState(ScheduledTask.ScheduledTaskState.EXECUTING);
-            try (final PhaseContext<?> context = createContext(task, task.getOwner());
+            try (final PhaseContext<?> context = this.createContext(task, task.getOwner());
                  final Timing timings = task.getTimingsHandler()) {
                 timings.startTimingIfSync();
                 if (context != null) {
@@ -201,7 +201,7 @@ abstract class SchedulerBase {
                 }
             } finally {
                 task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
-                onTaskCompletion(task);
+                this.onTaskCompletion(task);
             }
         });
     }

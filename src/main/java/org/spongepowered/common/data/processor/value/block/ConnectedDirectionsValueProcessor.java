@@ -78,7 +78,7 @@ public class ConnectedDirectionsValueProcessor extends
 
     @Override
     protected Immutable<Set<Direction>> constructImmutableValue(Set<Direction> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

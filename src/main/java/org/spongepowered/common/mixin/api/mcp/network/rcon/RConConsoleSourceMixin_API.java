@@ -64,6 +64,6 @@ public abstract class RConConsoleSourceMixin_API implements RconSource {
 
     @Intrinsic
     public String api$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 }

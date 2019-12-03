@@ -52,11 +52,11 @@ public abstract class EnumDyeColorMixin_API implements DyeColor {
     }
 
     public String dye$getId() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 
     public Color dye$getColor() {
-        float[] color = getColorComponentValues();
+        float[] color = this.getColorComponentValues();
         int r = GenericMath.floor(color[0] * 255);
         int g = GenericMath.floor(color[1] * 255);
         int b = GenericMath.floor(color[2] * 255);

@@ -44,7 +44,7 @@ public class SpongeCareer extends SpongeEntityMeta implements Career {
 
     @Override
     public String getName() {
-        return getTranslation().get();
+        return this.getTranslation().get();
     }
 
     @Override

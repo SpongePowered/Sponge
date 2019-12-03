@@ -45,7 +45,7 @@ public class OreBuilder implements Ore.Builder {
     private Predicate<BlockState> conditions;
 
     public OreBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class OreBuilder implements Ore.Builder {
 
     @Override
     public Builder from(Ore value) {
-        return ore(value.getOreBlock())
+        return this.ore(value.getOreBlock())
             .size(value.getDepositSize())
             .perChunk(value.getDepositsPerChunk())
             .height(value.getHeight())

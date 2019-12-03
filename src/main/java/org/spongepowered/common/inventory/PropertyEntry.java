@@ -46,10 +46,10 @@ public final class PropertyEntry {
     }
 
     public Property<?> getProperty() {
-        return property;
+        return this.property;
     }
 
     public Object getValue() {
-        return value;
+        return this.value;
     }
 }

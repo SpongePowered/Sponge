@@ -76,7 +76,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
 
                 @Override
                 public Class<? extends AnnotatedEventListener> load(Method method) throws Exception {
-                    return createClass(method);
+                    return ClassEventListenerFactory.this.createClass(method);
                 }
             });
     private FilterFactory filterFactory;

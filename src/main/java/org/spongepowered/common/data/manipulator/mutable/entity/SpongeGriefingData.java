@@ -43,7 +43,7 @@ public class SpongeGriefingData extends AbstractBooleanData<GriefingData, Immuta
 
     @Override
     public Mutable<Boolean> canGrief() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

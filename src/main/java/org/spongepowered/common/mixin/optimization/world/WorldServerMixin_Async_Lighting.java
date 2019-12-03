@@ -308,7 +308,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
     }
 
     private int asyncLightingImpl$getRawBlockLightAsync(final LightType lightType, final BlockPos pos, final Chunk currentChunk, final List<Chunk> neighbors) {
-        final Chunk chunk = asyncLightingImpl$getLightChunk(pos, currentChunk, neighbors);
+        final Chunk chunk = this.asyncLightingImpl$getLightChunk(pos, currentChunk, neighbors);
         if (chunk == null || chunk.unloadQueued) {
             return lightType.defaultLightValue;
         }
@@ -368,9 +368,10 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
     }
 
     private short asyncLightingImpl$blockPosToShort(final BlockPos pos) {
-        short serialized = (short) asyncLightingImpl$setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
-        serialized = (short) asyncLightingImpl$setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
-        serialized = (short) asyncLightingImpl$setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
+        short serialized = (short) this.asyncLightingImpl$setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+        serialized = (short) this
+                .asyncLightingImpl$setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
+        serialized = (short) this.asyncLightingImpl$setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
         return serialized;
     }
 

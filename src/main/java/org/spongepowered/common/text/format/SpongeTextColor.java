@@ -64,7 +64,7 @@ public class SpongeTextColor implements TextColor {
 
     @Override
     public String toString() {
-        return getName();
+        return this.getName();
     }
 
     public static SpongeTextColor of(TextFormatting color) {

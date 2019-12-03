@@ -63,7 +63,7 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
                 .build()
                 .asImmutable();
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -99,10 +99,10 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.MAX_AIR, ImmutableSpongeBreathingData.this::getMaxAir);
-        registerKeyValue(Keys.MAX_AIR, ImmutableSpongeBreathingData.this::maxAir);
+        this.registerFieldGetter(Keys.MAX_AIR, ImmutableSpongeBreathingData.this::getMaxAir);
+        this.registerKeyValue(Keys.MAX_AIR, ImmutableSpongeBreathingData.this::maxAir);
 
-        registerFieldGetter(Keys.REMAINING_AIR, ImmutableSpongeBreathingData.this::getRemainingAir);
-        registerKeyValue(Keys.REMAINING_AIR, ImmutableSpongeBreathingData.this::remainingAir);
+        this.registerFieldGetter(Keys.REMAINING_AIR, ImmutableSpongeBreathingData.this::getRemainingAir);
+        this.registerKeyValue(Keys.REMAINING_AIR, ImmutableSpongeBreathingData.this::remainingAir);
     }
 }

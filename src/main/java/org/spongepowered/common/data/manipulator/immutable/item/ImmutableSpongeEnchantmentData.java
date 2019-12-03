@@ -40,12 +40,12 @@ public class ImmutableSpongeEnchantmentData extends AbstractImmutableListData<En
 
     public ImmutableSpongeEnchantmentData(List<Enchantment> enchantments) {
         super(ImmutableEnchantmentData.class, enchantments, Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.class);
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
     public Immutable<Enchantment> enchantments() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override

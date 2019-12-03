@@ -55,7 +55,7 @@ public final class SpongeGenerationData extends AbstractIntData<GenerationData, 
 
     @Override
     protected org.spongepowered.api.data.value.Value.Mutable<?> getValueGetter() {
-        return generation();
+        return this.generation();
     }
 
     @Override

@@ -44,7 +44,7 @@ public class FilterFactory {
 
                 @Override
                 public Class<? extends EventFilter> load(Method method) throws Exception {
-                    return createClass(method);
+                    return FilterFactory.this.createClass(method);
                 }
             });
     private final String targetPackage;

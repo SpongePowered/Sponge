@@ -50,7 +50,7 @@ public abstract class BlockPistonExtensionMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getPistonTypeFor(blockState), impl$getDirectionalData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getPistonTypeFor(blockState), this.impl$getDirectionalData(blockState));
     }
 
     @Override

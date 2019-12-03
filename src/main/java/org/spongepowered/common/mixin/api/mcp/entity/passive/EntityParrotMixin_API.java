@@ -59,7 +59,7 @@ public abstract class EntityParrotMixin_API extends EntityTameableMixin_API impl
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
-        manipulators.add(getParrotData());
+        manipulators.add(this.getParrotData());
     }
 
 }

@@ -58,22 +58,22 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
         this.smallValue = ImmutableSpongeValue.cachedOf(Keys.ARMOR_STAND_IS_SMALL, false, this.small);
         this.armsValue = ImmutableSpongeValue.cachedOf(Keys.ARMOR_STAND_HAS_ARMS, false, this.arms);
         this.basePlateValue = ImmutableSpongeValue.cachedOf(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, this.basePlate);
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ARMOR_STAND_HAS_ARMS, () -> this.arms);
-        registerKeyValue(Keys.ARMOR_STAND_HAS_ARMS, () -> this.armsValue);
+        this.registerFieldGetter(Keys.ARMOR_STAND_HAS_ARMS, () -> this.arms);
+        this.registerKeyValue(Keys.ARMOR_STAND_HAS_ARMS, () -> this.armsValue);
 
-        registerFieldGetter(Keys.ARMOR_STAND_IS_SMALL, () -> this.small);
-        registerKeyValue(Keys.ARMOR_STAND_IS_SMALL, () -> this.smallValue);
+        this.registerFieldGetter(Keys.ARMOR_STAND_IS_SMALL, () -> this.small);
+        this.registerKeyValue(Keys.ARMOR_STAND_IS_SMALL, () -> this.smallValue);
 
-        registerFieldGetter(Keys.ARMOR_STAND_HAS_BASE_PLATE, () -> this.basePlate);
-        registerKeyValue(Keys.ARMOR_STAND_HAS_BASE_PLATE, () -> this.basePlateValue);
+        this.registerFieldGetter(Keys.ARMOR_STAND_HAS_BASE_PLATE, () -> this.basePlate);
+        this.registerKeyValue(Keys.ARMOR_STAND_HAS_BASE_PLATE, () -> this.basePlateValue);
 
-        registerFieldGetter(Keys.ARMOR_STAND_MARKER, () -> this.marker);
-        registerKeyValue(Keys.ARMOR_STAND_MARKER, () -> this.markerValue);
+        this.registerFieldGetter(Keys.ARMOR_STAND_MARKER, () -> this.marker);
+        this.registerKeyValue(Keys.ARMOR_STAND_MARKER, () -> this.markerValue);
 
     }
 

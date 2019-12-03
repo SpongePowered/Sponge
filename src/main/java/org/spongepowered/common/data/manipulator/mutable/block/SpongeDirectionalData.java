@@ -44,6 +44,6 @@ public class SpongeDirectionalData extends AbstractSingleEnumData<Direction, Dir
 
     @Override
     public Mutable<Direction> direction() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

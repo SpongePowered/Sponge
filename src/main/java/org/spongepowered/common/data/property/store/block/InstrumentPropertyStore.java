@@ -46,7 +46,7 @@ public class InstrumentPropertyStore extends AbstractBlockPropertyStore<Instrume
 
     @Override
     protected Optional<InstrumentProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
-        return Optional.of(new InstrumentProperty(getInstrumentType(block)));
+        return Optional.of(new InstrumentProperty(this.getInstrumentType(block)));
     }
 
     @SuppressWarnings("deprecation")

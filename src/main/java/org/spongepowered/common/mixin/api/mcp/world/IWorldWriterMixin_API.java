@@ -44,22 +44,22 @@ public interface IWorldWriterMixin_API extends MutableGameVolume {
 
     @Override
     default boolean setBlock(int x, int y, int z, org.spongepowered.api.block.BlockState state, BlockChangeFlag flag) {
-        return shadow$setBlockState(new BlockPos(x, y, z), (BlockState) state, BlockChangeFlagRegistryModule.toNative(flag));
+        return this.shadow$setBlockState(new BlockPos(x, y, z), (BlockState) state, BlockChangeFlagRegistryModule.toNative(flag));
     }
 
     @Override
     default boolean spawnEntity(org.spongepowered.api.entity.Entity entity) {
-        return shadow$addEntity((Entity) entity);
+        return this.shadow$addEntity((Entity) entity);
     }
 
     @Override
     default boolean removeBlock(int x, int y, int z) {
-        return shadow$removeBlock(new BlockPos(x, y, z), false);
+        return this.shadow$removeBlock(new BlockPos(x, y, z), false);
     }
 
     @Override
     default boolean destroyBlock(Vector3i pos, boolean performDrops) {
-        return shadow$destroyBlock(new BlockPos(pos.getX(), pos.getY(), pos.getZ()), performDrops);
+        return this.shadow$destroyBlock(new BlockPos(pos.getX(), pos.getY(), pos.getZ()), performDrops);
     }
 
 }

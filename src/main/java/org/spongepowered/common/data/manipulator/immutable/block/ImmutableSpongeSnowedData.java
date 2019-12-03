@@ -40,7 +40,7 @@ public class ImmutableSpongeSnowedData extends AbstractImmutableBooleanData<Immu
 
     @Override
     public Immutable<Boolean> hasSnow() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

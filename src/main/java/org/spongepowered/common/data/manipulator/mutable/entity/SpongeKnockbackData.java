@@ -48,18 +48,18 @@ public class SpongeKnockbackData extends AbstractIntData<KnockbackData, Immutabl
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(0)
-                .actualValue(getValue())
+                .actualValue(this.getValue())
                 .build();
     }
 
     @Override
     protected org.spongepowered.api.data.value.Value.Mutable<?> getValueGetter() {
-        return knockbackStrength();
+        return this.knockbackStrength();
     }
 
     @Override
     public ImmutableKnockbackData asImmutable() {
-        return new ImmutableSpongeKnockbackData(getValue());
+        return new ImmutableSpongeKnockbackData(this.getValue());
     }
 
 }

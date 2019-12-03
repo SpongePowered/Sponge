@@ -64,7 +64,7 @@ public class QuartzDataProcessor extends AbstractCatalogDataProcessor<QuartzType
 
     @Override
     protected Mutable<QuartzType> constructValue(QuartzType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

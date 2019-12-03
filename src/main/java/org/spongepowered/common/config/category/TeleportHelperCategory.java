@@ -48,7 +48,7 @@ public class TeleportHelperCategory extends ConfigCategory {
     private List<String> unsafeBlockBlockIds = new ArrayList<>();
 
     public boolean isForceBlacklistOn() {
-        return forceBlacklistOn;
+        return this.forceBlacklistOn;
     }
 
     public List<String> getUnsafeFloorBlockIds() {

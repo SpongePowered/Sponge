@@ -66,7 +66,7 @@ public final class DataViewJsonWriter extends JsonWriter {
     }
 
     public DataContainer getResult() throws IOException {
-        close();
+        this.close();
         return this.result;
     }
 
@@ -81,24 +81,24 @@ public final class DataViewJsonWriter extends JsonWriter {
     @SuppressWarnings("unchecked")
     private void put(@Nullable Object value) {
         if (this.pendingKey != null) {
-            ((DataView) peek()).set(this.pendingKey, value);
+            ((DataView) this.peek()).set(this.pendingKey, value);
             this.pendingKey = null;
         } else {
-            ((List<Object>) peek()).add(value);
+            ((List<Object>) this.peek()).add(value);
         }
     }
 
     @Override
     public JsonWriter beginArray() {
         List<Object> list = new ArrayList<>();
-        put(list);
+        this.put(list);
         this.stack.add(list);
         return this;
     }
 
     @Override
     public JsonWriter endArray() {
-        checkState(!this.stack.isEmpty() && this.pendingKey == null && pop() instanceof List);
+        checkState(!this.stack.isEmpty() && this.pendingKey == null && this.pop() instanceof List);
         return this;
     }
 
@@ -109,7 +109,7 @@ public final class DataViewJsonWriter extends JsonWriter {
             return this;
         }
 
-        Object parent = peek();
+        Object parent = this.peek();
         if (parent instanceof DataView) {
             checkState(this.pendingKey != null);
             ((DataView) parent).createView(this.pendingKey);
@@ -117,56 +117,56 @@ public final class DataViewJsonWriter extends JsonWriter {
             return this;
         }
 
-        put(DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED));
+        this.put(DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED));
         return this;
     }
 
     @Override
     public JsonWriter endObject() {
-        checkState(!this.stack.isEmpty() && this.pendingKey == null && pop() instanceof DataView);
+        checkState(!this.stack.isEmpty() && this.pendingKey == null && this.pop() instanceof DataView);
         return this;
     }
 
     @Override
     public JsonWriter name(String name) {
-        checkState(!this.stack.isEmpty() && this.pendingKey == null && peek() instanceof DataView);
+        checkState(!this.stack.isEmpty() && this.pendingKey == null && this.peek() instanceof DataView);
         this.pendingKey = DataQuery.of(name);
         return this;
     }
 
     @Override
     public JsonWriter value(String value) {
-        put(value);
+        this.put(value);
         return this;
     }
 
     @Override
     public JsonWriter nullValue() {
-        put(null);
+        this.put(null);
         return this;
     }
 
     @Override
     public JsonWriter value(boolean value) {
-        put(value);
+        this.put(value);
         return this;
     }
 
     @Override
     public JsonWriter value(double value) {
-        put(value);
+        this.put(value);
         return this;
     }
 
     @Override
     public JsonWriter value(long value) {
-        put(value);
+        this.put(value);
         return this;
     }
 
     @Override
     public JsonWriter value(Number value) {
-        put(value);
+        this.put(value);
         return this;
     }
 

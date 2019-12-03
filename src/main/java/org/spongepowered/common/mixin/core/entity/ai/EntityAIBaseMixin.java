@@ -46,7 +46,7 @@ public abstract class EntityAIBaseMixin implements EntityAIBasesBridge {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void assignAITaskType(final CallbackInfo ci) {
-        final Optional<AITaskType> optAiTaskType = AITaskTypeModule.getInstance().getByAIClass(getClass());
+        final Optional<AITaskType> optAiTaskType = AITaskTypeModule.getInstance().getByAIClass(this.getClass());
         if (optAiTaskType.isPresent()) {
             this.impl$type = optAiTaskType.get();
         }

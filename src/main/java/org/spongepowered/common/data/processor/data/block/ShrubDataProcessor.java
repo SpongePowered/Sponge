@@ -64,7 +64,7 @@ public class ShrubDataProcessor extends AbstractCatalogDataProcessor<ShrubType, 
 
     @Override
     protected Mutable<ShrubType> constructValue(ShrubType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

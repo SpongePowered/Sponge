@@ -71,7 +71,7 @@ public class TileEntitySuccessCountValueProcessor extends AbstractSpongeValuePro
 
     @Override
     protected Immutable<Integer> constructImmutableValue(final Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

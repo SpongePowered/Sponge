@@ -60,12 +60,12 @@ public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return type();
+        return this.type();
     }
 
     @Override
     public I asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, getValue());
+        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, this.getValue());
     }
 
     @Override

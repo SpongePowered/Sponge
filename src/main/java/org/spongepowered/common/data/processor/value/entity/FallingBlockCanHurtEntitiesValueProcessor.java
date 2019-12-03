@@ -60,7 +60,7 @@ public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeVal
 
     @Override
     protected Immutable<Boolean> constructImmutableValue(final Boolean value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -45,7 +45,7 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
         this.health = health;
         checkArgument(maxHealth > 0);
         this.maxHealth = maxHealth;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeHealthData() {
@@ -109,12 +109,12 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.HEALTH, SpongeHealthData.this::getHealth);
-        registerFieldSetter(Keys.HEALTH, SpongeHealthData.this::setHealth);
-        registerKeyValue(Keys.HEALTH, SpongeHealthData.this::health);
+        this.registerFieldGetter(Keys.HEALTH, SpongeHealthData.this::getHealth);
+        this.registerFieldSetter(Keys.HEALTH, SpongeHealthData.this::setHealth);
+        this.registerKeyValue(Keys.HEALTH, SpongeHealthData.this::health);
 
-        registerFieldGetter(Keys.MAX_HEALTH, SpongeHealthData.this::getMaxHealth);
-        registerFieldSetter(Keys.MAX_HEALTH, SpongeHealthData.this::setMaxHealth);
-        registerKeyValue(Keys.MAX_HEALTH, SpongeHealthData.this::maxHealth);
+        this.registerFieldGetter(Keys.MAX_HEALTH, SpongeHealthData.this::getMaxHealth);
+        this.registerFieldSetter(Keys.MAX_HEALTH, SpongeHealthData.this::setMaxHealth);
+        this.registerKeyValue(Keys.MAX_HEALTH, SpongeHealthData.this::maxHealth);
     }
 }

@@ -101,7 +101,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
     @Override
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(final Class<T> configClass) {
-        return typeSerializableConfig(configClass, TypeSerializers.getDefaultSerializers());
+        return this.typeSerializableConfig(configClass, TypeSerializers.getDefaultSerializers());
     }
 
     @Override
@@ -150,7 +150,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
     @Override
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(final Class<T> configClass) {
-        return jsonSerializableConfig(configClass, GSON);
+        return this.jsonSerializableConfig(configClass, GSON);
     }
 
     private static class JsonConstructor<C extends FilteredTriggerConfiguration> implements Function<JsonObject, C> {

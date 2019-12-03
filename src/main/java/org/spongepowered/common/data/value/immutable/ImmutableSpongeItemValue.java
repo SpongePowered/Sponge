@@ -52,13 +52,13 @@ public class ImmutableSpongeItemValue extends ImmutableSpongeValue<ItemStack> {
 
     @Override
     public Immutable<ItemStack> transform(Function<ItemStack, ItemStack> function) {
-        final ItemStack value = checkNotNull(function).apply(get());
-        return new ImmutableSpongeItemValue(this.getKey(), getDefault(), checkNotNull(value));
+        final ItemStack value = checkNotNull(function).apply(this.get());
+        return new ImmutableSpongeItemValue(this.getKey(), this.getDefault(), checkNotNull(value));
     }
 
     @Override
     public Mutable<ItemStack> asMutable() {
-        return new SpongeItemValue(getKey(), getDefault(), get());
+        return new SpongeItemValue(this.getKey(), this.getDefault(), this.get());
     }
 
     @Override

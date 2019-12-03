@@ -157,7 +157,7 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
             final Mutable<?, ?> manipulator = iterator.next();
             if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
                 iterator.remove();
-                bridge$removeCustomFromNbt(manipulator);
+                this.bridge$removeCustomFromNbt(manipulator);
                 return DataTransactionResult.builder()
                     .replace(manipulator.getValues())
                     .result(DataTransactionResult.Type.SUCCESS)

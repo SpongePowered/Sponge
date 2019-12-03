@@ -53,7 +53,7 @@ public class ComparatorDataProcessor extends
 
     @Override
     protected Mutable<ComparatorType> constructValue(ComparatorType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

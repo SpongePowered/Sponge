@@ -232,6 +232,6 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
 
     @Override
     public String bridge$getPrettyPrinterString() {
-        return getPrettyPrinterStringHelper().toString();
+        return this.getPrettyPrinterStringHelper().toString();
     }
 }

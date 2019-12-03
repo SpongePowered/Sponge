@@ -49,6 +49,6 @@ public class SpongeSlimeData extends AbstractBoundedComparableData<Integer, Slim
 
     @Override
     public Mutable<Integer> size() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

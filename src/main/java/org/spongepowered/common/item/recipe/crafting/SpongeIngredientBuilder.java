@@ -90,19 +90,19 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
     @Override
     public Ingredient.Builder with(final ItemStackSnapshot... items) {
         Arrays.stream(items).map(ItemStackSnapshot::createStack).forEach(this.matchItems::add);
-        return withDisplay(items);
+        return this.withDisplay(items);
     }
 
     @Override
     public Ingredient.Builder with(final ItemStack... items) {
         Arrays.stream(items).map(ItemStack::copy).forEach(this.matchItems::add);
-        return withDisplay(items);
+        return this.withDisplay(items);
     }
 
     @Override
     public Ingredient.Builder with(final ItemType... items) {
         Arrays.stream(items).map(t -> (Predicate<ItemStack>) t::matches).forEach(this.predicates::add);
-        return withDisplay(items);
+        return this.withDisplay(items);
     }
 
     @Override

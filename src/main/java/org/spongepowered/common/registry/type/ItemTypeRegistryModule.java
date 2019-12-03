@@ -46,7 +46,7 @@ import java.util.Optional;
 public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<ItemType>, AlternateCatalogRegistryModule<ItemType> {
 
     public final ItemStack NONE = (ItemStack) net.minecraft.item.ItemStack.EMPTY;
-    public final ItemStackSnapshot NONE_SNAPSHOT = NONE.createSnapshot();
+    public final ItemStackSnapshot NONE_SNAPSHOT = this.NONE.createSnapshot();
 
     public static ItemTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -95,11 +95,11 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public void registerDefaults() {
-        setItemNone();
+        this.setItemNone();
     }
 
     private void setItemNone() {
-        RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", NONE_SNAPSHOT);
+        RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", this.NONE_SNAPSHOT);
     }
 
     ItemTypeRegistryModule() {

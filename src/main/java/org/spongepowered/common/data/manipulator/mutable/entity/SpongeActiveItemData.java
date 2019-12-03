@@ -45,22 +45,22 @@ public class SpongeActiveItemData extends AbstractSingleData<ItemStackSnapshot, 
 
     @Override
     public Mutable<ItemStackSnapshot> activeItem() {
-        return new SpongeValue<>(Keys.ACTIVE_ITEM, getValue());
+        return new SpongeValue<>(Keys.ACTIVE_ITEM, this.getValue());
     }
 
     @Override
     protected Mutable<ItemStackSnapshot> getValueGetter() {
-        return activeItem();
+        return this.activeItem();
     }
 
     @Override
     public ActiveItemData copy() {
-        return new SpongeActiveItemData(getValue());
+        return new SpongeActiveItemData(this.getValue());
     }
 
     @Override
     public ImmutableActiveItemData asImmutable() {
-        return new ImmutableSpongeActiveItemData(getValue());
+        return new ImmutableSpongeActiveItemData(this.getValue());
     }
 
 }

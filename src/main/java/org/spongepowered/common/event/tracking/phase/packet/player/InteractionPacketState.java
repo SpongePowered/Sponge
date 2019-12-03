@@ -227,19 +227,19 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     printer.trace(System.err);
                 });
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, entities);
+                this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, entities);
             });
 
             phaseContext.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((multimap -> {
                 for (final Map.Entry<UUID, Collection<ItemEntity>> entry : multimap.asMap().entrySet()) {
                     if (entry.getKey().equals(player.getUniqueID())) {
-                        throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
+                        this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                     } else {
                         final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.world).getEntityFromUuid(entry.getKey());
                         if (spawnedEntity != null) {
                             try (final CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 entityFrame.pushCause(spawnedEntity);
-                                throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
+                                this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                             }
                         }
                     }

@@ -149,7 +149,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                 rawMap = EntitySelectorAccessor.accessor$getArgumentMap(selector.substring(argListIndex + 1, selector.length() - 1));
             }
             Map<ArgumentType<?>, Argument<?>> arguments =
-                    parseArguments(rawMap);
+                    this.parseArguments(rawMap);
             return new SpongeSelector(type, ImmutableMap.copyOf(arguments));
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid selector " + selector,
@@ -160,10 +160,10 @@ public class SpongeSelectorFactory implements SelectorFactory {
     @Override
     public Limit<ArgumentType<Integer>> createScoreArgumentType(String name) {
         if (!this.scoreToTypeMap.containsKey(name)) {
-            SpongeArgumentType<Integer> min = createArgumentType(
+            SpongeArgumentType<Integer> min = this.createArgumentType(
                     "score_" + name + "_min", Integer.class,
                     Score.class.getName());
-            SpongeArgumentType<Integer> max = createArgumentType(
+            SpongeArgumentType<Integer> max = this.createArgumentType(
                     "score_" + name, Integer.class,
                     Score.class.getName());
             this.scoreToTypeMap
@@ -178,7 +178,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public Optional<ArgumentType<?>> getArgumentType(String name) {
         if (name.startsWith("score_")) {
             String objective = name.replaceAll("^score_", "").replaceAll("_min$", "");
-            Limit<ArgumentType<Integer>> limit = createScoreArgumentType(objective);
+            Limit<ArgumentType<Integer>> limit = this.createScoreArgumentType(objective);
             if (name.endsWith("_min")) {
                 return Optional.of(limit.minimum());
             } else {
@@ -195,13 +195,13 @@ public class SpongeSelectorFactory implements SelectorFactory {
 
     @Override
     public SpongeArgumentType<String> createArgumentType(String key) {
-        return createArgumentType(key, String.class);
+        return this.createArgumentType(key, String.class);
     }
 
     @Override
     public <T> SpongeArgumentType<T> createArgumentType(String key,
             Class<T> type) {
-        return createArgumentType(key, type, type.getName());
+        return this.createArgumentType(key, type, type.getName());
     }
 
     @SuppressWarnings("unchecked")
@@ -217,7 +217,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
 
     public <T> SpongeArgumentType.Invertible<T> createInvertibleArgumentType(
             String key, Class<T> type) {
-        return createInvertibleArgumentType(key, type, type.getName());
+        return this.createInvertibleArgumentType(key, type, type.getName());
     }
 
     @SuppressWarnings("unchecked")
@@ -236,7 +236,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     @Override
     public <T> Argument<T> createArgument(ArgumentType<T> type, T value) {
         if (type instanceof ArgumentType.Invertible) {
-            return createArgument((ArgumentType.Invertible<T>) type, value,
+            return this.createArgument((ArgumentType.Invertible<T>) type, value,
                     false);
         }
         return new SpongeArgument<>(type, value);
@@ -263,7 +263,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
             while (extIter.hasNext() && typeIter.hasNext()) {
                 Function<V, T> extractor = extIter.next();
                 ArgumentType<T> subtype = typeIter.next();
-                set.add(createArgument(subtype, extractor.apply(value)));
+                set.add(this.createArgument(subtype, extractor.apply(value)));
             }
         }
         return set;
@@ -273,9 +273,9 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public Argument<?> parseArgument(String argument)
             throws IllegalArgumentException {
         String[] argBits = argument.split("=");
-        SpongeArgumentType<Object> type = getArgumentTypeWithChecks(argBits[0]);
+        SpongeArgumentType<Object> type = this.getArgumentTypeWithChecks(argBits[0]);
         String value = argBits[1];
-        return parseArgumentCreateShared(type, value);
+        return this.parseArgumentCreateShared(type, value);
     }
 
     public Map<ArgumentType<?>, Argument<?>> parseArguments(
@@ -284,9 +284,9 @@ public class SpongeSelectorFactory implements SelectorFactory {
             new HashMap<>(argumentMap.size());
         for (Entry<String, String> argument : argumentMap.entrySet()) {
             String argKey = argument.getKey();
-            SpongeArgumentType<Object> type = getArgumentTypeWithChecks(argKey);
+            SpongeArgumentType<Object> type = this.getArgumentTypeWithChecks(argKey);
             String value = argument.getValue();
-            generated.put(type, parseArgumentCreateShared(type, value));
+            generated.put(type, this.parseArgumentCreateShared(type, value));
         }
         return generated;
     }
@@ -312,10 +312,10 @@ public class SpongeSelectorFactory implements SelectorFactory {
         Argument<?> created;
         if (type instanceof ArgumentType.Invertible && !value.isEmpty() && value.charAt(0) == '!') {
             created =
-                    createArgument((ArgumentType.Invertible<Object>) type,
+                    this.createArgument((ArgumentType.Invertible<Object>) type,
                             type.convert(value.substring(1)), true);
         } else {
-            created = createArgument(type, type.convert(value));
+            created = this.createArgument(type, type.convert(value));
         }
         return created;
     }

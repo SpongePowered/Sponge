@@ -65,21 +65,21 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
 
     @Override
     public Immutable<E> asImmutable() {
-        return new ImmutableSpongeOptionalValue<>(getKey(), this.actualValue);
+        return new ImmutableSpongeOptionalValue<>(this.getKey(), this.actualValue);
     }
 
     @Override
     public Mutable<E> copy() {
-        return new SpongeOptionalValue<>(getKey(), this.actualValue);
+        return new SpongeOptionalValue<>(this.getKey(), this.actualValue);
     }
 
     @Override
     public Mutable<E> setTo(@Nullable E value) {
-        return set(Optional.ofNullable(value));
+        return this.set(Optional.ofNullable(value));
     }
 
     @Override
     public org.spongepowered.api.data.value.Value.Mutable<E> or(E defaultValue) { // TODO actually construct the keys
-        return new SpongeValue<>(null, null, get().isPresent() ? get().get() : checkNotNull(defaultValue));
+        return new SpongeValue<>(null, null, this.get().isPresent() ? this.get().get() : checkNotNull(defaultValue));
     }
 }

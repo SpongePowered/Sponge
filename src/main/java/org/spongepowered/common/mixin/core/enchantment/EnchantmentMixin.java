@@ -38,7 +38,7 @@ public abstract class EnchantmentMixin {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("EnchantmentType")
-                .add("Name", shadow$getName())
+                .add("Name", this.shadow$getName())
                 .add("Id", ((EnchantmentType) this).getId())
                 .toString();
     }

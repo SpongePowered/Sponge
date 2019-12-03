@@ -60,17 +60,17 @@ public class DefaultConfigAnnotation implements DefaultConfig {
         }
 
         DefaultConfig that = (DefaultConfig) o;
-        return sharedRoot() == that.sharedRoot();
+        return this.sharedRoot() == that.sharedRoot();
     }
 
     @Override
     public int hashCode() {
-        return (127 * "sharedRoot".hashCode()) ^ Boolean.valueOf(sharedRoot()).hashCode();
+        return (127 * "sharedRoot".hashCode()) ^ Boolean.valueOf(this.sharedRoot()).hashCode();
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper('@' + getClass().getName())
+        return MoreObjects.toStringHelper('@' + this.getClass().getName())
                 .add("shared", this.shared)
                 .toString();
     }

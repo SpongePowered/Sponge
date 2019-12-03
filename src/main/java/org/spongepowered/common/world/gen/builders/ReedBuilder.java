@@ -37,7 +37,7 @@ public class ReedBuilder implements Reed.Builder {
     private VariableAmount height;
 
     public ReedBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -54,7 +54,7 @@ public class ReedBuilder implements Reed.Builder {
 
     @Override
     public Builder from(Reed value) {
-        return perChunk(value.getReedsPerChunk())
+        return this.perChunk(value.getReedsPerChunk())
             .reedHeight(value.getReedHeight());
     }
 

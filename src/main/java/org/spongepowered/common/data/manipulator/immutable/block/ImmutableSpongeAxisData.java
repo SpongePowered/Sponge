@@ -42,7 +42,7 @@ public class ImmutableSpongeAxisData extends AbstractImmutableSingleEnumData<Axi
 
     @Override
     public Immutable<Axis> axis() {
-        return type();
+        return this.type();
     }
 
 }

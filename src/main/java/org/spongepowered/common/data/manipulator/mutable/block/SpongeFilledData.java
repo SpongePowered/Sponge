@@ -39,7 +39,7 @@ public class SpongeFilledData extends AbstractBooleanData<FilledData, ImmutableF
 
     @Override
     public Mutable<Boolean> filled() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

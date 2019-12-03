@@ -52,7 +52,7 @@ public class PlacingDisabledValueProcessor
 	@Override
 	public DataTransactionResult offerToStore(final ValueContainer<?> container, final Set<EquipmentType> value) {
 		try {
-			set((ArmorStandEntity) container, value);
+            this.set((ArmorStandEntity) container, value);
 			return DataTransactionResult.successNoData();
 		} catch (Exception e) {
 			return DataTransactionResult.failNoData();

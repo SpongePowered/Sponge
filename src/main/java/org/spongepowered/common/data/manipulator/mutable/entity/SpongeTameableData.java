@@ -45,7 +45,7 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
     public SpongeTameableData(@Nullable UUID owner) {
         super(TameableData.class);
         this.owner = owner;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeTameableData() {
@@ -86,8 +86,8 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.TAMED_OWNER, SpongeTameableData.this::getOwner);
-        registerFieldSetter(Keys.TAMED_OWNER, SpongeTameableData.this::setOwner);
-        registerKeyValue(Keys.TAMED_OWNER, SpongeTameableData.this::owner);
+        this.registerFieldGetter(Keys.TAMED_OWNER, SpongeTameableData.this::getOwner);
+        this.registerFieldSetter(Keys.TAMED_OWNER, SpongeTameableData.this::setOwner);
+        this.registerKeyValue(Keys.TAMED_OWNER, SpongeTameableData.this::owner);
     }
 }

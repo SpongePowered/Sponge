@@ -39,7 +39,7 @@ public class ImmutableSpongeChargedData extends AbstractImmutableBooleanData<Imm
 
     @Override
     public Immutable<Boolean> charged() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

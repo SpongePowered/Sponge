@@ -249,7 +249,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         }
 
         // Double check that the PhaseTracker is already capturing the Death phase
-        try (final EntityDeathContext context = createOrNullDeathPhase(isMainThread, cause)) {
+        try (final EntityDeathContext context = this.createOrNullDeathPhase(isMainThread, cause)) {
             // We re-enter the state only if we aren't already in the death state. This can usually happen when
             // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
             // but then again, mods....
@@ -318,7 +318,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Inject(method = "setHealth", at = @At("HEAD"))
     private void onSetHealthResetEvents(final float health, final CallbackInfo info) {
         if (this.getHealth() <= 0 && health > 0) {
-            bridge$resetDeathEventsPosted();
+            this.bridge$resetDeathEventsPosted();
         }
     }
 
@@ -556,7 +556,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                         }
 
                         // Sponge Start - notify the cause tracker
-                        try (final EntityDeathContext context = createOrNullDeathPhase(true, source)) {
+                        try (final EntityDeathContext context = this.createOrNullDeathPhase(true, source)) {
                             if (context != null) {
                                 context.buildAndSwitch();
                             }
@@ -606,7 +606,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         if (!this.isEntityInvulnerable(damageSource)) {
             final boolean human = (LivingEntity) (Object) this instanceof PlayerEntity;
             // apply forge damage hook
-            damage = bridge$applyModDamage((LivingEntity) (Object) this, damageSource, damage);
+            damage = this.bridge$applyModDamage((LivingEntity) (Object) this, damageSource, damage);
             final float originalDamage = damage; // set after forge hook.
             if (damage <= 0) {
                 damage = 0;
@@ -616,7 +616,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             final Optional<DamageFunction> hardHatFunction =
                 DamageEventHandler.createHardHatModifier((LivingEntity) (Object) this, damageSource);
             final Optional<List<DamageFunction>> armorFunction =
-                bridge$provideArmorModifiers((LivingEntity) (Object) this, damageSource, damage);
+                    this.bridge$provideArmorModifiers((LivingEntity) (Object) this, damageSource, damage);
             final Optional<DamageFunction> resistanceFunction =
                 DamageEventHandler.createResistanceModifier((LivingEntity) (Object) this, damageSource);
             final Optional<List<DamageFunction>> armorEnchantments =
@@ -675,7 +675,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 // Armor
                 if (!damageSource.isUnblockable()) {
                     for (final DamageFunction modifier : event.getModifiers()) {
-                        bridge$applyArmorDamage((LivingEntity) (Object) this, damageSource, event, modifier.getModifier());
+                        this.bridge$applyArmorDamage((LivingEntity) (Object) this, damageSource, event, modifier.getModifier());
                     }
                 }
 
@@ -1018,7 +1018,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     // as well as USED_ITEM and USED_HAND
     private void addSelfToFrame(final CauseStackManager.StackFrame frame, final ItemStackSnapshot snapshot, final HandType hand) {
         frame.addContext(EventContextKeys.USED_HAND, hand);
-        addSelfToFrame(frame, snapshot);
+        this.addSelfToFrame(frame, snapshot);
     }
 
     private void addSelfToFrame(final CauseStackManager.StackFrame frame, final ItemStackSnapshot snapshot) {
@@ -1058,7 +1058,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         SpongeImplHooks.onUseItemTick((LivingEntity) (Object) this, this.activeItemStack, this.activeItemStackUseCount);
 
 
-        return getItemInUseCount();
+        return this.getItemInUseCount();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -1083,7 +1083,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             this.activeItemStackUseCount = event.getRemainingDuration();
             ci.cancel();
         } else if (event.isCancelled()) {
-            resetActiveHand();
+            this.resetActiveHand();
             ci.cancel();
         } else {
             this.impl$activeItemStackCopy = this.activeItemStack.copy();
@@ -1128,7 +1128,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             return;
         }
 
-        setHeldItem(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
+        this.setHeldItem(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
     }
 
     @SuppressWarnings("ConstantConditions")

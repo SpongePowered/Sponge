@@ -99,7 +99,7 @@ public class TopologicalOrder {
             this.result = new ArrayList<>();
             for (DataNode<?> node : this.graph.getNodes()) {
                 if (!this.node_indices.containsKey(node)) {
-                    strongconnect(node);
+                    this.strongconnect(node);
                 }
             }
             return this.result;
@@ -113,7 +113,7 @@ public class TopologicalOrder {
 
             for (DataNode<?> adj : node.getAdjacent()) {
                 if (!this.node_indices.containsKey(adj)) {
-                    strongconnect(adj);
+                    this.strongconnect(adj);
                     int lowlink = Math.min(this.lowlinks.getInt(node), this.lowlinks.getInt(adj));
                     this.lowlinks.put(node, lowlink);
                 } else if (this.stack.contains(adj)) {

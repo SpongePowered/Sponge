@@ -36,7 +36,7 @@ public class DeadBushBuilder implements DeadBush.Builder {
     private VariableAmount count;
 
     public DeadBushBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class DeadBushBuilder implements DeadBush.Builder {
 
     @Override
     public Builder from(DeadBush value) {
-        perChunk(value.getShrubsPerChunk());
+        this.perChunk(value.getShrubsPerChunk());
         return this;
     }
 

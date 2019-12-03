@@ -46,11 +46,11 @@ public class UserCollection extends SpongeSubjectCollection {
 
     @Override
     public SpongeSubject get(String identifier) {
-        UUID uid = identToUuid(identifier);
+        UUID uid = this.identToUuid(identifier);
         if (uid == null) {
             throw new IllegalArgumentException("Provided identifier must be a uuid, was " + identifier);
         }
-        return get(uuidToGameProfile(uid));
+        return this.get(this.uuidToGameProfile(uid));
     }
 
     protected SpongeSubject get(GameProfile profile) {
@@ -68,11 +68,11 @@ public class UserCollection extends SpongeSubjectCollection {
 
     @Override
     public boolean isRegistered(String identifier) {
-        UUID uid = identToUuid(identifier);
+        UUID uid = this.identToUuid(identifier);
         if (uid == null) {
             return false;
         }
-        GameProfile profile = uuidToGameProfile(uid);
+        GameProfile profile = this.uuidToGameProfile(uid);
         return SpongePermissionService.getOps().getEntry(profile) != null;
     }
 

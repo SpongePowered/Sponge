@@ -40,7 +40,7 @@ public class ImmutableSpongeAggressiveData extends AbstractImmutableBooleanData<
 
     @Override
     public Immutable<Boolean> aggressive() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

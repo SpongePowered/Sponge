@@ -50,7 +50,7 @@ public final class SpongeDimensionType implements DimensionType {
 
         this.key = CatalogKey.of(modId, dimName);
         this.configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(modId).resolve(dimName);
-        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, configPath.resolve("dimension.conf"),
+        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"),
             SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfigAdapter(), false);
         this.context = new Context(Context.DIMENSION_KEY, modId + "." + dimName);
         this.hasSkyLight = hasSkyLight;

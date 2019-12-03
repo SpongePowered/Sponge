@@ -166,9 +166,9 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void preRegistryInit() {
         CommonModuleRegistry.getInstance().registerDefaultModules();
-        syncModules();
+        this.syncModules();
 
-        registerModulePhase();
+        this.registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
         DataRegistrar.setupSerialization();
         if (PRINT_CATALOG_TYPES) { // Lol... this gets spammy really fast.... Probably at some point should be put to file.
@@ -197,20 +197,20 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void preInit() {
         this.phase = RegistrationPhase.PRE_INIT;
-        syncModules();
-        registerModulePhase();
+        this.syncModules();
+        this.registerModulePhase();
     }
 
     public void init() {
         this.phase = RegistrationPhase.INIT;
-        syncModules();
-        registerInitModulePhase();
+        this.syncModules();
+        this.registerInitModulePhase();
     }
 
     public void postInit() {
         this.phase = RegistrationPhase.POST_INIT;
-        syncModules();
-        registerModulePhase();
+        this.syncModules();
+        this.registerModulePhase();
         SpongeImpl.getPropertyRegistry().completeRegistration();
         SpongeDataManager.finalizeRegistration();
         this.phase = RegistrationPhase.LOADED;
@@ -229,10 +229,10 @@ public class SpongeGameRegistry implements GameRegistry {
                 }
             }
             if (ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
-                throwRegistryEvent(module);
+                this.throwRegistryEvent(module);
             }
         }
-        registerAdditionalPhase();
+        this.registerAdditionalPhase();
         MODULES = null;
 
     }
@@ -245,7 +245,7 @@ public class SpongeGameRegistry implements GameRegistry {
                 REGISTRIES.remove(module);
             }
         }
-        registerAdditionalPhase();
+        this.registerAdditionalPhase();
     }
 
     private void registerAdditionalPhase() {
@@ -287,7 +287,7 @@ public class SpongeGameRegistry implements GameRegistry {
     private void syncModules() {
         final DirectedGraph<Class<? extends RegistryModule>> graph = new DirectedGraph<>();
         for (RegistryModule module : REGISTRIES) {
-            addToGraph(module, graph);
+            this.addToGraph(module, graph);
         }
         ORDERED_MODULES.clear();
         try {
@@ -333,7 +333,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @SuppressWarnings("unchecked")
     public <TUnknown, T extends CatalogType> T getTranslated(Class<TUnknown> clazz, Class<T> catalogClazz) {
-        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClazz).orElse(null);
+        CatalogRegistryModule<T> module = this.getRegistryModuleFor(catalogClazz).orElse(null);
         checkArgument(module instanceof ExtraClassCatalogRegistryModule);
         ExtraClassCatalogRegistryModule<T, TUnknown> classModule = (ExtraClassCatalogRegistryModule<T, TUnknown>) module;
         return classModule.getForClass(clazz);
@@ -341,7 +341,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public <T extends CatalogType> Optional<T> getType(Class<T> typeClass, String id) {
-        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
+        CatalogRegistryModule<T> registryModule = this.getRegistryModuleFor(typeClass).orElse(null);
         if (registryModule == null) {
             return Optional.empty();
         }
@@ -350,7 +350,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
-        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
+        CatalogRegistryModule<T> registryModule = this.getRegistryModuleFor(typeClass).orElse(null);
         if (registryModule == null) {
             return Collections.emptyList();
         }
@@ -360,7 +360,7 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public <T extends CatalogType> Collection<T> getAllFor(String pluginId, Class<T> typeClass) {
         checkNotNull(pluginId);
-        final CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
+        final CatalogRegistryModule<T> registryModule = this.getRegistryModuleFor(typeClass).orElse(null);
         if (registryModule == null) {
             return Collections.emptyList();
         }
@@ -385,7 +385,7 @@ public class SpongeGameRegistry implements GameRegistry {
     @SuppressWarnings("deprecation")
     @Override
     public <T extends CatalogType> T register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
-        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
+        CatalogRegistryModule<T> registryModule = this.getRegistryModuleFor(type).orElse(null);
         if (registryModule == null) {
             throw new UnsupportedOperationException("Failed to find a RegistryModule for that type");
         }
@@ -567,7 +567,7 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     public void registerAdditionals() {
-        registerAdditionalPhase();
+        this.registerAdditionalPhase();
     }
 
     public static void clear() {
@@ -580,7 +580,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     private void throwRegistryEvent(RegistryModule module) {
         final Class<? extends CatalogType> catalog = REGISTRY_CATALOG_MAP.get(module);
-        throwRegistryEvent(catalog, module);
+        this.throwRegistryEvent(catalog, module);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes", "ConstantConditions"})

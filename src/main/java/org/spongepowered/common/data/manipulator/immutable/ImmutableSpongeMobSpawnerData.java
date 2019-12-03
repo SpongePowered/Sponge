@@ -140,7 +140,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
                 this.nextToSpawn);
         this.toSpawnValue = new ImmutableSpongeWeightedCollectionValue<>(Keys.SPAWNER_ENTITIES, this.entitiesToSpawn);
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -217,25 +217,25 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
 
     @Override
     protected void registerGetters() {
-        registerKeyValue(Keys.SPAWNER_REMAINING_DELAY, ImmutableSpongeMobSpawnerData.this::remainingDelay);
-        registerKeyValue(Keys.SPAWNER_MINIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::minimumSpawnDelay);
-        registerKeyValue(Keys.SPAWNER_MAXIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::maximumSpawnDelay);
-        registerKeyValue(Keys.SPAWNER_SPAWN_COUNT, ImmutableSpongeMobSpawnerData.this::spawnCount);
-        registerKeyValue(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, ImmutableSpongeMobSpawnerData.this::maximumNearbyEntities);
-        registerKeyValue(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, ImmutableSpongeMobSpawnerData.this::requiredPlayerRange);
-        registerKeyValue(Keys.SPAWNER_SPAWN_RANGE, ImmutableSpongeMobSpawnerData.this::spawnRange);
-        registerKeyValue(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, ImmutableSpongeMobSpawnerData.this::nextEntityToSpawn);
-        registerKeyValue(Keys.SPAWNER_ENTITIES, ImmutableSpongeMobSpawnerData.this::possibleEntitiesToSpawn);
+        this.registerKeyValue(Keys.SPAWNER_REMAINING_DELAY, ImmutableSpongeMobSpawnerData.this::remainingDelay);
+        this.registerKeyValue(Keys.SPAWNER_MINIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::minimumSpawnDelay);
+        this.registerKeyValue(Keys.SPAWNER_MAXIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::maximumSpawnDelay);
+        this.registerKeyValue(Keys.SPAWNER_SPAWN_COUNT, ImmutableSpongeMobSpawnerData.this::spawnCount);
+        this.registerKeyValue(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, ImmutableSpongeMobSpawnerData.this::maximumNearbyEntities);
+        this.registerKeyValue(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, ImmutableSpongeMobSpawnerData.this::requiredPlayerRange);
+        this.registerKeyValue(Keys.SPAWNER_SPAWN_RANGE, ImmutableSpongeMobSpawnerData.this::spawnRange);
+        this.registerKeyValue(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, ImmutableSpongeMobSpawnerData.this::nextEntityToSpawn);
+        this.registerKeyValue(Keys.SPAWNER_ENTITIES, ImmutableSpongeMobSpawnerData.this::possibleEntitiesToSpawn);
 
-        registerFieldGetter(Keys.SPAWNER_REMAINING_DELAY, () -> this.remaining);
-        registerFieldGetter(Keys.SPAWNER_MINIMUM_DELAY, () -> this.minSpawnDelay);
-        registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, () -> this.maxSpawnDelay);
-        registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, () -> this.count);
-        registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, () -> this.maxNearby);
-        registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, () -> this.playerRange);
-        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> this.spawnRange);
-        registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, () -> this.nextToSpawn);
-        registerFieldGetter(Keys.SPAWNER_ENTITIES, () -> this.entitiesToSpawn);
+        this.registerFieldGetter(Keys.SPAWNER_REMAINING_DELAY, () -> this.remaining);
+        this.registerFieldGetter(Keys.SPAWNER_MINIMUM_DELAY, () -> this.minSpawnDelay);
+        this.registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, () -> this.maxSpawnDelay);
+        this.registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, () -> this.count);
+        this.registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, () -> this.maxNearby);
+        this.registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, () -> this.playerRange);
+        this.registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> this.spawnRange);
+        this.registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, () -> this.nextToSpawn);
+        this.registerFieldGetter(Keys.SPAWNER_ENTITIES, () -> this.entitiesToSpawn);
 
     }
 }

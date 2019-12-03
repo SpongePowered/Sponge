@@ -50,7 +50,7 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
 
     @Override
     public Map<Set<Context>, List<SubjectReference>> getAllParents() {
-        return ImmutableMap.of(GLOBAL_CONTEXT, getParents(GLOBAL_CONTEXT));
+        return ImmutableMap.of(GLOBAL_CONTEXT, this.getParents(GLOBAL_CONTEXT));
     }
 
     @Override

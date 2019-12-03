@@ -44,7 +44,7 @@ public class ImmutableSpongeBrewingStandData extends AbstractImmutableIntData<Im
 
     @Override
     public ImmutableBoundedValue<Integer> remainingBrewTime() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

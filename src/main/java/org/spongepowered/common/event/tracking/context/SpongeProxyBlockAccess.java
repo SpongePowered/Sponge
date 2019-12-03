@@ -147,7 +147,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                     printer.add("   Stack proxy in position %n :", offset);
                     printer.add(f.stack_debug);
                 }
-                popProxy(f);
+                this.popProxy(f);
                 offset--;
             }
             printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
@@ -294,7 +294,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                 }
             }
         }
-        proceed(pos, newState, false);
+        this.proceed(pos, newState, false);
     }
 
     private void unmarkRemoval(final BlockPos pos) {
@@ -308,7 +308,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     void unmarkRemoval(final BlockPos pos, final TileEntity tileEntity) {
-        unmarkRemoval(pos);
+        this.unmarkRemoval(pos);
         if (tileEntity != null) {
             this.queuedRemovals.remove(pos, tileEntity);
             final TileEntity removed = this.affectedTileEntities.remove(pos);
@@ -326,9 +326,9 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         if (removed != null) {
             this.queuedRemovals.remove(targetPosition, removed);
             if (this.queuedTiles.containsEntry(targetPosition, removed)) {
-                markRemovedTile(targetPosition);
+                this.markRemovedTile(targetPosition);
             } else {
-                removeTileEntityFromWorldAndChunk(removed);
+                this.removeTileEntityFromWorldAndChunk(removed);
             }
         }
     }
@@ -356,7 +356,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             // someone else popped for us?
             System.err.println("Unknown removal for: " + targetPos + " with tile entity: " + added);
         }
-        unmarkRemoval(targetPos, added);
+        this.unmarkRemoval(targetPos, added);
         final TileEntity existing = this.affectedTileEntities.remove(targetPos);
         if (existing != null && existing != added) {
             ((TileEntityBridge) existing).bridge$setCaptured(false);
@@ -416,7 +416,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             // by the hooks in WorldServerMixin for getting tiles for removal.
             final BlockPos pos = removed.getPos();
             this.affectedTileEntities.put(pos, null);
-            markRemovedTile(pos);
+            this.markRemovedTile(pos);
             if (!this.queuedRemovals.containsEntry(pos, removed)) {
                 this.queuedRemovals.put(pos, removed);
             }
@@ -451,9 +451,9 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     void pushTile(final BlockPos pos, final TileEntity tile) {
         this.affectedTileEntities.put(pos, tile);
         if (tile == null) {
-            markRemovedTile(pos);
+            this.markRemovedTile(pos);
         } else {
-            unmarkRemoval(pos);
+            this.unmarkRemoval(pos);
         }
     }
 

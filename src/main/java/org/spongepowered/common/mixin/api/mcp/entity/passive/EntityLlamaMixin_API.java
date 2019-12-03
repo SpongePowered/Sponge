@@ -45,7 +45,7 @@ public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implem
 
     @Override
     public Mutable<LlamaType> llamaVariant() {
-        final int i = getVariant();
+        final int i = this.getVariant();
         final LlamaType variant;
         if (i == 0) {
             variant = LlamaTypes.CREAMY;
@@ -56,7 +56,7 @@ public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implem
         } else if (i == 3) {
             variant = LlamaTypes.GRAY;
         } else {
-            setVariant(0); // Basically some validation
+            this.setVariant(0); // Basically some validation
             variant = LlamaTypes.CREAMY;
         }
         return new SpongeValue<>(Keys.LLAMA_VARIANT, Constants.Entity.Llama.DEFAULT_VARIANT, variant);
@@ -69,7 +69,7 @@ public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implem
                 .defaultValue(Constants.Entity.Llama.DEFAULT_STRENGTH)
                 .minimum(Constants.Entity.Llama.MINIMUM_STRENGTH)
                 .maximum(Constants.Entity.Llama.MAXIMUM_STRENGTH)
-                .actualValue(getStrength())
+                .actualValue(this.getStrength())
                 .build();
     }
 

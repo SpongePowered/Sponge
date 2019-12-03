@@ -44,7 +44,7 @@ public class ImmutableSpongeKnockbackData extends AbstractImmutableIntData<Immut
 
     @Override
     public ImmutableBoundedValue<Integer> knockbackStrength() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override

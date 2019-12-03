@@ -68,7 +68,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         SpongeItemStackGenerator that = (SpongeItemStackGenerator) o;
@@ -120,7 +120,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
 
         @Override
         public ItemStackGenerator.Builder from(ItemStackGenerator value) {
-            reset();
+            this.reset();
             checkNotNull(value, "ItemStackGenerator cannot be null!");
             checkArgument(value instanceof SpongeItemStackGenerator, "Cannot use from on a non-Sponge implemented ItemStackGenerator!");
             SpongeItemStackGenerator generator = (SpongeItemStackGenerator) value;

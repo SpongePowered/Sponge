@@ -45,7 +45,7 @@ public class SeaFloorBuilder implements SeaFloor.Builder {
     private Predicate<BlockState> check;
 
     public SeaFloorBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

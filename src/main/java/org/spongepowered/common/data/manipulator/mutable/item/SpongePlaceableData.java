@@ -55,7 +55,7 @@ public class SpongePlaceableData extends AbstractSingleSetData<BlockType, Placea
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.PLACEABLE_BLOCKS.getQuery(), getValue().stream()
+            .set(Keys.PLACEABLE_BLOCKS.getQuery(), this.getValue().stream()
                 .map(BlockType::getId)
                 .collect(Collectors.toList()));
     }
@@ -63,6 +63,6 @@ public class SpongePlaceableData extends AbstractSingleSetData<BlockType, Placea
     @SuppressWarnings("unchecked")
     @Override
     public Mutable<BlockType> placeable() {
-        return (Mutable<BlockType>) getValueGetter();
+        return (Mutable<BlockType>) this.getValueGetter();
     }
 }

@@ -96,13 +96,13 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
 
     @Override
     public void registerDefaults() {
-        createAITaskType("minecraft:wander", "Wander", WanderAITask.class);
-        createAITaskType("minecraft:avoid_entity", "Avoid Entity", AvoidEntityAITask.class);
-        createAITaskType("minecraft:run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyAITask.class);
-        createAITaskType("minecraft:swimming", "Swimming", SwimmingAITask.class);
-        createAITaskType("minecraft:watch_closest", "Watch Closest", WatchClosestAITask.class);
-        createAITaskType("minecraft:find_nearest_attackable_target", "Find Nearest Attackable Target", FindNearestAttackableTargetAITask.class);
-        createAITaskType("minecraft:attack_living", "Attack Living", AttackLivingAITask.class);
+        this.createAITaskType("minecraft:wander", "Wander", WanderAITask.class);
+        this.createAITaskType("minecraft:avoid_entity", "Avoid Entity", AvoidEntityAITask.class);
+        this.createAITaskType("minecraft:run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyAITask.class);
+        this.createAITaskType("minecraft:swimming", "Swimming", SwimmingAITask.class);
+        this.createAITaskType("minecraft:watch_closest", "Watch Closest", WatchClosestAITask.class);
+        this.createAITaskType("minecraft:find_nearest_attackable_target", "Find Nearest Attackable Target", FindNearestAttackableTargetAITask.class);
+        this.createAITaskType("minecraft:attack_living", "Attack Living", AttackLivingAITask.class);
     }
 
     private AITaskType createAITaskType(String combinedId, String name, Class<? extends AITask<? extends Agent>> aiClass) {
@@ -117,7 +117,7 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
         final PluginContainer pluginContainer = optPluginContainer.get();
         final String combinedId = pluginContainer.getId().toLowerCase(Locale.ENGLISH) + ':' + id;
 
-        return createAITaskType(combinedId, name, aiClass);
+        return this.createAITaskType(combinedId, name, aiClass);
     }
 
     AITaskTypeModule() {}

@@ -42,9 +42,9 @@ public final class WeatherRegistryModule
 
     @Override
     public void registerDefaults() {
-        register(new SpongeWeather("minecraft:clear", "clear"));
-        register(new SpongeWeather("minecraft:rain", "rain"));
-        register(new SpongeWeather("minecraft:thunder_storm", "thunder_storm"));
+        this.register(new SpongeWeather("minecraft:clear", "clear"));
+        this.register(new SpongeWeather("minecraft:rain", "rain"));
+        this.register(new SpongeWeather("minecraft:thunder_storm", "thunder_storm"));
     }
 
 }

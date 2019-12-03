@@ -45,17 +45,17 @@ public abstract class BlockPrismarine_EnumTypeMixin_API {
     @Nullable private Translation api$translation;
 
     public String prismarine$getId() {
-        return "minecraft:" + shadow$getTranslationKey();
+        return "minecraft:" + this.shadow$getTranslationKey();
     }
 
     @Intrinsic
     public String prismarine$getName() {
-        return shadow$getTranslationKey();
+        return this.shadow$getTranslationKey();
     }
 
     public Translation prismarine$getTranslation() {
         if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation("tile.prismarine." + shadow$getTranslationKey() + ".name");
+            this.api$translation = new SpongeTranslation("tile.prismarine." + this.shadow$getTranslationKey() + ".name");
         }
         return this.api$translation;
     }

@@ -126,11 +126,11 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         if (this.self.isOnline()) {
             return this.self.getPlayer().get();
         }
-        if (!isInitialized()) {
-            initialize();
+        if (!this.isInitialized()) {
+            this.initialize();
         }
         if (markDirty) {
-            markDirty();
+            this.markDirty();
         }
         return (DataHolder) this;
     }
@@ -162,7 +162,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         try {
             try (FileInputStream in = new FileInputStream(file)) {
-                readFromNbt(CompressedStreamTools.readCompressed(in));
+                this.readFromNbt(CompressedStreamTools.readCompressed(in));
             }
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Corrupt user file {}", file, e);
@@ -398,8 +398,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private SpongeUser loadInventory() {
         if (this.inventory == null) {
-            if (!isInitialized()) {
-                initialize();
+            if (!this.isInitialized()) {
+                this.initialize();
             }
             this.inventory = new SpongeUserInventory(this);
             final ListNBT nbttaglist = this.nbt.getList(Constants.Entity.Player.INVENTORY, 10);
@@ -411,8 +411,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private SpongeUser loadEnderInventory() {
         if (this.enderChest == null) {
-            if (!isInitialized()) {
-                initialize();
+            if (!this.isInitialized()) {
+                this.initialize();
             }
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.nbt.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9))
@@ -496,7 +496,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     public DataContainer toContainer() {
         // TODO More data
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Entity.Player.UUID, this.profile.getId())
                 .set(Constants.Entity.Player.NAME, this.profile.getName())
                 .set(Constants.Entity.Player.SPAWNS, this.spawnLocations);
@@ -504,7 +504,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public boolean canEquip(final EquipmentType type) {
-        return getForInventory(p -> p.canEquip(type), u -> true);
+        return this.getForInventory(p -> p.canEquip(type), u -> true);
     }
 
     @Override
@@ -629,9 +629,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
-        Preconditions.checkState(isInitialized(), "User {} is not initialized", this.profile.getId());
+        Preconditions.checkState(this.isInitialized(), "User {} is not initialized", this.profile.getId());
         final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
-        final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), getUniqueId() + ".dat");
+        final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), this.getUniqueId() + ".dat");
         CompoundNBT tag;
         try {
             tag = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
@@ -639,11 +639,11 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             // Nevermind
             tag = new CompoundNBT();
         }
-        writeToNbt(tag);
+        this.writeToNbt(tag);
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(tag, out);
             dirtyUsers.remove(this);
-            invalidate();
+            this.invalidate();
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
@@ -720,7 +720,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.getClass() != obj.getClass()) {
             return false;
         }
         final SpongeUser other = (SpongeUser) obj;

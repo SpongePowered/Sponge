@@ -63,7 +63,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
 
     @Override
     public SubjectReference newSubjectReference(String subjectIdentifier) {
-        return this.service.newSubjectReference(getIdentifier(), subjectIdentifier);
+        return this.service.newSubjectReference(this.getIdentifier(), subjectIdentifier);
     }
 
     public abstract SpongeSubject get(String identifier);
@@ -72,24 +72,24 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
 
     @Override
     public CompletableFuture<Subject> loadSubject(String identifier) {
-        return CompletableFuture.completedFuture(get(identifier));
+        return CompletableFuture.completedFuture(this.get(identifier));
     }
 
     @Override
     public Optional<Subject> getSubject(String identifier) {
-        return Optional.of(get(identifier));
+        return Optional.of(this.get(identifier));
     }
 
     @Override
     public CompletableFuture<Boolean> hasSubject(String identifier) {
-        return CompletableFuture.completedFuture(isRegistered(identifier));
+        return CompletableFuture.completedFuture(this.isRegistered(identifier));
     }
 
     @Override
     public CompletableFuture<Map<String, Subject>> loadSubjects(Set<String> identifiers) {
         Map<String, Subject> ret = new HashMap<>();
         for (String id : identifiers) {
-            ret.put(id, get(id));
+            ret.put(id, this.get(id));
         }
         return CompletableFuture.completedFuture(ImmutableMap.copyOf(ret));
     }
@@ -97,7 +97,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getLoadedWithPermission(String permission) {
         final Map<Subject, Boolean> ret = new HashMap<>();
-        for (Subject subj : getLoadedSubjects()) {
+        for (Subject subj : this.getLoadedSubjects()) {
             Tristate state = subj.getPermissionValue(subj.getActiveContexts(), permission);
             if (state != Tristate.UNDEFINED) {
                 ret.put(subj, state.asBoolean());
@@ -109,7 +109,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getLoadedWithPermission(Set<Context> contexts, String permission) {
         final Map<Subject, Boolean> ret = new HashMap<>();
-        for (Subject subj : getLoadedSubjects()) {
+        for (Subject subj : this.getLoadedSubjects()) {
             Tristate state = subj.getPermissionValue(contexts, permission);
             if (state != Tristate.UNDEFINED) {
                 ret.put(subj, state.asBoolean());
@@ -120,7 +120,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
 
     @Override
     public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(String permission) {
-        return CompletableFuture.completedFuture(getLoadedWithPermission(permission).entrySet().stream()
+        return CompletableFuture.completedFuture(this.getLoadedWithPermission(permission).entrySet().stream()
                 .collect(Collectors.toMap(
                         e -> e.getKey().asSubjectReference(),
                         Map.Entry::getValue)
@@ -130,7 +130,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
 
     @Override
     public CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(Set<Context> contexts, String permission) {
-        return CompletableFuture.completedFuture(getLoadedWithPermission(contexts, permission).entrySet().stream()
+        return CompletableFuture.completedFuture(this.getLoadedWithPermission(contexts, permission).entrySet().stream()
                 .collect(Collectors.toMap(
                         e -> e.getKey().asSubjectReference(),
                         Map.Entry::getValue)
@@ -140,7 +140,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
 
     @Override
     public CompletableFuture<Set<String>> getAllIdentifiers() {
-        return CompletableFuture.completedFuture(getLoadedSubjects().stream()
+        return CompletableFuture.completedFuture(this.getLoadedSubjects().stream()
                 .map(Subject::getIdentifier)
                 .collect(ImmutableSet.toImmutableSet())
         );
@@ -148,7 +148,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
 
     @Override
     public SpongeSubject getDefaults() {
-        return this.service.getDefaultCollection().get(getIdentifier());
+        return this.service.getDefaultCollection().get(this.getIdentifier());
     }
 
     @Override

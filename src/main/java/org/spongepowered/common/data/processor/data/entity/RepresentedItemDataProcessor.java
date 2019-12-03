@@ -95,7 +95,7 @@ public class RepresentedItemDataProcessor extends
         if (container instanceof ItemFrameEntity) {
             ItemFrameEntity frame = (ItemFrameEntity) container;
             if (!frame.getDisplayedItem().isEmpty()) {
-                final Immutable<ItemStackSnapshot> old = constructImmutableValue(getVal(frame).get());
+                final Immutable<ItemStackSnapshot> old = this.constructImmutableValue(this.getVal(frame).get());
                 frame.setDisplayedItem(ItemStack.EMPTY);
                 return DataTransactionResult.successRemove(old);
             }

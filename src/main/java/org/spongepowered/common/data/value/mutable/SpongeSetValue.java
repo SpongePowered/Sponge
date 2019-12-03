@@ -63,7 +63,7 @@ public class SpongeSetValue<E> extends SpongeCollectionValue<E, Set<E>, Mutable<
     public Mutable<E> filter(Predicate<? super E> predicate) {
         final Set<E> set = Sets.newHashSet();
         set.addAll(this.actualValue.stream().filter(element -> checkNotNull(predicate).test(element)).collect(Collectors.toList()));
-        return new SpongeSetValue<>(getKey(), set);
+        return new SpongeSetValue<>(this.getKey(), set);
     }
 
     @Override
@@ -73,11 +73,11 @@ public class SpongeSetValue<E> extends SpongeCollectionValue<E, Set<E>, Mutable<
 
     @Override
     public Immutable<E> asImmutable() {
-        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.copyOf(this.actualValue));
+        return new ImmutableSpongeSetValue<>(this.getKey(), ImmutableSet.copyOf(this.actualValue));
     }
 
     @Override
     public Mutable<E> copy() {
-        return new SpongeSetValue<>(getKey(), this.getDefault(), this.actualValue);
+        return new SpongeSetValue<>(this.getKey(), this.getDefault(), this.actualValue);
     }
 }

@@ -73,7 +73,7 @@ public abstract class SPacketChunkDataMixin {
         try {
             return this$0.extractChunkData(buf, chunkIn, writeSkylight, changedSectionFilter);
         } catch (Exception e) {
-            spongeImpl$printVerbosity(chunkIn, writeSkylight, changedSectionFilter, e);
+            this.spongeImpl$printVerbosity(chunkIn, writeSkylight, changedSectionFilter, e);
             throw new RuntimeException(String.format("Exception creating chunk packet for chunk at '%s %s'!", this.chunkX, this.chunkZ), e);
         }
     }

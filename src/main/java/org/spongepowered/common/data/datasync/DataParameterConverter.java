@@ -76,7 +76,7 @@ public abstract class DataParameterConverter<E> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         DataParameterConverter<?> that = (DataParameterConverter<?>) o;

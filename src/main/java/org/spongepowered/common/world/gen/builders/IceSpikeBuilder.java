@@ -40,7 +40,7 @@ public class IceSpikeBuilder implements IceSpike.Builder {
     private VariableAmount extremeIncrease;
 
     public IceSpikeBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class IceSpikeBuilder implements IceSpike.Builder {
 
     @Override
     public Builder from(IceSpike value) {
-        return height(value.getHeight())
+        return this.height(value.getHeight())
             .spikesPerChunk(value.getSpikesPerChunk())
             .extremeSpikeIncrease(value.getExtremeSpikeIncrease());
     }

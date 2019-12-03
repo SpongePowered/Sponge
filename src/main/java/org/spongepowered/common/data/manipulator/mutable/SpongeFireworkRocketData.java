@@ -48,6 +48,6 @@ public class SpongeFireworkRocketData extends AbstractBoundedComparableData<Inte
 
     @Override
     public Mutable<Integer> flightModifier() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

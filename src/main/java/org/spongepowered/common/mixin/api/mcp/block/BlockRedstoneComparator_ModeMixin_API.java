@@ -39,11 +39,11 @@ public abstract class BlockRedstoneComparator_ModeMixin_API implements Comparato
     @Shadow public abstract String shadow$getName();
 
     public String comparator$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String comparator$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 }

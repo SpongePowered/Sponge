@@ -52,8 +52,8 @@ public abstract class BlockTripWireMixin extends BlockMixin {
 
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getIsDisarmedFor(blockState),
-                impl$getIsAttachedFor(blockState), impl$getIsPoweredFor(blockState), impl$getConnectedDirectionData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getIsDisarmedFor(blockState),
+                this.impl$getIsAttachedFor(blockState), this.impl$getIsPoweredFor(blockState), this.impl$getConnectedDirectionData(blockState));
     }
 
     @Override

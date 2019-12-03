@@ -172,7 +172,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
-    private final User impl$user = bridge$getUserObject();
+    private final User impl$user = this.bridge$getUserObject();
     private ImmutableSet<SkinPart> impl$skinParts = ImmutableSet.of();
     private int impl$viewDistance;
     @Nullable private GameType impl$pendingGameType;
@@ -188,7 +188,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        if (bridge$isHealthScaled()) {
+        if (this.bridge$isHealthScaled()) {
             compound.putDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, this.impl$healthScale);
         }
     }
@@ -239,7 +239,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         } else {
             tracksEntityDeaths = false;
         }
-        try (final PhaseContext<?> context = impl$createDeathContext(cause, tracksEntityDeaths)) {
+        try (final PhaseContext<?> context = this.impl$createDeathContext(cause, tracksEntityDeaths)) {
             if (context != null) {
                 context.buildAndSwitch();
             }
@@ -634,7 +634,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     @Nullable
     public Text bridge$getDisplayNameText() {
-        return Text.of(shadow$getName());
+        return Text.of(this.shadow$getName());
     }
 
     @Override
@@ -779,12 +779,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             )
     )
     private float spongeGetScaledHealthForPacket(final ServerPlayerEntity entityPlayerMP) {
-        return bridge$getInternalScaledHealth();
+        return this.bridge$getInternalScaledHealth();
     }
 
     @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 1))
     private void updateHealthPriorToArmor(final CallbackInfo ci) {
-        bridge$refreshScaledHealth();
+        this.bridge$refreshScaledHealth();
     }
 
     @Override
@@ -802,7 +802,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 ((DataCompoundHolder) this).data$getSpongeCompound().remove(Constants.Sponge.Entity.Player.HEALTH_SCALE);
             }
         }
-        bridge$refreshScaledHealth();
+        this.bridge$refreshScaledHealth();
     }
 
     @Override
@@ -811,10 +811,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         // of modifying the attribute instances themselves, we bypass other potentially detrimental logi
         // that would otherwise break the actual health scaling.
         final Set<IAttributeInstance> dirtyInstances = ((AttributeMap) this.getAttributeMap()).getDirtyInstances();
-        bridge$injectScaledHealth(dirtyInstances);
+        this.bridge$injectScaledHealth(dirtyInstances);
 
         // Send the new information to the client.
-        this.connection.sendPacket(new SUpdateHealthPacket(bridge$getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
+        this.connection.sendPacket(new SUpdateHealthPacket(this.bridge$getInternalScaledHealth(), this.getFoodStats().getFoodLevel(),
+                this.getFoodStats().getSaturationLevel()));
         this.connection.sendPacket(new SEntityPropertiesPacket(this.getEntityId(), dirtyInstances));
         // Reset the dirty instances since they've now been manually updated on the client.
         dirtyInstances.clear();
@@ -843,7 +844,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
 
         // We now re-create a new ranged attribute for our desired max health
-        final double defaultt = bridge$isHealthScaled() ? this.impl$healthScale : this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue();
+        final double defaultt =
+                this.bridge$isHealthScaled() ? this.impl$healthScale : this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue();
 
         final RangedAttribute maxHealth =
             new RangedAttribute(null, "generic.maxHealth", defaultt, 0.0D, Float.MAX_VALUE);
@@ -865,8 +867,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     public float bridge$getInternalScaledHealth() {
-        if (!bridge$isHealthScaled()) {
-            return getHealth();
+        if (!this.bridge$isHealthScaled()) {
+            return this.getHealth();
         }
         if (this.impl$cachedModifiedHealth == -1) {
             // Because attribute modifiers from mods can add onto health and multiply health, we
@@ -889,7 +891,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
             this.impl$cachedModifiedHealth = (float) modifiedScale;
         }
-        return (getHealth() / getMaxHealth()) * this.impl$cachedModifiedHealth;
+        return (this.getHealth() / this.getMaxHealth()) * this.impl$cachedModifiedHealth;
     }
 
     @Override
@@ -899,7 +901,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Redirect(method = "readEntityFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getForceGamemode()Z"))
     private boolean onCheckForcedGameMode(final MinecraftServer minecraftServer) {
-        return minecraftServer.getForceGamemode() && !bridge$hasForcedGamemodeOverridePermission();
+        return minecraftServer.getForceGamemode() && !this.bridge$hasForcedGamemodeOverridePermission();
     }
 
     @Override

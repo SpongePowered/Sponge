@@ -47,7 +47,7 @@ public class ImmutableSpongeFuseData extends AbstractImmutableData<ImmutableFuse
         this.fuseDurationValue = new ImmutableSpongeValue<>(Keys.FUSE_DURATION, fuseDuration);
         this.ticksRemaining = ticksRemaining;
         this.ticksRemainingValue = new ImmutableSpongeValue<>(Keys.TICKS_REMAINING, ticksRemaining);
-        registerGetters();
+        this.registerGetters();
     }
 
     public ImmutableSpongeFuseData() {
@@ -56,10 +56,10 @@ public class ImmutableSpongeFuseData extends AbstractImmutableData<ImmutableFuse
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.FUSE_DURATION, () -> this.fuseDuration);
-        registerKeyValue(Keys.FUSE_DURATION, this::fuseDuration);
-        registerFieldGetter(Keys.TICKS_REMAINING, () -> this.ticksRemaining);
-        registerKeyValue(Keys.TICKS_REMAINING, this::ticksRemaining);
+        this.registerFieldGetter(Keys.FUSE_DURATION, () -> this.fuseDuration);
+        this.registerKeyValue(Keys.FUSE_DURATION, this::fuseDuration);
+        this.registerFieldGetter(Keys.TICKS_REMAINING, () -> this.ticksRemaining);
+        this.registerKeyValue(Keys.TICKS_REMAINING, this::ticksRemaining);
     }
 
     @Override

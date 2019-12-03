@@ -54,7 +54,7 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
         this.offset = offset;
         this.blockValue = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), block);
         this.offsetValue = new ImmutableSpongeValue<>(Keys.OFFSET, 6, offset);
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -89,10 +89,10 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
 
     @Override
     protected void registerGetters() {
-        registerKeyValue(Keys.REPRESENTED_BLOCK, ImmutableSpongeMinecartBlockData.this::block);
-        registerKeyValue(Keys.OFFSET, ImmutableSpongeMinecartBlockData.this::offset);
+        this.registerKeyValue(Keys.REPRESENTED_BLOCK, ImmutableSpongeMinecartBlockData.this::block);
+        this.registerKeyValue(Keys.OFFSET, ImmutableSpongeMinecartBlockData.this::offset);
 
-        registerFieldGetter(Keys.REPRESENTED_BLOCK, ImmutableSpongeMinecartBlockData.this::getBlock);
-        registerFieldGetter(Keys.OFFSET, ImmutableSpongeMinecartBlockData.this::getOffset);
+        this.registerFieldGetter(Keys.REPRESENTED_BLOCK, ImmutableSpongeMinecartBlockData.this::getBlock);
+        this.registerFieldGetter(Keys.OFFSET, ImmutableSpongeMinecartBlockData.this::getOffset);
     }
 }

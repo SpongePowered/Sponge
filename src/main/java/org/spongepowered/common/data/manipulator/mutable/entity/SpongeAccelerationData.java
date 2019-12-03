@@ -51,7 +51,7 @@ public class SpongeAccelerationData extends AbstractSingleData<Vector3d, Acceler
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return acceleration();
+        return this.acceleration();
     }
 
     @Override
@@ -61,16 +61,16 @@ public class SpongeAccelerationData extends AbstractSingleData<Vector3d, Acceler
 
     @Override
     public ImmutableAccelerationData asImmutable() {
-        return new ImmutableSpongeAccelerationData(getValue());
+        return new ImmutableSpongeAccelerationData(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .createView(Keys.ACCELERATION.getQuery())
-            .set(Constants.Sponge.AccelerationData.ACCELERATION_X, getValue().getX())
-            .set(Constants.Sponge.AccelerationData.ACCELERATION_Y, getValue().getY())
-            .set(Constants.Sponge.AccelerationData.ACCELERATION_Z, getValue().getZ())
+            .set(Constants.Sponge.AccelerationData.ACCELERATION_X, this.getValue().getX())
+            .set(Constants.Sponge.AccelerationData.ACCELERATION_Y, this.getValue().getY())
+            .set(Constants.Sponge.AccelerationData.ACCELERATION_Z, this.getValue().getZ())
             .getContainer();
     }
 

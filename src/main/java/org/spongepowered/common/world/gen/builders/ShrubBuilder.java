@@ -48,7 +48,7 @@ public class ShrubBuilder implements Shrub.Builder {
     @Nullable private Function<Location<Extent>, ShrubType> override;
 
     public ShrubBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class ShrubBuilder implements Shrub.Builder {
     public Builder from(Shrub value) {
         WeightedTable<ShrubType> table = new WeightedTable<>();
         table.addAll(value.getTypes());
-        return perChunk(value.getShrubsPerChunk())
+        return this.perChunk(value.getShrubsPerChunk())
             .types(table)
             .supplier(value.getSupplierOverride().orElse(null));
     }

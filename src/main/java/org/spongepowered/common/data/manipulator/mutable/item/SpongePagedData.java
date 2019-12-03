@@ -49,7 +49,7 @@ public class SpongePagedData extends AbstractListData<Text, PagedData, Immutable
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(getValue()));
+            .set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.getValue()));
     }
 
 }

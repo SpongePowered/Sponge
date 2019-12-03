@@ -47,7 +47,7 @@ public abstract class BlockQuartz_EnumTypeMixin_API {
     @Nullable private Translation api$translation;
 
     public String quartz$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic

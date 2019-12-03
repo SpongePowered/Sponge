@@ -48,7 +48,7 @@ public abstract class BlockSaplingMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getTreeTypeFor(blockState), impl$getGrowthData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getTreeTypeFor(blockState), this.impl$getGrowthData(blockState));
     }
 
     @Override

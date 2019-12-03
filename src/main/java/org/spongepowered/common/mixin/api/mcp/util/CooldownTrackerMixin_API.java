@@ -52,7 +52,7 @@ public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.
     @Override
     public boolean hasCooldown(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
-        return hasCooldown((Item) type);
+        return this.hasCooldown((Item) type);
     }
 
     @Override
@@ -80,13 +80,13 @@ public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.
 
     @Override
     public boolean resetCooldown(final ItemType type) {
-        return setCooldown(type, 0);
+        return this.setCooldown(type, 0);
     }
 
     @Override
     public OptionalDouble getFractionRemaining(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
-        final float cooldown = getCooldown((Item) type, 0);
+        final float cooldown = this.getCooldown((Item) type, 0);
 
         if (cooldown > 0.0F) {
             return OptionalDouble.of(cooldown);

@@ -76,7 +76,7 @@ public class LoadingIntMap<V> extends Int2ObjectOpenHashMap<V> {
         if (res == null) {
             res = this.loader.apply(key);
             if (res != null) {
-                put(key, res);
+                this.put(key, res);
             }
         }
         return res;
@@ -91,7 +91,7 @@ public class LoadingIntMap<V> extends Int2ObjectOpenHashMap<V> {
 
         @Override
         public T apply(Object input) {
-            return apply();
+            return this.apply();
         }
 
         public abstract T apply();

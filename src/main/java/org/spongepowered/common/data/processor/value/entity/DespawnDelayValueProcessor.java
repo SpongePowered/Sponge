@@ -66,7 +66,7 @@ public class DespawnDelayValueProcessor extends AbstractSpongeValueProcessor<Ite
 
     @Override
     protected ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

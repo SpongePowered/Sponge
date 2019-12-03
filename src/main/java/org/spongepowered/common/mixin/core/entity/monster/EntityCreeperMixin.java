@@ -105,16 +105,16 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
 
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(final int state, final CallbackInfo ci) {
-        bridge$setFuseDuration(this.fuseDuration);
+        this.bridge$setFuseDuration(this.fuseDuration);
         if (this.world.isRemote) {
             return;
         }
 
-        if (!((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_PRIMED && !bridge$shouldPrime()) {
+        if (!((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_PRIMED && !this.bridge$shouldPrime()) {
             ci.cancel();
-        } else if (((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_IDLE && !bridge$shouldDefuse()) {
+        } else if (((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_IDLE && !this.bridge$shouldDefuse()) {
             ci.cancel();
-        } else if (getCreeperState() != state) {
+        } else if (this.getCreeperState() != state) {
             this.stateDirty = true;
         }
     }
@@ -127,9 +127,9 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
 
         if (this.stateDirty) {
             if (state == Constants.Entity.Creeper.STATE_PRIMED) {
-                bridge$postPrime();
+                this.bridge$postPrime();
             } else if (state == Constants.Entity.Creeper.STATE_IDLE) {
-                bridge$postDefuse();
+                this.bridge$postDefuse();
             }
             this.stateDirty = false;
         }
@@ -161,9 +161,9 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityCreeper;ignite()V"))
     private void onInteractIgnite(final CreeperEntity self) {
-        this.interactPrimeCancelled = !bridge$shouldPrime();
+        this.interactPrimeCancelled = !this.bridge$shouldPrime();
         if (!this.interactPrimeCancelled) {
-            ignite();
+            this.ignite();
         }
     }
 

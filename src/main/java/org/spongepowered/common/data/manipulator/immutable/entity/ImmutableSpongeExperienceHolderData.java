@@ -87,7 +87,7 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
                 .build()
                 .asImmutable();
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -141,17 +141,17 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.EXPERIENCE_LEVEL, ImmutableSpongeExperienceHolderData.this::getLevel);
-        registerKeyValue(Keys.EXPERIENCE_LEVEL, ImmutableSpongeExperienceHolderData.this::level);
+        this.registerFieldGetter(Keys.EXPERIENCE_LEVEL, ImmutableSpongeExperienceHolderData.this::getLevel);
+        this.registerKeyValue(Keys.EXPERIENCE_LEVEL, ImmutableSpongeExperienceHolderData.this::level);
 
-        registerFieldGetter(Keys.TOTAL_EXPERIENCE, ImmutableSpongeExperienceHolderData.this::getTotalExp);
-        registerKeyValue(Keys.TOTAL_EXPERIENCE, ImmutableSpongeExperienceHolderData.this::totalExperience);
+        this.registerFieldGetter(Keys.TOTAL_EXPERIENCE, ImmutableSpongeExperienceHolderData.this::getTotalExp);
+        this.registerKeyValue(Keys.TOTAL_EXPERIENCE, ImmutableSpongeExperienceHolderData.this::totalExperience);
 
-        registerFieldGetter(Keys.EXPERIENCE_SINCE_LEVEL, ImmutableSpongeExperienceHolderData.this::getExpSinceLevel);
-        registerKeyValue(Keys.EXPERIENCE_SINCE_LEVEL, ImmutableSpongeExperienceHolderData.this::experienceSinceLevel);
+        this.registerFieldGetter(Keys.EXPERIENCE_SINCE_LEVEL, ImmutableSpongeExperienceHolderData.this::getExpSinceLevel);
+        this.registerKeyValue(Keys.EXPERIENCE_SINCE_LEVEL, ImmutableSpongeExperienceHolderData.this::experienceSinceLevel);
 
-        registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, ImmutableSpongeExperienceHolderData.this::getExpBetweenLevels);
-        registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, ImmutableSpongeExperienceHolderData.this::experienceBetweenLevels);
+        this.registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, ImmutableSpongeExperienceHolderData.this::getExpBetweenLevels);
+        this.registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, ImmutableSpongeExperienceHolderData.this::experienceBetweenLevels);
     }
 
 }

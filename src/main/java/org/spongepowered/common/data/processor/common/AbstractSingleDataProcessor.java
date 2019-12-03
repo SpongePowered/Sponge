@@ -46,22 +46,22 @@ public abstract class AbstractSingleDataProcessor<T, V extends Value<T>, M exten
 
     @Override
     public Optional<M> createFrom(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
+        if (!this.supports(dataHolder)) {
             return Optional.empty();
         }
-        Optional<M> optional = from(dataHolder);
+        Optional<M> optional = this.from(dataHolder);
         if (!optional.isPresent()) {
-            return Optional.of(createManipulator());
+            return Optional.of(this.createManipulator());
         }
         return optional;
     }
 
     @Override
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        if (!supports(dataHolder)) {
+        if (!this.supports(dataHolder)) {
             return Optional.empty();
         }
-        final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
+        final M merged = checkNotNull(overlap).merge(manipulator.copy(), this.from(dataHolder).orElse(null));
         return Optional.of(manipulator.set(this.key, merged.get(this.key).get()));
     }
 

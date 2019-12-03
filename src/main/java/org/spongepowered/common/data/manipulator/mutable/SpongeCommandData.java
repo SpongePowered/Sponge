@@ -53,12 +53,12 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     public SpongeCommandData() {
         super(CommandData.class);
         this.command = "";
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     @Override
     public Mutable<String> storedCommand() {
-        return new SpongeValue<>(Keys.COMMAND, getStoredCommand());
+        return new SpongeValue<>(Keys.COMMAND, this.getStoredCommand());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
 
     @Override
     public org.spongepowered.api.data.value.OptionalValue.Mutable<Text> lastOutput() {
-        return new SpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, getLastOutput());
+        return new SpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, this.getLastOutput());
     }
 
     @Override
@@ -155,23 +155,23 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     @Override
     protected void registerGettersAndSetters() {
         // Keys.COMMAND
-        registerFieldGetter(Keys.COMMAND, SpongeCommandData.this::getStoredCommand);
-        registerFieldSetter(Keys.COMMAND, this::setStoredCommand);
-        registerKeyValue(Keys.COMMAND, SpongeCommandData.this::storedCommand);
+        this.registerFieldGetter(Keys.COMMAND, SpongeCommandData.this::getStoredCommand);
+        this.registerFieldSetter(Keys.COMMAND, this::setStoredCommand);
+        this.registerKeyValue(Keys.COMMAND, SpongeCommandData.this::storedCommand);
 
         // Keys.SUCCESS_COUNT
-        registerFieldGetter(Keys.SUCCESS_COUNT, SpongeCommandData.this::getSuccessCount);
-        registerFieldSetter(Keys.SUCCESS_COUNT, this::setSuccessCount);
-        registerKeyValue(Keys.SUCCESS_COUNT, SpongeCommandData.this::successCount);
+        this.registerFieldGetter(Keys.SUCCESS_COUNT, SpongeCommandData.this::getSuccessCount);
+        this.registerFieldSetter(Keys.SUCCESS_COUNT, this::setSuccessCount);
+        this.registerKeyValue(Keys.SUCCESS_COUNT, SpongeCommandData.this::successCount);
 
         // Keys.TRACKS_OUTPUT
-        registerFieldGetter(Keys.TRACKS_OUTPUT, SpongeCommandData.this::tracksOutput);
-        registerFieldSetter(Keys.TRACKS_OUTPUT, this::shouldTrackOutput);
-        registerKeyValue(Keys.TRACKS_OUTPUT, SpongeCommandData.this::doesTrackOutput);
+        this.registerFieldGetter(Keys.TRACKS_OUTPUT, SpongeCommandData.this::tracksOutput);
+        this.registerFieldSetter(Keys.TRACKS_OUTPUT, this::shouldTrackOutput);
+        this.registerKeyValue(Keys.TRACKS_OUTPUT, SpongeCommandData.this::doesTrackOutput);
 
         // Keys.LAST_COMMAND_OUTPUT
-        registerFieldGetter(Keys.LAST_COMMAND_OUTPUT, SpongeCommandData.this::getLastOutput);
-        registerFieldSetter(Keys.LAST_COMMAND_OUTPUT, optional -> this.setLastOutput(optional.orElse(Text.of())));
-        registerKeyValue(Keys.LAST_COMMAND_OUTPUT, SpongeCommandData.this::lastOutput);
+        this.registerFieldGetter(Keys.LAST_COMMAND_OUTPUT, SpongeCommandData.this::getLastOutput);
+        this.registerFieldSetter(Keys.LAST_COMMAND_OUTPUT, optional -> this.setLastOutput(optional.orElse(Text.of())));
+        this.registerKeyValue(Keys.LAST_COMMAND_OUTPUT, SpongeCommandData.this::lastOutput);
     }
 }

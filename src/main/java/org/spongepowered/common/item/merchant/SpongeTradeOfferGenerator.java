@@ -130,7 +130,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
 
         @Override
         public TradeOfferGenerator.Builder from(TradeOfferGenerator value) {
-            reset();
+            this.reset();
             if (value instanceof SpongeTradeOfferGenerator) {
                 final SpongeTradeOfferGenerator generator = (SpongeTradeOfferGenerator) value;
                 this.firstGenerator = generator.firstItemGenerator;

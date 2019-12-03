@@ -43,7 +43,7 @@ public class ImmutableSpongeGrowthData extends AbstractImmutableIntData<Immutabl
 
     @Override
     public ImmutableBoundedValue<Integer> growthStage() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override

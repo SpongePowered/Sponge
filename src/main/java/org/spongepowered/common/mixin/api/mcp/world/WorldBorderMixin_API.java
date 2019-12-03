@@ -60,57 +60,57 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
 
     @Intrinsic
     public int apiBorder$getWarningTime() {
-        return shadow$getWarningTime();
+        return this.shadow$getWarningTime();
     }
 
     @Intrinsic
     public void apiBorder$setWarningTime(final int time) {
-        shadow$setWarningTime(time);
+        this.shadow$setWarningTime(time);
     }
 
     @Intrinsic
     public int apiBorder$getWarningDistance() {
-        return shadow$getWarningDistance();
+        return this.shadow$getWarningDistance();
     }
 
     @Intrinsic
     public void apiBorder$setWarningDistance(final int distance) {
-        shadow$setWarningDistance(distance);
+        this.shadow$setWarningDistance(distance);
     }
 
     @Override
     public double getNewDiameter() {
-        return getTargetSize();
+        return this.getTargetSize();
     }
 
     @Intrinsic
     public double apiBorder$getDiameter() {
-        return shadow$getDiameter();
+        return this.shadow$getDiameter();
     }
 
     @Override
     public void setDiameter(final double diameter) {
-        setTransition(diameter);
+        this.setTransition(diameter);
     }
 
     @Override
     public void setDiameter(final double diameter, final long time) {
-        setTransition(getDiameter(), diameter, time);
+        this.setTransition(this.getDiameter(), diameter, time);
     }
 
     @Override
     public void setDiameter(final double startDiameter, final double endDiameter, final long time) {
-        setTransition(startDiameter, endDiameter, time);
+        this.setTransition(startDiameter, endDiameter, time);
     }
 
     @Override
     public long getTimeRemaining() {
-        return getTimeUntilTarget();
+        return this.getTimeUntilTarget();
     }
 
     @Override
     public Vector3d getCenter() {
-        return new Vector3d(getCenterX(), 0, getCenterZ());
+        return new Vector3d(this.getCenterX(), 0, this.getCenterZ());
     }
 
     @Intrinsic
@@ -120,26 +120,26 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
 
     @Override
     public double getDamageThreshold() {
-        return getDamageBuffer();
+        return this.getDamageBuffer();
     }
 
     @Override
     public void setDamageThreshold(final double distance) {
-        setDamageBuffer(distance);
+        this.setDamageBuffer(distance);
     }
 
     @Intrinsic
     public double apiBorder$getDamageAmount() {
-        return shadow$getDamageAmount();
+        return this.shadow$getDamageAmount();
     }
 
     @Intrinsic
     public void apiBorder$setDamageAmount(final double damage) {
-        shadow$setDamageAmount(damage);
+        this.shadow$setDamageAmount(damage);
     }
 
     @Override
     public ChunkPreGenerate.Builder newChunkPreGenerate(final World world) {
-        return new SpongeChunkPreGenerateTask.Builder(world, getCenter(), getNewDiameter());
+        return new SpongeChunkPreGenerateTask.Builder(world, this.getCenter(), this.getNewDiameter());
     }
 }

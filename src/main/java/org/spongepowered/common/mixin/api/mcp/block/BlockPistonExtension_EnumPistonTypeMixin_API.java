@@ -46,18 +46,18 @@ public abstract class BlockPistonExtension_EnumPistonTypeMixin_API implements Pi
 
     @Override
     public String getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String piston$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 
     @Override
     public Translation getTranslation() {
         if (this.api$translation == null) {
-            final String internalName = shadow$getName();
+            final String internalName = this.shadow$getName();
             final String translationId;
             if ("normal".equals(internalName)) {
                 translationId = "tile.pistonBase.name";

@@ -55,7 +55,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     public SpongeTradeOfferBuilder() {
         super(TradeOffer.class, 1);
-        reset();
+        this.reset();
     }
 
     @Override

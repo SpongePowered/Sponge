@@ -50,6 +50,6 @@ public class SpongeRespawnLocationData extends AbstractMappedData<UUID, RespawnL
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.RESPAWN_LOCATIONS, getValue());
+            .set(Keys.RESPAWN_LOCATIONS, this.getValue());
     }
 }

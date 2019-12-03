@@ -60,7 +60,7 @@ public class CanPlaceAsBlockValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Immutable<Boolean> constructImmutableValue(final Boolean value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

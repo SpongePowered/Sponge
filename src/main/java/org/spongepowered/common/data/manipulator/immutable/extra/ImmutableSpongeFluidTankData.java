@@ -50,6 +50,6 @@ public class ImmutableSpongeFluidTankData extends AbstractImmutableMappedData<Di
 
     @Override
     public Immutable<Direction, List<FluidStackSnapshot>> fluids() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

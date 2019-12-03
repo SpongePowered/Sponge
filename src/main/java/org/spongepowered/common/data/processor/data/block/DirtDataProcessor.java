@@ -64,7 +64,7 @@ public class DirtDataProcessor extends AbstractCatalogDataProcessor<DirtType, Mu
 
     @Override
     protected Mutable<DirtType> constructValue(DirtType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

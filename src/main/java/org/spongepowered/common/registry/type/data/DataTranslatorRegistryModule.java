@@ -103,8 +103,8 @@ public class DataTranslatorRegistryModule implements AlternateCatalogRegistryMod
     public void registerDefaults() {
         DataSerializers.registerSerializers(this);
 
-        registerAdditionalCatalog(SchematicTranslator.get());
-        registerAdditionalCatalog(ConfigurateTranslator.instance());
+        this.registerAdditionalCatalog(SchematicTranslator.get());
+        this.registerAdditionalCatalog(ConfigurateTranslator.instance());
 
         // Just provide a mapping for the following translator, Schematic is already in use
         final LegacySchematicTranslator legacySchematicTranslator = LegacySchematicTranslator.get();

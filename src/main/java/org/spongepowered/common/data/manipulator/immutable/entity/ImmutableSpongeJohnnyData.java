@@ -39,7 +39,7 @@ public class ImmutableSpongeJohnnyData extends AbstractImmutableBooleanData<Immu
 
     @Override
     public Immutable<Boolean> johnny() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

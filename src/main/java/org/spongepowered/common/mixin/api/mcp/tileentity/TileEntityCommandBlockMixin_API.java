@@ -51,12 +51,12 @@ public abstract class TileEntityCommandBlockMixin_API extends TileEntityMixin_AP
 
     @Override
     public void execute() {
-        getCommandBlockLogic().trigger(this.world);
+        this.getCommandBlockLogic().trigger(this.world);
     }
 
     @Override
     public String getName() {
-        return getCommandBlockLogic().getName();
+        return this.getCommandBlockLogic().getName();
     }
 
     @Override

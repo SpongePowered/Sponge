@@ -45,7 +45,7 @@ public abstract class BlockAnvilMixin extends BlockMixin {
 
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.of(impl$getDirectionalData(blockState));
+        return ImmutableList.of(this.impl$getDirectionalData(blockState));
     }
 
     @Override

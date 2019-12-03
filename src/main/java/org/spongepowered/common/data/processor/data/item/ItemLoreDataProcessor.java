@@ -63,16 +63,16 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (supports(container)) {
+        if (this.supports(container)) {
             ItemStack stack = (ItemStack) container;
-            Optional<List<Text>> old = getVal(stack);
+            Optional<List<Text>> old = this.getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
             if(stack.getChildTag(Constants.Item.ITEM_DISPLAY) != null) {
                 stack.getChildTag(Constants.Item.ITEM_DISPLAY).remove(Constants.Item.ITEM_LORE);
             }
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }

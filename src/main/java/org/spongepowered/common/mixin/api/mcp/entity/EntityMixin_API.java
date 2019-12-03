@@ -166,14 +166,14 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) this.world, getPosition());
+        return new Location<>((World) this.world, this.getPosition());
     }
 
     @Override
     public boolean setLocationAndRotation(final Location<World> location, final Vector3d rotation) {
-        final boolean result = setLocation(location);
+        final boolean result = this.setLocation(location);
         if (result) {
-            setRotation(rotation);
+            this.setRotation(rotation);
             return true;
         }
 
@@ -184,7 +184,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public boolean setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
-        if (isRemoved()) {
+        if (this.isRemoved()) {
             return false;
         }
 
@@ -262,7 +262,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                             ((Entity) (Object) this).rotationPitch);
                     ((NetHandlerPlayServerBridge) player.connection).bridge$setLastMoveLocation(null); // Set last move to teleport target
                 } else {
-                    setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
+                    this.setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
                 }
 
                 if (isTeleporting || isChangingDimension) {
@@ -289,8 +289,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
         if (relativePositions.isEmpty()) {
             // This is just a normal teleport that happens to set both.
-            relocated = setLocation(location);
-            setRotation(rotation);
+            relocated = this.setLocation(location);
+            this.setRotation(rotation);
         } else {
             if (((Entity) (Object) this) instanceof ServerPlayerEntity && ((ServerPlayerEntity) (Entity) (Object) this).connection != null) {
                 // Players use different logic, as they support real relative movement.
@@ -319,8 +319,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 ((ServerPlayerEntity) ((Entity) (Object) this)).connection.setPlayerLocation(location.getPosition().getX(), location.getPosition()
                     .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
-                Location<World> resultantLocation = getLocation();
-                Vector3d resultantRotation = getRotation();
+                Location<World> resultantLocation = this.getLocation();
+                Vector3d resultantRotation = this.getRotation();
 
                 if (relativePositions.contains(RelativePositions.X)) {
                     resultantLocation = resultantLocation.add(location.getPosition().getX(), 0, 0);
@@ -343,8 +343,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 }
 
                 // From here just a normal teleport is needed.
-                relocated = setLocation(resultantLocation);
-                setRotation(resultantRotation);
+                relocated = this.setLocation(resultantLocation);
+                this.setRotation(resultantRotation);
             }
         }
         return relocated;
@@ -362,7 +362,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Transform<World> getTransform() {
-        return new Transform<>(getWorld(), getPosition(), getRotation(), getScale());
+        return new Transform<>(this.getWorld(), this.getPosition(), this.getRotation(), this.getScale());
     }
 
     @Override
@@ -370,8 +370,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         checkNotNull(transform, "The transform cannot be null!");
         final boolean result = setLocation(transform.getLocation());
         if (result) {
-            setRotation(transform.getRotation());
-            setScale(transform.getScale());
+            this.setRotation(transform.getRotation());
+            this.setScale(transform.getScale());
             return true;
         }
 
@@ -382,7 +382,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public boolean transferToWorld(final World world, final Vector3d position) {
         checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
-        return setLocation(new Location<>(world, position));
+        return this.setLocation(new Location<>(world, position));
     }
 
     @Override
@@ -394,26 +394,26 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public void setRotation(final Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
-        if (isRemoved()) {
+        if (this.isRemoved()) {
             return;
         }
         if (((Entity) (Object) this) instanceof ServerPlayerEntity && ((ServerPlayerEntity) (Entity) (Object) this).connection != null) {
             // Force an update, this also set the rotation in this entity
-            ((ServerPlayerEntity) (Entity) (Object) this).connection.setPlayerLocation(getPosition().getX(), getPosition().getY(),
-                getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
+            ((ServerPlayerEntity) (Entity) (Object) this).connection.setPlayerLocation(this.getPosition().getX(), this.getPosition().getY(),
+                    this.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
             if (!this.world.isRemote) { // We can't set the rotation update on client worlds.
-                ((ServerWorldBridge) getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
+                ((ServerWorldBridge) this.getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
             // Let the entity tracker do its job, this just updates the variables
-            shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
+            this.shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
         }
     }
 
     @Override
     public Optional<AABB> getBoundingBox() {
-        final AxisAlignedBB boundingBox = getEntityBoundingBox();
+        final AxisAlignedBB boundingBox = this.getEntityBoundingBox();
         if (boundingBox == null) {
             return Optional.empty();
         }
@@ -438,7 +438,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public boolean isLoaded() {
         // TODO - add flag for entities loaded/unloaded into world
-        return !isRemoved();
+        return !this.isRemoved();
     }
 
     @Override
@@ -453,7 +453,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             return false;
         }
         // Causes at this point should already be pushed from plugins before this point with the cause system.
-        return attackEntityFrom((DamageSource) damageSource, (float) damage);
+        return this.attackEntityFrom((DamageSource) damageSource, (float) damage);
     }
 
     @Override
@@ -469,12 +469,12 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Intrinsic
     public List<org.spongepowered.api.entity.Entity> entity$getPassengers() {
-        return (List) shadow$getPassengers();
+        return (List) this.shadow$getPassengers();
     }
 
     @Override
     public Optional<org.spongepowered.api.entity.Entity> getVehicle() {
-        return Optional.ofNullable((org.spongepowered.api.entity.Entity) getRidingEntity());
+        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.getRidingEntity());
     }
 
     @Override
@@ -515,10 +515,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public boolean setVehicle(@Nullable final org.spongepowered.api.entity.Entity entity) {
-        if (getRidingEntity() == null && entity == null) {
+        if (this.getRidingEntity() == null && entity == null) {
             return false;
         }
-        if (getRidingEntity() != null) {
+        if (this.getRidingEntity() != null) {
             this.dismountRidingEntity();
             return true;
         }
@@ -542,13 +542,13 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public DataContainer toContainer() {
-        final Transform<World> transform = getTransform();
+        final Transform<World> transform = this.getTransform();
         final CompoundNBT compound = new CompoundNBT();
-        writeToNBT(compound);
+        this.writeToNBT(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Constants.Entity.CLASS, this.getClass().getName())
             .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
             .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
@@ -592,7 +592,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         try {
             final CompoundNBT compound = new CompoundNBT();
-            writeToNBT(compound);
+            this.writeToNBT(compound);
             final Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
             compound.putUniqueId(Constants.UUID, entity.getUniqueID());
             entity.read(compound);
@@ -627,7 +627,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Translation getTranslation() {
-        return getType().getTranslation();
+        return this.getType().getTranslation();
     }
 
     @Override

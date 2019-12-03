@@ -60,22 +60,22 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
 
     @Override
     default int getMaximumLight() {
-        return shadow$getMaxLightLevel();
+        return this.shadow$getMaxLightLevel();
     }
 
     @Override
     default int getEmittedLight(Vector3i pos) {
-        return shadow$getLightValue(new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
+        return this.shadow$getLightValue(new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     @Override
     default int getEmittedLight(int x, int y, int z) {
-        return shadow$getLightValue(new BlockPos(x, y, z));
+        return this.shadow$getLightValue(new BlockPos(x, y, z));
     }
 
     @Override
     default int getHeight() {
-        return shadow$getHeight();
+        return this.shadow$getHeight();
     }
 
     @Override
@@ -85,17 +85,17 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
 
     @Override
     default Optional<? extends BlockEntity> getBlockEntity(int x, int y, int z) {
-        return Optional.ofNullable((BlockEntity) shadow$getTileEntity(new BlockPos(x, y, z)));
+        return Optional.ofNullable((BlockEntity) this.shadow$getTileEntity(new BlockPos(x, y, z)));
     }
 
     @Override
     default org.spongepowered.api.block.BlockState getBlock(int x, int y, int z) {
-        return (org.spongepowered.api.block.BlockState) shadow$getBlockState(new BlockPos(x, y, z));
+        return (org.spongepowered.api.block.BlockState) this.shadow$getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
     default FluidState getFluid(int x, int y, int z) {
-        return (FluidState) shadow$getFluidState(new BlockPos(x, y, z));
+        return (FluidState) this.shadow$getFluidState(new BlockPos(x, y, z));
     }
 
     @Override

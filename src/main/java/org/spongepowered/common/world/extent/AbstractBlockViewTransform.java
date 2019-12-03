@@ -79,7 +79,7 @@ public abstract class AbstractBlockViewTransform<V extends ReadableBlockVolume> 
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
-        return getBlock(x, y, z).getType();
+        return this.getBlock(x, y, z).getType();
     }
 
     @Override

@@ -222,7 +222,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
 
     @CustomCatalogRegistration
     public void registerCatalogs() {
-        registerDefaults();
+        this.registerDefaults();
         RegistryHelper.mapFields(PopulatorTypes.class, this.populatorTypeMappings);
         RegistryHelper.mapFields(InternalPopulatorTypes.class, this.populatorTypeMappings);
     }
@@ -236,40 +236,40 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
     }
 
     public Feature replaceFromForge(Biome biome) {
-        if (hasRegistrationFor(biome.getClass())) {
+        if (this.hasRegistrationFor(biome.getClass())) {
             Feature removed = this.populatorClassToTypeMappings.remove(biome.getClass());
             this.populatorTypeMappings.remove(removed.getId());
             SpongePopulatorType replacement = new SpongePopulatorType(((BiomeType) biome).getName(), ((BiomeBridge) biome).bridge$getModId());
             this.populatorClassToTypeMappings.put(biome.getClass(), replacement);
-            registerAdditionalCatalog(replacement);
+            this.registerAdditionalCatalog(replacement);
             return replacement;
         }
-        return getOrCreateForType(biome);
+        return this.getOrCreateForType(biome);
     }
 
     public Feature getOrCreateForType(Biome biome) {
-        if (hasRegistrationFor(biome.getClass())) {
-            return getForClass(biome.getClass());
+        if (this.hasRegistrationFor(biome.getClass())) {
+            return this.getForClass(biome.getClass());
         }
         Feature type = this.customTypeFunction.apply(biome);
         if (type == null) {
             return InternalPopulatorTypes.UNKNOWN;
         }
-        registerAdditionalCatalog(type);
+        this.registerAdditionalCatalog(type);
         this.populatorClassToTypeMappings.put(biome.getClass(), type);
         return type;
     }
 
 
     public Feature getOrCreateForType(Class<?> cls) {
-        if (hasRegistrationFor(cls)) {
-            return getForClass(cls);
+        if (this.hasRegistrationFor(cls)) {
+            return this.getForClass(cls);
         }
         Feature type = this.classPopulatorTypeFunction.apply(cls);
         if (type == null) {
             return InternalPopulatorTypes.UNKNOWN;
         }
-        registerAdditionalCatalog(type);
+        this.registerAdditionalCatalog(type);
         this.populatorClassToTypeMappings.put(cls, type);
         return type;
     }

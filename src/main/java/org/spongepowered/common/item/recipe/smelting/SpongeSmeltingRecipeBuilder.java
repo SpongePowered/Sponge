@@ -93,7 +93,7 @@ public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRe
     @Override
     public ResultStep ingredient(ItemStackSnapshot ingredient) {
         checkNotNull(ingredient, "ingredient");
-        return ingredient(new MatchSmeltingVanillaItemStack(ingredient), ingredient);
+        return this.ingredient(new MatchSmeltingVanillaItemStack(ingredient), ingredient);
     }
 
     @Override

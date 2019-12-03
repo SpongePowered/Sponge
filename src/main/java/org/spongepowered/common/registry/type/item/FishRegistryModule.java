@@ -46,8 +46,8 @@ public final class FishRegistryModule extends MinecraftEnumBasedAlternateCatalog
     @AdditionalRegistration
     public void registerAdditional() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            if (!this.catalogTypeMap.containsValue(enumAs(fishType))) {
-                this.catalogTypeMap.put(enumAs(fishType).getId(), (Fish) (Object) fishType);
+            if (!this.catalogTypeMap.containsValue(this.enumAs(fishType))) {
+                this.catalogTypeMap.put(this.enumAs(fishType).getId(), (Fish) (Object) fishType);
             }
         }
     }

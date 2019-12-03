@@ -56,24 +56,24 @@ public interface IRecipeMixin_API extends CraftingRecipe {
     @Override
     @Nonnull
     default ItemStackSnapshot getExemplaryResult() {
-        return ItemStackUtil.snapshotOf(getRecipeOutput());
+        return ItemStackUtil.snapshotOf(this.getRecipeOutput());
     }
 
     @Override
     default boolean isValid(@Nonnull CraftingGridInventory inv, @Nonnull World world) {
-        return matches(toNativeInventory(inv), (net.minecraft.world.World) world);
+        return this.matches(toNativeInventory(inv), (net.minecraft.world.World) world);
     }
 
     @Override
     @Nonnull
     default ItemStackSnapshot getResult(@Nonnull CraftingGridInventory inv) {
-        return ItemStackUtil.snapshotOf(getCraftingResult(toNativeInventory(inv)));
+        return ItemStackUtil.snapshotOf(this.getCraftingResult(toNativeInventory(inv)));
     }
 
     @Override
     @Nonnull
     default List<ItemStackSnapshot> getRemainingItems(@Nonnull CraftingGridInventory inv) {
-        return getRemainingItems(toNativeInventory(inv)).stream()
+        return this.getRemainingItems(toNativeInventory(inv)).stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
     }
@@ -85,7 +85,7 @@ public interface IRecipeMixin_API extends CraftingRecipe {
 
     @Override
     default String getName() {
-        return getId();
+        return this.getId();
     }
 
     @Override

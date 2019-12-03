@@ -175,7 +175,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         )
     )
     private void impl$interruptSmelt(final CallbackInfo ci) {
-        impl$callInteruptSmeltEvent();
+        this.impl$callInteruptSmeltEvent();
     }
 
     // Interrupt-Passive - if the currently smelting item was removed in some other way
@@ -198,7 +198,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         )
     )
     private void impl$onResetCookTimePassive(final CallbackInfo ci) {
-        impl$callInteruptSmeltEvent();
+        this.impl$callInteruptSmeltEvent();
     }
 
     private void impl$callInteruptSmeltEvent() {
@@ -216,7 +216,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
         locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))
     private void impl$afterSmeltItem(final CallbackInfo ci, final ItemStack itemStack, final ItemStack result, final ItemStack outputStack) {
-        impl$callSmeltFinish(result);
+        this.impl$callSmeltFinish(result);
     }
 
     /**
@@ -232,7 +232,7 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
      */
     @Surrogate
     private void impl$afterSmeltItem(final CallbackInfo ci, final ItemStack outputStack) {
-        impl$callSmeltFinish(FurnaceRecipes.instance().getSmeltingResult(this.furnaceItemStacks.get(0)));
+        this.impl$callSmeltFinish(FurnaceRecipes.instance().getSmeltingResult(this.furnaceItemStacks.get(0)));
     }
 
     private void impl$callSmeltFinish(final ItemStack result) {

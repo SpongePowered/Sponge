@@ -118,7 +118,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<BlockEntityType
         return DataContainer.createNew()
                 .set(Constants.Sponge.TileEntityArchetype.TILE_TYPE, this.type)
                 .set(Constants.Sponge.TileEntityArchetype.BLOCK_STATE, this.blockState)
-                .set(Constants.Sponge.TileEntityArchetype.TILE_DATA, getTileData())
+                .set(Constants.Sponge.TileEntityArchetype.TILE_DATA, this.getTileData())
                 ;
     }
 
@@ -146,7 +146,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<BlockEntityType
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {

@@ -51,7 +51,7 @@ public class GrowthDataProcessor extends AbstractBlockOnlyDataProcessor<Integer,
     @Override
     protected Mutable<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
-                .defaultValue(getDefaultValue())
+                .defaultValue(this.getDefaultValue())
                 .minimum(0)
                 .maximum(7)
                 .actualValue(actualValue)

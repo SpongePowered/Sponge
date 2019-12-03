@@ -65,7 +65,7 @@ public class DisguisedBlockDataProcessor extends
 
     @Override
     protected Mutable<DisguisedBlockType> constructValue(DisguisedBlockType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

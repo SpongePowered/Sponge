@@ -66,7 +66,7 @@ public class ChestRotationValueProcessor extends AbstractSpongeValueProcessor<Ar
 
     @Override
     protected Immutable<Vector3d> constructImmutableValue(Vector3d value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

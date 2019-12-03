@@ -62,12 +62,12 @@ public class SpongeFluidItemData extends AbstractSingleData<FluidStackSnapshot, 
 
     @Override
     public Mutable<FluidStackSnapshot> fluid() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.FLUID_ITEM_STACK, getValue());
+            .set(Keys.FLUID_ITEM_STACK, this.getValue());
     }
 }

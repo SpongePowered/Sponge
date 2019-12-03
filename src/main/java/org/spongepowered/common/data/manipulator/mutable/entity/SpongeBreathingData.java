@@ -43,7 +43,7 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
         super(BreathingData.class);
         this.maxAir = maxAir;
         this.remainingAir = remainingAir;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeBreathingData() {
@@ -105,12 +105,12 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.MAX_AIR, SpongeBreathingData.this::getMaxAir);
-        registerFieldSetter(Keys.MAX_AIR, SpongeBreathingData.this::setMaxAir);
-        registerKeyValue(Keys.MAX_AIR, SpongeBreathingData.this::maxAir);
+        this.registerFieldGetter(Keys.MAX_AIR, SpongeBreathingData.this::getMaxAir);
+        this.registerFieldSetter(Keys.MAX_AIR, SpongeBreathingData.this::setMaxAir);
+        this.registerKeyValue(Keys.MAX_AIR, SpongeBreathingData.this::maxAir);
 
-        registerFieldGetter(Keys.REMAINING_AIR, SpongeBreathingData.this::getRemainingAir);
-        registerFieldSetter(Keys.REMAINING_AIR, SpongeBreathingData.this::setRemainingAir);
-        registerKeyValue(Keys.REMAINING_AIR, SpongeBreathingData.this::remainingAir);
+        this.registerFieldGetter(Keys.REMAINING_AIR, SpongeBreathingData.this::getRemainingAir);
+        this.registerFieldSetter(Keys.REMAINING_AIR, SpongeBreathingData.this::setRemainingAir);
+        this.registerKeyValue(Keys.REMAINING_AIR, SpongeBreathingData.this::remainingAir);
     }
 }

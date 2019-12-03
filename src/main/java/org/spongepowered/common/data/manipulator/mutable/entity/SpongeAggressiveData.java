@@ -43,7 +43,7 @@ public class SpongeAggressiveData extends AbstractBooleanData<AggressiveData, Im
 
     @Override
     public Mutable<Boolean> aggressive() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

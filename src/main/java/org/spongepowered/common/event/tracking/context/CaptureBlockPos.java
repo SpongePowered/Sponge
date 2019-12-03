@@ -74,7 +74,7 @@ public final class CaptureBlockPos implements AutoCloseable {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         final CaptureBlockPos that = (CaptureBlockPos) o;

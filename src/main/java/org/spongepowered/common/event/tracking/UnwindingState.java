@@ -119,7 +119,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         if (!phaseContext.isPostingSpecialProcess()) { // If we're posting special, we need to
             return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, flags);
         }
-        if (!doesBulkBlockCapture(phaseContext)) {
+        if (!this.doesBulkBlockCapture(phaseContext)) {
             phaseContext.setSingleSnapshot(originalBlockSnapshot);
             return null;
         }

@@ -64,7 +64,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
                 .collect(Collectors.groupingBy(ResourceLocation::toString, Collectors.counting()));
 
         for(final String mob : types.keySet()) {
-            put(EntityUtil.fromNameToType(mob).get(),
+            this.put(EntityUtil.fromNameToType(mob).get(),
                     types.get(mob).intValue() * 100); // times 100 to fit with forge's format
         }
     }
@@ -78,7 +78,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
      * @param weight Weight of the type
      */
     public void put(final EntityType type, final int weight) {
-        remove(type);
+        this.remove(type);
 
         this.dungeonMobs.add(new WeightedSerializableObject<>(new SpongeEntityArchetypeBuilder().type(type).build(), weight));
         this.presentTypes.add(type);
@@ -90,7 +90,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
      * @param type Type to remove
      */
     public void remove(final EntityType type) {
-        get(type).ifPresent(this.dungeonMobs::remove);
+        this.get(type).ifPresent(this.dungeonMobs::remove);
         this.presentTypes.remove(type);
     }
 

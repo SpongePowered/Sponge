@@ -43,6 +43,6 @@ public class SpongeWetData extends AbstractBooleanData<WetData, ImmutableWetData
 
     @Override
     public Mutable<Boolean> wet() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

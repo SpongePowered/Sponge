@@ -52,7 +52,7 @@ public abstract class BlockFarmlandMixin extends BlockMixin {
 
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getMoistureData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getMoistureData(blockState));
     }
 
     @Override

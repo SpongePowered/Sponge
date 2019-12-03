@@ -66,7 +66,7 @@ public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueP
 
     @Override
     protected Immutable<WeightedSerializableObject<EntityArchetype>> constructImmutableValue(final WeightedSerializableObject<EntityArchetype> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

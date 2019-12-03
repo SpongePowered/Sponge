@@ -33,7 +33,7 @@ public class FossilBuilder implements Fossil.Builder {
     private double probability;
 
     public FossilBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

@@ -53,7 +53,7 @@ public class SpongeDisabledSlotsData extends AbstractData<DisabledSlotsData, Imm
         this.takingDisabled = takingDisabled;
         this.placingDisabled = placingDisabled;
 
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
 
@@ -69,13 +69,13 @@ public class SpongeDisabledSlotsData extends AbstractData<DisabledSlotsData, Imm
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.ARMOR_STAND_TAKING_DISABLED, () -> this.takingDisabled);
-        registerFieldSetter(Keys.ARMOR_STAND_TAKING_DISABLED, (takingDisabled) -> this.takingDisabled = takingDisabled);
-        registerKeyValue(Keys.ARMOR_STAND_TAKING_DISABLED, this::takingDisabled);
+        this.registerFieldGetter(Keys.ARMOR_STAND_TAKING_DISABLED, () -> this.takingDisabled);
+        this.registerFieldSetter(Keys.ARMOR_STAND_TAKING_DISABLED, (takingDisabled) -> this.takingDisabled = takingDisabled);
+        this.registerKeyValue(Keys.ARMOR_STAND_TAKING_DISABLED, this::takingDisabled);
 
-        registerFieldGetter(Keys.ARMOR_STAND_PLACING_DISABLED, () -> this.placingDisabled);
-        registerFieldSetter(Keys.ARMOR_STAND_PLACING_DISABLED, (placingDisabled) -> this.placingDisabled = placingDisabled);
-        registerKeyValue(Keys.ARMOR_STAND_PLACING_DISABLED, this::placingDisabled);
+        this.registerFieldGetter(Keys.ARMOR_STAND_PLACING_DISABLED, () -> this.placingDisabled);
+        this.registerFieldSetter(Keys.ARMOR_STAND_PLACING_DISABLED, (placingDisabled) -> this.placingDisabled = placingDisabled);
+        this.registerKeyValue(Keys.ARMOR_STAND_PLACING_DISABLED, this::placingDisabled);
     }
 
     @Override

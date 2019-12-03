@@ -38,22 +38,22 @@ public abstract class AbstractMultiDataProcessor<T extends Mutable<T, I>, I exte
 
     @Override
     public Optional<T> createFrom(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
+        if (!this.supports(dataHolder)) {
             return Optional.empty();
         }
-        Optional<T> optional = from(dataHolder);
+        Optional<T> optional = this.from(dataHolder);
         if (!optional.isPresent()) {
-            return Optional.of(createManipulator());
+            return Optional.of(this.createManipulator());
         }
         return optional;
     }
 
     @Override
     public Optional<T> fill(DataHolder dataHolder, T manipulator, MergeFunction overlap) {
-        if (!supports(dataHolder)) {
+        if (!this.supports(dataHolder)) {
             return Optional.empty();
         }
-        final T merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
+        final T merged = checkNotNull(overlap).merge(manipulator.copy(), this.from(dataHolder).orElse(null));
         merged.getValues().forEach(manipulator::set);
         return Optional.of(manipulator);
     }

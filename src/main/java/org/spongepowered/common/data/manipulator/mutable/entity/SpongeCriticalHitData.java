@@ -45,27 +45,27 @@ public class SpongeCriticalHitData extends AbstractSingleData<Boolean, CriticalH
 
     @Override
     public CriticalHitData copy() {
-        return new SpongeCriticalHitData(getValue());
+        return new SpongeCriticalHitData(this.getValue());
     }
 
     @Override
     public ImmutableCriticalHitData asImmutable() {
-        return new ImmutableSpongeCriticalHitData(getValue());
+        return new ImmutableSpongeCriticalHitData(this.getValue());
     }
 
     @Override
     public Mutable<Boolean> criticalHit() {
-        return SpongeValueFactory.getInstance().createValue(Keys.CRITICAL_HIT, getValue(), false);
+        return SpongeValueFactory.getInstance().createValue(Keys.CRITICAL_HIT, this.getValue(), false);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-                .set(Keys.CRITICAL_HIT, getValue());
+                .set(Keys.CRITICAL_HIT, this.getValue());
     }
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return criticalHit();
+        return this.criticalHit();
     }
 }

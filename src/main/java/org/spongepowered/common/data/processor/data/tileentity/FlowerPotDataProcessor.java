@@ -56,13 +56,13 @@ public class FlowerPotDataProcessor extends
             return DataTransactionResult.failNoData();
         }
         TileEntityFlowerPot flowerPot = (TileEntityFlowerPot) container;
-        Optional<ItemStackSnapshot> old = getVal(flowerPot);
+        Optional<ItemStackSnapshot> old = this.getVal(flowerPot);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
         flowerPot.setItemStack(ItemStack.EMPTY);
         flowerPot.markDirty();
-        return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+        return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
     }
 
     @Override

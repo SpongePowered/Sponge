@@ -360,7 +360,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
         if (skin.equals(this.skinUuid)) {
             return true;
         }
-        if (!updateFakeProfileWithSkin(skin)) {
+        if (!this.updateFakeProfileWithSkin(skin)) {
             return false;
         }
         if (this.isAliveAndInWorld()) {
@@ -394,7 +394,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     private void respawnOnClient() {
         this.pushPackets(new SDestroyEntitiesPacket(this.getEntityId()), this.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
         this.pushPackets(this.createSpawnPacket());
-        removeFromTabListDelayed(null, this.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER));
+        this.removeFromTabListDelayed(null, this.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER));
     }
 
     /**

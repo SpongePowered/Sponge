@@ -55,7 +55,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
         this.canDropAsItem = canDropAsItem;
         this.fallTime = fallTime;
         this.canHurtEntities = canHurtEntities;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeFallingBlockData() {
@@ -67,33 +67,33 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FALL_DAMAGE_PER_BLOCK, SpongeFallingBlockData.this::getFallDamagePerBlock);
-        registerFieldSetter(Keys.FALL_DAMAGE_PER_BLOCK, SpongeFallingBlockData.this::setFallDamagePerBlock);
-        registerKeyValue(Keys.FALL_DAMAGE_PER_BLOCK, SpongeFallingBlockData.this::fallDamagePerBlock);
+        this.registerFieldGetter(Keys.FALL_DAMAGE_PER_BLOCK, SpongeFallingBlockData.this::getFallDamagePerBlock);
+        this.registerFieldSetter(Keys.FALL_DAMAGE_PER_BLOCK, SpongeFallingBlockData.this::setFallDamagePerBlock);
+        this.registerKeyValue(Keys.FALL_DAMAGE_PER_BLOCK, SpongeFallingBlockData.this::fallDamagePerBlock);
 
-        registerFieldGetter(Keys.MAX_FALL_DAMAGE, SpongeFallingBlockData.this::getMaxFallDamage);
-        registerFieldSetter(Keys.MAX_FALL_DAMAGE, SpongeFallingBlockData.this::setMaxFallDamage);
-        registerKeyValue(Keys.MAX_FALL_DAMAGE, SpongeFallingBlockData.this::maxFallDamage);
+        this.registerFieldGetter(Keys.MAX_FALL_DAMAGE, SpongeFallingBlockData.this::getMaxFallDamage);
+        this.registerFieldSetter(Keys.MAX_FALL_DAMAGE, SpongeFallingBlockData.this::setMaxFallDamage);
+        this.registerKeyValue(Keys.MAX_FALL_DAMAGE, SpongeFallingBlockData.this::maxFallDamage);
 
-        registerFieldGetter(Keys.FALLING_BLOCK_STATE, SpongeFallingBlockData.this::getBlockState);
-        registerFieldSetter(Keys.FALLING_BLOCK_STATE, SpongeFallingBlockData.this::setBlockState);
-        registerKeyValue(Keys.FALLING_BLOCK_STATE, SpongeFallingBlockData.this::blockState);
+        this.registerFieldGetter(Keys.FALLING_BLOCK_STATE, SpongeFallingBlockData.this::getBlockState);
+        this.registerFieldSetter(Keys.FALLING_BLOCK_STATE, SpongeFallingBlockData.this::setBlockState);
+        this.registerKeyValue(Keys.FALLING_BLOCK_STATE, SpongeFallingBlockData.this::blockState);
 
-        registerFieldGetter(Keys.CAN_PLACE_AS_BLOCK, SpongeFallingBlockData.this::getCanPlaceAsBlock);
-        registerFieldSetter(Keys.CAN_PLACE_AS_BLOCK, SpongeFallingBlockData.this::setCanPlaceAsBlock);
-        registerKeyValue(Keys.CAN_PLACE_AS_BLOCK, SpongeFallingBlockData.this::canPlaceAsBlock);
+        this.registerFieldGetter(Keys.CAN_PLACE_AS_BLOCK, SpongeFallingBlockData.this::getCanPlaceAsBlock);
+        this.registerFieldSetter(Keys.CAN_PLACE_AS_BLOCK, SpongeFallingBlockData.this::setCanPlaceAsBlock);
+        this.registerKeyValue(Keys.CAN_PLACE_AS_BLOCK, SpongeFallingBlockData.this::canPlaceAsBlock);
 
-        registerFieldGetter(Keys.CAN_DROP_AS_ITEM, SpongeFallingBlockData.this::getCanDropAsItem);
-        registerFieldSetter(Keys.CAN_DROP_AS_ITEM, SpongeFallingBlockData.this::setCanDropAsItem);
-        registerKeyValue(Keys.CAN_DROP_AS_ITEM, SpongeFallingBlockData.this::canDropAsItem);
+        this.registerFieldGetter(Keys.CAN_DROP_AS_ITEM, SpongeFallingBlockData.this::getCanDropAsItem);
+        this.registerFieldSetter(Keys.CAN_DROP_AS_ITEM, SpongeFallingBlockData.this::setCanDropAsItem);
+        this.registerKeyValue(Keys.CAN_DROP_AS_ITEM, SpongeFallingBlockData.this::canDropAsItem);
 
-        registerFieldGetter(Keys.FALL_TIME, SpongeFallingBlockData.this::getFallTime);
-        registerFieldSetter(Keys.FALL_TIME, SpongeFallingBlockData.this::setFallTime);
-        registerKeyValue(Keys.FALL_TIME, SpongeFallingBlockData.this::fallTime);
+        this.registerFieldGetter(Keys.FALL_TIME, SpongeFallingBlockData.this::getFallTime);
+        this.registerFieldSetter(Keys.FALL_TIME, SpongeFallingBlockData.this::setFallTime);
+        this.registerKeyValue(Keys.FALL_TIME, SpongeFallingBlockData.this::fallTime);
 
-        registerFieldGetter(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, SpongeFallingBlockData.this::getCanHurtEntities);
-        registerFieldSetter(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, SpongeFallingBlockData.this::setCanHurtEntities);
-        registerKeyValue(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, SpongeFallingBlockData.this::canHurtEntities);
+        this.registerFieldGetter(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, SpongeFallingBlockData.this::getCanHurtEntities);
+        this.registerFieldSetter(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, SpongeFallingBlockData.this::setCanHurtEntities);
+        this.registerKeyValue(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, SpongeFallingBlockData.this::canHurtEntities);
     }
 
     public void setFallDamagePerBlock(double value) {

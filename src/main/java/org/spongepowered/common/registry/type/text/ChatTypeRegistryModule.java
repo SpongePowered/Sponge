@@ -50,8 +50,8 @@ public final class ChatTypeRegistryModule extends MinecraftEnumBasedAlternateCat
     @AdditionalRegistration
     public void customRegistration() {
         for (ChatType chatType: ChatType.values()) {
-            if (!this.catalogTypeMap.containsKey(enumAs(chatType).getId())) {
-                this.catalogTypeMap.put(enumAs(chatType).getId(), enumAs(chatType));
+            if (!this.catalogTypeMap.containsKey(this.enumAs(chatType).getId())) {
+                this.catalogTypeMap.put(this.enumAs(chatType).getId(), this.enumAs(chatType));
             }
         }
     }

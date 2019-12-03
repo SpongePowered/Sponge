@@ -41,6 +41,6 @@ public class ImmutableSpongeCareerData extends AbstractImmutableSingleCatalogDat
 
     @Override
     public Immutable<Career> career() {
-        return type();
+        return this.type();
     }
 }

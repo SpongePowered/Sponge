@@ -77,21 +77,21 @@ public class SpongeInvisibilityData extends AbstractData<InvisibilityData, Immut
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.VANISH, this::isVanish);
-        registerFieldSetter(Keys.VANISH, (value) -> this.vanish = value);
-        registerKeyValue(Keys.VANISH, this::vanish);
+        this.registerFieldGetter(Keys.VANISH, this::isVanish);
+        this.registerFieldSetter(Keys.VANISH, (value) -> this.vanish = value);
+        this.registerKeyValue(Keys.VANISH, this::vanish);
 
-        registerFieldGetter(Keys.VANISH_IGNORES_COLLISION, this::isCollision);
-        registerFieldSetter(Keys.VANISH_IGNORES_COLLISION, (value) -> this.collision = value);
-        registerKeyValue(Keys.VANISH_IGNORES_COLLISION, this::ignoresCollisionDetection);
+        this.registerFieldGetter(Keys.VANISH_IGNORES_COLLISION, this::isCollision);
+        this.registerFieldSetter(Keys.VANISH_IGNORES_COLLISION, (value) -> this.collision = value);
+        this.registerKeyValue(Keys.VANISH_IGNORES_COLLISION, this::ignoresCollisionDetection);
 
-        registerFieldGetter(Keys.VANISH_PREVENTS_TARGETING, this::isUntargetable);
-        registerFieldSetter(Keys.VANISH_PREVENTS_TARGETING, (value) -> this.untargetable = value);
-        registerKeyValue(Keys.VANISH_PREVENTS_TARGETING, this::untargetable);
+        this.registerFieldGetter(Keys.VANISH_PREVENTS_TARGETING, this::isUntargetable);
+        this.registerFieldSetter(Keys.VANISH_PREVENTS_TARGETING, (value) -> this.untargetable = value);
+        this.registerKeyValue(Keys.VANISH_PREVENTS_TARGETING, this::untargetable);
 
-        registerFieldGetter(Keys.INVISIBLE, () -> this.invisible);
-        registerFieldSetter(Keys.INVISIBLE, (value) -> this.invisible = value);
-        registerKeyValue(Keys.INVISIBLE, this::invisible);
+        this.registerFieldGetter(Keys.INVISIBLE, () -> this.invisible);
+        this.registerFieldSetter(Keys.INVISIBLE, (value) -> this.invisible = value);
+        this.registerKeyValue(Keys.INVISIBLE, this::invisible);
     }
 
     @Override

@@ -43,7 +43,7 @@ public class SpongeFlyingAbilityData extends AbstractBooleanData<FlyingAbilityDa
 
     @Override
     public Mutable<Boolean> canFly() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

@@ -56,7 +56,7 @@ public class SpongeAuthorData extends AbstractSingleData<Text, AuthorData, Immut
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return author();
+        return this.author();
     }
 
     @Override

@@ -272,7 +272,7 @@ public final class PacketPhase {
 
     @SuppressWarnings("WeakerAccess")
     PacketPhase() {
-        setupPacketToStateMapping();
+        this.setupPacketToStateMapping();
     }
 
     private static final class Holder {

@@ -49,7 +49,7 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getDoublePlantTypeFor(blockState), impl$getPortionData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getDoublePlantTypeFor(blockState), this.impl$getPortionData(blockState));
     }
 
     @Override
@@ -66,7 +66,7 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.VARIANT, doublePlantType));
         } else if (manipulator instanceof ImmutablePortionData) {
             return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.HALF,
-                    impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
+                    this.impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -78,7 +78,7 @@ public abstract class BlockDoublePlantMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.VARIANT, doublePlantType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.HALF, impl$convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.withProperty(DoublePlantBlock.HALF, this.impl$convertPortionType((PortionType) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

@@ -42,7 +42,7 @@ public class SpongeFuseData extends AbstractData<FuseData, ImmutableFuseData> im
         super(FuseData.class);
         this.fuseDuration = fuseDuration;
         this.ticksRemaining = ticksRemaining;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeFuseData() {
@@ -51,13 +51,13 @@ public class SpongeFuseData extends AbstractData<FuseData, ImmutableFuseData> im
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FUSE_DURATION, () -> this.fuseDuration);
-        registerFieldSetter(Keys.FUSE_DURATION, fuseDuration -> this.fuseDuration = fuseDuration);
-        registerKeyValue(Keys.FUSE_DURATION, this::fuseDuration);
+        this.registerFieldGetter(Keys.FUSE_DURATION, () -> this.fuseDuration);
+        this.registerFieldSetter(Keys.FUSE_DURATION, fuseDuration -> this.fuseDuration = fuseDuration);
+        this.registerKeyValue(Keys.FUSE_DURATION, this::fuseDuration);
 
-        registerFieldGetter(Keys.TICKS_REMAINING, () -> this.ticksRemaining);
-        registerFieldSetter(Keys.TICKS_REMAINING, ticksRemaining -> this.ticksRemaining = ticksRemaining);
-        registerKeyValue(Keys.TICKS_REMAINING, this::ticksRemaining);
+        this.registerFieldGetter(Keys.TICKS_REMAINING, () -> this.ticksRemaining);
+        this.registerFieldSetter(Keys.TICKS_REMAINING, ticksRemaining -> this.ticksRemaining = ticksRemaining);
+        this.registerKeyValue(Keys.TICKS_REMAINING, this::ticksRemaining);
     }
 
     @Override

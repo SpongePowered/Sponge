@@ -63,17 +63,17 @@ public abstract class AbstractSingleSetData<E, M extends Mutable<M, I>, I extend
 
     @Override
     protected org.spongepowered.api.data.value.Value.Mutable<?> getValueGetter() {
-        return new SpongeSetValue<>(this.usedKey, getValue());
+        return new SpongeSetValue<>(this.usedKey, this.getValue());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public M copy() {
-        return (M) ReflectionUtil.createInstance(this.getClass(), getValue());
+        return (M) ReflectionUtil.createInstance(this.getClass(), this.getValue());
     }
 
     @Override
     public I asImmutable() {
-        return ReflectionUtil.createInstance(this.immutableClass, getValue());
+        return ReflectionUtil.createInstance(this.immutableClass, this.getValue());
     }
 }

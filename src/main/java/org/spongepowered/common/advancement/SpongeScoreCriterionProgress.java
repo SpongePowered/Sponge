@@ -76,31 +76,31 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
 
     @Override
     public Optional<Instant> set(final int score) {
-        checkState(score >= 0 && score <= getGoal(), "Score cannot be negative or greater than the goal.");
-        int lastScore = getScore();
+        checkState(score >= 0 && score <= this.getGoal(), "Score cannot be negative or greater than the goal.");
+        int lastScore = this.getScore();
         if (lastScore == score) {
-            return get();
+            return this.get();
         }
         final CriterionEvent.Score.Change event;
         final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
         final Advancement advancement = this.progress.getAdvancement();
         final Player player = ((PlayerAdvancementsBridge) ((AdvancementProgressBridge) this.progress).bridge$getPlayerAdvancements()).bridge$getPlayer();
-        if (lastScore == getGoal()) {
+        if (lastScore == this.getGoal()) {
             event = SpongeEventFactory.createCriterionEventScoreRevoke(
-                    cause, advancement, getCriterion(), player, lastScore, score);
-        } else if (score == getGoal()) {
+                    cause, advancement, this.getCriterion(), player, lastScore, score);
+        } else if (score == this.getGoal()) {
             event = SpongeEventFactory.createCriterionEventScoreGrant(
-                    cause, advancement, getCriterion(), player, Instant.now(), lastScore, score);
+                    cause, advancement, this.getCriterion(), player, Instant.now(), lastScore, score);
         } else {
             event = SpongeEventFactory.createCriterionEventScoreChange(
-                    cause, advancement, getCriterion(), player, lastScore, score);
+                    cause, advancement, this.getCriterion(), player, lastScore, score);
         }
         if (SpongeImpl.postEvent(event)) {
-            return get();
+            return this.get();
         }
         SpongeScoreCriterion.BYPASS_EVENT = true;
         // This is the only case a instant will be returned
-        if (score == getGoal()) {
+        if (score == this.getGoal()) {
             Instant instant = null;
             for (final AdvancementCriterion criterion : this.criterion.internalCriteria) {
                 final org.spongepowered.api.advancement.criteria.CriterionProgress progress = this.progress.get(criterion).get();
@@ -135,12 +135,12 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
 
     @Override
     public Optional<Instant> add(final int score) {
-        return set(MathHelper.clamp(getScore() + score, 0, getGoal()));
+        return this.set(MathHelper.clamp(this.getScore() + score, 0, this.getGoal()));
     }
 
     @Override
     public Optional<Instant> remove(final int score) {
-        return set(MathHelper.clamp(getScore() - score, 0, getGoal()));
+        return this.set(MathHelper.clamp(this.getScore() - score, 0, this.getGoal()));
     }
 
     @Override
@@ -159,13 +159,13 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
 
     @Override
     public Instant grant() {
-        return set(getGoal()).get();
+        return this.set(this.getGoal()).get();
     }
 
     @Override
     public Optional<Instant> revoke() {
-        final Optional<Instant> previousState = get();
-        set(0);
+        final Optional<Instant> previousState = this.get();
+        this.set(0);
         return previousState;
     }
 

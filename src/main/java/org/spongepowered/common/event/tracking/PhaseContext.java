@@ -188,8 +188,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        addBlockCaptures();
-        addEntityCaptures();
+        this.addBlockCaptures();
+        this.addEntityCaptures();
         return (P) this;
     }
 
@@ -314,15 +314,15 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         // we can safely pop the frame here since this is only called when we're checking for processing
 
         return
-                isNonEmpty(this.blocksSupplier)
-                || isNonEmpty(this.blockItemDropsSupplier)
-                || isNonEmpty(this.blockItemEntityDropsSupplier)
-                || isNonEmpty(this.capturedItemsSupplier)
-                || isNonEmpty(this.capturedEntitiesSupplier)
-                || isNonEmpty(this.capturedItemStackSupplier)
-                || isNonEmpty(this.entityItemDropsSupplier)
-                || isNonEmpty(this.entityItemEntityDropsSupplier)
-                || isNonEmpty(this.blockEntitySpawnSupplier);
+                this.isNonEmpty(this.blocksSupplier)
+                || this.isNonEmpty(this.blockItemDropsSupplier)
+                || this.isNonEmpty(this.blockItemEntityDropsSupplier)
+                || this.isNonEmpty(this.capturedItemsSupplier)
+                || this.isNonEmpty(this.capturedEntitiesSupplier)
+                || this.isNonEmpty(this.capturedItemStackSupplier)
+                || this.isNonEmpty(this.entityItemDropsSupplier)
+                || this.isNonEmpty(this.entityItemEntityDropsSupplier)
+                || this.isNonEmpty(this.blockEntitySpawnSupplier);
     }
 
     private boolean isNonEmpty(@Nullable final ICaptureSupplier supplier) {
@@ -346,7 +346,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public <T> T requireSource(final Class<T> targetClass) {
-        return getSource(targetClass)
+        return this.getSource(targetClass)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
     }
 
@@ -550,7 +550,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public Optional<BlockPos> getBlockPosition() {
-        return getCaptureBlockPos()
+        return this.getCaptureBlockPos()
                 .getPos();
     }
 
@@ -577,7 +577,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final PhaseContext<?> other = (PhaseContext<?>) obj;

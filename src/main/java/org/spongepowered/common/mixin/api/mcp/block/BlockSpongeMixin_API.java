@@ -34,6 +34,6 @@ public abstract class BlockSpongeMixin_API extends BlockMixin_API {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".dry.name");
+        return new SpongeTranslation(this.getTranslationKey() + ".dry.name");
     }
 }

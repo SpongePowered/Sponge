@@ -43,6 +43,6 @@ public class SpongeDisarmedData extends AbstractBooleanData<DisarmedData, Immuta
 
     @Override
     public Mutable<Boolean> disarmed() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

@@ -95,7 +95,7 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getAgentData());
+        manipulators.add(this.getAgentData());
     }
 
 }

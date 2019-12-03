@@ -53,12 +53,12 @@ public final class TileEntityLockableDataProcessor
             return DataTransactionResult.failNoData();
         }
         LockableTileEntity tile = (LockableTileEntity) container;
-        Optional<String> old = getVal(tile);
+        Optional<String> old = this.getVal(tile);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
         tile.setLockCode(LockCode.EMPTY_CODE);
-        return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+        return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
     }
 
     @Override

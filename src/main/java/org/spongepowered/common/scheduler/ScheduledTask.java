@@ -133,7 +133,7 @@ public class ScheduledTask implements Task {
     @Override
     public boolean cancel() {
         boolean success = false;
-        if (getState() != ScheduledTask.ScheduledTaskState.RUNNING && getState() != ScheduledTaskState.EXECUTING) {
+        if (this.getState() != ScheduledTask.ScheduledTaskState.RUNNING && this.getState() != ScheduledTaskState.EXECUTING) {
             success = true;
         }
         this.setState(ScheduledTask.ScheduledTaskState.CANCELED);

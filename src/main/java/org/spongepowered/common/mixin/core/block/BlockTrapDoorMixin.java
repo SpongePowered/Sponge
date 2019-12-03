@@ -52,9 +52,9 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<Immutable<?, ?>>builder()
-            .add(impl$getPortionTypeFor(blockState))
-            .add(impl$getIsOpenFor(blockState))
-            .add(impl$getDirectionalData(blockState))
+            .add(this.impl$getPortionTypeFor(blockState))
+            .add(this.impl$getIsOpenFor(blockState))
+            .add(this.impl$getDirectionalData(blockState))
             .build();
     }
 
@@ -69,7 +69,7 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.HALF, this.impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
@@ -85,7 +85,7 @@ public abstract class BlockTrapDoorMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.withProperty(TrapDoorBlock.HALF, this.impl$convertType((SlabBlock.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;

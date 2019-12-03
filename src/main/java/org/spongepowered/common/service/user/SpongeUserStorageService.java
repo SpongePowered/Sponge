@@ -75,7 +75,7 @@ public class SpongeUserStorageService implements UserStorageService {
             profile = (GameProfile) new com.mojang.authlib.GameProfile(FAKEPLAYER_UUID, name);
         }
 
-        Optional<User> user = get(profile);
+        Optional<User> user = this.get(profile);
         if (user.isPresent()) {
             return user.get();
         }

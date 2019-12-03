@@ -124,7 +124,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
                     ThreadUtil.getDescription(((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getServerThread())
             ));
         }
-        checkProviders();
+        this.checkProviders();
     }
 
     private static boolean isPermittedThread() {
@@ -133,12 +133,12 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public Cause getCurrentCause() {
-        enforceMainThread();
+        this.enforceMainThread();
         if (this.cached_cause == null || this.cached_ctx == null) {
             if (this.cause.isEmpty()) {
-                this.cached_cause = Cause.of(getCurrentContext(), SpongeImpl.getGame());
+                this.cached_cause = Cause.of(this.getCurrentContext(), SpongeImpl.getGame());
             } else {
-                this.cached_cause = Cause.of(getCurrentContext(), this.cause);
+                this.cached_cause = Cause.of(this.getCurrentContext(), this.cause);
             }
         }
         return this.cached_cause;
@@ -156,7 +156,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         // except for this method call-point.
         for (final Iterator<PhaseContext<?>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
             final PhaseContext<?> tuple = iterator.next();
-            final StackFrame frame = pushCauseFrame(); // these should auto close
+            final StackFrame frame = this.pushCauseFrame(); // these should auto close
             ((BiConsumer) tuple.state.getFrameModifier()).accept(frame, tuple); // The frame will be auto closed by the phase context
         }
         // Clear the list since everything is now loaded.
@@ -168,7 +168,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public EventContext getCurrentContext() {
-        enforceMainThread();
+        this.enforceMainThread();
         if (this.cached_ctx == null) {
             this.cached_ctx = EventContext.of(this.ctx);
         }
@@ -177,7 +177,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public CauseStackManager pushCause(final Object obj) {
-        enforceMainThread();
+        this.enforceMainThread();
         checkNotNull(obj, "obj");
         this.cached_cause = null;
         if (this.cause.peek() == obj) {
@@ -203,7 +203,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public Object popCause() {
-        enforceMainThread();
+        this.enforceMainThread();
         final int size = this.cause.size();
         // First, check for duplicate causes. If there are duplicates,
         // we can artificially "pop" by just peeking.
@@ -223,21 +223,21 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public void popCauses(final int n) {
-        enforceMainThread();
+        this.enforceMainThread();
         for (int i = 0; i < n; i++) {
-            popCause();
+            this.popCause();
         }
     }
 
     @Override
     public Object peekCause() {
-        enforceMainThread();
+        this.enforceMainThread();
         return this.cause.peek();
     }
 
     @Override
     public StackFrame pushCauseFrame() {
-        enforceMainThread();
+        this.enforceMainThread();
         // Ensure duplicate causes will be correctly sized.
         final int size = this.cause.size();
         if (this.duplicateCauses.length <= size) {
@@ -253,7 +253,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             // Just in case we didn't catch a corrupted frame, clear it to ensure that we have
             // a clean slate.
             frame.clear();
-            frame.old_min_depth = min_depth;
+            frame.old_min_depth = this.min_depth;
             frame.lastCauseSize = this.duplicateCauses[size];
         }
 
@@ -270,7 +270,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public void popCauseFrame(final StackFrame oldFrame) {
-        enforceMainThread();
+        this.enforceMainThread();
         checkNotNull(oldFrame, "oldFrame");
         final CauseStackFrameImpl frame = this.frames.peek();
         if (frame != oldFrame) {
@@ -317,7 +317,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
                     printer.add("   Stack frame in position %n :", offset);
                     printer.add(f.stack_debug);
                 }
-                popCauseFrame(f);
+                this.popCauseFrame(f);
                 offset--;
             }
             printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
@@ -375,7 +375,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public <T> CauseStackManager addContext(final EventContextKey<T> key, final T value) {
-        enforceMainThread();
+        this.enforceMainThread();
         checkNotNull(key, "key");
         checkNotNull(value, "value");
         this.cached_ctx = null;
@@ -389,7 +389,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     @Override
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getContext(final EventContextKey<T> key) {
-        enforceMainThread();
+        this.enforceMainThread();
         checkNotNull(key, "key");
         return Optional.ofNullable((T) this.ctx.get(key));
     }
@@ -397,7 +397,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     @Override
     @SuppressWarnings("unchecked")
     public <T> Optional<T> removeContext(final EventContextKey<T> key) {
-        enforceMainThread();
+        this.enforceMainThread();
         checkNotNull(key, "key");
         this.cached_ctx = null;
         Object existing = this.ctx.remove(key);

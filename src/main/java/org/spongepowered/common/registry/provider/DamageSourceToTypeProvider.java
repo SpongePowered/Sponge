@@ -82,7 +82,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
     public DamageType getOrCustom(String key) {
         final DamageType damageType = this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH));
         if (damageType == null) {
-            addCustom(key);
+            this.addCustom(key);
             return DamageTypes.CUSTOM;
         }
         return damageType;

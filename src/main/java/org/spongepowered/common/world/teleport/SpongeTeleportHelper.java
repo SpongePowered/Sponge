@@ -71,7 +71,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             // Get the vectors to check, and get the block types with them.
             // The vectors should be sorted by distance from the centre of the checking region, so
             // this makes it easier to try to get close, because we can just iterate and get progressively further out.
-            Optional<Vector3i> result = getSafeLocation(world, getBlockLocations(location, height, width), distanceToDrop, filters);
+            Optional<Vector3i> result = this.getSafeLocation(world, this.getBlockLocations(location, height, width), distanceToDrop, filters);
             return result.map(vector3i -> new Location<>(world, vector3i.toDouble().add(0.5, 0, 0.5)));
         } finally {
             // Just in case some exception occurs, we want this to disable again.
@@ -150,15 +150,15 @@ public class SpongeTeleportHelper implements TeleportHelper {
             }
 
             // Get the block, add it to the cache.
-            BlockData block = getBlockData(currentTarget, world, blockCache, undefinedResults);
+            BlockData block = this.getBlockData(currentTarget, world, blockCache, undefinedResults);
 
             // If the block isn't safe, no point in continuing on this run.
             if (block.isSafeBody) {
 
                 // Check the block ABOVE is safe for the body, and the two BELOW are safe too.
-                if (getBlockData(
+                if (this.getBlockData(
                     currentTarget.add(0, 1, 0), world, blockCache, undefinedResults).isSafeBody
-                        && (floorDistanceCheck <= 0 || isFloorSafe(currentTarget, world, blockCache, undefinedResults, floorDistanceCheck))) {
+                        && (floorDistanceCheck <= 0 || this.isFloorSafe(currentTarget, world, blockCache, undefinedResults, floorDistanceCheck))) {
 
                     // This position should be safe. Get the center of the block to spawn into.
                     return true;
@@ -172,7 +172,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
     private boolean isFloorSafe(Vector3i currentTarget, World world, Map<Vector3i, BlockData> blockCache, Collection<TeleportHelperFilter> filters,
             int floorDistanceCheck) {
         for (int i = 1; i < floorDistanceCheck; ++i) {
-            BlockData data = getBlockData(currentTarget.sub(0, i, 0), world, blockCache, filters);
+            BlockData data = this.getBlockData(currentTarget.sub(0, i, 0), world, blockCache, filters);
 
             // If it's a safe floor, we can just say yes now.
             if (data.isSafeFloor) {
@@ -186,7 +186,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
         }
 
         // Check the next block down, if it's a floor, then we're good to go, otherwise we'd fall too far for our liking.
-        return getBlockData(currentTarget.sub(0, floorDistanceCheck, 0), world, blockCache, filters).isSafeFloor;
+        return this.getBlockData(currentTarget.sub(0, floorDistanceCheck, 0), world, blockCache, filters).isSafeFloor;
     }
 
     private BlockData getBlockData(Vector3i vector3i, World world, Map<Vector3i, BlockData> cache, Collection<TeleportHelperFilter> filters) {

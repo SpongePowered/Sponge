@@ -53,43 +53,43 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     @Override
 
     public Immutable<E> with(Set<E> value) {
-        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.copyOf(value));
+        return new ImmutableSpongeSetValue<>(this.getKey(), ImmutableSet.copyOf(value));
     }
 
     @Override
     public Immutable<E> transform(Function<Set<E>, Set<E>> function) {
-        return new ImmutableSpongeSetValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
+        return new ImmutableSpongeSetValue<>(this.getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
     }
 
     @Override
     public Immutable<E> withElement(E elements) {
-        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
+        return new ImmutableSpongeSetValue<>(this.getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override
     public Immutable<E> withAll(Iterable<E> elements) {
-        return new ImmutableSpongeSetValue<>(getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).addAll(elements).build());
+        return new ImmutableSpongeSetValue<>(this.getKey(), ImmutableSet.<E>builder().addAll(this.actualValue).addAll(elements).build());
     }
 
     @Override
     public Immutable<E> without(E element) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(existing -> !existing.equals(element)).forEach(builder::add);
-        return new ImmutableSpongeSetValue<>(getKey(), builder.build());
+        return new ImmutableSpongeSetValue<>(this.getKey(), builder.build());
     }
 
     @Override
     public Immutable<E> withoutAll(Iterable<E> elements) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
-        return new ImmutableSpongeSetValue<>(getKey(), builder.build());
+        return new ImmutableSpongeSetValue<>(this.getKey(), builder.build());
     }
 
     @Override
     public Immutable<E> withoutAll(Predicate<E> predicate) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(existingElement -> checkNotNull(predicate).test(existingElement)).forEach(builder::add);
-        return new ImmutableSpongeSetValue<>(getKey(), builder.build());
+        return new ImmutableSpongeSetValue<>(this.getKey(), builder.build());
     }
 
     @Override
@@ -103,6 +103,6 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     public Mutable<E> asMutable() {
         final Set<E> set = Sets.newHashSet();
         set.addAll(this.actualValue);
-        return new SpongeSetValue<>(getKey(), set);
+        return new SpongeSetValue<>(this.getKey(), set);
     }
 }

@@ -59,10 +59,10 @@ public class SpongeTimingsFactory implements TimingsFactory {
         final TimingsCategory category = SpongeImpl.getGlobalConfigAdapter().getConfig().getTimings();
         TimingsManager.privacy = category.isServerNamePrivate();
         TimingsManager.hiddenConfigs.addAll(category.getHiddenConfigEntries());
-        setVerboseTimingsEnabled(category.isVerbose());
-        setTimingsEnabled(this.moduleEnabled && category.isEnabled());
-        setHistoryInterval(category.getHistoryInterval());
-        setHistoryLength(category.getHistoryLength());
+        this.setVerboseTimingsEnabled(category.isVerbose());
+        this.setTimingsEnabled(this.moduleEnabled && category.isEnabled());
+        this.setHistoryInterval(category.getHistoryInterval());
+        this.setHistoryLength(category.getHistoryLength());
 
         SpongeImpl.getLogger().debug("Sponge Timings: " + this.timingsEnabled +
                                     " - Verbose: " + this.verboseEnabled +
@@ -106,7 +106,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
             return;
         }
         this.timingsEnabled = enabled;
-        reset();
+        this.reset();
     }
 
     @Override
@@ -130,7 +130,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
         this.historyInterval = Math.max(20 * 60, interval);
         // Recheck the history length with the new Interval
         if (this.historyLength != -1) {
-            setHistoryLength(this.historyLength);
+            this.setHistoryLength(this.historyLength);
         }
     }
 
@@ -154,7 +154,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
         }
         this.historyLength = Math.max(Math.min(maxLength, length), this.historyInterval);
         Queue<TimingHistory> oldQueue = TimingsManager.HISTORY;
-        int frames = (getHistoryLength() / getHistoryInterval());
+        int frames = (this.getHistoryLength() / this.getHistoryInterval());
         if (length > maxLength) {
             SpongeImpl.getLogger().warn(
                     "Timings Length too high. Requested " + length + ", max is " + maxLength

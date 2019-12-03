@@ -116,7 +116,7 @@ public class SpongeScheduler implements Scheduler {
 
     @Override
     public Set<Task> getScheduledTasks(Object plugin) {
-        String testOwnerId = checkPluginInstance(plugin).getId();
+        String testOwnerId = this.checkPluginInstance(plugin).getId();
 
         Set<Task> allTasks = this.getScheduledTasks();
         Iterator<Task> it = allTasks.iterator();
@@ -138,12 +138,12 @@ public class SpongeScheduler implements Scheduler {
 
     @Override
     public SpongeExecutorService createSyncExecutor(Object plugin) {
-        return new TaskExecutorService(() -> createTaskBuilder(), this.syncScheduler, checkPluginInstance(plugin));
+        return new TaskExecutorService(() -> this.createTaskBuilder(), this.syncScheduler, this.checkPluginInstance(plugin));
     }
 
     @Override
     public SpongeExecutorService createAsyncExecutor(Object plugin) {
-        return new TaskExecutorService(() -> createTaskBuilder().async(), this.asyncScheduler, checkPluginInstance(plugin));
+        return new TaskExecutorService(() -> this.createTaskBuilder().async(), this.asyncScheduler, this.checkPluginInstance(plugin));
     }
 
     /**
@@ -175,11 +175,11 @@ public class SpongeScheduler implements Scheduler {
     }
 
     String getNameFor(PluginContainer plugin, ScheduledTask.TaskSynchronicity syncType) {
-        return getDelegate(syncType).nextName(plugin);
+        return this.getDelegate(syncType).nextName(plugin);
     }
 
     void submit(ScheduledTask task) {
-        getDelegate(task).addTask(task);
+        this.getDelegate(task).addTask(task);
     }
 
     /**
@@ -203,7 +203,7 @@ public class SpongeScheduler implements Scheduler {
     }
 
     public Future<?> callSync(Runnable runnable) {
-        return callSync(() -> {
+        return this.callSync(() -> {
             runnable.run();
             return null;
         });
@@ -211,7 +211,7 @@ public class SpongeScheduler implements Scheduler {
 
     public <V> Future<V> callSync(Callable<V> callable) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
-        createTaskBuilder().execute(runnable).submit(SpongeImpl.getPlugin());
+        this.createTaskBuilder().execute(runnable).submit(SpongeImpl.getPlugin());
         return runnable;
     }
 }

@@ -55,7 +55,7 @@ public class OrQuery extends SpongeDepthQuery {
     }
 
     public boolean matches(Lens lens, Lens parent, Inventory inventory) {
-        for (Query orQuery : orQueries) {
+        for (Query orQuery : this.orQueries) {
             if (orQuery instanceof SpongeDepthQuery) {
                 if (((SpongeDepthQuery) orQuery).matches(lens, parent, inventory)) {
                     return true;

@@ -90,7 +90,7 @@ public class TradeOfferDataProcessor
 
     @Override
     protected Immutable<List<TradeOffer>> constructImmutableValue(final List<TradeOffer> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -39,7 +39,7 @@ public class PumpkinBuilder implements Pumpkin.Builder {
     private double chance;
 
     public PumpkinBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -58,7 +58,7 @@ public class PumpkinBuilder implements Pumpkin.Builder {
 
     @Override
     public Builder from(Pumpkin value) {
-        return perChunk(value.getPumpkinsPerChunk())
+        return this.perChunk(value.getPumpkinsPerChunk())
             .chance(value.getPumpkinChance());
     }
 

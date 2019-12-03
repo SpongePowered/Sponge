@@ -68,7 +68,7 @@ public class EntityLastCommandOutputValueProcessor extends
 
     @Override
     protected Immutable<Optional<Text>> constructImmutableValue(Optional<Text> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

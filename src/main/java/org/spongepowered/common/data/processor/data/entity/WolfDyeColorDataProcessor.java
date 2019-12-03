@@ -64,7 +64,7 @@ public class WolfDyeColorDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected Immutable<DyeColor> constructImmutableValue(DyeColor value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

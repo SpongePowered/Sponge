@@ -62,7 +62,7 @@ public abstract class EntityPigZombieMixin_API extends EntityZombieMixin_API imp
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getAngerData());
-        manipulators.add(new SpongeAggressiveData(isAngry()));
+        manipulators.add(this.getAngerData());
+        manipulators.add(new SpongeAggressiveData(this.isAngry()));
     }
 }

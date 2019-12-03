@@ -42,7 +42,7 @@ public class EndIslandBuilder implements EndIsland.Builder {
     private int exclusion;
 
     public EndIslandBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -72,9 +72,9 @@ public class EndIslandBuilder implements EndIsland.Builder {
 
     @Override
     public Builder from(EndIsland value) {
-        startingRadius(value.getStartingRadius());
-        radiusDecrement(value.getRadiusDecrement());
-        islandBlock(value.getIslandBlock());
+        this.startingRadius(value.getStartingRadius());
+        this.radiusDecrement(value.getRadiusDecrement());
+        this.islandBlock(value.getIslandBlock());
         return this;
     }
 

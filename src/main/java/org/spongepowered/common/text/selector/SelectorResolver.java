@@ -119,22 +119,22 @@ public class SelectorResolver {
             this.entityOrigin = null;
         }
         this.position = position == null ? Vector3d.ZERO : position;
-        this.selectorFilter = makeFilter();
+        this.selectorFilter = this.makeFilter();
     }
 
     private Predicate<Entity> makeFilter() {
-        Vector3d position = getPositionOrDefault(this.position, ArgumentTypes.POSITION);
+        Vector3d position = this.getPositionOrDefault(this.position, ArgumentTypes.POSITION);
         ArrayList<Predicate<Entity>> filters = new ArrayList<Predicate<Entity>>();
 
-        addTypeFilters(filters);
-        addLevelFilters(filters);
-        addGamemodeFilters(filters);
-        addTeamFilters(filters);
-        addScoreFilters(filters);
-        addNameFilters(filters);
-        addRadiusFilters(position, filters);
-        addDimensionFilters(position, filters);
-        addRotationFilters(filters);
+        this.addTypeFilters(filters);
+        this.addLevelFilters(filters);
+        this.addGamemodeFilters(filters);
+        this.addTeamFilters(filters);
+        this.addScoreFilters(filters);
+        this.addNameFilters(filters);
+        this.addRadiusFilters(position, filters);
+        this.addDimensionFilters(position, filters);
+        this.addRotationFilters(filters);
 
         // Pack the list before returning it to improve space efficiency
         filters.trimToSize();
@@ -330,13 +330,13 @@ public class SelectorResolver {
         int maxToSelect = this.selector.get(ArgumentTypes.COUNT).orElse(defaultCount);
         boolean isReversed = maxToSelect < 0;
         maxToSelect = Math.abs(maxToSelect);
-        Set<? extends Extent> extents = getExtentSet();
+        Set<? extends Extent> extents = this.getExtentSet();
         Stream<Entity> entityStream = extents.stream()
                 .flatMap(ext -> ext.getEntities().stream())
                 .filter(this.selectorFilter);
 
         if (maxToSelect == 0) {
-            return entityStream.sorted(distanceSort(isReversed))
+            return entityStream.sorted(this.distanceSort(isReversed))
                     .collect(ImmutableSet.toImmutableSet());
         }
 
@@ -348,13 +348,13 @@ public class SelectorResolver {
             return ImmutableSet.copyOf(holder.subList(0, maxToSelect));
         }
 
-        return entityStream.sorted(distanceSort(isReversed))
+        return entityStream.sorted(this.distanceSort(isReversed))
                 .limit(maxToSelect)
                 .collect(ImmutableSet.toImmutableSet());
     }
 
     private Comparator<? super Entity> distanceSort(boolean isReversed) {
-        Vector3d position = getPositionOrDefault(this.position, ArgumentTypes.POSITION);
+        Vector3d position = this.getPositionOrDefault(this.position, ArgumentTypes.POSITION);
         int multiplier = isReversed ? -1 : 1;
         return (a, b) -> {
             double distToPosA = a.getLocation().getPosition().distanceSquared(position);

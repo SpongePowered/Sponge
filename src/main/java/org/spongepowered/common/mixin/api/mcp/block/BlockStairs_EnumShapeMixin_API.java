@@ -39,11 +39,11 @@ public abstract class BlockStairs_EnumShapeMixin_API {
     @Shadow public abstract String shadow$getName();
 
     public String stair$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String stair$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 }

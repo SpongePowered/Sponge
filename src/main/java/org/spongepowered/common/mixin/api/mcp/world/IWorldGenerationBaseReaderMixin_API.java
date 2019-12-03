@@ -42,11 +42,11 @@ public interface IWorldGenerationBaseReaderMixin_API extends ReadableGenerationV
 
     @Override
     default boolean hasBlockState(int x, int y, int z, Predicate<? super BlockState> predicate) {
-        return shadow$hasBlockState(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
+        return this.shadow$hasBlockState(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
     }
 
     @Override
     default int getHeight(HeightType type, int x, int z) {
-        return shadow$getHeight((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
+        return this.shadow$getHeight((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
     }
 }

@@ -73,18 +73,18 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     @Override
     public void setBiome(int x, int y, int z, BiomeType biome) {
-        checkOpen();
-        checkRange(x, y, z);
+        this.checkOpen();
+        this.checkRange(x, y, z);
 
-        this.biomes[getIndex(x, z)] = (byte) this.palette.getOrAssign(biome);
+        this.biomes[this.getIndex(x, z)] = (byte) this.palette.getOrAssign(biome);
     }
 
     @Override
     public BiomeType getBiome(int x, int y, int z) {
-        checkOpen();
-        checkRange(x, y, z);
+        this.checkOpen();
+        this.checkRange(x, y, z);
 
-        byte biomeId = this.biomes[getIndex(x, z)];
+        byte biomeId = this.biomes[this.getIndex(x, z)];
         return this.palette.get(biomeId & 255).orElse(BiomeTypes.OCEAN);
     }
 
@@ -95,7 +95,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
      * @return The internal byte array.
      */
     public byte[] detach() {
-        checkOpen();
+        this.checkOpen();
 
         this.detached = true;
         return this.biomes;
@@ -129,8 +129,8 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     @Override
     public MutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new MutableBiomeViewDownsize(this, newMin, newMax);
     }
 
@@ -151,7 +151,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     @Override
     public MutableBiomeVolume getBiomeCopy(StorageType type) {
-        checkOpen();
+        this.checkOpen();
         switch (type) {
             case STANDARD:
                 return new ByteArrayMutableBiomeBuffer(this.palette, this.biomes.clone(), this.start, this.size);
@@ -163,7 +163,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     @Override
     public ImmutableBiomeVolume getImmutableBiomeCopy() {
-        checkOpen();
+        this.checkOpen();
         return new ByteArrayImmutableBiomeBuffer(this.palette, this.biomes, this.start, this.size);
     }
 
@@ -172,7 +172,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {

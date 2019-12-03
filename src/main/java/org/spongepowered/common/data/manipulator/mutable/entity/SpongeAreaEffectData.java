@@ -82,56 +82,56 @@ public class SpongeAreaEffectData extends AbstractData<AreaEffectCloudData, Immu
         this.potionEffects = new ArrayList<>(potionEffects.size());
         this.potionEffects.addAll(potionEffects);
         this.age = age;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeAreaEffectData() {
         super(AreaEffectCloudData.class);
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_AGE, () -> this.age);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_AGE, (age) -> this.age = age < 0 ? 0 : age);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_AGE, this::age);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_AGE, () -> this.age);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_AGE, (age) -> this.age = age < 0 ? 0 : age);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_AGE, this::age);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, () -> this.reapplicationDelay);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, (age) -> this.reapplicationDelay = age < 0 ? 0 : age);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, this::applicationDelay);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, () -> this.reapplicationDelay);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, (age) -> this.reapplicationDelay = age < 0 ? 0 : age);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, this::applicationDelay);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_COLOR, () -> this.color);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_COLOR, (color) -> this.color = color);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_COLOR, this::color);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_COLOR, () -> this.color);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_COLOR, (color) -> this.color = color);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_COLOR, this::color);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_DURATION, () -> this.duration);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_DURATION, (duration) -> this.duration = duration < 0 ? 0 : duration);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_DURATION, this::duration);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_DURATION, () -> this.duration);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_DURATION, (duration) -> this.duration = duration < 0 ? 0 : duration);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_DURATION, this::duration);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, () -> this.durationOnUse);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, (durationOnUse) -> this.durationOnUse = durationOnUse < 0 ? 0 : durationOnUse);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, this::durationOnUse);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, () -> this.durationOnUse);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, (durationOnUse) -> this.durationOnUse = durationOnUse < 0 ? 0 : durationOnUse);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, this::durationOnUse);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, () -> this.particleType);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, (particleType) -> this.particleType = particleType);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, this::particleType);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, () -> this.particleType);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, (particleType) -> this.particleType = particleType);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, this::particleType);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_RADIUS, () -> this.radius);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_RADIUS, (radius) -> this.radius = radius < 0 ? 0 : radius);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_RADIUS, this::radius);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_RADIUS, () -> this.radius);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_RADIUS, (radius) -> this.radius = radius < 0 ? 0 : radius);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_RADIUS, this::radius);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, () -> this.radiusOnUse);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, (radiusOnUse) -> this.radiusOnUse = radiusOnUse < 0 ? 0 : radiusOnUse);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, this::radiusOnUse);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, () -> this.radiusOnUse);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, (radiusOnUse) -> this.radiusOnUse = radiusOnUse < 0 ? 0 : radiusOnUse);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, this::radiusOnUse);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, () -> this.waitTime);
-        registerFieldSetter(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, (waitTime) -> this.waitTime = waitTime < 0 ? 0 : waitTime);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, this::waitTime);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, () -> this.waitTime);
+        this.registerFieldSetter(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, (waitTime) -> this.waitTime = waitTime < 0 ? 0 : waitTime);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, this::waitTime);
 
-        registerFieldGetter(Keys.POTION_EFFECTS, () -> this.potionEffects);
-        registerFieldSetter(Keys.POTION_EFFECTS, (potionEffects1) -> this.potionEffects = potionEffects1);
-        registerKeyValue(Keys.POTION_EFFECTS, this::effects);
+        this.registerFieldGetter(Keys.POTION_EFFECTS, () -> this.potionEffects);
+        this.registerFieldSetter(Keys.POTION_EFFECTS, (potionEffects1) -> this.potionEffects = potionEffects1);
+        this.registerKeyValue(Keys.POTION_EFFECTS, this::effects);
 
 
     }

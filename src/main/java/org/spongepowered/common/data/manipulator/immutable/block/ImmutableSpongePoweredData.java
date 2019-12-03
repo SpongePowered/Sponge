@@ -39,7 +39,7 @@ public class ImmutableSpongePoweredData extends AbstractImmutableBooleanData<Imm
 
     @Override
     public Immutable<Boolean> powered() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

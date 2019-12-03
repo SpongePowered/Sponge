@@ -186,7 +186,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Constants.Sponge.EntityArchetype.ENTITY_TYPE, this.type)
-                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, getEntityData())
+                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.getEntityData())
                 ;
     }
 
@@ -213,7 +213,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {

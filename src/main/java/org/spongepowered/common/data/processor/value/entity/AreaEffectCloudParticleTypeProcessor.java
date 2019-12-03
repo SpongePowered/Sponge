@@ -68,7 +68,7 @@ public class AreaEffectCloudParticleTypeProcessor extends AbstractSpongeValuePro
 
     @Override
     protected Immutable<ParticleType> constructImmutableValue(ParticleType value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

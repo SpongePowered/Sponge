@@ -49,7 +49,7 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
         this.walkSpeedValue = new ImmutableSpongeValue<>(Keys.WALKING_SPEED, 0.7D, this.walkSpeed);
         this.flyingSpeedValue = new ImmutableSpongeValue<>(Keys.FLYING_SPEED, 0.05D, this.flySpeed);
 
-        registerGetters();
+        this.registerGetters();
     }
 
     public double getWalkSpeed() {
@@ -62,11 +62,11 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.WALKING_SPEED, ImmutableSpongeMovementSpeedData.this::getWalkSpeed);
-        registerKeyValue(Keys.WALKING_SPEED, ImmutableSpongeMovementSpeedData.this::walkSpeed);
+        this.registerFieldGetter(Keys.WALKING_SPEED, ImmutableSpongeMovementSpeedData.this::getWalkSpeed);
+        this.registerKeyValue(Keys.WALKING_SPEED, ImmutableSpongeMovementSpeedData.this::walkSpeed);
 
-        registerFieldGetter(Keys.FLYING_SPEED, ImmutableSpongeMovementSpeedData.this::getFlySpeed);
-        registerKeyValue(Keys.FLYING_SPEED, ImmutableSpongeMovementSpeedData.this::flySpeed);
+        this.registerFieldGetter(Keys.FLYING_SPEED, ImmutableSpongeMovementSpeedData.this::getFlySpeed);
+        this.registerKeyValue(Keys.FLYING_SPEED, ImmutableSpongeMovementSpeedData.this::flySpeed);
     }
 
     @Override

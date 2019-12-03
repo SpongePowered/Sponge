@@ -77,7 +77,7 @@ public class EntityMixin_Collisions implements CollisionsCapability {
 
             this.collision$entityModId = ((SpongeEntityType) ((Entity) this).getType()).getModId();
             if (!this.world.isRemote) {
-                collision$initializeCollisionState(this.world);
+                this.collision$initializeCollisionState(this.world);
             }
         }
     }

@@ -63,7 +63,7 @@ public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<Entit
 
     @Override
     protected Immutable<Optional<Double>> constructImmutableValue(final Optional<Double> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -80,17 +80,17 @@ public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<Immut
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.VANISH, this::isVanish);
-        registerKeyValue(Keys.VANISH, this::vanish);
+        this.registerFieldGetter(Keys.VANISH, this::isVanish);
+        this.registerKeyValue(Keys.VANISH, this::vanish);
 
-        registerFieldGetter(Keys.VANISH_IGNORES_COLLISION, this::isCollision);
-        registerKeyValue(Keys.VANISH_IGNORES_COLLISION, this::ignoresCollisionDetection);
+        this.registerFieldGetter(Keys.VANISH_IGNORES_COLLISION, this::isCollision);
+        this.registerKeyValue(Keys.VANISH_IGNORES_COLLISION, this::ignoresCollisionDetection);
 
-        registerFieldGetter(Keys.VANISH_PREVENTS_TARGETING, this::isUntargetable);
-        registerKeyValue(Keys.VANISH_PREVENTS_TARGETING, this::untargetable);
+        this.registerFieldGetter(Keys.VANISH_PREVENTS_TARGETING, this::isUntargetable);
+        this.registerKeyValue(Keys.VANISH_PREVENTS_TARGETING, this::untargetable);
 
-        registerFieldGetter(Keys.INVISIBLE, () -> this.invisible);
-        registerKeyValue(Keys.INVISIBLE, this::invisible);
+        this.registerFieldGetter(Keys.INVISIBLE, () -> this.invisible);
+        this.registerKeyValue(Keys.INVISIBLE, this::invisible);
     }
 
     @Override

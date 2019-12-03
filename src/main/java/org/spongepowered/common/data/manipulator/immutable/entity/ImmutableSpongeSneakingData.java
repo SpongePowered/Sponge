@@ -39,7 +39,7 @@ public class ImmutableSpongeSneakingData extends AbstractImmutableBooleanData<Im
     
     @Override
     public Immutable<Boolean> sneaking() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

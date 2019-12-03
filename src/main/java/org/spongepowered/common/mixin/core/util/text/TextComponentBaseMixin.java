@@ -66,7 +66,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
 
     @Override
     public Iterator<ITextComponent> bridge$childrenIterator() {
-        return getSiblings().iterator();
+        return this.getSiblings().iterator();
     }
 
     @Override
@@ -78,7 +78,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
     public String bridge$toPlain() {
         final StringBuilder builder = new StringBuilder();
 
-        for (final ITextComponent component : bridge$withChildren()) {
+        for (final ITextComponent component : this.bridge$withChildren()) {
             builder.append(component.getUnformattedComponentText());
         }
 
@@ -88,7 +88,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
     private StringBuilder getLegacyFormattingBuilder() {
         final StringBuilder builder = new StringBuilder();
 
-        final Style style = getStyle();
+        final Style style = this.getStyle();
         apply(builder, COLOR_CHAR, defaultIfNull(style.getColor(), RESET));
         apply(builder, COLOR_CHAR, BOLD, style.getBold());
         apply(builder, COLOR_CHAR, ITALIC, style.getItalic());
@@ -101,7 +101,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
 
     @Override
     public String bridge$getLegacyFormatting() {
-        return getLegacyFormattingBuilder().toString();
+        return this.getLegacyFormattingBuilder().toString();
     }
 
     @Override
@@ -111,7 +111,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
         ResolvedChatStyle current = null;
         Style previous = null;
 
-        for (final ITextComponent component : bridge$withChildren()) {
+        for (final ITextComponent component : this.bridge$withChildren()) {
             final Style newStyle = component.getStyle();
             final ResolvedChatStyle style = resolve(current, previous, newStyle);
             previous = newStyle;
@@ -152,8 +152,8 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
 
     @Override
     public String bridge$toLegacySingle(final char code) {
-        return getLegacyFormattingBuilder()
-                .append(getUnformattedComponentText())
+        return this.getLegacyFormattingBuilder()
+                .append(this.getUnformattedComponentText())
                 .toString();
     }
 
@@ -196,7 +196,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
 
     @Override
     public Text bridge$toText() {
-        final Text.Builder builder = impl$createBuilder();
+        final Text.Builder builder = this.impl$createBuilder();
 
         final StyleBridge style = (StyleBridge) this.style;
         if (style != null) {

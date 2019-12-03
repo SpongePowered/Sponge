@@ -50,7 +50,7 @@ public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.PLACEABLE_BLOCKS.getQuery(), getValue()
+            .set(Keys.PLACEABLE_BLOCKS.getQuery(), this.getValue()
                 .stream()
                 .map(BlockType::getId)
                 .collect(Collectors.toList()));
@@ -58,6 +58,6 @@ public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData
 
     @Override
     public Immutable<BlockType> placeable() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

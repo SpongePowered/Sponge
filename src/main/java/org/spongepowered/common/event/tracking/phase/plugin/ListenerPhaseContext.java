@@ -80,7 +80,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     public Optional<Player> getCapturedPlayer() throws IllegalStateException {
-        return getCapturedPlayerSupplier().getPlayer();
+        return this.getCapturedPlayerSupplier().getPlayer();
     }
 
     @Override
@@ -120,7 +120,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
             final CapturePlayer that = (CapturePlayer) o;

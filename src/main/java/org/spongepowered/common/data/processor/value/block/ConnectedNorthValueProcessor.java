@@ -60,7 +60,7 @@ public class ConnectedNorthValueProcessor extends
 
     @Override
     protected Immutable<Boolean> constructImmutableValue(Boolean value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

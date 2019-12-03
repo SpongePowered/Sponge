@@ -51,7 +51,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
 
     @Override
     public List<SubjectReference> getParents(Set<Context> contexts) {
-        final SubjectReference parent = getParent();
+        final SubjectReference parent = this.getParent();
         return contexts.isEmpty() && parent != null ? Collections.singletonList(parent) : Collections.emptyList();
     }
 
@@ -64,14 +64,14 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        setParent(parent);
+        this.setParent(parent);
         return CompletableFuture.completedFuture(true);
     }
 
     @Override
     public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
         if (parent == this.parent) {
-            setParent(null);
+            this.setParent(null);
             return CompletableFuture.completedFuture(true);
         }
 
@@ -80,7 +80,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
 
     @Override
     public CompletableFuture<Boolean> clearParents() {
-        return removeParent(GLOBAL_CONTEXT, this.parent);
+        return this.removeParent(GLOBAL_CONTEXT, this.parent);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
             return CompletableFuture.completedFuture(false);
         }
 
-        return clearParents();
+        return this.clearParents();
     }
 
     public void setParent(@Nullable SubjectReference parent) {

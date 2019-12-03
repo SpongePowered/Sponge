@@ -44,6 +44,6 @@ public class SpongeCooldownData extends AbstractBoundedComparableData<Integer, C
 
     @Override
     public Mutable<Integer> cooldown() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

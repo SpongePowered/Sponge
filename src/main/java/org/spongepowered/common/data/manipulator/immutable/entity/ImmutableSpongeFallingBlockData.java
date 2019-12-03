@@ -79,31 +79,31 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
         this.canHurtEntitiesValue = new ImmutableSpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, Constants.Entity.FallingBlock
                 .DEFAULT_CAN_HURT_ENTITIES, this.canHurtEntities);
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.FALL_DAMAGE_PER_BLOCK, ImmutableSpongeFallingBlockData.this::getFallDamagePerBlock);
-        registerKeyValue(Keys.FALL_DAMAGE_PER_BLOCK, ImmutableSpongeFallingBlockData.this::fallDamagePerBlock);
+        this.registerFieldGetter(Keys.FALL_DAMAGE_PER_BLOCK, ImmutableSpongeFallingBlockData.this::getFallDamagePerBlock);
+        this.registerKeyValue(Keys.FALL_DAMAGE_PER_BLOCK, ImmutableSpongeFallingBlockData.this::fallDamagePerBlock);
 
-        registerFieldGetter(Keys.MAX_FALL_DAMAGE, ImmutableSpongeFallingBlockData.this::getMaxFallDamage);
-        registerKeyValue(Keys.MAX_FALL_DAMAGE, ImmutableSpongeFallingBlockData.this::maxFallDamage);
+        this.registerFieldGetter(Keys.MAX_FALL_DAMAGE, ImmutableSpongeFallingBlockData.this::getMaxFallDamage);
+        this.registerKeyValue(Keys.MAX_FALL_DAMAGE, ImmutableSpongeFallingBlockData.this::maxFallDamage);
 
-        registerFieldGetter(Keys.FALLING_BLOCK_STATE, ImmutableSpongeFallingBlockData.this::getBlockState);
-        registerKeyValue(Keys.FALLING_BLOCK_STATE, ImmutableSpongeFallingBlockData.this::blockState);
+        this.registerFieldGetter(Keys.FALLING_BLOCK_STATE, ImmutableSpongeFallingBlockData.this::getBlockState);
+        this.registerKeyValue(Keys.FALLING_BLOCK_STATE, ImmutableSpongeFallingBlockData.this::blockState);
 
-        registerFieldGetter(Keys.CAN_PLACE_AS_BLOCK, ImmutableSpongeFallingBlockData.this::getCanPlaceAsBlock);
-        registerKeyValue(Keys.CAN_PLACE_AS_BLOCK, ImmutableSpongeFallingBlockData.this::canPlaceAsBlock);
+        this.registerFieldGetter(Keys.CAN_PLACE_AS_BLOCK, ImmutableSpongeFallingBlockData.this::getCanPlaceAsBlock);
+        this.registerKeyValue(Keys.CAN_PLACE_AS_BLOCK, ImmutableSpongeFallingBlockData.this::canPlaceAsBlock);
 
-        registerFieldGetter(Keys.CAN_DROP_AS_ITEM, ImmutableSpongeFallingBlockData.this::getCanDropAsItem);
-        registerKeyValue(Keys.CAN_DROP_AS_ITEM, ImmutableSpongeFallingBlockData.this::canDropAsItem);
+        this.registerFieldGetter(Keys.CAN_DROP_AS_ITEM, ImmutableSpongeFallingBlockData.this::getCanDropAsItem);
+        this.registerKeyValue(Keys.CAN_DROP_AS_ITEM, ImmutableSpongeFallingBlockData.this::canDropAsItem);
 
-        registerFieldGetter(Keys.FALL_TIME, ImmutableSpongeFallingBlockData.this::getFallTime);
-        registerKeyValue(Keys.FALL_TIME, ImmutableSpongeFallingBlockData.this::fallTime);
+        this.registerFieldGetter(Keys.FALL_TIME, ImmutableSpongeFallingBlockData.this::getFallTime);
+        this.registerKeyValue(Keys.FALL_TIME, ImmutableSpongeFallingBlockData.this::fallTime);
 
-        registerFieldGetter(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, ImmutableSpongeFallingBlockData.this::getCanHurtEntities);
-        registerKeyValue(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, ImmutableSpongeFallingBlockData.this::canHurtEntities);
+        this.registerFieldGetter(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, ImmutableSpongeFallingBlockData.this::getCanHurtEntities);
+        this.registerKeyValue(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, ImmutableSpongeFallingBlockData.this::canHurtEntities);
     }
 
     public double getFallDamagePerBlock() {

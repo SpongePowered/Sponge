@@ -45,7 +45,7 @@ public interface ICriterionInstanceMixin_API extends FilteredTrigger {
 
     @Override
     default Trigger getType() {
-        final ICriterionTrigger triggerType = CriteriaTriggers.get(getId());
+        final ICriterionTrigger triggerType = CriteriaTriggers.get(this.getId());
         checkNotNull(triggerType, "triggerType");
         return (Trigger) triggerType;
     }

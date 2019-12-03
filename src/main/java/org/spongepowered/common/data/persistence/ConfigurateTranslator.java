@@ -86,7 +86,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     public ConfigurationNode translateData(DataView container) {
         ConfigurationNode node = SimpleConfigurationNode.root();
-        translateContainerToData(node, container);
+        this.translateContainerToData(node, container);
         return node;
     }
 

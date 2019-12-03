@@ -68,14 +68,14 @@ public class PlaceableDataProcessor
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (supports(container)) {
+        if (this.supports(container)) {
             ItemStack stack = (ItemStack) container;
-            Optional<Set<BlockType>> old = getVal(stack);
+            Optional<Set<BlockType>> old = this.getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            if (set(stack, ImmutableSet.<BlockType>of())) {
-                return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            if (this.set(stack, ImmutableSet.<BlockType>of())) {
+                return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }

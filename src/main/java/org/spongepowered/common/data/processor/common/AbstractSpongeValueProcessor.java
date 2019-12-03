@@ -68,7 +68,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends Value<E>> imp
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(ValueContainer<?> container) {
-        return this.containerClass.isInstance(container) && supports((C) container);
+        return this.containerClass.isInstance(container) && this.supports((C) container);
     }
 
 
@@ -86,17 +86,17 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends Value<E>> imp
     @SuppressWarnings("unchecked")
     @Override
     public Optional<E> getValueFromContainer(ValueContainer<?> container) {
-        if (!supports(container)) {
+        if (!this.supports(container)) {
             return Optional.empty();
         }
-        return getVal((C) container);
+        return this.getVal((C) container);
     }
 
     @Override
     public Optional<V> getApiValueFromContainer(ValueContainer<?> container) {
-        final Optional<E> optionalValue = getValueFromContainer(container);
+        final Optional<E> optionalValue = this.getValueFromContainer(container);
         if(optionalValue.isPresent()) {
-            return Optional.of(constructValue(optionalValue.get()));
+            return Optional.of(this.constructValue(optionalValue.get()));
         }
         return Optional.empty();
     }
@@ -104,14 +104,14 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends Value<E>> imp
     @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
-        final Immutable<E> newValue = constructImmutableValue(value);
-        if (supports(container)) {
+        final Immutable<E> newValue = this.constructImmutableValue(value);
+        if (this.supports(container)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<E> oldVal = getVal((C) container);
+            final Optional<E> oldVal = this.getVal((C) container);
             try {
-                if (set((C) container, value)) {
+                if (this.set((C) container, value)) {
                     if (oldVal.isPresent()) {
-                        builder.replace(constructImmutableValue(oldVal.get()));
+                        builder.replace(this.constructImmutableValue(oldVal.get()));
                     }
                     return builder.result(DataTransactionResult.Type.SUCCESS).success(newValue).build();
                 }

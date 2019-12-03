@@ -52,12 +52,12 @@ public class SpongeColoredData extends AbstractSingleData<Color, ColoredData, Im
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return color();
+        return this.color();
     }
 
     @Override
     public ImmutableColoredData asImmutable() {
-        return new ImmutableSpongeColoredData(getValue());
+        return new ImmutableSpongeColoredData(this.getValue());
     }
 
     @Override
@@ -68,6 +68,6 @@ public class SpongeColoredData extends AbstractSingleData<Color, ColoredData, Im
 
     @Override
     public Mutable<Color> color() {
-        return new SpongeValue<>(Keys.COLOR, Color.BLACK, getValue());
+        return new SpongeValue<>(Keys.COLOR, Color.BLACK, this.getValue());
     }
 }

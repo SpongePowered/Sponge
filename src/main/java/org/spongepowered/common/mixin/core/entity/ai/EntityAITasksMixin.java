@@ -181,8 +181,8 @@ public abstract class EntityAITasksMixin implements EntityAITasksBridge {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .addValue(bridge$getOwner())
-                .addValue(bridge$getType())
+                .addValue(this.bridge$getOwner())
+                .addValue(this.bridge$getType())
                 .toString();
     }
 }

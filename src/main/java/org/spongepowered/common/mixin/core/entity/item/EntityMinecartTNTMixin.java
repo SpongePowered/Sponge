@@ -114,19 +114,19 @@ public abstract class EntityMinecartTNTMixin extends EntityMinecartMixin impleme
 
     @Inject(method = "ignite", at = @At("INVOKE"), cancellable = true)
     private void preIgnite(final CallbackInfo ci) {
-        if (!bridge$shouldPrime()) {
-            bridge$setFuseTicksRemaining(-1);
+        if (!this.bridge$shouldPrime()) {
+            this.bridge$setFuseTicksRemaining(-1);
             ci.cancel();
         }
     }
 
     @Inject(method = "ignite", at = @At("RETURN"))
     private void postSpongeIgnite(final CallbackInfo ci) {
-        bridge$setFuseTicksRemaining(this.impl$fuseDuration);
+        this.bridge$setFuseTicksRemaining(this.impl$fuseDuration);
         if (this.impl$primeCause != null) {
             Sponge.getCauseStackManager().pushCause(this.impl$primeCause);
         }
-        bridge$postPrime();
+        this.bridge$postPrime();
         if (this.impl$primeCause != null) {
             Sponge.getCauseStackManager().popCause();
         }

@@ -58,7 +58,7 @@ public final class SpongeEnchantment implements Enchantment {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Queries.ENCHANTMENT_ID, this.enchantmentType.getId())
                 .set(Queries.LEVEL, this.level);
     }
@@ -74,7 +74,7 @@ public final class SpongeEnchantment implements Enchantment {
             return true;
         }
 
-        if (object == null || getClass() != object.getClass()) {
+        if (object == null || this.getClass() != object.getClass()) {
             return false;
         }
 

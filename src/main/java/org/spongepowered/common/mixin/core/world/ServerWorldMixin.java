@@ -885,8 +885,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
         if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
             blockEvent.bridge$setSourceUser(currentContext.getActiveUser());
-            if (SpongeImplHooks.hasBlockTileEntity(blockIn, getBlockState(pos))) {
-                blockEvent.bridge$setTileEntity((org.spongepowered.api.block.entity.BlockEntity) getTileEntity(pos));
+            if (SpongeImplHooks.hasBlockTileEntity(blockIn, this.getBlockState(pos))) {
+                blockEvent.bridge$setTileEntity((org.spongepowered.api.block.entity.BlockEntity) this.getTileEntity(pos));
             }
             if (blockEvent.bridge$getTileEntity() == null) {
                 final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
@@ -948,7 +948,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> phaseState = phaseTracker.getCurrentState();
         if (phaseState.ignoresBlockEvent()) {
-            return fireBlockEvent(event);
+            return this.fireBlockEvent(event);
         }
         return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
     }
@@ -1397,7 +1397,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         if (PhaseTracker.isEntitySpawnInvalid((Entity) entity)) {
             return true;
         }
-        return canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity((ServerWorld) (Object) this, entity);
+        return this.canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity((ServerWorld) (Object) this, entity);
     }
 
 
@@ -1510,7 +1510,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
      */
     @Override
     public void notifyNeighborsOfStateExcept(final BlockPos pos, final Block blockType, final net.minecraft.util.Direction skipSide) {
-        if (isChunkAvailable(pos)) {
+        if (this.isChunkAvailable(pos)) {
             return;
         }
 
@@ -1518,7 +1518,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
             final EnumSet<net.minecraft.util.Direction> directions = EnumSet.of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN, net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
             directions.remove(skipSide);
-            throwNotifyNeighborAndCall(pos, blockType, directions);
+            this.throwNotifyNeighborAndCall(pos, blockType, directions);
             return;
         }
 
@@ -1542,12 +1542,12 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
      */
     @Override
     public void notifyNeighborsOfStateChange(final BlockPos sourcePos, final Block sourceBlock, final boolean updateObserverBlocks) {
-        if (isChunkAvailable(sourcePos)) {
+        if (this.isChunkAvailable(sourcePos)) {
             return;
         }
 
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
-            throwNotifyNeighborAndCall(sourcePos, sourceBlock, Constants.World.NOTIFY_DIRECTION_SET);
+            this.throwNotifyNeighborAndCall(sourcePos, sourceBlock, Constants.World.NOTIFY_DIRECTION_SET);
         } else {
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
             for (final net.minecraft.util.Direction direction : Constants.World.NOTIFY_DIRECTIONS) {
@@ -1584,7 +1584,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     private boolean isChunkAvailable(final BlockPos sourcePos) {
-        if (!isValid(sourcePos)) {
+        if (!this.isValid(sourcePos)) {
             return true;
         }
 
@@ -1604,7 +1604,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
     @Override
     protected void onUpdateWeatherEffect(final net.minecraft.entity.Entity entityIn) {
-        onCallEntityUpdate(entityIn); // maybe we should combine these injections/redirects?
+        this.onCallEntityUpdate(entityIn); // maybe we should combine these injections/redirects?
     }
 
     @Override
@@ -1638,7 +1638,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         }
 
         TrackingUtil.tickEntity(entity);
-        bridge$updateRotation(entity);
+        this.bridge$updateRotation(entity);
     }
 
     @Override
@@ -1651,7 +1651,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         }
 
         TrackingUtil.tickRidingEntity(entity);
-        bridge$updateRotation(entity);
+        this.bridge$updateRotation(entity);
     }
 
     /**
@@ -1766,7 +1766,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     public boolean bridge$forceSpawnEntity(final net.minecraft.entity.Entity entity) {
         final int x = entity.getPosition().getX();
         final int z = entity.getPosition().getZ();
-        return impl$forceSpawnEntity(entity, x >> 4, z >> 4);
+        return this.impl$forceSpawnEntity(entity, x >> 4, z >> 4);
     }
 
     private boolean impl$forceSpawnEntity(final net.minecraft.entity.Entity entity, final int chunkX, final int chunkZ) {
@@ -1915,7 +1915,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         Explosion explosion = new Explosion((ServerWorld) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
         // Sponge Start - all the remaining behavior is in bridge$triggerInternalExplosion().
-        explosion = bridge$triggerInternalExplosion((org.spongepowered.api.world.explosion.Explosion) explosion, e -> GeneralPhase.State.EXPLOSION
+        explosion = this.bridge$triggerInternalExplosion((org.spongepowered.api.world.explosion.Explosion) explosion, e -> GeneralPhase.State.EXPLOSION
                 .createPhaseContext()
                 .explosion(e)
                 .potentialExplosionSource((ServerWorld) (Object) this, entityIn));
@@ -2461,7 +2461,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public SpongeChunkGenerator bridge$getSpongeGenerator() {
         if (this.impl$spongegen == null) {
-            impl$updateWorldGenerator();
+            this.impl$updateWorldGenerator();
         }
         return this.impl$spongegen;
     }

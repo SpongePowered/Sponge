@@ -178,7 +178,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
         }
 
         if (spongeOldFile.exists()) {
-            if (impl$loadSpongeDatFile(info, spongeOldFile, false)) {
+            if (this.impl$loadSpongeDatFile(info, spongeOldFile, false)) {
                 if (exceptionRaised) {
                     // Tell the user we successfully loaded a backup
                     SpongeImpl.getLogger().warn("Successfully loaded backup data file {} for world '{}'.", spongeFile.getName(), info.getWorldName());

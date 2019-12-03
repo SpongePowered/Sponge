@@ -80,7 +80,7 @@ public abstract class PotionEffectMixin_API implements PotionEffect {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Item.Potions.POTION_TYPE, this.getType().getId())
                 .set(Constants.Item.Potions.POTION_DURATION, this.duration)
                 .set(Constants.Item.Potions.POTION_AMPLIFIER, this.amplifier)

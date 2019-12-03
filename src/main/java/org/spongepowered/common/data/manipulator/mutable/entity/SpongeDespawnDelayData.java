@@ -48,7 +48,7 @@ public final class SpongeDespawnDelayData extends AbstractData<DespawnDelayData,
     public SpongeDespawnDelayData(int value) {
         super(DespawnDelayData.class);
         this.value = value;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeDespawnDelayData(int value, int minimum, int maximum, int defaultValue) {
@@ -57,18 +57,18 @@ public final class SpongeDespawnDelayData extends AbstractData<DespawnDelayData,
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.INFINITE_DESPAWN_DELAY, this::isInfinite);
-        registerFieldSetter(Keys.INFINITE_DESPAWN_DELAY, (value) -> this.value = value ? Constants.Entity.Item.MAGIC_NO_DESPAWN : this.value);
-        registerKeyValue(Keys.INFINITE_DESPAWN_DELAY, this::infinite);
+        this.registerFieldGetter(Keys.INFINITE_DESPAWN_DELAY, this::isInfinite);
+        this.registerFieldSetter(Keys.INFINITE_DESPAWN_DELAY, (value) -> this.value = value ? Constants.Entity.Item.MAGIC_NO_DESPAWN : this.value);
+        this.registerKeyValue(Keys.INFINITE_DESPAWN_DELAY, this::infinite);
 
-        registerFieldGetter(Keys.DESPAWN_DELAY, this::getDelay);
-        registerFieldSetter(Keys.DESPAWN_DELAY, (value) -> this.value = value);
-        registerKeyValue(Keys.DESPAWN_DELAY, this::delay);
+        this.registerFieldGetter(Keys.DESPAWN_DELAY, this::getDelay);
+        this.registerFieldSetter(Keys.DESPAWN_DELAY, (value) -> this.value = value);
+        this.registerKeyValue(Keys.DESPAWN_DELAY, this::delay);
     }
 
     @Override
     public Mutable<Boolean> infinite() {
-        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, isInfinite());
+        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, this.isInfinite());
     }
 
     private boolean isInfinite() {
@@ -103,6 +103,6 @@ public final class SpongeDespawnDelayData extends AbstractData<DespawnDelayData,
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.DESPAWN_DELAY, this.value)
-                .set(Keys.INFINITE_DESPAWN_DELAY, isInfinite());
+                .set(Keys.INFINITE_DESPAWN_DELAY, this.isInfinite());
     }
 }

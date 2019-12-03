@@ -37,7 +37,7 @@ public class NetherFireBuilder implements NetherFire.Builder {
     private VariableAmount cluster;
 
     public NetherFireBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -54,7 +54,7 @@ public class NetherFireBuilder implements NetherFire.Builder {
 
     @Override
     public NetherFire.Builder from(NetherFire value) {
-        return perChunk(value.getClustersPerChunk())
+        return this.perChunk(value.getClustersPerChunk())
             .perCluster(value.getFirePerCluster());
     }
 

@@ -39,7 +39,7 @@ public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<I
 
     @Override
     public Immutable<Boolean> screaming() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

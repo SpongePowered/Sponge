@@ -66,7 +66,7 @@ public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Immutable<WeightedTable<EntityArchetype>> constructImmutableValue(final WeightedTable<EntityArchetype> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

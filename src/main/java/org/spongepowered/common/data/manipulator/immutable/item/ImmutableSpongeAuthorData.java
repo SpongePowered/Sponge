@@ -57,7 +57,7 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return author();
+        return this.author();
     }
 
     @Override

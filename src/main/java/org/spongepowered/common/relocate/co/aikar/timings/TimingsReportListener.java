@@ -64,17 +64,17 @@ public final class TimingsReportListener {
     }
 
     public String getTimingsURL() {
-        return timingsURL;
+        return this.timingsURL;
     }
 
     public void done() {
-        done(null);
+        this.done(null);
     }
 
     public void done(String url) {
         this.timingsURL = url;
-        if (onDone != null) {
-            onDone.run();
+        if (this.onDone != null) {
+            this.onDone.run();
         }
     }
 

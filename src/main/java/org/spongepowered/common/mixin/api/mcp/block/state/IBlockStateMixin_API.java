@@ -59,7 +59,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
 
     @Override
     default BlockType getType() {
-        return (BlockType) getBlock();
+        return (BlockType) this.getBlock();
     }
 
     @Override
@@ -77,7 +77,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     @SuppressWarnings({"unchecked"})
     @Override
     default <T extends Comparable<T>> Optional<T> getTraitValue(final StateProperty<T> blockTrait) {
-        for (final Map.Entry<IProperty<?>, Comparable<?>> entry : getProperties().entrySet()) {
+        for (final Map.Entry<IProperty<?>, Comparable<?>> entry : this.getProperties().entrySet()) {
             //noinspection EqualsBetweenInconvertibleTypes
             if (entry.getKey() == blockTrait) {
                 return Optional.of((T) entry.getValue());
@@ -89,7 +89,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     @SuppressWarnings("rawtypes")
     @Override
     default Optional<StateProperty<?>> getTrait(final String blockTrait) {
-        for (final IProperty property : getProperties().keySet()) {
+        for (final IProperty property : this.getProperties().keySet()) {
             if (property.getName().equalsIgnoreCase(blockTrait)) {
                 return Optional.of((StateProperty<?>) property);
             }
@@ -113,7 +113,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
             }
         }
         if (value instanceof Comparable) {
-            if (getProperties().containsKey((IProperty) trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
+            if (this.getProperties().containsKey((IProperty) trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
                 return Optional.of((BlockState) this.withProperty((IProperty) trait, (Comparable) value));
             }
         }
@@ -122,24 +122,24 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
 
     @Override
     default Collection<StateProperty<?>> getTraits() {
-        return getTraitMap().keySet();
+        return this.getTraitMap().keySet();
     }
 
     @Override
     default Collection<?> getTraitValues() {
-        return getTraitMap().values();
+        return this.getTraitMap().values();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     default Map<StateProperty<?>, ?> getTraitMap() {
-        return (ImmutableMap) getProperties();
+        return (ImmutableMap) this.getProperties();
     }
 
     @Override
     default String getId() {
         final StringBuilder builder = new StringBuilder();
-        builder.append(((BlockType) getBlock()).getId());
+        builder.append(((BlockType) this.getBlock()).getId());
         final ImmutableMap<IProperty<?>, Comparable<?>> properties =  this.getProperties();
         if (!properties.isEmpty()) {
             builder.append('[');
@@ -156,7 +156,7 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
 
     @Override
     default String getName() {
-        return getId();
+        return this.getId();
     }
 
     @Override
@@ -177,8 +177,8 @@ public interface IBlockStateMixin_API extends net.minecraft.block.BlockState, Bl
     @Override
     default DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(Constants.Block.BLOCK_STATE, getId());
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Constants.Block.BLOCK_STATE, this.getId());
     }
 
     @Override

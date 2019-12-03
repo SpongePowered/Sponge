@@ -58,7 +58,7 @@ public abstract class GameTypeMixin_API {
 
     @Intrinsic
     public String gamemode$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 
     public Translation gamemode$getTranslation() {

@@ -86,7 +86,7 @@ public class ItemFireworkMixin extends Item {
     )
     private void spongeImpl$ThrowPreBeforeSpawning(World worldIn, PlayerEntity playerIn, Hand handIn,
         CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack stack) {
-        if (spongeImpl$ThrowConstructPreEvent(worldIn, playerIn, stack)) {
+        if (this.spongeImpl$ThrowConstructPreEvent(worldIn, playerIn, stack)) {
             cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, stack));
         }
     }
@@ -119,7 +119,7 @@ public class ItemFireworkMixin extends Item {
     )
     private void spongeImpl$ThrowPrimeEventsIfCancelled(PlayerEntity player, World worldIn, BlockPos pos, Hand hand, Direction facing,
         float hitX, float hitY, float hitZ, CallbackInfoReturnable<ActionResultType> cir, ItemStack stack) {
-        if (spongeImpl$ThrowConstructPreEvent(worldIn, player, stack)) {
+        if (this.spongeImpl$ThrowConstructPreEvent(worldIn, player, stack)) {
             cir.setReturnValue(ActionResultType.SUCCESS);
         }
 
@@ -160,7 +160,7 @@ public class ItemFireworkMixin extends Item {
     )
     private void spongeImpl$InjectPrimeEventAndCancel(PlayerEntity player, World worldIn, BlockPos pos, Hand hand, Direction facing, float hitX,
         float hitY, float hitZ, CallbackInfoReturnable<ActionResultType> cir, ItemStack usedItem, FireworkRocketEntity rocket) {
-        if (spongeImpl$ThrowPrimeEventAndGetCancel(worldIn, player, rocket, usedItem)) {
+        if (this.spongeImpl$ThrowPrimeEventAndGetCancel(worldIn, player, rocket, usedItem)) {
             cir.setReturnValue(ActionResultType.SUCCESS);
         }
     }
@@ -172,7 +172,7 @@ public class ItemFireworkMixin extends Item {
     )
     private void spongeImpl$InjectPrimeEventAndCancel(World worldIn, PlayerEntity player, Hand handIn,
         CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack usedItem, FireworkRocketEntity rocket) {
-        if (spongeImpl$ThrowPrimeEventAndGetCancel(worldIn, player, rocket, usedItem)) {
+        if (this.spongeImpl$ThrowPrimeEventAndGetCancel(worldIn, player, rocket, usedItem)) {
             // We have to still return success because the server/client can get out of sync otherwise.
             cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, usedItem));
         }

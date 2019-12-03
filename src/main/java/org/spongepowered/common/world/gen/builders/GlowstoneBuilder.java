@@ -40,7 +40,7 @@ public class GlowstoneBuilder implements Glowstone.Builder {
     private VariableAmount height;
     
     public GlowstoneBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class GlowstoneBuilder implements Glowstone.Builder {
 
     @Override
     public Builder from(Glowstone value) {
-        return perChunk(value.getClustersPerChunk())
+        return this.perChunk(value.getClustersPerChunk())
             .blocksPerCluster(value.getAttemptsPerCluster())
             .clusterHeight(value.getClusterHeight())
             .height(value.getHeight());

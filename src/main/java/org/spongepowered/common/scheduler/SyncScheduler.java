@@ -67,7 +67,7 @@ public class SyncScheduler extends SchedulerBase {
 
     @Override
     protected void executeTaskRunnable(ScheduledTask task, Runnable runnable) {
-        try (BasicPluginContext context = createContext(task)) {
+        try (BasicPluginContext context = this.createContext(task)) {
             if (context != null) {
                 context.buildAndSwitch();
             }

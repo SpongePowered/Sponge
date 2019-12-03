@@ -64,13 +64,13 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
     @SuppressWarnings("deprecation")
     @Override
     public void register(CraftingRecipe recipe) {
-        registerAdditionalCatalog(recipe);
+        this.registerAdditionalCatalog(recipe);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public Collection<CraftingRecipe> getRecipes() {
-        return getAll();
+        return this.getAll();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
 
     @Override
     public Map<String, CraftingRecipe> provideCatalogMap() {
-        final Collection<CraftingRecipe> recipes = getAll();
+        final Collection<CraftingRecipe> recipes = this.getAll();
         final Map<String, CraftingRecipe> mappings = new HashMap<>();
         for (CraftingRecipe recipe : recipes) {
             final String id = recipe.getId();

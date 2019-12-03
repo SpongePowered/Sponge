@@ -59,19 +59,19 @@ public abstract class EntityCreeperMixin_API extends EntityMobMixin_API implemen
 
     @Override
     public void prime() {
-        checkState(!isPrimed(), "already primed");
-        setCreeperState(Constants.Entity.Creeper.STATE_PRIMED);
+        checkState(!this.isPrimed(), "already primed");
+        this.setCreeperState(Constants.Entity.Creeper.STATE_PRIMED);
     }
 
     @Override
     public void defuse() {
-        checkState(isPrimed(), "not primed");
-        setCreeperState(Constants.Entity.Creeper.STATE_IDLE);
+        checkState(this.isPrimed(), "not primed");
+        this.setCreeperState(Constants.Entity.Creeper.STATE_IDLE);
     }
 
     @Override
     public boolean isPrimed() {
-        return getCreeperState() == Constants.Entity.Creeper.STATE_PRIMED;
+        return this.getCreeperState() == Constants.Entity.Creeper.STATE_PRIMED;
     }
 
     @Override

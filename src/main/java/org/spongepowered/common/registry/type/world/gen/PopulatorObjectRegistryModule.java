@@ -76,17 +76,17 @@ public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalo
     @Override
     public void registerDefaults() {
         // Populators
-        register(new DesertWellsFeature());
+        this.register(new DesertWellsFeature());
 
         // Trees
-        register(new TreeFeature(false));
-        register(new BigTreeFeature(false));
-        register(new BirchTreeFeature(false, false));
-        register(new BirchTreeFeature(false, true));
-        register(new TallTaigaTreeFeature(false));
-        register(new PointyTaigaTreeFeature());
-        register(new MegaPineTree(false, true));
-        register(new MegaPineTree(false, false));
+        this.register(new TreeFeature(false));
+        this.register(new BigTreeFeature(false));
+        this.register(new BirchTreeFeature(false, false));
+        this.register(new BirchTreeFeature(false, true));
+        this.register(new TallTaigaTreeFeature(false));
+        this.register(new PointyTaigaTreeFeature());
+        this.register(new MegaPineTree(false, true));
+        this.register(new MegaPineTree(false, false));
         BlockState jlog = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
         BlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(LeavesBlock.CHECK_DECAY, Boolean.valueOf(false));
         BlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(LeavesBlock.CHECK_DECAY, Boolean.valueOf(false));
@@ -94,13 +94,13 @@ public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalo
         trees.bridge$setId("minecraft:jungle");
         trees.bridge$setName("Jungle tree");
         trees.bridge$setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
-        register((TreeFeature) trees);
-        register(new MegaJungleFeature(false, 10, 20, jlog, jleaf));
+        this.register((TreeFeature) trees);
+        this.register(new MegaJungleFeature(false, 10, 20, jlog, jleaf));
         ShrubFeature bush = new ShrubFeature(jlog, leaf);
-        register(bush);
-        register( new SavannaTreeFeature(false));
+        this.register(bush);
+        this.register( new SavannaTreeFeature(false));
         register(new CanopyTreeFeature(false));
-        register(new SwampTreeFeature());
+        this.register(new SwampTreeFeature());
 
         // Mushrooms
         register(new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK));
@@ -108,7 +108,7 @@ public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalo
     }
 
     private void register(Feature worldGenerator) {
-        register((PopulatorObject) worldGenerator);
+        this.register((PopulatorObject) worldGenerator);
     }
 
 }

@@ -103,7 +103,7 @@ public class SpongePaginationService implements PaginationService {
         if (this.commandRegistered.compareAndSet(false, true)) {
             SpongeImpl.getGame().getCommandManager().register(
                     SpongeImpl.getPlugin(),
-                    buildPaginationCommand(),
+                    this.buildPaginationCommand(),
                     "pagination", "page"
             );
         }
@@ -118,10 +118,10 @@ public class SpongePaginationService implements PaginationService {
     @Nullable
     SourcePaginations getPaginationState(MessageReceiver source, boolean create) {
         if (source instanceof Player) {
-            return getPaginationStateForPlayer((Player) source, create);
+            return this.getPaginationStateForPlayer((Player) source, create);
         }
 
-        return getPaginationStateForNonPlayer(source, create);
+        return this.getPaginationStateForNonPlayer(source, create);
     }
 
     @Nullable
@@ -199,7 +199,7 @@ public class SpongePaginationService implements PaginationService {
         protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
             UUID id;
 
-            SourcePaginations paginations = getPaginationState(source, false);
+            SourcePaginations paginations = SpongePaginationService.this.getPaginationState(source, false);
             if (paginations == null) {
                 throw args.createError(t("Source %s has no paginations!", source.getName()));
             }
@@ -223,7 +223,7 @@ public class SpongePaginationService implements PaginationService {
 
         @Override
         public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
-            SourcePaginations paginations = getPaginationState(src, false);
+            SourcePaginations paginations = SpongePaginationService.this.getPaginationState(src, false);
             if (paginations == null) {
                 return ImmutableList.of();
             }

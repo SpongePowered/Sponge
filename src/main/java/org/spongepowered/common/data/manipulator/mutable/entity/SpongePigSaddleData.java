@@ -43,6 +43,6 @@ public class SpongePigSaddleData extends AbstractBooleanData<PigSaddleData, Immu
 
     @Override
     public Mutable<Boolean> saddle() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

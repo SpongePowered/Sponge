@@ -69,7 +69,7 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
 
     @Override
     public FindNearestAttackableTargetAITask.Builder from(FindNearestAttackableTargetAITask value) {
-        return target(value.getTargetClass())
+        return this.target(value.getTargetClass())
             .chance(value.getChance())
             .filter(value.getFilter());
     }

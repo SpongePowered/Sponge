@@ -48,18 +48,18 @@ public abstract class EntitySlimeMixin_API extends EntityLivingMixin_API impleme
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(1)
-                .actualValue(getSlimeSize())
+                .actualValue(this.getSlimeSize())
                 .build();
     }
 
     @Override
     public SlimeData getSlimeData() {
-        return new SpongeSlimeData(getSlimeSize());
+        return new SpongeSlimeData(this.getSlimeSize());
     }
 
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getSlimeData());
+        manipulators.add(this.getSlimeData());
     }
 }

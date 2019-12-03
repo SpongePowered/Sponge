@@ -47,37 +47,37 @@ public abstract class DamageSourceMixin_API implements DamageSource {
 
     @Override
     public boolean isExplosive() {
-        return isExplosion();
+        return this.isExplosion();
     }
 
     @Override
     public boolean isMagic() {
-        return isMagicDamage();
+        return this.isMagicDamage();
     }
 
     @Override
     public boolean doesAffectCreative() {
-        return canHarmInCreative();
+        return this.canHarmInCreative();
     }
 
     @Override
     public boolean isAbsolute() {
-        return isDamageAbsolute();
+        return this.isDamageAbsolute();
     }
 
     @Override
     public boolean isBypassingArmor() {
-        return isUnblockable();
+        return this.isUnblockable();
     }
 
     @Override
     public boolean isScaledByDifficulty() {
-        return isDifficultyScaled();
+        return this.isDifficultyScaled();
     }
 
     @Override
     public double getExhaustion() {
-        return getHungerDamage();
+        return this.getHungerDamage();
     }
 
     @Override

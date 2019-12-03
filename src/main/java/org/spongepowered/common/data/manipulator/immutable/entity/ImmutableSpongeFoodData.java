@@ -74,7 +74,7 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
                 .build()
                 .asImmutable();
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -119,14 +119,14 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.FOOD_LEVEL, ImmutableSpongeFoodData.this::getFood);
-        registerKeyValue(Keys.FOOD_LEVEL, ImmutableSpongeFoodData.this::foodLevel);
+        this.registerFieldGetter(Keys.FOOD_LEVEL, ImmutableSpongeFoodData.this::getFood);
+        this.registerKeyValue(Keys.FOOD_LEVEL, ImmutableSpongeFoodData.this::foodLevel);
 
-        registerFieldGetter(Keys.EXHAUSTION, ImmutableSpongeFoodData.this::getExhaustion);
-        registerKeyValue(Keys.EXHAUSTION, ImmutableSpongeFoodData.this::exhaustion);
+        this.registerFieldGetter(Keys.EXHAUSTION, ImmutableSpongeFoodData.this::getExhaustion);
+        this.registerKeyValue(Keys.EXHAUSTION, ImmutableSpongeFoodData.this::exhaustion);
 
-        registerFieldGetter(Keys.SATURATION, ImmutableSpongeFoodData.this::getSaturation);
-        registerKeyValue(Keys.SATURATION, ImmutableSpongeFoodData.this::saturation);
+        this.registerFieldGetter(Keys.SATURATION, ImmutableSpongeFoodData.this::getSaturation);
+        this.registerKeyValue(Keys.SATURATION, ImmutableSpongeFoodData.this::saturation);
 
     }
 }

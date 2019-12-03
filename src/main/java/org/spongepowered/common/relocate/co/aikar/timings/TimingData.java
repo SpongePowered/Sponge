@@ -107,15 +107,15 @@ class TimingData {
     }
 
     boolean hasData() {
-        return count > 0;
+        return this.count > 0;
     }
 
     long getTotalTime() {
-        return totalTime;
+        return this.totalTime;
     }
 
     int getCurTickCount() {
-        return curTickCount;
+        return this.curTickCount;
     }
 
     void setCurTickCount(int curTickCount) {
@@ -123,7 +123,7 @@ class TimingData {
     }
 
     long getCurTickTotal() {
-        return curTickTotal;
+        return this.curTickTotal;
     }
 
     void setCurTickTotal(long curTickTotal) {

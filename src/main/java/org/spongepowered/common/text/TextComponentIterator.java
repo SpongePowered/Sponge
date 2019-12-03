@@ -62,7 +62,7 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
     // we're done iterating.
     @Override
     public ITextComponent next() {
-        if (!hasNext()) {
+        if (!this.hasNext()) {
             throw new NoSuchElementException();
         }
 

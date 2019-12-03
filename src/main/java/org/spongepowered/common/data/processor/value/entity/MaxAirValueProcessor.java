@@ -68,7 +68,7 @@ public class MaxAirValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
 
     @Override
     protected Immutable<Integer> constructImmutableValue(final Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

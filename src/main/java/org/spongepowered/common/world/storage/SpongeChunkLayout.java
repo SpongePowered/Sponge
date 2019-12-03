@@ -72,7 +72,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
 
     @Override
     public boolean isInChunk(int wx, int wy, int wz, int cx, int cy, int cz) {
-        return isInChunk(wx - (cx << 4), wy - (cy << 8), wz - (cz << 4));
+        return this.isInChunk(wx - (cx << 4), wy - (cy << 8), wz - (cz << 4));
     }
 
     @Override

@@ -51,7 +51,7 @@ public class AxisDataProcessor extends AbstractBlockOnlyDataProcessor<Axis, Muta
 
     @Override
     protected Mutable<Axis> constructValue(Axis actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

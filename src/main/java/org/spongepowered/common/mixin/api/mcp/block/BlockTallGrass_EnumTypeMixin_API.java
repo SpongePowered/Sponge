@@ -70,7 +70,7 @@ public abstract class BlockTallGrass_EnumTypeMixin_API implements ShrubType {
     public Translation shrub$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.api$translation == null) {
-            this.api$translation = impl$resolveTranslation();
+            this.api$translation = this.impl$resolveTranslation();
         }
         return this.api$translation;
     }

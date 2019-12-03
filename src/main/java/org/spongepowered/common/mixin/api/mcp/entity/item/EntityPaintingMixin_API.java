@@ -57,6 +57,6 @@ public abstract class EntityPaintingMixin_API extends EntityHangingMixin_API imp
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getArtData());
+        manipulators.add(this.getArtData());
     }
 }

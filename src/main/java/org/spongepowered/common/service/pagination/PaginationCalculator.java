@@ -187,7 +187,7 @@ class PaginationCalculator {
                         newLine = true;
                     }
                 } else {
-                    int width = getWidth(cp, bold);
+                    int width = this.getWidth(cp, bold);
                     total += width;
                     newLine = false;
                 }
@@ -212,35 +212,35 @@ class PaginationCalculator {
     //TODO: Probably should completely rewrite this to not compute padding, but loop until the padding is done, unless
     //we can get accurate computation of padding ahead of time.
     Text center(Text text, Text padding) {
-        int inputLength = getWidth(text);
+        int inputLength = this.getWidth(text);
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH, this seems most graceful way to fail
         if (inputLength >= LINE_WIDTH) {
             return text;
         }
-        final Text textWithSpaces = addSpaces(Text.of(" "), text);
+        final Text textWithSpaces = this.addSpaces(Text.of(" "), text);
 
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH
-        boolean addSpaces = getWidth(textWithSpaces) <= LINE_WIDTH;
+        boolean addSpaces = this.getWidth(textWithSpaces) <= LINE_WIDTH;
 
         //TODO: suspect, why are we changing the style of the padding, they may want different styles on the padding.
-        Text styledPadding = withStyle(padding, text);
-        int paddingLength = getWidth(styledPadding);
+        Text styledPadding = this.withStyle(padding, text);
+        int paddingLength = this.getWidth(styledPadding);
         final Text.Builder output = Text.builder();
 
         //Using 0 width unicode symbols as padding throws us into an unending loop, replace them with the default padding
         if(paddingLength < 1) {
             padding = Text.of("=");
-            styledPadding = withColor(withStyle(padding, text), text);
-            paddingLength = getWidth(styledPadding);
+            styledPadding = this.withColor(this.withStyle(padding, text), text);
+            paddingLength = this.getWidth(styledPadding);
         }
 
         //if we only need padding
         if (inputLength == 0) {
-            addPadding(padding, output, GenericMath.floor((double) LINE_WIDTH / paddingLength));
+            this.addPadding(padding, output, GenericMath.floor((double) LINE_WIDTH / paddingLength));
         } else {
             if(addSpaces) {
                 text = textWithSpaces;
-                inputLength = getWidth(textWithSpaces);
+                inputLength = this.getWidth(textWithSpaces);
             }
 
             int paddingNecessary = LINE_WIDTH - inputLength;
@@ -251,9 +251,9 @@ class PaginationCalculator {
             //Do not use ceil, this prevents floating point errors.
             int afterPadding = paddingCount - beforePadding;
 
-            addPadding(styledPadding, output, beforePadding);
+            this.addPadding(styledPadding, output, beforePadding);
             output.append(text);
-            addPadding(styledPadding, output, afterPadding);
+            this.addPadding(styledPadding, output, afterPadding);
         }
 
         return this.finalizeBuilder(text, output);

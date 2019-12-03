@@ -46,12 +46,12 @@ public class SpongeConfigManager implements ConfigManager {
 
     @Override
     public ConfigRoot getSharedConfig(Object instance) {
-        return getSharedRoot(containerFromInstance(instance));
+        return getSharedRoot(this.containerFromInstance(instance));
     }
 
     @Override
     public ConfigRoot getPluginConfig(Object instance) {
-        return getPrivateRoot(containerFromInstance(instance));
+        return getPrivateRoot(this.containerFromInstance(instance));
     }
 
     private PluginContainer containerFromInstance(Object instance) {

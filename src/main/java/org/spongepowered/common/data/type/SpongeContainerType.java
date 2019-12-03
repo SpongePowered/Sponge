@@ -55,15 +55,15 @@ public class SpongeContainerType extends SpongeCatalogType implements ContainerT
     }
 
     public int getSize() {
-        return size;
+        return this.size;
     }
 
     public int getWidth() {
-        return width;
+        return this.width;
     }
 
     public int getHeight() {
-        return height;
+        return this.height;
     }
 
     public Container provideContainer(int id, IInventory viewed, PlayerEntity viewing) {

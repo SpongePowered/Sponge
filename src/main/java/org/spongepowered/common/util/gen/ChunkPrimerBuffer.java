@@ -67,21 +67,21 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
-        checkRange(x, y, z);
+        this.checkRange(x, y, z);
         return (BlockState) this.chunkPrimer.getBlockState(x & 0xf, y, z & 0xf);
     }
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block) {
-        checkRange(x, y, z);
+        this.checkRange(x, y, z);
         this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (net.minecraft.block.BlockState) block);
         return true;
     }
 
     @Override
     public MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new MutableBlockViewDownsize(this, newMin, newMax);
     }
 

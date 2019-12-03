@@ -50,7 +50,7 @@ public class OpenDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, M
 
     @Override
     protected Mutable<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

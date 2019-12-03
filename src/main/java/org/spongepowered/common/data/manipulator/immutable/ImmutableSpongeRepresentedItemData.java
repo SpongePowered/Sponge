@@ -49,7 +49,7 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableSingleD
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return item();
+        return this.item();
     }
 
     @Override

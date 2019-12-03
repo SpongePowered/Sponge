@@ -52,7 +52,7 @@ public abstract class BiomeMixin_API implements BiomeType {
         gensettings.getGenerationPopulators().clear();
         gensettings.getGroundCoverLayers().clear();
         ((BiomeBridge) this).bridge$buildPopulators((World) world, gensettings);
-        if (!getClass().getName().startsWith("net.minecraft")) {
+        if (!this.getClass().getName().startsWith("net.minecraft")) {
             gensettings.getPopulators().add(new WrappedBiomeDecorator((Biome) (Object) this));
         } else if (!this.decorator.getClass().getName().startsWith("net.minecraft")) {
             gensettings.getPopulators().add(new WrappedBiomeDecorator(this.decorator));

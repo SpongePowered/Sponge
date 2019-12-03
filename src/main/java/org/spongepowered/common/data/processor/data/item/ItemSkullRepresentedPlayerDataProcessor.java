@@ -58,14 +58,14 @@ public class ItemSkullRepresentedPlayerDataProcessor
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (supports(container)) {
+        if (this.supports(container)) {
             ItemStack stack = (ItemStack) container;
-            Optional<GameProfile> old = getVal(stack);
+            Optional<GameProfile> old = this.getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
             if (SkullUtils.setProfile(stack, null)) {
-                return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+                return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }

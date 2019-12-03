@@ -65,7 +65,7 @@ public class RemainingAirValueProcessor extends AbstractSpongeValueProcessor<Liv
 
     @Override
     protected ImmutableBoundedValue<Integer> constructImmutableValue(final Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

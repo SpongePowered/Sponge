@@ -80,12 +80,12 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements Mutable<E> 
 
     @Override
     public Mutable<E> transform(Function<E, E> function) {
-        return set(checkNotNull(checkNotNull(function).apply(get())));
+        return this.set(checkNotNull(checkNotNull(function).apply(this.get())));
     }
 
     @Override
     public ImmutableBoundedValue<E> asImmutable() {
-        return new ImmutableSpongeBoundedValue<>(getKey(), this.getDefault(), this.actualValue, this.comparator, this.minimum, this.maximum);
+        return new ImmutableSpongeBoundedValue<>(this.getKey(), this.getDefault(), this.actualValue, this.comparator, this.minimum, this.maximum);
     }
 
     @Override

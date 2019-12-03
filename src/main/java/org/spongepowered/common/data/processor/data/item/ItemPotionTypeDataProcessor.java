@@ -96,10 +96,10 @@ public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor
             return DataTransactionResult.failNoData();
         }
 
-        Optional<PotionType> val = getVal(itemStack);
+        Optional<PotionType> val = this.getVal(itemStack);
         if (val.isPresent()) {
             PotionUtils.addPotionToItemStack(itemStack, Potions.EMPTY);
-            return DataTransactionResult.successRemove(constructImmutableValue(val.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(val.get()));
         }
         return DataTransactionResult.successNoData();
     }

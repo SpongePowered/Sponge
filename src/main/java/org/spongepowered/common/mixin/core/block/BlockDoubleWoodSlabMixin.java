@@ -41,7 +41,7 @@ public abstract class BlockDoubleWoodSlabMixin extends BlockWoodSlabMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getTreeTypeFor(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getTreeTypeFor(blockState));
     }
 
     @Override

@@ -46,8 +46,8 @@ public class ArmorTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogT
     @AdditionalRegistration
     public void customRegistration() {
         for (ArmorItem.ArmorMaterial armorMaterial : ArmorItem.ArmorMaterial.values()) {
-            if (!this.catalogTypeMap.containsKey(enumAs(armorMaterial).getId())) {
-                this.catalogTypeMap.put(enumAs(armorMaterial).getId(), enumAs(armorMaterial));
+            if (!this.catalogTypeMap.containsKey(this.enumAs(armorMaterial).getId())) {
+                this.catalogTypeMap.put(this.enumAs(armorMaterial).getId(), this.enumAs(armorMaterial));
             }
         }
     }

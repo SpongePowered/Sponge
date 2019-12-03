@@ -327,7 +327,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
                 try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
-                    closeInventory();
+                    this.closeInventory();
                 }
             }).submit(SpongeImpl.getPlugin());
             return false;
@@ -367,7 +367,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void kick() {
-        kick(Text.of(SpongeImpl.getGame().getRegistry().getTranslationById("disconnect.disconnected").get()));
+        this.kick(Text.of(SpongeImpl.getGame().getRegistry().getTranslationById("disconnect.disconnected").get()));
     }
 
     @Override
@@ -406,22 +406,22 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void stopSounds() {
-        stopSounds0(null, null);
+        this.stopSounds0(null, null);
     }
 
     @Override
     public void stopSounds(final SoundType sound) {
-        stopSounds0(checkNotNull(sound, "sound"), null);
+        this.stopSounds0(checkNotNull(sound, "sound"), null);
     }
 
     @Override
     public void stopSounds(final SoundCategory category) {
-        stopSounds0(null, checkNotNull(category, "category"));
+        this.stopSounds0(null, checkNotNull(category, "category"));
     }
 
     @Override
     public void stopSounds(final SoundType sound, final SoundCategory category) {
-        stopSounds0(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
+        this.stopSounds0(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
     }
 
     private void stopSounds0(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
@@ -430,12 +430,12 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public void playRecord(final Vector3i position, final MusicDisc recordType) {
-        playRecord0(position, checkNotNull(recordType, "recordType"));
+        this.playRecord0(position, checkNotNull(recordType, "recordType"));
     }
 
     @Override
     public void stopRecord(final Vector3i position) {
-        playRecord0(position, null);
+        this.playRecord0(position, null);
     }
 
     private void playRecord0(final Vector3i position, @Nullable final MusicDisc recordType) {
@@ -520,8 +520,8 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Override
     public void spongeApi$supplyVanillaManipulators(final Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getJoinData());
-        manipulators.add(getGameModeData());
+        manipulators.add(this.getJoinData());
+        manipulators.add(this.getGameModeData());
     }
 
     public void sendBlockChange(final BlockPos pos, final net.minecraft.block.BlockState state) {
@@ -614,7 +614,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     @Override
     public CooldownTracker getCooldownTracker() {
-        return (CooldownTracker) shadow$getCooldownTracker();
+        return (CooldownTracker) this.shadow$getCooldownTracker();
     }
 
     @Override

@@ -47,7 +47,7 @@ public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, Immu
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return note();
+        return this.note();
     }
 
     @Override
@@ -57,17 +57,17 @@ public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, Immu
 
     @Override
     public Mutable<NotePitch> note() {
-        return new SpongeValue<>(Keys.NOTE_PITCH, NotePitches.F_SHARP0, getValue());
+        return new SpongeValue<>(Keys.NOTE_PITCH, NotePitches.F_SHARP0, this.getValue());
     }
 
     @Override
     public NoteData copy() {
-        return new SpongeNoteData(getValue());
+        return new SpongeNoteData(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.NOTE_PITCH.getQuery(), getValue().getId());
+            .set(Keys.NOTE_PITCH.getQuery(), this.getValue().getId());
     }
 }

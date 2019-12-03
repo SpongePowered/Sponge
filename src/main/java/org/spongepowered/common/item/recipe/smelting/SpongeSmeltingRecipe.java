@@ -100,7 +100,7 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe {
     @Override
     @Nonnull
     public Optional<SmeltingResult> getResult(@Nonnull ItemStackSnapshot ingredient) {
-        if (isValid(ingredient)) {
+        if (this.isValid(ingredient)) {
             return Optional.of(new SmeltingResult(this.exemplaryResult, this.experience));
         }
 

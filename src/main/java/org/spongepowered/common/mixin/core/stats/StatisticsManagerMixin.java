@@ -62,7 +62,7 @@ public abstract class StatisticsManagerMixin implements StatisticsManagerBridge 
             return;
         }
 
-        final int prev = readStat(stat);
+        final int prev = this.readStat(stat);
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
@@ -74,7 +74,7 @@ public abstract class StatisticsManagerMixin implements StatisticsManagerBridge 
             ci.cancel();
 
             if (!cancelled) {
-                increaseStat(player, stat, (int) (event.getValue() - prev));
+                this.increaseStat(player, stat, (int) (event.getValue() - prev));
                 this.statCaptured = false;
             }
         }

@@ -93,7 +93,7 @@ public class StoredEnchantmentDataProcessor extends
 
     @Override
     protected Immutable<List<Enchantment>> constructImmutableValue(List<Enchantment> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override
@@ -103,7 +103,7 @@ public class StoredEnchantmentDataProcessor extends
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (supports(container)) {
+        if (this.supports(container)) {
             ItemStack stack = (ItemStack) container;
             if (stack.hasTag() && stack.getTag().contains(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, Constants.NBT.TAG_COMPOUND)) {
                 stack.getTag().remove(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST);

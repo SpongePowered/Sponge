@@ -53,7 +53,7 @@ public class BigMushroomDataProcessor extends
 
     @Override
     protected Mutable<BigMushroomType> constructValue(BigMushroomType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

@@ -49,9 +49,9 @@ public abstract class BlockFenceGateMixin extends BlockHorizontalMixin {
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<Immutable<?, ?>>builder()
             .addAll(super.bridge$getManipulators(blockState))
-            .add(impl$getIsOpenFor(blockState))
-            .add(impl$getIsPoweredFor(blockState))
-            .add(impl$getInWallFor(blockState))
+            .add(this.impl$getIsOpenFor(blockState))
+            .add(this.impl$getIsPoweredFor(blockState))
+            .add(this.impl$getInWallFor(blockState))
             .build();
     }
 

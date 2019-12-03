@@ -45,7 +45,7 @@ public abstract class BlockRailPoweredMixin extends BlockRailBaseMixin {
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<Immutable<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
-                .add(impl$getIsPoweredFor(blockState))
+                .add(this.impl$getIsPoweredFor(blockState))
                 .build();
     }
 

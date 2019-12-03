@@ -48,7 +48,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
         if (container instanceof Entity) {
             if (((EntityAccessor) container).accessor$getFire() >= Constants.Entity.MINIMUM_FIRE_TICKS) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                builder.replace(getApiValueFromContainer(container).get().asImmutable());
+                builder.replace(this.getApiValueFromContainer(container).get().asImmutable());
                 builder.replace(container.getValue(Keys.FIRE_DAMAGE_DELAY).get().asImmutable());
                 ((Entity) container).extinguish();
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
@@ -83,7 +83,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     protected Immutable<Integer> constructImmutableValue(final Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

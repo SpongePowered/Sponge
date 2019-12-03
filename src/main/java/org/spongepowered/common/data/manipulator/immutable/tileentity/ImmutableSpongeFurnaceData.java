@@ -74,17 +74,17 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.PASSED_BURN_TIME, ImmutableSpongeFurnaceData.this::getPassedBurnTime);
-        registerKeyValue(Keys.PASSED_BURN_TIME, ImmutableSpongeFurnaceData.this::passedBurnTime);
+        this.registerFieldGetter(Keys.PASSED_BURN_TIME, ImmutableSpongeFurnaceData.this::getPassedBurnTime);
+        this.registerKeyValue(Keys.PASSED_BURN_TIME, ImmutableSpongeFurnaceData.this::passedBurnTime);
 
-        registerFieldGetter(Keys.MAX_BURN_TIME, ImmutableSpongeFurnaceData.this::getMaxBurnTime);
-        registerKeyValue(Keys.MAX_BURN_TIME, ImmutableSpongeFurnaceData.this::maxBurnTime);
+        this.registerFieldGetter(Keys.MAX_BURN_TIME, ImmutableSpongeFurnaceData.this::getMaxBurnTime);
+        this.registerKeyValue(Keys.MAX_BURN_TIME, ImmutableSpongeFurnaceData.this::maxBurnTime);
 
-        registerFieldGetter(Keys.PASSED_COOK_TIME, ImmutableSpongeFurnaceData.this::getPassedCookTime);
-        registerKeyValue(Keys.PASSED_COOK_TIME, ImmutableSpongeFurnaceData.this::passedCookTime);
+        this.registerFieldGetter(Keys.PASSED_COOK_TIME, ImmutableSpongeFurnaceData.this::getPassedCookTime);
+        this.registerKeyValue(Keys.PASSED_COOK_TIME, ImmutableSpongeFurnaceData.this::passedCookTime);
 
-        registerFieldGetter(Keys.MAX_COOK_TIME, ImmutableSpongeFurnaceData.this::getMaxCookTime);
-        registerKeyValue(Keys.MAX_COOK_TIME, ImmutableSpongeFurnaceData.this::maxCookTime);
+        this.registerFieldGetter(Keys.MAX_COOK_TIME, ImmutableSpongeFurnaceData.this::getMaxCookTime);
+        this.registerKeyValue(Keys.MAX_COOK_TIME, ImmutableSpongeFurnaceData.this::maxCookTime);
     }
 
     @Override

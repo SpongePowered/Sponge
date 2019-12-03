@@ -46,7 +46,7 @@ public abstract class BlockDoubleStoneSlabMixin extends BlockStoneSlabMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getSlabTypeFor(blockState), impl$getIsSeamlessFor(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getSlabTypeFor(blockState), this.impl$getIsSeamlessFor(blockState));
     }
 
     @Override

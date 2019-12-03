@@ -43,6 +43,6 @@ public class SpongeSneakingData extends AbstractBooleanData<SneakingData, Immuta
 
     @Override
     public Mutable<Boolean> sneaking() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

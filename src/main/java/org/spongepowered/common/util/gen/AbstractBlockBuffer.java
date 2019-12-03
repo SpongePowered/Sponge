@@ -88,7 +88,7 @@ public abstract class AbstractBlockBuffer implements ReadableBlockVolume {
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
-        return getBlock(x, y, z).getType();
+        return this.getBlock(x, y, z).getType();
     }
 
     @Override
@@ -96,7 +96,7 @@ public abstract class AbstractBlockBuffer implements ReadableBlockVolume {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         AbstractBlockBuffer that = (AbstractBlockBuffer) o;

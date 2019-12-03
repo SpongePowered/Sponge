@@ -46,7 +46,7 @@ public class DungeonBuilder implements Dungeon.Builder {
     private LootTable<ItemStackSnapshot> items;
 
     public DungeonBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -77,7 +77,7 @@ public class DungeonBuilder implements Dungeon.Builder {
 
     @Override
     public Builder from(Dungeon value) {
-        attempts(value.getAttemptsPerChunk());
+        this.attempts(value.getAttemptsPerChunk());
         value.getMobSpawnerData().ifPresent(this::mobSpawnerData);
         value.getChoices().ifPresent(this::choices);
         this.items = new LootTable<>();

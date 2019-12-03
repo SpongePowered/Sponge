@@ -72,7 +72,7 @@ public abstract class BlockTallGrassMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public List<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getPlantData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getPlantData(blockState));
     }
 
 

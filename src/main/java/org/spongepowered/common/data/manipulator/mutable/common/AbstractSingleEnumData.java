@@ -74,7 +74,7 @@ public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends Mutabl
 
     @Override
     public I asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, getValue());
+        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, this.getValue());
     }
 
     @Override

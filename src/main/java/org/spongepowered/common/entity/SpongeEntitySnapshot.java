@@ -169,7 +169,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public DataContainer toContainer() {
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.manipulators);
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Queries.WORLD_ID, this.worldUuid.toString())
                 .set(Constants.Entity.TYPE, this.entityType.getId())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
@@ -213,7 +213,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T extends Immutable<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        final Optional<T> optional = get(containerClass);
+        final Optional<T> optional = this.get(containerClass);
         if (optional.isPresent()) {
             return optional;
         }
@@ -255,7 +255,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         if (createNew) {
-            final SpongeEntitySnapshotBuilder snapshotBuilder = createBuilder();
+            final SpongeEntitySnapshotBuilder snapshotBuilder = this.createBuilder();
             snapshotBuilder.manipulators = builder.build();
             return Optional.of(snapshotBuilder.build());
         }
@@ -275,13 +275,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<EntitySnapshot> with(Immutable<?, ?> valueContainer) {
-        return Optional.of(createBuilder().add(valueContainer).build());
+        return Optional.of(this.createBuilder().add(valueContainer).build());
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     public Optional<EntitySnapshot> with(Iterable<Immutable<?, ?>> valueContainers) {
-        final Builder builder = createBuilder();
+        final Builder builder = this.createBuilder();
         for (Immutable manipulator : valueContainers) {
             builder.add(manipulator);
         }
@@ -290,7 +290,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<EntitySnapshot> without(Class<? extends Immutable<?, ?>> containerClass) {
-        if (!supports(containerClass)) {
+        if (!this.supports(containerClass)) {
             return Optional.empty();
         }
         final ImmutableList.Builder<Immutable<?, ?>> builder = ImmutableList.builder();
@@ -299,7 +299,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 builder.add(manipulator);
             }
         }
-        final SpongeEntitySnapshotBuilder snapshotBuilder = createBuilder();
+        final SpongeEntitySnapshotBuilder snapshotBuilder = this.createBuilder();
         snapshotBuilder.manipulators = builder.build();
         return Optional.of(snapshotBuilder.build());
     }
@@ -376,7 +376,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public EntitySnapshot withLocation(Location<World> location) {
         checkNotNull(location, "location");
-        final SpongeEntitySnapshotBuilder builder = createBuilder();
+        final SpongeEntitySnapshotBuilder builder = this.createBuilder();
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
         CompoundNBT newCompound = this.compound.copy();
@@ -419,7 +419,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         }
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
-            Entity newEntity = world.get().createEntity(getType(), this.position);
+            Entity newEntity = world.get().createEntity(this.getType(), this.position);
             if (newEntity != null) {
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
                 if (this.compound != null) {
@@ -466,7 +466,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
 

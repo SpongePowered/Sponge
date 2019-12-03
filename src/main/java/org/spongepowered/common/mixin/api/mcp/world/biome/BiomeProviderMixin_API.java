@@ -50,7 +50,7 @@ public abstract class BiomeProviderMixin_API implements BiomeGenerator {
         int ySize = size.getY();
         int zSize = size.getZ();
 
-        Biome[] biomes = getBiomes(null, xStart, zStart, xSize, zSize, true);
+        Biome[] biomes = this.getBiomes(null, xStart, zStart, xSize, zSize, true);
 
         for (int k = 0; k < zSize; k++) {
             for (int j = 0; j < ySize; j++) {

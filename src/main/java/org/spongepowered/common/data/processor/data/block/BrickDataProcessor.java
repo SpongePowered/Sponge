@@ -64,7 +64,7 @@ public class BrickDataProcessor extends AbstractCatalogDataProcessor<BrickType, 
 
     @Override
     protected Mutable<BrickType> constructValue(BrickType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

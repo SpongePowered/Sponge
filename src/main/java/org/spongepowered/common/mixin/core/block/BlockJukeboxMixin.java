@@ -40,6 +40,6 @@ public abstract class BlockJukeboxMixin implements BlockJukeboxBridge {
 
     @Override
     public void accessor$dropRecordItem(final World worldIn, final BlockPos pos, final BlockState state) {
-        dropRecord(worldIn, pos, state);
+        this.dropRecord(worldIn, pos, state);
     }
 }

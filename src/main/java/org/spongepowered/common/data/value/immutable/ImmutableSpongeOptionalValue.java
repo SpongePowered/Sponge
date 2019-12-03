@@ -49,26 +49,26 @@ public class ImmutableSpongeOptionalValue<E> extends ImmutableSpongeValue<Option
 
     @Override
     public Immutable<E> with(Optional<E> value) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), checkNotNull(value));
+        return new ImmutableSpongeOptionalValue<>(this.getKey(), checkNotNull(value));
     }
 
     @Override
     public Immutable<E> transform(Function<Optional<E>, Optional<E>> function) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), checkNotNull(function.apply(get())));
+        return new ImmutableSpongeOptionalValue<>(this.getKey(), checkNotNull(function.apply(this.get())));
     }
 
     @Override
     public Mutable<E> asMutable() {
-        return new SpongeOptionalValue<>(getKey(), this.actualValue);
+        return new SpongeOptionalValue<>(this.getKey(), this.actualValue);
     }
 
     @Override
     public Immutable<E> instead(@Nullable E value) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), Optional.ofNullable(value));
+        return new ImmutableSpongeOptionalValue<>(this.getKey(), Optional.ofNullable(value));
     }
 
     @Override
     public org.spongepowered.api.data.value.Value.Immutable<E> or(E value) { // TODO actually construct a new key for this kind...
-        return new ImmutableSpongeValue<>(null, get().isPresent() ? get().get() : checkNotNull(value));
+        return new ImmutableSpongeValue<>(null, this.get().isPresent() ? this.get().get() : checkNotNull(value));
     }
 }

@@ -39,7 +39,7 @@ public class ImmutableSpongeAffectsSpawningData extends AbstractImmutableBoolean
 
     @Override
     public Immutable<Boolean> affectsSpawning() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

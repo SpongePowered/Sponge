@@ -76,7 +76,7 @@ public abstract class WorldGenDoublePlantMixin_API extends Feature implements Do
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());
             z = random.nextInt(size.getZ());
-            y = nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
+            y = this.nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
             generate(world, random, world.getHeight(chunkPos.add(x, y, z)));
         }
         ((WorldGenDoublePlantBridge) this).bridge$setCurrentExtent(null);

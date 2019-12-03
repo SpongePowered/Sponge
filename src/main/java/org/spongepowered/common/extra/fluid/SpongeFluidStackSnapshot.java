@@ -201,7 +201,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fluidType, volume, extraData);
+        return Objects.hash(this.fluidType, this.volume, this.extraData);
     }
 
     @Override
@@ -209,7 +209,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final SpongeFluidStackSnapshot other = (SpongeFluidStackSnapshot) obj;

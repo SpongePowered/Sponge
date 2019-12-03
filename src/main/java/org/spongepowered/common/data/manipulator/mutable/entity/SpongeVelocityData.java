@@ -47,7 +47,7 @@ public class SpongeVelocityData extends AbstractSingleData<Vector3d, VelocityDat
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return velocity();
+        return this.velocity();
     }
 
     @Override
@@ -57,16 +57,16 @@ public class SpongeVelocityData extends AbstractSingleData<Vector3d, VelocityDat
 
     @Override
     public ImmutableVelocityData asImmutable() {
-        return new ImmutableSpongeVelocityData(getValue());
+        return new ImmutableSpongeVelocityData(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .createView(Keys.VELOCITY.getQuery())
-            .set(Constants.Sponge.VelocityData.VELOCITY_X, getValue().getX())
-            .set(Constants.Sponge.VelocityData.VELOCITY_Y, getValue().getY())
-            .set(Constants.Sponge.VelocityData.VELOCITY_Z, getValue().getZ())
+            .set(Constants.Sponge.VelocityData.VELOCITY_X, this.getValue().getX())
+            .set(Constants.Sponge.VelocityData.VELOCITY_Y, this.getValue().getY())
+            .set(Constants.Sponge.VelocityData.VELOCITY_Z, this.getValue().getZ())
             .getContainer();
     }
 

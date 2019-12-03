@@ -35,12 +35,12 @@ public interface ReusableLensInventoryAdapaterBridge extends InventoryAdapter, I
 
     @Override
     default SlotLensProvider bridge$generateSlotProvider() {
-        return bridge$getReusableLens().getSlots();
+        return this.bridge$getReusableLens().getSlots();
     }
 
     @Override
     default Lens bridge$generateLens(SlotLensProvider slotProvider) {
-        return bridge$getReusableLens().getLens();
+        return this.bridge$getReusableLens().getLens();
     }
 
 }

@@ -43,7 +43,7 @@ public class SpongeBreedableData extends AbstractBooleanData<BreedableData, Immu
 
     @Override
     public Mutable<Boolean> breedable() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

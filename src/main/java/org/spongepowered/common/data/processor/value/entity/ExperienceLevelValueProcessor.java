@@ -45,15 +45,15 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        final ImmutableBoundedValue<Integer> newValue = constructImmutableValue(value);
-        if (supports(container)) {
+        final ImmutableBoundedValue<Integer> newValue = this.constructImmutableValue(value);
+        if (this.supports(container)) {
             final PlayerEntity player = (PlayerEntity) container;
             final Integer oldValue = player.experienceLevel;
             player.experienceTotal = ExperienceHolderUtils.xpAtLevel(value);
             player.experience = 0;
             player.experienceLevel = value;
             ((ServerPlayerEntityBridge) container).bridge$refreshExp();
-            final ImmutableBoundedValue<Integer> oldImmutableValue = constructImmutableValue(oldValue);
+            final ImmutableBoundedValue<Integer> oldImmutableValue = this.constructImmutableValue(oldValue);
             return DataTransactionResult.successReplaceResult(newValue, oldImmutableValue);
         }
 
@@ -87,6 +87,6 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 }

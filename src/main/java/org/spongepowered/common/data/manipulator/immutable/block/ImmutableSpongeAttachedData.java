@@ -39,7 +39,7 @@ public class ImmutableSpongeAttachedData extends AbstractImmutableBooleanData<Im
 
     @Override
     public Immutable<Boolean> attached() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

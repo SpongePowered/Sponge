@@ -62,7 +62,7 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Override
     public String getName() {
-        return getId();
+        return this.getId();
     }
 
     @Override
@@ -75,12 +75,12 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".name");
+        return new SpongeTranslation(this.getTranslationKey() + ".name");
     }
 
     @Override
     public int getMaxStackQuantity() {
-        return getItemStackLimit();
+        return this.getItemStackLimit();
     }
 
     @Override

@@ -57,8 +57,8 @@ public abstract class TileEntitySkullMixin_API extends TileEntityMixin_API imple
     @Override
     public void supplyVanillaManipulators(List<org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getSkullData());
-        Optional<RepresentedPlayerData> profileData = get(RepresentedPlayerData.class);
+        manipulators.add(this.getSkullData());
+        Optional<RepresentedPlayerData> profileData = this.get(RepresentedPlayerData.class);
         if (profileData.isPresent()) {
             manipulators.add(profileData.get());
         }

@@ -67,7 +67,7 @@ public class AgeValueProcessor extends AbstractSpongeValueProcessor<AgeableEntit
 
     @Override
     protected ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class AgeValueProcessor extends AbstractSpongeValueProcessor<AgeableEntit
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        final ImmutableBoundedValue<Integer> proposedValue = constructImmutableValue(value);
+        final ImmutableBoundedValue<Integer> proposedValue = this.constructImmutableValue(value);
         if (this.supports(container)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final ImmutableBoundedValue<Integer> newAgeValue = SpongeValueFactory.boundedBuilder(Keys.AGE)

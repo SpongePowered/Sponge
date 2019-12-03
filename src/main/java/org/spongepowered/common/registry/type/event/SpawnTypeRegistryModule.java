@@ -72,26 +72,26 @@ public class SpawnTypeRegistryModule implements AlternateCatalogRegistryModule<S
 
     @Override
     public void registerDefaults() {
-        registerDefault("dispense", "Dispense");
-        registerDefault("block_spawning", "BlockSpawning");
-        registerDefault("breeding", "Breeding");
-        registerDefault("dropped_item", "DroppedItem");
-        registerDefault("experience", "Experience");
-        registerDefault("falling_block", "FallingBlock");
-        registerDefault("mob_spawner", "MobSpawner");
-        registerDefault("passive", "Passive");
-        registerDefault("placement", "Placement");
-        registerDefault("projectile", "Projectile");
-        registerDefault("spawn_egg", "SpawnEgg");
-        registerDefault("structure", "Structure");
-        registerDefault("tnt_ignite", "TNTIgnite");
-        registerDefault("weather", "Weather");
-        registerDefault("custom", "Custom");
-        registerDefault("chunk_load", "ChunkLoad");
-        registerDefault("world_spawner", "WorldSpawner");
-        registerDefault("plugin", "Plugin");
-        registerAdditionalCatalog(FORCED);
-        registerAdditionalCatalog(ENTITY_DEATH);
+        this.registerDefault("dispense", "Dispense");
+        this.registerDefault("block_spawning", "BlockSpawning");
+        this.registerDefault("breeding", "Breeding");
+        this.registerDefault("dropped_item", "DroppedItem");
+        this.registerDefault("experience", "Experience");
+        this.registerDefault("falling_block", "FallingBlock");
+        this.registerDefault("mob_spawner", "MobSpawner");
+        this.registerDefault("passive", "Passive");
+        this.registerDefault("placement", "Placement");
+        this.registerDefault("projectile", "Projectile");
+        this.registerDefault("spawn_egg", "SpawnEgg");
+        this.registerDefault("structure", "Structure");
+        this.registerDefault("tnt_ignite", "TNTIgnite");
+        this.registerDefault("weather", "Weather");
+        this.registerDefault("custom", "Custom");
+        this.registerDefault("chunk_load", "ChunkLoad");
+        this.registerDefault("world_spawner", "WorldSpawner");
+        this.registerDefault("plugin", "Plugin");
+        this.registerAdditionalCatalog(FORCED);
+        this.registerAdditionalCatalog(ENTITY_DEATH);
     }
 
     private static SpawnType generateType(String id, String name) {

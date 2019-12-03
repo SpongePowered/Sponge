@@ -47,7 +47,7 @@ public class ImmutableSpongeDelayableData extends AbstractImmutableIntData<Immut
 
     @Override
     public ImmutableBoundedValue<Integer> delay() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override

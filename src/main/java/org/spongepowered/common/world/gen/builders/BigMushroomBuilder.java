@@ -49,7 +49,7 @@ public class BigMushroomBuilder implements BigMushroom.Builder {
     private VariableAmount count;
 
     public BigMushroomBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

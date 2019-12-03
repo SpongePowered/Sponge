@@ -39,7 +39,7 @@ public class ImmutableSpongePersistingData extends AbstractImmutableBooleanData<
 
     @Override
     public Immutable<Boolean> persists() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

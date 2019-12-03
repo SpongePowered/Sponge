@@ -50,6 +50,6 @@ public class SpongeRedstonePoweredData extends AbstractBoundedComparableData<Int
 
     @Override
     public Mutable<Integer> power() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

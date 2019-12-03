@@ -50,6 +50,6 @@ public class SpongeExpOrbData extends AbstractBoundedComparableData<Integer, Exp
 
     @Override
     public Mutable<Integer> experience() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

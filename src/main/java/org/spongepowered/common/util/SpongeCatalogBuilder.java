@@ -87,7 +87,7 @@ public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends Rese
         if (name == null) {
             name = new FixedTranslation(this.id);
         }
-        return build(plugin, this.id, name);
+        return this.build(plugin, this.id, name);
     }
 
     protected abstract C build(PluginContainer plugin, String id, Translation name);

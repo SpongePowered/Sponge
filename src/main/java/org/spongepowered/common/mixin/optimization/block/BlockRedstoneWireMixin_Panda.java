@@ -195,7 +195,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
                     this.panda$turnOn.add(pos);
                 }
                 // Set all the way to off for now, because wires that were powered by this need to update first
-                setWireState(worldIn, pos, state, 0);
+                this.setWireState(worldIn, pos, state, 0);
             // Power rose?
             } else if (newPower > oldPower) {
                 // Set new Power
@@ -218,7 +218,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
             final int newPower = Math.max(blockPower, wirePower);
 
             if (newPower > oldPower) {
-                setWireState(worldIn, pos, state, newPower);
+                this.setWireState(worldIn, pos, state, newPower);
             } else if (newPower < oldPower) {
                 // Add warning
             }
@@ -403,7 +403,7 @@ public abstract class BlockRedstoneWireMixin_Panda extends Block {
     private List<Direction> getSidesToPower(final World worldIn, final BlockPos pos) {
         final List<Direction> retval = Lists.newArrayList();
         for (final Direction facing : facingsHorizontal) {
-            if (isPowerSourceAt(worldIn, pos, facing))
+            if (this.isPowerSourceAt(worldIn, pos, facing))
                 retval.add(facing);
         }
         if (retval.isEmpty())

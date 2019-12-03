@@ -96,7 +96,7 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<Se
         if (!(container instanceof ServerPlayerEntityBridge)) {
             return DataTransactionResult.failNoData();
         }
-        final Immutable<Double> current = constructImmutableValue(((ServerPlayerEntityBridge) container).bridge$getHealthScale());
+        final Immutable<Double> current = this.constructImmutableValue(((ServerPlayerEntityBridge) container).bridge$getHealthScale());
         ((ServerPlayerEntityBridge) container).bridge$setHealthScale(Constants.Entity.Player.DEFAULT_HEALTH_SCALE);
         return DataTransactionResult.successRemove(current);
     }

@@ -37,7 +37,7 @@ public final class SpongeURIResourcePack extends SpongeResourcePack {
     public SpongeURIResourcePack(URI uri, @Nullable String hash) {
         super(hash);
         this.uri = uri;
-        this.name = getName0();
+        this.name = this.getName0();
     }
 
     public SpongeURIResourcePack(String uri, @Nullable String hash) throws URISyntaxException {

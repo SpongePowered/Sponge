@@ -54,7 +54,7 @@ public class SpongeHideData extends AbstractData<HideData, ImmutableHideData> im
         this.canPlace = canPlace;
         this.miscellaneous = miscellaneous;
 
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeHideData() {
@@ -115,29 +115,29 @@ public class SpongeHideData extends AbstractData<HideData, ImmutableHideData> im
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.HIDE_ENCHANTMENTS, this::isEnchantments);
-        registerFieldSetter(Keys.HIDE_ENCHANTMENTS, this::setEnchantments);
-        registerKeyValue(Keys.HIDE_ENCHANTMENTS, this::hideEnchantments);
+        this.registerFieldGetter(Keys.HIDE_ENCHANTMENTS, this::isEnchantments);
+        this.registerFieldSetter(Keys.HIDE_ENCHANTMENTS, this::setEnchantments);
+        this.registerKeyValue(Keys.HIDE_ENCHANTMENTS, this::hideEnchantments);
 
-        registerFieldGetter(Keys.HIDE_ATTRIBUTES, this::isAttributes);
-        registerFieldSetter(Keys.HIDE_ATTRIBUTES, this::setAttributes);
-        registerKeyValue(Keys.HIDE_ATTRIBUTES, this::hideAttributes);
+        this.registerFieldGetter(Keys.HIDE_ATTRIBUTES, this::isAttributes);
+        this.registerFieldSetter(Keys.HIDE_ATTRIBUTES, this::setAttributes);
+        this.registerKeyValue(Keys.HIDE_ATTRIBUTES, this::hideAttributes);
 
-        registerFieldGetter(Keys.HIDE_UNBREAKABLE, this::isUnbreakable);
-        registerFieldSetter(Keys.HIDE_UNBREAKABLE, this::setUnbreakable);
-        registerKeyValue(Keys.HIDE_UNBREAKABLE, this::hideUnbreakable);
+        this.registerFieldGetter(Keys.HIDE_UNBREAKABLE, this::isUnbreakable);
+        this.registerFieldSetter(Keys.HIDE_UNBREAKABLE, this::setUnbreakable);
+        this.registerKeyValue(Keys.HIDE_UNBREAKABLE, this::hideUnbreakable);
 
-        registerFieldGetter(Keys.HIDE_CAN_DESTROY, this::isCanDestroy);
-        registerFieldSetter(Keys.HIDE_CAN_DESTROY, this::setCanDestroy);
-        registerKeyValue(Keys.HIDE_CAN_DESTROY, this::hideCanDestroy);
+        this.registerFieldGetter(Keys.HIDE_CAN_DESTROY, this::isCanDestroy);
+        this.registerFieldSetter(Keys.HIDE_CAN_DESTROY, this::setCanDestroy);
+        this.registerKeyValue(Keys.HIDE_CAN_DESTROY, this::hideCanDestroy);
 
-        registerFieldGetter(Keys.HIDE_CAN_PLACE, this::isCanPlace);
-        registerFieldSetter(Keys.HIDE_CAN_PLACE, this::setCanPlace);
-        registerKeyValue(Keys.HIDE_CAN_PLACE, this::hideCanPlace);
+        this.registerFieldGetter(Keys.HIDE_CAN_PLACE, this::isCanPlace);
+        this.registerFieldSetter(Keys.HIDE_CAN_PLACE, this::setCanPlace);
+        this.registerKeyValue(Keys.HIDE_CAN_PLACE, this::hideCanPlace);
 
-        registerFieldGetter(Keys.HIDE_MISCELLANEOUS, this::isMiscellaneous);
-        registerFieldSetter(Keys.HIDE_MISCELLANEOUS, this::setMiscellaneous);
-        registerKeyValue(Keys.HIDE_MISCELLANEOUS, this::hideMiscellaneous);
+        this.registerFieldGetter(Keys.HIDE_MISCELLANEOUS, this::isMiscellaneous);
+        this.registerFieldSetter(Keys.HIDE_MISCELLANEOUS, this::setMiscellaneous);
+        this.registerKeyValue(Keys.HIDE_MISCELLANEOUS, this::hideMiscellaneous);
     }
 
     public boolean isEnchantments() {

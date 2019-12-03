@@ -39,7 +39,7 @@ public class ImmutableSpongeDecayableData extends AbstractImmutableBooleanData<I
 
     @Override
     public Immutable<Boolean> decayable() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

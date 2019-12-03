@@ -47,7 +47,7 @@ public abstract class MapGenBaseMixin_API implements GenerationPopulator {
         Preconditions.checkNotNull(world);
         final int x = buffer.getBlockMin().getX() / 16;
         final int z = buffer.getBlockMin().getZ() / 16;
-        generate((net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));
+        this.generate((net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));
     }
 
 }

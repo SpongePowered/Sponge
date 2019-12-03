@@ -44,16 +44,16 @@ public final class ImmutableSpongePickupDelayData extends AbstractImmutableData<
     public ImmutableSpongePickupDelayData(int value) {
         super(ImmutablePickupDelayData.class);
         this.value = value;
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.INFINITE_PICKUP_DELAY, this::isInifinitePickup);
-        registerKeyValue(Keys.INFINITE_PICKUP_DELAY, this::infinite);
+        this.registerFieldGetter(Keys.INFINITE_PICKUP_DELAY, this::isInifinitePickup);
+        this.registerKeyValue(Keys.INFINITE_PICKUP_DELAY, this::infinite);
 
-        registerFieldGetter(Keys.PICKUP_DELAY, this::getDelay);
-        registerKeyValue(Keys.PICKUP_DELAY, this::delay);
+        this.registerFieldGetter(Keys.PICKUP_DELAY, this::getDelay);
+        this.registerKeyValue(Keys.PICKUP_DELAY, this::delay);
     }
 
     @Override
@@ -80,7 +80,7 @@ public final class ImmutableSpongePickupDelayData extends AbstractImmutableData<
 
     @Override
     public Immutable<Boolean> infinite() {
-        return new ImmutableSpongeValue<>(Keys.INFINITE_PICKUP_DELAY, false, isInifinitePickup());
+        return new ImmutableSpongeValue<>(Keys.INFINITE_PICKUP_DELAY, false, this.isInifinitePickup());
     }
 
     private boolean isInifinitePickup() {

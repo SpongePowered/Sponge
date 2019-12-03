@@ -81,7 +81,7 @@ public abstract class SpongeUserMixin_API implements User {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<CommandSource> getCommandSource() {
-        return (Optional) getPlayer();
+        return (Optional) this.getPlayer();
     }
 
     @Override
@@ -96,14 +96,14 @@ public abstract class SpongeUserMixin_API implements User {
 
     @Override
     public Vector3d getPosition() {
-        return getPlayer()
+        return this.getPlayer()
             .map(User::getPosition)
             .orElseGet(() -> new Vector3d(this.posX, this.posY, this.posZ));
     }
 
     @Override
     public Optional<UUID> getWorldUniqueId() {
-        final Optional<Player> playerOpt = getPlayer();
+        final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.get().getWorldUniqueId();
         }
@@ -113,7 +113,7 @@ public abstract class SpongeUserMixin_API implements User {
 
     @Override
     public boolean setLocation(final Vector3d position, final UUID world) {
-        final Optional<Player> playerOpt = getPlayer();
+        final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.get().setLocation(position, world);
         }
@@ -132,7 +132,7 @@ public abstract class SpongeUserMixin_API implements User {
 
     @Override
     public Vector3d getRotation() {
-        return getPlayer()
+        return this.getPlayer()
             .map(Entity::getRotation)
             .orElseGet(() -> new Vector3d(this.rotationPitch, this.rotationYaw, 0));
     }
@@ -140,7 +140,7 @@ public abstract class SpongeUserMixin_API implements User {
     @Override
     public void setRotation(final Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
-        final Optional<Player> playerOpt = getPlayer();
+        final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             playerOpt.get().setRotation(rotation);
             return;
@@ -152,7 +152,7 @@ public abstract class SpongeUserMixin_API implements User {
 
     @Override
     public Inventory getEnderChestInventory() {
-        final Optional<Player> playerOpt = getPlayer();
+        final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.get().getEnderChestInventory();
         }

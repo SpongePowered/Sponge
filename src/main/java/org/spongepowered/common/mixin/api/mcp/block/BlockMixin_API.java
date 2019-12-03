@@ -87,7 +87,7 @@ public abstract class BlockMixin_API implements BlockType {
 
     @Override
     public BlockState getDefaultState() {
-        return (BlockState) shadow$getDefaultState();
+        return (BlockState) this.shadow$getDefaultState();
     }
 
     @SuppressWarnings("unchecked")
@@ -107,12 +107,12 @@ public abstract class BlockMixin_API implements BlockType {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".name");
+        return new SpongeTranslation(this.getTranslationKey() + ".name");
     }
 
     @Intrinsic
     public boolean block$getTickRandomly() {
-        return shadow$getTickRandomly();
+        return this.shadow$getTickRandomly();
     }
 
     @Override
@@ -123,12 +123,12 @@ public abstract class BlockMixin_API implements BlockType {
 
     @Override
     public Collection<StateProperty<?>> getTraits() {
-        return getDefaultState().getTraits();
+        return this.getDefaultState().getTraits();
     }
 
     @Override
     public Optional<StateProperty<?>> getTrait(String blockTrait) {
-        return getDefaultState().getTrait(blockTrait);
+        return this.getDefaultState().getTrait(blockTrait);
     }
 
     @Override

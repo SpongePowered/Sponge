@@ -92,7 +92,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (container instanceof ItemStack) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<Text> optional = getValueFromContainer(container);
+            final Optional<Text> optional = this.getValueFromContainer(container);
             if (optional.isPresent()) {
                 try {
                     ((ItemStack) container).clearCustomName();

@@ -230,7 +230,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Override
     public String toString() {
-        return getClass().getSimpleName();
+        return this.getClass().getSimpleName();
     }
 
     @Inject(method = "tick", at = @At(value = "HEAD"))

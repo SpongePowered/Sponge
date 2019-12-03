@@ -55,7 +55,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$initializeDescriptionText(final CallbackInfo ci) {
-        setServerDescription(null);
+        this.setServerDescription(null);
     }
 
     /**

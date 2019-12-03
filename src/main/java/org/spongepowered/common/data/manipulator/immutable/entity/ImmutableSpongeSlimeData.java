@@ -43,7 +43,7 @@ public class ImmutableSpongeSlimeData extends AbstractImmutableIntData<Immutable
 
     @Override
     public Immutable<Integer> size() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override

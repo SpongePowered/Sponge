@@ -62,7 +62,7 @@ public final class SpongeChunkRegenerateFlag implements ChunkRegenerateFlag {
         if (this.create == create) {
             return this;
         }
-        return create ? andFlag(ChunkRegenerateFlags.CREATE) : andNotFlag(ChunkRegenerateFlags.CREATE);
+        return create ? this.andFlag(ChunkRegenerateFlags.CREATE) : this.andNotFlag(ChunkRegenerateFlags.CREATE);
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class SpongeChunkRegenerateFlag implements ChunkRegenerateFlag {
         if (this.entities == entities) {
             return this;
         }
-        return entities ? andFlag(ChunkRegenerateFlags.ENTITIES) : andNotFlag(ChunkRegenerateFlags.ENTITIES);
+        return entities ? this.andFlag(ChunkRegenerateFlags.ENTITIES) : this.andNotFlag(ChunkRegenerateFlags.ENTITIES);
     }
 
     @Override

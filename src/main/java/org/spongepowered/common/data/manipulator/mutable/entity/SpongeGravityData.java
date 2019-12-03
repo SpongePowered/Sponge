@@ -44,7 +44,7 @@ public class SpongeGravityData extends AbstractBooleanData<GravityData, Immutabl
 
     @Override
     public Mutable<Boolean> gravity() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }
 

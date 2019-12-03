@@ -121,7 +121,7 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        if (supports(dataHolder)) {
+        if (this.supports(dataHolder)) {
             ItemStack data = (ItemStack) dataHolder;
             if (data.hasTag() && data.getTag().contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
                 data.getTag().remove(Constants.Item.ITEM_HIDE_FLAGS);

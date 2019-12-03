@@ -53,8 +53,8 @@ public abstract class BlockStairsMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getStairShapeFor(blockState), impl$getPortionTypeFor(blockState),
-                impl$getDirectionalData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getStairShapeFor(blockState), this.impl$getPortionTypeFor(blockState),
+                this.impl$getDirectionalData(blockState));
     }
 
     @Override
@@ -72,7 +72,7 @@ public abstract class BlockStairsMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(StairsBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.withProperty(StairsBlock.HALF, this.impl$convertType((SlabBlock.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
@@ -88,7 +88,7 @@ public abstract class BlockStairsMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(StairsBlock.SHAPE, stairShapeType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(StairsBlock.HALF, impl$convertType((SlabBlock.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.withProperty(StairsBlock.HALF, this.impl$convertType((SlabBlock.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = Constants.DirectionFunctions.checkDirectionToHorizontal((Direction) value);

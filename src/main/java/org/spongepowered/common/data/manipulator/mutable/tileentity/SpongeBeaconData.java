@@ -53,18 +53,18 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
         super(BeaconData.class);
         this.primaryEffect = primaryEffect;
         this.secondaryEffect = secondaryEffect;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, this::getPrimaryEffect);
-        registerFieldSetter(Keys.BEACON_PRIMARY_EFFECT, this::setPrimaryEffect);
-        registerKeyValue(Keys.BEACON_PRIMARY_EFFECT, this::primaryEffect);
+        this.registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, this::getPrimaryEffect);
+        this.registerFieldSetter(Keys.BEACON_PRIMARY_EFFECT, this::setPrimaryEffect);
+        this.registerKeyValue(Keys.BEACON_PRIMARY_EFFECT, this::primaryEffect);
 
-        registerFieldGetter(Keys.BEACON_SECONDARY_EFFECT, this::getSecondaryEffect);
-        registerFieldSetter(Keys.BEACON_SECONDARY_EFFECT, this::setSecondaryEffect);
-        registerKeyValue(Keys.BEACON_SECONDARY_EFFECT, this::secondaryEffect);
+        this.registerFieldGetter(Keys.BEACON_SECONDARY_EFFECT, this::getSecondaryEffect);
+        this.registerFieldSetter(Keys.BEACON_SECONDARY_EFFECT, this::setSecondaryEffect);
+        this.registerKeyValue(Keys.BEACON_SECONDARY_EFFECT, this::secondaryEffect);
     }
 
     public Optional<PotionEffectType> getPrimaryEffect() {

@@ -410,9 +410,9 @@ public final class CommonModuleRegistry {
 
     public void registerDefaultModules() {
         SpongeGameRegistry registry = SpongeImpl.getRegistry();
-        registerFactories();
-        registerDefaultSuppliers(registry);
-        registerCommonModules(registry);
+        this.registerFactories();
+        this.registerDefaultSuppliers(registry);
+        this.registerCommonModules(registry);
     }
 
     private void registerFactories() {

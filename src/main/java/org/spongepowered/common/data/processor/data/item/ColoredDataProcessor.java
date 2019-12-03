@@ -51,9 +51,9 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
-        if (supports(container)) {
+        if (this.supports(container)) {
             final ItemStack stack = (ItemStack) container;
-            final Optional<Color> old = getVal(stack);
+            final Optional<Color> old = this.getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
@@ -64,14 +64,14 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
             if(display != null) {
                 display.remove(Constants.Item.ITEM_COLOR);
             }
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }
 
     @Override
     protected boolean set(final ItemStack container, final Color value) {
-        if (!supports(container)) {
+        if (!this.supports(container)) {
             return false;
         }
         ColorUtil.setItemStackColor(container, value);

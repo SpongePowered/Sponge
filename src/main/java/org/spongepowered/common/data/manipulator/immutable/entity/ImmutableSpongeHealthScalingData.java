@@ -54,7 +54,7 @@ public class ImmutableSpongeHealthScalingData
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return healthScale();
+        return this.healthScale();
     }
 
     @Override

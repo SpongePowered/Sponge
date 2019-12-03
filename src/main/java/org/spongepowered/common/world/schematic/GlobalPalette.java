@@ -141,7 +141,7 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final GlobalPalette other = (GlobalPalette) obj;

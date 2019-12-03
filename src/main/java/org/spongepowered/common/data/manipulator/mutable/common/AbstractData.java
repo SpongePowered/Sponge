@@ -162,7 +162,7 @@ public abstract class AbstractData<M extends Mutable<M, I>, I extends Immutable<
             return Optional.empty();
         }
         // .... and delegate to the processor!
-        return processor.get().fill(dataHolder, copy(), overlap);
+        return processor.get().fill(dataHolder, this.copy(), overlap);
     }
 
     // ---------------
@@ -181,21 +181,21 @@ public abstract class AbstractData<M extends Mutable<M, I>, I extends Immutable<
 
     @Override
     public <E> M set(Key<? extends Value<E>> key, E value) {
-        checkArgument(supports(key), "This data manipulator doesn't support the following key: " + key.toString());
+        checkArgument(this.supports(key), "This data manipulator doesn't support the following key: " + key.toString());
         this.keyFieldSetterMap.get(key).accept(value);
         return (M) this;
     }
 
     @Override
     public <E> M transform(Key<? extends Value<E>> key, Function<E, E> function) {
-        checkArgument(supports(key));
+        checkArgument(this.supports(key));
         this.keyFieldSetterMap.get(key).accept(checkNotNull(function.apply((E) this.keyFieldGetterMap.get(key).get())));
         return (M) this;
     }
 
     @Override
     public <E> Optional<E> get(Key<? extends Value<E>> key) {
-        if (!supports(key)) {
+        if (!this.supports(key)) {
             return Optional.empty();
         }
         return Optional.of((E) this.keyFieldGetterMap.get(key).get());
@@ -239,7 +239,7 @@ public abstract class AbstractData<M extends Mutable<M, I>, I extends Immutable<
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final AbstractData other = (AbstractData) obj;
@@ -254,6 +254,6 @@ public abstract class AbstractData<M extends Mutable<M, I>, I extends Immutable<
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion());
+            .set(Queries.CONTENT_VERSION, this.getContentVersion());
     }
 }

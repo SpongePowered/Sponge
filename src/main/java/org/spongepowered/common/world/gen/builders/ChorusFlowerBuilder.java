@@ -35,7 +35,7 @@ public class ChorusFlowerBuilder implements ChorusFlower.Builder {
     private int exclusion = 1024;
     
     public ChorusFlowerBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

@@ -54,8 +54,8 @@ public abstract class MinecraftFallingBlockDamageSourceMixin_API extends EntityD
         return MoreObjects.toStringHelper("FallingBlockDamageSource")
             .add("Name", this.getDamageType())
             .add("Type", this.getType().getId())
-            .add("FallingBlock", getSource().toString())
-            .add("Data", getFallingBlockData())
+            .add("FallingBlock", this.getSource().toString())
+            .add("Data", this.getFallingBlockData())
             .toString();
     }
 

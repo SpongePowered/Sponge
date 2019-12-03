@@ -51,7 +51,7 @@ public class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, 
     @Nullable private DisplayInfo displayInfo;
 
     public SpongeAdvancementBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

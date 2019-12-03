@@ -43,7 +43,7 @@ public class SpongeJohnnyData extends AbstractBooleanData<JohnnyData, ImmutableJ
 
     @Override
     public Mutable<Boolean> johnny() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

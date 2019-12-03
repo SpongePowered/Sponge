@@ -56,13 +56,13 @@ public class SpongeDurabilityData extends AbstractData<DurabilityData, Immutable
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.ITEM_DURABILITY, () -> this.durability);
-        registerFieldSetter(Keys.ITEM_DURABILITY, this::setDurability);
-        registerKeyValue(Keys.ITEM_DURABILITY, this::durability);
+        this.registerFieldGetter(Keys.ITEM_DURABILITY, () -> this.durability);
+        this.registerFieldSetter(Keys.ITEM_DURABILITY, this::setDurability);
+        this.registerKeyValue(Keys.ITEM_DURABILITY, this::durability);
 
-        registerFieldGetter(Keys.UNBREAKABLE, () -> this.unbreakable);
-        registerFieldSetter(Keys.UNBREAKABLE, value -> this.unbreakable = value);
-        registerKeyValue(Keys.UNBREAKABLE, this::unbreakable);
+        this.registerFieldGetter(Keys.UNBREAKABLE, () -> this.unbreakable);
+        this.registerFieldSetter(Keys.UNBREAKABLE, value -> this.unbreakable = value);
+        this.registerKeyValue(Keys.UNBREAKABLE, this::unbreakable);
     }
 
     public void setDurability(int durability) {

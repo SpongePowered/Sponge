@@ -43,7 +43,7 @@ public class SpongeArgument<T> implements Argument<T> {
 
         @Override
         String getEqualitySymbols() {
-            return isInverted() ? "!=" : "=";
+            return this.isInverted() ? "!=" : "=";
         }
 
         @Override
@@ -89,7 +89,7 @@ public class SpongeArgument<T> implements Argument<T> {
 
     @Override
     public String toPlain() {
-        return this.type.getKey() + getEqualitySymbols() + toSelectorArgument(getValue());
+        return this.type.getKey() + this.getEqualitySymbols() + toSelectorArgument(this.getValue());
     }
 
 }

@@ -44,7 +44,7 @@ public class VineBuilder implements Vine.Builder {
 
     @Override
     public Builder from(Vine value) {
-        return perChunk(value.getVinesPerChunk());
+        return this.perChunk(value.getVinesPerChunk());
     }
 
     @Override

@@ -44,7 +44,7 @@ public abstract class BlockBannerMixin extends BlockMixin {
 
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getIsAttachedFor(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getIsAttachedFor(blockState));
     }
 
     @Override

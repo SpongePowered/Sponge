@@ -43,14 +43,14 @@ public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableB
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block) {
-        checkRange(x, y, z);
+        this.checkRange(x, y, z);
         return this.volume.setBlock(x, y, z, block);
     }
 
     @Override
     public MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new MutableBlockViewDownsize(this.volume, newMin, newMax);
     }
 

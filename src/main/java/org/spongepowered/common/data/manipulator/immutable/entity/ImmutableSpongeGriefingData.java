@@ -40,7 +40,7 @@ public class ImmutableSpongeGriefingData extends AbstractImmutableBooleanData<Im
 
     @Override
     public Immutable<Boolean> canGrief() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

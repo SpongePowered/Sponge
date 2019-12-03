@@ -47,12 +47,12 @@ public class ImmutableSpongeStatisticData extends AbstractImmutableMappedData<St
 
     @Override
     public StatisticData asMutable() {
-        return new SpongeStatisticData(getValue());
+        return new SpongeStatisticData(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        return super.toContainer().set(Keys.STATISTICS, getValue());
+        return super.toContainer().set(Keys.STATISTICS, this.getValue());
     }
 
 }

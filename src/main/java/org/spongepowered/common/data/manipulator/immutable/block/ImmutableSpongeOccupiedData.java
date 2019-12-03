@@ -39,7 +39,7 @@ public class ImmutableSpongeOccupiedData extends AbstractImmutableBooleanData<Im
 
     @Override
     public Immutable<Boolean> occupied() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

@@ -130,7 +130,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
                     if (!experience.isEmpty()) {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                        appendContextOfPossibleEntityDeath(tickingEntity, frame);
+                        this.appendContextOfPossibleEntityDeath(tickingEntity, frame);
                         SpongeCommonEventFactory.callSpawnEntity(experience, phaseContext);
                         frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
                     }
@@ -322,7 +322,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             frame.pushCause(tickingEntity);
             if (entity instanceof ExperienceOrbEntity) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                appendContextOfPossibleEntityDeath(tickingEntity, frame);
+                this.appendContextOfPossibleEntityDeath(tickingEntity, frame);
                 final List<Entity> experience = new ArrayList<>(1);
                 experience.add(entity);
 

@@ -35,7 +35,7 @@ public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreA
     private int goal;
 
     public SpongeScoreCriterionBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

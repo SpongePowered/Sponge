@@ -99,10 +99,10 @@ public class EntityPotionDataProcessor extends AbstractSingleDataSingleTargetPro
         if (!(container instanceof LivingEntity)) {
             return DataTransactionResult.failNoData();
         }
-        Optional<List<PotionEffect>> effects = getVal((LivingEntity) container);
+        Optional<List<PotionEffect>> effects = this.getVal((LivingEntity) container);
         if (effects.isPresent()) {
             ((LivingEntity) container).clearActivePotions();
-            return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();
     }

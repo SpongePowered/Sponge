@@ -69,6 +69,6 @@ public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnaps
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return item();
+        return this.item();
     }
 }

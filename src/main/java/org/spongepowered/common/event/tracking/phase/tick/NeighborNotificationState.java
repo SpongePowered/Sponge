@@ -75,13 +75,13 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final NeighborNotificationContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
         context.applyOwnerIfAvailable(explosionContext::owner);
-        final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
+        final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
         explosionContext.source(locatableBlock);
     }
 
     @Override
     public boolean spawnEntityOrCapture(final NeighborNotificationContext context, final Entity entity, final int chunkX, final int chunkZ) {
-        final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
+        final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
         if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
             return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
         }

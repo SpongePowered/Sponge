@@ -37,7 +37,7 @@ public class CactusBuilder implements Cactus.Builder {
     private VariableAmount height;
     
     public CactusBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -54,8 +54,8 @@ public class CactusBuilder implements Cactus.Builder {
 
     @Override
     public Builder from(Cactus value) {
-        cactiPerChunk(value.getCactiPerChunk());
-        height(value.getHeight());
+        this.cactiPerChunk(value.getCactiPerChunk());
+        this.height(value.getHeight());
         return this;
     }
 

@@ -67,7 +67,7 @@ public class RightArmRotationValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Immutable<Vector3d> constructImmutableValue(final Vector3d value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

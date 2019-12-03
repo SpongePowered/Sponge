@@ -44,7 +44,7 @@ public abstract class BlockSnowMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getLayerData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getLayerData(blockState));
     }
 
     @Override

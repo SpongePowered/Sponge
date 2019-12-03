@@ -105,7 +105,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
         int zSizeBlock = zSize * 4;
 
         // Get biomes
-        ObjectArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartBlock, zStartBlock, xSizeBlock, zSizeBlock);
+        ObjectArrayMutableBiomeBuffer buffer = this.getBiomeBuffer(xStartBlock, zStartBlock, xSizeBlock, zSizeBlock);
         this.biomeGenerator.generateBiomes(buffer);
 
         // Downscale
@@ -137,7 +137,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
         int xSizeSegments = xMaxSegment - xStartSegment + 1;
         int zSizeSegments = zMaxSegment - zStartSegment + 1;
 
-        ObjectArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment, zStartSegment, xSizeSegments, zSizeSegments);
+        ObjectArrayMutableBiomeBuffer buffer = this.getBiomeBuffer(xStartSegment, zStartSegment, xSizeSegments, zSizeSegments);
         this.biomeGenerator.generateBiomes(buffer);
 
         for (int x = xStartSegment; x < xMaxSegment; x++) {
@@ -162,7 +162,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
         int xSizeSegments = xMaxSegment - xStartSegment + 1;
         int zSizeSegments = zMaxSegment - zStartSegment + 1;
 
-        ObjectArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment, zStartSegment, xSizeSegments, zSizeSegments);
+        ObjectArrayMutableBiomeBuffer buffer = this.getBiomeBuffer(xStartSegment, zStartSegment, xSizeSegments, zSizeSegments);
         this.biomeGenerator.generateBiomes(buffer);
 
         BlockPos blockpos = null;

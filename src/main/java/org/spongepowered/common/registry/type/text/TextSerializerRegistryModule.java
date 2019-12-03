@@ -58,10 +58,10 @@ public final class TextSerializerRegistryModule implements AlternateCatalogRegis
 
     @Override
     public void registerDefaults() {
-        registerSerializer(new PlainTextSerializer());
-        registerSerializer(new JsonTextSerializer());
-        registerSerializer(new SpongeFormattingCodeTextSerializer("sponge:formatting_code", "Formatting Codes", '&'));
-        registerSerializer(new SpongeFormattingCodeTextSerializer("minecraft:legacy_formatting_code", "Legacy Formatting Codes", COLOR_CHAR));
+        this.registerSerializer(new PlainTextSerializer());
+        this.registerSerializer(new JsonTextSerializer());
+        this.registerSerializer(new SpongeFormattingCodeTextSerializer("sponge:formatting_code", "Formatting Codes", '&'));
+        this.registerSerializer(new SpongeFormattingCodeTextSerializer("minecraft:legacy_formatting_code", "Legacy Formatting Codes", COLOR_CHAR));
     }
 
     private void registerSerializer(TextSerializer serializer) {

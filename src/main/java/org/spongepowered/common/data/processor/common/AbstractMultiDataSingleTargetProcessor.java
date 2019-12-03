@@ -51,7 +51,7 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends M
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return this.holderClass.isInstance(dataHolder) && supports((Holder) dataHolder);
+        return this.holderClass.isInstance(dataHolder) && this.supports((Holder) dataHolder);
     }
 
     protected boolean supports(Holder dataHolder) {
@@ -67,12 +67,12 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends M
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<T> from(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
+        if (!this.supports(dataHolder)) {
             return Optional.empty();
         }
-        if (doesDataExist((Holder) dataHolder)) {
-            final T manipulator = createManipulator();
-            final Map<Key<?>, ?> keyValues = getValues((Holder) dataHolder);
+        if (this.doesDataExist((Holder) dataHolder)) {
+            final T manipulator = this.createManipulator();
+            final Map<Key<?>, ?> keyValues = this.getValues((Holder) dataHolder);
             for (Map.Entry<Key<?>, ?> entry : keyValues.entrySet()) {
                 manipulator.set((Key) entry.getKey(), entry.getValue());
             }
@@ -84,9 +84,9 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends M
     @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult set(DataHolder dataHolder, T manipulator, MergeFunction function) {
-        if (supports(dataHolder)) {
+        if (this.supports(dataHolder)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<T> old = from(dataHolder);
+            final Optional<T> old = this.from(dataHolder);
             final T merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final Map<Key<?>, Object> map = new IdentityHashMap<>();
             final Set<org.spongepowered.api.data.value.Value.Immutable<?>> newValues = merged.getValues();
@@ -94,7 +94,7 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends M
                 map.put(value.getKey(), value.get());
             }
             try {
-                if (set((Holder) dataHolder, map)) {
+                if (this.set((Holder) dataHolder, map)) {
                     if (old.isPresent()) {
                         builder.replace(old.get().getValues());
                     }

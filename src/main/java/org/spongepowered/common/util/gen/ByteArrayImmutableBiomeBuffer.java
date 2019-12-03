@@ -64,15 +64,15 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
 
     @Override
     public BiomeType getBiome(int x, int y, int z) {
-        checkRange(x, y, z);
-        BiomeType biomeType = (BiomeType) Biome.getBiomeForId(this.biomes[getIndex(x, z)] & 255);
+        this.checkRange(x, y, z);
+        BiomeType biomeType = (BiomeType) Biome.getBiomeForId(this.biomes[this.getIndex(x, z)] & 255);
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 
     @Override
     public ImmutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ImmutableBiomeViewDownsize(this, newMin, newMax);
     }
 
@@ -115,7 +115,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {

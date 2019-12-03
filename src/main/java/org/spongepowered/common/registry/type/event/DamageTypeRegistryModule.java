@@ -56,21 +56,21 @@ public final class DamageTypeRegistryModule extends AbstractPrefixAlternateCatal
     @Override
     public void registerDefaults() {
 
-        register(new SpongeDamageType("minecraft:attack", "attack"));
-        register(new SpongeDamageType("minecraft:contact", "contact"));
-        register(new SpongeDamageType("minecraft:custom", "custom"));
-        register(new SpongeDamageType("minecraft:drown", "drown"));
-        register(new SpongeDamageType("minecraft:explosive", "explosive"));
-        register(new SpongeDamageType("minecraft:fall", "fall"));
-        register(new SpongeDamageType("minecraft:fire", "fire"));
-        register(new SpongeDamageType("minecraft:generic", "generic"));
-        register(new SpongeDamageType("minecraft:hunger", "hunger"));
-        register(new SpongeDamageType("minecraft:magic", "magic"));
-        register(new SpongeDamageType("minecraft:projectile", "projectile"));
-        register(new SpongeDamageType("minecraft:suffocate", "suffocate"));
-        register(new SpongeDamageType("minecraft:void", "void"));
-        register(new SpongeDamageType("minecraft:sweeping_attack", "sweeping_attack"));
-        register(new SpongeDamageType("minecraft:magma", "magma"));
+        this.register(new SpongeDamageType("minecraft:attack", "attack"));
+        this.register(new SpongeDamageType("minecraft:contact", "contact"));
+        this.register(new SpongeDamageType("minecraft:custom", "custom"));
+        this.register(new SpongeDamageType("minecraft:drown", "drown"));
+        this.register(new SpongeDamageType("minecraft:explosive", "explosive"));
+        this.register(new SpongeDamageType("minecraft:fall", "fall"));
+        this.register(new SpongeDamageType("minecraft:fire", "fire"));
+        this.register(new SpongeDamageType("minecraft:generic", "generic"));
+        this.register(new SpongeDamageType("minecraft:hunger", "hunger"));
+        this.register(new SpongeDamageType("minecraft:magic", "magic"));
+        this.register(new SpongeDamageType("minecraft:projectile", "projectile"));
+        this.register(new SpongeDamageType("minecraft:suffocate", "suffocate"));
+        this.register(new SpongeDamageType("minecraft:void", "void"));
+        this.register(new SpongeDamageType("minecraft:sweeping_attack", "sweeping_attack"));
+        this.register(new SpongeDamageType("minecraft:magma", "magma"));
 
     }
 }

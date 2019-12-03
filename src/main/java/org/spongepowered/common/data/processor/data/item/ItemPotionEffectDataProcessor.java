@@ -107,7 +107,7 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
             return DataTransactionResult.failNoData();
         }
 
-        Optional<List<PotionEffect>> currentEffects = getVal(itemStack);
+        Optional<List<PotionEffect>> currentEffects = this.getVal(itemStack);
         if (!itemStack.hasTag()) {
             itemStack.setTag(new CompoundNBT());
         }
@@ -115,7 +115,7 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
         final CompoundNBT tagCompound = itemStack.getTag();
         tagCompound.setTag(Constants.Item.CUSTOM_POTION_EFFECTS, new ListNBT());
         if (currentEffects.isPresent()) {
-            return DataTransactionResult.successRemove(constructImmutableValue(currentEffects.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(currentEffects.get()));
         }
         return DataTransactionResult.successNoData();
     }

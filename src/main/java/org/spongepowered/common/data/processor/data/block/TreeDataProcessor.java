@@ -73,11 +73,11 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<WoodType, Mu
     @Override
     protected Optional<WoodType> getVal(ItemStack stack) {
         if (stack.getItem() == ItemTypes.LEAVES2 || stack.getItem() == ItemTypes.LOG2) {
-            return Optional.of(getFromMeta(stack.getDamage() + 4));
+            return Optional.of(this.getFromMeta(stack.getDamage() + 4));
         } else if (boatMapping.containsKey((ItemType) stack.getItem())) {
             return Optional.of(boatMapping.get(stack.getItem()));
         } else {
-            return Optional.of(getFromMeta(stack.getDamage()));
+            return Optional.of(this.getFromMeta(stack.getDamage()));
         }
     }
 
@@ -117,7 +117,7 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<WoodType, Mu
 
     @Override
     protected Mutable<WoodType> constructValue(WoodType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

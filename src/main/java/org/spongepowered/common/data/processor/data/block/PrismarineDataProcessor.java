@@ -65,7 +65,7 @@ public class PrismarineDataProcessor extends
 
     @Override
     protected Mutable<PrismarineType> constructValue(PrismarineType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

@@ -53,7 +53,7 @@ public abstract class TileEntityEnchantmentTableMixin_API extends TileEntityMixi
     public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         if (((EnchantingTableTileEntity) (Object) this).hasCustomName()) {
-            manipulators.add(get(DisplayNameData.class).get());
+            manipulators.add(this.get(DisplayNameData.class).get());
         }
     }
 

@@ -62,13 +62,13 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                 // This is inefficient, but at least we only need to do it once
                 switch (this.action) {
                     case SHOW_TEXT:
-                        bridge$setHandle(TextActions.showText(((ITextComponentBridge) this.value).bridge$toText()));
+                        this.bridge$setHandle(TextActions.showText(((ITextComponentBridge) this.value).bridge$toText()));
                         break;
                     case SHOW_ITEM:
-                        bridge$setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
+                        this.bridge$setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(this.loadNbt()))));
                         break;
                     case SHOW_ENTITY:
-                        CompoundNBT nbt = loadNbt();
+                        CompoundNBT nbt = this.loadNbt();
                         String name = nbt.getString("name");
                         EntityType type = null;
                         if (nbt.contains("type", Constants.NBT.TAG_STRING)) {
@@ -76,7 +76,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));
-                        bridge$setHandle(TextActions.showEntity(uniqueId, name, type));
+                        this.bridge$setHandle(TextActions.showEntity(uniqueId, name, type));
                         break;
                     default:
                 }

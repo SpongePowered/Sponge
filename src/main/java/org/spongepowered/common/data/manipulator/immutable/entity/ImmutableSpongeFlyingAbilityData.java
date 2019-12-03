@@ -39,7 +39,7 @@ public class ImmutableSpongeFlyingAbilityData extends AbstractImmutableBooleanDa
 
     @Override
     public Immutable<Boolean> canFly() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

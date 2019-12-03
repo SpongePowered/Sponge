@@ -36,14 +36,14 @@ public abstract class MinecraftEnumBasedCatalogTypeModule<E extends Enum<E>, T e
 
     protected MinecraftEnumBasedCatalogTypeModule() {
         super("minecraft");
-        generateInitialMap();
+        this.generateInitialMap();
     }
 
     protected abstract E[] getValues();
 
     protected void generateInitialMap() {
-        for (E enumType: getValues()) {
-            this.catalogTypeMap.put(enumAs(enumType).getId(), enumAs(enumType));
+        for (E enumType: this.getValues()) {
+            this.catalogTypeMap.put(this.enumAs(enumType).getId(), this.enumAs(enumType));
         }
     }
 

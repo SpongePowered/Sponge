@@ -60,7 +60,7 @@ public class FallTimeValueProcessor extends AbstractSpongeValueProcessor<Falling
 
     @Override
     protected Immutable<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -40,7 +40,7 @@ public class ImmutableSpongeAngerableData extends AbstractImmutableIntData<Immut
 
     @Override
     public ImmutableBoundedValue<Integer> angerLevel() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

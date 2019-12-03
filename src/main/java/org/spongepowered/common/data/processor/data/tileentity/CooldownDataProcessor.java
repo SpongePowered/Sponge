@@ -72,7 +72,7 @@ public class CooldownDataProcessor
 
     @Override
     public Immutable<Integer> constructImmutableValue(final Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override
@@ -84,12 +84,12 @@ public class CooldownDataProcessor
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (container instanceof HopperTileEntity) {
             final HopperTileEntity hopper = (HopperTileEntity) container;
-            final Optional<Integer> old = getVal(hopper);
+            final Optional<Integer> old = this.getVal(hopper);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
             ((TileEntityHopperAccessor) hopper).accessor$setTransferCooldown(-1);
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }

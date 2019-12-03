@@ -68,7 +68,7 @@ public abstract class PotionMixin_API implements PotionEffectType {
 
     @Intrinsic
     public boolean potion$isInstant() {
-        return shadow$isInstant();
+        return this.shadow$isInstant();
     }
 
     @Intrinsic
@@ -80,7 +80,7 @@ public abstract class PotionMixin_API implements PotionEffectType {
     public Translation getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(shadow$getName());
+            this.api$translation = new SpongeTranslation(this.shadow$getName());
         }
         return this.api$translation;
     }
@@ -89,7 +89,7 @@ public abstract class PotionMixin_API implements PotionEffectType {
     @Override
     public Translation getPotionTranslation() {
         if (this.api$potionTranslation == null) {
-            String name = shadow$getName();
+            String name = this.shadow$getName();
             final String potionId = "potion." + PotionEffectTypeRegistryModule.potionMapping.getOrDefault(name, "effect.missing");
             this.api$potionTranslation = new SpongeTranslation(potionId);
         }

@@ -69,7 +69,7 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Mus
         if (resourceLocation == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(mappings.get(resourceLocation.toString()));
+        return Optional.ofNullable(this.mappings.get(resourceLocation.toString()));
     }
 
     @Override
@@ -100,7 +100,7 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Mus
         for (Map.Entry<SoundEvent, MusicDiscItem> recordEntry : ((ItemRecordAccessor) Items.RECORD_CAT).accessor$getRecords().entrySet()) {
             final MusicDiscItem recordItem = recordEntry.getValue();
             final String key = Item.REGISTRY.getKey(recordItem).toString();
-            if(!mappings.containsKey(key)) {
+            if(!this.mappings.containsKey(key)) {
                 this.add(new SpongeRecordType(key, recordItem.getTranslationKey(), (ItemType) recordItem, (SoundType) ((ItemRecordAccessor) recordItem).accessor$getSoundEvent()));
             }
         }

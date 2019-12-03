@@ -96,7 +96,7 @@ import javax.annotation.Nullable;
 @Mixin(value = Block.class)
 public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {
 
-    private final boolean impl$isVanilla = getClass().getName().startsWith("net.minecraft.");
+    private final boolean impl$isVanilla = this.getClass().getName().startsWith("net.minecraft.");
     private boolean impl$hasCollideLogic;
     private boolean impl$hasCollideWithStateLogic;
     // Used to determine if this block needs to be handled in WorldServer#addBlockEvent
@@ -145,7 +145,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
 
     @Override
     public ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> bridge$getProperties(final net.minecraft.block.BlockState blockState) {
-        return populateSpongeProperties(ImmutableMap.builder(), blockState).build();
+        return this.populateSpongeProperties(ImmutableMap.builder(), blockState).build();
     }
 
     @SuppressWarnings("unchecked")

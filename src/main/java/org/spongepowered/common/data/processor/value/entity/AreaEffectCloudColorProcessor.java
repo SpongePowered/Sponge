@@ -60,7 +60,7 @@ public class AreaEffectCloudColorProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Immutable<Color> constructImmutableValue(Color value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

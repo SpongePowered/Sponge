@@ -38,7 +38,7 @@ public class IcePathBuilder implements IcePath.Builder {
     private VariableAmount count;
     
     public IcePathBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class IcePathBuilder implements IcePath.Builder {
 
     @Override
     public Builder from(IcePath value) {
-        return radius(value.getRadius())
+        return this.radius(value.getRadius())
             .perChunk(value.getSectionsPerChunk());
     }
 

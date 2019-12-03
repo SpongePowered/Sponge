@@ -53,7 +53,7 @@ public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Bui
 
     @Override
     public AttackLivingAITask.Builder from(AttackLivingAITask value) {
-        return speed(value.getSpeed())
+        return this.speed(value.getSpeed())
             .longMemory();
     }
 

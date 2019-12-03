@@ -80,7 +80,7 @@ public abstract class AbstractBiomeViewDownsize<V extends ReadableBiomeVolume> i
 
     @Override
     public BiomeType getBiome(int x, int y, int z) {
-        checkRange(x, y, z);
+        this.checkRange(x, y, z);
         return this.volume.getBiome(x, y, z);
     }
 

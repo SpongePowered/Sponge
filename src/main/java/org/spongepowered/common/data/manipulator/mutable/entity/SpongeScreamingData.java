@@ -43,6 +43,6 @@ public class SpongeScreamingData extends AbstractBooleanData<ScreamingData, Immu
 
     @Override
     public Mutable<Boolean> screaming() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

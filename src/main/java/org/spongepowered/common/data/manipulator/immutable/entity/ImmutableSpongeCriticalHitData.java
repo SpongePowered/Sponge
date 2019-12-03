@@ -42,22 +42,22 @@ public class ImmutableSpongeCriticalHitData extends AbstractImmutableSingleData<
 
     @Override
     public CriticalHitData asMutable() {
-        return new SpongeCriticalHitData(getValue());
+        return new SpongeCriticalHitData(this.getValue());
     }
 
     @Override
     public Immutable<Boolean> criticalHit() {
-        return ImmutableSpongeValue.cachedOf(Keys.CRITICAL_HIT, false, getValue());
+        return ImmutableSpongeValue.cachedOf(Keys.CRITICAL_HIT, false, this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-                .set(Keys.CRITICAL_HIT, getValue());
+                .set(Keys.CRITICAL_HIT, this.getValue());
     }
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return criticalHit();
+        return this.criticalHit();
     }
 }

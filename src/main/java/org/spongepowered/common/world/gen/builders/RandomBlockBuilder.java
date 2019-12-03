@@ -46,7 +46,7 @@ public class RandomBlockBuilder implements RandomBlock.Builder {
     private Predicate<Location<World>> target;
 
     public RandomBlockBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class RandomBlockBuilder implements RandomBlock.Builder {
 
     @Override
     public Builder from(RandomBlock value) {
-        return block(value.getBlock())
+        return this.block(value.getBlock())
             .perChunk(value.getAttemptsPerChunk())
             .placementTarget(value.getPlacementTarget())
             .height(value.getHeightRange());

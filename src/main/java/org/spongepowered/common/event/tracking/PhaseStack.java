@@ -106,7 +106,7 @@ final class PhaseStack {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final PhaseStack other = (PhaseStack) obj;

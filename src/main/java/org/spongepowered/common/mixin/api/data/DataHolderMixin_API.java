@@ -235,7 +235,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         SpongeTimings.dataOfferMultiManipulators.startTimingIfSync();
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         for (final Mutable<?, ?> manipulator : valueContainers) {
-            final DataTransactionResult result = offer(manipulator);
+            final DataTransactionResult result = this.offer(manipulator);
             if (!result.getRejectedData().isEmpty()) {
                 builder.reject(result.getRejectedData());
             }
@@ -331,7 +331,7 @@ public abstract class DataHolderMixin_API implements DataHolder {
         }
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         for (final Immutable<?> replaced : result.getReplacedData()) {
-            builder.absorbResult(offer(replaced));
+            builder.absorbResult(this.offer(replaced));
         }
         for (final Immutable<?> successful : result.getSuccessfulData()) {
             builder.absorbResult(remove(successful));
@@ -427,12 +427,12 @@ public abstract class DataHolderMixin_API implements DataHolder {
 
     @Override
     public Set<Key<?>> getKeys() {
-        return getContainers().stream().flatMap(container -> container.getKeys().stream()).collect(Collectors.toSet());
+        return this.getContainers().stream().flatMap(container -> container.getKeys().stream()).collect(Collectors.toSet());
     }
 
     @Override
     public Set<Immutable<?>> getValues() {
-        return getContainers().stream().flatMap(container -> container.getValues().stream()).collect(Collectors.toSet());
+        return this.getContainers().stream().flatMap(container -> container.getValues().stream()).collect(Collectors.toSet());
     }
 
     // The rest of these are default implemented in the event some implementation fails.

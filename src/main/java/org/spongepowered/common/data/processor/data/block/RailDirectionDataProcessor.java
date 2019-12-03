@@ -53,7 +53,7 @@ public class RailDirectionDataProcessor extends
 
     @Override
     protected Mutable<RailDirection> constructValue(RailDirection actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

@@ -107,7 +107,7 @@ class SpongePermissionDescription implements PermissionDescription {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.getClass() != obj.getClass()) {
             return false;
         }
         SpongePermissionDescription other = (SpongePermissionDescription) obj;

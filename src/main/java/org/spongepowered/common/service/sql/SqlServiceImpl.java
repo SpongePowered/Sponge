@@ -229,7 +229,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
             ConnectionInfo that = (ConnectionInfo) o;

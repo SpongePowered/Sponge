@@ -49,7 +49,7 @@ public class ImmutableSpongeNoteData extends AbstractImmutableSingleData<NotePit
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return note();
+        return this.note();
     }
 
     @Override
@@ -64,6 +64,6 @@ public class ImmutableSpongeNoteData extends AbstractImmutableSingleData<NotePit
 
     @Override
     public DataContainer toContainer() {
-        return super.toContainer().set(Keys.NOTE_PITCH, getValue());
+        return super.toContainer().set(Keys.NOTE_PITCH, this.getValue());
     }
 }

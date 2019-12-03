@@ -55,8 +55,8 @@ public class TransactionTypeRegistryModule
 
     @Override
     public void registerDefaults() {
-        register(new SpongeTransactionType("sponge:deposit", "deposit"));
-        register(new SpongeTransactionType("sponge:withdraw", "withdraw"));
-        register(new SpongeTransactionType("sponge:transfer", "transfer"));
+        this.register(new SpongeTransactionType("sponge:deposit", "deposit"));
+        this.register(new SpongeTransactionType("sponge:withdraw", "withdraw"));
+        this.register(new SpongeTransactionType("sponge:transfer", "transfer"));
     }
 }

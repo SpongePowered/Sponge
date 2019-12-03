@@ -68,7 +68,7 @@ public final class JSONUtil {
         private final Map<String, Object> elements = Maps.newHashMap();
 
         public JsonObjectBuilder add(int key, Object value) {
-            return add(String.valueOf(key), value);
+            return this.add(String.valueOf(key), value);
         }
 
         public JsonObjectBuilder add(String key, Object value) {

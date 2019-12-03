@@ -154,7 +154,7 @@ public abstract class AbstractImmutableData<I extends Immutable<I, M>, M extends
 
     @Override
     public <E> Optional<E> get(Key<? extends Value<E>> key) {
-        if (!supports(key)) {
+        if (!this.supports(key)) {
             return Optional.empty();
         }
         return Optional.of((E) this.keyFieldGetterMap.get(key).get());
@@ -202,7 +202,7 @@ public abstract class AbstractImmutableData<I extends Immutable<I, M>, M extends
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final AbstractImmutableData other = (AbstractImmutableData) obj;
@@ -217,6 +217,6 @@ public abstract class AbstractImmutableData<I extends Immutable<I, M>, M extends
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion());
+            .set(Queries.CONTENT_VERSION, this.getContentVersion());
     }
 }

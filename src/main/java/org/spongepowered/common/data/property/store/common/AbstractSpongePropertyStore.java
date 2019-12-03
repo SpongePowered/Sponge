@@ -42,7 +42,7 @@ public abstract class AbstractSpongePropertyStore<T extends Property<?, ?>> impl
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof World) {
-            return getFor((Location<World>) propertyHolder);
+            return this.getFor((Location<World>) propertyHolder);
         }
         return Optional.empty();
     }

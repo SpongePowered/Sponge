@@ -90,6 +90,6 @@ public abstract class EntityShulkerBulletMixin_API extends EntityMixin_API imple
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getTargetData());
-        manipulators.add(getDirectionalData());
+        manipulators.add(this.getDirectionalData());
     }
 }

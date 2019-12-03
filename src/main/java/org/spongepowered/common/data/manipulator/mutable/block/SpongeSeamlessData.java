@@ -43,6 +43,6 @@ public class SpongeSeamlessData extends AbstractBooleanData<SeamlessData, Immuta
 
     @Override
     public Mutable<Boolean> seamless() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

@@ -39,12 +39,12 @@ public abstract class BlockLog_EnumAxisMixin_API implements LogAxis {
     @Shadow public abstract String shadow$getName();
 
     public String log$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String log$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 
     @SuppressWarnings("ConstantConditions")

@@ -43,7 +43,7 @@ public class ImmutableSpongeExpOrbData extends AbstractImmutableIntData<Immutabl
 
     @Override
     public Immutable<Integer> experience() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override

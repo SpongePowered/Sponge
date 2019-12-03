@@ -49,7 +49,7 @@ public class MushroomBuilder implements Mushroom.Builder {
     private VariableAmount count;
 
     public MushroomBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -83,7 +83,7 @@ public class MushroomBuilder implements Mushroom.Builder {
     public Builder from(Mushroom value) {
         ChanceTable<MushroomType> table = new ChanceTable<>();
         table.addAll(value.getTypes());
-        return types(table)
+        return this.types(table)
             .mushroomsPerChunk(value.getMushroomsPerChunk())
             .supplier(value.getSupplierOverride().orElse(null));
     }

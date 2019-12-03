@@ -49,6 +49,6 @@ public class SpongeStoredEnchantmentData extends AbstractListData<Enchantment, S
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Keys.STORED_ENCHANTMENTS, getValue());
+                .set(Keys.STORED_ENCHANTMENTS, this.getValue());
     }
 }

@@ -39,7 +39,7 @@ public class ImmutableSpongeDisarmedData extends AbstractImmutableBooleanData<Im
 
     @Override
     public Immutable<Boolean> disarmed() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

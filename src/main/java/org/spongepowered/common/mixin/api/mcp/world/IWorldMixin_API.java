@@ -124,7 +124,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
 
     @Override
     default boolean setBiome(int x, int y, int z, BiomeType biome) {
-        final IChunk iChunk = shadow$getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
+        final IChunk iChunk = this.shadow$getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
         if (iChunk == null) {
             return false;
         }
@@ -153,12 +153,12 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
 
     @Override
     default boolean containsBlock(int x, int y, int z) {
-        return shadow$chunkExists(x >> 4, z >> 4);
+        return this.shadow$chunkExists(x >> 4, z >> 4);
     }
 
     @Override
     default boolean isAreaAvailable(int x, int y, int z) {
-        return shadow$chunkExists(x >> 4, z >> 4);
+        return this.shadow$chunkExists(x >> 4, z >> 4);
     }
 
     @Override
@@ -197,17 +197,17 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
 
     @Override
     default long getSeed() {
-        return shadow$getSeed();
+        return this.shadow$getSeed();
     }
 
     @Override
     default TerrainGenerator<?> getTerrainGenerator() {
-        return (TerrainGenerator<?>) shadow$getChunkProvider().getChunkGenerator();
+        return (TerrainGenerator<?>) this.shadow$getChunkProvider().getChunkGenerator();
     }
 
     @Override
     default WorldProperties getProperties() {
-        return (WorldProperties) shadow$getWorldInfo();
+        return (WorldProperties) this.shadow$getWorldInfo();
     }
 
     @Override

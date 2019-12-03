@@ -79,31 +79,32 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
         if (propertyHolder instanceof Location) {
             final Location<?> location = (Location<?>) propertyHolder;
             final BlockState block = (BlockState) location.getBlock();
-            return getForBlock(location, block);
+            return this.getForBlock(location, block);
         } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
             final Item item = ((ItemStack) propertyHolder).getItem();
             if (item instanceof BlockItem) {
                 final Block block = ((BlockItem) item).getBlock();
                 if (block != null) {
-                    return getForBlock(null, block.getDefaultState());
+                    return this.getForBlock(null, block.getDefaultState());
                 }
             }
         } else if (propertyHolder instanceof BlockState) {
-            return getForBlock(null, ((BlockState) propertyHolder));
+            return this.getForBlock(null, ((BlockState) propertyHolder));
         } else if (propertyHolder instanceof Block) {
-            return getForBlock(null, ((Block) propertyHolder).getDefaultState());
+            return this.getForBlock(null, ((Block) propertyHolder).getDefaultState());
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<T> getFor(Location<World> location) {
-        return getForBlock(location, (BlockState) location.getBlock());
+        return this.getForBlock(location, (BlockState) location.getBlock());
     }
 
     @Override
     public Optional<T> getFor(Location<World> location, Direction direction) {
-        return getForDirection(((net.minecraft.world.World) location.getExtent()), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+        return this
+                .getForDirection(((net.minecraft.world.World) location.getExtent()), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
                 toEnumFacing(direction));
     }
 }

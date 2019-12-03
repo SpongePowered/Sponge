@@ -65,7 +65,7 @@ public class ImmutableSpongeHideData extends AbstractImmutableData<ImmutableHide
         this.canPlaceValue = ImmutableSpongeValue.cachedOf(Keys.HIDE_CAN_PLACE, false, canPlace);
         this.miscellaneousValue = ImmutableSpongeValue.cachedOf(Keys.HIDE_MISCELLANEOUS, false, miscellaneous);
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -116,23 +116,23 @@ public class ImmutableSpongeHideData extends AbstractImmutableData<ImmutableHide
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.HIDE_ENCHANTMENTS, this::isEnchantments);
-        registerKeyValue(Keys.HIDE_ENCHANTMENTS, this::hideEnchantments);
+        this.registerFieldGetter(Keys.HIDE_ENCHANTMENTS, this::isEnchantments);
+        this.registerKeyValue(Keys.HIDE_ENCHANTMENTS, this::hideEnchantments);
 
-        registerFieldGetter(Keys.HIDE_ATTRIBUTES, this::isAttributes);
-        registerKeyValue(Keys.HIDE_ATTRIBUTES, this::hideAttributes);
+        this.registerFieldGetter(Keys.HIDE_ATTRIBUTES, this::isAttributes);
+        this.registerKeyValue(Keys.HIDE_ATTRIBUTES, this::hideAttributes);
 
-        registerFieldGetter(Keys.HIDE_UNBREAKABLE, this::isUnbreakable);
-        registerKeyValue(Keys.HIDE_UNBREAKABLE, this::hideUnbreakable);
+        this.registerFieldGetter(Keys.HIDE_UNBREAKABLE, this::isUnbreakable);
+        this.registerKeyValue(Keys.HIDE_UNBREAKABLE, this::hideUnbreakable);
 
-        registerFieldGetter(Keys.HIDE_CAN_DESTROY, this::isCanDestroy);
-        registerKeyValue(Keys.HIDE_CAN_DESTROY, this::hideCanDestroy);
+        this.registerFieldGetter(Keys.HIDE_CAN_DESTROY, this::isCanDestroy);
+        this.registerKeyValue(Keys.HIDE_CAN_DESTROY, this::hideCanDestroy);
 
-        registerFieldGetter(Keys.HIDE_CAN_PLACE, this::isCanPlace);
-        registerKeyValue(Keys.HIDE_CAN_PLACE, this::hideCanPlace);
+        this.registerFieldGetter(Keys.HIDE_CAN_PLACE, this::isCanPlace);
+        this.registerKeyValue(Keys.HIDE_CAN_PLACE, this::hideCanPlace);
 
-        registerFieldGetter(Keys.HIDE_MISCELLANEOUS, this::isMiscellaneous);
-        registerKeyValue(Keys.HIDE_MISCELLANEOUS, this::hideMiscellaneous);
+        this.registerFieldGetter(Keys.HIDE_MISCELLANEOUS, this::isMiscellaneous);
+        this.registerKeyValue(Keys.HIDE_MISCELLANEOUS, this::hideMiscellaneous);
     }
 
     public boolean isMiscellaneous() {

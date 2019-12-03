@@ -55,8 +55,8 @@ public abstract class MinecraftBlockDamageSourceMixin_API extends DamageSourceMi
     public String toString() {
         return MoreObjects.toStringHelper("BlockDamageSource")
             .add("Name", this.damageType)
-            .add("Type", getType().getId())
-            .add("BlockSnapshot", getBlockSnapshot())
+            .add("Type", this.getType().getId())
+            .add("BlockSnapshot", this.getBlockSnapshot())
             .add("Location", this.location)
             .toString();
     }

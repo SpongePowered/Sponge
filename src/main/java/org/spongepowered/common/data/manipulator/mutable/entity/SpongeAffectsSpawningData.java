@@ -43,7 +43,7 @@ public class SpongeAffectsSpawningData extends AbstractBooleanData<AffectsSpawni
 
     @Override
     public Mutable<Boolean> affectsSpawning() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

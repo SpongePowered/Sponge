@@ -48,7 +48,7 @@ public class ForestBuilder implements Forest.Builder {
     @Nullable private Function<Location<Extent>, PopulatorObject> override;
     
     public ForestBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ForestBuilder implements Forest.Builder {
     public Builder from(Forest value) {
         WeightedTable<PopulatorObject> table = new WeightedTable<>();
         table.addAll(value.getTypes());
-        return perChunk(value.getTreesPerChunk())
+        return this.perChunk(value.getTreesPerChunk())
             .types(table)
             .supplier(value.getSupplierOverride().orElse(null));
     }

@@ -54,7 +54,7 @@ public abstract class TextComponentTranslationMixin extends TextComponentBaseMix
 
     @Override
     public Iterator<ITextComponent> bridge$childrenIterator() {
-        ensureInitialized();
+        this.ensureInitialized();
         return Iterators.concat(this.children.iterator(), super.bridge$childrenIterator());
     }
 

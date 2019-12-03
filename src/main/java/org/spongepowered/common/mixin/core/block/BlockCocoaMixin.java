@@ -45,7 +45,7 @@ public abstract class BlockCocoaMixin extends BlockHorizontalMixin {
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<Immutable<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
-                .add(impl$getGrowthData(blockState))
+                .add(this.impl$getGrowthData(blockState))
                 .build();
     }
 

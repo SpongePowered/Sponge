@@ -35,7 +35,7 @@ public abstract class EntityEnderCrystalMixin_API extends EntityMixin_API implem
 
     @Override
     public void detonate() {
-        setDead();
+        this.setDead();
         ((EntityEnderCrystalBridge) this).bridge$ThrowEventWithDetonation(this.world, null, this.posX, this.posY, this.posZ, true, null);
     }
 

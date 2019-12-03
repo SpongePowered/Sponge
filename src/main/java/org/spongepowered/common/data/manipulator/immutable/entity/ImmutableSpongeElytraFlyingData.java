@@ -39,7 +39,7 @@ public class ImmutableSpongeElytraFlyingData extends AbstractImmutableBooleanDat
 
     @Override
     public Immutable<Boolean> elytraFlying() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

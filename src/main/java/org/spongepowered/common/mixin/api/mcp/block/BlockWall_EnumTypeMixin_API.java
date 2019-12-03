@@ -39,11 +39,11 @@ public abstract class BlockWall_EnumTypeMixin_API {
     @Shadow public abstract String shadow$getTranslationKey();
 
     public String wall$getId() {
-        return "minecraft:" + shadow$getTranslationKey();
+        return "minecraft:" + this.shadow$getTranslationKey();
     }
 
     @Intrinsic
     public String wall$getName() {
-        return shadow$getTranslationKey();
+        return this.shadow$getTranslationKey();
     }
 }

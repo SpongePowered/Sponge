@@ -57,6 +57,6 @@ public abstract class EntityRabbitMixin_API extends EntityAnimalMixin_API implem
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getRabbitData());
+        manipulators.add(this.getRabbitData());
     }
 }

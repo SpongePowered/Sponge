@@ -155,7 +155,7 @@ public class SpongeConfig<T extends ConfigBase> {
             this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
 
             // If load fails, avoid saving as this can mess up world configs.
-            if (!load()) {
+            if (!this.load()) {
                 return;
             }
             // In order for the removeDuplicates method to function properly, it is extremely
@@ -164,9 +164,9 @@ public class SpongeConfig<T extends ConfigBase> {
             // all duplicates prior.
             // To handle the above issue, we only call save for world configs during init.
             if (!forceSaveOnLoad && parent != null && parent.parent != null) {
-                saveNow();
+                this.saveNow();
             } else if (forceSaveOnLoad) {
-                saveNow();
+                this.saveNow();
             }
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Failed to initialize configuration", e);
@@ -195,7 +195,7 @@ public class SpongeConfig<T extends ConfigBase> {
 
             // before saving this config, remove any values already declared with the same value on the parent
             if (this.parent != null) {
-                removeDuplicates(saveNode);
+                this.removeDuplicates(saveNode);
             }
 
             // save the data to disk
@@ -250,7 +250,7 @@ public class SpongeConfig<T extends ConfigBase> {
             }
 
             // populate the config object
-            populateInstance();
+            this.populateInstance();
             return true;
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Failed to load configuration", e);
@@ -327,20 +327,20 @@ public class SpongeConfig<T extends ConfigBase> {
 
     public CompletableFuture<CommentedConfigurationNode> updateSetting(String key, Object value) {
         return Functional.asyncFailableFuture(() -> {
-            CommentedConfigurationNode upd = getSetting(key);
+            CommentedConfigurationNode upd = this.getSetting(key);
             upd.setValue(value);
-            populateInstance();
-            saveNow();
+            this.populateInstance();
+            this.saveNow();
             return upd;
         }, ForkJoinPool.commonPool());
     }
 
     public <V> CompletableFuture<CommentedConfigurationNode> updateSetting(String key, V value, TypeToken<V> token) {
         return Functional.asyncFailableFuture(() -> {
-            CommentedConfigurationNode upd = getSetting(key);
+            CommentedConfigurationNode upd = this.getSetting(key);
             upd.setValue(token, value);
-            populateInstance();
-            save();
+            this.populateInstance();
+            this.save();
             return upd;
         }, ForkJoinPool.commonPool());
     }
@@ -352,11 +352,11 @@ public class SpongeConfig<T extends ConfigBase> {
     @Nullable
     public CommentedConfigurationNode getSetting(String key) {
         if (key.equalsIgnoreCase("config-enabled")) {
-            return getRootNode().getNode(key);
+            return this.getRootNode().getNode(key);
         } else if (!key.contains(".") || key.indexOf('.') == key.length() - 1) {
             return null;
         } else {
-            CommentedConfigurationNode node = getRootNode();
+            CommentedConfigurationNode node = this.getRootNode();
             final String[] split = key.split("\\.");
             return node.getNode((Object[]) split);
         }

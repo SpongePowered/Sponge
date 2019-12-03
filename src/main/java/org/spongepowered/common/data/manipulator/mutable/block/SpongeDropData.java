@@ -43,6 +43,6 @@ public class SpongeDropData extends AbstractBooleanData<DropData, ImmutableDropD
 
     @Override
     public Mutable<Boolean> willDrop() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

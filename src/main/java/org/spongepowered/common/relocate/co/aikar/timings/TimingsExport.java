@@ -279,7 +279,7 @@ class TimingsExport extends Thread {
             this.listeners.send(Text.of(TextColors.RED, "Warning: Timings report done over RCON will cause lag spikes."));
             this.listeners.send(Text.of(TextColors.RED, "You should use ", TextColors.YELLOW,
                     "/sponge timings report" + TextColors.RED, " in game or console."));
-            run();
+            this.run();
         } else {
             super.start();
         }
@@ -317,7 +317,7 @@ class TimingsExport extends Thread {
             request.write(JSONUtil.toString(this.out).getBytes("UTF-8"));
             request.close();
 
-            response = getResponse(con);
+            response = this.getResponse(con);
 
             if (con.getResponseCode() != 302) {
                 this.listeners.send(Text.of(

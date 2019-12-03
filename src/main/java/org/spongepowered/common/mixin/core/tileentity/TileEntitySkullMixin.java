@@ -47,7 +47,7 @@ public abstract class TileEntitySkullMixin extends TileEntityMixin implements Ti
         this.skullType = 3;
         this.playerProfile = mcProfile;
         if (update) {
-            updatePlayerProfile();
+            this.updatePlayerProfile();
         }
     }
 
@@ -62,7 +62,7 @@ public abstract class TileEntitySkullMixin extends TileEntityMixin implements Ti
      */
     @Overwrite
     public void setPlayerProfile(final com.mojang.authlib.GameProfile mcProfile) {
-        bridge$setPlayerProfile(mcProfile, true);
+        this.bridge$setPlayerProfile(mcProfile, true);
     }
 
     /**

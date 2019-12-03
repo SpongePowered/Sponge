@@ -65,12 +65,12 @@ public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends
     @SuppressWarnings("unchecked")
     @Override
     public M copy() {
-        return (M) ReflectionUtil.createInstance(this.getClass(), getValue());
+        return (M) ReflectionUtil.createInstance(this.getClass(), this.getValue());
     }
 
     @Override
     public I asImmutable() {
-        return ReflectionUtil.createInstance(this.immutableClass, getValue());
+        return ReflectionUtil.createInstance(this.immutableClass, this.getValue());
     }
 
     @Override
@@ -94,7 +94,7 @@ public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         if (!super.equals(obj)) {
@@ -106,12 +106,12 @@ public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends
 
     @Override
     public Mutable<E> getListValue() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override
     public List<E> asList() {
-        return getValue();
+        return this.getValue();
     }
 
     @Override

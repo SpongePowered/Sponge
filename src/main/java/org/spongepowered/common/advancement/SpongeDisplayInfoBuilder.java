@@ -47,7 +47,7 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     private boolean hidden;
 
     public SpongeDisplayInfoBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

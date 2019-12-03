@@ -44,7 +44,7 @@ public class ImmutableSpongeColoredData extends AbstractImmutableSingleData<Colo
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return color();
+        return this.color();
     }
 
     @Override

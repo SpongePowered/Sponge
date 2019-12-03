@@ -94,12 +94,12 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
 
         @Override
         public Optional<String> getFriendlyIdentifier() {
-            return getCommandSource().map(CommandSource::getName);
+            return this.getCommandSource().map(CommandSource::getName);
         }
 
         @Override
         public Optional<CommandSource> getCommandSource() {
-            return Optional.ofNullable(DataFactoryCollection.this.commandSourceFunction.apply(getIdentifier()));
+            return Optional.ofNullable(DataFactoryCollection.this.commandSourceFunction.apply(this.getIdentifier()));
         }
 
         @Override
@@ -114,7 +114,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
 
         @Override
         public SubjectReference asSubjectReference() {
-            return DataFactoryCollection.this.service.newSubjectReference(DataFactoryCollection.this.getIdentifier(), getIdentifier());
+            return DataFactoryCollection.this.service.newSubjectReference(DataFactoryCollection.this.getIdentifier(), this.getIdentifier());
         }
 
         @Override
@@ -127,11 +127,11 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
             Tristate ret = super.getPermissionValue(contexts, permission);
 
             if (ret == Tristate.UNDEFINED) {
-                ret = getDataPermissionValue(DataFactoryCollection.this.getDefaults().getTransientSubjectData(), permission);
+                ret = this.getDataPermissionValue(DataFactoryCollection.this.getDefaults().getTransientSubjectData(), permission);
             }
 
             if (ret == Tristate.UNDEFINED) {
-                ret = getDataPermissionValue(DataFactoryCollection.this.service.getDefaults().getTransientSubjectData(), permission);
+                ret = this.getDataPermissionValue(DataFactoryCollection.this.service.getDefaults().getTransientSubjectData(), permission);
             }
             return ret;
         }
@@ -140,10 +140,10 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         public Optional<String> getOption(Set<Context> contexts, String option) {
             Optional<String> ret = super.getOption(contexts, option);
             if (!ret.isPresent()) {
-                ret = getDataOptionValue(DataFactoryCollection.this.getDefaults().getSubjectData(), option);
+                ret = this.getDataOptionValue(DataFactoryCollection.this.getDefaults().getSubjectData(), option);
             }
             if (!ret.isPresent()) {
-                ret = getDataOptionValue(DataFactoryCollection.this.service.getDefaults().getSubjectData(), option);
+                ret = this.getDataOptionValue(DataFactoryCollection.this.service.getDefaults().getSubjectData(), option);
             }
             return ret;
         }

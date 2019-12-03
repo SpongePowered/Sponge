@@ -39,8 +39,8 @@ public final class BossBarColorRegistryModule extends MinecraftEnumBasedCatalogT
     @AdditionalRegistration
     public void customRegistration() {
         for (BossInfo.Color color : BossInfo.Color.values()) {
-            if (!this.catalogTypeMap.containsKey(enumAs(color).getId())) {
-                this.catalogTypeMap.put(enumAs(color).getId().toLowerCase(Locale.ENGLISH), (BossBarColor) (Object) color);
+            if (!this.catalogTypeMap.containsKey(this.enumAs(color).getId())) {
+                this.catalogTypeMap.put(this.enumAs(color).getId().toLowerCase(Locale.ENGLISH), (BossBarColor) (Object) color);
             }
         }
     }

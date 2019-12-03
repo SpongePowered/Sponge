@@ -140,7 +140,7 @@ public class SpongeBanBuilder implements Ban.Builder {
 
     @Override
     public Ban.Builder from(Ban ban) {
-        reset();
+        this.reset();
         this.banType = ban.getType();
 
         if (this.banType.equals(BanTypes.PROFILE)) {

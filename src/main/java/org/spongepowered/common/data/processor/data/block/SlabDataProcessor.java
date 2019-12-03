@@ -84,7 +84,7 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Mu
 
     @Override
     protected Mutable<SlabType> constructValue(SlabType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

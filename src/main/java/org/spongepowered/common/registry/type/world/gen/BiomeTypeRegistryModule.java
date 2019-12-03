@@ -92,7 +92,7 @@ public final class BiomeTypeRegistryModule
             }
         }
         // Re-map fields in case mods have changed vanilla world types
-        RegistryHelper.mapFields(BiomeTypes.class, provideCatalogMap());
+        RegistryHelper.mapFields(BiomeTypes.class, this.provideCatalogMap());
     }
 
     public static final ImmutableMap<String, String> MINECRAFT_TO_SPONGE_FIELD_NAMES = ImmutableMap.<String, String>builder()
@@ -136,7 +136,7 @@ public final class BiomeTypeRegistryModule
     public void registerAdditionalCatalog(BiomeType biome) {
         checkNotNull(biome);
         checkArgument(biome instanceof VirtualBiomeType, "Cannot register non-virtual biomes at this time.");
-        checkArgument(!getById(biome.getId()).isPresent(), "Duplicate biome id");
+        checkArgument(!this.getById(biome.getId()).isPresent(), "Duplicate biome id");
 
         this.biomeTypes.add(biome);
     }

@@ -54,12 +54,12 @@ public class ImmutableSpongeActiveItemData extends AbstractImmutableSingleData<I
 
     @Override
     protected Immutable<ItemStackSnapshot> getValueGetter() {
-        return activeItem();
+        return this.activeItem();
     }
 
     @Override
     public ActiveItemData asMutable() {
-        return new SpongeActiveItemData(getValue());
+        return new SpongeActiveItemData(this.getValue());
     }
 
 }

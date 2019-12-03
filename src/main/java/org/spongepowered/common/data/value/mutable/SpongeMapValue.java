@@ -63,12 +63,12 @@ public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements Muta
 
     @Override
     public Immutable<K, V> asImmutable() {
-        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.copyOf(this.actualValue));
+        return new ImmutableSpongeMapValue<>(this.getKey(), ImmutableMap.copyOf(this.actualValue));
     }
 
     @Override
     public Mutable<K, V> copy() {
-        return new SpongeMapValue<>(getKey(), this.getDefault(), this.actualValue);
+        return new SpongeMapValue<>(this.getKey(), this.getDefault(), this.actualValue);
     }
 
     @Override

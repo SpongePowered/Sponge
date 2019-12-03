@@ -86,6 +86,6 @@ public final class SpongeDataManipulatorBuilder<T extends Mutable<T, I>, I exten
         } else {
             usedContainer = container.copy();
         }
-        return this.buildFunction.apply(usedContainer, create());
+        return this.buildFunction.apply(usedContainer, this.create());
     }
 }

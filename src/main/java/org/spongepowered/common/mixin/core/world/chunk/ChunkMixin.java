@@ -327,7 +327,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         final BlockState iblockstate1 = this.getBlockState(pos);
 
         // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
-        return bridge$setBlockState(pos, state, iblockstate1, BlockChangeFlags.ALL);
+        return this.bridge$setBlockState(pos, state, iblockstate1, BlockChangeFlags.ALL);
     }
 
     /**
@@ -397,7 +397,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                                               || !ShouldFire.CHANGE_BLOCK_EVENT
                                               || !state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag))
                                              ? null
-                                             : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
+                                             : this.createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
         final BlockTransaction.ChangeBlock transaction;
         final ServerWorldBridge mixinWorld = isFake ? null : (ServerWorldBridge) this.world;
 
@@ -631,8 +631,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             .extendedState(extended)
             .worldId(((org.spongepowered.api.world.World) this.world).getUniqueId())
             .position(VecHelper.toVector3i(pos));
-        final Optional<UUID> creator = bridge$getBlockOwnerUUID(pos);
-        final Optional<UUID> notifier = bridge$getBlockNotifierUUID(pos);
+        final Optional<UUID> creator = this.bridge$getBlockOwnerUUID(pos);
+        final Optional<UUID> notifier = this.bridge$getBlockNotifierUUID(pos);
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
         if (existing != null) {
@@ -779,7 +779,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         final int highestSubChunk = GenericMath.clamp(GenericMath.floor((yMax + 2) / 16D), 0, this.entityLists.length - 1);
         // For each sub-chunk, perform intersections in its entity list
         for (int i = lowestSubChunk; i <= highestSubChunk; i++) {
-            impl$getIntersectingEntities(this.entityLists[i], start, direction, distance, filter, intersections);
+            this.impl$getIntersectingEntities(this.entityLists[i], start, direction, distance, filter, intersections);
         }
     }
 
@@ -815,7 +815,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             // If the entity has part, recurse on these
             final net.minecraft.entity.Entity[] parts = entity.getParts();
             if (parts != null && parts.length > 0) {
-                impl$getIntersectingEntities(Arrays.asList(parts), start, direction, distance, filter, intersections);
+                this.impl$getIntersectingEntities(Arrays.asList(parts), start, direction, distance, filter, intersections);
             }
         }
     }

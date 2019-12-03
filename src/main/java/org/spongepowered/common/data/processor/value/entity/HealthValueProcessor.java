@@ -68,7 +68,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
 
     @Override
     protected ImmutableBoundedValue<Double> constructImmutableValue(Double value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<LivingEnt
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Double value) {
-        final ImmutableBoundedValue<Double> proposedValue = constructImmutableValue(value);
+        final ImmutableBoundedValue<Double> proposedValue = this.constructImmutableValue(value);
         if (container instanceof LivingEntity) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final LivingEntity livingbase = (LivingEntity) container;

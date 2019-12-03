@@ -54,8 +54,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("deprecation")
 public class SpongeContextCalculator implements ContextCalculator<Subject> {
 
-    private final LoadingCache<RemoteSource, Set<Context>> remoteIpCache = buildAddressCache(Context.REMOTE_IP_KEY, rs -> getAddress(rs, RemoteConnection::getAddress));
-    private final LoadingCache<RemoteSource, Set<Context>> localIpCache = buildAddressCache(Context.LOCAL_IP_KEY, rs -> getAddress(rs, RemoteConnection::getVirtualHost));
+    private final LoadingCache<RemoteSource, Set<Context>> remoteIpCache =
+            this.buildAddressCache(Context.REMOTE_IP_KEY, rs -> getAddress(rs, RemoteConnection::getAddress));
+    private final LoadingCache<RemoteSource, Set<Context>> localIpCache =
+            this.buildAddressCache(Context.LOCAL_IP_KEY, rs -> getAddress(rs, RemoteConnection::getVirtualHost));
 
     private static InetAddress getAddress(RemoteSource input, Function<RemoteConnection, InetSocketAddress> func) {
         InetSocketAddress socket = func.apply(input.getConnection());

@@ -88,12 +88,12 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
 
     @Override
     public List<Enchantment> build() throws IllegalStateException {
-        checkNotNull(seed, "The random seed cannot be null");
-        checkNotNull(option, "The option cannot be null");
-        checkNotNull(level, "The level cannot be null");
+        checkNotNull(this.seed, "The random seed cannot be null");
+        checkNotNull(this.option, "The option cannot be null");
+        checkNotNull(this.level, "The level cannot be null");
         List<EnchantmentData> enchantments;
         if (this.pool == null || this.pool.isEmpty()) {
-            checkNotNull(item, "The item cannot be null");
+            checkNotNull(this.item, "The item cannot be null");
             enchantments = EnchantmentHelper.buildEnchantmentList(new Random(this.seed + this.option),
                                         ItemStackUtil.toNative(this.item), this.level, this.treasure);
 

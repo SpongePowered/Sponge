@@ -68,6 +68,6 @@ public class EntityVillager_ListEnchantedItemForEmeraldsMixin_API implements Tra
 
     @Override
     public void accept(Merchant owner, List<TradeOffer> tradeOffers, Random random) {
-        tradeOffers.add(apply(random));
+        tradeOffers.add(this.apply(random));
     }
 }

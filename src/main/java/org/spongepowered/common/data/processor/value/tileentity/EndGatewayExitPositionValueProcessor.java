@@ -61,7 +61,7 @@ public class EndGatewayExitPositionValueProcessor extends AbstractSpongeValuePro
 
     @Override
     protected Immutable<Vector3i> constructImmutableValue(Vector3i value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

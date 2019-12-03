@@ -124,12 +124,12 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
 
     @Override
     public int bridge$getFuseTicksRemaining() {
-        return getInvulTime();
+        return this.getInvulTime();
     }
 
     @Override
     public void bridge$setFuseTicksRemaining(final int fuseTicks) {
-        setInvulTime(fuseTicks);
+        this.setInvulTime(fuseTicks);
     }
 
     /**

@@ -62,10 +62,10 @@ public final class ChunkRegenerateFlagRegistryModule implements RegistryModule {
 
     @Override
     public void registerDefaults() {
-        register(new SpongeChunkRegenerateFlag("NONE".toLowerCase(Locale.ENGLISH), Flags.NONE));
-        register(new SpongeChunkRegenerateFlag("ALL".toLowerCase(Locale.ENGLISH), Flags.ALL));
-        register(new SpongeChunkRegenerateFlag("CREATE".toLowerCase(Locale.ENGLISH), Flags.CREATE));
-        register(new SpongeChunkRegenerateFlag("ENTITIES".toLowerCase(Locale.ENGLISH), Flags.ENTITIES));
+        this.register(new SpongeChunkRegenerateFlag("NONE".toLowerCase(Locale.ENGLISH), Flags.NONE));
+        this.register(new SpongeChunkRegenerateFlag("ALL".toLowerCase(Locale.ENGLISH), Flags.ALL));
+        this.register(new SpongeChunkRegenerateFlag("CREATE".toLowerCase(Locale.ENGLISH), Flags.CREATE));
+        this.register(new SpongeChunkRegenerateFlag("ENTITIES".toLowerCase(Locale.ENGLISH), Flags.ENTITIES));
         RegistryHelper.mapFields(ChunkRegenerateFlags.class, this.flags);
     }
 

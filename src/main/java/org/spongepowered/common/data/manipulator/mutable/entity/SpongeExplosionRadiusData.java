@@ -48,22 +48,22 @@ public class SpongeExplosionRadiusData extends AbstractSingleData<Optional<Integ
 
     @Override
     protected Mutable<Integer> getValueGetter() {
-        return explosionRadius();
+        return this.explosionRadius();
     }
 
     @Override
     public ExplosionRadiusData copy() {
-        return new SpongeExplosionRadiusData(getValue());
+        return new SpongeExplosionRadiusData(this.getValue());
     }
 
     @Override
     public ImmutableExplosionRadiusData asImmutable() {
-        return new ImmutableSpongeExplosionRadiusData(getValue());
+        return new ImmutableSpongeExplosionRadiusData(this.getValue());
     }
 
     @Override
     public Mutable<Integer> explosionRadius() {
-        return new SpongeOptionalValue<>(Keys.EXPLOSION_RADIUS, getValue());
+        return new SpongeOptionalValue<>(Keys.EXPLOSION_RADIUS, this.getValue());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

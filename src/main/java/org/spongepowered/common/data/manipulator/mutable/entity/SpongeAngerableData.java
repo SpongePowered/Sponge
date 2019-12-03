@@ -50,7 +50,7 @@ public class SpongeAngerableData extends AbstractIntData<AngerableData, Immutabl
     @Override
     public Mutable<Integer> angerLevel() {
         return SpongeValueFactory.boundedBuilder(Keys.ANGER)
-                .actualValue(getValue())
+                .actualValue(this.getValue())
                 .defaultValue(0)
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)
@@ -59,12 +59,12 @@ public class SpongeAngerableData extends AbstractIntData<AngerableData, Immutabl
 
     @Override
     protected org.spongepowered.api.data.value.Value.Mutable<?> getValueGetter() {
-        return angerLevel();
+        return this.angerLevel();
     }
 
     @Override
     public ImmutableAngerableData asImmutable() {
-        return new ImmutableSpongeAngerableData(getValue());
+        return new ImmutableSpongeAngerableData(this.getValue());
     }
 
 }

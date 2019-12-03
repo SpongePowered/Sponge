@@ -54,7 +54,7 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
         } else {
             this.immutableValue = new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, Optional.of(this.owner));
         }
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -76,8 +76,8 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.TAMED_OWNER, ImmutableSpongeTameableData.this::getOwner);
-        registerKeyValue(Keys.TAMED_OWNER, ImmutableSpongeTameableData.this::owner);
+        this.registerFieldGetter(Keys.TAMED_OWNER, ImmutableSpongeTameableData.this::getOwner);
+        this.registerKeyValue(Keys.TAMED_OWNER, ImmutableSpongeTameableData.this::owner);
     }
 
     public Optional<UUID> getOwner() {

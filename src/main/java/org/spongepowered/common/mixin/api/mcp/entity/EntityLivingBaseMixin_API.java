@@ -80,14 +80,14 @@ public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implemen
     @Override
     public Vector3d getHeadRotation() {
         // pitch, yaw, roll -- Minecraft does not currently support head roll
-        return new Vector3d(getRotation().getX(), getRotationYawHead(), 0);
+        return new Vector3d(this.getRotation().getX(), this.getRotationYawHead(), 0);
     }
 
     @Override
     public void setHeadRotation(Vector3d rotation) {
-        setRotation(getRotation().mul(0, 1, 1).add(rotation.getX(), 0, 0));
-        setRotationYawHead((float) rotation.getY());
-        setRenderYawOffset((float) rotation.getY());
+        this.setRotation(this.getRotation().mul(0, 1, 1).add(rotation.getX(), 0, 0));
+        this.setRotationYawHead((float) rotation.getY());
+        this.setRenderYawOffset((float) rotation.getY());
     }
 
     @Override

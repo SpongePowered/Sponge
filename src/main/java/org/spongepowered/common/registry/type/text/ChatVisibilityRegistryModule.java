@@ -60,8 +60,8 @@ public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAltern
     @AdditionalRegistration
     public void customRegistration() {
         for (PlayerEntity.EnumChatVisibility visibility : PlayerEntity.EnumChatVisibility.values()) {
-            if (!this.catalogTypeMap.containsKey(enumAs(visibility).getId())) {
-                this.catalogTypeMap.put(enumAs(visibility).getId(), enumAs(visibility));
+            if (!this.catalogTypeMap.containsKey(this.enumAs(visibility).getId())) {
+                this.catalogTypeMap.put(this.enumAs(visibility).getId(), this.enumAs(visibility));
             }
         }
     }

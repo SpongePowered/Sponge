@@ -100,10 +100,10 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
         if (!(container instanceof ArrowEntity)) {
             return DataTransactionResult.failNoData();
         }
-        final Optional<List<PotionEffect>> effects = getVal((ArrowEntity) container);
+        final Optional<List<PotionEffect>> effects = this.getVal((ArrowEntity) container);
         if (effects.isPresent()) {
             ((EntityTippedArrowAccessor) container).accessor$getCustomPotionEffects().clear();
-            return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();
     }

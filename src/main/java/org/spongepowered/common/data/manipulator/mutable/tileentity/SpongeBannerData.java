@@ -54,7 +54,7 @@ public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerDa
         super(BannerData.class);
         this.base = checkNotNull(base, "base");
         this.layers = Lists.newArrayList(checkNotNull(layers, "layers"));
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeBannerData() {
@@ -79,13 +79,13 @@ public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerDa
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.BANNER_BASE_COLOR, this::getBase);
-        registerFieldSetter(Keys.BANNER_BASE_COLOR, this::setBase);
-        registerKeyValue(Keys.BANNER_BASE_COLOR, this::baseColor);
+        this.registerFieldGetter(Keys.BANNER_BASE_COLOR, this::getBase);
+        this.registerFieldSetter(Keys.BANNER_BASE_COLOR, this::setBase);
+        this.registerKeyValue(Keys.BANNER_BASE_COLOR, this::baseColor);
 
-        registerFieldGetter(Keys.BANNER_PATTERNS, this::getLayers);
-        registerFieldSetter(Keys.BANNER_PATTERNS, this::setLayers);
-        registerKeyValue(Keys.BANNER_PATTERNS, this::patternsList);
+        this.registerFieldGetter(Keys.BANNER_PATTERNS, this::getLayers);
+        this.registerFieldSetter(Keys.BANNER_PATTERNS, this::setLayers);
+        this.registerKeyValue(Keys.BANNER_PATTERNS, this::patternsList);
     }
 
     @Override

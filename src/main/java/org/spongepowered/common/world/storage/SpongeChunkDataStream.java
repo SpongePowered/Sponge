@@ -92,7 +92,7 @@ public class SpongeChunkDataStream implements ChunkDataStream {
 
     private int getNextIndex() {
         int next;
-        while (itrAvailable()) {
+        while (this.itrAvailable()) {
             if ((next = this.regionFileItr.getNext()) == -1) {
                 this.regionFileItr = null;
             } else {
@@ -104,7 +104,7 @@ public class SpongeChunkDataStream implements ChunkDataStream {
 
     @Override
     public DataContainer next() {
-        final int next = getNextIndex();
+        final int next = this.getNextIndex();
         if (next == -1) {
             throw new NoSuchElementException();
         }
@@ -119,7 +119,7 @@ public class SpongeChunkDataStream implements ChunkDataStream {
 
     @Override
     public boolean hasNext() {
-        return getNextIndex() != -1;
+        return this.getNextIndex() != -1;
     }
 
     @Override
@@ -129,11 +129,11 @@ public class SpongeChunkDataStream implements ChunkDataStream {
         final RegionFileItr currentItr = this.regionFileItr;
         final Set<Path> currentOpenedFiles = Sets.newHashSet(this.openedFiles);
         int count = 0;
-        int index = getNextIndex();
+        int index = this.getNextIndex();
         while (index != -1) {
             count++;
             this.regionFileItr.index = index + 1;
-            index = getNextIndex();
+            index = this.getNextIndex();
         }
         this.regionFileItr = currentItr;
         this.openedFiles.clear();

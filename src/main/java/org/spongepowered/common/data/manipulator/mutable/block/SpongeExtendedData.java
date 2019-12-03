@@ -43,6 +43,6 @@ public class SpongeExtendedData extends AbstractBooleanData<ExtendedData, Immuta
 
     @Override
     public Mutable<Boolean> extended() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

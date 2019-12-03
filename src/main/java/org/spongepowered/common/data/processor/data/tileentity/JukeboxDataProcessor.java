@@ -59,7 +59,7 @@ public class JukeboxDataProcessor extends
             if (jukebox.getRecord() == null) {
                 return true;
             }
-            return remove(jukebox);
+            return this.remove(jukebox);
         }
         if (!(stackSnapshot.getType() instanceof MusicDiscItem)) {
             return false;
@@ -89,12 +89,12 @@ public class JukeboxDataProcessor extends
             return DataTransactionResult.failNoData();
         }
         JukeboxBlock.TileEntityJukebox jukebox = (TileEntityJukebox) container;
-        Optional<ItemStackSnapshot> old = getVal(jukebox);
+        Optional<ItemStackSnapshot> old = this.getVal(jukebox);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        if (remove(jukebox)) {
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+        if (this.remove(jukebox)) {
+            return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         }
         return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
     }

@@ -39,7 +39,7 @@ public class ImmutableSpongeBreedableData extends AbstractImmutableBooleanData<I
 
     @Override
     public Immutable<Boolean> breedable() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

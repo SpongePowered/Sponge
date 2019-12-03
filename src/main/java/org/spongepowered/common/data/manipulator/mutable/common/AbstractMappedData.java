@@ -69,12 +69,12 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
 
     @Override
     public M copy() {
-        return (M) ReflectionUtil.createInstance(this.getClass(), getValue());
+        return (M) ReflectionUtil.createInstance(this.getClass(), this.getValue());
     }
 
     @Override
     public I asImmutable() {
-        return ReflectionUtil.createInstance(this.immutableClass, getValue());
+        return ReflectionUtil.createInstance(this.immutableClass, this.getValue());
     }
 
     @Override
@@ -103,7 +103,7 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         if (!super.equals(obj)) {
@@ -125,12 +125,12 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
 
     @Override
     public Mutable<K, V> getMapValue() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override
     public Map<K, V> asMap() {
-        return getValue();
+        return this.getValue();
     }
 
     @Override

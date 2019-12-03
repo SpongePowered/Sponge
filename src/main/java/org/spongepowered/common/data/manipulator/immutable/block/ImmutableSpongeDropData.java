@@ -39,7 +39,7 @@ public class ImmutableSpongeDropData extends AbstractImmutableBooleanData<Immuta
 
     @Override
     public Immutable<Boolean> willDrop() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

@@ -32,7 +32,7 @@ public class DefineableClassLoader extends ClassLoader {
 
     @SuppressWarnings("unchecked")
     public <T> Class<T> defineClass(String name, byte[] b) {
-        return (Class<T>) defineClass(name, b, 0, b.length);
+        return (Class<T>) this.defineClass(name, b, 0, b.length);
     }
 
 }

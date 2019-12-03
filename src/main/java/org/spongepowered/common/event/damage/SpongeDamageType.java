@@ -55,7 +55,7 @@ public class SpongeDamageType implements DamageType {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.getClass() != obj.getClass()) {
             return false;
         }
         final SpongeDamageType other = (SpongeDamageType) obj;

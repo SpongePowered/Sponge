@@ -67,7 +67,7 @@ public abstract class AbstractCatalogDataProcessor<T, V extends Value<T>, M exte
 
     @Override
     protected org.spongepowered.api.data.value.Value.Immutable<T> constructImmutableValue(T value) {
-        return ImmutableSpongeValue.cachedOf(this.key, getDefaultValue(), value);
+        return ImmutableSpongeValue.cachedOf(this.key, this.getDefaultValue(), value);
     }
 
 }

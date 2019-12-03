@@ -49,27 +49,27 @@ public abstract class EntityItemMixin_API extends EntityMixin_API implements Ite
 
     @Override
     public Translation getTranslation() {
-        return ((org.spongepowered.api.item.inventory.ItemStack) getItem()).getTranslation();
+        return ((org.spongepowered.api.item.inventory.ItemStack) this.getItem()).getTranslation();
     }
 
     @Override
     public ItemType getItemType() {
-        return (ItemType) getItem().getItem();
+        return (ItemType) this.getItem().getItem();
     }
 
     @Override
     public RepresentedItemData getItemData() {
-        return new SpongeRepresentedItemData(ItemStackUtil.snapshotOf(getItem()));
+        return new SpongeRepresentedItemData(ItemStackUtil.snapshotOf(this.getItem()));
     }
 
     @Override
     public Mutable<ItemStackSnapshot> item() {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(getItem()));
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getItem()));
     }
 
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getItemData());
+        manipulators.add(this.getItemData());
     }
 }

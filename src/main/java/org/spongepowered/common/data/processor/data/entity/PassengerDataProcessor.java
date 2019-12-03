@@ -102,7 +102,7 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
                         .map(Entity::getUniqueId)
                         .collect(ImmutableList.toImmutableList());
                 entity.removePassengers();
-                return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(constructImmutableValue(passengers)).build();
+                return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(this.constructImmutableValue(passengers)).build();
             }
             return DataTransactionResult.successNoData();
         }

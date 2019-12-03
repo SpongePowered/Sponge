@@ -49,7 +49,7 @@ public abstract class BlockButtonMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments")
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getIsPoweredFor(blockState), impl$getDirectionalData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getIsPoweredFor(blockState), this.impl$getDirectionalData(blockState));
     }
 
     @Override

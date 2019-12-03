@@ -205,7 +205,7 @@ public abstract class BlockLeavesMixin extends BlockMixin {
 
     @Override
     public List<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getTreeData(blockState), impl$getIsDecayableFor(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getTreeData(blockState), this.impl$getIsDecayableFor(blockState));
 
     }
 

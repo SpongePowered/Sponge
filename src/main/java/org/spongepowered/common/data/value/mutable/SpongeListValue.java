@@ -64,7 +64,7 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, Mutabl
     public Mutable<E> filter(Predicate<? super E> predicate) {
         final List<E> list = Lists.newArrayList();
         list.addAll(this.actualValue.stream().filter(element -> checkNotNull(predicate).test(element)).collect(Collectors.toList()));
-        return new SpongeListValue<>(getKey(), list);
+        return new SpongeListValue<>(this.getKey(), list);
     }
 
     @Override
@@ -74,12 +74,12 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, Mutabl
 
     @Override
     public Immutable<E> asImmutable() {
-        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.copyOf(this.actualValue));
+        return new ImmutableSpongeListValue<>(this.getKey(), ImmutableList.copyOf(this.actualValue));
     }
 
     @Override
     public Mutable<E> copy() {
-        return new SpongeListValue<>(getKey(), this.getDefault(), Lists.newArrayList(this.actualValue));
+        return new SpongeListValue<>(this.getKey(), this.getDefault(), Lists.newArrayList(this.actualValue));
     }
 
     @Override

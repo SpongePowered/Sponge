@@ -66,7 +66,7 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
                 .build()
                 .asImmutable();
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -101,11 +101,11 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.FIRE_TICKS, ImmutableSpongeIgniteableData.this::getFireTicks);
-        registerKeyValue(Keys.FIRE_TICKS, ImmutableSpongeIgniteableData.this::fireTicks);
+        this.registerFieldGetter(Keys.FIRE_TICKS, ImmutableSpongeIgniteableData.this::getFireTicks);
+        this.registerKeyValue(Keys.FIRE_TICKS, ImmutableSpongeIgniteableData.this::fireTicks);
 
-        registerFieldGetter(Keys.FIRE_DAMAGE_DELAY, ImmutableSpongeIgniteableData.this::getFireDelay);
-        registerKeyValue(Keys.FIRE_DAMAGE_DELAY, ImmutableSpongeIgniteableData.this::fireDelay);
+        this.registerFieldGetter(Keys.FIRE_DAMAGE_DELAY, ImmutableSpongeIgniteableData.this::getFireDelay);
+        this.registerKeyValue(Keys.FIRE_DAMAGE_DELAY, ImmutableSpongeIgniteableData.this::fireDelay);
     }
 
 }

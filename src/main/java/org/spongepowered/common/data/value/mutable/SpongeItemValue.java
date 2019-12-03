@@ -63,11 +63,11 @@ public class SpongeItemValue extends SpongeValue<ItemStack> {
 
     @Override
     public Immutable<ItemStack> asImmutable() {
-        return new ImmutableSpongeItemValue(this.getKey(), getDefault(), get());
+        return new ImmutableSpongeItemValue(this.getKey(), this.getDefault(), this.get());
     }
 
     @Override
     public Mutable<ItemStack> copy() {
-        return new SpongeItemValue(this.getKey(), getDefault(), get());
+        return new SpongeItemValue(this.getKey(), this.getDefault(), this.get());
     }
 }

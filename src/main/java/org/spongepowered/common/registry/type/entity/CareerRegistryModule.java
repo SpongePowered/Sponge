@@ -114,7 +114,7 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
     }
 
     public Career registerCareer(Career career) {
-        registerAdditionalCatalog(career);
+        this.registerAdditionalCatalog(career);
         return career;
     }
 
@@ -127,24 +127,24 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
 
     @Override
     public void registerDefaults() {
-        this.careerMap.put("farmer", registerCareer(this.FARMER));
-        this.careerMap.put("fisherman", registerCareer(this.FISHERMAN));
-        this.careerMap.put("shepherd", registerCareer(this.SHEPHERD));
-        this.careerMap.put("fletcher", registerCareer(this.FLETCHER));
+        this.careerMap.put("farmer", this.registerCareer(this.FARMER));
+        this.careerMap.put("fisherman", this.registerCareer(this.FISHERMAN));
+        this.careerMap.put("shepherd", this.registerCareer(this.SHEPHERD));
+        this.careerMap.put("fletcher", this.registerCareer(this.FLETCHER));
 
-        this.careerMap.put("librarian", registerCareer(this.LIBRARIAN));
-        this.careerMap.put("cartographer", registerCareer(this.CARTOGRAPHER));
+        this.careerMap.put("librarian", this.registerCareer(this.LIBRARIAN));
+        this.careerMap.put("cartographer", this.registerCareer(this.CARTOGRAPHER));
 
-        this.careerMap.put("cleric", registerCareer(this.CLERIC));
+        this.careerMap.put("cleric", this.registerCareer(this.CLERIC));
 
-        this.careerMap.put("armorer", registerCareer(this.ARMORER));
-        this.careerMap.put("weapon_smith", registerCareer(this.WEAPON_SMITH));
-        this.careerMap.put("tool_smith", registerCareer(this.TOOL_SMITH));
+        this.careerMap.put("armorer", this.registerCareer(this.ARMORER));
+        this.careerMap.put("weapon_smith", this.registerCareer(this.WEAPON_SMITH));
+        this.careerMap.put("tool_smith", this.registerCareer(this.TOOL_SMITH));
 
-        this.careerMap.put("butcher", registerCareer(this.BUTCHER));
-        this.careerMap.put("leatherworker", registerCareer(this.LEATHERWORKER));
+        this.careerMap.put("butcher", this.registerCareer(this.BUTCHER));
+        this.careerMap.put("leatherworker", this.registerCareer(this.LEATHERWORKER));
 
-        this.careerMap.put("nitwit", registerCareer(this.NITWIT));
+        this.careerMap.put("nitwit", this.registerCareer(this.NITWIT));
     }
 
     CareerRegistryModule() { }

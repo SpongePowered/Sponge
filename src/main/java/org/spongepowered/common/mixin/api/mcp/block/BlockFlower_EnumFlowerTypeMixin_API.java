@@ -47,7 +47,7 @@ public abstract class BlockFlower_EnumFlowerTypeMixin_API implements PlantType {
 
     @Override
     public String getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic

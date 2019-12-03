@@ -54,7 +54,7 @@ public abstract class SpongeOperatorCriterionProgress implements ImplementationB
     @Override
     public Optional<Instant> get() {
         if (this.cachedAchievedState == null) {
-            this.cachedAchievedState = get0();
+            this.cachedAchievedState = this.get0();
         }
         return this.cachedAchievedState;
     }
@@ -76,7 +76,7 @@ public abstract class SpongeOperatorCriterionProgress implements ImplementationB
 
     @Override
     public Optional<Instant> revoke() {
-        final Optional<Instant> previousState = get();
+        final Optional<Instant> previousState = this.get();
         for (final AdvancementCriterion criterion : this.criterion.getCriteria()) {
             this.progress.get(criterion).get().revoke();
         }

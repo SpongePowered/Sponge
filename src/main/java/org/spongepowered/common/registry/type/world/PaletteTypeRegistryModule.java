@@ -69,10 +69,10 @@ public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistr
     @SuppressWarnings("deprecation")
     @Override
     public void registerDefaults() {
-        registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.GLOBAL);
-        registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL);
-        registerAdditionalCatalog(new SpongePaletteType<>("global_biomes", GlobalPalette::getBiomePalette));
-        registerAdditionalCatalog(new SpongePaletteType<>("local_biomes", () -> new BimapPalette<>(PaletteTypes.LOCAL_BIOMES)));
+        this.registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.GLOBAL);
+        this.registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL);
+        this.registerAdditionalCatalog(new SpongePaletteType<>("global_biomes", GlobalPalette::getBiomePalette));
+        this.registerAdditionalCatalog(new SpongePaletteType<>("local_biomes", () -> new BimapPalette<>(PaletteTypes.LOCAL_BIOMES)));
     }
 
     @Override

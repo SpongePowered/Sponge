@@ -65,7 +65,7 @@ public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<Mi
 
     @Override
     protected Immutable<String> constructImmutableValue(final String value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

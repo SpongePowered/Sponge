@@ -59,7 +59,7 @@ public abstract class ItemArmorMaterialMixin_API implements ArmorType {
 
     @Override
     public Optional<ItemType> getRepairItemType() {
-        return Optional.ofNullable((ItemType) shadow$getRepairItem());
+        return Optional.ofNullable((ItemType) this.shadow$getRepairItem());
     }
 
 }

@@ -137,7 +137,7 @@ public abstract class EntityFireworkRocketMixin extends EntityMixin implements F
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.THROWER, ((FireworkRocket) this).getShooter()); // TODO - Remove in 1.13/API 8
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((FireworkRocket) this).getShooter());
-                bridge$postPrime();
+                this.bridge$postPrime();
             }
         }
     }

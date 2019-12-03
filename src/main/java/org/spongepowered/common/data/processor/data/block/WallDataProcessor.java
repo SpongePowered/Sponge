@@ -64,7 +64,7 @@ public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Mu
 
     @Override
     protected Mutable<WallType> constructValue(WallType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

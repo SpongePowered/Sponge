@@ -60,7 +60,7 @@ public abstract class EntityPlayerMixin_API extends EntityLivingBaseMixin_API {
 
     @Intrinsic
     public String api$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 
 

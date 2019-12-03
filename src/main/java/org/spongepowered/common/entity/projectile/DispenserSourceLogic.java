@@ -47,7 +47,7 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
     @Override
     public <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, Dispenser source, Class<P> projectileClass, Object... args) {
         if (args.length == 1 && args[0] instanceof Item) {
-            return launch((DispenserTileEntity) source, projectileClass, (Item) args[0]);
+            return this.launch((DispenserTileEntity) source, projectileClass, (Item) args[0]);
         }
         Optional<P> projectile = logic.createProjectile(source, projectileClass, source.getLocation());
         if (projectile.isPresent()) {

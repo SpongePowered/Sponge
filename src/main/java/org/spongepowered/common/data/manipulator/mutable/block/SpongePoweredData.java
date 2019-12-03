@@ -43,6 +43,6 @@ public class SpongePoweredData extends AbstractBooleanData<PoweredData, Immutabl
 
     @Override
     public Mutable<Boolean> powered() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

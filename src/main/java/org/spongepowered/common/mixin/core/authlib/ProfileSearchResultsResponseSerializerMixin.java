@@ -56,10 +56,10 @@ public abstract class ProfileSearchResultsResponseSerializerMixin {
         for (Iterator<JsonElement> iterator = json.getAsJsonArray().iterator(); iterator.hasNext(); ) {
             JsonObject element = iterator.next().getAsJsonObject();
             String id = element.get("id").getAsString();
-            if (uuidPattern == null) {
-                uuidPattern = Pattern.compile("[0-9a-fA-F-]+");
+            if (this.uuidPattern == null) {
+                this.uuidPattern = Pattern.compile("[0-9a-fA-F-]+");
             }
-            if (!uuidPattern.matcher(id).matches()) {
+            if (!this.uuidPattern.matcher(id).matches()) {
                 SpongeImpl.getLogger().debug("Received invalid profile from Mojang for username " + element.get("name") + ", skipping");
                 iterator.remove();
             }

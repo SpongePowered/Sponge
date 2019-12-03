@@ -53,7 +53,7 @@ public abstract class TileEntityChestMixin_API extends TileEntityLockableLootMix
     @Override
     public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<ConnectedDirectionData> connectedChestData = get(ConnectedDirectionData.class);
+        Optional<ConnectedDirectionData> connectedChestData = this.get(ConnectedDirectionData.class);
         if (connectedChestData.isPresent()) {
             manipulators.add(connectedChestData.get());
         }

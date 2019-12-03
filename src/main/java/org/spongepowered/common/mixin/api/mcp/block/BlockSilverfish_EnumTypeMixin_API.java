@@ -40,11 +40,11 @@ public abstract class BlockSilverfish_EnumTypeMixin_API {
     @Shadow public abstract String shadow$getTranslationKey();
 
     public String silver$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String silver$getName() {
-        return shadow$getTranslationKey();
+        return this.shadow$getTranslationKey();
     }
 }

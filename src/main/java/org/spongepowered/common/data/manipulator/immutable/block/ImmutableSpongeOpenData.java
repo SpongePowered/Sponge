@@ -39,7 +39,7 @@ public class ImmutableSpongeOpenData extends AbstractImmutableBooleanData<Immuta
 
     @Override
     public Immutable<Boolean> open() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

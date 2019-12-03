@@ -45,6 +45,6 @@ public class ImmutableSpongeFireworkRocketData extends AbstractImmutableIntData<
 
     @Override
     public ImmutableBoundedValue<Integer> flightModifier() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

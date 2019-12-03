@@ -51,7 +51,7 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Pla
 
     @Override
     protected Immutable<Double> constructImmutableValue(final Double value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

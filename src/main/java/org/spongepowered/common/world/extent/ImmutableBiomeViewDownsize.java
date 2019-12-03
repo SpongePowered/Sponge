@@ -38,8 +38,8 @@ public class ImmutableBiomeViewDownsize extends AbstractBiomeViewDownsize<Immuta
 
     @Override
     public ImmutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ImmutableBiomeViewDownsize(this.volume, newMin, newMax);
     }
 

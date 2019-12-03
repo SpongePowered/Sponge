@@ -51,7 +51,7 @@ public class DirectionalDataProcessor extends AbstractBlockOnlyDataProcessor<Dir
 
     @Override
     protected Mutable<Direction> constructValue(Direction actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

@@ -125,11 +125,11 @@ public class SpongePlatform implements Platform {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("type", getType())
-                .add("executionType", getExecutionType())
+                .add("type", this.getType())
+                .add("executionType", this.getExecutionType())
                 .add("api", this.api)
                 .add("impl", this.impl)
-                .add("minecraftVersion", getMinecraftVersion())
+                .add("minecraftVersion", this.getMinecraftVersion())
                 .toString();
     }
 

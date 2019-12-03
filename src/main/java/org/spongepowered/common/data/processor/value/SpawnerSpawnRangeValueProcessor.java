@@ -66,7 +66,7 @@ public class SpawnerSpawnRangeValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected Immutable<Short> constructImmutableValue(Short value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

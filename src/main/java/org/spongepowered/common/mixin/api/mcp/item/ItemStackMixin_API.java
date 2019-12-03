@@ -80,7 +80,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public ItemType apiStack$getType() {
-        return (ItemType) shadow$getItem();
+        return (ItemType) this.shadow$getItem();
     }
 
     public void apiStack$setQuantity(int quantity) throws IllegalArgumentException {
@@ -88,7 +88,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public int apiStack$getMaxStackQuantity() {
-        return getMaxStackSize();
+        return this.getMaxStackSize();
     }
 
     @Override
@@ -121,7 +121,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public ItemStack apiStack$copy() {
-        return (ItemStack) shadow$copy();
+        return (ItemStack) this.shadow$copy();
     }
 
     @Override
@@ -132,12 +132,12 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     @Override
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.ItemStack.TYPE, this.apiStack$getType().getId())
                 .set(Constants.ItemStack.COUNT, this.apiStack$getQuantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.getItemDamage());
-        if (hasTagCompound()) { // no tag? no data, simple as that.
-            final CompoundNBT compound = getTagCompound().copy();
+        if (this.hasTagCompound()) { // no tag? no data, simple as that.
+            final CompoundNBT compound = this.getTagCompound().copy();
             if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
                 final CompoundNBT spongeCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
                 if (spongeCompound.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
@@ -164,7 +164,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public Translation apiStack$getTranslation() {
-        return new SpongeTranslation(shadow$getItem().getTranslationKey((net.minecraft.item.ItemStack) (Object) this) + ".name");
+        return new SpongeTranslation(this.shadow$getItem().getTranslationKey((net.minecraft.item.ItemStack) (Object) this) + ".name");
     }
 
     public ItemStackSnapshot apiStack$createSnapshot() {

@@ -62,14 +62,14 @@ public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogT
 
     @Override
     public void registerDefaults() {
-        register(create("oak", new TreeFeature(false), new BigTreeFeature(false)));
-        register(create("birch", new BirchTreeFeature(false, false), new BirchTreeFeature(false, true)));
+        this.register(this.create("oak", new TreeFeature(false), new BigTreeFeature(false)));
+        this.register(this.create("birch", new BirchTreeFeature(false, false), new BirchTreeFeature(false, true)));
 
         MegaPineTree tall_megapine = new MegaPineTree(false, true);
         MegaPineTree megapine = new MegaPineTree(false, false);
 
-        register(create("tall_taiga", new TallTaigaTreeFeature(false), tall_megapine));
-        register(create("pointy_taiga", new PointyTaigaTreeFeature(), megapine));
+        this.register(this.create("tall_taiga", new TallTaigaTreeFeature(false), tall_megapine));
+        this.register(this.create("pointy_taiga", new PointyTaigaTreeFeature(), megapine));
 
         BlockState jlog = Blocks.LOG.getDefaultState()
             .withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
@@ -86,14 +86,14 @@ public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogT
         trees.bridge$setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
         MegaJungleFeature mega = new MegaJungleFeature(false, 10, 20, jlog, jleaf);
 
-        register(create("jungle", (TreeFeature) trees, mega));
+        this.register(this.create("jungle", (TreeFeature) trees, mega));
 
         ShrubFeature bush = new ShrubFeature(jlog, leaf);
 
-        register(create("jungle_bush", bush, null));
-        register(create("savanna", new SavannaTreeFeature(false), null));
-        register(create("canopy", new CanopyTreeFeature(false), null));
-        register(create("swamp", new SwampTreeFeature(), null));
+        this.register(this.create("jungle_bush", bush, null));
+        this.register(this.create("savanna", new SavannaTreeFeature(false), null));
+        this.register(this.create("canopy", new CanopyTreeFeature(false), null));
+        this.register(this.create("swamp", new SwampTreeFeature(), null));
     }
 
     private SpongeBiomeTreeType create(String name, Feature small, @Nullable Feature large) {

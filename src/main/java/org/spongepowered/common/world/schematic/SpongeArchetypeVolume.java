@@ -77,7 +77,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
 
     @Override
     public Optional<BlockEntityArchetype> getTileEntityArchetype(int x, int y, int z) {
-        return Optional.ofNullable(this.tiles.get(getBlockMin().add(x, y, z)));
+        return Optional.ofNullable(this.tiles.get(this.getBlockMin().add(x, y, z)));
     }
 
     @Override
@@ -190,7 +190,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         SpongeArchetypeVolume that = (SpongeArchetypeVolume) o;

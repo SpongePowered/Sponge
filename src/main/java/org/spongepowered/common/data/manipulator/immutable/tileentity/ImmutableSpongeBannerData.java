@@ -57,7 +57,7 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
         this.layers = ImmutableList.copyOf(checkNotNull(layers, "Null pattern list!"));
         this.baseValue = ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, Constants.Catalog.DEFAULT_BANNER_BASE, this.base);
         this.layersValue = new ImmutableSpongePatternListValue(Keys.BANNER_PATTERNS, this.layers);
-        registerGetters();
+        this.registerGetters();
     }
 
     public DyeColor getBase() {
@@ -70,11 +70,11 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.BANNER_BASE_COLOR, this::getBase);
-        registerKeyValue(Keys.BANNER_BASE_COLOR, this::baseColor);
+        this.registerFieldGetter(Keys.BANNER_BASE_COLOR, this::getBase);
+        this.registerKeyValue(Keys.BANNER_BASE_COLOR, this::baseColor);
 
-        registerFieldGetter(Keys.BANNER_PATTERNS, this::getLayers);
-        registerKeyValue(Keys.BANNER_PATTERNS, this::patterns);
+        this.registerFieldGetter(Keys.BANNER_PATTERNS, this::getLayers);
+        this.registerKeyValue(Keys.BANNER_PATTERNS, this::patterns);
     }
 
     @Override

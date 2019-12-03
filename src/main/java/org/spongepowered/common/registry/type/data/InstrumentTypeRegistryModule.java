@@ -62,16 +62,16 @@ public class InstrumentTypeRegistryModule extends AbstractPrefixCheckCatalogRegi
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        register(new SpongeInstrumentType("minecraft:harp", "Harp", 0));
-        register(new SpongeInstrumentType("minecraft:bass_drum", "Bass Drum", 1));
-        register(new SpongeInstrumentType("minecraft:snare", "Snare", 2));
-        register(new SpongeInstrumentType("minecraft:high_hat", "High Hat", 3));
-        register(new SpongeInstrumentType("minecraft:bass_attack", "Bass Attack", 4));
-        register(new SpongeInstrumentType("minecraft:flute", "Flute", 5));
-        register(new SpongeInstrumentType("minecraft:bell", "Bell", 6));
-        register(new SpongeInstrumentType("minecraft:guitar", "Guitar", 7));
-        register(new SpongeInstrumentType("minecraft:chime", "Chime", 8));
-        register(new SpongeInstrumentType("minecraft:xylophone", "Xylophone", 9));
+        this.register(new SpongeInstrumentType("minecraft:harp", "Harp", 0));
+        this.register(new SpongeInstrumentType("minecraft:bass_drum", "Bass Drum", 1));
+        this.register(new SpongeInstrumentType("minecraft:snare", "Snare", 2));
+        this.register(new SpongeInstrumentType("minecraft:high_hat", "High Hat", 3));
+        this.register(new SpongeInstrumentType("minecraft:bass_attack", "Bass Attack", 4));
+        this.register(new SpongeInstrumentType("minecraft:flute", "Flute", 5));
+        this.register(new SpongeInstrumentType("minecraft:bell", "Bell", 6));
+        this.register(new SpongeInstrumentType("minecraft:guitar", "Guitar", 7));
+        this.register(new SpongeInstrumentType("minecraft:chime", "Chime", 8));
+        this.register(new SpongeInstrumentType("minecraft:xylophone", "Xylophone", 9));
     }
 
     private static final class Holder {

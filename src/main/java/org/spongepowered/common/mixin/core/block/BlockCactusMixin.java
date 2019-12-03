@@ -71,7 +71,7 @@ public abstract class BlockCactusMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments")
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getGrowthData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getGrowthData(blockState));
     }
 
     @Override

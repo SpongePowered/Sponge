@@ -48,22 +48,22 @@ public class SpongeWeightedCollectionValue<E> extends SpongeCollectionValue<Tabl
 
     @Override
     public Mutable<E> filter(Predicate<? super TableEntry<E>> predicate) {
-        return set(get().stream().filter(predicate).collect(Collectors.toCollection(WeightedTable<E>::new)));
+        return this.set(this.get().stream().filter(predicate).collect(Collectors.toCollection(WeightedTable<E>::new)));
     }
 
     @Override
     public WeightedTable<E> getAll() {
-        return get().stream().collect(Collectors.toCollection(WeightedTable<E>::new));
+        return this.get().stream().collect(Collectors.toCollection(WeightedTable<E>::new));
     }
 
     @Override
     public Immutable<E> asImmutable() {
-        return new ImmutableSpongeWeightedCollectionValue<>(getKey(), getAll());
+        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), this.getAll());
     }
 
     @Override
     public Mutable<E> copy() {
-        return new SpongeWeightedCollectionValue<>(getKey(), getAll());
+        return new SpongeWeightedCollectionValue<>(this.getKey(), this.getAll());
     }
 
     @Nullable

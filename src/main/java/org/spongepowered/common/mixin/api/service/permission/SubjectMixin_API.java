@@ -126,7 +126,7 @@ public abstract class SubjectMixin_API implements Subject {
     public boolean hasPermission(final String permission) {
         // forwarded to the implementation in this class, and not the default
         // in the Subject interface so permission defaults can be applied
-        return hasPermission(getActiveContexts(), permission);
+        return this.hasPermission(this.getActiveContexts(), permission);
     }
 
     @Override

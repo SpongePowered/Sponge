@@ -44,7 +44,7 @@ public class SpongeAndCriterionProgress extends SpongeOperatorCriterionProgress 
     @Override
     public Optional<Instant> get0() {
         Optional<Instant> time = Optional.empty();
-        for (final AdvancementCriterion criterion : getCriterion().getCriteria()) {
+        for (final AdvancementCriterion criterion : this.getCriterion().getCriteria()) {
             final Optional<Instant> time1 = this.progress.get(criterion).get().get();
             if (!time1.isPresent()) {
                 return Optional.empty();

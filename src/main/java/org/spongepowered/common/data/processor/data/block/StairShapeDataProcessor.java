@@ -53,7 +53,7 @@ public class StairShapeDataProcessor extends
 
     @Override
     protected Mutable<StairShape> constructValue(StairShape actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

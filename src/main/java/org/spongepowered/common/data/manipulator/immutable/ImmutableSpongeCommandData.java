@@ -71,7 +71,7 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
         this.tracksValue = ImmutableSpongeValue.cachedOf(Keys.TRACKS_OUTPUT, false, this.tracks);
         this.lastOutputValue = new ImmutableSpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -130,14 +130,14 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
 
     @Override
     protected void registerGetters() {
-        registerKeyValue(Keys.COMMAND, ImmutableSpongeCommandData.this::storedCommand);
-        registerKeyValue(Keys.SUCCESS_COUNT, ImmutableSpongeCommandData.this::successCount);
-        registerKeyValue(Keys.TRACKS_OUTPUT, ImmutableSpongeCommandData.this::doesTrackOutput);
-        registerKeyValue(Keys.LAST_COMMAND_OUTPUT, ImmutableSpongeCommandData.this::lastOutput);
+        this.registerKeyValue(Keys.COMMAND, ImmutableSpongeCommandData.this::storedCommand);
+        this.registerKeyValue(Keys.SUCCESS_COUNT, ImmutableSpongeCommandData.this::successCount);
+        this.registerKeyValue(Keys.TRACKS_OUTPUT, ImmutableSpongeCommandData.this::doesTrackOutput);
+        this.registerKeyValue(Keys.LAST_COMMAND_OUTPUT, ImmutableSpongeCommandData.this::lastOutput);
 
-        registerFieldGetter(Keys.COMMAND, ImmutableSpongeCommandData.this::getStoredCommand);
-        registerFieldGetter(Keys.SUCCESS_COUNT, ImmutableSpongeCommandData.this::getSuccess);
-        registerFieldGetter(Keys.TRACKS_OUTPUT, ImmutableSpongeCommandData.this::getTracks);
-        registerFieldGetter(Keys.LAST_COMMAND_OUTPUT, ImmutableSpongeCommandData.this::getLastOutput);
+        this.registerFieldGetter(Keys.COMMAND, ImmutableSpongeCommandData.this::getStoredCommand);
+        this.registerFieldGetter(Keys.SUCCESS_COUNT, ImmutableSpongeCommandData.this::getSuccess);
+        this.registerFieldGetter(Keys.TRACKS_OUTPUT, ImmutableSpongeCommandData.this::getTracks);
+        this.registerFieldGetter(Keys.LAST_COMMAND_OUTPUT, ImmutableSpongeCommandData.this::getLastOutput);
     }
 }

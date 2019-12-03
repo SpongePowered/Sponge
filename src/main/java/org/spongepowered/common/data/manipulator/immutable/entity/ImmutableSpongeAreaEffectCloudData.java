@@ -154,7 +154,7 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
                 .actualValue(this.durationOnUse)
                 .build()
                 .asImmutable();
-        registerGetters();
+        this.registerGetters();
     }
 
     public ImmutableSpongeAreaEffectCloudData() {
@@ -173,32 +173,32 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_AGE, () -> this.age);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_AGE, this::age);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_AGE, () -> this.age);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_AGE, this::age);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, () -> this.reapplicationDelay);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, this::applicationDelay);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, () -> this.reapplicationDelay);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, this::applicationDelay);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_COLOR, () -> this.color);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_COLOR, this::color);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_COLOR, () -> this.color);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_COLOR, this::color);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_DURATION, () -> this.duration);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_DURATION, this::duration);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_DURATION, () -> this.duration);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_DURATION, this::duration);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, () -> this.durationOnUse);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, this::durationOnUse);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, () -> this.durationOnUse);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, this::durationOnUse);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, () -> this.particleType);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, this::particleType);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, () -> this.particleType);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, this::particleType);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_RADIUS, () -> this.radius);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_RADIUS, this::radius);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_RADIUS, () -> this.radius);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_RADIUS, this::radius);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, () -> this.radiusOnUse);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, this::radiusOnUse);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, () -> this.radiusOnUse);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, this::radiusOnUse);
 
-        registerFieldGetter(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, () -> this.waitTime);
-        registerKeyValue(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, this::waitTime);
+        this.registerFieldGetter(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, () -> this.waitTime);
+        this.registerKeyValue(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, this::waitTime);
     }
 
     @Override

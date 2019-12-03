@@ -78,9 +78,9 @@ public abstract class WorldGenBlockBlobMixin extends WorldGeneratorMixin {
 //                int j = i1 + rand.nextInt(2);
 //                int k = i1 + rand.nextInt(2);
 //                int l = i1 + rand.nextInt(2);
-                final int j = impl$getRadiusInstance(rand);
-                final int k = impl$getRadiusInstance(rand);
-                final int l = impl$getRadiusInstance(rand);
+                final int j = this.impl$getRadiusInstance(rand);
+                final int k = this.impl$getRadiusInstance(rand);
+                final int l = this.impl$getRadiusInstance(rand);
                 final float f = (j + k + l) * 0.333F + 0.5F;
 
                 for (final BlockPos blockpos1 : BlockPos.getAllInBox(position.add(-j, -k, -l), position.add(j, k, l))) {

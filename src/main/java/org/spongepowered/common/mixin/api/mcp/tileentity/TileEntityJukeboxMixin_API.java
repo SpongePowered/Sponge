@@ -49,8 +49,8 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
 
     @Override
     public void playRecord() {
-        if (!getRecord().isEmpty()) {
-            this.world.playEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(getRecord().getItem()));
+        if (!this.getRecord().isEmpty()) {
+            this.world.playEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(this.getRecord().getItem()));
         }
     }
 
@@ -88,7 +88,7 @@ public abstract class TileEntityJukeboxMixin_API extends TileEntityMixin_API imp
     @Override
     public void supplyVanillaManipulators(final List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        get(RepresentedItemData.class).ifPresent(manipulators::add);
+        this.get(RepresentedItemData.class).ifPresent(manipulators::add);
     }
 
 }

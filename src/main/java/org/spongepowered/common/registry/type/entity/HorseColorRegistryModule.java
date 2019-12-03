@@ -79,13 +79,13 @@ public class HorseColorRegistryModule extends AbstractPrefixAlternateCatalogType
         HORSE_COLOR_IDMAP.put(4, HorseColorRegistryModule.BLACK);
         HORSE_COLOR_IDMAP.put(5, HorseColorRegistryModule.GRAY);
         HORSE_COLOR_IDMAP.put(6, HorseColorRegistryModule.DARK_BROWN);
-        register(WHITE);
-        register(CREAMY);
-        register(CHESTNUT);
-        register(BROWN);
-        register(BLACK);
-        register(GRAY);
-        register(DARK_BROWN);
+        this.register(WHITE);
+        this.register(CREAMY);
+        this.register(CHESTNUT);
+        this.register(BROWN);
+        this.register(BLACK);
+        this.register(GRAY);
+        this.register(DARK_BROWN);
 
     }
 }

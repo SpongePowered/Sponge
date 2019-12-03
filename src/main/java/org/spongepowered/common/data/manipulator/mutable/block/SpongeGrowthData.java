@@ -49,6 +49,6 @@ public class SpongeGrowthData extends AbstractBoundedComparableData<Integer, Gro
 
     @Override
     public Mutable<Integer> growthStage() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

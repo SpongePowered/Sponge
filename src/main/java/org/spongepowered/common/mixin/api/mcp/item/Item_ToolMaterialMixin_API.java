@@ -53,7 +53,7 @@ public abstract class Item_ToolMaterialMixin_API implements ToolType {
     @Override
     public String getName() {
         if (this.spongeImpl$capitalizedName == null) {
-            this.spongeImpl$capitalizedName = getId().toUpperCase(Locale.ENGLISH);
+            this.spongeImpl$capitalizedName = this.getId().toUpperCase(Locale.ENGLISH);
         }
         return this.spongeImpl$capitalizedName;
     }

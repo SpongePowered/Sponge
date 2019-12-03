@@ -216,7 +216,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public DataContainer translate(Schematic schematic) throws InvalidDataException {
         DataContainer data = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-        addTo(schematic, data);
+        this.addTo(schematic, data);
         return data;
     }
 

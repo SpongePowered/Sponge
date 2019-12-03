@@ -40,6 +40,6 @@ public class ImmutableSpongeFluidLevelData extends AbstractImmutableIntData<Immu
 
     @Override
     public ImmutableBoundedValue<Integer> level() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

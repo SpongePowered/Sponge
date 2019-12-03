@@ -243,7 +243,7 @@ class TaskExecutorService extends AbstractExecutorService implements SpongeExecu
 
             // Since it is set after being scheduled, it might have thrown
             // an exception already
-            if (isDone() && !isCancelled()) {
+            if (this.isDone() && !this.isCancelled()) {
                 this.owningTask.cancel();
             }
         }
@@ -253,7 +253,7 @@ class TaskExecutorService extends AbstractExecutorService implements SpongeExecu
             // A repeating task that is done but hasn't been cancelled has
             // failed exceptionally. Following the contract of
             // ScheduledExecutorService, this means the task has to be stopped.
-            if (!isCancelled() && this.owningTask != null) {
+            if (!this.isCancelled() && this.owningTask != null) {
                 this.owningTask.cancel();
             }
         }

@@ -56,14 +56,14 @@ public abstract class AbstractSingleData<T, M extends Mutable<M, I>, I extends I
         super(manipulatorClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey);
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(this.usedKey, AbstractSingleData.this::getValue);
-        registerFieldSetter(this.usedKey, this::setValue);
-        registerKeyValue(this.usedKey, AbstractSingleData.this::getValueGetter);
+        this.registerFieldGetter(this.usedKey, AbstractSingleData.this::getValue);
+        this.registerFieldSetter(this.usedKey, this::setValue);
+        this.registerKeyValue(this.usedKey, AbstractSingleData.this::getValueGetter);
     }
 
     protected abstract org.spongepowered.api.data.value.Value.Mutable<?> getValueGetter();
@@ -97,7 +97,7 @@ public abstract class AbstractSingleData<T, M extends Mutable<M, I>, I extends I
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(this.usedKey, getValue());
+            .set(this.usedKey, this.getValue());
     }
 
     @Override
@@ -111,7 +111,7 @@ public abstract class AbstractSingleData<T, M extends Mutable<M, I>, I extends I
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         if (!super.equals(obj)) {

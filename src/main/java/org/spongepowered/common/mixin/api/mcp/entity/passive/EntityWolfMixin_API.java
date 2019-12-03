@@ -43,7 +43,7 @@ public abstract class EntityWolfMixin_API extends EntityAgeableMixin_API impleme
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(get(SittingData.class).get());
+        manipulators.add(this.get(SittingData.class).get());
         manipulators.add(new SpongeAggressiveData(this.shadow$isAngry()));
     }
 }

@@ -70,7 +70,7 @@ public class SpongePatternListValue extends SpongeListValue<PatternLayer> implem
 
     @Override
     public PatternListValue add(int index, BannerPatternShape patternShape, DyeColor color) {
-        return add(index, new SpongePatternLayer(patternShape, color));
+        return this.add(index, new SpongePatternLayer(patternShape, color));
     }
 
     @Override
@@ -135,11 +135,11 @@ public class SpongePatternListValue extends SpongeListValue<PatternLayer> implem
 
     @Override
     public ImmutablePatternListValue asImmutable() {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.copyOf(this.actualValue));
+        return new ImmutableSpongePatternListValue(this.getKey(), ImmutableList.copyOf(this.actualValue));
     }
 
     @Override
     public PatternListValue copy() {
-        return new SpongePatternListValue(getKey(), Lists.newArrayList(this.actualValue));
+        return new SpongePatternListValue(this.getKey(), Lists.newArrayList(this.actualValue));
     }
 }

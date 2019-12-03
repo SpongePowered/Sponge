@@ -64,7 +64,7 @@ public class StoneDataProcessor extends AbstractCatalogDataProcessor<StoneType, 
 
     @Override
     protected Mutable<StoneType> constructValue(StoneType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

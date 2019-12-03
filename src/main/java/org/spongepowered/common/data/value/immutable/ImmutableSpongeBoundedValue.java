@@ -68,25 +68,26 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
     @Override
     public ImmutableBoundedValue<E> with(E value) {
         if (this.comparator.compare(value, this.minimum) >= 0 && this.comparator.compare(value, this.maximum) <= 0) {
-            return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), value,  getComparator(), getMinValue(), getMaxValue());
+            return new ImmutableSpongeBoundedValue<>(this.getKey(), this.getDefault(), value,
+                    this.getComparator(), this.getMinValue(), this.getMaxValue());
         }
-        return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), getComparator(), getMinValue(), getMaxValue());
+        return new ImmutableSpongeBoundedValue<>(this.getKey(), this.getDefault(), this.getComparator(), this.getMinValue(), this.getMaxValue());
     }
 
     @Override
     public ImmutableBoundedValue<E> transform(Function<E, E> function) {
-        return with(checkNotNull(checkNotNull(function).apply(get())));
+        return this.with(checkNotNull(checkNotNull(function).apply(this.get())));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Mutable<E> asMutable() {
-        return SpongeValueFactory.boundedBuilder((Key<? extends BoundedValue<E>>) getKey())
-            .defaultValue(getDefault())
-            .minimum(getMinValue())
-            .maximum(getMaxValue())
-            .actualValue(get())
-            .comparator(getComparator())
+        return SpongeValueFactory.boundedBuilder((Key<? extends BoundedValue<E>>) this.getKey())
+            .defaultValue(this.getDefault())
+            .minimum(this.getMinValue())
+            .maximum(this.getMaxValue())
+            .actualValue(this.get())
+            .comparator(this.getComparator())
             .build();
     }
 

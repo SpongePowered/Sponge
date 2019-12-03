@@ -62,7 +62,7 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
                 .build()
                 .asImmutable();
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -89,11 +89,11 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.HEALTH, ImmutableSpongeHealthData.this::getHealth);
-        registerKeyValue(Keys.HEALTH, ImmutableSpongeHealthData.this::health);
+        this.registerFieldGetter(Keys.HEALTH, ImmutableSpongeHealthData.this::getHealth);
+        this.registerKeyValue(Keys.HEALTH, ImmutableSpongeHealthData.this::health);
 
-        registerFieldGetter(Keys.MAX_HEALTH, ImmutableSpongeHealthData.this::getMaxHealth);
-        registerKeyValue(Keys.MAX_HEALTH, ImmutableSpongeHealthData.this::maxHealth);
+        this.registerFieldGetter(Keys.MAX_HEALTH, ImmutableSpongeHealthData.this::getMaxHealth);
+        this.registerKeyValue(Keys.MAX_HEALTH, ImmutableSpongeHealthData.this::maxHealth);
     }
 
     public double getHealth() {

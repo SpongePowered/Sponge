@@ -56,17 +56,17 @@ public class ImmutableSpongeDisabledSlotsData extends AbstractImmutableData<Immu
         this.takingDisabledValue = new ImmutableSpongeSetValue<>(Keys.ARMOR_STAND_TAKING_DISABLED, this.takingDisabled);
         this.placingDisabledValue = new ImmutableSpongeSetValue<>(Keys.ARMOR_STAND_PLACING_DISABLED, this.placingDisabled);
 
-        registerGetters();
+        this.registerGetters();
     }
 
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ARMOR_STAND_TAKING_DISABLED, () -> this.takingDisabled);
-        registerKeyValue(Keys.ARMOR_STAND_TAKING_DISABLED, () -> this.takingDisabledValue);
+        this.registerFieldGetter(Keys.ARMOR_STAND_TAKING_DISABLED, () -> this.takingDisabled);
+        this.registerKeyValue(Keys.ARMOR_STAND_TAKING_DISABLED, () -> this.takingDisabledValue);
 
-        registerFieldGetter(Keys.ARMOR_STAND_PLACING_DISABLED, () -> this.placingDisabled);
-        registerKeyValue(Keys.ARMOR_STAND_PLACING_DISABLED, () -> this.placingDisabledValue);
+        this.registerFieldGetter(Keys.ARMOR_STAND_PLACING_DISABLED, () -> this.placingDisabled);
+        this.registerKeyValue(Keys.ARMOR_STAND_PLACING_DISABLED, () -> this.placingDisabledValue);
     }
 
     @Override

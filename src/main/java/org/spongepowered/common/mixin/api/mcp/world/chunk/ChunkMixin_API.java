@@ -193,7 +193,7 @@ public abstract class ChunkMixin_API implements Chunk {
 
     @Override
     public double getRegionalDifficultyPercentage() {
-        final double region = getRegionalDifficultyFactor();
+        final double region = this.getRegionalDifficultyFactor();
         if (region < 2) {
             return 0;
         }
@@ -210,19 +210,19 @@ public abstract class ChunkMixin_API implements Chunk {
 
     @Override
     public BiomeType getBiome(final int x, final int y, final int z) {
-        checkBiomeBounds(x, y, z);
-        return (BiomeType) getBiome(new BlockPos(x, y, z), this.world.getBiomeProvider());
+        this.checkBiomeBounds(x, y, z);
+        return (BiomeType) this.getBiome(new BlockPos(x, y, z), this.world.getBiomeProvider());
     }
 
     @Override
     public void setBiome(final int x, final int y, final int z, final BiomeType biome) {
-        checkBiomeBounds(x, y, z);
+        this.checkBiomeBounds(x, y, z);
         // Taken from Chunk#getBiome
-        final byte[] biomeArray = getBiomeArray();
+        final byte[] biomeArray = this.getBiomeArray();
         final int i = x & 15;
         final int j = z & 15;
         biomeArray[j << 4 | i] = (byte) (Biome.getIdForBiome((Biome) biome) & 255);
-        setBiomeArray(biomeArray);
+        this.setBiomeArray(biomeArray);
 
         if (this.world instanceof ServerWorld) {
             final PlayerChunkMapEntry entry = ((ServerWorld) this.world).getPlayerChunkMap().getEntry(this.x, this.z);
@@ -234,26 +234,26 @@ public abstract class ChunkMixin_API implements Chunk {
 
     @Override
     public BlockState getBlock(final int x, final int y, final int z) {
-        checkBlockBounds(x, y, z);
-        return (BlockState) getBlockState(new BlockPos(x, y, z));
+        this.checkBlockBounds(x, y, z);
+        return (BlockState) this.getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
     public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
-        checkBlockBounds(x, y, z);
+        this.checkBlockBounds(x, y, z);
         return this.world.setBlockState(new BlockPos(x, y, z), (net.minecraft.block.BlockState) block, Constants.BlockChangeFlags.ALL);
     }
 
     @Override
     public boolean setBlock(final int x, final int y, final int z, final BlockState block, final BlockChangeFlag flag) {
-        checkBlockBounds(x, y, z);
+        this.checkBlockBounds(x, y, z);
         return this.world.setBlockState(new BlockPos(x, y, z), (net.minecraft.block.BlockState) block, ((SpongeBlockChangeFlag) flag).getRawFlag());
     }
 
     @Override
     public BlockType getBlockType(final int x, final int y, final int z) {
-        checkBlockBounds(x, y, z);
-        return (BlockType) getBlockState(x, y, z).getBlock();
+        this.checkBlockBounds(x, y, z);
+        return (BlockType) this.getBlockState(x, y, z).getBlock();
     }
 
     @Override
@@ -334,21 +334,21 @@ public abstract class ChunkMixin_API implements Chunk {
     }
 
     private void checkBiomeBounds(final int x, final int y, final int z) {
-        if (!containsBiome(x, y, z)) {
+        if (!this.containsBiome(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.getBiomeMin(), this.getBiomeMax());
         }
     }
 
     private void checkBlockBounds(final int x, final int y, final int z) {
-        if (!containsBlock(x, y, z)) {
+        if (!this.containsBlock(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.getBlockMin(), this.getBlockMax());
         }
     }
 
     @Override
     public Extent getExtentView(final Vector3i newMin, final Vector3i newMax) {
-        checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ExtentViewDownsize(this, newMin, newMax);
     }
 
@@ -491,7 +491,7 @@ public abstract class ChunkMixin_API implements Chunk {
 
     @Override
     public Optional<AABB> getBlockSelectionBox(final int x, final int y, final int z) {
-        checkBlockBounds(x, y, z);
+        this.checkBlockBounds(x, y, z);
         return ((org.spongepowered.api.world.World) this.world).getBlockSelectionBox((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15));
     }
 
@@ -501,7 +501,7 @@ public abstract class ChunkMixin_API implements Chunk {
         checkNotNull(box, "box");
         checkNotNull(filter, "filter");
         final List<net.minecraft.entity.Entity> entities = new ArrayList<>();
-        getEntitiesOfTypeWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMinecraftAABB(box), entities,
+        this.getEntitiesOfTypeWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMinecraftAABB(box), entities,
             entity -> filter.test((Entity) entity));
         return entities.stream().map(entity -> (Entity) entity).collect(Collectors.toSet());
     }
@@ -528,7 +528,7 @@ public abstract class ChunkMixin_API implements Chunk {
         checkNotNull(end, "end");
         checkNotNull(filter, "filter");
         final Vector3d diff = end.sub(start);
-        return api$getIntersectingEntities(start, end, diff.normalize(), diff.length(), filter);
+        return this.api$getIntersectingEntities(start, end, diff.normalize(), diff.length(), filter);
     }
 
     @Override
@@ -538,12 +538,12 @@ public abstract class ChunkMixin_API implements Chunk {
         checkNotNull(direction, "direction");
         checkNotNull(filter, "filter");
         direction = direction.normalize();
-        return api$getIntersectingEntities(start, start.add(direction.mul(distance)), direction, distance, filter);
+        return this.api$getIntersectingEntities(start, start.add(direction.mul(distance)), direction, distance, filter);
     }
 
     private Set<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> api$getIntersectingEntities(final Vector3d start, final Vector3d end, final Vector3d direction, final double distance,
             final java.util.function.Predicate<? super org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> filter) {
-        final Vector2d entryAndExitY = getEntryAndExitY(start, end, direction, distance);
+        final Vector2d entryAndExitY = this.getEntryAndExitY(start, end, direction, distance);
         if (entryAndExitY == null) {
             // Doesn't intersect the chunk, ignore it
             return Collections.emptySet();
@@ -557,8 +557,8 @@ public abstract class ChunkMixin_API implements Chunk {
     private Vector2d getEntryAndExitY(final Vector3d start, final Vector3d end, final Vector3d direction, final double distance) {
         // Modified from AABB.intersects(ray)
         // Increase the bounds to the whole chunk plus a margin of two blocks
-        final Vector3i min = getBlockMin().sub(2, 2, 2);
-        final Vector3i max = getBlockMax().add(3, 3, 3);
+        final Vector3i min = this.getBlockMin().sub(2, 2, 2);
+        final Vector3i max = this.getBlockMax().add(3, 3, 3);
         // Find the intersections on the -x and +x planes, oriented by direction
         final double txMin;
         final double txMax;

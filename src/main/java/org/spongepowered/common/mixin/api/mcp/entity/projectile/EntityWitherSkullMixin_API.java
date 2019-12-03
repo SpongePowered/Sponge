@@ -35,6 +35,6 @@ public abstract class EntityWitherSkullMixin_API extends EntityFireballMixin_API
     @Override
     public void detonate() {
         ((EntityWitherSkullBridge) this).bridge$CreateAndProcessExplosionEvent(this.world, (WitherSkullEntity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
-        setDead();
+        this.setDead();
     }
 }

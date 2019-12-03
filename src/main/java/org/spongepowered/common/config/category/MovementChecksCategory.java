@@ -40,15 +40,15 @@ public class MovementChecksCategory extends ConfigCategory {
     private boolean movedWrongly = true;
 
     public boolean playerMovedTooQuickly() {
-        return playerMovedTooQuickly;
+        return this.playerMovedTooQuickly;
     }
 
     public boolean playerVehicleMovedTooQuickly() {
-        return playerVehicleMovedTooQuickly;
+        return this.playerVehicleMovedTooQuickly;
     }
 
     public boolean movedWrongly() {
-        return movedWrongly;
+        return this.movedWrongly;
     }
 
 }

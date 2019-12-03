@@ -39,7 +39,7 @@ public class ImmutableSpongePigSaddleData extends AbstractImmutableBooleanData<I
 
     @Override
     public Immutable<Boolean> saddle() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

@@ -65,7 +65,7 @@ public class ChunkMixin_Collisions {
             return;
         }
 
-        if (!collisionsImpl$allowEntityCollision(listToFill)) {
+        if (!this.collisionsImpl$allowEntityCollision(listToFill)) {
             ci.cancel();
         }
     }
@@ -81,7 +81,7 @@ public class ChunkMixin_Collisions {
             return;
         }
 
-        if (!collisionsImpl$allowEntityCollision(listToFill)) {
+        if (!this.collisionsImpl$allowEntityCollision(listToFill)) {
             ci.cancel();
         }
     }

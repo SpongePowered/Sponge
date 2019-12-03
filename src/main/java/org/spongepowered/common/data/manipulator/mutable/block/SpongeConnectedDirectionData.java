@@ -47,7 +47,7 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
 
     public SpongeConnectedDirectionData(Set<Direction> connectedDirections) {
         super(ConnectedDirectionData.class);
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
         this.connectedDirections = Sets.newHashSet(connectedDirections);
     }
 
@@ -158,22 +158,22 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
 
     @Override
     protected void registerGettersAndSetters() {
-        registerKeyValue(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::connectedDirections);
-        registerKeyValue(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::connectedNorth);
-        registerKeyValue(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::connectedSouth);
-        registerKeyValue(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::connectedEast);
-        registerKeyValue(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::connectedWest);
+        this.registerKeyValue(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::connectedDirections);
+        this.registerKeyValue(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::connectedNorth);
+        this.registerKeyValue(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::connectedSouth);
+        this.registerKeyValue(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::connectedEast);
+        this.registerKeyValue(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::connectedWest);
 
-        registerFieldGetter(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::getDirections);
-        registerFieldGetter(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::isNorth);
-        registerFieldGetter(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::isSouth);
-        registerFieldGetter(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::isEast);
-        registerFieldGetter(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::isWest);
+        this.registerFieldGetter(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::getDirections);
+        this.registerFieldGetter(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::isNorth);
+        this.registerFieldGetter(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::isSouth);
+        this.registerFieldGetter(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::isEast);
+        this.registerFieldGetter(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::isWest);
 
-        registerFieldSetter(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::setDirections);
-        registerFieldSetter(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::setNorth);
-        registerFieldSetter(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::setSouth);
-        registerFieldSetter(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::setEast);
-        registerFieldSetter(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::setWest);
+        this.registerFieldSetter(Keys.CONNECTED_DIRECTIONS, SpongeConnectedDirectionData.this::setDirections);
+        this.registerFieldSetter(Keys.CONNECTED_NORTH, SpongeConnectedDirectionData.this::setNorth);
+        this.registerFieldSetter(Keys.CONNECTED_SOUTH, SpongeConnectedDirectionData.this::setSouth);
+        this.registerFieldSetter(Keys.CONNECTED_EAST, SpongeConnectedDirectionData.this::setEast);
+        this.registerFieldSetter(Keys.CONNECTED_WEST, SpongeConnectedDirectionData.this::setWest);
     }
 }

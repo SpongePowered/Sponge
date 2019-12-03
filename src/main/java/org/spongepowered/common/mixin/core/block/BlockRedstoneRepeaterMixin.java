@@ -45,7 +45,7 @@ public abstract class BlockRedstoneRepeaterMixin extends BlockMixin {
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<Immutable<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
-                .add(impl$getDelayableData(blockState))
+                .add(this.impl$getDelayableData(blockState))
                 .build();
     }
 

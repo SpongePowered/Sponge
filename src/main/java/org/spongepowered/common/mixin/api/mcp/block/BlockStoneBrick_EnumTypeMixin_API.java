@@ -45,17 +45,17 @@ public abstract class BlockStoneBrick_EnumTypeMixin_API {
     @Nullable private Translation api$translation;
 
     public String brick$getId() {
-        return "minecraft:" + shadow$getTranslationKey();
+        return "minecraft:" + this.shadow$getTranslationKey();
     }
 
     @Intrinsic
     public String brick$getName() {
-        return shadow$getTranslationKey();
+        return this.shadow$getTranslationKey();
     }
 
     public Translation brick$getTranslation() {
         if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation("tile.stonebricksmooth." + shadow$getTranslationKey() + ".name");
+            this.api$translation = new SpongeTranslation("tile.stonebricksmooth." + this.shadow$getTranslationKey() + ".name");
         }
         return this.api$translation;
     }

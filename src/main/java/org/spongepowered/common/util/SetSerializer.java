@@ -39,12 +39,12 @@ public class SetSerializer implements TypeSerializer<Set<?>> {
 
     @Override
     public Set<?> deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        return new HashSet<>(value.getList(getInnerToken(type)));
+        return new HashSet<>(value.getList(this.getInnerToken(type)));
     }
 
     @Override
     public void serialize(TypeToken<?> type, Set<?> obj, ConfigurationNode value) throws ObjectMappingException {
-        value.setValue(getListTokenFromSet(type), new ArrayList<>(obj));
+        value.setValue(this.getListTokenFromSet(type), new ArrayList<>(obj));
     }
 
     private TypeToken<?> getInnerToken(TypeToken<?> type) {
@@ -54,7 +54,7 @@ public class SetSerializer implements TypeSerializer<Set<?>> {
     @SuppressWarnings("unchecked")
     private <E> TypeToken<List<E>> getListTokenFromSet(TypeToken<?> type) {
         // Get the inner type out of the type token
-        TypeToken<?> innerType = getInnerToken(type);
+        TypeToken<?> innerType = this.getInnerToken(type);
 
         // Put it into the new list token
         return new TypeToken<List<E>>() { private static final long serialVersionUID = 1L; }.where(new TypeParameter<E>() {}, (TypeToken<E>)innerType);

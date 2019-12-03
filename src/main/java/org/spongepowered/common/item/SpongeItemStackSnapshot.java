@@ -201,7 +201,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Constants.ItemStack.TYPE, this.isNone() ? ItemTypes.NONE.getId() : this.itemType.getId())
             .set(Constants.ItemStack.COUNT, this.quantity)
             .set(Constants.ItemStack.DAMAGE_VALUE, this.damageValue);
@@ -228,7 +228,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @SuppressWarnings("rawtypes")
     @Override
     public <T extends Immutable<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        final Optional<T> optional = get(containerClass);
+        final Optional<T> optional = this.get(containerClass);
         if (optional.isPresent()) {
             return optional;
         }
@@ -306,7 +306,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public ItemStackSnapshot merge(ItemStackSnapshot that) {
-        return merge(that, MergeFunction.IGNORE_ALL);
+        return this.merge(that, MergeFunction.IGNORE_ALL);
     }
 
     @Override
@@ -403,7 +403,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;

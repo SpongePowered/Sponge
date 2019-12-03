@@ -53,16 +53,16 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
         this.colorValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
         this.styleValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.HORSE_COLOR, ImmutableSpongeHorseData.this::getHorseColor);
-        registerKeyValue(Keys.HORSE_COLOR, ImmutableSpongeHorseData.this::color);
+        this.registerFieldGetter(Keys.HORSE_COLOR, ImmutableSpongeHorseData.this::getHorseColor);
+        this.registerKeyValue(Keys.HORSE_COLOR, ImmutableSpongeHorseData.this::color);
 
-        registerFieldGetter(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::getHorseStyle);
-        registerKeyValue(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::style);
+        this.registerFieldGetter(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::getHorseStyle);
+        this.registerKeyValue(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::style);
 
     }
 

@@ -45,7 +45,7 @@ public abstract class BlockPlanksMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getTreeTypeFor(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getTreeTypeFor(blockState));
     }
 
     @Override

@@ -38,7 +38,7 @@ public abstract class EntityLargeFireballMixin_API extends EntityFireballMixin_A
     @Override
     public void detonate() {
         ((EntityLargeFireballBridge) this).bridge$throwExplosionEventAndExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
-        setDead();
+        this.setDead();
     }
 
 }

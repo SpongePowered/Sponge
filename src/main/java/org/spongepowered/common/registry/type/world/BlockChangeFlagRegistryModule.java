@@ -130,24 +130,24 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
                 builder.add(Flag.IGNORE_PHYSICS.name);
             }
             if (Constants.BlockChangeFlags.NONE == i) {
-                register(new SpongeBlockChangeFlag("NONE".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("NONE".toLowerCase(Locale.ENGLISH), i));
             } else if (Constants.BlockChangeFlags.ALL == i) {
-                register(new SpongeBlockChangeFlag("ALL".toLowerCase(Locale.ENGLISH), i));
-                register(new SpongeBlockChangeFlag("NEIGHBOR_PHYSICS_OBSERVER".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("ALL".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("NEIGHBOR_PHYSICS_OBSERVER".toLowerCase(Locale.ENGLISH), i));
             } else if (Constants.BlockChangeFlags.NEIGHBOR == i) {
-                register(new SpongeBlockChangeFlag("NEIGHBOR".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("NEIGHBOR".toLowerCase(Locale.ENGLISH), i));
             } else if (Constants.BlockChangeFlags.PHYSICS == i) {
-                register(new SpongeBlockChangeFlag("PHYSICS".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("PHYSICS".toLowerCase(Locale.ENGLISH), i));
             } else if (Constants.BlockChangeFlags.OBSERVER == i) {
-                register(new SpongeBlockChangeFlag("OBSERVER".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("OBSERVER".toLowerCase(Locale.ENGLISH), i));
             } else if (Constants.BlockChangeFlags.NEIGHBOR_PHYSICS == i) {
-                register(new SpongeBlockChangeFlag("NEIGHBOR_PHYSICS".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("NEIGHBOR_PHYSICS".toLowerCase(Locale.ENGLISH), i));
             } else if (Constants.BlockChangeFlags.NEIGHBOR_OBSERVER == i) {
-                register(new SpongeBlockChangeFlag("NEIGHBOR_OBSERVER".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("NEIGHBOR_OBSERVER".toLowerCase(Locale.ENGLISH), i));
             } else if (Constants.BlockChangeFlags.PHYSICS_OBSERVER == i) {
-                register(new SpongeBlockChangeFlag("PHYSICS_OBSERVER".toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag("PHYSICS_OBSERVER".toLowerCase(Locale.ENGLISH), i));
             } else {
-                register(new SpongeBlockChangeFlag(builder.toString().toLowerCase(Locale.ENGLISH), i));
+                this.register(new SpongeBlockChangeFlag(builder.toString().toLowerCase(Locale.ENGLISH), i));
             }
         }
         RegistryHelper.mapFields(org.spongepowered.api.world.BlockChangeFlags.class, this.flags);

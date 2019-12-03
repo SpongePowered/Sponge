@@ -50,7 +50,7 @@ public class ImmutableSpongePotionTypeData extends AbstractImmutableSingleData<P
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return type();
+        return this.type();
     }
 
     @Override

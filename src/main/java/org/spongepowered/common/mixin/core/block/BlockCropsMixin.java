@@ -49,7 +49,7 @@ public abstract class BlockCropsMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getGrowthData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getGrowthData(blockState));
     }
 
     @Override
@@ -61,10 +61,10 @@ public abstract class BlockCropsMixin extends BlockMixin {
     public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            if (growth > getMaxAge()) {
-                growth = getMaxAge();
+            if (growth > this.getMaxAge()) {
+                growth = this.getMaxAge();
             }
-            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
+            return Optional.of((BlockState) blockState.withProperty(this.getAgeProperty(), growth));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -73,16 +73,16 @@ public abstract class BlockCropsMixin extends BlockMixin {
     public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
-            if (growth > getMaxAge()) {
-                growth = getMaxAge();
+            if (growth > this.getMaxAge()) {
+                growth = this.getMaxAge();
             }
-            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
+            return Optional.of((BlockState) blockState.withProperty(this.getAgeProperty(), growth));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(getAgeProperty()), 0, getMaxAge());
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(this.getAgeProperty()), 0, this.getMaxAge());
     }
 
 }

@@ -64,13 +64,13 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
 
     @Override
     public void defuse() {
-        checkState(isPrimed(), "not primed");
+        checkState(this.isPrimed(), "not primed");
         checkState(!((EntityTNTPrimedBridge) this).bridge$isExploding(), "tnt about to explode");
         if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
-            setDead();
+            this.setDead();
             // Place a TNT block at the Entity's position
             Sponge.getCauseStackManager().pushCause(this);
-            getWorld().setBlock((int) this.posX, (int) this.posY, (int) this.posZ, BlockState.builder().blockType(BLOCK_TYPE).build(), BlockChangeFlags.ALL);
+            this.getWorld().setBlock((int) this.posX, (int) this.posY, (int) this.posZ, BlockState.builder().blockType(BLOCK_TYPE).build(), BlockChangeFlags.ALL);
             Sponge.getCauseStackManager().popCause();
             ((FusedExplosiveBridge) this).bridge$postDefuse();
         }
@@ -78,9 +78,9 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
 
     @Override
     public void prime() {
-        checkState(!isPrimed(), "already primed");
+        checkState(!this.isPrimed(), "already primed");
         checkState(!((EntityTNTPrimedBridge) this).bridge$isExploding(), "tnt about to explode");
-        getWorld().spawnEntity(this);
+        this.getWorld().spawnEntity(this);
     }
 
     @Override
@@ -90,8 +90,8 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
 
     @Override
     public void detonate() {
-        setDead();
-        explode();
+        this.setDead();
+        this.explode();
     }
 
 

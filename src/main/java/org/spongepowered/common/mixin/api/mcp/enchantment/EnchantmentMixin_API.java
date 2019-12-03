@@ -80,27 +80,27 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public int getMinimumLevel() {
-        return getMinLevel();
+        return this.getMinLevel();
     }
 
     @Override
     public int getMaximumLevel() {
-        return getMaxLevel();
+        return this.getMaxLevel();
     }
 
     @Override
     public int getMinimumEnchantabilityForLevel(int level) {
-        return getMinEnchantability(level);
+        return this.getMinEnchantability(level);
     }
 
     @Override
     public int getMaximumEnchantabilityForLevel(int level) {
-        return getMaxEnchantability(level);
+        return this.getMaxEnchantability(level);
     }
 
     @Override
     public boolean canBeAppliedByTable(ItemStack stack) {
-        return canBeAppliedToStack(stack);
+        return this.canBeAppliedToStack(stack);
     }
 
     @Override
@@ -110,27 +110,27 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public boolean isCompatibleWith(EnchantmentType ench) {
-        return canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
+        return this.canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
     }
 
     @Intrinsic
     public String enchantment$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(shadow$getName());
+        return new SpongeTranslation(this.shadow$getName());
     }
 
     @Override
     public boolean isTreasure() {
-        return isTreasureEnchantment();
+        return this.isTreasureEnchantment();
     }
 
     @Intrinsic
     public boolean enchantment$isCurse() {
-        return shadow$isCurse();
+        return this.shadow$isCurse();
     }
 
 }

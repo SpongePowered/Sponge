@@ -39,11 +39,11 @@ public abstract class BlockSlab_EnumBlockHalfMixin_API {
     @Shadow public abstract String shadow$getName();
 
     public String portion$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String portion$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 }

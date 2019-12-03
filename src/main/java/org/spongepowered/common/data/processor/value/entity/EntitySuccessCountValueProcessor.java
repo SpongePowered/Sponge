@@ -69,7 +69,7 @@ public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     protected Immutable<Integer> constructImmutableValue(final Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

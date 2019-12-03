@@ -127,16 +127,16 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
 
     @Override
     protected void registerGetters() {
-        registerKeyValue(Keys.WIRE_ATTACHMENTS, ImmutableSpongeWireAttachmentData.this::wireAttachments);
-        registerKeyValue(Keys.WIRE_ATTACHMENT_NORTH, ImmutableSpongeWireAttachmentData.this::wireAttachmentNorth);
-        registerKeyValue(Keys.WIRE_ATTACHMENT_SOUTH, ImmutableSpongeWireAttachmentData.this::wireAttachmentSouth);
-        registerKeyValue(Keys.WIRE_ATTACHMENT_EAST, ImmutableSpongeWireAttachmentData.this::wireAttachmentEast);
-        registerKeyValue(Keys.WIRE_ATTACHMENT_WEST, ImmutableSpongeWireAttachmentData.this::wireAttachmentWest);
+        this.registerKeyValue(Keys.WIRE_ATTACHMENTS, ImmutableSpongeWireAttachmentData.this::wireAttachments);
+        this.registerKeyValue(Keys.WIRE_ATTACHMENT_NORTH, ImmutableSpongeWireAttachmentData.this::wireAttachmentNorth);
+        this.registerKeyValue(Keys.WIRE_ATTACHMENT_SOUTH, ImmutableSpongeWireAttachmentData.this::wireAttachmentSouth);
+        this.registerKeyValue(Keys.WIRE_ATTACHMENT_EAST, ImmutableSpongeWireAttachmentData.this::wireAttachmentEast);
+        this.registerKeyValue(Keys.WIRE_ATTACHMENT_WEST, ImmutableSpongeWireAttachmentData.this::wireAttachmentWest);
 
-        registerFieldGetter(Keys.WIRE_ATTACHMENTS, ImmutableSpongeWireAttachmentData.this::getWireAttachmentMap);
-        registerFieldGetter(Keys.WIRE_ATTACHMENT_NORTH, ImmutableSpongeWireAttachmentData.this::getNorth);
-        registerFieldGetter(Keys.WIRE_ATTACHMENT_SOUTH, ImmutableSpongeWireAttachmentData.this::getSouth);
-        registerFieldGetter(Keys.WIRE_ATTACHMENT_EAST, ImmutableSpongeWireAttachmentData.this::getEast);
-        registerFieldGetter(Keys.WIRE_ATTACHMENT_WEST, ImmutableSpongeWireAttachmentData.this::getWest);
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENTS, ImmutableSpongeWireAttachmentData.this::getWireAttachmentMap);
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENT_NORTH, ImmutableSpongeWireAttachmentData.this::getNorth);
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENT_SOUTH, ImmutableSpongeWireAttachmentData.this::getSouth);
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENT_EAST, ImmutableSpongeWireAttachmentData.this::getEast);
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENT_WEST, ImmutableSpongeWireAttachmentData.this::getWest);
     }
 }

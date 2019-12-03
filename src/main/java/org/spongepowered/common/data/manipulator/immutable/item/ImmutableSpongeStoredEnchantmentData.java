@@ -45,6 +45,6 @@ public class ImmutableSpongeStoredEnchantmentData
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-                .set(Keys.STORED_ENCHANTMENTS, getValue());
+                .set(Keys.STORED_ENCHANTMENTS, this.getValue());
     }
 }

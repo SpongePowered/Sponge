@@ -44,6 +44,6 @@ public class SpongeAxisData extends AbstractSingleEnumData<Axis, AxisData, Immut
 
     @Override
     public Mutable<Axis> type() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

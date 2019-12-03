@@ -40,7 +40,7 @@ public abstract class TileEntityCommandBlockMixin extends TileEntityMixin implem
 
     @Override
     public ICommandSender bridge$asICommandSender() {
-        return getCommandBlockLogic();
+        return this.getCommandBlockLogic();
     }
 
 }

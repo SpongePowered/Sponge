@@ -40,7 +40,7 @@ public class BlockBlobBuilder implements BlockBlob.Builder {
     private VariableAmount count;
 
     public BlockBlobBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

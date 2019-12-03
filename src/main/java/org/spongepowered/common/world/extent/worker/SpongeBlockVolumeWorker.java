@@ -61,7 +61,7 @@ public class SpongeBlockVolumeWorker<V extends ReadableBlockVolume> implements B
     @SuppressWarnings("try")
     @Override
     public void map(BlockVolumeMapper mapper, MutableBlockVolume destination) {
-        final Vector3i offset = align(destination);
+        final Vector3i offset = this.align(destination);
         final int xOffset = offset.getX();
         final int yOffset = offset.getY();
         final int zOffset = offset.getZ();
@@ -90,11 +90,11 @@ public class SpongeBlockVolumeWorker<V extends ReadableBlockVolume> implements B
 
     @Override
     public void merge(ReadableBlockVolume second, BlockVolumeMerger merger, MutableBlockVolume destination) {
-        final Vector3i offsetSecond = align(second);
+        final Vector3i offsetSecond = this.align(second);
         final int xOffsetSecond = offsetSecond.getX();
         final int yOffsetSecond = offsetSecond.getY();
         final int zOffsetSecond = offsetSecond.getZ();
-        final Vector3i offsetDestination = align(destination);
+        final Vector3i offsetDestination = this.align(destination);
         final int xOffsetDestination = offsetDestination.getX();
         final int yOffsetDestination = offsetDestination.getY();
         final int zOffsetDestination = offsetDestination.getZ();

@@ -52,8 +52,8 @@ public abstract class TileEntityBeaconMixin_API extends TileEntityLockableMixin_
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.Beacon.PRIMARY, getField(1));
-        container.set(Constants.TileEntity.Beacon.SECONDARY, getField(2));
+        container.set(Constants.TileEntity.Beacon.PRIMARY, this.getField(1));
+        container.set(Constants.TileEntity.Beacon.SECONDARY, this.getField(2));
         return container;
     }
 

@@ -117,7 +117,7 @@ public class PhaseTrackerCategory extends ConfigCategory {
                   + " https://gist.github.com/gabizou/ad570dc09dfed259cac9d74284e78e8b\n"
                   + " https://github.com/SpongePowered/SpongeForge/issues/2787\n"
     )
-    private boolean reportNullSourceBlocks = isVanilla();
+    private boolean reportNullSourceBlocks = this.isVanilla();
 
     @Setting(value = "auto-fix-null-source-block-providing-tile-entities",
         comment = "A mapping that is semi-auto-populating for TileEntities whose types\n"
@@ -169,7 +169,7 @@ public class PhaseTrackerCategory extends ConfigCategory {
     }
 
     public boolean isReportNullSourceBlocks() {
-        return reportNullSourceBlocks;
+        return this.reportNullSourceBlocks;
     }
 
     public void setReportNullSourceBlocks(boolean reportNullSourceBlocks) {
@@ -177,7 +177,7 @@ public class PhaseTrackerCategory extends ConfigCategory {
     }
 
     public Map<String, Boolean> getAutoFixedTiles() {
-        return autoFixedTiles;
+        return this.autoFixedTiles;
     }
 
     private boolean isVanilla() {

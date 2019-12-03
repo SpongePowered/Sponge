@@ -114,7 +114,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      */
     public boolean put(final BlockSnapshot snapshot, final BlockState newState) {
         // Start by figuring out the backing snapshot. In all likelyhood, we could just cast, but we want to be safe
-        final SpongeBlockSnapshot backingSnapshot = getBackingSnapshot(snapshot);
+        final SpongeBlockSnapshot backingSnapshot = this.getBackingSnapshot(snapshot);
         // Get the key of the block position, we know this is a pure block pos and not a mutable one too.
         final BlockPos blockPos = backingSnapshot.getBlockPos();
         if (this.usedBlocks == null) { // Means we have a first usage. All three fields are null
@@ -144,7 +144,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             // If the position is duplicated, we need to update the original snapshot of the now incoming block change
             // in relation to the original state (so if a block was set to air, then afterwards set to piston head, it should go from break to modify)
             if (!added) {
-                associateBlockChangeForPosition(newState, blockPos);
+                this.associateBlockChangeForPosition(newState, blockPos);
             }
             return added;
         }
@@ -162,7 +162,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             // Now we can re-evaluate the modified block position
             // If the position is duplicated, we need to update the original snapshot of the now incoming block change
             // in relation to the original state (so if a block was set to air, then afterwards set to piston head, it should go from break to modify)
-            associateBlockChangeForPosition(newState, blockPos);
+            this.associateBlockChangeForPosition(newState, blockPos);
             return false;
         }
         // At this point, we haven't captured the block position yet.
@@ -241,17 +241,17 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             throw new IllegalStateException("Unexpected pruning on an empty capture object for position " + snapshot.getPosition());
         }
         // Start by figuring out the backing snapshot. In all likelyhood, we could just cast, but we want to be safe
-        final SpongeBlockSnapshot backingSnapshot = getBackingSnapshot(snapshot);
+        final SpongeBlockSnapshot backingSnapshot = this.getBackingSnapshot(snapshot);
         // Get the key of the block position, we know this is a pure block pos and not a mutable one too.
         final BlockPos blockPos = backingSnapshot.getBlockPos();
         // Check if we have a multi-pos
         if (this.multimap != null) {
-            pruneFromMulti(backingSnapshot, blockPos);
+            this.pruneFromMulti(backingSnapshot, blockPos);
             return;
         }
-        pruneSingle(backingSnapshot, blockPos);
+        this.pruneSingle(backingSnapshot, blockPos);
         if (this.head != null) {
-            pruneTransaction(getBackingSnapshot(snapshot));
+            this.pruneTransaction(this.getBackingSnapshot(snapshot));
         }
     }
 
@@ -338,7 +338,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     @SuppressWarnings("UnstableApiUsage") // Guava marks Multimaps.asMap as Beta features
     public final void acceptAndClearIfNotEmpty(final BiConsumer<List<? extends BlockSnapshot>, Map<BlockPos, List<BlockSnapshot>>> consumer) {
         if (this.multimap != null) {
-            final List<? extends BlockSnapshot> blockSnapshots = get();
+            final List<? extends BlockSnapshot> blockSnapshots = this.get();
             // Since multimaps provide a view when asMap is called, we need to recreate the collection
             // of the map to pass into the consumer
             final Map<BlockPos, List<SpongeBlockSnapshot>> view = Multimaps.asMap(this.multimap);
@@ -407,7 +407,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer,
             notifyState, notifyPos, sourceBlock, sourcePos, actualSourceState);
         notification.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(), this);
-        logTransaction(notification);
+        this.logTransaction(notification);
     }
 
     /**
@@ -428,7 +428,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final int transactionIndex = ++this.transactionIndex;
         final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(transactionIndex, this.snapshotIndex,
             originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags);
-        logTransaction(changeBlock);
+        this.logTransaction(changeBlock);
         return changeBlock;
     }
 
@@ -489,7 +489,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 // replacing a tile.
                 snapshot.blockChange = BlockChange.MODIFY;
                 final BlockTransaction.ReplaceTileEntity transaction = new BlockTransaction.ReplaceTileEntity(transactionIndex, this.snapshotIndex, newTile, oldTile, snapshot);
-                logTransaction(transaction);
+                this.logTransaction(transaction);
                 transaction.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(),this);
                 return;
             }
@@ -497,7 +497,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             snapshot.blockChange = BlockChange.BREAK;
             final BlockTransaction.RemoveTileEntity transaction = new BlockTransaction.RemoveTileEntity(transactionIndex, this.snapshotIndex, oldTile, snapshot);
             transaction.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(), this);
-            logTransaction(transaction);
+            this.logTransaction(transaction);
             return;
         }
         if (newTile != null) {
@@ -506,7 +506,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             final BlockTransaction.AddTileEntity
                 transaction = new BlockTransaction.AddTileEntity(transactionIndex, this.snapshotIndex, newTile, snapshot);
             transaction.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(), this);
-            logTransaction(transaction);
+            this.logTransaction(transaction);
         }
     }
 
@@ -795,7 +795,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final MultiBlockCaptureSupplier other = (MultiBlockCaptureSupplier) obj;

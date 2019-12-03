@@ -124,7 +124,7 @@ public class BimapPalette<T extends CatalogType> implements Palette<T> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         BimapPalette<?> that = (BimapPalette<?>) o;

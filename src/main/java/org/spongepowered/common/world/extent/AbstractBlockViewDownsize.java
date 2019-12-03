@@ -77,12 +77,12 @@ public abstract class AbstractBlockViewDownsize<V extends ReadableBlockVolume> i
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
-        return getBlock(x, y, z).getType();
+        return this.getBlock(x, y, z).getType();
     }
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
-        checkRange(x, y, z);
+        this.checkRange(x, y, z);
         return this.volume.getBlock(x, y, z);
     }
 

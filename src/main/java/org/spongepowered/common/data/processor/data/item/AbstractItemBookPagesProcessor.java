@@ -69,9 +69,9 @@ abstract class AbstractItemBookPagesProcessor<T, M extends Mutable<M, I>, I exte
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
-        if (supports(container)) {
+        if (this.supports(container)) {
             final ItemStack stack = (ItemStack) container;
-            final Optional<List<T>> old = getVal(stack);
+            final Optional<List<T>> old = this.getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
@@ -79,7 +79,7 @@ abstract class AbstractItemBookPagesProcessor<T, M extends Mutable<M, I>, I exte
             if (tag != null) {
                 tag.setTag(Constants.Item.Book.ITEM_BOOK_PAGES, new ListNBT());
             }
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }

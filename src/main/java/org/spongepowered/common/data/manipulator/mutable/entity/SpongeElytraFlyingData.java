@@ -43,7 +43,7 @@ public class SpongeElytraFlyingData extends AbstractBooleanData<ElytraFlyingData
 
     @Override
     public Mutable<Boolean> elytraFlying() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

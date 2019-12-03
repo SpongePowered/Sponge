@@ -47,7 +47,7 @@ public class AdvancementProgressMixin_API implements org.spongepowered.api.advan
 
     @Override
     public Optional<Instant> get() {
-        return get(getAdvancement().getCriterion()).get().get();
+        return this.get(this.getAdvancement().getCriterion()).get().get();
     }
 
     @Override
@@ -74,11 +74,11 @@ public class AdvancementProgressMixin_API implements org.spongepowered.api.advan
 
     @Override
     public Instant grant() {
-        return get(getAdvancement().getCriterion()).get().grant();
+        return this.get(this.getAdvancement().getCriterion()).get().grant();
     }
 
     @Override
     public Optional<Instant> revoke() {
-        return get(getAdvancement().getCriterion()).get().revoke();
+        return this.get(this.getAdvancement().getCriterion()).get().revoke();
     }
 }

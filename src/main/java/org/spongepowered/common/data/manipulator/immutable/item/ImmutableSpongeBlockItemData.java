@@ -52,7 +52,7 @@ public class ImmutableSpongeBlockItemData extends AbstractImmutableSingleData<Bl
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return state();
+        return this.state();
     }
 
     @Override

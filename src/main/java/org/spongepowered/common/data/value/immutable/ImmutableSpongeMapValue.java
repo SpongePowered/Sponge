@@ -53,19 +53,19 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
 
     @Override
     public Immutable<K, V> with(Map<K, V> value) {
-        return new ImmutableSpongeMapValue<>(getKey(), checkNotNull(value));
+        return new ImmutableSpongeMapValue<>(this.getKey(), checkNotNull(value));
     }
 
     @Override
     public Immutable<K, V> transform(Function<Map<K, V>, Map<K, V>> function) {
-        return new ImmutableSpongeMapValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
+        return new ImmutableSpongeMapValue<>(this.getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
     }
 
     @Override
     public Mutable<K, V> asMutable() {
         final Map<K, V> map = Maps.newHashMap();
         map.putAll(this.actualValue);
-        return new SpongeMapValue<>(getKey(), map);
+        return new SpongeMapValue<>(this.getKey(), map);
     }
 
     @Override
@@ -75,13 +75,13 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
 
     @Override
     public Immutable<K, V> with(K key, V value) {
-        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).put(checkNotNull(key),
+        return new ImmutableSpongeMapValue<>(this.getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).put(checkNotNull(key),
                                                                                                                  checkNotNull(value)).build());
     }
 
     @Override
     public Immutable<K, V> withAll(Map<K, V> map) {
-        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).putAll(map).build());
+        return new ImmutableSpongeMapValue<>(this.getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).putAll(map).build());
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
         this.actualValue.entrySet().stream()
             .filter(entry -> !entry.getKey().equals(key))
             .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
-        return new ImmutableSpongeMapValue<>(getKey(), builder.build());
+        return new ImmutableSpongeMapValue<>(this.getKey(), builder.build());
     }
 
     @Override
@@ -99,7 +99,7 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
         this.actualValue.entrySet().stream()
             .filter(entry -> !Iterables.contains(keys, entry.getKey()))
             .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
-        return new ImmutableSpongeMapValue<>(getKey(), builder.build());
+        return new ImmutableSpongeMapValue<>(this.getKey(), builder.build());
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
         this.actualValue.entrySet().stream()
             .filter(entry -> checkNotNull(predicate).test(entry))
             .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
-        return new ImmutableSpongeMapValue<>(getKey(), builder.build());
+        return new ImmutableSpongeMapValue<>(this.getKey(), builder.build());
     }
 
     @Override

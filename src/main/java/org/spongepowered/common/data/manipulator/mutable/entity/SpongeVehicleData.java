@@ -55,7 +55,7 @@ public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicl
         super(VehicleData.class);
         this.vehicle = vehicle;
         this.baseVehicle = baseVehicle;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeVehicleData(Entity vehicle, Entity baseVehicle) {
@@ -120,13 +120,13 @@ public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicl
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.VEHICLE, SpongeVehicleData.this::getVehicle);
-        registerFieldSetter(Keys.VEHICLE, SpongeVehicleData.this::setVehicle);
-        registerKeyValue(Keys.VEHICLE, SpongeVehicleData.this::vehicle);
+        this.registerFieldGetter(Keys.VEHICLE, SpongeVehicleData.this::getVehicle);
+        this.registerFieldSetter(Keys.VEHICLE, SpongeVehicleData.this::setVehicle);
+        this.registerKeyValue(Keys.VEHICLE, SpongeVehicleData.this::vehicle);
 
-        registerFieldGetter(Keys.BASE_VEHICLE, SpongeVehicleData.this::getBaseVehicle);
-        registerFieldSetter(Keys.BASE_VEHICLE, SpongeVehicleData.this::setBaseVehicle);
-        registerKeyValue(Keys.BASE_VEHICLE, SpongeVehicleData.this::baseVehicle);
+        this.registerFieldGetter(Keys.BASE_VEHICLE, SpongeVehicleData.this::getBaseVehicle);
+        this.registerFieldSetter(Keys.BASE_VEHICLE, SpongeVehicleData.this::setBaseVehicle);
+        this.registerKeyValue(Keys.BASE_VEHICLE, SpongeVehicleData.this::baseVehicle);
     }
 
 }

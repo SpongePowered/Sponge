@@ -90,7 +90,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
         boolean result = false;
 
         try {
-            result = impl$readLegacy(ctx, this.buf);
+            result = this.impl$readLegacy(ctx, this.buf);
         } finally {
             this.buf.resetReaderIndex();
             if (!result) {
@@ -199,7 +199,7 @@ public abstract class LegacyPingHandlerMixin extends ChannelInboundHandlerAdapte
     }
 
     private void writeResponse(final ChannelHandlerContext ctx, final String response) {
-        writeAndFlush(ctx, getStringBuffer(response));
+        this.writeAndFlush(ctx, this.getStringBuffer(response));
     }
 
 }

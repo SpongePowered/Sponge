@@ -41,7 +41,7 @@ public class SpongeCoalType extends SpongeEntityMeta implements CoalType {
 
     @Override
     public String getName() {
-        return getTranslation().get();
+        return this.getTranslation().get();
     }
 
     @Override

@@ -48,7 +48,7 @@ public class DoublePlantBuilder implements DoublePlant.Builder {
     private VariableAmount count;
 
     public DoublePlantBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -82,9 +82,9 @@ public class DoublePlantBuilder implements DoublePlant.Builder {
     public Builder from(DoublePlant value) {
         WeightedTable<DoublePlantType> table = new WeightedTable<>();
         table.addAll(value.getPossibleTypes());
-        types(table);
-        perChunk(value.getPlantsPerChunk());
-        supplier(value.getSupplierOverride().orElse(null));
+        this.types(table);
+        this.perChunk(value.getPlantsPerChunk());
+        this.supplier(value.getSupplierOverride().orElse(null));
         return this;
     }
 

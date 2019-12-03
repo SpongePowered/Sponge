@@ -76,15 +76,15 @@ public class SpongePermissionService implements PermissionService {
 
     public SpongePermissionService(Game game) {
         this.game = game;
-        this.subjects.put(SUBJECTS_DEFAULT, (this.defaultCollection = newCollection(SUBJECTS_DEFAULT)));
+        this.subjects.put(SUBJECTS_DEFAULT, (this.defaultCollection = this.newCollection(SUBJECTS_DEFAULT)));
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
         this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
-                s -> new FixedParentMemorySubjectData(this, getGroupForOpLevel(2).asSubjectReference()), NO_COMMAND_SOURCE));
+                s -> new FixedParentMemorySubjectData(this, this.getGroupForOpLevel(2).asSubjectReference()), NO_COMMAND_SOURCE));
 
         this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
-                s -> new FixedParentMemorySubjectData(this, getGroupForOpLevel(4).asSubjectReference()),
+                s -> new FixedParentMemorySubjectData(this, this.getGroupForOpLevel(4).asSubjectReference()),
                 s -> {
                     if (s.equals("Server")) {
                         return SpongeImpl.getGame().getServer().getConsole();
@@ -94,7 +94,7 @@ public class SpongePermissionService implements PermissionService {
                     return null;
                 }));
 
-        this.defaultData = getDefaultCollection().get(SUBJECTS_DEFAULT);
+        this.defaultData = this.getDefaultCollection().get(SUBJECTS_DEFAULT);
     }
 
     static OpList getOps() {
@@ -106,17 +106,17 @@ public class SpongePermissionService implements PermissionService {
     }
 
     public Subject getGroupForOpLevel(int level) {
-        return getGroupSubjects().get("op_" + level);
+        return this.getGroupSubjects().get("op_" + level);
     }
 
     @Override
     public SpongeSubjectCollection getUserSubjects() {
-        return get(PermissionService.SUBJECTS_USER);
+        return this.get(PermissionService.SUBJECTS_USER);
     }
 
     @Override
     public SpongeSubjectCollection getGroupSubjects() {
-        return get(PermissionService.SUBJECTS_GROUP);
+        return this.get(PermissionService.SUBJECTS_GROUP);
     }
 
     private SpongeSubjectCollection newCollection(String identifier) {
@@ -126,7 +126,7 @@ public class SpongePermissionService implements PermissionService {
     public SpongeSubjectCollection get(String identifier) {
         SpongeSubjectCollection ret = this.subjects.get(identifier);
         if (ret == null) {
-            SpongeSubjectCollection existingRet = this.subjects.putIfAbsent(identifier, (ret = newCollection(identifier)));
+            SpongeSubjectCollection existingRet = this.subjects.putIfAbsent(identifier, (ret = this.newCollection(identifier)));
             if (existingRet != null) {
                 ret = existingRet;
             }
@@ -153,12 +153,12 @@ public class SpongePermissionService implements PermissionService {
 
     @Override
     public CompletableFuture<SubjectCollection> loadCollection(String identifier) {
-        return CompletableFuture.completedFuture(get(identifier));
+        return CompletableFuture.completedFuture(this.get(identifier));
     }
 
     @Override
     public Optional<SubjectCollection> getCollection(String identifier) {
-        return Optional.of(get(identifier));
+        return Optional.of(this.get(identifier));
     }
 
     @Override
@@ -173,7 +173,7 @@ public class SpongePermissionService implements PermissionService {
 
     @Override
     public CompletableFuture<Set<String>> getAllIdentifiers() {
-        return CompletableFuture.completedFuture(getLoadedCollections().keySet());
+        return CompletableFuture.completedFuture(this.getLoadedCollections().keySet());
     }
 
     @Override

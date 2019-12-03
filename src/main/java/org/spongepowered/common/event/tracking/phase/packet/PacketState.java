@@ -163,7 +163,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     @Override
     public boolean doesCaptureEntitySpawns() {
-        return shouldCaptureEntity();
+        return this.shouldCaptureEntity();
     }
 
 

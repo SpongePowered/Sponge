@@ -75,7 +75,7 @@ public class ExperienceFromStartOfLevelValueProcessor extends AbstractSpongeValu
 
     @Override
     protected Immutable<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value);
+        return this.constructValue(value);
     }
 
 }

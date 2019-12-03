@@ -58,7 +58,7 @@ public class ChunkBufferPrimer extends ChunkPrimer {
     @Override
     public int findGroundBlockIdx(int x, int z) {
         for (int y = 255; y >= 0; --y) {
-            net.minecraft.block.BlockState iblockstate = getBlockState(x, y, z);
+            net.minecraft.block.BlockState iblockstate = this.getBlockState(x, y, z);
 
             if (iblockstate != null && iblockstate != defaultState) {
                 return y;

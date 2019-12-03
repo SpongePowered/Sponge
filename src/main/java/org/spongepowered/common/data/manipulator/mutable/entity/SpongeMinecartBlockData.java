@@ -51,7 +51,7 @@ public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, Imm
         this.block = Preconditions.checkNotNull(block);
         this.offset = offset;
 
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     @Override
@@ -99,14 +99,14 @@ public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, Imm
 
     @Override
     protected void registerGettersAndSetters() {
-        registerKeyValue(Keys.REPRESENTED_BLOCK, SpongeMinecartBlockData.this::block);
-        registerKeyValue(Keys.OFFSET, SpongeMinecartBlockData.this::offset);
+        this.registerKeyValue(Keys.REPRESENTED_BLOCK, SpongeMinecartBlockData.this::block);
+        this.registerKeyValue(Keys.OFFSET, SpongeMinecartBlockData.this::offset);
 
-        registerFieldGetter(Keys.REPRESENTED_BLOCK, SpongeMinecartBlockData.this::getBlock);
-        registerFieldGetter(Keys.OFFSET, SpongeMinecartBlockData.this::getOffset);
+        this.registerFieldGetter(Keys.REPRESENTED_BLOCK, SpongeMinecartBlockData.this::getBlock);
+        this.registerFieldGetter(Keys.OFFSET, SpongeMinecartBlockData.this::getOffset);
 
-        registerFieldSetter(Keys.REPRESENTED_BLOCK, SpongeMinecartBlockData.this::setBlock);
-        registerFieldSetter(Keys.OFFSET, SpongeMinecartBlockData.this::setOffset);
+        this.registerFieldSetter(Keys.REPRESENTED_BLOCK, SpongeMinecartBlockData.this::setBlock);
+        this.registerFieldSetter(Keys.OFFSET, SpongeMinecartBlockData.this::setOffset);
     }
 
 }

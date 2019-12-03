@@ -234,7 +234,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         SpongeLocatableBlock that = (SpongeLocatableBlock) o;

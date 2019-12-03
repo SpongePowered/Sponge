@@ -43,6 +43,6 @@ public class SpongeAgentData extends AbstractBooleanData<AgentData, ImmutableAge
 
     @Override
     public Mutable<Boolean> aiEnabled() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

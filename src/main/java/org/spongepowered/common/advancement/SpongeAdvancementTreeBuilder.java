@@ -43,7 +43,7 @@ public class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Advanceme
     private String background;
 
     public SpongeAdvancementTreeBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

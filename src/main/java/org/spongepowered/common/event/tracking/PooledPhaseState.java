@@ -48,7 +48,7 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
             this.cached = peek;
             return peek;
         }
-        this.cached = createNewContext();
+        this.cached = this.createNewContext();
         return this.cached;
     }
 

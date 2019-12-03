@@ -72,13 +72,13 @@ public class SpongeDamageableData extends AbstractData<DamageableData, Immutable
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.LAST_ATTACKER, () -> Optional.ofNullable(this.lastAttacker));
-        registerFieldSetter(Keys.LAST_ATTACKER, lastAttacker -> this.lastAttacker = lastAttacker == null ? null : lastAttacker.orElse(null));
-        registerKeyValue(Keys.LAST_ATTACKER, this::lastAttacker);
+        this.registerFieldGetter(Keys.LAST_ATTACKER, () -> Optional.ofNullable(this.lastAttacker));
+        this.registerFieldSetter(Keys.LAST_ATTACKER, lastAttacker -> this.lastAttacker = lastAttacker == null ? null : lastAttacker.orElse(null));
+        this.registerKeyValue(Keys.LAST_ATTACKER, this::lastAttacker);
 
-        registerFieldGetter(Keys.LAST_DAMAGE, () -> Optional.ofNullable(this.lastDamage));
-        registerFieldSetter(Keys.LAST_DAMAGE, lastDamage -> this.lastDamage = lastDamage == null ? null : lastDamage.orElse(null));
-        registerKeyValue(Keys.LAST_DAMAGE, this::lastDamage);
+        this.registerFieldGetter(Keys.LAST_DAMAGE, () -> Optional.ofNullable(this.lastDamage));
+        this.registerFieldSetter(Keys.LAST_DAMAGE, lastDamage -> this.lastDamage = lastDamage == null ? null : lastDamage.orElse(null));
+        this.registerKeyValue(Keys.LAST_DAMAGE, this::lastDamage);
     }
 
     @Override

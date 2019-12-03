@@ -104,7 +104,7 @@ public final class SpongeDataRegistration<M extends Mutable<M, I>, I extends Imm
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         SpongeDataRegistration<?, ?> that = (SpongeDataRegistration<?, ?>) o;

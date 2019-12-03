@@ -232,7 +232,7 @@ public abstract class ChunkGeneratorOverworldMixin implements PopulatorProviderB
             // SpongeChunkGenerator will directly call the bridge method if it's being used.
             if (biomes == null || !(this.world.getChunkProvider() instanceof SpongeChunkGenerator)) {
                 // construct the biomes array according to the method above, allows api biome pops to be used
-                return bridge$getBiomesForGeneration((x + 2) / 4, (z + 2) / 4); // Undo the math modification
+                return this.bridge$getBiomesForGeneration((x + 2) / 4, (z + 2) / 4); // Undo the math modification
             }
             return biomes;
         }

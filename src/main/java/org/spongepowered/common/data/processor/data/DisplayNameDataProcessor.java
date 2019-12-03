@@ -132,7 +132,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
         } else if (!(holder instanceof ItemStack)) {
             return DataTransactionResult.failResult(manipulator.getValues());
         }
-        final Optional<DisplayNameData> old = from(holder);
+        final Optional<DisplayNameData> old = this.from(holder);
         final DisplayNameData merged = checkNotNull(function).merge(old.orElse(null), manipulator);
         final Text newValue = merged.displayName().get();
         final Immutable<Text> immutableValue = merged.displayName().asImmutable();

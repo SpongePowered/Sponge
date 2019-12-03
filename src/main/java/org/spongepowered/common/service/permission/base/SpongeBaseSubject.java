@@ -50,17 +50,17 @@ public abstract class SpongeBaseSubject implements Subject {
 
     @Override
     public SubjectReference asSubjectReference() {
-        return getService().newSubjectReference(getContainingCollection().getIdentifier(), getIdentifier());
+        return this.getService().newSubjectReference(this.getContainingCollection().getIdentifier(), this.getIdentifier());
     }
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
-        return getPermissionValue(contexts, permission) == Tristate.TRUE;
+        return this.getPermissionValue(contexts, permission) == Tristate.TRUE;
     }
 
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-        return getDataPermissionValue(getTransientSubjectData(), permission);
+        return this.getDataPermissionValue(this.getTransientSubjectData(), permission);
     }
 
     protected Tristate getDataPermissionValue(MemorySubjectData subject, String permission) {
@@ -80,12 +80,12 @@ public abstract class SpongeBaseSubject implements Subject {
 
     @Override
     public boolean isChildOf(Set<Context> contexts, SubjectReference parent) {
-        return getSubjectData().getParents(contexts).contains(parent);
+        return this.getSubjectData().getParents(contexts).contains(parent);
     }
 
     @Override
     public List<SubjectReference> getParents(Set<Context> contexts) {
-        return getSubjectData().getParents(contexts);
+        return this.getSubjectData().getParents(contexts);
     }
 
     protected Optional<String> getDataOptionValue(MemorySubjectData subject, String option) {
@@ -105,7 +105,7 @@ public abstract class SpongeBaseSubject implements Subject {
 
     @Override
     public Optional<String> getOption(Set<Context> contexts, String key) {
-        return getDataOptionValue(getTransientSubjectData(), key);
+        return this.getDataOptionValue(this.getTransientSubjectData(), key);
     }
 
     @Override

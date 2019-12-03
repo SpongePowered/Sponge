@@ -71,11 +71,11 @@ public class HorseStyleRegistryModule extends AbstractPrefixAlternateCatalogType
 
     @Override
     public void registerDefaults() {
-        register(NONE);
-        register(WHITE_STYLE);
-        register(WHITEFIELD);
-        register(WHITE_DOTS);
-        register(BLACK_DOTS);
+        this.register(NONE);
+        this.register(WHITE_STYLE);
+        this.register(WHITEFIELD);
+        this.register(WHITE_DOTS);
+        this.register(BLACK_DOTS);
 
         HORSE_STYLE_IDMAP.put(0, NONE);
         HORSE_STYLE_IDMAP.put(1, WHITE_STYLE);

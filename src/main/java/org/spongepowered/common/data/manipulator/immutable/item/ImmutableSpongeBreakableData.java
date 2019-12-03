@@ -50,7 +50,7 @@ public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), getValue()
+            .set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), this.getValue()
                 .stream()
                 .map(BlockType::getId)
                 .collect(Collectors.toList()));
@@ -58,6 +58,6 @@ public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData
 
     @Override
     public Immutable<BlockType> breakable() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

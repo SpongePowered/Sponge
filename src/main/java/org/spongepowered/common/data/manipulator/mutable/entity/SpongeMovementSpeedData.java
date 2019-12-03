@@ -42,7 +42,7 @@ public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, Imm
         super(MovementSpeedData.class);
         this.walkSpeed = walkSpeed;
         this.flySpeed = flySpeed;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeMovementSpeedData() {
@@ -70,13 +70,13 @@ public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, Imm
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.WALKING_SPEED, SpongeMovementSpeedData.this::getWalkSpeed);
-        registerFieldSetter(Keys.WALKING_SPEED, SpongeMovementSpeedData.this::setWalkSpeed);
-        registerKeyValue(Keys.WALKING_SPEED, SpongeMovementSpeedData.this::walkSpeed);
+        this.registerFieldGetter(Keys.WALKING_SPEED, SpongeMovementSpeedData.this::getWalkSpeed);
+        this.registerFieldSetter(Keys.WALKING_SPEED, SpongeMovementSpeedData.this::setWalkSpeed);
+        this.registerKeyValue(Keys.WALKING_SPEED, SpongeMovementSpeedData.this::walkSpeed);
 
-        registerFieldGetter(Keys.FLYING_SPEED, SpongeMovementSpeedData.this::getFlySpeed);
-        registerFieldSetter(Keys.FLYING_SPEED, SpongeMovementSpeedData.this::setFlySpeed);
-        registerKeyValue(Keys.FLYING_SPEED, SpongeMovementSpeedData.this::flySpeed);
+        this.registerFieldGetter(Keys.FLYING_SPEED, SpongeMovementSpeedData.this::getFlySpeed);
+        this.registerFieldSetter(Keys.FLYING_SPEED, SpongeMovementSpeedData.this::setFlySpeed);
+        this.registerKeyValue(Keys.FLYING_SPEED, SpongeMovementSpeedData.this::flySpeed);
     }
 
     @Override

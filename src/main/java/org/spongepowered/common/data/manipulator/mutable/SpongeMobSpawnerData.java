@@ -74,7 +74,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         this.nextEntityToSpawn = checkNotNull(nextEntityToSpawn);
         checkNotNull(entities).forEach(Preconditions::checkNotNull);
         this.entities = entities.stream().collect(Collectors.toCollection(WeightedTable<EntityArchetype>::new));
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeMobSpawnerData() {
@@ -201,34 +201,34 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
 
     @Override
     protected void registerGettersAndSetters() {
-        registerKeyValue(Keys.SPAWNER_REMAINING_DELAY, SpongeMobSpawnerData.this::remainingDelay);
-        registerKeyValue(Keys.SPAWNER_MINIMUM_DELAY, SpongeMobSpawnerData.this::minimumSpawnDelay);
-        registerKeyValue(Keys.SPAWNER_MAXIMUM_DELAY, SpongeMobSpawnerData.this::maximumSpawnDelay);
-        registerKeyValue(Keys.SPAWNER_SPAWN_COUNT, SpongeMobSpawnerData.this::spawnCount);
-        registerKeyValue(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, SpongeMobSpawnerData.this::maximumNearbyEntities);
-        registerKeyValue(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, SpongeMobSpawnerData.this::requiredPlayerRange);
-        registerKeyValue(Keys.SPAWNER_SPAWN_RANGE, SpongeMobSpawnerData.this::spawnRange);
-        registerKeyValue(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpongeMobSpawnerData.this::nextEntityToSpawn);
-        registerKeyValue(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::possibleEntitiesToSpawn);
+        this.registerKeyValue(Keys.SPAWNER_REMAINING_DELAY, SpongeMobSpawnerData.this::remainingDelay);
+        this.registerKeyValue(Keys.SPAWNER_MINIMUM_DELAY, SpongeMobSpawnerData.this::minimumSpawnDelay);
+        this.registerKeyValue(Keys.SPAWNER_MAXIMUM_DELAY, SpongeMobSpawnerData.this::maximumSpawnDelay);
+        this.registerKeyValue(Keys.SPAWNER_SPAWN_COUNT, SpongeMobSpawnerData.this::spawnCount);
+        this.registerKeyValue(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, SpongeMobSpawnerData.this::maximumNearbyEntities);
+        this.registerKeyValue(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, SpongeMobSpawnerData.this::requiredPlayerRange);
+        this.registerKeyValue(Keys.SPAWNER_SPAWN_RANGE, SpongeMobSpawnerData.this::spawnRange);
+        this.registerKeyValue(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, SpongeMobSpawnerData.this::nextEntityToSpawn);
+        this.registerKeyValue(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::possibleEntitiesToSpawn);
 
-        registerFieldGetter(Keys.SPAWNER_REMAINING_DELAY, () -> this.remainingDelay);
-        registerFieldGetter(Keys.SPAWNER_MINIMUM_DELAY, () -> this.minimumDelay);
-        registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, () -> this.maximumDelay);
-        registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, () -> this.count);
-        registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, () -> this.maximumEntities);
-        registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, () -> this.playerRange);
-        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> this.spawnRange);
-        registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, () -> this.nextEntityToSpawn);
-        registerFieldGetter(Keys.SPAWNER_ENTITIES, () -> this.entities);
+        this.registerFieldGetter(Keys.SPAWNER_REMAINING_DELAY, () -> this.remainingDelay);
+        this.registerFieldGetter(Keys.SPAWNER_MINIMUM_DELAY, () -> this.minimumDelay);
+        this.registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, () -> this.maximumDelay);
+        this.registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, () -> this.count);
+        this.registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, () -> this.maximumEntities);
+        this.registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, () -> this.playerRange);
+        this.registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> this.spawnRange);
+        this.registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, () -> this.nextEntityToSpawn);
+        this.registerFieldGetter(Keys.SPAWNER_ENTITIES, () -> this.entities);
 
-        registerFieldSetter(Keys.SPAWNER_REMAINING_DELAY, remaining -> this.remainingDelay = checkNotNull(remaining));
-        registerFieldSetter(Keys.SPAWNER_MINIMUM_DELAY, minDelay -> this.minimumDelay = checkNotNull(minDelay));
-        registerFieldSetter(Keys.SPAWNER_MAXIMUM_DELAY, maxDelay -> this.maximumDelay = checkNotNull(maxDelay));
-        registerFieldSetter(Keys.SPAWNER_SPAWN_COUNT, count -> this.count = checkNotNull(count));
-        registerFieldSetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, maxEntities -> this.maximumEntities = checkNotNull(maxEntities));
-        registerFieldSetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, playerRange -> this.playerRange = checkNotNull(playerRange));
-        registerFieldSetter(Keys.SPAWNER_SPAWN_RANGE, spawnRange -> this.spawnRange = checkNotNull(spawnRange));
-        registerFieldSetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, nextEntity -> this.nextEntityToSpawn = checkNotNull(nextEntity));
-        registerFieldSetter(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::setEntities);
+        this.registerFieldSetter(Keys.SPAWNER_REMAINING_DELAY, remaining -> this.remainingDelay = checkNotNull(remaining));
+        this.registerFieldSetter(Keys.SPAWNER_MINIMUM_DELAY, minDelay -> this.minimumDelay = checkNotNull(minDelay));
+        this.registerFieldSetter(Keys.SPAWNER_MAXIMUM_DELAY, maxDelay -> this.maximumDelay = checkNotNull(maxDelay));
+        this.registerFieldSetter(Keys.SPAWNER_SPAWN_COUNT, count -> this.count = checkNotNull(count));
+        this.registerFieldSetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, maxEntities -> this.maximumEntities = checkNotNull(maxEntities));
+        this.registerFieldSetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, playerRange -> this.playerRange = checkNotNull(playerRange));
+        this.registerFieldSetter(Keys.SPAWNER_SPAWN_RANGE, spawnRange -> this.spawnRange = checkNotNull(spawnRange));
+        this.registerFieldSetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, nextEntity -> this.nextEntityToSpawn = checkNotNull(nextEntity));
+        this.registerFieldSetter(Keys.SPAWNER_ENTITIES, SpongeMobSpawnerData.this::setEntities);
     }
 }

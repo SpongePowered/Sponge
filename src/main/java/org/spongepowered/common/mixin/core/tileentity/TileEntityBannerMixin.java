@@ -61,13 +61,13 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
 
     @Inject(method = "setItemValues", at = @At("RETURN"))
     private void onSetItemValues(final CallbackInfo ci) {
-        impl$updatePatterns();
+        this.impl$updatePatterns();
     }
 
     @Override
     public void bridge$readFromSpongeCompound(final CompoundNBT compound) {
         super.bridge$readFromSpongeCompound(compound);
-        impl$updatePatterns();
+        this.impl$updatePatterns();
     }
 
     @Override
@@ -114,7 +114,7 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
             compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).getDyeDamage());
             this.patterns.appendTag(compound);
         }
-        impl$markDirtyAndUpdate();
+        this.impl$markDirtyAndUpdate();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -133,6 +133,6 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
         } catch (final Exception e) {
             this.baseColor = net.minecraft.item.DyeColor.BLACK;
         }
-        impl$markDirtyAndUpdate();
+        this.impl$markDirtyAndUpdate();
     }
 }

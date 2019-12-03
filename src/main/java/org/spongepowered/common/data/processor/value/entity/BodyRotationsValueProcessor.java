@@ -83,7 +83,7 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<Ar
 
     @Override
     protected Immutable<Map<BodyPart, Vector3d>> constructImmutableValue(final Map<BodyPart, Vector3d> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

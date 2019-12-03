@@ -41,12 +41,12 @@ public final class SkullTypeRegistryModule
     }
     @Override
     public void registerDefaults() {
-        register(new SpongeSkullType((byte) 0, "minecraft:skeleton", "skeleton"));
-        register(new SpongeSkullType((byte) 1, "minecraft:wither_skeleton", "wither_skeleton"));
-        register(new SpongeSkullType((byte) 2, "minecraft:zombie", "zombie"));
-        register(new SpongeSkullType((byte) 3, "minecraft:player", "player"));
-        register(new SpongeSkullType((byte) 4,"minecraft:creeper", "creeper"));
-        register(new SpongeSkullType((byte) 5, "minecraft:ender_dragon", "ender_dragon"));
+        this.register(new SpongeSkullType((byte) 0, "minecraft:skeleton", "skeleton"));
+        this.register(new SpongeSkullType((byte) 1, "minecraft:wither_skeleton", "wither_skeleton"));
+        this.register(new SpongeSkullType((byte) 2, "minecraft:zombie", "zombie"));
+        this.register(new SpongeSkullType((byte) 3, "minecraft:player", "player"));
+        this.register(new SpongeSkullType((byte) 4,"minecraft:creeper", "creeper"));
+        this.register(new SpongeSkullType((byte) 5, "minecraft:ender_dragon", "ender_dragon"));
     }
 
 

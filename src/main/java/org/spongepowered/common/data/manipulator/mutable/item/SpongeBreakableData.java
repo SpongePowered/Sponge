@@ -50,7 +50,7 @@ public class SpongeBreakableData extends AbstractSingleSetData<BlockType, Breaka
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), getValue().stream()
+            .set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), this.getValue().stream()
                 .map(BlockType::getId)
                 .collect(Collectors.toList()));
     }
@@ -58,6 +58,6 @@ public class SpongeBreakableData extends AbstractSingleSetData<BlockType, Breaka
     @SuppressWarnings("unchecked")
     @Override
     public Mutable<BlockType> breakable() {
-        return (Mutable<BlockType>) getValueGetter();
+        return (Mutable<BlockType>) this.getValueGetter();
     }
 }

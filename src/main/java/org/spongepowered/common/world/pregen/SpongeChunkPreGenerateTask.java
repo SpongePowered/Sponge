@@ -181,7 +181,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
     @Override
     public Duration getTotalTime() {
-        return Duration.of((isCancelled() ? this.generationEndTime : System.currentTimeMillis()) - this.generationStartTime, ChronoUnit.MILLIS);
+        return Duration.of((this.isCancelled() ? this.generationEndTime : System.currentTimeMillis()) - this.generationStartTime, ChronoUnit.MILLIS);
     }
 
     @Override
@@ -193,7 +193,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
         // It's possible we haven't cancelled the task here, so we just make sure of it, and perform
         // some cleanup.
         if (!this.scheduler.getTaskById(this.spongeTask.getUniqueId()).isPresent()) {
-            cancel();
+            this.cancel();
         }
 
         return this.isCancelled;
@@ -227,7 +227,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
         if (Sponge.getEventManager().post(preEvent)) {
             // Cancelled event = cancelled task.
-            cancelTask(task);
+            this.cancelTask(task);
             return;
         }
 
@@ -240,13 +240,13 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
         int count = 0;
         int skipped = 0;
         do {
-            final Vector3i position = nextChunkPosition();
+            final Vector3i position = this.nextChunkPosition();
             final Vector3i pos1 = position.sub(Vector3i.UNIT_X);
             final Vector3i pos2 = position.sub(Vector3i.UNIT_Z);
             final Vector3i pos3 = pos2.sub(Vector3i.UNIT_X);
 
             // We can only skip generation if all chunks are loaded.
-            if (!areAllChunksLoaded(position, pos1, pos2, pos3)) {
+            if (!this.areAllChunksLoaded(position, pos1, pos2, pos3)) {
 
                 // At least one chunk isn't generated, so to populate, we need to load them all.
                 this.world.loadChunk(position, true);
@@ -260,7 +260,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
                 // Skipped them, log this.
                 skipped += this.currentGenCount;
             }
-        } while (hasNextChunkPosition() && checkChunkCount(count) && checkTickTime(System.currentTimeMillis() - stepStartTime));
+        } while (this.hasNextChunkPosition() && this.checkChunkCount(count) && this.checkTickTime(System.currentTimeMillis() - stepStartTime));
 
         this.chunksGenerated += count;
         this.chunksSkipped += skipped;
@@ -277,11 +277,11 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
                 count,
                 skipped
         ))) {
-            cancelTask(task);
+            this.cancelTask(task);
             return;
         }
 
-        if (!hasNextChunkPosition()) {
+        if (!this.hasNextChunkPosition()) {
             // Generation has completed.
             Sponge.getEventManager().post(SpongeEventFactory.createChunkPreGenerationEventComplete(
                     this.cause,
@@ -290,7 +290,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
             ));
 
             this.isCancelled = true;
-            unregisterListener();
+            this.unregisterListener();
             task.cancel();
         }
     }
@@ -314,7 +314,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
         }
 
         this.isCancelled = true;
-        unregisterListener();
+        this.unregisterListener();
     }
 
     private boolean hasNextChunkPosition() {
@@ -464,7 +464,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
             final SpongeChunkPreGenerateTask other = (SpongeChunkPreGenerateTask) value;
             // Bypass null check
             this.plugin = other.plugin;
-            return tickInterval(other.tickInterval)
+            return this.tickInterval(other.tickInterval)
                     .chunksPerTick(other.chunkCount)
                     .tickPercentLimit(other.tickPercent);
         }

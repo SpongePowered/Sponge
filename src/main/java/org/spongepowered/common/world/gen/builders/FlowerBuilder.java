@@ -49,7 +49,7 @@ public class FlowerBuilder implements Flower.Builder {
     private VariableAmount count;
 
     public FlowerBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -83,7 +83,7 @@ public class FlowerBuilder implements Flower.Builder {
     public Builder from(Flower value) {
         WeightedTable<PlantType> table = new WeightedTable<>();
         table.addAll(value.getFlowerTypes());
-        return perChunk(value.getFlowersPerChunk())
+        return this.perChunk(value.getFlowersPerChunk())
             .types(table)
             .supplier(value.getSupplierOverride().orElse(null));
     }

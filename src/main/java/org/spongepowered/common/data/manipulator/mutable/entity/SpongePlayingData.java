@@ -43,7 +43,7 @@ public class SpongePlayingData extends AbstractBooleanData<PlayingData, Immutabl
 
     @Override
     public Mutable<Boolean> playing() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

@@ -60,13 +60,13 @@ public abstract class EntityLightningBoltMixin extends EntityMixin {
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
     private boolean spongeImpl$throwEventForChangingBlocks(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
-        return spongeImpl$strikeBlockAndAddSnapshot(world, pos, blockState);
+        return this.spongeImpl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
 
     @Redirect(method = "onUpdate()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
     private boolean spongeImpl$throwEventForChangingBlockDuringUpdate(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
-        return spongeImpl$strikeBlockAndAddSnapshot(world, pos, blockState);
+        return this.spongeImpl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
 
     private boolean spongeImpl$strikeBlockAndAddSnapshot(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {

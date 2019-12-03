@@ -50,7 +50,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
         this.expBetweenLevels = ExperienceHolderUtils.getExpBetweenLevels(level);
         this.totalExp = totalExp;
         this.expSinceLevel = expSinceLevel;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeExperienceHolderData() {
@@ -154,23 +154,23 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.EXPERIENCE_LEVEL, SpongeExperienceHolderData.this::getLevel);
-        registerFieldSetter(Keys.EXPERIENCE_LEVEL, SpongeExperienceHolderData.this::setLevel);
-        registerKeyValue(Keys.EXPERIENCE_LEVEL, SpongeExperienceHolderData.this::level);
+        this.registerFieldGetter(Keys.EXPERIENCE_LEVEL, SpongeExperienceHolderData.this::getLevel);
+        this.registerFieldSetter(Keys.EXPERIENCE_LEVEL, SpongeExperienceHolderData.this::setLevel);
+        this.registerKeyValue(Keys.EXPERIENCE_LEVEL, SpongeExperienceHolderData.this::level);
 
-        registerFieldGetter(Keys.TOTAL_EXPERIENCE, SpongeExperienceHolderData.this::getTotalExp);
-        registerFieldSetter(Keys.TOTAL_EXPERIENCE, SpongeExperienceHolderData.this::setTotalExp);
-        registerKeyValue(Keys.TOTAL_EXPERIENCE, SpongeExperienceHolderData.this::totalExperience);
+        this.registerFieldGetter(Keys.TOTAL_EXPERIENCE, SpongeExperienceHolderData.this::getTotalExp);
+        this.registerFieldSetter(Keys.TOTAL_EXPERIENCE, SpongeExperienceHolderData.this::setTotalExp);
+        this.registerKeyValue(Keys.TOTAL_EXPERIENCE, SpongeExperienceHolderData.this::totalExperience);
 
-        registerFieldGetter(Keys.EXPERIENCE_SINCE_LEVEL, SpongeExperienceHolderData.this::getExpSinceLevel);
-        registerFieldSetter(Keys.EXPERIENCE_SINCE_LEVEL, SpongeExperienceHolderData.this::setExpSinceLevel);
-        registerKeyValue(Keys.EXPERIENCE_SINCE_LEVEL, SpongeExperienceHolderData.this::experienceSinceLevel);
+        this.registerFieldGetter(Keys.EXPERIENCE_SINCE_LEVEL, SpongeExperienceHolderData.this::getExpSinceLevel);
+        this.registerFieldSetter(Keys.EXPERIENCE_SINCE_LEVEL, SpongeExperienceHolderData.this::setExpSinceLevel);
+        this.registerKeyValue(Keys.EXPERIENCE_SINCE_LEVEL, SpongeExperienceHolderData.this::experienceSinceLevel);
 
-        registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, SpongeExperienceHolderData.this::getExpBetweenLevels);
-        registerFieldSetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, value -> {
+        this.registerFieldGetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, SpongeExperienceHolderData.this::getExpBetweenLevels);
+        this.registerFieldSetter(Keys.EXPERIENCE_FROM_START_OF_LEVEL, value -> {
             // do nothing
         });
-        registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, () -> getExperienceBetweenLevels().asMutable());
+        this.registerKeyValue(Keys.EXPERIENCE_FROM_START_OF_LEVEL, () -> this.getExperienceBetweenLevels().asMutable());
     }
 
 }

@@ -38,7 +38,7 @@ public class ImmutableSpongeAgentData extends AbstractImmutableBooleanData<Immut
     }
     @Override
     public Immutable<Boolean> aiEnabled() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

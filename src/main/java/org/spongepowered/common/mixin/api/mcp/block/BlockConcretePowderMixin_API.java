@@ -34,6 +34,6 @@ public abstract class BlockConcretePowderMixin_API extends BlockMixin_API {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".white.name");
+        return new SpongeTranslation(this.getTranslationKey() + ".white.name");
     }
 }

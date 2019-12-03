@@ -48,6 +48,6 @@ public class SpongeFallDistanceData extends AbstractBoundedComparableData<Float,
 
     @Override
     public Mutable<Float> fallDistance() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

@@ -39,7 +39,7 @@ public class ImmutableSpongeSeamlessData extends AbstractImmutableBooleanData<Im
 
     @Override
     public Immutable<Boolean> seamless() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

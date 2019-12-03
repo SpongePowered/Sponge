@@ -51,7 +51,7 @@ public abstract class TileEntityHopperMixin_API extends TileEntityLockableLootMi
     @Override
     public void supplyVanillaManipulators(final List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        get(CooldownData.class).ifPresent(manipulators::add);
+        this.get(CooldownData.class).ifPresent(manipulators::add);
     }
 
 

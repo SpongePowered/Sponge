@@ -69,11 +69,11 @@ class IterablePagination extends ActivePagination {
         if (page <= this.lastPage) {
             throw new CommandException(t("You cannot go to previous pages in an iterable pagination."));
         } else if (page > this.lastPage + 1) {
-            getLines(page - 1);
+            this.getLines(page - 1);
         }
         this.lastPage = page;
 
-        if (getMaxContentLinesPerPage() <= 0) {
+        if (this.getMaxContentLinesPerPage() <= 0) {
             return Lists.newArrayList(Iterators.transform(this.countIterator, new Function<Map.Entry<Text, Integer>, Text>() {
 
                 @Nullable
@@ -84,19 +84,19 @@ class IterablePagination extends ActivePagination {
             }));
         }
 
-        List<Text> ret = new ArrayList<>(getMaxContentLinesPerPage());
+        List<Text> ret = new ArrayList<>(this.getMaxContentLinesPerPage());
         int addedLines = 0;
-        while (addedLines <= getMaxContentLinesPerPage()) {
+        while (addedLines <= this.getMaxContentLinesPerPage()) {
             if (!this.countIterator.hasNext()) {
                 // Pad the last page, but only if it isn't the first.
                 if (page > 1) {
-                    padPage(ret, addedLines, false);
+                    this.padPage(ret, addedLines, false);
                 }
                 break;
             }
-            if (addedLines + this.countIterator.peek().getValue() > getMaxContentLinesPerPage()) {
+            if (addedLines + this.countIterator.peek().getValue() > this.getMaxContentLinesPerPage()) {
                 // Add the continuation marker, pad if required
-                padPage(ret, addedLines, true);
+                this.padPage(ret, addedLines, true);
                 break;
             }
             Map.Entry<Text, Integer> ent = this.countIterator.next();
@@ -113,7 +113,7 @@ class IterablePagination extends ActivePagination {
 
     @Override
     protected boolean hasNext(int page) {
-        return page == getCurrentPage() && this.countIterator.hasNext();
+        return page == this.getCurrentPage() && this.countIterator.hasNext();
     }
 
     @Override

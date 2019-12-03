@@ -64,7 +64,7 @@ public class SandDataProcessor extends AbstractCatalogDataProcessor<SandType, Mu
 
     @Override
     protected Mutable<SandType> constructValue(SandType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

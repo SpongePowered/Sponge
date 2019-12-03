@@ -41,7 +41,7 @@ public class RandomObjectBuilder implements RandomObject.Builder {
     private PopulatorObject object;
 
     public RandomObjectBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class RandomObjectBuilder implements RandomObject.Builder {
 
     @Override
     public Builder from(RandomObject value) {
-        return perChunk(value.getAttemptsPerChunk())
+        return this.perChunk(value.getAttemptsPerChunk())
             .height(value.getHeightRange())
             .object(value.getObject())
             .spawnChance(value.getSpawnChance());

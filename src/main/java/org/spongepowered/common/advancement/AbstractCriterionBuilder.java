@@ -58,7 +58,7 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
     @Override
     public T build() {
         checkState(this.name != null, "The name must be set");
-        return build0();
+        return this.build0();
     }
 
     abstract T build0();

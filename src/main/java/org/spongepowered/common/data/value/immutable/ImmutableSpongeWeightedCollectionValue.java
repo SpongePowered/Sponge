@@ -51,7 +51,7 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
 
     @Override
     public Immutable<E> with(WeightedTable<E> value) {
-        return new ImmutableSpongeWeightedCollectionValue<>(getKey(), value);
+        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), value);
     }
 
     @Override
@@ -64,14 +64,14 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
 
     @Override
     public Immutable<E> transform(Function<WeightedTable<E>, WeightedTable<E>> function) {
-        final WeightedTable<E> table = getAll();
+        final WeightedTable<E> table = this.getAll();
         final WeightedTable<E> functionTable = function.apply(table);
         return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), functionTable);
     }
 
     @Override
     public Immutable<E> withAll(Iterable<TableEntry<E>> elements) {
-        final WeightedTable<E> newTable = getAll();
+        final WeightedTable<E> newTable = this.getAll();
         elements.forEach(newTable::add);
         return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), newTable);
     }
@@ -111,7 +111,7 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
 
     @Override
     public Mutable<E> asMutable() {
-        return new SpongeWeightedCollectionValue<>(this.getKey(), getAll());
+        return new SpongeWeightedCollectionValue<>(this.getKey(), this.getAll());
     }
 
     @Nullable

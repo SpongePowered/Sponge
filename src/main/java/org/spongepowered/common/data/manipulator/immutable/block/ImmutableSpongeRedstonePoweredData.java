@@ -48,7 +48,7 @@ public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableIntData
 
     @Override
     public ImmutableBoundedValue<Integer> power() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override

@@ -97,7 +97,7 @@ public class SpongeBiomeTreeType implements BiomeTreeType {
             return false;
         }
         SpongeBiomeTreeType b = (SpongeBiomeTreeType) o;
-        return getId().equals(b.getId());
+        return this.getId().equals(b.getId());
     }
 
     @Override

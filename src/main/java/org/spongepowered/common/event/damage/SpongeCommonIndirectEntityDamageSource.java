@@ -74,7 +74,7 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
 
     @Override
     public Entity getTrueSource() {
-        return (Entity) getSource();
+        return (Entity) this.getSource();
     }
 
     @Override

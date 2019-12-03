@@ -104,7 +104,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<BlockE
         final BlockEntity tileEntity = location.getTileEntity()
                 .orElseThrow(() -> new IllegalArgumentException("There is no tile entity available at the provided location: " + location));
 
-        return tile(tileEntity);
+        return this.tile(tileEntity);
     }
 
     @Override

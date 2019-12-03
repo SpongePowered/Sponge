@@ -37,6 +37,6 @@ public abstract class EntityMinecartCommandBlockMixin_API extends EntityMinecart
 
     @Override
     public String getName() {
-        return getCommandBlockLogic().getName();
+        return this.getCommandBlockLogic().getName();
     }
 }

@@ -539,7 +539,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         if (this.player.getServerWorld() == (ServerWorld) this.impl$spectatingTeleportLocation.getExtent()) {
             final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
             this.impl$spectatingTeleportLocation = null;
-            player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+            this.player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
             ci.cancel();
         }
     }

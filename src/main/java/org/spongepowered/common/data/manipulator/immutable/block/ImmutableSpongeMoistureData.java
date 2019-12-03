@@ -52,6 +52,6 @@ public class ImmutableSpongeMoistureData extends AbstractImmutableIntData<Immuta
 
     @Override
     public ImmutableBoundedValue<Integer> moisture() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

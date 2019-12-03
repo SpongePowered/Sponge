@@ -55,7 +55,7 @@ public class UserSubject extends SpongeSubject {
         this.data = new SingleParentMemorySubjectData(users.getService()) {
             @Override
             public SubjectReference getParent() {
-                return users.getService().getGroupForOpLevel(getOpLevel()).asSubjectReference();
+                return users.getService().getGroupForOpLevel(UserSubject.this.getOpLevel()).asSubjectReference();
             }
 
             @Override
@@ -87,7 +87,7 @@ public class UserSubject extends SpongeSubject {
 
     @Override
     public Optional<String> getFriendlyIdentifier() {
-        return Optional.of(player.getName());
+        return Optional.of(this.player.getName());
     }
 
     @Override
@@ -123,19 +123,19 @@ public class UserSubject extends SpongeSubject {
 
     @Override
     public PermissionService getService() {
-        return collection.getService();
+        return this.collection.getService();
     }
 
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
         Tristate ret = super.getPermissionValue(contexts, permission);
         if (ret == Tristate.UNDEFINED) {
-            ret = getDataPermissionValue(this.collection.getDefaults().getSubjectData(), permission);
+            ret = this.getDataPermissionValue(this.collection.getDefaults().getSubjectData(), permission);
         }
         if (ret == Tristate.UNDEFINED) {
-            ret = getDataPermissionValue(this.collection.getService().getDefaults().getSubjectData(), permission);
+            ret = this.getDataPermissionValue(this.collection.getService().getDefaults().getSubjectData(), permission);
         }
-        if (ret == Tristate.UNDEFINED && getOpLevel() >= SpongePermissionService.getServerOpLevel()) {
+        if (ret == Tristate.UNDEFINED && this.getOpLevel() >= SpongePermissionService.getServerOpLevel()) {
             ret = Tristate.TRUE;
         }
         return ret;
@@ -145,10 +145,10 @@ public class UserSubject extends SpongeSubject {
     public Optional<String> getOption(Set<Context> contexts, String option) {
         Optional<String> ret = super.getOption(contexts, option);
         if (!ret.isPresent()) {
-            ret = getDataOptionValue(this.collection.getDefaults().getSubjectData(), option);
+            ret = this.getDataOptionValue(this.collection.getDefaults().getSubjectData(), option);
         }
         if (!ret.isPresent()) {
-            ret = getDataOptionValue(this.collection.getService().getDefaults().getSubjectData(), option);
+            ret = this.getDataOptionValue(this.collection.getService().getDefaults().getSubjectData(), option);
         }
         return ret;
     }

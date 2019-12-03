@@ -77,7 +77,7 @@ public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData
         this.rightLegRotationValue = new ImmutableSpongeValue<>(Keys.RIGHT_LEG_ROTATION,
                 Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_LEG)).orElse(Constants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION));
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -153,26 +153,26 @@ public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.BODY_ROTATIONS, () -> this.rotations);
-        registerKeyValue(Keys.BODY_ROTATIONS, this::partRotation);
+        this.registerFieldGetter(Keys.BODY_ROTATIONS, () -> this.rotations);
+        this.registerKeyValue(Keys.BODY_ROTATIONS, this::partRotation);
 
-        registerFieldGetter(Keys.HEAD_ROTATION, () -> this.rotations.get(BodyParts.HEAD));
-        registerKeyValue(Keys.HEAD_ROTATION, this::headDirection);
+        this.registerFieldGetter(Keys.HEAD_ROTATION, () -> this.rotations.get(BodyParts.HEAD));
+        this.registerKeyValue(Keys.HEAD_ROTATION, this::headDirection);
 
-        registerFieldGetter(Keys.CHEST_ROTATION, () -> this.rotations.get(BodyParts.CHEST));
-        registerKeyValue(Keys.CHEST_ROTATION, this::bodyRotation);
+        this.registerFieldGetter(Keys.CHEST_ROTATION, () -> this.rotations.get(BodyParts.CHEST));
+        this.registerKeyValue(Keys.CHEST_ROTATION, this::bodyRotation);
 
-        registerFieldGetter(Keys.LEFT_ARM_ROTATION, () -> this.rotations.get(BodyParts.LEFT_ARM));
-        registerKeyValue(Keys.LEFT_ARM_ROTATION, this::leftArmDirection);
+        this.registerFieldGetter(Keys.LEFT_ARM_ROTATION, () -> this.rotations.get(BodyParts.LEFT_ARM));
+        this.registerKeyValue(Keys.LEFT_ARM_ROTATION, this::leftArmDirection);
 
-        registerFieldGetter(Keys.RIGHT_ARM_ROTATION, () -> this.rotations.get(BodyParts.RIGHT_ARM));
-        registerKeyValue(Keys.RIGHT_ARM_ROTATION, this::rightArmDirection);
+        this.registerFieldGetter(Keys.RIGHT_ARM_ROTATION, () -> this.rotations.get(BodyParts.RIGHT_ARM));
+        this.registerKeyValue(Keys.RIGHT_ARM_ROTATION, this::rightArmDirection);
 
-        registerFieldGetter(Keys.LEFT_LEG_ROTATION, () -> this.rotations.get(BodyParts.LEFT_LEG));
-        registerKeyValue(Keys.LEFT_LEG_ROTATION, this::leftLegDirection);
+        this.registerFieldGetter(Keys.LEFT_LEG_ROTATION, () -> this.rotations.get(BodyParts.LEFT_LEG));
+        this.registerKeyValue(Keys.LEFT_LEG_ROTATION, this::leftLegDirection);
 
-        registerFieldGetter(Keys.RIGHT_LEG_ROTATION, () -> this.rotations.get(BodyParts.RIGHT_LEG));
-        registerKeyValue(Keys.RIGHT_LEG_ROTATION, this::rightLegDirection);
+        this.registerFieldGetter(Keys.RIGHT_LEG_ROTATION, () -> this.rotations.get(BodyParts.RIGHT_LEG));
+        this.registerKeyValue(Keys.RIGHT_LEG_ROTATION, this::rightLegDirection);
     }
 
 }

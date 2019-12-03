@@ -152,7 +152,7 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
             final ListNBT passengerList = compound.getList(Constants.Entity.PASSENGERS, Constants.NBT.TAG_COMPOUND);
 
             for (int i = 0; i < passengerList.tagCount(); i++) {
-                final Entity passenger = impl$ThrowEventAndConstruct(passengerList.getCompound(i), world, x, y, z, doesNotForceSpawn);
+                final Entity passenger = this.impl$ThrowEventAndConstruct(passengerList.getCompound(i), world, x, y, z, doesNotForceSpawn);
                 if (passenger != null) {
                     passenger.startRiding(entity, true);
                 }

@@ -74,7 +74,7 @@ public class BeaconSecondaryEffectValueProcessor
 
     @Override
     protected Immutable<Optional<PotionEffectType>> constructImmutableValue(Optional<PotionEffectType> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

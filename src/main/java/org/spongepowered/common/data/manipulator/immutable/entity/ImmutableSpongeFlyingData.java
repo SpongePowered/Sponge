@@ -39,7 +39,7 @@ public class ImmutableSpongeFlyingData extends AbstractImmutableBooleanData<Immu
 
     @Override
     public Immutable<Boolean> flying() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

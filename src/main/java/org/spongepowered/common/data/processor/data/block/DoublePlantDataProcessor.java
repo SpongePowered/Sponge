@@ -65,7 +65,7 @@ public class DoublePlantDataProcessor extends
 
     @Override
     protected Mutable<DoublePlantType> constructValue(DoublePlantType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

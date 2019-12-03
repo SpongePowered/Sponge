@@ -39,7 +39,7 @@ public abstract class TileEntityFlowerPotMixin_API extends TileEntityMixin_API i
     @Override
     public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<RepresentedItemData> flowerItemData = get(RepresentedItemData.class);
+        Optional<RepresentedItemData> flowerItemData = this.get(RepresentedItemData.class);
         if (flowerItemData.isPresent()) {
             manipulators.add(flowerItemData.get());
         }

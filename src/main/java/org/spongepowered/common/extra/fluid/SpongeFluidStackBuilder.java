@@ -100,7 +100,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
         if (!container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
             return Optional.empty();
         }
-        reset();
+        this.reset();
         final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
         final Optional<FluidType> fluidType = Sponge.getRegistry().getType(FluidType.class, fluidId);
         if (!fluidType.isPresent()) {
@@ -113,7 +113,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
         } else {
             this.extra = null;
         }
-        return Optional.of(build());
+        return Optional.of(this.build());
     }
 
     @Override

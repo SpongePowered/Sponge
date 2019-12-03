@@ -75,7 +75,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
 
     @Override
     public DataContainer read(String input) throws IOException {
-        return readFrom(new StringReader(input));
+        return this.readFrom(new StringReader(input));
     }
 
     @Override
@@ -180,7 +180,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
     @Override
     public String write(DataView data) throws IOException {
         StringWriter writer = new StringWriter();
-        writeTo(writer, data);
+        this.writeTo(writer, data);
         return writer.toString();
     }
 

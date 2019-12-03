@@ -45,7 +45,7 @@ public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vec
 
     @Override
     protected Immutable<Vector3d> getValueGetter() {
-        return velocity();
+        return this.velocity();
     }
 
     @Override

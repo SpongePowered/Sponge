@@ -116,47 +116,47 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
 
     @Override
     default WorldBorder getBorder() {
-        return (WorldBorder) shadow$getWorldBorder();
+        return (WorldBorder) this.shadow$getWorldBorder();
     }
 
     @Override
     default boolean isInBorder(Entity entity) {
-        return shadow$getWorldBorder().contains(((net.minecraft.entity.Entity) entity).getBoundingBox());
+        return this.shadow$getWorldBorder().contains(((net.minecraft.entity.Entity) entity).getBoundingBox());
     }
 
     @Override
     default Dimension getDimension() {
-        return (Dimension) shadow$getDimension();
+        return (Dimension) this.shadow$getDimension();
     }
 
     @Override
     default boolean canSeeSky(int x, int y, int z) {
-        return shadow$isSkyLightMax(new BlockPos(x, y, z));
+        return this.shadow$isSkyLightMax(new BlockPos(x, y, z));
     }
 
     @Override
     default boolean hasWater(int x, int y, int z) {
-        return shadow$hasWater(new BlockPos(x, y, z));
+        return this.shadow$hasWater(new BlockPos(x, y, z));
     }
 
     @Override
     default int getSkylightSubtracted() {
-        return shadow$getSkylightSubtracted();
+        return this.shadow$getSkylightSubtracted();
     }
 
     @Intrinsic
     default int readable$getSeaLevel() {
-        return shadow$getSeaLevel();
+        return this.shadow$getSeaLevel();
     }
 
     @Override
     default boolean isCollisionBoxesEmpty(@Nullable Entity entity, AABB aabb) {
-        return shadow$isCollisionBoxesEmpty((net.minecraft.entity.Entity) entity, VecHelper.toMinecraftAABB(aabb));
+        return this.shadow$isCollisionBoxesEmpty((net.minecraft.entity.Entity) entity, VecHelper.toMinecraftAABB(aabb));
     }
 
     @Override
     default boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty) {
-        return shadow$isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd);
+        return this.shadow$isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd);
     }
 
     /**
@@ -236,26 +236,26 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
 
     @Override
     default ProtoChunk<?> getChunk(int x, int y, int z) {
-        return (ProtoChunk<?>) shadow$getChunk(x >> 4, z >> 4, ChunkStatus.EMPTY, true);
+        return (ProtoChunk<?>) this.shadow$getChunk(x >> 4, z >> 4, ChunkStatus.EMPTY, true);
     }
 
     @Override
     default boolean isChunkLoaded(int x, int y, int z, boolean allowEmpty) {
-        return shadow$chunkExists(x >> 4, z >> 4);
+        return this.shadow$chunkExists(x >> 4, z >> 4);
     }
 
     @Override
     default boolean hasChunk(int x, int y, int z) {
-        return shadow$chunkExists(x >> 4, z >> 4);
+        return this.shadow$chunkExists(x >> 4, z >> 4);
     }
 
     @Override
     default boolean hasChunk(Vector3i position) {
-        return shadow$chunkExists(position.getX() >> 4, position.getZ() >> 4);
+        return this.shadow$chunkExists(position.getX() >> 4, position.getZ() >> 4);
     }
 
     @Override
     default int getHeight(HeightType type, int x, int z) {
-        return shadow$getHeight((Heightmap.Type) (Object) type, x, z);
+        return this.shadow$getHeight((Heightmap.Type) (Object) type, x, z);
     }
 }

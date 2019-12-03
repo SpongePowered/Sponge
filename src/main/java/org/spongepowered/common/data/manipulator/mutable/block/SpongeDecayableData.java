@@ -43,6 +43,6 @@ public class SpongeDecayableData extends AbstractBooleanData<DecayableData, Immu
 
     @Override
     public Mutable<Boolean> decayable() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

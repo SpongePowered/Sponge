@@ -113,15 +113,15 @@ abstract class ActivePagination {
     protected abstract int getTotalPages();
 
     public void nextPage() throws CommandException {
-        specificPage(this.currentPage + 1);
+        this.specificPage(this.currentPage + 1);
     }
 
     public void previousPage() throws CommandException {
-        specificPage(this.currentPage - 1);
+        this.specificPage(this.currentPage - 1);
     }
 
     public void currentPage() throws CommandException {
-        specificPage(this.currentPage);
+        this.specificPage(this.currentPage);
     }
 
     protected int getCurrentPage() {
@@ -134,7 +134,7 @@ abstract class ActivePagination {
 
     public void specificPage(int page) throws CommandException {
         MessageReceiver src = this.src.get()
-                .orElseThrow(() -> new CommandException(t("Source for pagination %s is no longer active!", getId())));
+                .orElseThrow(() -> new CommandException(t("Source for pagination %s is no longer active!", this.getId())));
         this.currentPage = page;
 
         List<Text> toSend = new ArrayList<>();
@@ -146,11 +146,11 @@ abstract class ActivePagination {
             toSend.add(this.header);
         }
 
-        for (Text line : getLines(page)) {
+        for (Text line : this.getLines(page)) {
             toSend.add(line);
         }
 
-        Text footer = calculateFooter(page);
+        Text footer = this.calculateFooter(page);
         toSend.add(this.calc.center(footer, this.padding));
         if (this.footer != null) {
             toSend.add(this.footer);
@@ -159,8 +159,8 @@ abstract class ActivePagination {
     }
 
     protected Text calculateFooter(int currentPage) {
-        boolean hasPrevious = hasPrevious(currentPage);
-        boolean hasNext = hasNext(currentPage);
+        boolean hasPrevious = this.hasPrevious(currentPage);
+        boolean hasNext = this.hasNext(currentPage);
 
         Text.Builder ret = Text.builder();
         if (hasPrevious) {
@@ -169,7 +169,7 @@ abstract class ActivePagination {
             ret.append(Text.of("«")).append(DIVIDER_TEXT);
         }
         boolean needsDiv = false;
-        int totalPages = getTotalPages();
+        int totalPages = this.getTotalPages();
         if (totalPages > 1) {
             ret.append(Text.of(
                     TextActions.showText(Text.of("/page " + currentPage)),
@@ -204,7 +204,7 @@ abstract class ActivePagination {
     }
 
     protected void padPage(final List<Text> currentPage, final int currentPageLines, final boolean addContinuation) {
-        final int maxContentLinesPerPage = getMaxContentLinesPerPage();
+        final int maxContentLinesPerPage = this.getMaxContentLinesPerPage();
         for (int i = currentPageLines; i < maxContentLinesPerPage; i++) {
             if (addContinuation && i == maxContentLinesPerPage - 1) {
                 currentPage.add(CONTINUATION_TEXT);

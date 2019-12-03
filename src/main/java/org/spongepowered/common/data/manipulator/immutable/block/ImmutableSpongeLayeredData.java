@@ -47,6 +47,6 @@ public class ImmutableSpongeLayeredData extends AbstractImmutableIntData<Immutab
 
     @Override
     public ImmutableBoundedValue<Integer> layer() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

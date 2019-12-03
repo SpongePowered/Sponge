@@ -65,7 +65,7 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     @SuppressWarnings("unchecked")
     @Override
     public boolean supports(DataHolder dataHolder) {
-        return this.holderClass.isInstance(dataHolder) && supports((Holder) dataHolder);
+        return this.holderClass.isInstance(dataHolder) && this.supports((Holder) dataHolder);
     }
 
     @Override
@@ -76,14 +76,14 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
-        if (supports(dataHolder)) {
+        if (this.supports(dataHolder)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<M> old = from(dataHolder);
+            final Optional<M> old = this.from(dataHolder);
             final M merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final T newValue = merged.get(this.key).get();
             final V immutableValue = (V) ((org.spongepowered.api.data.value.Value.Mutable) merged.getValue(this.key).get()).asImmutable();
             try {
-                if (set((Holder) dataHolder, newValue)) {
+                if (this.set((Holder) dataHolder, newValue)) {
                     if (old.isPresent()) {
                         builder.replace(old.get().getValues());
                     }
@@ -100,10 +100,10 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
 
     @Override
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        if (!supports(dataHolder)) {
+        if (!this.supports(dataHolder)) {
             return Optional.empty();
         }
-        final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
+        final M merged = checkNotNull(overlap).merge(manipulator.copy(), this.from(dataHolder).orElse(null));
         return Optional.of(manipulator.set(this.key, merged.get(this.key).get()));
     }
 
@@ -126,12 +126,12 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     @SuppressWarnings("unchecked")
     @Override
     public Optional<M> from(DataHolder dataHolder) {
-        if (!supports(dataHolder)) {
+        if (!this.supports(dataHolder)) {
             return Optional.empty();
         }
-        final Optional<T> optional = getVal((Holder) dataHolder);
+        final Optional<T> optional = this.getVal((Holder) dataHolder);
         if (optional.isPresent()) {
-            return Optional.of(createManipulator().set(this.key, optional.get()));
+            return Optional.of(this.createManipulator().set(this.key, optional.get()));
         }
         return Optional.empty();
     }
@@ -153,23 +153,23 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     @SuppressWarnings("unchecked")
     @Override
     public final boolean supports(ValueContainer<?> container) {
-        return this.holderClass.isInstance(container) && supports((Holder) container);
+        return this.holderClass.isInstance(container) && this.supports((Holder) container);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public final Optional<T> getValueFromContainer(ValueContainer<?> container) {
-        if (!supports(container)) {
+        if (!this.supports(container)) {
             return Optional.empty();
         }
-        return getVal((Holder) container);
+        return this.getVal((Holder) container);
     }
 
     @Override
     public Optional<V> getApiValueFromContainer(ValueContainer<?> container) {
-        final Optional<T> optionalValue = getValueFromContainer(container);
+        final Optional<T> optionalValue = this.getValueFromContainer(container);
         if(optionalValue.isPresent()) {
-            return Optional.of(constructValue(optionalValue.get()));
+            return Optional.of(this.constructValue(optionalValue.get()));
         }
         return Optional.empty();
     }
@@ -177,14 +177,14 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, T value) {
-        final org.spongepowered.api.data.value.Value.Immutable<T> newValue = constructImmutableValue(value);
-        if (supports(container)) {
+        final org.spongepowered.api.data.value.Value.Immutable<T> newValue = this.constructImmutableValue(value);
+        if (this.supports(container)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<T> oldVal = getVal((Holder) container);
+            final Optional<T> oldVal = this.getVal((Holder) container);
             try {
-                if (set((Holder) container, value)) {
+                if (this.set((Holder) container, value)) {
                     if (oldVal.isPresent()) {
-                        builder.replace(constructImmutableValue(oldVal.get()));
+                        builder.replace(this.constructImmutableValue(oldVal.get()));
                     }
                     return builder.result(DataTransactionResult.Type.SUCCESS).success(newValue).build();
                 }
@@ -199,6 +199,6 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
 
     @Override
     public final DataTransactionResult remove(DataHolder dataHolder) {
-        return removeFrom(dataHolder);
+        return this.removeFrom(dataHolder);
     }
 }

@@ -55,7 +55,7 @@ public abstract class NetworkManagerMixin extends SimpleChannelInboundHandler im
 
     @Override
     public InetSocketAddress bridge$getAddress() {
-        final SocketAddress remoteAddress = getRemoteAddress();
+        final SocketAddress remoteAddress = this.getRemoteAddress();
         if (remoteAddress instanceof LocalAddress) { // Single player
             return Constants.Networking.LOCALHOST;
         }

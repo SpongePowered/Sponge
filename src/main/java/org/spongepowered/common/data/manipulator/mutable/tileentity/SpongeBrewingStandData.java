@@ -50,6 +50,6 @@ public class SpongeBrewingStandData extends AbstractBoundedComparableData<Intege
 
     @Override
     public Mutable<Integer> remainingBrewTime() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

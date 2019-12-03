@@ -62,7 +62,7 @@ public class AsyncScheduler extends SchedulerBase {
     private void mainLoop() {
         this.lastProcessingTimestamp = System.nanoTime();
         while (true) {
-            recalibrateMinimumTimeout();
+            this.recalibrateMinimumTimeout();
             this.runTick();
         }
     }

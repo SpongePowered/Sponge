@@ -87,7 +87,7 @@ public abstract class EntityMinecartMixin extends EntityMixin implements EntityM
 
     @Redirect(method = "applyDrag", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;isBeingRidden()Z"))
     private boolean onIsRidden(final AbstractMinecartEntity self) {
-        return !this.impl$slowWhenEmpty || isBeingRidden();
+        return !this.impl$slowWhenEmpty || this.isBeingRidden();
     }
 
     @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;removePassengers()V"),

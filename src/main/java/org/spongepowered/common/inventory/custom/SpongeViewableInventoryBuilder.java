@@ -68,7 +68,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     // Helpers
 
     private int posToIndex(Vector2i pos) {
-        return posToIndex(pos.getX(), pos.getY());
+        return this.posToIndex(pos.getX(), pos.getY());
     }
 
     private int posToIndex(int x, int y) {
@@ -142,7 +142,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         List<Integer> indizes = new ArrayList<>();
         for (int y = yMin; y <= yMax; y++) {
             for (int x = xMin; x <= xMax; x++) {
-                indizes.add(posToIndex(x, y));
+                indizes.add(this.posToIndex(x, y));
             }
         }
         return this.slotsAtIndizes(source, indizes);
@@ -151,20 +151,20 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     // simple redirects
 
     public DummyStep dummySlots(int count, Vector2i offset) {
-        return this.dummySlots(count, posToIndex(offset));
+        return this.dummySlots(count, this.posToIndex(offset));
     }
 
     public BuildingStep slots(List<Slot> source, Vector2i offset) {
-        return this.slots(source, posToIndex(offset));
+        return this.slots(source, this.posToIndex(offset));
     }
 
     public DummyStep dummyGrid(Vector2i size, int offset) {
-        return this.dummyGrid(size, indexToPos(offset));
+        return this.dummyGrid(size, this.indexToPos(offset));
     }
 
     @Override
     public BuildingStep grid(List<Slot> source, Vector2i size, int offset) {
-        return this.grid(source, size, indexToPos(offset));
+        return this.grid(source, size, this.indexToPos(offset));
     }
     // dummy
     @Override

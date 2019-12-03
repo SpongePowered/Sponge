@@ -38,7 +38,7 @@ public abstract class EntityEndermanMixin_API extends EntityMobMixin_API impleme
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(get(ScreamingData.class).get());
+        manipulators.add(this.get(ScreamingData.class).get());
     }
 
 }

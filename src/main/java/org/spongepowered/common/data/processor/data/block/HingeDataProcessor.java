@@ -52,7 +52,7 @@ public class HingeDataProcessor extends AbstractBlockOnlyDataProcessor<Hinge, Mu
 
     @Override
     protected Mutable<Hinge> constructValue(Hinge actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

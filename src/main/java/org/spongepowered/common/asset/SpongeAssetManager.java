@@ -59,7 +59,7 @@ public final class SpongeAssetManager implements AssetManager {
 
     @Override
     public Optional<Asset> getAsset(String name) {
-        return getAsset(SpongeImpl.getPlugin(), name);
+        return this.getAsset(SpongeImpl.getPlugin(), name);
     }
 
 }

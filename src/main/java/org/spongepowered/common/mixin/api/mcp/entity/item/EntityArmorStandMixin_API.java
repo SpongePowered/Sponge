@@ -92,7 +92,7 @@ public abstract class EntityArmorStandMixin_API extends EntityLivingBaseMixin_AP
 
     @Override
     public DisabledSlotsData getDisabledSlotsData() {
-        return new SpongeDisabledSlotsData(takingDisabled().get(), placingDisabled().get());
+        return new SpongeDisabledSlotsData(this.takingDisabled().get(), this.placingDisabled().get());
     }
 
     @Override
@@ -110,8 +110,8 @@ public abstract class EntityArmorStandMixin_API extends EntityLivingBaseMixin_AP
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getBodyPartRotationalData());
-        manipulators.add(getArmorStandData());
+        manipulators.add(this.getBodyPartRotationalData());
+        manipulators.add(this.getArmorStandData());
     }
 
 }

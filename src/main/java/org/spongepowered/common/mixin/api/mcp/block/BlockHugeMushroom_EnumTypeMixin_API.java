@@ -39,11 +39,11 @@ public abstract class BlockHugeMushroom_EnumTypeMixin_API {
     @Shadow public abstract String shadow$getName();
 
     public String mushroom$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String mushroom$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 }

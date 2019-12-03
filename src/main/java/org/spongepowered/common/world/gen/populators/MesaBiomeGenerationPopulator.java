@@ -83,7 +83,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
             int xo = buffer.getBlockMin().getX() + x;
             for (int z = 0; z < size.getZ(); z++) {
                 int zo = buffer.getBlockMin().getZ() + z;
-                performOnColumn(rand, buffer, world, xo, zo, this.stoneNoise[x + z * 16]);
+                this.performOnColumn(rand, buffer, world, xo, zo, this.stoneNoise[x + z * 16]);
             }
         }
 

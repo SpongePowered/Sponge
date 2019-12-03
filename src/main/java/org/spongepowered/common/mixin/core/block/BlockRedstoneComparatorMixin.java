@@ -48,8 +48,8 @@ public abstract class BlockRedstoneComparatorMixin extends BlockMixin {
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<Immutable<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
-                .add(impl$getComparatorTypeFor(blockState))
-                .add(impl$getIsPoweredFor(blockState))
+                .add(this.impl$getComparatorTypeFor(blockState))
+                .add(this.impl$getIsPoweredFor(blockState))
                 .build();
     }
 

@@ -50,18 +50,18 @@ public class SpongeJoinData extends AbstractData<JoinData, ImmutableJoinData> im
         super(JoinData.class);
         this.firstJoined = firstJoined;
         this.lastJoined = lastJoined;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FIRST_DATE_PLAYED, () -> this.firstJoined);
-        registerFieldSetter(Keys.FIRST_DATE_PLAYED, instant -> this.firstJoined = checkNotNull(instant, "First join instant cannot be null!"));
-        registerKeyValue(Keys.FIRST_DATE_PLAYED, this::firstPlayed);
+        this.registerFieldGetter(Keys.FIRST_DATE_PLAYED, () -> this.firstJoined);
+        this.registerFieldSetter(Keys.FIRST_DATE_PLAYED, instant -> this.firstJoined = checkNotNull(instant, "First join instant cannot be null!"));
+        this.registerKeyValue(Keys.FIRST_DATE_PLAYED, this::firstPlayed);
 
-        registerFieldGetter(Keys.LAST_DATE_PLAYED, () -> this.lastJoined);
-        registerFieldSetter(Keys.LAST_DATE_PLAYED, instant -> this.lastJoined = checkNotNull(instant, "Last join instant cannot be null!"));
-        registerKeyValue(Keys.LAST_DATE_PLAYED, this::lastPlayed);
+        this.registerFieldGetter(Keys.LAST_DATE_PLAYED, () -> this.lastJoined);
+        this.registerFieldSetter(Keys.LAST_DATE_PLAYED, instant -> this.lastJoined = checkNotNull(instant, "Last join instant cannot be null!"));
+        this.registerKeyValue(Keys.LAST_DATE_PLAYED, this::lastPlayed);
     }
 
     @Override

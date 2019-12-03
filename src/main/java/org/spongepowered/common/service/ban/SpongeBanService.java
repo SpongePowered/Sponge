@@ -125,25 +125,25 @@ public class SpongeBanService implements BanService {
     @SuppressWarnings("unchecked")
     @Override
     public boolean pardon(final GameProfile profile) {
-        final Optional<Ban.Profile> ban = getBanFor(profile);
+        final Optional<Ban.Profile> ban = this.getBanFor(profile);
         final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
             (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
         accessor.accessor$removeExpired();
-        return ban.isPresent() && removeBan(ban.get());
+        return ban.isPresent() && this.removeBan(ban.get());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean pardon(final InetAddress address) {
-        final Optional<Ban.Ip> ban = getBanFor(address);
+        final Optional<Ban.Ip> ban = this.getBanFor(address);
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
         accessor.accessor$removeExpired();
-        return ban.isPresent() && removeBan(ban.get());
+        return ban.isPresent() && this.removeBan(ban.get());
     }
 
     @Override
     public boolean removeBan(final Ban ban) {
-        if (!hasBan(ban)) {
+        if (!this.hasBan(ban)) {
             return false;
         }
         if (ban.getType().equals(BanTypes.PROFILE)) {

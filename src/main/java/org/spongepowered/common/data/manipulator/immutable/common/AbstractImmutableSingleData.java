@@ -45,7 +45,7 @@ public abstract class AbstractImmutableSingleData<T, I extends Immutable<I, M>, 
         super(immutableClass);
         this.value = checkNotNull(value);
         this.usedKey = checkNotNull(usedKey, "Hey, the key provided is null! Please make sure it is registered!");
-        registerGetters();
+        this.registerGetters();
     }
 
     protected abstract org.spongepowered.api.data.value.Value.Immutable<?> getValueGetter();
@@ -59,8 +59,8 @@ public abstract class AbstractImmutableSingleData<T, I extends Immutable<I, M>, 
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(this.usedKey, AbstractImmutableSingleData.this::getValue);
-        registerKeyValue(this.usedKey, AbstractImmutableSingleData.this::getValueGetter);
+        this.registerFieldGetter(this.usedKey, AbstractImmutableSingleData.this::getValue);
+        this.registerKeyValue(this.usedKey, AbstractImmutableSingleData.this::getValueGetter);
     }
 
     @SuppressWarnings("unchecked")
@@ -82,6 +82,6 @@ public abstract class AbstractImmutableSingleData<T, I extends Immutable<I, M>, 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(this.usedKey, getValue());
+            .set(this.usedKey, this.getValue());
     }
 }

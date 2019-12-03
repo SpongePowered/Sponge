@@ -59,7 +59,7 @@ public abstract class ClickEventMixin implements ClickEventBridge {
                 switch (this.action) {
                     case OPEN_URL:
                         try {
-                            bridge$setHandle(TextActions.openUrl(new URL(this.value)));
+                            this.bridge$setHandle(TextActions.openUrl(new URL(this.value)));
                         } catch (MalformedURLException e) {
                             SpongeImpl.getLogger().debug("Tried to parse invalid URL \"{}\": {}", this.value, e.getMessage());
                         }
@@ -70,19 +70,19 @@ public abstract class ClickEventMixin implements ClickEventBridge {
                                 UUID callbackId = UUID.fromString(this.value.substring(SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED.length() + 1));
                                 Optional<Consumer<CommandSource>> callback = SpongeCallbackHolder.getInstance().getCallbackForUUID(callbackId);
                                 if (callback.isPresent()) {
-                                    bridge$setHandle(TextActions.executeCallback(callback.get()));
+                                    this.bridge$setHandle(TextActions.executeCallback(callback.get()));
                                     break;
                                 }
                             } catch (IllegalArgumentException ex) {
                             }
                         }
-                        bridge$setHandle(TextActions.runCommand(this.value));
+                        this.bridge$setHandle(TextActions.runCommand(this.value));
                         break;
                     case SUGGEST_COMMAND:
-                        bridge$setHandle(TextActions.suggestCommand(this.value));
+                        this.bridge$setHandle(TextActions.suggestCommand(this.value));
                         break;
                     case CHANGE_PAGE:
-                        bridge$setHandle(TextActions.changePage(Integer.parseInt(this.value)));
+                        this.bridge$setHandle(TextActions.changePage(Integer.parseInt(this.value)));
                         break;
                     default:
                 }

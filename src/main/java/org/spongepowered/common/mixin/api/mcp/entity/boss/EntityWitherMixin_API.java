@@ -56,7 +56,7 @@ public abstract class EntityWitherMixin_API extends EntityMobMixin_API implement
     public List<Living> getTargets() {
         List<Living> values = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            int id = getWatchedTargetId(i);
+            int id = this.getWatchedTargetId(i);
             if (id > 0) {
                 values.add((Living) this.world.getEntityByID(id));
             }
@@ -68,7 +68,7 @@ public abstract class EntityWitherMixin_API extends EntityMobMixin_API implement
     public void setTargets(List<Living> targets) {
         checkNotNull(targets, "Targets are null!");
         for (int i = 0; i < 2; i++) {
-            updateWatchedTargetId(i, targets.size() > i ? ((LivingEntity) targets.get(i)).getEntityId() : 0);
+            this.updateWatchedTargetId(i, targets.size() > i ? ((LivingEntity) targets.get(i)).getEntityId() : 0);
         }
     }
 
@@ -85,7 +85,7 @@ public abstract class EntityWitherMixin_API extends EntityMobMixin_API implement
 
     @Override
     public void prime() {
-        checkState(!isPrimed(), "already primed");
+        checkState(!this.isPrimed(), "already primed");
         if (((FusedExplosiveBridge) this).bridge$shouldPrime()) {
             ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(this.fuseDuration);
             ((FusedExplosiveBridge) this).bridge$postPrime();
@@ -94,9 +94,9 @@ public abstract class EntityWitherMixin_API extends EntityMobMixin_API implement
 
     @Override
     public void defuse() {
-        checkState(isPrimed(), "not primed");
+        checkState(this.isPrimed(), "not primed");
         if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
-            setInvulTime(0);
+            this.setInvulTime(0);
             ((FusedExplosiveBridge) this).bridge$postDefuse();
         }
     }

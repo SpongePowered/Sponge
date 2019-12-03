@@ -47,7 +47,7 @@ public class SpongePlainPagedData extends AbstractListData<String, PlainPagedDat
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.PLAIN_BOOK_PAGES.getQuery(), getValue());
+            .set(Keys.PLAIN_BOOK_PAGES.getQuery(), this.getValue());
     }
 
 }

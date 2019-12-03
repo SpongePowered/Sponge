@@ -144,7 +144,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
         final net.minecraft.item.ItemStack old = this.slot.getStack(this.bridge$getFabric());
         ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
         if (stack.isEmpty()) {
-            clear(); // NONE item will clear the slot
+            this.clear(); // NONE item will clear the slot
             SlotTransaction trans = new SlotTransaction(this, oldSnap, ItemStackSnapshot.empty());
             return result.transaction(trans).build();
         }

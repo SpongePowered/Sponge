@@ -53,6 +53,6 @@ public class SpongeLayeredData extends AbstractBoundedComparableData<Integer, La
 
     @Override
     public Mutable<Integer> layer() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

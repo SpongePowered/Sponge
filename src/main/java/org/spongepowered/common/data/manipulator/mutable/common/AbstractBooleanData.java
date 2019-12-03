@@ -59,7 +59,7 @@ public abstract class AbstractBooleanData<M extends Mutable<M, I>, I extends Imm
 
     @Override
     public I asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, getValue());
+        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, this.getValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -71,6 +71,6 @@ public abstract class AbstractBooleanData<M extends Mutable<M, I>, I extends Imm
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(this.usedKey.getQuery(), getValue());
+            .set(this.usedKey.getQuery(), this.getValue());
     }
 }

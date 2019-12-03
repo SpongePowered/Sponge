@@ -58,21 +58,21 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.PASSED_BURN_TIME, SpongeFurnaceData.this::getPassedBurnTime);
-        registerFieldSetter(Keys.PASSED_BURN_TIME, SpongeFurnaceData.this::setPassedBurnTime);
-        registerKeyValue(Keys.PASSED_BURN_TIME, SpongeFurnaceData.this::passedBurnTime);
+        this.registerFieldGetter(Keys.PASSED_BURN_TIME, SpongeFurnaceData.this::getPassedBurnTime);
+        this.registerFieldSetter(Keys.PASSED_BURN_TIME, SpongeFurnaceData.this::setPassedBurnTime);
+        this.registerKeyValue(Keys.PASSED_BURN_TIME, SpongeFurnaceData.this::passedBurnTime);
 
-        registerFieldGetter(Keys.MAX_BURN_TIME, SpongeFurnaceData.this::getMaxBurnTime);
-        registerFieldSetter(Keys.MAX_BURN_TIME, SpongeFurnaceData.this::setMaxBurnTime);
-        registerKeyValue(Keys.MAX_BURN_TIME, SpongeFurnaceData.this::maxBurnTime);
+        this.registerFieldGetter(Keys.MAX_BURN_TIME, SpongeFurnaceData.this::getMaxBurnTime);
+        this.registerFieldSetter(Keys.MAX_BURN_TIME, SpongeFurnaceData.this::setMaxBurnTime);
+        this.registerKeyValue(Keys.MAX_BURN_TIME, SpongeFurnaceData.this::maxBurnTime);
 
-        registerFieldGetter(Keys.PASSED_COOK_TIME, SpongeFurnaceData.this::getPassedCookTime);
-        registerFieldSetter(Keys.PASSED_COOK_TIME, SpongeFurnaceData.this::setPassedCookTime);
-        registerKeyValue(Keys.PASSED_COOK_TIME, SpongeFurnaceData.this::passedCookTime);
+        this.registerFieldGetter(Keys.PASSED_COOK_TIME, SpongeFurnaceData.this::getPassedCookTime);
+        this.registerFieldSetter(Keys.PASSED_COOK_TIME, SpongeFurnaceData.this::setPassedCookTime);
+        this.registerKeyValue(Keys.PASSED_COOK_TIME, SpongeFurnaceData.this::passedCookTime);
 
-        registerFieldGetter(Keys.MAX_COOK_TIME, SpongeFurnaceData.this::getMaxCookTime);
-        registerFieldSetter(Keys.MAX_COOK_TIME, SpongeFurnaceData.this::setMaxCookTime);
-        registerKeyValue(Keys.MAX_COOK_TIME, SpongeFurnaceData.this::maxCookTime);
+        this.registerFieldGetter(Keys.MAX_COOK_TIME, SpongeFurnaceData.this::getMaxCookTime);
+        this.registerFieldSetter(Keys.MAX_COOK_TIME, SpongeFurnaceData.this::setMaxCookTime);
+        this.registerKeyValue(Keys.MAX_COOK_TIME, SpongeFurnaceData.this::maxCookTime);
     }
 
     @Override

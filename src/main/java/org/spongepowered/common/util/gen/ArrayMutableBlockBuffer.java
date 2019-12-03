@@ -73,7 +73,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         this.palette = palette;
         int airId = palette.getOrAssign(AIR);
 
-        int dataSize = area();
+        int dataSize = this.area();
         this.data = new PackedBackingData(dataSize, palette.getHighestId());
 
         // all blocks default to air
@@ -111,12 +111,12 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block) {
-        checkRange(x, y, z);
+        this.checkRange(x, y, z);
         int id = this.palette.getOrAssign(block);
         if (id > this.data.getMax()) {
 
             int highId = this.palette.getHighestId();
-            int dataSize = area();
+            int dataSize = this.area();
             BackingData newdata;
             if (highId * 2 > GlobalPalette.getBlockPalette().getHighestId()) {
                 // we are only saving about 1 bit at this point, so transition to a global palette
@@ -138,20 +138,20 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
             }
             this.data = newdata;
         }
-        this.data.set(getIndex(x, y, z), id);
+        this.data.set(this.getIndex(x, y, z), id);
         return true;
     }
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
-        checkRange(x, y, z);
-        return this.palette.get(this.data.get(getIndex(x, y, z))).orElse(AIR);
+        this.checkRange(x, y, z);
+        return this.palette.get(this.data.get(this.getIndex(x, y, z))).orElse(AIR);
     }
 
     @Override
     public MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new MutableBlockViewDownsize(this, newMin, newMax);
     }
 
@@ -195,7 +195,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
@@ -270,7 +270,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
             CharBackingData that = (CharBackingData) o;
@@ -367,7 +367,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
             PackedBackingData that = (PackedBackingData) o;

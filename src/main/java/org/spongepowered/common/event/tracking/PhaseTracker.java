@@ -595,7 +595,7 @@ public final class PhaseTracker {
             }
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
-        printPhasestack(phaseData, e, printer);
+        this.printPhasestack(phaseData, e, printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
             this.printedExceptionsForBlocks.add(phaseState);
@@ -640,7 +640,7 @@ public final class PhaseTracker {
             }
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
-        printPhasestack(context, e, printer);
+        this.printPhasestack(context, e, printer);
         printer.log(SpongeImpl.getLogger(), Level.ERROR);
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
             this.printedExceptionsForEntities.add(context.state);

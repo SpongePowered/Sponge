@@ -76,7 +76,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
 
     @Override
     public DataTransactionResult remove(final DataHolder dataHolder) {
-        if (supports(dataHolder)) {
+        if (this.supports(dataHolder)) {
             final net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) dataHolder);
             if (entity.getRidingEntity() != null) {
                 final EntitySnapshot previousVehicle = ((Entity) entity.getRidingEntity()).createSnapshot();

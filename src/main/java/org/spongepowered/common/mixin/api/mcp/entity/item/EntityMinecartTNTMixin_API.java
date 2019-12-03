@@ -40,13 +40,13 @@ public abstract class EntityMinecartTNTMixin_API extends EntityMinecartMixin_API
 
     @Override
     public void prime() {
-        checkState(!isPrimed(), "already primed");
-        ignite();
+        checkState(!this.isPrimed(), "already primed");
+        this.ignite();
     }
 
     @Override
     public void defuse() {
-        checkState(isPrimed(), "not primed");
+        checkState(this.isPrimed(), "not primed");
         if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
             ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(-1);
             ((FusedExplosiveBridge) this).bridge$postDefuse();

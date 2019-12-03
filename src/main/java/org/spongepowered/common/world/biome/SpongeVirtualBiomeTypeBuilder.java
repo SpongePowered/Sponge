@@ -45,7 +45,7 @@ public class SpongeVirtualBiomeTypeBuilder implements VirtualBiomeType.Builder {
     private Function<World, BiomeGenerationSettings> func;
 
     public SpongeVirtualBiomeTypeBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

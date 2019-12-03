@@ -39,7 +39,7 @@ public class ImmutableSpongeInWallData extends AbstractImmutableBooleanData<Immu
 
     @Override
     public Immutable<Boolean> inWall() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

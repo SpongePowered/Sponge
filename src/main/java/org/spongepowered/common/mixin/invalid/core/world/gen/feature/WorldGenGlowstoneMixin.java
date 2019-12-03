@@ -61,7 +61,7 @@ public abstract class WorldGenGlowstoneMixin extends WorldGeneratorMixin {
                 final int zAdd = rand.nextInt(8) - rand.nextInt(8);
                 final BlockPos blockpos1 = position.add(xAdd, ((Glowstone) this).getClusterHeight().getFlooredAmount(rand), zAdd);
 //                if (worldIn.getBlockState(blockpos1).getBlock().getMaterial() == Material.air) {
-                if (bridge$isAir(worldIn.getBlockState(blockpos1), worldIn, blockpos1)) {
+                if (this.bridge$isAir(worldIn.getBlockState(blockpos1), worldIn, blockpos1)) {
                     // Sponge end
                     int j = 0;
                     final Direction[] aenumfacing = Direction.values();

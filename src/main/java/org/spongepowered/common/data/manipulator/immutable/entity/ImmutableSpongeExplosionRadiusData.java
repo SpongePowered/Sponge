@@ -47,12 +47,12 @@ public class ImmutableSpongeExplosionRadiusData
 
     @Override
     protected Immutable<Integer> getValueGetter() {
-        return explosionRadius();
+        return this.explosionRadius();
     }
 
     @Override
     public ExplosionRadiusData asMutable() {
-        return new SpongeExplosionRadiusData(getValue());
+        return new SpongeExplosionRadiusData(this.getValue());
     }
 
     @Override

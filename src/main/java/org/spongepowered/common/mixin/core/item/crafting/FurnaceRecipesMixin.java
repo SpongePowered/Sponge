@@ -75,7 +75,7 @@ public abstract class FurnaceRecipesMixin implements SpongeAdditionalCatalogRegi
     @Inject(method = "getSmeltingResult", at = @At("RETURN"), cancellable = true)
     private void spongeImpl$onGetSmeltingResult(ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
         ItemStackSnapshot ingredient = ItemStackUtil.snapshotOf(stack);
-        Optional<SmeltingResult> result = getCustomResult(ingredient);
+        Optional<SmeltingResult> result = this.getCustomResult(ingredient);
 
         if (result.isPresent()) {
             ItemStack nativeResult = ItemStackUtil.fromSnapshotToNative(result.get().getResult());
@@ -93,7 +93,7 @@ public abstract class FurnaceRecipesMixin implements SpongeAdditionalCatalogRegi
     @Inject(method = "getSmeltingExperience", at = @At("RETURN"), cancellable = true)
     private void spongeImpl$onGetSmeltingExperience(ItemStack stack, CallbackInfoReturnable<Float> cir) {
         ItemStackSnapshot ingredient = ItemStackUtil.snapshotOf(stack);
-        Optional<SmeltingResult> result = getCustomResult(ingredient);
+        Optional<SmeltingResult> result = this.getCustomResult(ingredient);
 
         if (result.isPresent()) {
             float nativeResult = (float) result.get().getExperience();

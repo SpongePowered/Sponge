@@ -153,13 +153,13 @@ public class TimingHistory {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
 
             RegionData that = (RegionData) o;
 
-            return regionId.equals(that.regionId);
+            return this.regionId.equals(that.regionId);
 
         }
 
@@ -168,7 +168,7 @@ public class TimingHistory {
 
         @Override
         public int hashCode() {
-            return regionId.hashCode();
+            return this.regionId.hashCode();
         }
 
         static class RegionId {
@@ -183,17 +183,17 @@ public class TimingHistory {
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
+                if (o == null || this.getClass() != o.getClass()) return false;
 
                 RegionId regionId1 = (RegionId) o;
 
-                return regionId == regionId1.regionId;
+                return this.regionId == regionId1.regionId;
 
             }
 
             @Override
             public int hashCode() {
-                return (int) (regionId ^ (regionId >>> 32));
+                return (int) (this.regionId ^ (this.regionId >>> 32));
             }
         }
     }

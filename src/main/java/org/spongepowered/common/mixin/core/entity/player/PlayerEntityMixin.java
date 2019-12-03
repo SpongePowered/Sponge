@@ -231,7 +231,7 @@ public abstract class PlayerEntityMixin extends EntityLivingBaseMixin implements
         }
         if (!this.dontRecalculateExperience) {
             final int newLevel = Math.max(this.experienceLevel + levels, 0);
-            postEventAndUpdateExperience(ExperienceHolderUtils.xpAtLevel(newLevel)
+            this.postEventAndUpdateExperience(ExperienceHolderUtils.xpAtLevel(newLevel)
                     + (int) (this.experience * ExperienceHolderUtils.getExpBetweenLevels(newLevel)));
             ci.cancel();
         }
@@ -239,7 +239,7 @@ public abstract class PlayerEntityMixin extends EntityLivingBaseMixin implements
 
     @Inject(method = "onEnchant", at = @At("RETURN"))
     private void onEnchantChangeExperienceLevels(final ItemStack item, final int levels, final CallbackInfo ci) {
-        bridge$recalculateTotalExperience();
+        this.bridge$recalculateTotalExperience();
     }
 
     /**
@@ -296,7 +296,7 @@ public abstract class PlayerEntityMixin extends EntityLivingBaseMixin implements
             if (finalLevel != this.experienceLevel) {
                 this.dontRecalculateExperience = true;
                 try {
-                    addExperienceLevel(finalLevel - this.experienceLevel);
+                    this.addExperienceLevel(finalLevel - this.experienceLevel);
                 } finally {
                     this.dontRecalculateExperience = false;
                 }
@@ -311,7 +311,7 @@ public abstract class PlayerEntityMixin extends EntityLivingBaseMixin implements
     @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
     private void recalculateXpOnLoad(final CompoundNBT compound, final CallbackInfo ci) {
         // Fix the mistakes of /xp commands past.
-        bridge$recalculateTotalExperience();
+        this.bridge$recalculateTotalExperience();
     }
 
     /**

@@ -46,7 +46,7 @@ public abstract class WorldMixin_TrackerAPI implements World {
 
     @Override
     public Optional<UUID> getCreator(final int x, final int y, final int z) {
-        final Chunk chunk = ((ChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -59,7 +59,7 @@ public abstract class WorldMixin_TrackerAPI implements World {
 
     @Override
     public Optional<UUID> getNotifier(final int x, final int y, final int z) {
-        final Chunk chunk = ((ChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -72,7 +72,7 @@ public abstract class WorldMixin_TrackerAPI implements World {
 
     @Override
     public void setCreator(final int x, final int y, final int z, @Nullable final UUID uuid) {
-        final Chunk chunk = ((ChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
@@ -83,7 +83,7 @@ public abstract class WorldMixin_TrackerAPI implements World {
 
     @Override
     public void setNotifier(final int x, final int y, final int z, @Nullable final UUID uuid) {
-        final Chunk chunk = ((ChunkProviderBridge) getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((ChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }

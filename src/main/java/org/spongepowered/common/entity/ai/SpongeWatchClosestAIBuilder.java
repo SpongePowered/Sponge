@@ -61,7 +61,7 @@ public final class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Bui
 
     @Override
     public WatchClosestAITask.Builder from(WatchClosestAITask value) {
-        return watch(value.getWatchedClass())
+        return this.watch(value.getWatchedClass())
             .maxDistance(value.getMaxDistance())
             .chance(value.getChance());
     }

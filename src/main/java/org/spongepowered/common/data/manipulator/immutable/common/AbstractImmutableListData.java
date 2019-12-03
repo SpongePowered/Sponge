@@ -71,11 +71,11 @@ public abstract class AbstractImmutableListData<E, I extends ImmutableListData<E
 
     @Override
     public Immutable<E> getListValue() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override
     public List<E> asList() {
-        return getValue();
+        return this.getValue();
     }
 }

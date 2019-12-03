@@ -89,7 +89,7 @@ public abstract class AbstractBiomeBuffer implements ReadableBiomeVolume {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         AbstractBiomeBuffer that = (AbstractBiomeBuffer) o;

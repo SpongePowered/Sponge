@@ -40,18 +40,18 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
     @Shadow public abstract int getMetadata();
 
     public String rail$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String rail$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public RailDirection cycleNext() {
-        int meta = getMetadata();
+        int meta = this.getMetadata();
         if (meta == 9) {
             meta = 0;
         } else {

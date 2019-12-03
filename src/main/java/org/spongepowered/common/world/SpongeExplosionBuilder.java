@@ -46,7 +46,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     private boolean shouldDamageEntities = true;
 
     public SpongeExplosionBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

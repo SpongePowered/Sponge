@@ -83,7 +83,7 @@ public class BlockPaletteWrapper implements org.spongepowered.api.world.schemati
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         BlockPaletteWrapper that = (BlockPaletteWrapper) o;

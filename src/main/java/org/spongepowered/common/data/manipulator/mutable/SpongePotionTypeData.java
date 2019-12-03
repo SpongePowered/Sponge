@@ -70,6 +70,6 @@ public class SpongePotionTypeData extends AbstractSingleData<PotionType, PotionT
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return type();
+        return this.type();
     }
 }

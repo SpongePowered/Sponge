@@ -60,7 +60,7 @@ public class IgniteableDataProcessor extends AbstractEntityDataProcessor<Entity,
         if (dataHolder instanceof Entity) {
             if (((EntityAccessor) dataHolder).accessor$getFire() > 0) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                builder.replace(from(dataHolder).get().getValues());
+                builder.replace(this.from(dataHolder).get().getValues());
                 ((Entity) dataHolder).extinguish();
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }

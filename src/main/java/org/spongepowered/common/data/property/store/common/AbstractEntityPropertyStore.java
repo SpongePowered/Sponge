@@ -40,7 +40,7 @@ public abstract class AbstractEntityPropertyStore<T extends Property<?, ?>> exte
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Entity) {
-            return getForEntity((Entity) propertyHolder);
+            return this.getForEntity((Entity) propertyHolder);
         }
         return Optional.empty();
     }

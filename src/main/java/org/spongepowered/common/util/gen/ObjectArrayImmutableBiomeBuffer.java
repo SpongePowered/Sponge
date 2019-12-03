@@ -65,8 +65,8 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
 
     @Override
     public BiomeType getBiome(int x, int y, int z) {
-        checkRange(x, y, z);
-        return this.biomes[getIndex(x, z)];
+        this.checkRange(x, y, z);
+        return this.biomes[this.getIndex(x, z)];
     }
 
     /**
@@ -79,8 +79,8 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * @return The native biome
      */
     public Biome getNativeBiome(int x, int y, int z) {
-        checkRange(x, y, z);
-        BiomeType type = this.biomes[getIndex(x, z)];
+        this.checkRange(x, y, z);
+        BiomeType type = this.biomes[this.getIndex(x, z)];
         if (type instanceof VirtualBiomeType) {
             type = ((VirtualBiomeType) type).getPersistedType();
         }
@@ -89,8 +89,8 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
 
     @Override
     public ImmutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ImmutableBiomeViewDownsize(this, newMin, newMax);
     }
 
@@ -125,7 +125,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {

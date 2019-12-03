@@ -52,33 +52,33 @@ public class SpongeStatisticData extends AbstractMappedData<Statistic, Long, Sta
 
     @Override
     public Optional<Long> get(Statistic key) {
-        return Optional.ofNullable(getValue().get(key));
+        return Optional.ofNullable(this.getValue().get(key));
     }
 
     @Override
     public Set<Statistic> getMapKeys() {
-        return getValue().keySet();
+        return this.getValue().keySet();
     }
 
     @Override
     public StatisticData put(Statistic key, Long value) {
-        return withMap(map -> map.put(key, value));
+        return this.withMap(map -> map.put(key, value));
     }
 
     @Override
     public StatisticData putAll(Map<? extends Statistic, ? extends Long> map) {
-        return withMap(value -> value.putAll(map));
+        return this.withMap(value -> value.putAll(map));
     }
 
     @Override
     public StatisticData remove(Statistic key) {
-        return withMap(map -> map.remove(key));
+        return this.withMap(map -> map.remove(key));
     }
 
     private StatisticData withMap(Consumer<Map<Statistic, Long>> c) {
-        Map<Statistic, Long> value = getValue();
+        Map<Statistic, Long> value = this.getValue();
         c.accept(value);
-        return setValue(value);
+        return this.setValue(value);
     }
 
     @Override
@@ -104,17 +104,17 @@ public class SpongeStatisticData extends AbstractMappedData<Statistic, Long, Sta
 
     @Override
     public StatisticData copy() {
-        return new SpongeStatisticData(getValue());
+        return new SpongeStatisticData(this.getValue());
     }
 
     @Override
     public ImmutableStatisticData asImmutable() {
-        return new ImmutableSpongeStatisticData(getValue());
+        return new ImmutableSpongeStatisticData(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
-        return super.toContainer().set(Keys.STATISTICS, getValue());
+        return super.toContainer().set(Keys.STATISTICS, this.getValue());
     }
 
 }

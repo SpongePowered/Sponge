@@ -44,16 +44,16 @@ public final class ImmutableSpongeDespawnDelayData extends AbstractImmutableData
     public ImmutableSpongeDespawnDelayData(int value) {
         super(ImmutableDespawnDelayData.class);
         this.value = value;
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.INFINITE_DESPAWN_DELAY, this::isInfinite);
-        registerKeyValue(Keys.INFINITE_DESPAWN_DELAY, this::infinite);
+        this.registerFieldGetter(Keys.INFINITE_DESPAWN_DELAY, this::isInfinite);
+        this.registerKeyValue(Keys.INFINITE_DESPAWN_DELAY, this::infinite);
 
-        registerFieldGetter(Keys.DESPAWN_DELAY, this::getDelay);
-        registerKeyValue(Keys.DESPAWN_DELAY, this::delay);
+        this.registerFieldGetter(Keys.DESPAWN_DELAY, this::getDelay);
+        this.registerKeyValue(Keys.DESPAWN_DELAY, this::delay);
     }
 
     @Override
@@ -65,7 +65,7 @@ public final class ImmutableSpongeDespawnDelayData extends AbstractImmutableData
 
     @Override
     public Immutable<Boolean> infinite() {
-        return new ImmutableSpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, isInfinite());
+        return new ImmutableSpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, this.isInfinite());
     }
 
     private boolean isInfinite() {

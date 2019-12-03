@@ -114,7 +114,7 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
 
     @Override
     public void bridge$setCareer(final Career career) {
-        setProfession(((SpongeEntityMeta) career.getProfession()).type);
+        this.setProfession(((SpongeEntityMeta) career.getProfession()).type);
         this.buyingList = null;
         this.careerId = ((SpongeCareer) career).type + 1;
         this.careerLevel = 1;

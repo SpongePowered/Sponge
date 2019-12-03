@@ -40,7 +40,7 @@ public class ImmutableSpongeGravityData extends AbstractImmutableBooleanData<Imm
 
     @Override
     public Immutable<Boolean> gravity() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

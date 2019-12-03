@@ -52,7 +52,7 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
 
         this.vehicleValue = new ImmutableSpongeValue<>(Keys.VEHICLE, this.vehicle);
         this.baseVehicleValue = new ImmutableSpongeValue<>(Keys.BASE_VEHICLE, this.baseVehicle);
-        registerGetters();
+        this.registerGetters();
     }
 
     public ImmutableSpongeVehicleData(Entity vehicle, Entity baseVehicle) {
@@ -91,11 +91,11 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.VEHICLE, ImmutableSpongeVehicleData.this::getVehicle);
-        registerKeyValue(Keys.VEHICLE, ImmutableSpongeVehicleData.this::vehicle);
+        this.registerFieldGetter(Keys.VEHICLE, ImmutableSpongeVehicleData.this::getVehicle);
+        this.registerKeyValue(Keys.VEHICLE, ImmutableSpongeVehicleData.this::vehicle);
 
-        registerFieldGetter(Keys.BASE_VEHICLE, ImmutableSpongeVehicleData.this::getBaseVehicle);
-        registerKeyValue(Keys.BASE_VEHICLE, ImmutableSpongeVehicleData.this::baseVehicle);
+        this.registerFieldGetter(Keys.BASE_VEHICLE, ImmutableSpongeVehicleData.this::getBaseVehicle);
+        this.registerKeyValue(Keys.BASE_VEHICLE, ImmutableSpongeVehicleData.this::baseVehicle);
     }
 
 }

@@ -43,7 +43,7 @@ public class SpongeChargedData extends AbstractBooleanData<ChargedData, Immutabl
 
     @Override
     public Mutable<Boolean> charged() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

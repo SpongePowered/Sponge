@@ -127,7 +127,7 @@ public abstract class TileEntityFurnaceMixin_API extends TileEntityLockableMixin
     @Override
     public void supplyVanillaManipulators(List<org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getFurnaceData());
+        manipulators.add(this.getFurnaceData());
 
     }
 }

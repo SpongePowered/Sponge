@@ -117,11 +117,11 @@ public abstract class RConThreadClientMixin extends RConThread implements RConTh
                 return event;
             }).get();
         } catch (InterruptedException | ExecutionException ignored) {
-            closeSocket();
+            this.closeSocket();
             return;
         }
         if (connectEvent.isCancelled()) {
-            closeSocket();
+            this.closeSocket();
             return;
         }
         /// Sponge: END
@@ -175,14 +175,14 @@ public abstract class RConThreadClientMixin extends RConThread implements RConTh
                                     }).get();
                                     final String logContents = this.impl$source.getLogContents();
                                     this.impl$source.resetLog();
-                                    sendMultipacketResponse(l, logContents);
+                                    this.sendMultipacketResponse(l, logContents);
                                     /// Sponge: END
                                 } catch (Exception exception) {
-                                    sendMultipacketResponse(l, "Error executing: " + command + " (" + exception.getMessage() + ")");
+                                    this.sendMultipacketResponse(l, "Error executing: " + command + " (" + exception.getMessage() + ")");
                                 }
                                 continue;
                             }
-                            sendLoginFailedResponse();
+                            this.sendLoginFailedResponse();
                             break; // Sponge: 'continue' -> 'break', disconnect when a invalid operation is requested
                         case 3:
                             final String password = RConUtils.getBytesAsString(this.buffer, j, i);
@@ -200,17 +200,17 @@ public abstract class RConThreadClientMixin extends RConThread implements RConTh
                                 }).get();
                                 if (!event.isCancelled()) {
                                     this.loggedIn = true;
-                                    sendResponse(l, 2, "");
+                                    this.sendResponse(l, 2, "");
                                     continue;
                                 }
                                 /// Sponge: END
                             }
 
                             this.loggedIn = false;
-                            sendLoginFailedResponse();
+                            this.sendLoginFailedResponse();
                             break; // Sponge: 'continue' -> 'break', disconnect if login failed
                         default:
-                            sendMultipacketResponse(l, String.format("Unknown request %s", Integer.toHexString(i1)));
+                            this.sendMultipacketResponse(l, String.format("Unknown request %s", Integer.toHexString(i1)));
                             break; // Sponge: 'continue' -> 'break', disconnect when a invalid operation is requested
                     }
                 }
@@ -221,7 +221,7 @@ public abstract class RConThreadClientMixin extends RConThread implements RConTh
                 break;
             }
         }
-        closeSocket();
+        this.closeSocket();
     }
 
     @Override

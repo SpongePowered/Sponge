@@ -77,7 +77,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
     public SpongeItemStackBuilder() {
         super(ItemStack.class, 1);
-        reset();
+        this.reset();
     }
 
     @Override
@@ -152,14 +152,14 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             || !container.contains(Constants.ItemStack.DAMAGE_VALUE)) {
             return this;
         }
-        reset();
+        this.reset();
 
         final int count = getData(container, Constants.ItemStack.COUNT, Integer.class);
-        quantity(count);
+        this.quantity(count);
 
         final String itemTypeId = getData(container, Constants.ItemStack.TYPE, String.class);
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
-        itemType(itemType);
+        this.itemType(itemType);
 
         this.damageValue = getData(container, Constants.ItemStack.DAMAGE_VALUE, Integer.class);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
@@ -182,10 +182,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     public ItemStack.Builder fromSnapshot(ItemStackSnapshot snapshot) {
         checkNotNull(snapshot, "The snapshot was null!");
-        itemType(snapshot.getType());
-        quantity(snapshot.getQuantity());
+        this.itemType(snapshot.getType());
+        this.quantity(snapshot.getQuantity());
         for (Immutable<?, ?> manipulator : snapshot.getContainers()) {
-            itemData(manipulator);
+            this.itemData(manipulator);
         }
         if (snapshot instanceof SpongeItemStackSnapshot) {
             this.damageValue = ((SpongeItemStackSnapshot) snapshot).getDamageValue();
@@ -203,11 +203,11 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     public ItemStack.Builder fromBlockSnapshot(BlockSnapshot blockSnapshot) {
         checkNotNull(blockSnapshot, "The snapshot was null!");
-        reset();
+        this.reset();
         final BlockType blockType = blockSnapshot.getState().getType();
         final Optional<ItemType> itemType = blockType.getItem();
-        itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockType.getId())));
-        quantity(1);
+        this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockType.getId())));
+        this.quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
             final Block block = (Block) blockType;
             this.damageValue = block.damageDropped((net.minecraft.block.BlockState) blockSnapshot.getState());
@@ -236,7 +236,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
                 .trace();
             return this;
         }
-        itemType(item.get());
+        this.itemType(item.get());
         this.damageValue = minecraftState.getBlock().damageDropped(minecraftState);
         return this;
     }
@@ -257,7 +257,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
     @Override
     public ItemStack.Builder from(ItemStack value) {
-        return fromItemStack(value);
+        return this.fromItemStack(value);
     }
 
     @Override

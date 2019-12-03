@@ -36,7 +36,7 @@ public class WaterLilyBuilder implements WaterLily.Builder {
     private VariableAmount count;
 
     public WaterLilyBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

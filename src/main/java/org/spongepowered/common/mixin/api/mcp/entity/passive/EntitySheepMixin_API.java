@@ -47,19 +47,19 @@ public abstract class EntitySheepMixin_API extends EntityAnimalMixin_API impleme
 
     @Override
     public DyeableData getDyeData() {
-        return new SpongeDyeableData((DyeColor) (Object) getFleeceColor());
+        return new SpongeDyeableData((DyeColor) (Object) this.getFleeceColor());
     }
 
     @Override
     public Mutable<DyeColor> color() {
-        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHEEP_COLOR, (DyeColor) (Object) getFleeceColor());
+        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHEEP_COLOR, (DyeColor) (Object) this.getFleeceColor());
     }
 
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getDyeData());
-        manipulators.add(new SpongeShearedData(getSheared()));
+        manipulators.add(this.getDyeData());
+        manipulators.add(new SpongeShearedData(this.getSheared()));
     }
 
 }

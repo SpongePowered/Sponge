@@ -95,11 +95,11 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
-        if (!supports(container)) {
+        if (!this.supports(container)) {
             return DataTransactionResult.failNoData();
         }
         final ItemStack itemStack = (ItemStack) container;
-        final Optional<EntityType> old = getVal(itemStack);
+        final Optional<EntityType> old = this.getVal(itemStack);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
@@ -108,7 +108,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
             if (tag != null) {
                 tag.remove(Constants.TileEntity.Spawner.SPAWNABLE_ENTITY_TAG);
             }
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         } catch (final Exception e) {
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }

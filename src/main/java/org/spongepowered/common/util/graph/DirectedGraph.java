@@ -79,8 +79,8 @@ public class DirectedGraph<D> {
      * node is added.
      */
     public void addEdge(D from, D to) {
-        DataNode<D> fromNode = add(from);
-        DataNode<D> toNode = add(to);
+        DataNode<D> fromNode = this.add(from);
+        DataNode<D> toNode = this.add(to);
         if (!fromNode.isAdjacent(toNode)) {
             fromNode.addEdge(toNode);
         }
@@ -152,8 +152,8 @@ public class DirectedGraph<D> {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("Node count: ").append(getNodeCount());
-        str.append(" Edge count: ").append(getEdgeCount()).append("\n");
+        str.append("Node count: ").append(this.getNodeCount());
+        str.append(" Edge count: ").append(this.getEdgeCount()).append("\n");
         for (DataNode<D> n : this.nodes.values()) {
             str.append(n.getData().toString()).append(" Edges: (");
             for (DataNode<D> a : n.getAdjacent()) {

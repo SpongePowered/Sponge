@@ -56,7 +56,7 @@ public class SpongeSelector implements Selector {
     public SpongeSelector(SelectorType type, ImmutableMap<ArgumentType<?>, Argument<?>> arguments) {
         this.type = checkNotNull(type, "type");
         this.arguments = checkNotNull(arguments, "arguments");
-        this.plain = buildString();
+        this.plain = this.buildString();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class SpongeSelector implements Selector {
 
     @Override
     public boolean isInverted(ArgumentType.Invertible<?> type) {
-        if (!has(type)) {
+        if (!this.has(type)) {
             return false;
         }
         return ((Argument.Invertible<?>) this.arguments.get(type)).isInverted();

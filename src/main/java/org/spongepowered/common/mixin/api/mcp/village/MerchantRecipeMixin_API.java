@@ -54,45 +54,45 @@ public abstract class MerchantRecipeMixin_API implements TradeOffer {
 
     @Override
     public ItemStackSnapshot getFirstBuyingItem() {
-        return ((ItemStack) getItemToBuy()).createSnapshot();
+        return ((ItemStack) this.getItemToBuy()).createSnapshot();
     }
 
     @Override
     public boolean hasSecondItem() {
-        return hasSecondItemToBuy();
+        return this.hasSecondItemToBuy();
     }
 
     @Override
     public Optional<ItemStackSnapshot> getSecondBuyingItem() {
-        if (getSecondItemToBuy() == null) {
+        if (this.getSecondItemToBuy() == null) {
             return Optional.empty();
         }
-        return Optional.of(((ItemStack) getSecondItemToBuy()).createSnapshot());
+        return Optional.of(((ItemStack) this.getSecondItemToBuy()).createSnapshot());
     }
 
     @Override
     public ItemStackSnapshot getSellingItem() {
-        return ((ItemStack) getItemToSell()).createSnapshot();
+        return ((ItemStack) this.getItemToSell()).createSnapshot();
     }
 
     @Override
     public int getUses() {
-        return getToolUses();
+        return this.getToolUses();
     }
 
     @Override
     public int getMaxUses() {
-        return getMaxTradeUses();
+        return this.getMaxTradeUses();
     }
 
     @Override
     public boolean hasExpired() {
-        return isRecipeDisabled();
+        return this.isRecipeDisabled();
     }
 
     @Override
     public boolean doesGrantExperience() {
-        return getRewardsExp();
+        return this.getRewardsExp();
     }
 
     @Override
@@ -103,7 +103,7 @@ public abstract class MerchantRecipeMixin_API implements TradeOffer {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Item.TradeOffer.FIRST_QUERY, this.getFirstBuyingItem())
                 .set(Constants.Item.TradeOffer.SECOND_QUERY, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
                 .set(Constants.Item.TradeOffer.BUYING_QUERY, this.getItemToBuy())

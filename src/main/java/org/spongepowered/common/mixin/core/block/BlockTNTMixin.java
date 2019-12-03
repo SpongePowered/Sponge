@@ -101,13 +101,13 @@ public abstract class BlockTNTMixin extends BlockMixin {
     @Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean impl$removePostSetAir(final World world, final BlockPos pos) {
         // Called when TNT is placed next to a charge
-        return impl$onRemove(world, pos);
+        return this.impl$onRemove(world, pos);
     }
 
     @Redirect(method = "neighborChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean impl$removeNeighbor(final World world, final BlockPos pos) {
         // Called when TNT receives charge
-        return impl$onRemove(world, pos);
+        return this.impl$onRemove(world, pos);
     }
 
     @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
@@ -121,7 +121,7 @@ public abstract class BlockTNTMixin extends BlockMixin {
     @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean impl$removeonCollide(final World world, final BlockPos pos) {
         // Called when the TNT is hit with a flaming arrow
-        return impl$onRemove(world, pos);
+        return this.impl$onRemove(world, pos);
     }
 
 }

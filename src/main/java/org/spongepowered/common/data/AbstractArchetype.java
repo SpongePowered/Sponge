@@ -163,7 +163,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
         }
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         for (final Immutable<?> replaced : result.getReplacedData()) {
-            builder.absorbResult(offer(replaced));
+            builder.absorbResult(this.offer(replaced));
         }
         for (final Immutable<?> successful : result.getSuccessfulData()) {
             builder.absorbResult(remove(successful));

@@ -54,7 +54,7 @@ public abstract class BlockRedstoneWireMixin extends BlockMixin {
 
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.of(impl$getPowerFor(blockState), impl$getConnectedDirectionData(blockState), impl$getWireAttachmentData(blockState));
+        return ImmutableList.of(this.impl$getPowerFor(blockState), this.impl$getConnectedDirectionData(blockState), this.impl$getWireAttachmentData(blockState));
     }
 
     @Override

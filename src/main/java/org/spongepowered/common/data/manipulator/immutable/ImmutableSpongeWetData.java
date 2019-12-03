@@ -39,7 +39,7 @@ public class ImmutableSpongeWetData extends AbstractImmutableBooleanData<Immutab
 
     @Override
     public Immutable<Boolean> wet() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

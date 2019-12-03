@@ -109,7 +109,7 @@ public final class SpongeImmutableDataManipulatorBuilder<T extends Mutable<T, I>
         } else {
             usedContainer = container.copy();
         }
-        Optional<T> optional = this.buildFunction.apply(usedContainer, create());
+        Optional<T> optional = this.buildFunction.apply(usedContainer, this.create());
         return optional.isPresent() ? Optional.of(optional.get().asImmutable()) : Optional.empty();
     }
 }

@@ -43,7 +43,7 @@ public interface IPhaseMixin_API extends DragonPhase {
 
     @Override
     default DragonPhaseType getType() {
-        return (DragonPhaseType) shadow$getType();
+        return (DragonPhaseType) this.shadow$getType();
     }
 
     @Override

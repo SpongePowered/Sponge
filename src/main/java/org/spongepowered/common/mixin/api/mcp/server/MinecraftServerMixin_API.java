@@ -150,32 +150,32 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public boolean getOnlineMode() {
-        return isServerInOnlineMode();
+        return this.isServerInOnlineMode();
     }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Player> getOnlinePlayers() {
-        if (getPlayerList() == null || getPlayerList().getPlayers() == null) {
+        if (this.getPlayerList() == null || this.getPlayerList().getPlayers() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List) getPlayerList().getPlayers());
+        return ImmutableList.copyOf((List) this.getPlayerList().getPlayers());
     }
 
     @Override
     public Optional<Player> getPlayer(final UUID uniqueId) {
-        if (getPlayerList() == null) {
+        if (this.getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) getPlayerList().getPlayerByUUID(uniqueId));
+        return Optional.ofNullable((Player) this.getPlayerList().getPlayerByUUID(uniqueId));
     }
 
     @Override
     public Optional<Player> getPlayer(final String name) {
-        if (getPlayerList() == null) {
+        if (this.getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) getPlayerList().getPlayerByUsername(name));
+        return Optional.ofNullable((Player) this.getPlayerList().getPlayerByUsername(name));
     }
 
     @Override
@@ -185,10 +185,10 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public int getMaxPlayers() {
-        if (getPlayerList() == null) {
+        if (this.getPlayerList() == null) {
             return 0;
         }
-        return getPlayerList().getMaxPlayers();
+        return this.getPlayerList().getMaxPlayers();
     }
 
     @Override
@@ -205,16 +205,16 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public void shutdown() {
-        initiateShutdown();
+        this.initiateShutdown();
     }
 
     @Override
     public void shutdown(final Text kickMessage) {
-        for (final Player player : getOnlinePlayers()) {
+        for (final Player player : this.getOnlinePlayers()) {
             player.kick(kickMessage);
         }
 
-        initiateShutdown();
+        this.initiateShutdown();
     }
 
 
@@ -271,8 +271,8 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public String getDefaultWorldName() {
-        checkState(getFolderName() != null, "Attempt made to grab default world name too early!");
-        return getFolderName();
+        checkState(this.getFolderName() != null, "Attempt made to grab default world name too early!");
+        return this.getFolderName();
     }
 
     @Override
@@ -332,7 +332,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public String toString() {
-        return getClass().getSimpleName();
+        return this.getClass().getSimpleName();
     }
 
 
@@ -356,6 +356,6 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Intrinsic
     public String command$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 }

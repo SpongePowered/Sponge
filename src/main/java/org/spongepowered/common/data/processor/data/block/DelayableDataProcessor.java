@@ -52,7 +52,7 @@ public class DelayableDataProcessor extends
     @Override
     protected Mutable<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
-                .defaultValue(getDefaultValue())
+                .defaultValue(this.getDefaultValue())
                 .minimum(1)
                 .maximum(4)
                 .actualValue(actualValue)

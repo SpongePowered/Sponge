@@ -174,7 +174,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public boolean save() throws IOException {
-        if (!getChunkProvider().canSave()) {
+        if (!this.getChunkProvider().canSave()) {
             return false;
         }
 
@@ -308,10 +308,10 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
-        if (!containsBlock(x, y, z)) {
+        if (!this.containsBlock(x, y, z)) {
             return BlockSnapshot.NONE;
         }
-        if (!isChunkLoaded(x >> 4, z >> 4, false)) {
+        if (!this.isChunkLoaded(x >> 4, z >> 4, false)) {
             return BlockSnapshot.NONE;
         }
         final BlockPos pos = new BlockPos(x, y, z);
@@ -476,22 +476,22 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public void stopSounds() {
-        apiImpl$stopSounds(null, null);
+        this.apiImpl$stopSounds(null, null);
     }
 
     @Override
     public void stopSounds(final SoundType sound) {
-        apiImpl$stopSounds(checkNotNull(sound, "sound"), null);
+        this.apiImpl$stopSounds(checkNotNull(sound, "sound"), null);
     }
 
     @Override
     public void stopSounds(final SoundCategory category) {
-        apiImpl$stopSounds(null, checkNotNull(category, "category"));
+        this.apiImpl$stopSounds(null, checkNotNull(category, "category"));
     }
 
     @Override
     public void stopSounds(final SoundType sound, final SoundCategory category) {
-        apiImpl$stopSounds(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
+        this.apiImpl$stopSounds(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
     }
 
     private void apiImpl$stopSounds(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
@@ -528,12 +528,12 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public void playRecord(final Vector3i position, final MusicDisc recordType) {
-        api$playRecord(position, checkNotNull(recordType, "recordType"));
+        this.api$playRecord(position, checkNotNull(recordType, "recordType"));
     }
 
     @Override
     public void stopRecord(final Vector3i position) {
-        api$playRecord(position, null);
+        this.api$playRecord(position, null);
     }
 
     private void api$playRecord(final Vector3i position, @Nullable final MusicDisc recordType) {
@@ -554,7 +554,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public long getRemainingDuration() {
-        final Weather weather = getWeather();
+        final Weather weather = this.getWeather();
         if (weather.equals(Weathers.CLEAR)) {
             if (this.worldInfo.getClearWeatherTime() > 0) {
                 return this.worldInfo.getClearWeatherTime();

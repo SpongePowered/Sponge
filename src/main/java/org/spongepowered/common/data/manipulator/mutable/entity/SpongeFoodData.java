@@ -44,7 +44,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
         this.foodLevel = foodLevel;
         this.foodSaturationLevel = foodSaturationLevel;
         this.foodExhaustionLevel = foodExhaustionLevel;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeFoodData() {
@@ -125,16 +125,16 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FOOD_LEVEL, SpongeFoodData.this::getFoodLevel);
-        registerFieldSetter(Keys.FOOD_LEVEL, SpongeFoodData.this::setFoodLevel);
-        registerKeyValue(Keys.FOOD_LEVEL, SpongeFoodData.this::foodLevel);
+        this.registerFieldGetter(Keys.FOOD_LEVEL, SpongeFoodData.this::getFoodLevel);
+        this.registerFieldSetter(Keys.FOOD_LEVEL, SpongeFoodData.this::setFoodLevel);
+        this.registerKeyValue(Keys.FOOD_LEVEL, SpongeFoodData.this::foodLevel);
 
-        registerFieldGetter(Keys.SATURATION, SpongeFoodData.this::getFoodSaturation);
-        registerFieldSetter(Keys.SATURATION, SpongeFoodData.this::setFoodSaturation);
-        registerKeyValue(Keys.SATURATION, SpongeFoodData.this::saturation);
+        this.registerFieldGetter(Keys.SATURATION, SpongeFoodData.this::getFoodSaturation);
+        this.registerFieldSetter(Keys.SATURATION, SpongeFoodData.this::setFoodSaturation);
+        this.registerKeyValue(Keys.SATURATION, SpongeFoodData.this::saturation);
 
-        registerFieldGetter(Keys.EXHAUSTION, SpongeFoodData.this::getFoodExhaustion);
-        registerFieldSetter(Keys.EXHAUSTION, SpongeFoodData.this::setFoodExhaustion);
-        registerKeyValue(Keys.EXHAUSTION, SpongeFoodData.this::exhaustion);
+        this.registerFieldGetter(Keys.EXHAUSTION, SpongeFoodData.this::getFoodExhaustion);
+        this.registerFieldSetter(Keys.EXHAUSTION, SpongeFoodData.this::setFoodExhaustion);
+        this.registerKeyValue(Keys.EXHAUSTION, SpongeFoodData.this::exhaustion);
     }
 }

@@ -44,7 +44,7 @@ public interface IEnvironmentBlockReaderMixin_API extends IBlockReaderMixin_API,
 
     @Override
     default BiomeType getBiome(int x, int y, int z) {
-        return (BiomeType) shadow$getBiome(new BlockPos(x, y, z));
+        return (BiomeType) this.shadow$getBiome(new BlockPos(x, y, z));
     }
 
     @Override
@@ -64,16 +64,16 @@ public interface IEnvironmentBlockReaderMixin_API extends IBlockReaderMixin_API,
 
     @Override
     default int getLight(LightType type, int x, int y, int z) {
-        return shadow$getLightFor((net.minecraft.world.LightType) (Object) type, new BlockPos(x, y, z));
+        return this.shadow$getLightFor((net.minecraft.world.LightType) (Object) type, new BlockPos(x, y, z));
     }
 
     @Override
     default int getLight(int x, int y, int z) {
-        return shadow$getLightFor(net.minecraft.world.LightType.BLOCK, new BlockPos(x, y, z));
+        return this.shadow$getLightFor(net.minecraft.world.LightType.BLOCK, new BlockPos(x, y, z));
     }
 
     @Override
     default boolean isSkylightMax(Vector3i pos) {
-        return shadow$isSkyLightMax(new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
+        return this.shadow$isSkyLightMax(new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
     }
 }

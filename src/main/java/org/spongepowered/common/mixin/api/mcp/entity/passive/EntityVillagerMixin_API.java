@@ -91,7 +91,7 @@ public abstract class EntityVillagerMixin_API extends EntityAgeableMixin_API imp
     @Override
     public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getCareerData());
+        manipulators.add(this.getCareerData());
     }
 
     @Override

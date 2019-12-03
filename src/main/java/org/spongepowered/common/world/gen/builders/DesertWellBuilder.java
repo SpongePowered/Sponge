@@ -39,7 +39,7 @@ public class DesertWellBuilder implements DesertWell.Builder {
     private PopulatorObject obj;
 
     public DesertWellBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -58,8 +58,8 @@ public class DesertWellBuilder implements DesertWell.Builder {
 
     @Override
     public Builder from(DesertWell value) {
-        probability(value.getSpawnProbability());
-        wellObject(value.getWellObject());
+        this.probability(value.getSpawnProbability());
+        this.wellObject(value.getWellObject());
         return this;
     }
 

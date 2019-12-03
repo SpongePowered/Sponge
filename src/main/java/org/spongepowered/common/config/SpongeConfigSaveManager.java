@@ -54,7 +54,7 @@ public class SpongeConfigSaveManager {
                 if (!this.stagedConfigs.isEmpty()) {
                     // We want to save and flush now, but add this into the set in case it is already present.
                     this.stagedConfigs.add(spongeConfig);
-                    flush();
+                    this.flush();
                 } else {
                     // just save
                     spongeConfig.saveNow();

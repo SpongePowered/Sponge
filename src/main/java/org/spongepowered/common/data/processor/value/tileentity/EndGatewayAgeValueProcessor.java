@@ -60,7 +60,7 @@ public class EndGatewayAgeValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected Immutable<Long> constructImmutableValue(Long value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

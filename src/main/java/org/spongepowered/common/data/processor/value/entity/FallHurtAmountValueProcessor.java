@@ -65,7 +65,7 @@ public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     protected Immutable<Double> constructImmutableValue(final Double value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -51,30 +51,30 @@ public final class SpongePickupDelayData extends AbstractData<PickupDelayData, I
     public SpongePickupDelayData(int value) {
         super(PickupDelayData.class);
         this.value = value;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.INFINITE_PICKUP_DELAY, this::isInifinitePickup);
-        registerFieldSetter(Keys.INFINITE_PICKUP_DELAY, (value) -> this.value = value ? Constants.Entity.Item.MAGIC_NO_PICKUP : this.value);
-        registerKeyValue(Keys.INFINITE_PICKUP_DELAY, this::infinite);
+        this.registerFieldGetter(Keys.INFINITE_PICKUP_DELAY, this::isInifinitePickup);
+        this.registerFieldSetter(Keys.INFINITE_PICKUP_DELAY, (value) -> this.value = value ? Constants.Entity.Item.MAGIC_NO_PICKUP : this.value);
+        this.registerKeyValue(Keys.INFINITE_PICKUP_DELAY, this::infinite);
 
-        registerFieldGetter(Keys.PICKUP_DELAY, this::getDelay);
-        registerFieldSetter(Keys.PICKUP_DELAY, (value) -> this.value = value);
-        registerKeyValue(Keys.PICKUP_DELAY, this::delay);
+        this.registerFieldGetter(Keys.PICKUP_DELAY, this::getDelay);
+        this.registerFieldSetter(Keys.PICKUP_DELAY, (value) -> this.value = value);
+        this.registerKeyValue(Keys.PICKUP_DELAY, this::delay);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.PICKUP_DELAY, this.value)
-                .set(Keys.INFINITE_PICKUP_DELAY, isInifinitePickup());
+                .set(Keys.INFINITE_PICKUP_DELAY, this.isInifinitePickup());
     }
 
     @Override
     public Mutable<Boolean> infinite() {
-        return new SpongeValue<>(Keys.INFINITE_PICKUP_DELAY, false, isInifinitePickup());
+        return new SpongeValue<>(Keys.INFINITE_PICKUP_DELAY, false, this.isInifinitePickup());
     }
 
     private boolean isInifinitePickup() {

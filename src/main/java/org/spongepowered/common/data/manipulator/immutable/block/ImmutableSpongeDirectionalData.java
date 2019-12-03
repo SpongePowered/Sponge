@@ -41,7 +41,7 @@ public class ImmutableSpongeDirectionalData extends AbstractImmutableSingleEnumD
 
     @Override
     public Immutable<Direction> direction() {
-        return type();
+        return this.type();
     }
 
 }

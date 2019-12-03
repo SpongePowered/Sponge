@@ -67,8 +67,8 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
-        if (supports(container)) {
-            set((ItemStack) container, "");
+        if (this.supports(container)) {
+            this.set((ItemStack) container, "");
             return DataTransactionResult.successNoData();
         }
         return DataTransactionResult.failNoData();

@@ -119,12 +119,12 @@ public final class TileEntityTypeRegistryModule
             final int colonIndex = key.indexOf(':');
             final String[] split = {key.substring(0, colonIndex), key.substring(colonIndex + 1)};
             final String name = split[1];
-            return getById(name);
+            return this.getById(name);
         }
         final ResourceLocation location = new ResourceLocation(id);
         final Class<? extends TileEntity> object = TileEntityAccessor.accessor$getRegistry().getOrDefault(location);
         if (object != null) {
-            final BlockEntityType forClass = getForClass(object);
+            final BlockEntityType forClass = this.getForClass(object);
             if (forClass != null) {
                 this.catalogTypeMap.put(location.toString(), forClass);
                 return Optional.of(forClass);

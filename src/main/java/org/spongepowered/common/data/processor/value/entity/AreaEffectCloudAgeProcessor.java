@@ -64,7 +64,7 @@ public class AreaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<Ar
 
     @Override
     protected Immutable<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

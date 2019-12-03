@@ -49,7 +49,7 @@ public abstract class StatCraftingMixin_API extends StatBaseMixin_API implements
     @Override
     public StatisticCategory getType() {
         if (this.api$statType == null) {
-            this.api$statType = Sponge.getRegistry().getType(StatisticCategory.class, getId().substring(0, getId().indexOf("."))).get();
+            this.api$statType = Sponge.getRegistry().getType(StatisticCategory.class, this.getId().substring(0, this.getId().indexOf("."))).get();
         }
         return this.api$statType;
     }

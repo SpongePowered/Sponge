@@ -184,7 +184,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
     private int impl$ifCaptureDoTransactions(final net.minecraft.entity.player.PlayerInventory inv, final int index, final ItemStack stack) {
         if (this.impl$doCapture) {
             // Capture items getting picked up
-            final Slot slot = index == 40 ? ((PlayerInventory) this).getOffhand() : impl$getSpongeSlotByIndex(index);
+            final Slot slot = index == 40 ? ((PlayerInventory) this).getOffhand() : this.impl$getSpongeSlotByIndex(index);
             final ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
             final int result = this.addResource(index, stack);
             final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.getStackInSlot(index));

@@ -105,17 +105,17 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
 
     @Override
     public String toString() {
-        return getKey();
+        return this.getKey();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ArgumentType && ((ArgumentType<?>) obj).getKey().equals(getKey());
+        return obj instanceof ArgumentType && ((ArgumentType<?>) obj).getKey().equals(this.getKey());
     }
 
     @Override
     public int hashCode() {
-        return getKey().hashCode();
+        return this.getKey().hashCode();
     }
 
     protected T convert(String s) {

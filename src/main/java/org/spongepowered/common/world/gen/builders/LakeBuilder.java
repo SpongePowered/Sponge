@@ -45,7 +45,7 @@ public class LakeBuilder implements Lake.Builder {
     private VariableAmount height;
 
     public LakeBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -73,7 +73,7 @@ public class LakeBuilder implements Lake.Builder {
 
     @Override
     public Builder from(Lake value) {
-        return liquidType(value.getLiquidType())
+        return this.liquidType(value.getLiquidType())
             .chance(value.getLakeProbability())
             .height(value.getHeight());
     }

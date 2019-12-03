@@ -41,17 +41,17 @@ public interface ICriterionTriggerMixin_API<C extends FilteredTriggerConfigurati
 
     @Override
     default String getId() {
-        return shadow$getId().toString();
+        return this.shadow$getId().toString();
     }
 
     @Override
     default String getName() {
-        return shadow$getId().getPath();
+        return this.shadow$getId().getPath();
     }
 
     @Override
     default void trigger() {
-        trigger(Sponge.getServer().getOnlinePlayers());
+        this.trigger(Sponge.getServer().getOnlinePlayers());
     }
 
     @Override

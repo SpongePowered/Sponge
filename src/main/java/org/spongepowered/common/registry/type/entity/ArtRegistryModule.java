@@ -66,7 +66,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<ArtType> {
 
     @CustomCatalogRegistration
     public void customRegistration() {
-        registerDefaults();
+        this.registerDefaults();
         RegistryHelper.mapFields(ArtTypes.class, field -> {
             String name = field.replace("_", "");
             return this.artMappings.get(name.toLowerCase(Locale.ENGLISH));

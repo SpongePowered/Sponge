@@ -43,7 +43,7 @@ public class SpongeSittingData extends AbstractBooleanData<SittingData, Immutabl
 
     @Override
     public Mutable<Boolean> sitting() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

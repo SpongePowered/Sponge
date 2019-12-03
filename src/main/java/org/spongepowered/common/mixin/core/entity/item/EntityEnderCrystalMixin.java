@@ -71,7 +71,7 @@ public abstract class EntityEnderCrystalMixin extends EntityMixin implements Exp
     @Nullable
     private net.minecraft.world.Explosion impl$throwEventWithEntity(net.minecraft.world.World world, @Nullable Entity nil, double x,
                                                     double y, double z, float strength, boolean smoking, DamageSource source, float damage) {
-        return bridge$ThrowEventWithDetonation(world, nil, x, y, z, smoking, source);
+        return this.bridge$ThrowEventWithDetonation(world, nil, x, y, z, smoking, source);
     }
 
     @Nullable

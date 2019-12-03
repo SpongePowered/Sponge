@@ -56,7 +56,7 @@ public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
                 ticks, ticks, type, beforeCooldown, (Player) this.player);
 
         if (Sponge.getEventManager().post(event)) {
-            notifyOnSet((Item) type, beforeCooldown.orElse(0));
+            this.notifyOnSet((Item) type, beforeCooldown.orElse(0));
             return -1;
         } else {
             return event.getNewCooldown();

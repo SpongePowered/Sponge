@@ -395,7 +395,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     public int cbuf$getVarInt(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final int value = readVarInt();
+        final int value = this.readVarInt();
         this.readerIndex(oldIndex);
         return value;
     }

@@ -43,6 +43,6 @@ public class SpongeInWallData extends AbstractBooleanData<InWallData, ImmutableI
 
     @Override
     public Mutable<Boolean> inWall() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

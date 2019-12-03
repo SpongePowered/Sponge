@@ -30,7 +30,7 @@ public abstract class SpongeSubject extends SpongeBaseSubject {
 
     @Override
     public MemorySubjectData getTransientSubjectData() {
-        return getSubjectData();
+        return this.getSubjectData();
     }
 
     @Override

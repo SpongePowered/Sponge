@@ -194,7 +194,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     private void register(RegisteredListener<? extends Event> handler) {
-        register(Collections.singletonList(handler));
+        this.register(Collections.singletonList(handler));
     }
 
     private void register(List<RegisteredListener<? extends Event>> handlers) {
@@ -233,12 +233,12 @@ public class SpongeEventManager implements EventManager {
         Class<?> handle = listenerObject.getClass();
         ClassLoader handleLoader = handle.getClassLoader();
 
-        AnnotatedEventListener.Factory handlerFactory = classLoaders.get(handleLoader);
+        AnnotatedEventListener.Factory handlerFactory = this.classLoaders.get(handleLoader);
         if (handlerFactory == null) {
             final DefineableClassLoader classLoader = new DefineableClassLoader(handleLoader);
             handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
                     new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
-            classLoaders.put(handleLoader, handlerFactory);
+            this.classLoaders.put(handleLoader, handlerFactory);
         }
 
         for (Method method : handle.getMethods()) {
@@ -282,7 +282,7 @@ public class SpongeEventManager implements EventManager {
         }
 
         this.registeredListeners.add(listenerObject);
-        register(handlers);
+        this.register(handlers);
     }
 
     private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, TypeToken<T> eventClass, Listener listener,
@@ -308,39 +308,39 @@ public class SpongeEventManager implements EventManager {
 
     @Override
     public void registerListeners(Object plugin, Object listener) {
-        registerListener(getPlugin(plugin), listener);
+        this.registerListener(this.getPlugin(plugin), listener);
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, EventListener<? super T> listener) {
-        registerListener(plugin, eventClass, Order.DEFAULT, listener);
+        this.registerListener(plugin, eventClass, Order.DEFAULT, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, TypeToken<T> eventType, EventListener<? super T> listener) {
-        registerListener(plugin, eventType, Order.DEFAULT, listener);
+        this.registerListener(plugin, eventType, Order.DEFAULT, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, EventListener<? super T> listener) {
-        registerListener(plugin, eventClass, Order.DEFAULT, false, listener);
+        this.registerListener(plugin, eventClass, Order.DEFAULT, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, TypeToken<T> eventType, Order order, EventListener<? super T> listener) {
-        registerListener(plugin, eventType, Order.DEFAULT, false, listener);
+        this.registerListener(plugin, eventType, Order.DEFAULT, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
             EventListener<? super T> listener) {
-        registerListener(plugin, TypeToken.of(eventClass), Order.DEFAULT, false, listener);
+        this.registerListener(plugin, TypeToken.of(eventClass), Order.DEFAULT, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, TypeToken<T> eventType, Order order, boolean beforeModifications,
             EventListener<? super T> listener) {
-        register(createRegistration(getPlugin(plugin), eventType, order, beforeModifications, listener));
+        this.register(createRegistration(this.getPlugin(plugin), eventType, order, beforeModifications, listener));
     }
 
     private void unregister(Predicate<RegisteredListener<?>> unregister) {
@@ -368,13 +368,13 @@ public class SpongeEventManager implements EventManager {
     @Override
     public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
-        unregister(handler -> listener.equals(handler.getHandle()));
+        this.unregister(handler -> listener.equals(handler.getHandle()));
     }
 
     @Override
     public void unregisterPluginListeners(Object pluginObj) {
-        final PluginContainer plugin = getPlugin(pluginObj);
-        unregister(handler -> plugin.equals(handler.getPlugin()));
+        final PluginContainer plugin = this.getPlugin(pluginObj);
+        this.unregister(handler -> plugin.equals(handler.getPlugin()));
     }
 
     @SuppressWarnings({"ConstantConditions", "unchecked", "rawtypes"})
@@ -413,7 +413,7 @@ public class SpongeEventManager implements EventManager {
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                 final PhaseContext<?> context = createPluginContext(handler);
+                 final PhaseContext<?> context = this.createPluginContext(handler);
                  final Timing timings = handler.getTimingsHandler()) {
                 frame.pushCause(handler.getPlugin());
                 if (context != null) {
@@ -455,7 +455,7 @@ public class SpongeEventManager implements EventManager {
             // Allow the client thread by default so devs can actually
             // call their own events inside the init events. Only allowing
             // this as long that there is no server available
-            return post(event, !Sponge.isServerAvailable());
+            return this.post(event, !Sponge.isServerAvailable());
         } finally {
             if (event instanceof InteractContainerEvent) { // Finished using Container
                 ((ContainerBridge) ((InteractContainerEvent) event).getTargetInventory()).bridge$setInUse(false);
@@ -464,15 +464,15 @@ public class SpongeEventManager implements EventManager {
     }
 
     public boolean postServer(Event event) {
-        return post(event, false);
+        return this.post(event, false);
     }
 
     public boolean post(Event event, boolean allowClientThread) {
-        return post(event, getHandlerCache(event).getListeners());
+        return this.post(event, this.getHandlerCache(event).getListeners());
     }
 
     public boolean post(Event event, PluginContainer plugin) {
-        return post(event, getHandlerCache(event).getListeners().stream()
+        return this.post(event, this.getHandlerCache(event).getListeners().stream()
                 .filter(l -> l.getPlugin().equals(plugin))
                 .collect(Collectors.toList()));
     }

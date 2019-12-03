@@ -99,7 +99,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
             .map(newVal -> {
                 BlockState o = null;
                 try {
-                    o = (BlockState) with((Key) key, newVal)
+                    o = (BlockState) this.with((Key) key, newVal)
                         .orElseThrow(() -> new IllegalStateException("Unable to retrieve a cycled BlockState for key: " + key + " and value: " + newVal));
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
@@ -130,13 +130,13 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public List<org.spongepowered.api.data.DataManipulator.Immutable<?, ?>> getManipulators() {
-        return lazyLoadManipulatorsAndKeys();
+        return this.lazyLoadManipulatorsAndKeys();
     }
 
     @Nullable
     private ImmutableMap<Key<?>, Object> getKeyMap() {
         if (this.api$keyMap == null) {
-            lazyLoadManipulatorsAndKeys();
+            this.lazyLoadManipulatorsAndKeys();
         }
         return this.api$keyMap;
     }
@@ -199,7 +199,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public <E> Optional<BlockState> with(final Key<? extends Value<E>> key, final E value) {
-        if (!supports(key)) {
+        if (!this.supports(key)) {
             return Optional.empty();
         }
         return ((BlockBridge) this.block).bridge$getStateWithValue(this, key, value);
@@ -214,7 +214,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     @SuppressWarnings({"unchecked"})
     @Override
     public Optional<BlockState> with(final org.spongepowered.api.data.DataManipulator.Immutable<?, ?> valueContainer) {
-        if (supports((Class<org.spongepowered.api.data.DataManipulator.Immutable<?, ?>>) valueContainer.getClass())) {
+        if (this.supports((Class<org.spongepowered.api.data.DataManipulator.Immutable<?, ?>>) valueContainer.getClass())) {
             return ((BlockBridge) this.block).bridge$getStateWithData(this, valueContainer);
         }
         return Optional.empty();
@@ -241,7 +241,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public BlockState merge(final BlockState that) {
-        if (!getType().equals(that.getType())) {
+        if (!this.getType().equals(that.getType())) {
             return this;
         }
         BlockState temp = this;
@@ -258,7 +258,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
 
     @Override
     public BlockState merge(final BlockState that, final MergeFunction function) {
-        if (!getType().equals(that.getType())) {
+        if (!this.getType().equals(that.getType())) {
             return this;
         }
         BlockState temp = this;
@@ -328,7 +328,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     @Override
     public Set<Key<?>> getKeys() {
         if (this.api$keys == null) {
-            lazyLoadManipulatorsAndKeys();
+            this.lazyLoadManipulatorsAndKeys();
         }
         return this.api$keys;
     }
@@ -336,7 +336,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     @Override
     public Set<Immutable<?>> getValues() {
         if (this.api$values == null) {
-            lazyLoadManipulatorsAndKeys();
+            this.lazyLoadManipulatorsAndKeys();
         }
         return this.api$values;
     }
@@ -349,14 +349,14 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Constants.Block.BLOCK_STATE, this.getId());
     }
 
     @Override
     public String getId() {
         if (this.api$id == null) {
-            impl$generateIdFromParentBlock(this.block);
+            this.impl$generateIdFromParentBlock(this.block);
         }
         return this.api$id;
     }
@@ -364,7 +364,7 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     @Override
     public String getName() {
         if (this.api$id == null) {
-            impl$generateIdFromParentBlock(this.block);
+            this.impl$generateIdFromParentBlock(this.block);
         }
         return this.api$id;
     }

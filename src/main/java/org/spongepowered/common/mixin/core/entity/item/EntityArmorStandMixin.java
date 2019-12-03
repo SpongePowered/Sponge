@@ -75,7 +75,7 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;setDead()V", ordinal = 0),
             cancellable = true)
     private void fireDamageEventOutOfWorld(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        fireDestroyDamageEvent(source, cir);
+        this.fireDestroyDamageEvent(source, cir);
     }
 
     @Inject(method = "attackEntityFrom",
@@ -83,7 +83,7 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;dropContents()V"),
             cancellable = true)
     private void fireDamageEventExplosion(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        fireDestroyDamageEvent(source, cir);
+        this.fireDestroyDamageEvent(source, cir);
     }
 
     @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;damageArmorStand(F)V"))
@@ -101,7 +101,7 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
     @Inject(method = "attackEntityFrom", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/util/DamageSource;isCreativePlayer()Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;playBrokenSound()V"), cancellable = true)
     private void fireDamageEventCreativePunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        fireDestroyDamageEvent(source, cir);
+        this.fireDestroyDamageEvent(source, cir);
     }
 
     @Inject(method = "attackEntityFrom",
@@ -125,7 +125,7 @@ public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
     @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;dropBlock()V"),
             cancellable = true)
     private void fireDamageEventSecondPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        fireDestroyDamageEvent(source, cir);
+        this.fireDestroyDamageEvent(source, cir);
     }
 
     /**

@@ -55,7 +55,7 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
     }
 
     public int getInternalId() {
-        return Item.REGISTRY.getId((Item) recordItem);
+        return Item.REGISTRY.getId((Item) this.recordItem);
     }
 
     @Override

@@ -96,7 +96,7 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
 
     @Override
     protected Immutable<DyeColor> constructImmutableValue(DyeColor value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -78,7 +78,7 @@ public abstract class BlockWallSignMixin extends BlockSignMixin {
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
         return ImmutableList.<Immutable<?, ?>>builder()
                 .addAll(super.bridge$getManipulators(blockState))
-                .add(impl$getDirectionalData(blockState))
+                .add(this.impl$getDirectionalData(blockState))
                 .build();
     }
 

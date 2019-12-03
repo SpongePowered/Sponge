@@ -57,7 +57,7 @@ public class SpongeTeamBuilder implements Team.Builder {
     private Set<Text> members;
 
     public SpongeTeamBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override

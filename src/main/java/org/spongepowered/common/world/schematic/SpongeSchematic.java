@@ -92,7 +92,7 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
 
     @Override
     public Palette<BlockState> getBlockPalette() {
-        return getPalette();
+        return this.getPalette();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {

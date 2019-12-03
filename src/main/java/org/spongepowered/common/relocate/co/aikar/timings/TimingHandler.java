@@ -65,7 +65,7 @@ class TimingHandler implements Timing {
         this.groupHandler = id.groupHandler;
 
         TimingIdentifier.getGroup(id.group).handlers.add(this);
-        checkEnabled();
+        this.checkEnabled();
     }
 
     final void checkEnabled() {
@@ -92,7 +92,7 @@ class TimingHandler implements Timing {
         }
 
         if (Sponge.isServerAvailable() && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            startTiming();
+            this.startTiming();
         }
     }
 
@@ -103,7 +103,7 @@ class TimingHandler implements Timing {
         }
 
         if (SpongeImplHooks.isMainThread()) {
-            stopTiming();
+            this.stopTiming();
         }
     }
 
@@ -134,7 +134,7 @@ class TimingHandler implements Timing {
                 this.start = 0;
                 return;
             }
-            addDiff(System.nanoTime() - this.start);
+            this.addDiff(System.nanoTime() - this.start);
             this.start = 0;
         }
     }
@@ -179,7 +179,7 @@ class TimingHandler implements Timing {
         this.timingDepth = 0;
         this.added = false;
         this.children.clear();
-        checkEnabled();
+        this.checkEnabled();
     }
 
     @Override
@@ -198,7 +198,7 @@ class TimingHandler implements Timing {
      */
     @Override
     public void close() {
-        stopTimingIfSync();
+        this.stopTimingIfSync();
     }
 
     public boolean isSpecial() {

@@ -50,7 +50,7 @@ public final class SpongeTargetedEntityData extends AbstractData<TargetedEntityD
     public SpongeTargetedEntityData(EntitySnapshot value) {
         super(TargetedEntityData.class);
         this.value = value;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     @Override
@@ -84,8 +84,8 @@ public final class SpongeTargetedEntityData extends AbstractData<TargetedEntityD
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::getValue);
-        registerFieldSetter(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::setValue);
-        registerKeyValue(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::value);
+        this.registerFieldGetter(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::getValue);
+        this.registerFieldSetter(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::setValue);
+        this.registerKeyValue(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::value);
     }
 }

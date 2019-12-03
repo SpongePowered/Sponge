@@ -57,21 +57,21 @@ public class SpongeFireworkEffect implements FireworkEffect {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         SpongeFireworkEffect that = (SpongeFireworkEffect) o;
-        return flicker == that.flicker &&
-                trails == that.trails &&
-                Objects.equals(colors, that.colors) &&
-                Objects.equals(fades, that.fades) &&
-                Objects.equals(shape, that.shape);
+        return this.flicker == that.flicker &&
+                this.trails == that.trails &&
+                Objects.equals(this.colors, that.colors) &&
+                Objects.equals(this.fades, that.fades) &&
+                Objects.equals(this.shape, that.shape);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(flicker, trails, colors, fades, shape);
+        return Objects.hash(this.flicker, this.trails, this.colors, this.fades, this.shape);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SpongeFireworkEffect implements FireworkEffect {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Item.Fireworks.FIREWORK_SHAPE, this.shape.getId())
                 .set(Constants.Item.Fireworks.FIREWORK_COLORS, this.colors)
                 .set(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, this.fades)

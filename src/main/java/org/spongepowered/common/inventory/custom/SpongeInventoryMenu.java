@@ -74,7 +74,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     private void reopen() {
-        new ArrayList<>(tracked.values()).stream().distinct().forEach(this::open);
+        new ArrayList<>(this.tracked.values()).stream().distinct().forEach(this::open);
     }
 
     public void setTitle(Text title) {
@@ -108,7 +108,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     public boolean isReadOnly() {
-        return readonly;
+        return this.readonly;
     }
 
     @Override
@@ -206,7 +206,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
             // else no slot present
             switch (clickTypeIn) {
                 case PICKUP:
-                    if (slotId == -999 && clickHandler != null) {
+                    if (slotId == -999 && this.clickHandler != null) {
                         if (dragType == 0) {return this.clickHandler.handle(cause, container, ClickTypes.CLICK_LEFT_OUTSIDE);
                         } else if (dragType == 1) {  return this.clickHandler.handle(cause, container, ClickTypes.CLICK_RIGHT_OUTSIDE);
                         } }  // else unknown slotId/drag-type

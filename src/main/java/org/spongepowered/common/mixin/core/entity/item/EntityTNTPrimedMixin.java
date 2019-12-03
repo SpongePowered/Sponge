@@ -131,7 +131,7 @@ public abstract class EntityTNTPrimedMixin extends EntityMixin implements Entity
                     frame.pushCause(this.impl$detonator);
                 }
                 frame.pushCause(this);
-                bridge$postPrime();
+                this.bridge$postPrime();
             }
         }
     }

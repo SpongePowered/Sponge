@@ -52,36 +52,36 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
 
     @Override
     public ImmutablePatternListValue with(List<PatternLayer> value) {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.copyOf(checkNotNull(value)));
+        return new ImmutableSpongePatternListValue(this.getKey(), ImmutableList.copyOf(checkNotNull(value)));
     }
 
     @Override
     public ImmutablePatternListValue transform(Function<List<PatternLayer>, List<PatternLayer>> function) {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
+        return new ImmutableSpongePatternListValue(this.getKey(), ImmutableList.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
     }
 
     @Override
     public PatternListValue asMutable() {
         final List<PatternLayer> list = Lists.newArrayList();
         list.addAll(this.actualValue);
-        return new SpongePatternListValue(getKey(), list);
+        return new SpongePatternListValue(this.getKey(), list);
     }
 
     @Override
     public ImmutablePatternListValue withElement(PatternLayer elements) {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.<PatternLayer>builder().addAll(this.actualValue).add(elements).build());
+        return new ImmutableSpongePatternListValue(this.getKey(), ImmutableList.<PatternLayer>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override
     public ImmutablePatternListValue withAll(Iterable<PatternLayer> elements) {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.<PatternLayer>builder().addAll(this.actualValue).addAll(elements).build());
+        return new ImmutableSpongePatternListValue(this.getKey(), ImmutableList.<PatternLayer>builder().addAll(this.actualValue).addAll(elements).build());
     }
 
     @Override
     public ImmutablePatternListValue without(PatternLayer element) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
         this.actualValue.stream().filter(existingElement -> !existingElement.equals(element)).forEach(builder::add);
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return new ImmutableSpongePatternListValue(this.getKey(), builder.build());
 
     }
 
@@ -89,14 +89,14 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
     public ImmutablePatternListValue withoutAll(Iterable<PatternLayer> elements) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
         this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return new ImmutableSpongePatternListValue(this.getKey(), builder.build());
     }
 
     @Override
     public ImmutablePatternListValue withoutAll(Predicate<PatternLayer> predicate) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
         this.actualValue.stream().filter(existing -> checkNotNull(predicate).test(existing)).forEach(builder::add);
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return new ImmutableSpongePatternListValue(this.getKey(), builder.build());
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return new ImmutableSpongePatternListValue(this.getKey(), builder.build());
     }
 
     @Override
@@ -122,7 +122,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
             }
             builder.add(iterator.next());
         }
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return new ImmutableSpongePatternListValue(this.getKey(), builder.build());
     }
 
     @Override
@@ -133,7 +133,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return new ImmutableSpongePatternListValue(this.getKey(), builder.build());
     }
 
     @Override
@@ -147,21 +147,21 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return new ImmutableSpongePatternListValue(this.getKey(), builder.build());
    }
 
     @Override
     public ImmutablePatternListValue with(BannerPatternShape patternShape, DyeColor color) {
-        return withElement(new SpongePatternLayer(patternShape, color));
+        return this.withElement(new SpongePatternLayer(patternShape, color));
     }
 
     @Override
     public ImmutablePatternListValue with(int index, BannerPatternShape patternShape, DyeColor color) {
-        return with(index, new SpongePatternLayer(patternShape, color));
+        return this.with(index, new SpongePatternLayer(patternShape, color));
     }
 
     @Override
     public ImmutablePatternListValue set(int index, BannerPatternShape patternShape, DyeColor color) {
-        return set(index, new SpongePatternLayer(patternShape, color));
+        return this.set(index, new SpongePatternLayer(patternShape, color));
     }
 }

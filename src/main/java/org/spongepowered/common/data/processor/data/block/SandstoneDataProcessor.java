@@ -65,7 +65,7 @@ public class SandstoneDataProcessor extends AbstractCatalogDataProcessor<Sandsto
 
     @Override
     protected Mutable<SandstoneType> constructValue(SandstoneType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

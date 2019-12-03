@@ -39,7 +39,7 @@ public class ImmutableSpongeSittingData extends AbstractImmutableBooleanData<Imm
 
     @Override
     public Immutable<Boolean> sitting() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

@@ -72,7 +72,7 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
         final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
                 this.advancementProgress).getAdvancement();
         ((AdvancementProgressBridge) this.advancementProgress).bridge$getPlayerAdvancements()
-                .grantCriterion(advancement, getCriterion().getName());
+                .grantCriterion(advancement, this.getCriterion().getName());
         return this.obtained.toInstant();
     }
 
@@ -85,7 +85,7 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
         final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
                 this.advancementProgress).getAdvancement();
         ((AdvancementProgressBridge) this.advancementProgress).bridge$getPlayerAdvancements()
-                .revokeCriterion(advancement, getCriterion().getName());
+                .revokeCriterion(advancement, this.getCriterion().getName());
         return Optional.of(instant);
     }
 

@@ -310,7 +310,7 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
 
         org.spongepowered.api.world.chunk.Chunk chunk = (org.spongepowered.api.world.chunk.Chunk) this.world.getChunk(chunkX, chunkZ);
 
-        BiomeGenerationSettings settings = getBiomeSettings(biome);
+        BiomeGenerationSettings settings = this.getBiomeSettings(biome);
 
         List<Feature> populators = new ArrayList<>(this.pop);
 

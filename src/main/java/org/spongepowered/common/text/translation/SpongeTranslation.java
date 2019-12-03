@@ -78,7 +78,7 @@ public class SpongeTranslation implements Translation {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.getClass() != obj.getClass()) {
             return false;
         }
         SpongeTranslation other = (SpongeTranslation) obj;

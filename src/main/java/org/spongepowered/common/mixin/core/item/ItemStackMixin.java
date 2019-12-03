@@ -92,7 +92,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
             this.manipulators.remove(existingManipulator);
         }
         this.manipulators.add(newManipulator);
-        resyncCustomToTag();
+        this.resyncCustomToTag();
         return builder.success(newManipulator.getValues())
             .result(DataTransactionResult.Type.SUCCESS)
             .build();
@@ -101,7 +101,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     @Override
     public void bridge$addFailedData(ImmutableList<DataView> failedData) {
         this.failedData.addAll(failedData);
-        resyncCustomToTag();
+        this.resyncCustomToTag();
     }
 
     @Override
@@ -130,17 +130,17 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
             for (DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            final CompoundNBT spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
+            final CompoundNBT spongeCompound = this.getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
             spongeCompound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else if (!this.failedData.isEmpty()) {
             final ListNBT newList = new ListNBT();
             for (DataView failedDatum : this.failedData) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
             }
-            final CompoundNBT spongeCompound = getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
+            final CompoundNBT spongeCompound = this.getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
             spongeCompound.setTag(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
         } else {
-            if (hasTagCompound()) {
+            if (this.hasTagCompound()) {
                 this.getTagCompound().remove(Constants.Sponge.SPONGE_DATA);
                 if (this.getTagCompound().isEmpty()) {
                     this.setTagCompound(null);
@@ -162,7 +162,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
         }
         if (manipulator != null) {
             this.manipulators.remove(manipulator);
-            resyncCustomToTag();
+            this.resyncCustomToTag();
             return DataTransactionResult.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
         }
         return DataTransactionResult.failNoData();
@@ -192,7 +192,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
                 builder.replace(((org.spongepowered.api.data.value.Value.Mutable) manipulator.getValue((Key) key).get()).asImmutable());
                 manipulator.set(key, value);
                 builder.success(((org.spongepowered.api.data.value.Value.Mutable) manipulator.getValue((Key) key).get()).asImmutable());
-                resyncCustomToTag();
+                this.resyncCustomToTag();
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
@@ -206,7 +206,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
             final Mutable<?, ?> manipulator = iterator.next();
             if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
                 iterator.remove();
-                resyncCustomToTag();
+                this.resyncCustomToTag();
                 return DataTransactionResult.builder()
                     .replace(manipulator.getValues())
                     .result(DataTransactionResult.Type.SUCCESS)
@@ -271,8 +271,8 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void onRead(CompoundNBT compound, CallbackInfo info) {
-        if (hasTagCompound() && getTagCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            DataUtil.readCustomData(getTagCompound().getCompound(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        if (this.hasTagCompound() && this.getTagCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            DataUtil.readCustomData(this.getTagCompound().getCompound(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
         }
     }
 
@@ -281,8 +281,8 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
         if (this.stackTagCompound != compound) {
             this.manipulators.clear();
         }
-        if (hasTagCompound() && getTagCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            DataUtil.readCustomData(getTagCompound().getCompound(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        if (this.hasTagCompound() && this.getTagCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            DataUtil.readCustomData(this.getTagCompound().getCompound(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
         }
     }
 

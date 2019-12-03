@@ -70,7 +70,7 @@ public final class SpongeEntityStatistic extends Stat implements EntityStatistic
     @Override
     public StatisticCategory getType() {
         if (this.statisticType == null) {
-            this.statisticType = Sponge.getRegistry().getType(StatisticCategory.class, getId().substring(0, getId().indexOf("."))).get();
+            this.statisticType = Sponge.getRegistry().getType(StatisticCategory.class, this.getId().substring(0, this.getId().indexOf("."))).get();
         }
         return this.statisticType;
     }

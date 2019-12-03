@@ -56,7 +56,7 @@ public class RespawnLocationDataProcessor extends
         if (container instanceof BedLocationsBridge) {
             ImmutableMap<UUID, RespawnLocation> removed = ((BedLocationsBridge) container).bridge$removeAllBeds();
             if (!removed.isEmpty()) {
-                return DataTransactionResult.successRemove(constructImmutableValue(removed));
+                return DataTransactionResult.successRemove(this.constructImmutableValue(removed));
             }
             return DataTransactionResult.successNoData();
         }

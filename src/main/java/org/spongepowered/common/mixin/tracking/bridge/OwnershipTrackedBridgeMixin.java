@@ -80,7 +80,7 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         final User value = this.tracked$ownerUser == null ? null : this.tracked$ownerUser.get();
         if (value == null) {
             if (this.tracked$owner != null) {
-                final Optional<User> user = tracked$getTrackedUser(PlayerTracker.Type.OWNER);
+                final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.OWNER);
                 user.ifPresent(owner -> this.tracked$ownerUser = new WeakReference<>(owner));
                 return user;
             }
@@ -99,7 +99,7 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         final User value = this.tracked$notifierUser == null ? null : this.tracked$notifierUser.get();
         if (value == null) {
             if (this.tracked$owner != null) {
-                final Optional<User> user = tracked$getTrackedUser(PlayerTracker.Type.NOTIFIER);
+                final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.NOTIFIER);
                 user.ifPresent(owner -> this.tracked$notifierUser = new WeakReference<>(owner));
                 return user;
             }

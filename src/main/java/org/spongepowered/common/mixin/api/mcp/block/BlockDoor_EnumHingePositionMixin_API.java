@@ -40,12 +40,12 @@ public abstract class BlockDoor_EnumHingePositionMixin_API implements Hinge {
     @Shadow public abstract String shadow$getName();
 
     public String hinge$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String hinge$getName() {
-        return shadow$getName();
+        return this.shadow$getName();
     }
 
     @Override

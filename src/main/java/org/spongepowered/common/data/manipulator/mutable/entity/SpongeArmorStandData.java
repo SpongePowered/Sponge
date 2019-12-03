@@ -51,27 +51,27 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
         this.small = small;
         this.arms = arms;
         this.basePlate = basePlate;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.ARMOR_STAND_HAS_ARMS, () -> this.arms);
-        registerFieldSetter(Keys.ARMOR_STAND_HAS_ARMS, (hasArms) -> this.arms = hasArms);
-        registerKeyValue(Keys.ARMOR_STAND_HAS_ARMS, this::arms);
+        this.registerFieldGetter(Keys.ARMOR_STAND_HAS_ARMS, () -> this.arms);
+        this.registerFieldSetter(Keys.ARMOR_STAND_HAS_ARMS, (hasArms) -> this.arms = hasArms);
+        this.registerKeyValue(Keys.ARMOR_STAND_HAS_ARMS, this::arms);
 
 
-        registerFieldGetter(Keys.ARMOR_STAND_IS_SMALL, () -> this.small);
-        registerFieldSetter(Keys.ARMOR_STAND_IS_SMALL, (small) -> this.small = small);
-        registerKeyValue(Keys.ARMOR_STAND_IS_SMALL, this::small);
+        this.registerFieldGetter(Keys.ARMOR_STAND_IS_SMALL, () -> this.small);
+        this.registerFieldSetter(Keys.ARMOR_STAND_IS_SMALL, (small) -> this.small = small);
+        this.registerKeyValue(Keys.ARMOR_STAND_IS_SMALL, this::small);
 
-        registerFieldGetter(Keys.ARMOR_STAND_HAS_BASE_PLATE, () -> this.basePlate);
-        registerFieldSetter(Keys.ARMOR_STAND_HAS_BASE_PLATE, (basePlate) -> this.basePlate = basePlate);
-        registerKeyValue(Keys.ARMOR_STAND_HAS_BASE_PLATE, this::basePlate);
+        this.registerFieldGetter(Keys.ARMOR_STAND_HAS_BASE_PLATE, () -> this.basePlate);
+        this.registerFieldSetter(Keys.ARMOR_STAND_HAS_BASE_PLATE, (basePlate) -> this.basePlate = basePlate);
+        this.registerKeyValue(Keys.ARMOR_STAND_HAS_BASE_PLATE, this::basePlate);
 
-        registerFieldGetter(Keys.ARMOR_STAND_MARKER, () -> this.marker);
-        registerFieldSetter(Keys.ARMOR_STAND_MARKER, (marker) -> this.marker = marker);
-        registerKeyValue(Keys.ARMOR_STAND_MARKER, this::marker);
+        this.registerFieldGetter(Keys.ARMOR_STAND_MARKER, () -> this.marker);
+        this.registerFieldSetter(Keys.ARMOR_STAND_MARKER, (marker) -> this.marker = marker);
+        this.registerKeyValue(Keys.ARMOR_STAND_MARKER, this::marker);
     }
 
     @Override

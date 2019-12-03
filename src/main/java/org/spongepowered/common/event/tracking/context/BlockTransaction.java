@@ -481,7 +481,7 @@ public abstract class BlockTransaction {
 
         @Override
         public void provideUnchangedStates(final BlockTransaction prevChange) {
-            provideExistingBlockState(prevChange, (BlockState) this.original.getState());
+            this.provideExistingBlockState(prevChange, (BlockState) this.original.getState());
             if (prevChange.applyTileAtTransaction(this.affectedPosition, this.queuedRemoval)) {
                 this.appliedPreChange = true;
             }
@@ -547,7 +547,7 @@ public abstract class BlockTransaction {
 
         @Override
         public void provideUnchangedStates(final BlockTransaction prevChange) {
-            provideExistingBlockState(prevChange, this.originalState);
+            this.provideExistingBlockState(prevChange, this.originalState);
         }
 
         @Override

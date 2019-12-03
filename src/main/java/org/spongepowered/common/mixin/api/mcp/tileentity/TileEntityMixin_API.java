@@ -86,7 +86,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     @Override
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Queries.WORLD_ID, ((World) this.world).getUniqueId().toString())
             .set(Queries.POSITION_X, this.getPos().getX())
             .set(Queries.POSITION_Y, this.getPos().getY())

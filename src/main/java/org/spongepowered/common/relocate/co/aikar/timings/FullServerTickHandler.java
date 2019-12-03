@@ -84,10 +84,10 @@ public class FullServerTickHandler extends TimingHandler {
         this.record.curTickCount--;
         this.minuteData.curTickTotal = this.record.curTickTotal;
         this.minuteData.curTickCount = 1;
-        boolean violated = isViolated();
+        boolean violated = this.isViolated();
         this.minuteData.processTick(violated);
         TimingsManager.TIMINGS_TICK.processTick(violated);
-        processTick(violated);
+        this.processTick(violated);
 
         if (TimingHistory.timedTicks % 1200 == 0) {
             TimingsManager.MINUTE_REPORTS.add(new TimingHistory.MinuteReport());

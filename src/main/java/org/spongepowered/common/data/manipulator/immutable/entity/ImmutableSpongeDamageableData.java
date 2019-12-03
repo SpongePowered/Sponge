@@ -76,11 +76,11 @@ public class ImmutableSpongeDamageableData extends AbstractImmutableData<Immutab
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.LAST_ATTACKER, () -> Optional.ofNullable(this.lastAttacker));
-        registerKeyValue(Keys.LAST_ATTACKER, () -> this.lastAttackerValue);
+        this.registerFieldGetter(Keys.LAST_ATTACKER, () -> Optional.ofNullable(this.lastAttacker));
+        this.registerKeyValue(Keys.LAST_ATTACKER, () -> this.lastAttackerValue);
 
-        registerFieldGetter(Keys.LAST_DAMAGE, () -> Optional.ofNullable(this.lastDamage));
-        registerKeyValue(Keys.LAST_DAMAGE, () -> this.lastDamageValue);
+        this.registerFieldGetter(Keys.LAST_DAMAGE, () -> Optional.ofNullable(this.lastDamage));
+        this.registerKeyValue(Keys.LAST_DAMAGE, () -> this.lastDamageValue);
     }
 
     @Override

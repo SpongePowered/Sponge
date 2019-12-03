@@ -73,7 +73,7 @@ public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdva
 
     private Collection<AdvancementCriterion> getRecursiveChildren() {
         if (this.recursiveChildrenCriteria == null) {
-            this.recursiveChildrenCriteria = getAllChildrenCriteria0(false);
+            this.recursiveChildrenCriteria = this.getAllChildrenCriteria0(false);
         }
         return this.recursiveChildrenCriteria;
     }
@@ -86,20 +86,20 @@ public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdva
     @Override
     public Collection<AdvancementCriterion> getLeafCriteria() {
         if (this.leafChildrenCriteria == null) {
-            this.leafChildrenCriteria = getAllChildrenCriteria0(true);
+            this.leafChildrenCriteria = this.getAllChildrenCriteria0(true);
         }
         return this.leafChildrenCriteria;
     }
 
     @Override
     public Collection<AdvancementCriterion> find(final String name) {
-        return getRecursiveChildren().stream()
+        return this.getRecursiveChildren().stream()
                 .filter(c -> c.getName().equals(name)).collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
     public Optional<AdvancementCriterion> findFirst(final String name) {
-        return getRecursiveChildren().stream()
+        return this.getRecursiveChildren().stream()
                 .filter(c -> c.getName().equals(name)).findFirst();
     }
 }

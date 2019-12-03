@@ -42,7 +42,7 @@ public abstract class TranslatableTextMixin extends TextMixin {
 
     @Override
     protected TextComponent createComponent() {
-        return new TranslationTextComponent(this.translation.getId(), unwrapArguments(this.arguments));
+        return new TranslationTextComponent(this.translation.getId(), this.unwrapArguments(this.arguments));
     }
 
     private Object[] unwrapArguments(final ImmutableList<Object> args) {

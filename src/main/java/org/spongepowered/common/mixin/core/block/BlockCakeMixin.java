@@ -44,7 +44,7 @@ public abstract class BlockCakeMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments")
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getLayerData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getLayerData(blockState));
     }
 
     @Override

@@ -76,8 +76,8 @@ public class BlockPaletteTypeRegistryModule implements SpongeAdditionalCatalogRe
 
     @Override
     public void registerDefaults() {
-        registerAdditionalCatalog(new SpongeBlockPaletteType("global_blocks", () -> (org.spongepowered.api.world.schematic.BlockPalette) GlobalPalette.getBlockPalette()));
-        registerAdditionalCatalog(new SpongeBlockPaletteType("local_blocks", () -> new BlockPaletteWrapper(new BimapPalette<>(PaletteTypes.LOCAL_BLOCKS), org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL)));
+        this.registerAdditionalCatalog(new SpongeBlockPaletteType("global_blocks", () -> (org.spongepowered.api.world.schematic.BlockPalette) GlobalPalette.getBlockPalette()));
+        this.registerAdditionalCatalog(new SpongeBlockPaletteType("local_blocks", () -> new BlockPaletteWrapper(new BimapPalette<>(PaletteTypes.LOCAL_BLOCKS), org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL)));
     }
 
     @Override

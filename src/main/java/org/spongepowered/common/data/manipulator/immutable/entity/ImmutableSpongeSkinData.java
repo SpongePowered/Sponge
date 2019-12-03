@@ -66,7 +66,7 @@ public class ImmutableSpongeSkinData extends AbstractImmutableSingleData<UUID, I
 
     @Override
     protected Immutable<?> getValueGetter() {
-        return skinUniqueId();
+        return this.skinUniqueId();
     }
 
 }

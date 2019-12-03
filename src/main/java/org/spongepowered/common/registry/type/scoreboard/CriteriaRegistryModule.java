@@ -39,12 +39,12 @@ public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalog
 
     @Override
     public void registerDefaults() {
-        register((Criterion) ScoreCriteria.DUMMY);
-        register((Criterion) ScoreCriteria.TRIGGER);
-        register((Criterion) ScoreCriteria.HEALTH);
-        register((Criterion) ScoreCriteria.PLAYER_KILL_COUNT);
-        register((Criterion) ScoreCriteria.TOTAL_KILL_COUNT);
-        register((Criterion) ScoreCriteria.DEATH_COUNT);
+        this.register((Criterion) ScoreCriteria.DUMMY);
+        this.register((Criterion) ScoreCriteria.TRIGGER);
+        this.register((Criterion) ScoreCriteria.HEALTH);
+        this.register((Criterion) ScoreCriteria.PLAYER_KILL_COUNT);
+        this.register((Criterion) ScoreCriteria.TOTAL_KILL_COUNT);
+        this.register((Criterion) ScoreCriteria.DEATH_COUNT);
     }
 
 }

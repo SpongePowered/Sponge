@@ -103,8 +103,8 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     public void bridge$fireConstructors() {
         super.bridge$fireConstructors();
         if (ShouldFire.A_I_TASK_EVENT_ADD) {
-            handleDelayedTaskEventFiring((EntityAITasksBridge) this.tasks);
-            handleDelayedTaskEventFiring((EntityAITasksBridge) this.targetTasks);
+            this.handleDelayedTaskEventFiring((EntityAITasksBridge) this.tasks);
+            this.handleDelayedTaskEventFiring((EntityAITasksBridge) this.targetTasks);
         }
     }
 
@@ -141,7 +141,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
         at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD),
         cancellable = true)
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
-        final net.minecraft.entity.Entity entity = getLeashHolder();
+        final net.minecraft.entity.Entity entity = this.getLeashHolder();
         if (!this.world.isRemote) {
             final CauseStackManager csm = Sponge.getCauseStackManager();
             if(entity == null) {

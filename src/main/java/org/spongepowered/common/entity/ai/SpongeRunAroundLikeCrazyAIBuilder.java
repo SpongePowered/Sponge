@@ -46,7 +46,7 @@ public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCra
 
     @Override
     public RunAroundLikeCrazyAITask.Builder from(RunAroundLikeCrazyAITask value) {
-        return speed(value.getSpeed());
+        return this.speed(value.getSpeed());
     }
 
     @Override

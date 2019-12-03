@@ -62,7 +62,7 @@ public class SpongePopulatorType implements Feature {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (this.getClass() != obj.getClass()) {
             return false;
         }
         final SpongePopulatorType other = (SpongePopulatorType) obj;

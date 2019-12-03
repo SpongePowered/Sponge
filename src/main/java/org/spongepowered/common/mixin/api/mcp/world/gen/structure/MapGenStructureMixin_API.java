@@ -60,7 +60,7 @@ public abstract class MapGenStructureMixin_API extends MapGenBase implements Fea
     public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
         Vector3i min = extent.getBlockMin();
         World world = (World) worldIn;
-        generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
+        this.generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
     }
 
 }

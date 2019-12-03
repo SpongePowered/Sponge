@@ -359,7 +359,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public DataContainer translate(final Schematic schematic) throws InvalidDataException {
         final DataContainer data = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-        addTo(schematic, data);
+        this.addTo(schematic, data);
         return data;
     }
 
@@ -398,7 +398,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     for (int x = 0; x < width; x++) {
                         final int x0 = xMin + x;
                         final BlockState state = schematic.getBlock(x0, y0, z0);
-                        writeIdToBuffer(buffer, palette.getOrAssign(state));
+                        this.writeIdToBuffer(buffer, palette.getOrAssign(state));
                     }
                 }
             }
@@ -416,7 +416,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     for (int x = 0; x < width; x++) {
                         final int x0 = xMin + x;
                         final BiomeType state = biomes.getBiome(x0, 0, z0);
-                        writeIdToBuffer(buffer, biomePalette.getOrAssign(state));
+                        this.writeIdToBuffer(buffer, biomePalette.getOrAssign(state));
                     }
 
                 }

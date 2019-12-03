@@ -48,7 +48,7 @@ public class SpongePassengerData extends AbstractListData<UUID, PassengerData, I
 
     @Override
     public Mutable<UUID> passengers() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
     @Override

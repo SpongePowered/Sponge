@@ -85,7 +85,7 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
 
     @Override
     public Mutable<Color> color() {
-        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, Color.ofRgb(getColor()));
+        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, Color.ofRgb(this.getColor()));
     }
 
     @Override
@@ -94,7 +94,7 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
                 .minimum(0D)
                 .maximum((double) Float.MAX_VALUE)
                 .defaultValue(0.5D)
-                .actualValue((double) getRadius())
+                .actualValue((double) this.getRadius())
                 .build();
     }
 

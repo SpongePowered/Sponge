@@ -60,7 +60,7 @@ public abstract class ChunkGeneratorOverworldMixin_API
         this.biomesForGeneration = ((ChunkGeneratorOverworldBridge) this).bridge$getBiomesForGeneration(x, z);
         final ChunkPrimer chunkprimer = new ChunkBufferPrimer(buffer);
         this.setBlocksInChunk(x, z, chunkprimer);
-        apiImpl$setBedrock(buffer);
+        this.apiImpl$setBedrock(buffer);
     }
 
     private void apiImpl$setBedrock(final MutableBlockVolume buffer) {

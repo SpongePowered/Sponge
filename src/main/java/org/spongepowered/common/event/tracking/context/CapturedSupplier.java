@@ -108,7 +108,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>>, ICapture
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final CapturedSupplier<?> other = (CapturedSupplier<?>) obj;

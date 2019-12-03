@@ -78,8 +78,8 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
 
     @Override
     public void registerDefaults() {
-        createGoalType("minecraft:normal", "Normal");
-        createGoalType("minecraft:target", "Target");
+        this.createGoalType("minecraft:normal", "Normal");
+        this.createGoalType("minecraft:target", "Target");
     }
 
     private GoalType createGoalType(String combinedId, String name) {
@@ -95,7 +95,7 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
         final PluginContainer pluginContainer = optPluginContainer.get();
         final String combinedId = pluginContainer.getId().toLowerCase(Locale.ENGLISH) + ":" + id;
 
-        return createGoalType(combinedId, name);
+        return this.createGoalType(combinedId, name);
     }
 
     GoalTypeModule() {

@@ -68,7 +68,7 @@ public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected Immutable<String> constructImmutableValue(final String value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
 }

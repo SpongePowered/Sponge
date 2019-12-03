@@ -39,7 +39,7 @@ public class ImmutableSpongePlayingData extends AbstractImmutableBooleanData<Imm
 
     @Override
     public Immutable<Boolean> playing() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

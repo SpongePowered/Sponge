@@ -520,7 +520,7 @@ public abstract class WorldMixin implements WorldBridge {
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;"),
                            to =   @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z")))
     private boolean onAddTileEntity(final List<? super TileEntity> list, final Object tile) {
-        if (!this.bridge$isFake() && !canTileUpdate((TileEntity) tile)) {
+        if (!this.bridge$isFake() && !this.canTileUpdate((TileEntity) tile)) {
             return false;
         }
 
@@ -659,7 +659,7 @@ public abstract class WorldMixin implements WorldBridge {
     @Redirect(method = "checkLightFor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;IZ)Z"))
     protected boolean spongeIsAreaLoadedForCheckingLight(
         final net.minecraft.world.World thisWorld, final BlockPos pos, final int radius, final boolean allowEmtpy, final LightType lightType, final BlockPos samePosition) {
-        return isAreaLoaded(pos, radius, allowEmtpy);
+        return this.isAreaLoaded(pos, radius, allowEmtpy);
     }
 
     /**

@@ -66,11 +66,11 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ITEM_DURABILITY, () -> this.durability);
-        registerKeyValue(Keys.ITEM_DURABILITY, this::durability);
+        this.registerFieldGetter(Keys.ITEM_DURABILITY, () -> this.durability);
+        this.registerKeyValue(Keys.ITEM_DURABILITY, this::durability);
 
-        registerFieldGetter(Keys.UNBREAKABLE, () -> this.unbreakable);
-        registerKeyValue(Keys.UNBREAKABLE, this::unbreakable);
+        this.registerFieldGetter(Keys.UNBREAKABLE, () -> this.unbreakable);
+        this.registerKeyValue(Keys.UNBREAKABLE, this::unbreakable);
     }
 
     @Override

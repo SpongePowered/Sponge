@@ -48,28 +48,28 @@ public class SpongeSkinData extends AbstractSingleData<UUID, SkinData, Immutable
 
     @Override
     public SkinData copy() {
-        return new SpongeSkinData(getValue());
+        return new SpongeSkinData(this.getValue());
     }
 
     @Override
     public ImmutableSkinData asImmutable() {
-        return new ImmutableSpongeSkinData(getValue());
+        return new ImmutableSpongeSkinData(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Constants.GameProfile.SKIN_UUID, getValue());
+            .set(Constants.GameProfile.SKIN_UUID, this.getValue());
     }
 
     @Override
     public Mutable<UUID> skinUniqueId() {
-        return new SpongeValue<>(Keys.SKIN_UNIQUE_ID, getValue());
+        return new SpongeValue<>(Keys.SKIN_UNIQUE_ID, this.getValue());
     }
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return skinUniqueId();
+        return this.skinUniqueId();
     }
 
 }

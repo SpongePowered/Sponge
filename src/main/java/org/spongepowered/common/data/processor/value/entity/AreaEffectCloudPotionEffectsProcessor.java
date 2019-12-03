@@ -68,7 +68,7 @@ public class AreaEffectCloudPotionEffectsProcessor extends AbstractSpongeValuePr
 
     @Override
     protected Immutable<PotionEffect> constructImmutableValue(List<PotionEffect> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

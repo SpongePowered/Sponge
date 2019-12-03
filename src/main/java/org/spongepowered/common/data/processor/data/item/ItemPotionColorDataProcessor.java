@@ -84,7 +84,7 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!supports(container)) {
+        if (!this.supports(container)) {
             return DataTransactionResult.failNoData();
         }
 
@@ -100,6 +100,6 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
 
         Color removedColor = Color.ofRgb(mainCompound.getInt(Constants.Item.CUSTOM_POTION_COLOR));
         mainCompound.remove(Constants.Item.CUSTOM_POTION_COLOR);
-        return DataTransactionResult.successRemove(constructImmutableValue(removedColor));
+        return DataTransactionResult.successRemove(this.constructImmutableValue(removedColor));
     }
 }

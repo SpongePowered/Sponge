@@ -46,16 +46,16 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
         super(ImmutableJoinData.class);
         this.firstJoinedValue = new ImmutableSpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, this.firstJoined = firstJoined);
         this.lastJoinedValue = new ImmutableSpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, this.lastJoined = lastJoined);
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.FIRST_DATE_PLAYED, () -> this.firstJoined);
-        registerKeyValue(Keys.FIRST_DATE_PLAYED, this::firstPlayed);
+        this.registerFieldGetter(Keys.FIRST_DATE_PLAYED, () -> this.firstJoined);
+        this.registerKeyValue(Keys.FIRST_DATE_PLAYED, this::firstPlayed);
 
-        registerFieldGetter(Keys.LAST_DATE_PLAYED, () -> this.lastJoined);
-        registerKeyValue(Keys.LAST_DATE_PLAYED, this::lastPlayed);
+        this.registerFieldGetter(Keys.LAST_DATE_PLAYED, () -> this.lastJoined);
+        this.registerKeyValue(Keys.LAST_DATE_PLAYED, this::lastPlayed);
     }
 
     @Override

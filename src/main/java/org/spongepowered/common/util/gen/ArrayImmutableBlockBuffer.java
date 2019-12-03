@@ -76,14 +76,14 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
-        checkRange(x, y, z);
-        return this.palette.get(this.data.get(getIndex(x, y, z))).orElse(AIR);
+        this.checkRange(x, y, z);
+        return this.palette.get(this.data.get(this.getIndex(x, y, z))).orElse(AIR);
     }
 
     @Override
     public ImmutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ImmutableBlockViewDownsize(this, newMin, newMax);
     }
 
@@ -131,7 +131,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {

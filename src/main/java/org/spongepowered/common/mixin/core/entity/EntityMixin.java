@@ -478,7 +478,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Inject(method = "readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void onSpongeReadFromNBT(final CompoundNBT compound, final CallbackInfo ci) {
         if (this.isConstructing) {
-            bridge$fireConstructors(); // Do this early as possible
+            this.bridge$fireConstructors(); // Do this early as possible
         }
         this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
     }

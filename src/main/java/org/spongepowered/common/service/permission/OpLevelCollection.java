@@ -130,12 +130,12 @@ public class OpLevelCollection extends SpongeSubjectCollection {
 
         @Override
         public PermissionService getService() {
-            return service;
+            return this.service;
         }
 
         @Override
         public SubjectReference asSubjectReference() {
-            return this.service.newSubjectReference(getContainingCollection().getIdentifier(), getIdentifier());
+            return this.service.newSubjectReference(this.getContainingCollection().getIdentifier(), this.getIdentifier());
         }
 
         @Override

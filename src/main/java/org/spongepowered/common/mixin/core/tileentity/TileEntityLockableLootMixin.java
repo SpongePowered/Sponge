@@ -36,7 +36,7 @@ public abstract class TileEntityLockableLootMixin extends TileEntityLockableMixi
 
     @Override
     public void bridge$setCustomDisplayName(String customName) {
-        setCustomName(customName);
+        this.setCustomName(customName);
     }
 
 }

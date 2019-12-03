@@ -126,11 +126,11 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
-        if (!supports(container)) {
+        if (!this.supports(container)) {
             return DataTransactionResult.failNoData();
         }
         final ItemStack itemStack = (ItemStack) container;
-        final Optional<List<Text>> old = getVal(itemStack);
+        final Optional<List<Text>> old = this.getVal(itemStack);
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
@@ -138,7 +138,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
             if (itemStack.hasTag()) {
                 itemStack.getTag().remove(Constants.Item.BLOCK_ENTITY_TAG);
             }
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         } catch (final Exception e) {
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }

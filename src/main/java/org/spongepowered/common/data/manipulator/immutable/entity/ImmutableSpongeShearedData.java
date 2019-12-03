@@ -39,7 +39,7 @@ public class ImmutableSpongeShearedData extends AbstractImmutableBooleanData<Imm
 
     @Override
     public Immutable<Boolean> sheared() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

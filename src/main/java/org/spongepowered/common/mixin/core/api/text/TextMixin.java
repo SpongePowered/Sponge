@@ -66,7 +66,7 @@ public abstract class TextMixin implements TextBridge {
 
     private ITextComponent initializeComponent() {
         if (this.component == null) {
-            this.component = createComponent();
+            this.component = this.createComponent();
             Style style = this.component.getStyle();
 
             if (this.format.getColor() != TextColors.NONE) {
@@ -103,12 +103,12 @@ public abstract class TextMixin implements TextBridge {
     }
 
     private ITextComponent getHandle() {
-        return initializeComponent();
+        return this.initializeComponent();
     }
 
     @Override
     public ITextComponent bridge$toComponent() {
-        return getHandle().shallowCopy(); // Mutable instances are not nice :(
+        return this.getHandle().shallowCopy(); // Mutable instances are not nice :(
     }
 
     /**
@@ -121,7 +121,7 @@ public abstract class TextMixin implements TextBridge {
      */
     @Overwrite
     public final String toPlain() {
-        return ((ITextComponentBridge) getHandle()).bridge$toPlain();
+        return ((ITextComponentBridge) this.getHandle()).bridge$toPlain();
     }
 
     /**
@@ -134,13 +134,13 @@ public abstract class TextMixin implements TextBridge {
      */
     @Overwrite
     public final String toPlainSingle() {
-        return getHandle().getUnformattedComponentText();
+        return this.getHandle().getUnformattedComponentText();
     }
 
     @Override
     public String bridge$toJson() {
         if (this.json == null) {
-            this.json = ITextComponent.Serializer.toJson(getHandle());
+            this.json = ITextComponent.Serializer.toJson(this.getHandle());
         }
 
         return this.json;
@@ -148,6 +148,6 @@ public abstract class TextMixin implements TextBridge {
 
     @Override
     public String bridge$toLegacy(char code) {
-        return ((ITextComponentBridge) getHandle()).bridge$toLegacy(code);
+        return ((ITextComponentBridge) this.getHandle()).bridge$toLegacy(code);
     }
 }

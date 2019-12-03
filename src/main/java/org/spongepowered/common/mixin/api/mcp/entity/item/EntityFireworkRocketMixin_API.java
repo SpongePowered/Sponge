@@ -81,16 +81,16 @@ public abstract class EntityFireworkRocketMixin_API extends EntityMixin_API impl
 
     @Override
     public void prime() {
-        checkState(!isPrimed(), "already primed");
+        checkState(!this.isPrimed(), "already primed");
         checkState(this.isDead, "firework about to be primed");
-        getWorld().spawnEntity(this);
+        this.getWorld().spawnEntity(this);
     }
 
     @Override
     public void defuse() {
-        checkState(isPrimed(), "not primed");
+        checkState(this.isPrimed(), "not primed");
         if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
-            setDead();
+            this.setDead();
             ((FusedExplosiveBridge) this).bridge$postDefuse();
         }
     }

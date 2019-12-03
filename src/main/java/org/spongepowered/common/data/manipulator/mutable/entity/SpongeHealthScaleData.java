@@ -54,7 +54,7 @@ public class SpongeHealthScaleData extends AbstractSingleData<Double, HealthScal
 
     @Override
     protected Mutable<Double> getValueGetter() {
-        return healthScale();
+        return this.healthScale();
     }
 
     @Override

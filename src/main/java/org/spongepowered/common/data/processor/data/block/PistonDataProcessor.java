@@ -81,7 +81,7 @@ public class PistonDataProcessor extends AbstractCatalogDataProcessor<PistonType
 
     @Override
     protected Mutable<PistonType> constructValue(PistonType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+        return new SpongeValue<>(this.key, this.getDefaultValue(), actualValue);
     }
 
 }

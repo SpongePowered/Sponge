@@ -71,12 +71,12 @@ public class DisabledSlotsDataProcessor extends
 
         if (keyValues.containsKey(Keys.ARMOR_STAND_TAKING_DISABLED)) {
             final Set<EquipmentType> takingDisabled = (Set<EquipmentType>) keyValues.get(Keys.ARMOR_STAND_TAKING_DISABLED);
-            disabledSlots |= (populateChunkFromSet(takingDisabled) << 8);
+            disabledSlots |= (this.populateChunkFromSet(takingDisabled) << 8);
         }
 
         if (keyValues.containsKey(Keys.ARMOR_STAND_PLACING_DISABLED)) {
             final Set<EquipmentType> placingDisabled = (Set<EquipmentType>) keyValues.get(Keys.ARMOR_STAND_PLACING_DISABLED);
-            disabledSlots |= (populateChunkFromSet(placingDisabled) << 16);
+            disabledSlots |= (this.populateChunkFromSet(placingDisabled) << 16);
         }
 
         dataHolder.accessor$setDisabledSlots(disabledSlots);

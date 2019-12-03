@@ -63,7 +63,7 @@ public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockIte
 
     @Override
     protected Mutable<?> getValueGetter() {
-        return state();
+        return this.state();
     }
 
     @Override

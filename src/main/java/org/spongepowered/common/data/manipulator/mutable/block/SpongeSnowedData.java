@@ -43,6 +43,6 @@ public class SpongeSnowedData extends AbstractBooleanData<SnowedData, ImmutableS
 
     @Override
     public Mutable<Boolean> hasSnow() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

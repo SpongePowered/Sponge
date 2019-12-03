@@ -49,7 +49,7 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
         super(HorseData.class);
         this.horseColor = checkNotNull(horseColor, "The Horse Color was null!");
         this.horseStyle = checkNotNull(horseStyle, "The Horse Style was null!");
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeHorseData() {
@@ -58,13 +58,13 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.HORSE_COLOR, SpongeHorseData.this::getHorseColor);
-        registerFieldSetter(Keys.HORSE_COLOR, SpongeHorseData.this::setHorseColor);
-        registerKeyValue(Keys.HORSE_COLOR, SpongeHorseData.this::color);
+        this.registerFieldGetter(Keys.HORSE_COLOR, SpongeHorseData.this::getHorseColor);
+        this.registerFieldSetter(Keys.HORSE_COLOR, SpongeHorseData.this::setHorseColor);
+        this.registerKeyValue(Keys.HORSE_COLOR, SpongeHorseData.this::color);
 
-        registerFieldGetter(Keys.HORSE_STYLE, SpongeHorseData.this::getHorseStyle);
-        registerFieldSetter(Keys.HORSE_STYLE, this::setHorseStyle);
-        registerKeyValue(Keys.HORSE_STYLE, SpongeHorseData.this::style);
+        this.registerFieldGetter(Keys.HORSE_STYLE, SpongeHorseData.this::getHorseStyle);
+        this.registerFieldSetter(Keys.HORSE_STYLE, this::setHorseStyle);
+        this.registerKeyValue(Keys.HORSE_STYLE, SpongeHorseData.this::style);
 
     }
 

@@ -92,7 +92,7 @@ public final class NotePitchRegistryModule implements CatalogRegistryModule<Note
     @Override
     public void registerDefaults() {
         for (final SpongeNotePitch pitch : pitchMappings.values()) {
-            notePitchMap.put(pitch.getId().toLowerCase(Locale.ENGLISH), pitch);
+            this.notePitchMap.put(pitch.getId().toLowerCase(Locale.ENGLISH), pitch);
         }
     }
 }

@@ -50,6 +50,6 @@ public class SpongeDelayableData extends AbstractBoundedComparableData<Integer, 
 
     @Override
     public Mutable<Integer> delay() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

@@ -70,7 +70,7 @@ public class FallDistanceDataProcessor
 
     @Override
     protected Immutable<Float> constructImmutableValue(Float value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -48,17 +48,17 @@ public abstract class BlockDirt_DirtTypeMixin_API {
 
     @Unique
     public String dirt$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String dirt$getName() {
-        return shadow$getTranslationKey();
+        return this.shadow$getTranslationKey();
     }
 
     public Translation dirt$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.dirt." + shadow$getTranslationKey() + ".name");
+            this.translation = new SpongeTranslation("tile.dirt." + this.shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

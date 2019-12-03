@@ -59,7 +59,7 @@ public class SpongePatternLayer implements PatternLayer {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Constants.TileEntity.Banner.SHAPE, this.id.getId())
             .set(Constants.TileEntity.Banner.COLOR, this.color.getName());
     }

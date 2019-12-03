@@ -58,8 +58,8 @@ public abstract class BlockDoorMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getHingeFor(blockState), impl$getIsOpenFor(blockState),
-                impl$getIsPoweredFor(blockState), impl$getDirectionalData(blockState), impl$getPortionData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getHingeFor(blockState), this.impl$getIsOpenFor(blockState),
+                this.impl$getIsPoweredFor(blockState), this.impl$getDirectionalData(blockState), this.impl$getPortionData(blockState));
     }
 
     @Override
@@ -87,7 +87,7 @@ public abstract class BlockDoorMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutablePortionData) {
             return Optional.of((BlockState) blockState.withProperty(DoorBlock.HALF,
-                    impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
+                    this.impl$convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -110,7 +110,7 @@ public abstract class BlockDoorMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(DoorBlock.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(DoorBlock.HALF, impl$convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.withProperty(DoorBlock.HALF, this.impl$convertPortionType((PortionType) value)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

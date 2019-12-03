@@ -83,12 +83,12 @@ public abstract class TileEntityLockableMixin_API<T extends BlockEntity & Carrie
     @Override
     public void supplyVanillaManipulators(final List<Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        final Optional<LockableData> lockData = get(LockableData.class);
+        final Optional<LockableData> lockData = this.get(LockableData.class);
         lockData.ifPresent(manipulators::add);
-        final Optional<InventoryItemData> inventoryData = get(InventoryItemData.class);
+        final Optional<InventoryItemData> inventoryData = this.get(InventoryItemData.class);
         inventoryData.ifPresent(manipulators::add);
         if (((LockableTileEntity) (Object) this).hasCustomName()) {
-            manipulators.add(get(DisplayNameData.class).get());
+            manipulators.add(this.get(DisplayNameData.class).get());
         }
     }
 

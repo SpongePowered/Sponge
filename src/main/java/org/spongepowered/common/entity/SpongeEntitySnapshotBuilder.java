@@ -120,7 +120,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
 
     @Override
     public SpongeEntitySnapshotBuilder from(Entity entity) {
-        reset();
+        this.reset();
         this.entityReference = new WeakReference<>(entity);
         this.worldId = entity.getWorld().getUniqueId();
         this.position = entity.getTransform().getPosition();
@@ -130,7 +130,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.entityId = entity.getUniqueId();
         this.manipulators = Lists.newArrayList();
         for (Mutable<?, ?> manipulator : ((CustomDataHolderBridge) entity).bridge$getCustomManipulators()) {
-            addManipulator(manipulator.asImmutable());
+            this.addManipulator(manipulator.asImmutable());
         }
         this.compound = new CompoundNBT();
         ((net.minecraft.entity.Entity) entity).writeWithoutTypeId(this.compound);
@@ -150,7 +150,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getImmutableProcessor((Class) manipulator.getClass());
         if (optional.isPresent()) {
             if (optional.get().supports(this.entityType)) {
-                addManipulator(manipulator);
+                this.addManipulator(manipulator);
             } else {
                 return this;
             }
@@ -202,7 +202,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         }
         this.manipulators = Lists.newArrayList();
         for (Immutable<?, ?> manipulator : holder.getContainers()) {
-            add(manipulator);
+            this.add(manipulator);
         }
         if (holder instanceof SpongeEntitySnapshot) {
             this.compound = ((SpongeEntitySnapshot) holder).getCompound().orElse(null);
@@ -220,7 +220,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.scale = transform.getScale();
         this.manipulators = Lists.newArrayList();
         for (Mutable<?, ?> manipulator : ((CustomDataHolderBridge) minecraftEntity).bridge$getCustomManipulators()) {
-            addManipulator(manipulator.asImmutable());
+            this.addManipulator(manipulator.asImmutable());
         }
         this.compound = new CompoundNBT();
         minecraftEntity.writeWithoutTypeId(this.compound);
@@ -286,6 +286,6 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         if (container.contains(Constants.Entity.UUID)) {
             this.entityId = UUID.fromString(container.getString(Constants.Entity.UUID).get());
         }
-        return Optional.of(build());
+        return Optional.of(this.build());
     }
 }

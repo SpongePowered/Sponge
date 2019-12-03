@@ -53,16 +53,16 @@ public class ImmutableSpongeBeaconData extends AbstractImmutableData<ImmutableBe
         this.secondaryEffect = secondaryEffect;
         this.primaryEffectValue = new ImmutableSpongeOptionalValue<>(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(this.primaryEffect));
         this.secondaryEffectValue = new ImmutableSpongeOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(this.secondaryEffect));
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, this::getPrimaryEffect);
-        registerKeyValue(Keys.BEACON_PRIMARY_EFFECT, this::primaryEffect);
+        this.registerFieldGetter(Keys.BEACON_PRIMARY_EFFECT, this::getPrimaryEffect);
+        this.registerKeyValue(Keys.BEACON_PRIMARY_EFFECT, this::primaryEffect);
 
-        registerFieldGetter(Keys.BEACON_SECONDARY_EFFECT, this::getSecondaryEffect);
-        registerKeyValue(Keys.BEACON_SECONDARY_EFFECT, this::secondaryEffect);
+        this.registerFieldGetter(Keys.BEACON_SECONDARY_EFFECT, this::getSecondaryEffect);
+        this.registerKeyValue(Keys.BEACON_SECONDARY_EFFECT, this::secondaryEffect);
     }
 
     public Optional<PotionEffectType> getPrimaryEffect() {

@@ -45,8 +45,8 @@ public class MushroomTypeRegistryModule
 
     @Override
     public void registerDefaults() {
-        register(new SpongeMushroomType("minecraft:brown", "brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK)));
-        register(new SpongeMushroomType("minecraft:red", "red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK)));
+        this.register(new SpongeMushroomType("minecraft:brown", "brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK)));
+        this.register(new SpongeMushroomType("minecraft:red", "red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK)));
     }
 
 }

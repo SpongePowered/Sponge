@@ -45,14 +45,14 @@ public final class RotationRegistryModule
 
     @Override
     public void registerDefaults() {
-        register(new SpongeRotation(0, "minecraft:top", "Top"));
-        register(new SpongeRotation(45, "minecraft:top_right", "Top Right"));
-        register(new SpongeRotation(90, "minecraft:right", "Right"));
-        register(new SpongeRotation(135, "minecraft:bottom_right", "Bottom Right"));
-        register(new SpongeRotation(180, "minecraft:bottom", "Bottom"));
-        register(new SpongeRotation(225, "minecraft:bottom_left", "Bottom Left"));
-        register(new SpongeRotation(270, "minecraft:left", "Left"));
-        register(new SpongeRotation(315, "minecraft:top_left", "Top Left"));
+        this.register(new SpongeRotation(0, "minecraft:top", "Top"));
+        this.register(new SpongeRotation(45, "minecraft:top_right", "Top Right"));
+        this.register(new SpongeRotation(90, "minecraft:right", "Right"));
+        this.register(new SpongeRotation(135, "minecraft:bottom_right", "Bottom Right"));
+        this.register(new SpongeRotation(180, "minecraft:bottom", "Bottom"));
+        this.register(new SpongeRotation(225, "minecraft:bottom_left", "Bottom Left"));
+        this.register(new SpongeRotation(270, "minecraft:left", "Left"));
+        this.register(new SpongeRotation(315, "minecraft:top_left", "Top Left"));
     }
 
     RotationRegistryModule() {

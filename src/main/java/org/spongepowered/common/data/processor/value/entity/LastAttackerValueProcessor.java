@@ -80,7 +80,7 @@ public class LastAttackerValueProcessor
 
     @Override
     protected Immutable<Optional<EntitySnapshot>> constructImmutableValue(Optional<EntitySnapshot> value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -61,6 +61,6 @@ public abstract class TileEntityShulkerBoxMixin_API extends TileEntityLockableLo
     @Override
     public void supplyVanillaManipulators(List<org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getDyeData());
+        manipulators.add(this.getDyeData());
     }
 }

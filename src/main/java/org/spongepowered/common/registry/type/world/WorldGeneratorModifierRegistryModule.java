@@ -77,8 +77,8 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     @SuppressWarnings("deprecation")
     @Override
     public void registerDefaults() {
-        registerAdditionalCatalog(new org.spongepowered.api.extra.modifier.skylands.SkylandsWorldGeneratorModifier());
-        registerAdditionalCatalog(new VoidWorldGeneratorModifier());
+        this.registerAdditionalCatalog(new org.spongepowered.api.extra.modifier.skylands.SkylandsWorldGeneratorModifier());
+        this.registerAdditionalCatalog(new VoidWorldGeneratorModifier());
     }
 
     @Override
@@ -90,7 +90,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     public void registerAdditionalCatalog(TerrainGeneratorConfig modifier) {
         checkNotNull(modifier, "modifier");
         final String id = modifier.getId();
-        checkId(id, "World generator ID");
+        this.checkId(id, "World generator ID");
 
         this.modifierMappings.put(id.toLowerCase(Locale.ENGLISH), modifier);
     }
@@ -107,7 +107,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
      */
     public void checkAllRegistered(Collection<TerrainGeneratorConfig> modifiers) {
         // We simply call toIds, that checks all world generators
-        toIds(modifiers);
+        this.toIds(modifiers);
     }
 
     /**

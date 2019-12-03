@@ -39,7 +39,7 @@ public class ImmutableSpongePlayerCreatedData extends AbstractImmutableBooleanDa
 
     @Override
     public Immutable<Boolean> playerCreated() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 
 }

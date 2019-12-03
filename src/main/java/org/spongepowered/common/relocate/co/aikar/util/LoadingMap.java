@@ -368,7 +368,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
         @Override
         @Nullable
         public T apply(@Nullable Object input) {
-            return apply();
+            return this.apply();
         }
 
         public abstract T apply();

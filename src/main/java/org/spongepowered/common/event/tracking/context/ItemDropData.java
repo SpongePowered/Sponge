@@ -95,7 +95,7 @@ public class ItemDropData {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final ItemDropData other = (ItemDropData) obj;
@@ -214,7 +214,7 @@ public class ItemDropData {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
             if (!super.equals(o)) {

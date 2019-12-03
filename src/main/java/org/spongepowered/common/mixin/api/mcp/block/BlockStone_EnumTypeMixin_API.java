@@ -47,17 +47,17 @@ public abstract class BlockStone_EnumTypeMixin_API {
     @Nullable private Translation api$translation;
 
     public String stone$getId() {
-        return "minecraft:" + shadow$getName();
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
     public String stone$getName() {
-        return shadow$getTranslationKey();
+        return this.shadow$getTranslationKey();
     }
 
     public Translation stone$getTranslation() {
         if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation("tile.stone." + shadow$getTranslationKey() + ".name");
+            this.api$translation = new SpongeTranslation("tile.stone." + this.shadow$getTranslationKey() + ".name");
         }
         return this.api$translation;
     }

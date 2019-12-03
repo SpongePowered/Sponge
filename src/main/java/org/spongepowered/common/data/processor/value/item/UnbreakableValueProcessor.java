@@ -75,7 +75,7 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
 
     @Override
     public Immutable<Boolean> constructImmutableValue(Boolean value) {
-        return constructValue(value).asImmutable();
+        return this.constructValue(value).asImmutable();
     }
 
     @Override

@@ -137,12 +137,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public BlockSnapshot withState(final BlockState blockState) {
-        return createBuilder().blockState(blockState).build();
+        return this.createBuilder().blockState(blockState).build();
     }
 
     @Override
     public BlockSnapshot withLocation(final Location<World> location) {
-        return createBuilder()
+        return this.createBuilder()
             .position(location.getBlockPosition())
             .worldId(location.getExtent().getUniqueId())
             .build();
@@ -281,7 +281,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Queries.WORLD_ID, this.worldUniqueId.toString())
             .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.pos.getX())
@@ -319,7 +319,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public <T extends Immutable<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
-        return get(containerClass);
+        return this.get(containerClass);
     }
 
     @Override
@@ -336,7 +336,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public <E> Optional<BlockSnapshot> with(final Key<? extends Value<E>> key, final E value) {
         final Optional<BlockState> optional = this.blockState.with(key, value);
         if (optional.isPresent()) {
-            return Optional.of(withState(optional.get()));
+            return Optional.of(this.withState(optional.get()));
         }
         return Optional.empty();
     }
@@ -344,7 +344,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @SuppressWarnings("rawtypes")
     @Override
     public Optional<BlockSnapshot> with(final Value<?> value) {
-        return with((Key) value.getKey(), value.get());
+        return this.with((Key) value.getKey(), value.get());
     }
 
     @Override
@@ -359,13 +359,13 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 newState = this.blockState;
             }
             if (changeState) {
-                return Optional.of(createBuilder().blockState(newState).build());
+                return Optional.of(this.createBuilder().blockState(newState).build());
             }
-            final SpongeBlockSnapshotBuilder builder = createBuilder();
+            final SpongeBlockSnapshotBuilder builder = this.createBuilder();
             builder.add(valueContainer);
             return Optional.of(builder.build());
         }
-        return Optional.of(createBuilder().add(valueContainer).build());
+        return Optional.of(this.createBuilder().add(valueContainer).build());
     }
 
     @Override
@@ -388,7 +388,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public BlockSnapshot merge(final BlockSnapshot that) {
-        return merge(that, MergeFunction.FORCE_NOTHING);
+        return this.merge(that, MergeFunction.FORCE_NOTHING);
     }
 
     @Override
@@ -406,14 +406,14 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public List<Immutable<?, ?>> getContainers() {
-        return getManipulators();
+        return this.getManipulators();
     }
 
     @Override
     public <E> Optional<E> get(final Key<? extends Value<E>> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((E) this.keyValueMap.get(key).get());
-        } else if (getKeyValueMap().containsKey(key)) {
+        } else if (this.getKeyValueMap().containsKey(key)) {
             return Optional.of((E) this.blockKeyValueMap.get(key).get());
         }
         return Optional.empty();
@@ -432,7 +432,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> getValueSet() {
         if (this.blockValueSet == null) {
-            this.blockValueSet = ImmutableSet.copyOf(getKeyValueMap().values());
+            this.blockValueSet = ImmutableSet.copyOf(this.getKeyValueMap().values());
         }
         return this.blockValueSet;
     }
@@ -469,7 +469,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((V) this.keyValueMap.get(key).asMutable());
-        } else if (getKeyValueMap().containsKey(key)) {
+        } else if (this.getKeyValueMap().containsKey(key)) {
             return Optional.of((V) this.blockKeyValueMap.get(key).asMutable());
         }
         return Optional.empty();
@@ -478,7 +478,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public boolean supports(final Key<?> key) {
         checkNotNull(key, "Key");
-        return this.keyValueMap.containsKey(key) || getKeyValueMap().containsKey(key);
+        return this.keyValueMap.containsKey(key) || this.getKeyValueMap().containsKey(key);
     }
 
     @Override
@@ -490,7 +490,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public Set<Key<?>> getKeys() {
         if (this.keys == null) {
-            this.keys = ImmutableSet.<Key<?>>builder().addAll(getKeyValueMap().keySet()).addAll(getKeyValueMap().keySet()).build();
+            this.keys = ImmutableSet.<Key<?>>builder().addAll(this.getKeyValueMap().keySet()).addAll(this.getKeyValueMap().keySet()).build();
         }
         return this.keys;
     }
@@ -499,7 +499,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues() {
         if (this.values == null) {
-            this.values = ImmutableSet.<org.spongepowered.api.data.value.Value.Immutable<?>>builder().addAll(getTileValueSet()).addAll(getValueSet()).build();
+            this.values = ImmutableSet.<org.spongepowered.api.data.value.Value.Immutable<?>>builder().addAll(this.getTileValueSet()).addAll(
+                    this.getValueSet()).build();
         }
         return this.values;
     }
@@ -584,7 +585,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
         final SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;

@@ -73,7 +73,7 @@ public abstract class BlockSpongeMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public List<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(impl$getWetData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.impl$getWetData(blockState));
     }
 
 }

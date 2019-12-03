@@ -86,7 +86,7 @@ public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge
 
     @Override
     public Subject bridge$resolve() {
-        return bridge$resolveOptional()
+        return this.bridge$resolveOptional()
             .orElseThrow(() -> new IllegalStateException("No subject reference present for user " + this));
     }
 }

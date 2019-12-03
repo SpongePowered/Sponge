@@ -43,6 +43,6 @@ public class SpongeShearedData extends AbstractBooleanData<ShearedData, Immutabl
 
     @Override
     public Mutable<Boolean> sheared() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

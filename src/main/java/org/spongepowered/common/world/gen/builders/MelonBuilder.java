@@ -37,7 +37,7 @@ public class MelonBuilder implements Melon.Builder {
     private VariableAmount count;
 
     public MelonBuilder() {
-        reset();
+        this.reset();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class MelonBuilder implements Melon.Builder {
 
     @Override
     public Builder from(Melon value) {
-        return perChunk(value.getMelonsPerChunk());
+        return this.perChunk(value.getMelonsPerChunk());
     }
 
     @Override

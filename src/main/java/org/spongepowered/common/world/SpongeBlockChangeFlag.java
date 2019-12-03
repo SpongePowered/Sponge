@@ -76,7 +76,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         if (this.updateNeighbors == updateNeighbors) {
             return this;
         }
-        return updateNeighbors ? andFlag(org.spongepowered.api.world.BlockChangeFlags.NEIGHBOR) : andNotFlag(
+        return updateNeighbors ? this.andFlag(org.spongepowered.api.world.BlockChangeFlags.NEIGHBOR) : this.andNotFlag(
             org.spongepowered.api.world.BlockChangeFlags.NEIGHBOR);
     }
 
@@ -85,7 +85,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         if (this.performBlockPhysics == performBlockPhysics) {
             return this;
         }
-        return performBlockPhysics ? andFlag(org.spongepowered.api.world.BlockChangeFlags.PHYSICS) : andNotFlag(
+        return performBlockPhysics ? this.andFlag(org.spongepowered.api.world.BlockChangeFlags.PHYSICS) : this.andNotFlag(
             org.spongepowered.api.world.BlockChangeFlags.PHYSICS);
     }
 
@@ -94,7 +94,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         if (this.notifyObservers == notifyObservers) {
             return this;
         }
-        return notifyObservers ? andFlag(org.spongepowered.api.world.BlockChangeFlags.OBSERVER) : andNotFlag(
+        return notifyObservers ? this.andFlag(org.spongepowered.api.world.BlockChangeFlags.OBSERVER) : this.andNotFlag(
             org.spongepowered.api.world.BlockChangeFlags.OBSERVER);
     }
 

@@ -126,12 +126,12 @@ public class ItemEnchantmentDataProcessor
     public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         if (container instanceof ItemStack) {
             final ItemStack stack = (ItemStack) container;
-            final Optional<List<Enchantment>> old = getVal(stack);
+            final Optional<List<Enchantment>> old = this.getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
             stack.getTag().remove(Constants.Item.ITEM_ENCHANTMENT_LIST);
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }

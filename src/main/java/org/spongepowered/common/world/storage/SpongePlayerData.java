@@ -65,7 +65,7 @@ public class SpongePlayerData implements DataSerializable {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         }
         final SpongePlayerData other = (SpongePlayerData) obj;
@@ -82,7 +82,7 @@ public class SpongePlayerData implements DataSerializable {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Entity.Player.UUID, this.uuid.toString())
                 .set(Constants.Sponge.PlayerData.PLAYER_DATA_JOIN, this.firstJoined)
                 .set(Constants.Sponge.PlayerData.PLAYER_DATA_LAST, this.lastJoined);

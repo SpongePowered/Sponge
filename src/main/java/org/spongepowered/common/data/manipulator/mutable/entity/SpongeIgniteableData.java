@@ -46,7 +46,7 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
         checkArgument(fireTicks > 0, "");
         this.fireTicks = fireTicks;
         this.fireDelay = fireDelay;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeIgniteableData() {
@@ -111,13 +111,13 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.FIRE_TICKS, SpongeIgniteableData.this::getFireTicks);
-        registerFieldSetter(Keys.FIRE_TICKS, SpongeIgniteableData.this::setFireTicks);
-        registerKeyValue(Keys.FIRE_TICKS, SpongeIgniteableData.this::fireTicks);
+        this.registerFieldGetter(Keys.FIRE_TICKS, SpongeIgniteableData.this::getFireTicks);
+        this.registerFieldSetter(Keys.FIRE_TICKS, SpongeIgniteableData.this::setFireTicks);
+        this.registerKeyValue(Keys.FIRE_TICKS, SpongeIgniteableData.this::fireTicks);
 
-        registerFieldGetter(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::getFireDelay);
-        registerFieldSetter(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::setFireDelay);
-        registerKeyValue(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::fireDelay);
+        this.registerFieldGetter(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::getFireDelay);
+        this.registerFieldSetter(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::setFireDelay);
+        this.registerKeyValue(Keys.FIRE_DAMAGE_DELAY, SpongeIgniteableData.this::fireDelay);
     }
 
 }

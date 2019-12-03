@@ -43,6 +43,6 @@ public class SpongeAttachedData extends AbstractBooleanData<AttachedData, Immuta
 
     @Override
     public Mutable<Boolean> attached() {
-        return getValueGetter();
+        return this.getValueGetter();
     }
 }

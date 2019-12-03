@@ -84,7 +84,7 @@ public abstract class BlockLogMixin extends BlockMixin {
         if (manipulator instanceof ImmutableTreeData) {
             final WoodType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
-            return impl$processLogType(blockState, type, treeType);
+            return this.impl$processLogType(blockState, type, treeType);
         }
         if (manipulator instanceof ImmutableLogAxisData) {
             final LogAxis logAxis = ((ImmutableLogAxisData) manipulator).type().get();
@@ -98,7 +98,7 @@ public abstract class BlockLogMixin extends BlockMixin {
         if (key.equals(Keys.TREE_TYPE)) {
             final WoodType treeType = (WoodType) value;
             final BlockPlanks.EnumType type = TreeTypeRegistryModule.getFor(treeType);
-            return impl$processLogType(blockState, type, treeType);
+            return this.impl$processLogType(blockState, type, treeType);
         } else if (key.equals(Keys.LOG_AXIS)) {
             return Optional.of((BlockState) blockState.withProperty(LogBlock.LOG_AXIS, (LogBlock.EnumAxis) value));
         }
@@ -124,6 +124,6 @@ public abstract class BlockLogMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public List<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(getTreeData(blockState), getLogAxisData(blockState));
+        return ImmutableList.<Immutable<?, ?>>of(this.getTreeData(blockState), this.getLogAxisData(blockState));
     }
 }
