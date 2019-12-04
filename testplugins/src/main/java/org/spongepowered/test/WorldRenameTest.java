@@ -89,7 +89,7 @@ public class WorldRenameTest {
                                     .renameWorld(context.<WorldProperties>getOne(worldKey).get(), context.<String>getOne(newNameKey).get())
                                     .orElseThrow(() -> new CommandException(Text.of(TextColors.RED, "The world was not renamed.")));
 
-                            source.sendMessage(Text.of("The world was renamed to " + newProperties.getWorldName()));
+                            source.sendMessage(Text.of("The world was renamed to " + newProperties.getName()));
                             return CommandResult.success();
                         }).build(), "renameworld");
 
@@ -112,7 +112,7 @@ public class WorldRenameTest {
                         .arguments(new WorldParameter(x -> true))
                         .executor((source, context) -> {
                             WorldProperties wp = context.<WorldProperties>getOne(worldKey).get();
-                            source.sendMessage(Text.of("World: ", wp.getWorldName(), " - UUID: ", wp.getUniqueId(), " - Dim ID:",
+                            source.sendMessage(Text.of("World: ", wp.getName(), " - UUID: ", wp.getUniqueId(), " - Dim ID:",
                                     wp.getAdditionalProperties().getInt(DataQuery.of("SpongeData", "dimensionId")).map(Object::toString)
                                             .orElse("unknown")));
                             return CommandResult.success();

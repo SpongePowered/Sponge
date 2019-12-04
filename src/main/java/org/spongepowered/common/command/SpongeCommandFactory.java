@@ -287,9 +287,9 @@ public class SpongeCommandFactory {
                 for (final WorldProperties properties : args.<WorldProperties>getAll("world")) {
                     final Optional<World> world = SpongeImpl.getGame().getServer().getWorld(properties.getUniqueId());
                     if (!world.isPresent() && this.requireWorldLoaded) {
-                        throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
+                        throw new CommandException(Text.of("World ", properties.getName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((WorldInfoBridge) properties).bridge$getConfigAdapter(),
+                    src.sendMessage(Text.of("World ", properties.getName(), ": ", processWorld(((WorldInfoBridge) properties).bridge$getConfigAdapter(),
                         world.orElse(null), src, args)));
                     ++successes;
                 }
@@ -835,9 +835,9 @@ public class SpongeCommandFactory {
             .executor((src, args) -> {
                 if (args.hasAny("world")) {
                     for (WorldProperties properties : args.<WorldProperties>getAll("world")) {
-                        final Optional<World> optWorld = Sponge.getServer().getWorld(properties.getWorldName());
+                        final Optional<World> optWorld = Sponge.getServer().getWorld(properties.getName());
                         if (!optWorld.isPresent()) {
-                            src.sendMessage(Text.of(properties.getWorldName() + " has no TPS as it is offline!"));
+                            src.sendMessage(Text.of(properties.getName() + " has no TPS as it is offline!"));
                         } else {
                             printWorldTickTime(src, optWorld.get());
                         }

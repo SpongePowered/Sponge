@@ -548,7 +548,7 @@ public final class EntityUtil {
 
         if (worldName != null) {
             for (final WorldProperties properties : Sponge.getServer().getAllWorldProperties()) {
-                if (properties.getWorldName().equalsIgnoreCase(worldName)) {
+                if (properties.getName().equalsIgnoreCase(worldName)) {
                     final Optional<World> spongeWorld = Sponge.getServer().loadWorld(properties);
                     if (spongeWorld.isPresent()) {
                         toWorld = (ServerWorld) spongeWorld.get();

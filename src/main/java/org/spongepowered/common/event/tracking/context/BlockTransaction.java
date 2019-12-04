@@ -536,7 +536,7 @@ public abstract class BlockTransaction {
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                .add("worldServer", ((World) this.worldServer).getProperties().getWorldName())
+                .add("worldServer", ((World) this.worldServer).getProperties().getName())
                 .add("notifyState", this.notifyState)
                 .add("notifyPos", this.notifyPos)
                 .add("sourceBlock", this.sourceBlock)

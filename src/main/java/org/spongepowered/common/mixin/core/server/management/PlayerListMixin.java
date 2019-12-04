@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -51,7 +52,7 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.IPlayerFileData;
-import net.minecraft.world.storage.WorldInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -112,11 +113,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final private List<ServerPlayerEntity> players;
     @Shadow @Final private Map<UUID, ServerPlayerEntity> uuidToPlayerMap;
     @Shadow private IPlayerFileData playerDataManager;
+    @Shadow @Final private Map<UUID, PlayerAdvancements> advancements;
 
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow protected abstract void shadow$setPlayerGameTypeBasedOnOther(ServerPlayerEntity target, ServerPlayerEntity source, IWorld worldIn);
     @Shadow public abstract void shadow$sendWorldInfo(ServerPlayerEntity playerIn, ServerWorld worldIn);
     @Shadow public abstract void shadow$updatePermissionLevel(ServerPlayerEntity player);
+
+    @Nullable private DimensionType impl$updatePermissionLevelDimensionType;
 
     /**
      * @author Minecrell - Minecraft 1.14.4
@@ -124,7 +128,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
      *     instead. Redirects all methods to the {@link BanService}.
      */
     @Redirect(method = "<init>", at = @At(value = "NEW", args = "class=net/minecraft/server/management/UserListBans"))
-    private BanList impl$createBanList(final File file) {
+    private BanList impl$createBanList(File file) {
         return new SpongeUserListBans(file);
     }
 
@@ -134,7 +138,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
      *     instead. Redirects all methods to the {@link BanService}.
      */
     @Redirect(method = "<init>", at = @At(value = "NEW", args = "class=net/minecraft/server/management/UserListIPBans"))
-    private IPBanList impl$createIPBanList(final File file) {
+    private IPBanList impl$createIPBanList(File file) {
         return new SpongeIPBanList(file);
     }
 
@@ -144,7 +148,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
      *     instead. Redirects all methods to the {@link WhitelistService}.
      */
     @Redirect(method = "<init>", at = @At(value = "NEW", args = "class=net/minecraft/server/management/UserListWhitelist"))
-    private WhiteList impl$createWhitelist(final File file) {
+    private WhiteList impl$createWhitelist(File file) {
         return new SpongeUserListWhitelist(file);
     }
 
@@ -347,45 +351,40 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))
-    private void impl$saveAllSpongeUsers(final CallbackInfo ci) {
+    private void impl$saveAllSpongeUsers(CallbackInfo ci) {
         for (final SpongeUser user : SpongeUser.dirtyUsers) {
             user.save();
         }
     }
 
-    @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V", shift = At.Shift.BEFORE), cancellable = true)
-    private void impl$sendAddPlayerListItemPacketAndPreparePlayer(final ServerPlayerEntity player, final CallbackInfo ci) {
-        // Create a packet to be used for players without context data
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+    private void impl$sendJoiningPlayerToOthersIfVisibleByThem(PlayerList playerList, IPacket<?> packet, ServerPlayerEntity player) {
         final SPlayerListItemPacket noSpecificViewerPacket = new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, player);
 
-        for (final ServerPlayerEntity viewer : this.playerEntityList) {
-            if (((Player) viewer).canSee((Player) player)) {
-                viewer.connection.sendPacket(noSpecificViewerPacket);
+        for (final ServerPlayerEntity otherPlayer : this.players) {
+            if (otherPlayer != player && ((Player) otherPlayer).canSee((Player) player)) {
+                otherPlayer.connection.sendPacket(noSpecificViewerPacket);
             }
 
-            if (player == viewer || ((Player) player).canSee((Player) viewer)) {
-                player.connection.sendPacket(new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, viewer));
+            if (otherPlayer == player || ((Player) player).canSee((Player) otherPlayer)) {
+                player.connection.sendPacket(new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, otherPlayer));
             }
         }
-
-        // Spawn player into level
-        final ServerWorld level = this.server.getWorld(player.dimension);
-        // TODO direct this appropriately
-        level.addEntity0(player);
-        this.preparePlayer(player, null);
-
-        // We always want to cancel.
-        ci.cancel();
     }
 
-    @Inject(method = "writePlayerData", at = @At(target = "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData"
-        + "(Lnet/minecraft/entity/player/EntityPlayer;)V", value = "INVOKE"))
-    private void impl$saveSpongePlayerDataAfterSavingPlayerData(final ServerPlayerEntity playerMP, final CallbackInfo callbackInfo) {
-        SpongePlayerDataHandler.savePlayer(playerMP.getUniqueID());
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
+    private int impl$nullifyPlayerLoopToSendVisiblePlayers(List<ServerPlayerEntity> players) {
+        // Looks odd, right? I don't want the original for statement to loop and redirects don't support locals so...nullify it as it is handled above
+        return 0;
+    }
+
+    @Inject(method = "writePlayerData", at = @At(target = "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/PlayerEntity;)V", value = "INVOKE"))
+    private void impl$saveSpongePlayerDataAfterSavingPlayerData(ServerPlayerEntity player, CallbackInfo ci) {
+        SpongePlayerDataHandler.savePlayer(player.getUniqueID());
     }
 
     @ModifyVariable(method = "sendPlayerPermissionLevel", at = @At("HEAD"), argsOnly = true)
-    private int impl$updatePermLevel(final int permLevel) {
+    private int impl$updatePermLevel(int permLevel) {
         // If a non-default permission service is being used, then the op level will always be 0.
         // We force it to be 4 to ensure that the client is able to open command blocks (
         if (!(Sponge.getServiceManager().provideUnchecked(PermissionService.class) instanceof SpongePermissionService)) {
@@ -395,13 +394,20 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Redirect(method = "updatePermissionLevel", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/WorldServer;getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
-    private WorldInfo onGetWorldInfo(final ServerWorld overworld, final ServerPlayerEntity player) {
-        // TODO: This applies only to singleplayer, on the server canSendCommands is called with the game profile
-        // We can't get the world from the game profile
+            target = "Lnet/minecraft/server/MinecraftServer;getPermissionLevel(Lcom/mojang/authlib/GameProfile;)I"))
+    private int impl$setDimensionTypeThenQueryPermissionLevel(MinecraftServer server, GameProfile profile, ServerPlayerEntity player) {
+        this.impl$updatePermissionLevelDimensionType = player.getServerWorld().getDimension().getType();
+        final int permissionLevel = server.getPermissionLevel(player.getGameProfile());
+        this.impl$updatePermissionLevelDimensionType = null;
+        return permissionLevel;
+    }
 
-        // Check the world info of the current world instead of overworld world info
-        return player.world.getWorldInfo();
+    @Redirect(method = "canSendCommands", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(Lnet/minecraft/world/dimension/DimensionType;)Lnet/minecraft/world/server/ServerWorld;"))
+    private ServerWorld impl$useDimensionTypeFromUpdatePermissionLevel(MinecraftServer server, DimensionType dimension) {
+        if (this.impl$updatePermissionLevelDimensionType != null) {
+            return server.getWorld(this.impl$updatePermissionLevelDimensionType);
+        }
+        return server.getWorld(dimension);
     }
 
     /**
@@ -414,7 +420,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
      * @param isSystem Whether this is a system message
      */
     @Overwrite
-    public void sendMessage(final ITextComponent component, final boolean isSystem) {
+    public void sendMessage(ITextComponent component, boolean isSystem) {
         ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.server, !isSystem);
     }
 

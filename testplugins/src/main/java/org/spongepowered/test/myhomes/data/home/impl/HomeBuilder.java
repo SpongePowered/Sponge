@@ -80,7 +80,7 @@ public class HomeBuilder extends AbstractDataBuilder<Home> {
             UUID uuid = content.getObject(Home.WORLD_QUERY, UUID.class).get();
             Vector3d pos = content.getObject(Home.POSITION_QUERY, Vector3d.class).get();
             String name = Sponge.getServer().getWorldProperties(uuid)
-                    .map(WorldProperties::getWorldName)
+                    .map(WorldProperties::getName)
                     .orElse(uuid.toString().substring(0, 9));
 
             name = String.format("%s-%d,%d,%d", name, pos.getFloorX(), pos.getFloorY(), pos.getFloorZ());
