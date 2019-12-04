@@ -102,6 +102,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -179,7 +180,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     private float impl$cachedModifiedHealth = -1;
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
-    private boolean impl$keepInventory = false;
+    @Nullable private Boolean impl$keepInventory = null;
     @Nullable private Text impl$displayName = null;
 
     @Override
@@ -206,9 +207,11 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
         }
     }
 
-
     @Override
     public boolean bridge$keepInventory() {
+        if (this.impl$keepInventory == null) {
+            return this.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY);
+        }
         return this.impl$keepInventory;
     }
 
