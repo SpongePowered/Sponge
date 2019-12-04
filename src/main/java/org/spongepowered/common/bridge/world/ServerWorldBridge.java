@@ -111,9 +111,9 @@ public interface ServerWorldBridge {
      */
     SpongeBlockSnapshot bridge$createSnapshotWithEntity(BlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity tileEntity);
 
-    SpongeWorldGenerator bridge$createWorldGenerator(DataContainer settings);
+    SpongeWorldGenerator bridge$createTerrainGenerator(DataContainer settings);
 
-    SpongeWorldGenerator bridge$createWorldGenerator(String settings);
+    SpongeWorldGenerator bridge$createTerrainGenerator(String settings);
 
     SpongeChunkGenerator bridge$createChunkGenerator(SpongeWorldGenerator newGenerator);
 

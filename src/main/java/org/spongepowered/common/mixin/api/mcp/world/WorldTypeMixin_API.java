@@ -26,36 +26,36 @@ package org.spongepowered.common.mixin.api.mcp.world;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.CaseFormat;
+import com.google.common.base.MoreObjects;
 import net.minecraft.world.WorldType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-
-import javax.annotation.Nullable;
+import org.spongepowered.common.registry.type.world.GeneratorTypeRegistryModule;
 
 @Mixin(WorldType.class)
 public abstract class WorldTypeMixin_API implements GeneratorType {
 
-    @Shadow @Final private String name;
+    @Nullable private CatalogKey api$key;
 
-    @Nullable private CatalogKey key;
+    @Inject(method = "<init>(ILjava/lang/String;Ljava/lang/String;I)V", at = @At("RETURN"))
+    private void onConstructSpongeRegister(int id, String name, String serializedName, int version, CallbackInfo ci) {
+        this.api$key = CatalogKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), name);
+        GeneratorTypeRegistryModule.getInstance().registerAdditionalCatalog(this);
+    }
 
     @Override
     public CatalogKey getKey() {
-        if (this.key == null) {
-            this.key = CatalogKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE,
-                this.name));
-        }
-
-        return this.key;
+        return this.api$key;
     }
 
     @Override
@@ -67,6 +67,29 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
     @Override
     public TerrainGenerator createGenerator(ServerWorld world) {
         checkNotNull(world);
-        return ((ServerWorldBridge) world).bridge$createWorldGenerator(this.getDefaultGeneratorSettings());
+        return ((ServerWorldBridge) world).bridge$createTerrainGenerator(this.getDefaultGeneratorSettings());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.api$key.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof WorldType)) {
+            return false;
+        }
+
+        final WorldType other = (WorldType) obj;
+        return this.api$key.equals(((WorldTypeBridge) other).bridge$getKey());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("key", this.api$key)
+            .add("settings", ((GeneratorType) this).getDefaultGeneratorSettings())
+            .toString();
     }
 }

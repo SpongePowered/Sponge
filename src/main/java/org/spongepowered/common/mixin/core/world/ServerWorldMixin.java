@@ -142,7 +142,6 @@ import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
-import org.spongepowered.common.bridge.world.WorldTypeBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -394,7 +393,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         // Get the default generator for the world type
         final DataContainer generatorSettings = ((org.spongepowered.api.world.World) this).getProperties().getGeneratorSettings();
 
-        final SpongeWorldGenerator newGenerator = this.bridge$createWorldGenerator(generatorSettings);
+        final SpongeWorldGenerator newGenerator = this.bridge$createTerrainGenerator(generatorSettings);
         // If the base generator is an IChunkProvider which implements
         // PopulatorProviderBridge we request that it add its populators not covered
         // by the base generation populator
@@ -433,14 +432,14 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public SpongeWorldGenerator bridge$createWorldGenerator(final DataContainer settings) {
+    public SpongeWorldGenerator bridge$createTerrainGenerator(final DataContainer settings) {
         // Minecraft uses a string for world generator settings
         // This string can be a JSON string, or be a string of a custom format
 
         // Try to convert to custom format
         final Optional<String> optCustomSettings = settings.getString(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS);
         if (optCustomSettings.isPresent()) {
-            return this.bridge$createWorldGenerator(optCustomSettings.get());
+            return this.bridge$createTerrainGenerator(optCustomSettings.get());
         }
 
         String jsonSettings = "";
@@ -451,12 +450,12 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                     ((net.minecraft.world.World) (Object) this).getWorldType(), this, e);
         }
 
-        return this.bridge$createWorldGenerator(jsonSettings);
+        return this.bridge$createTerrainGenerator(jsonSettings);
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public SpongeWorldGenerator bridge$createWorldGenerator(final String settings) {
+    public SpongeWorldGenerator bridge$createTerrainGenerator(final String settings) {
         final ServerWorld worldServer = (ServerWorld) (Object) this;
         final WorldType worldType = worldServer.getWorldType();
         final ChunkGenerator chunkGenerator = ((WorldTypeBridge) worldType).bridge$getChunkGenerator()
