@@ -687,7 +687,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     transaction = next;
                     continue;
                 }
-                final Optional<ServerWorldBridge> maybeWorld = transaction.getWorldServer();
+                final Optional<ServerWorldBridge> maybeWorld = transaction.getWorldBridge();
                 final BlockTransaction derp = transaction;
                 try (@SuppressWarnings("try") final SpongeProxyBlockAccess access = maybeWorld.map(
                     ServerWorldBridge::bridge$getProxyAccess).map(proxy -> proxy.switchTo(derp)).orElse(null);

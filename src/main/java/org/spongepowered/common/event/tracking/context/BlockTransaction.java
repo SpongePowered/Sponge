@@ -82,7 +82,7 @@ public abstract class BlockTransaction {
             .toString();
     }
 
-    abstract Optional<ServerWorldBridge> getWorldServer();
+    abstract Optional<ServerWorldBridge> getWorldBridge();
 
     abstract void cancel(ServerWorld worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess);
 
@@ -206,7 +206,7 @@ public abstract class BlockTransaction {
 
         @SuppressWarnings("unchecked")
         @Override
-        Optional<ServerWorldBridge> getWorldServer() {
+        Optional<ServerWorldBridge> getWorldBridge() {
             return (Optional<ServerWorldBridge>) (Optional<?>) this.addedSnapshot.getWorldServer();
         }
 
@@ -293,7 +293,7 @@ public abstract class BlockTransaction {
 
         @SuppressWarnings("unchecked")
         @Override
-        Optional<ServerWorldBridge> getWorldServer() {
+        Optional<ServerWorldBridge> getWorldBridge() {
             return (Optional<ServerWorldBridge>) (Optional<?>) this.tileSnapshot.getWorldServer();
         }
 
@@ -356,7 +356,7 @@ public abstract class BlockTransaction {
 
         @SuppressWarnings("unchecked")
         @Override
-        Optional<ServerWorldBridge> getWorldServer() {
+        Optional<ServerWorldBridge> getWorldBridge() {
             return (Optional<ServerWorldBridge>) (Optional<?>) this.removedSnapshot.getWorldServer();
         }
 
@@ -495,7 +495,7 @@ public abstract class BlockTransaction {
 
         @SuppressWarnings("unchecked")
         @Override
-        Optional<ServerWorldBridge> getWorldServer() {
+        Optional<ServerWorldBridge> getWorldBridge() {
             return (Optional<ServerWorldBridge>) (Optional<?>) this.original.getWorldServer();
         }
 
@@ -517,16 +517,16 @@ public abstract class BlockTransaction {
 
 
     static final class NeighborNotification extends BlockTransaction {
-        final ServerWorldBridge worldServer;
+        final ServerWorldBridge worldBridge;
         final BlockState notifyState;
         final BlockPos notifyPos;
         final Block sourceBlock;
         final BlockPos sourcePos;
 
-        NeighborNotification(final int transactionIndex, final int snapshotIndex, final ServerWorldBridge worldServer, final BlockState notifyState, final BlockPos notifyPos,
+        NeighborNotification(final int transactionIndex, final int snapshotIndex, final ServerWorldBridge worldBridge, final BlockState notifyState, final BlockPos notifyPos,
                              final Block sourceBlock, final BlockPos sourcePos, final BlockState sourceState) {
             super(transactionIndex, snapshotIndex, sourcePos, sourceState);
-            this.worldServer = worldServer;
+            this.worldBridge = worldBridge;
             this.notifyState = notifyState;
             this.notifyPos = notifyPos;
             this.sourceBlock = sourceBlock;
@@ -536,7 +536,7 @@ public abstract class BlockTransaction {
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                .add("worldServer", ((World) this.worldServer).getProperties().getName())
+                .add("world", ((World) this.worldBridge).getProperties().getDirectoryName())
                 .add("notifyState", this.notifyState)
                 .add("notifyPos", this.notifyPos)
                 .add("sourceBlock", this.sourceBlock)
@@ -565,19 +565,18 @@ public abstract class BlockTransaction {
         void process(final Transaction<BlockSnapshot> eventTransaction, final IPhaseState phaseState, final PhaseContext<?> phaseContext,
             final int currentDepth) {
             // Otherwise, we have a neighbor notification to process.
-            final ServerWorldBridge worldServer = this.worldServer;
             final BlockPos notifyPos = this.notifyPos;
             final Block sourceBlock = this.sourceBlock;
             final BlockPos sourcePos = this.sourcePos;
-            final SpongeProxyBlockAccess proxyAccess = worldServer.bridge$getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = this.worldBridge.bridge$getProxyAccess();
             BlockState blockState = proxyAccess.getBlockState(notifyPos);
             if (blockState == null) {
-                blockState = ((ServerWorld) this.worldServer).getBlockState(notifyPos);
+                blockState = ((ServerWorld) this.worldBridge).getBlockState(notifyPos);
             }
-            final Chunk chunk = ((ServerWorld) this.worldServer).getChunkAt(sourcePos);
-            final Block used = PhaseTracker.validateBlockForNeighborNotification((ServerWorld) this.worldServer, sourcePos, sourceBlock, notifyPos, chunk);
+            final Chunk chunk = ((ServerWorld) this.worldBridge).getChunkAt(sourcePos);
+            final Block used = PhaseTracker.validateBlockForNeighborNotification((ServerWorld) this.worldBridge, sourcePos, sourceBlock, notifyPos, chunk);
 
-            PhaseTracker.getInstance().notifyBlockOfStateChange(worldServer, blockState, notifyPos, used, sourcePos);
+            PhaseTracker.getInstance().notifyBlockOfStateChange(this.worldBridge, blockState, notifyPos, used, sourcePos);
         }
 
         @Override
@@ -608,8 +607,8 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        Optional<ServerWorldBridge> getWorldServer() {
-            return Optional.of(this.worldServer);
+        Optional<ServerWorldBridge> getWorldBridge() {
+            return Optional.of(this.worldBridge);
         }
     }
 
