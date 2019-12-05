@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.config.category;
 
-import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
@@ -51,9 +50,6 @@ public class OptimizationCategory extends ConfigCategory {
                                                  + "time during saves if your world is already fully generated. \n"
                                                  + "Warning: disabling structure saving will break the vanilla locate command.")
     private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
-
-    @Setting(value = "async-lighting", comment = "Runs lighting updates asynchronously.")
-    private AsyncLightingCategory asyncLightingCategory = new AsyncLightingCategory();
 
     @Setting(value = "eigen-redstone", comment = "Uses theosib's redstone algorithms to completely overhaul the way redstone works.")
     private EigenRedstoneCategory eigenRedstonCategory = new EigenRedstoneCategory();
@@ -157,14 +153,6 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean useCacheTameableOwners() {
         return this.cacheTameableOwners;
-    }
-
-    public AsyncLightingCategory getAsyncLightingCategory() {
-        return this.asyncLightingCategory;
-    }
-
-    public boolean useAsyncLighting() {
-        return this.asyncLightingCategory.isEnabled();
     }
 
     public EigenRedstoneCategory getEigenRedstoneCategory() {
