@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.nbt;
 
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBT;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,8 +40,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
- * @author gabizou - January 25th, 2016
- * Updated: February 2nd - Rewrite overwrite to use two redirects
+ * @author Zidane - Minecraft 1.14.4
  *
  * Normally this shouldn't be necessary, however, due to unforseen consequences
  * of creating block snapshots, there are corner cases where mod authors are
@@ -50,15 +49,15 @@ import javax.annotation.Nullable;
  * out for the client to see and report to both Sponge and the mod author.
  */
 @Mixin(CompoundNBT.class)
-public abstract class NBTTagCompoundMixin extends NBTBase {
+public abstract class CompoundNBTMixin {
 
-    @Shadow @Final private Map<String, NBTBase> tagMap;
+    @Shadow @Final private Map<String, INBT> tagMap;
 
-    @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTBase;copy()Lnet/minecraft/nbt/NBTBase;"))
+    @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/INBT;copy()Lnet/minecraft/nbt/INBT;"))
     @Nullable
-    private NBTBase onTagCopy(@Nullable final NBTBase base) {
+    private INBT impl$checkForOverflowOnCopy(INBT inbt) {
         try {
-            return base == null ? null : base.copy();
+            return inbt == null ? null : inbt.copy();
         } catch (StackOverflowError e) {
             final PrettyPrinter printer = new PrettyPrinter(60)
                 .add("StackOverflow from trying to copy this compound")
@@ -73,7 +72,7 @@ public abstract class NBTTagCompoundMixin extends NBTBase {
             } catch (Throwable error) {
                 printer.addWrapped(80, "Unable to get the string of this compound. Printing out some of the entries to better assist");
 
-                for (final Map.Entry<String, NBTBase> entry : this.tagMap.entrySet()) {
+                for (final Map.Entry<String, INBT> entry : this.tagMap.entrySet()) {
                     try {
                         printer.addWrapped(80, "%s : %s", entry.getKey(), entry.getValue());
                     } catch (Throwable throwable) {
@@ -89,17 +88,19 @@ public abstract class NBTTagCompoundMixin extends NBTBase {
         }
     }
 
-    @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V"))
-    private void onCopySet(final CompoundNBT compound, final String string, @Nullable final NBTBase base) {
-        if (base == null) {
-            final IllegalStateException exception = new IllegalStateException("There is a null NBTBase in the compound for key: " + string);
+    @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundNBT;put(Ljava/lang/String;Lnet/minecraft/nbt/INBT;)Lnet/minecraft/nbt/INBT;"))
+    private INBT impl$checkForNullNBTValuesDuringCopy(CompoundNBT compound, String key, INBT value) {
+        if (value == null) {
+            final IllegalStateException exception = new IllegalStateException("There is a null NBT component in the compound for key: " + key);
             SpongeImpl.getLogger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
                                          + "If you are seeing this, then Sponge is preventing an exception from being thrown due to unforseen\n"
                                          + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
                                          + "authors for the offending compound data!", exception);
         } else {
-            compound.setTag(string, base);
+            compound.put(key, value);
         }
+
+        return value;
     }
 
 }

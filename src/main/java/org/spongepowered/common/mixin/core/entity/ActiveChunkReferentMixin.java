@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.bridge;
+package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
@@ -37,17 +37,17 @@ import javax.annotation.Nullable;
 @Mixin({Entity.class, TileEntity.class})
 public class ActiveChunkReferentMixin implements ActiveChunkReferantBridge {
 
-    private WeakReference<ChunkBridge> activeChunk$ChunkReference = new WeakReference<>(null);
+    private WeakReference<ChunkBridge> activeChunk$chunkReference = new WeakReference<>(null);
 
     @Override
     @Nullable
     public ChunkBridge bridge$getActiveChunk() {
-        return this.activeChunk$ChunkReference.get();
+        return this.activeChunk$chunkReference.get();
     }
 
     @Override
-    public void bridge$setActiveChunk(@Nullable final ChunkBridge chunk) {
-        this.activeChunk$ChunkReference = new WeakReference<>(chunk);
+    public void bridge$setActiveChunk(@Nullable final ChunkBridge chunkBridge) {
+        this.activeChunk$chunkReference = new WeakReference<>(chunkBridge);
     }
 
 }
