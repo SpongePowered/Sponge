@@ -461,7 +461,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     private void onSpongeWriteToNBT(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         if (((CustomDataHolderBridge) this).bridge$hasManipulators()) {
-            this.spongeImpl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
+            this.spongeImpl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
         }
     }
 
@@ -480,7 +480,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (this.isConstructing) {
             this.bridge$fireConstructors(); // Do this early as possible
         }
-        this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
+        this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
     }
 
     /**
@@ -495,7 +495,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     protected void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
         DataUtil.readCustomData(compound, ((org.spongepowered.api.entity.Entity) this));
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.contains(Constants.Sponge.Entity.CAN_GRIEF)) {
-            ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
+            ((GrieferBridge) this).bridge$setCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
         }
         if (compound.contains(Constants.Sponge.Entity.IS_VANISHED, Constants.NBT.TAG_BYTE)) {
             this.bridge$setVanished(compound.getBoolean(Constants.Sponge.Entity.IS_VANISHED));
@@ -518,7 +518,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      */
     protected void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
         DataUtil.writeCustomData(compound, (org.spongepowered.api.entity.Entity) this);
-        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$CanGrief()) {
+        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$canGrief()) {
             compound.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
         }
         if (this.bridge$isVanished()) {
@@ -606,11 +606,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     public void bridge$setInvisible(final boolean invisible) {
         this.setInvisible(invisible);
         if (invisible) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             spongeData.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         } else {
-            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-                ((DataCompoundHolder) this).data$getSpongeCompound().remove(Constants.Sponge.Entity.IS_INVISIBLE);
+            if (((DataCompoundHolder) this).data$hasSpongeDataCompound()) {
+                ((DataCompoundHolder) this).data$getSpongeDataCompound().remove(Constants.Sponge.Entity.IS_INVISIBLE);
             }
         }
     }
@@ -626,11 +626,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         this.vanish$pendingVisibilityUpdate = true;
         this.vanish$visibilityTicks = 20;
         if (vanished) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             spongeData.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
         } else {
-            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-                final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            if (((DataCompoundHolder) this).data$hasSpongeDataCompound()) {
+                final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
                 spongeData.remove(Constants.Sponge.Entity.IS_VANISHED);
                 spongeData.remove(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
                 spongeData.remove(Constants.Sponge.Entity.VANISH_UNTARGETABLE);

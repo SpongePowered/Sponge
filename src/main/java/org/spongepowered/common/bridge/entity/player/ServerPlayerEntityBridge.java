@@ -30,6 +30,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -37,11 +38,10 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.math.vector.Vector3d;
+
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public interface ServerPlayerEntityBridge {
 

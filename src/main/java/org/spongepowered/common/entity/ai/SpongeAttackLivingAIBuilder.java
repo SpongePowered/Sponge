@@ -27,10 +27,10 @@ package org.spongepowered.common.entity.ai;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
 import org.spongepowered.api.entity.living.Creature;
 
-public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Builder {
+public final class SpongeAttackLivingAIBuilder implements AttackLivingGoal.Builder {
 
     private double speed;
     private boolean longMemory;
@@ -40,33 +40,33 @@ public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Bui
     }
 
     @Override
-    public AttackLivingAITask.Builder speed(double speed) {
+    public AttackLivingGoal.Builder speed(double speed) {
         this.speed = speed;
         return this;
     }
 
     @Override
-    public AttackLivingAITask.Builder longMemory() {
+    public AttackLivingGoal.Builder longMemory() {
         this.longMemory = true;
         return this;
     }
 
     @Override
-    public AttackLivingAITask.Builder from(AttackLivingAITask value) {
+    public AttackLivingGoal.Builder from(AttackLivingGoal value) {
         return this.speed(value.getSpeed())
             .longMemory();
     }
 
     @Override
-    public AttackLivingAITask.Builder reset() {
+    public AttackLivingGoal.Builder reset() {
         this.speed = 0;
         this.longMemory = false;
         return this;
     }
 
     @Override
-    public AttackLivingAITask build(Creature owner) {
+    public AttackLivingGoal build(Creature owner) {
         Preconditions.checkNotNull(owner);
-        return (AttackLivingAITask) new MeleeAttackGoal((CreatureEntity) owner, this.speed, this.longMemory);
+        return (AttackLivingGoal) new MeleeAttackGoal((CreatureEntity) owner, this.speed, this.longMemory);
     }
 }

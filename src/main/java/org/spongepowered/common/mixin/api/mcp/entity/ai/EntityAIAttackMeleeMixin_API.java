@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(MeleeAttackGoal.class)
-public abstract class EntityAIAttackMeleeMixin_API implements AttackLivingAITask {
+public abstract class EntityAIAttackMeleeMixin_API implements AttackLivingGoal {
 
     @Shadow double speedTowardsTarget;
     @Shadow boolean longMemory;
@@ -41,7 +41,7 @@ public abstract class EntityAIAttackMeleeMixin_API implements AttackLivingAITask
     }
 
     @Override
-    public AttackLivingAITask setSpeed(double speed) {
+    public AttackLivingGoal setSpeed(double speed) {
         this.speedTowardsTarget = speed;
         return this;
     }
@@ -52,7 +52,7 @@ public abstract class EntityAIAttackMeleeMixin_API implements AttackLivingAITask
     }
 
     @Override
-    public AttackLivingAITask setLongMemory(boolean longMemory) {
+    public AttackLivingGoal setLongMemory(boolean longMemory) {
         this.longMemory = longMemory;
         return this;
     }

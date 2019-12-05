@@ -61,7 +61,7 @@ public abstract class EntitySilverfish_AISummonSilverfishMixin extends Goal {
     )
     private boolean onCanGrief(final World world, final BlockPos pos, final boolean dropBlock) {
         final BlockState blockState = world.getBlockState(pos);
-        return ((GrieferBridge) this.silverfish).bridge$CanGrief()
+        return ((GrieferBridge) this.silverfish).bridge$canGrief()
                ? world.destroyBlock(pos, dropBlock)
                : world.setBlockState(pos, blockState.get(SilverfishBlock.VARIANT).getModelBlock(), 3);
     }

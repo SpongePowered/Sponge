@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.bridge.world.gen.feature;
 
-import org.spongepowered.api.world.extent.Extent;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface DoublePlantFeatureBridge {
 

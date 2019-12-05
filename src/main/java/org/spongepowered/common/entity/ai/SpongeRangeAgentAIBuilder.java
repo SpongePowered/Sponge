@@ -29,10 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.goal.RangedAttackGoal;
-import org.spongepowered.api.entity.ai.task.builtin.creature.RangeAgentAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RangeAgentGoal;
 import org.spongepowered.api.entity.living.Ranger;
 
-public final class SpongeRangeAgentAIBuilder implements RangeAgentAITask.Builder {
+public final class SpongeRangeAgentAIBuilder implements RangeAgentGoal.Builder {
 
     private double maxSpeed;
     private int delayBetweenAttacks;
@@ -43,25 +43,25 @@ public final class SpongeRangeAgentAIBuilder implements RangeAgentAITask.Builder
     }
 
     @Override
-    public RangeAgentAITask.Builder moveSpeed(double speed) {
+    public RangeAgentGoal.Builder moveSpeed(double speed) {
         this.maxSpeed = speed;
         return this;
     }
 
     @Override
-    public RangeAgentAITask.Builder delayBetweenAttacks(int delay) {
+    public RangeAgentGoal.Builder delayBetweenAttacks(int delay) {
         this.delayBetweenAttacks = delay;
         return this;
     }
 
     @Override
-    public RangeAgentAITask.Builder attackRadius(float radius) {
+    public RangeAgentGoal.Builder attackRadius(float radius) {
         this.attackRadius = radius;
         return this;
     }
 
     @Override
-    public RangeAgentAITask.Builder from(RangeAgentAITask value) {
+    public RangeAgentGoal.Builder from(RangeAgentGoal value) {
         checkNotNull(value);
         this.maxSpeed = value.getMoveSpeed();
         this.delayBetweenAttacks = value.getDelayBetweenAttacks();
@@ -70,7 +70,7 @@ public final class SpongeRangeAgentAIBuilder implements RangeAgentAITask.Builder
     }
 
     @Override
-    public RangeAgentAITask.Builder reset() {
+    public RangeAgentGoal.Builder reset() {
         // I'ma use Snowmen defaults. I like Snowmen.
         this.maxSpeed = 1.25D;
         this.delayBetweenAttacks = 20;
@@ -79,9 +79,9 @@ public final class SpongeRangeAgentAIBuilder implements RangeAgentAITask.Builder
     }
 
     @Override
-    public RangeAgentAITask build(Ranger owner) {
+    public RangeAgentGoal build(Ranger owner) {
         checkNotNull(owner);
         checkArgument(owner instanceof IRangedAttackMob, "Ranger must be an IRangedAttackMob!");
-        return (RangeAgentAITask) new RangedAttackGoal((IRangedAttackMob) owner, this.maxSpeed, this.delayBetweenAttacks, this.attackRadius);
+        return (RangeAgentGoal) new RangedAttackGoal((IRangedAttackMob) owner, this.maxSpeed, this.delayBetweenAttacks, this.attackRadius);
     }
 }

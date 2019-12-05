@@ -31,5 +31,4 @@ public interface BlockPosBridge {
     boolean bridge$isValidPosition();
 
     boolean bridge$isInvalidYPosition();
-
 }

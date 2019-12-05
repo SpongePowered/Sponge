@@ -28,10 +28,10 @@ import com.google.common.base.Preconditions;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.WatchClosestGoal;
 import org.spongepowered.api.entity.living.Agent;
 
-public final class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
+public final class SpongeWatchClosestAIBuilder implements WatchClosestGoal.Builder {
 
     private Class<? extends Entity> watchedClass;
     private float maxDistance;
@@ -42,32 +42,32 @@ public final class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Bui
     }
 
     @Override
-    public WatchClosestAITask.Builder watch(Class<? extends Entity> watchedClass) {
+    public WatchClosestGoal.Builder watch(Class<? extends Entity> watchedClass) {
         this.watchedClass = watchedClass;
         return this;
     }
 
     @Override
-    public WatchClosestAITask.Builder maxDistance(float maxDistance) {
+    public WatchClosestGoal.Builder maxDistance(float maxDistance) {
         this.maxDistance = maxDistance;
         return this;
     }
 
     @Override
-    public WatchClosestAITask.Builder chance(float chance) {
+    public WatchClosestGoal.Builder chance(float chance) {
         this.chance = chance;
         return this;
     }
 
     @Override
-    public WatchClosestAITask.Builder from(WatchClosestAITask value) {
+    public WatchClosestGoal.Builder from(WatchClosestGoal value) {
         return this.watch(value.getWatchedClass())
             .maxDistance(value.getMaxDistance())
             .chance(value.getChance());
     }
 
     @Override
-    public WatchClosestAITask.Builder reset() {
+    public WatchClosestGoal.Builder reset() {
         this.watchedClass = null;
         this.maxDistance = 8;
         this.chance = 0.02f;
@@ -76,8 +76,8 @@ public final class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Bui
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public WatchClosestAITask build(Agent owner) {
+    public WatchClosestGoal build(Agent owner) {
         Preconditions.checkNotNull(this.watchedClass);
-        return (WatchClosestAITask) new LookAtGoal((MobEntity) owner, (Class) this.watchedClass, this.maxDistance, this.chance);
+        return (WatchClosestGoal) new LookAtGoal((MobEntity) owner, (Class) this.watchedClass, this.maxDistance, this.chance);
     }
 }

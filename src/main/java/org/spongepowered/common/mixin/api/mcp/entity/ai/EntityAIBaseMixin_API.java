@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.task.AITask;
-import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.Goal;
+import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -37,24 +37,24 @@ import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 import java.util.Optional;
 
 @Mixin(net.minecraft.entity.ai.goal.Goal.class)
-@Implements(value = @Interface(iface = AITask.class, prefix = "task$"))
-public abstract class EntityAIBaseMixin_API<O extends Agent> implements AITask<O> {
+@Implements(value = @Interface(iface = Goal.class, prefix = "task$"))
+public abstract class EntityAIBaseMixin_API<O extends Agent> implements Goal<O> {
 
     @Shadow private int mutexBits;
 
     @Override
-    public AITaskType getType() {
+    public GoalType getType() {
         return ((GoalBridge) this).bridge$getType();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<Goal<O>> getGoal() {
-        return (Optional<Goal<O>>) (Optional<?>) ((GoalBridge) this).bridge$getAIGoal();
+    public Optional<GoalExecutor<O>> getGoal() {
+        return (Optional<GoalExecutor<O>>) (Optional<?>) ((GoalBridge) this).bridge$getGoalExecutor();
     }
 
     @Override
-    public boolean canRunConcurrentWith(AITask<O> other) {
+    public boolean canRunConcurrentWith(Goal<O> other) {
         return (this.mutexBits & ((net.minecraft.entity.ai.goal.Goal) other).getMutexBits()) == 0;
     }
 

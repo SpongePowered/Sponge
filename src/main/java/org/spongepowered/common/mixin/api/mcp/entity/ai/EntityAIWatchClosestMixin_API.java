@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.WatchClosestGoal;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -39,7 +39,7 @@ import net.minecraft.entity.ai.goal.LookAtGoal;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(LookAtGoal.class)
-public abstract class EntityAIWatchClosestMixin_API extends Goal implements WatchClosestAITask {
+public abstract class EntityAIWatchClosestMixin_API extends Goal implements WatchClosestGoal {
 
     @Shadow protected Class watchedClass;
     @Shadow protected float maxDistance;
@@ -56,7 +56,7 @@ public abstract class EntityAIWatchClosestMixin_API extends Goal implements Watc
     }
 
     @Override
-    public WatchClosestAITask setWatchedClass(final Class<? extends Entity> watchedClass) {
+    public WatchClosestGoal setWatchedClass(final Class<? extends Entity> watchedClass) {
         this.watchedClass = watchedClass;
         return this;
     }
@@ -67,7 +67,7 @@ public abstract class EntityAIWatchClosestMixin_API extends Goal implements Watc
     }
 
     @Override
-    public WatchClosestAITask setMaxDistance(final float maxDistance) {
+    public WatchClosestGoal setMaxDistance(final float maxDistance) {
         this.maxDistance = maxDistance;
         return this;
     }
@@ -78,7 +78,7 @@ public abstract class EntityAIWatchClosestMixin_API extends Goal implements Watc
     }
 
     @Override
-    public WatchClosestAITask setChance(final float chance) {
+    public WatchClosestGoal setChance(final float chance) {
         this.chance = chance;
         return this;
     }

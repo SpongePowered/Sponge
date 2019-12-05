@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.core.entity.ai;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.GoalType;
-import org.spongepowered.api.entity.ai.task.AITask;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
@@ -59,7 +59,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
     @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> executingTaskEntries;
 
     @Nullable private MobEntity owner;
-    @Nullable private GoalType type;
+    @Nullable private GoalExecutorType type;
     private boolean initialized;
 
     @Override
@@ -79,16 +79,16 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
      */
     @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddEntityTask(final Set<GoalSelector.EntityAITaskEntry> set, final Object entry, final int priority, final net.minecraft.entity.ai.goal.Goal base) {
-        ((GoalBridge) base).bridge$setGoal((Goal<?>) this);
+        ((GoalBridge) base).bridge$setGoalExecutor((GoalExecutor<?>) this);
         if (!ShouldFire.A_I_TASK_EVENT_ADD || this.owner == null || ((EntityBridge) this.owner).bridge$isConstructing()) {
             // Event is fired in bridge$fireConstructors
             return set.add(((GoalSelector) (Object) this).new EntityAITaskEntry(priority, base));
         }
         final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(), priority, priority,
-                (Goal<?>) this, (Agent) this.owner, (AITask<?>) base);
+                (GoalExecutor<?>) this, (Agent) this.owner, (Goal<?>) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
-            ((GoalBridge) base).bridge$setGoal(null);
+            ((GoalBridge) base).bridge$setGoalExecutor(null);
             return false;
         }
         return set.add(((GoalSelector) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
@@ -105,12 +105,12 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
     }
 
     @Override
-    public GoalType bridge$getType() {
+    public GoalExecutorType bridge$getType() {
         return this.type;
     }
 
     @Override
-    public void bridge$setType(final GoalType type) {
+    public void bridge$setType(final GoalExecutorType type) {
         this.type = type;
     }
 
@@ -135,7 +135,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
                 AITaskEvent.Remove event = null;
                 if (ShouldFire.A_I_TASK_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
                     event = SpongeEventFactory.createAITaskEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
-                            (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
+                            (GoalExecutor) this, (Agent) this.owner, (Goal) otherAiBase, entityaitaskentry.priority);
                     SpongeImpl.postEvent(event);
                 }
                 if (event == null || !event.isCancelled()) {
@@ -165,7 +165,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     private boolean areTasksCompatible(final GoalSelector.EntityAITaskEntry taskEntry1, final GoalSelector.EntityAITaskEntry taskEntry2) {
-        return (((AITask) taskEntry2.action).canRunConcurrentWith((AITask) taskEntry1.action));
+        return (((Goal) taskEntry2.action).canRunConcurrentWith((Goal) taskEntry1.action));
     }
 
     @Override

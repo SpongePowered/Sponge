@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.entity.item;
 
 import net.minecraft.entity.LivingEntity;
-import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
 public interface EntityTNTPrimedBridge {
 

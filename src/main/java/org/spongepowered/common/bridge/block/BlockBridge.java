@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.CauseStackManager;
@@ -50,20 +50,20 @@ import java.util.function.BiConsumer;
  * <p>It is important to note that when using this level of implementation,
  * it is already guaranteed that a particular {@link BlockBridge} is capable
  * of a particular type thanks to {@link Mixin}s. All that is needed to handle
- * a particular type of {@link Value} or {@link ImmutableDataManipulator} is a
+ * a particular type of {@link Value} or {@link Immutable} is a
  * simple cast. This is particularly useful for {@link BlockState}s as
  * they already know the type they need to focus on.</p>
  */
 public interface BlockBridge {
 
     /**
-     * Gets all the {@link ImmutableDataManipulator}s for the provided
-     * {@link IBlockState}.
+     * Gets all the {@link Immutable}s for the provided
+     * {@link BlockState}.
      *
      * @param blockState The block state being passed in
      * @return The list of immutable manipulators
      */
-    List<Immutable<?, ?>> bridge$getManipulators(net.minecraft.block.BlockState blockState);
+    List<Immutable> bridge$getManipulators(BlockState blockState);
 
     /**
      * A simple check whether the class is supported by the block or not.
@@ -71,7 +71,7 @@ public interface BlockBridge {
      * @param immutable The immutable class
      * @return True if the data possibly represented by an instance of the class is supported
      */
-    boolean bridge$supports(Class<? extends Immutable<?, ?>> immutable);
+    boolean bridge$supports(Class<? extends Immutable> immutable);
 
     /**
      * Instead of delegating to a block processor, we can delegate to the block
@@ -88,7 +88,7 @@ public interface BlockBridge {
      * @param <E> The type of value, for type checking
      * @return The blockstate with the new value, if available and compatible
      */
-    <E> Optional<BlockState> bridge$getStateWithValue(net.minecraft.block.BlockState blockState, Key<? extends Value<E>> key, E value);
+    <E> Optional<BlockState> bridge$getStateWithValue(BlockState blockState, Key<? extends Value<E>> key, E value);
 
     /**
      * Again, another delegate method directly to the block, usually not all
@@ -105,7 +105,7 @@ public interface BlockBridge {
      * @param manipulator The manipulator being offered
      * @return The block state with the requested data, if available
      */
-    Optional<BlockState> bridge$getStateWithData(net.minecraft.block.BlockState blockState, Immutable<?, ?> manipulator);
+    Optional<org.spongepowered.api.block.BlockState> bridge$getStateWithData(BlockState blockState, Immutable manipulator);
 
     // Normal API methods
 
@@ -120,7 +120,7 @@ public interface BlockBridge {
     /**
      * Used to determine if this block should fire 
      * sponge events during WorldServer#addBlockEvent.
-     * 
+     *
      * @return Whether this block should fire events
      */
     boolean bridge$shouldFireBlockEvents();
@@ -135,11 +135,12 @@ public interface BlockBridge {
         return false;
     }
 
-    ImmutableMap<Class<? extends Property<?,?>>,Property<?,?>> bridge$getProperties(net.minecraft.block.BlockState mixinStateImplementation);
+    ImmutableMap<Class<? extends Property>, Property> bridge$getProperties(BlockState blockState);
 
     void bridge$initializeTrackerState();
 
     default BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> bridge$getTickFrameModifier() {
-        return (frame, world) -> {};
+        return (frame, world) -> {
+        };
     }
 }

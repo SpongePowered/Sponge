@@ -59,13 +59,13 @@ public class GriefingDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected boolean set(Entity dataHolder, Boolean value) {
-        ((GrieferBridge) dataHolder).bridge$SetCanGrief(value);
+        ((GrieferBridge) dataHolder).bridge$setCanGrief(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity dataHolder) {
-        return Optional.of(((GrieferBridge) dataHolder).bridge$CanGrief());
+        return Optional.of(((GrieferBridge) dataHolder).bridge$canGrief());
     }
 
     @Override

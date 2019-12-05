@@ -61,7 +61,7 @@ public abstract class EntityAIEatGrassMixin extends Goal {
     )
     @SuppressWarnings({"unchecked", "rawtypes", "Guava"})
     private boolean onTallGrassApplyForGriefing(final Predicate predicate, final Object object) {
-        return ((GrieferBridge) this.grassEaterEntity).bridge$CanGrief() && predicate.apply(object);
+        return ((GrieferBridge) this.grassEaterEntity).bridge$canGrief() && predicate.apply(object);
     }
 
     /**
@@ -89,6 +89,6 @@ public abstract class EntityAIEatGrassMixin extends Goal {
         )
     )
     private Block onSpongeGetBlockForgriefing(final BlockState state) {
-        return ((GrieferBridge) this.grassEaterEntity).bridge$CanGrief() ? state.getBlock() : Blocks.AIR;
+        return ((GrieferBridge) this.grassEaterEntity).bridge$canGrief() ? state.getBlock() : Blocks.AIR;
     }
 }

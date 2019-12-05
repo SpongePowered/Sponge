@@ -26,13 +26,12 @@ package org.spongepowered.common.bridge.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.math.vector.Vector3d;
-import javax.annotation.Nullable;
 
 public interface EntityBridge {
 
@@ -48,8 +47,8 @@ public interface EntityBridge {
 
     /**
      * Sets an entity to be tracked or untracked. Specifically used in
-     * {@link net.minecraft.world.World#onEntityAdded(Entity)} and
-     * {@link net.minecraft.world.World#onEntityRemoved(Entity)}.
+     * {@link net.minecraft.world.World#addEntity(Entity)} (Entity)} and
+     * {@link net.minecraft.world.server.ServerWorld#removeEntity(Entity)}.
      *
      * @param tracked Tracked
      */
@@ -65,7 +64,7 @@ public interface EntityBridge {
 
     @Nullable BlockPos bridge$getLastCollidedBlockPos();
 
-    void bridge$setLocationAndAngles(Transform<World> transform);
+    void bridge$setLocationAndAngles(Transform transform);
 
     default void bridge$onJoinWorld() {
 

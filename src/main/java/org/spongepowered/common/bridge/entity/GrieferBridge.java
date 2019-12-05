@@ -28,9 +28,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 
 public interface GrieferBridge {
 
-    boolean bridge$CanGrief();
+    boolean bridge$canGrief();
 
-    void bridge$SetCanGrief(boolean grief);
+    void bridge$setCanGrief(boolean grief);
 
     default boolean bridge$isGriefer() {
         return !(this instanceof ServerPlayerEntity);

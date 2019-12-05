@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidEntityGoal;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Final;
@@ -34,11 +34,10 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Predicate;
-import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 
 @SuppressWarnings("rawtypes")
-@Mixin(AvoidEntityGoal.class)
-public abstract class EntityAIAvoidEntityMixin_API extends EntityAIBaseMixin_API<Creature> implements AvoidEntityAITask {
+@Mixin(net.minecraft.entity.ai.goal.AvoidEntityGoal.class)
+public abstract class EntityAIAvoidEntityMixin_API extends EntityAIBaseMixin_API<Creature> implements AvoidEntityGoal {
 
     @Shadow @Final @Mutable private double farSpeed;
     @Shadow @Final @Mutable private double nearSpeed;
@@ -52,7 +51,7 @@ public abstract class EntityAIAvoidEntityMixin_API extends EntityAIBaseMixin_API
     }
 
     @Override
-    public AvoidEntityAITask setTargetSelector(Predicate<Entity> predicate) {
+    public AvoidEntityGoal setTargetSelector(Predicate<Entity> predicate) {
         this.avoidTargetSelector = Functional.java8ToGuava(predicate);
         return this;
     }
@@ -63,7 +62,7 @@ public abstract class EntityAIAvoidEntityMixin_API extends EntityAIBaseMixin_API
     }
 
     @Override
-    public AvoidEntityAITask setSearchDistance(float distance) {
+    public AvoidEntityGoal setSearchDistance(float distance) {
         this.avoidDistance = distance;
         return this;
     }
@@ -74,7 +73,7 @@ public abstract class EntityAIAvoidEntityMixin_API extends EntityAIBaseMixin_API
     }
 
     @Override
-    public AvoidEntityAITask setCloseRangeSpeed(double speed) {
+    public AvoidEntityGoal setCloseRangeSpeed(double speed) {
        this.nearSpeed = speed;
         return this;
     }
@@ -85,7 +84,7 @@ public abstract class EntityAIAvoidEntityMixin_API extends EntityAIBaseMixin_API
     }
 
     @Override
-    public AvoidEntityAITask setFarRangeSpeed(double speed) {
+    public AvoidEntityGoal setFarRangeSpeed(double speed) {
         this.farSpeed = speed;
         return this;
     }

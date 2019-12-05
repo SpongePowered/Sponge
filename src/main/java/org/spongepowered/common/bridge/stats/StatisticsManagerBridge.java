@@ -25,9 +25,6 @@
 package org.spongepowered.common.bridge.stats;
 
 import net.minecraft.stats.Stat;
-import net.minecraft.util.TupleIntJsonSerializable;
-
-import java.util.Map;
 
 public interface StatisticsManagerBridge {
 

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
+import net.minecraft.world.LightType;
+
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.minecraft.world.LightType;
 
 public interface ChunkBridge_AsyncLighting {
 

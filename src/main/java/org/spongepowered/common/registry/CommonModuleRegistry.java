@@ -82,17 +82,17 @@ import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.ai.GoalType;
-import org.spongepowered.api.entity.ai.task.AITaskType;
-import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
-import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
-import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.RangeAgentAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
+import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.GoalType;
+import org.spongepowered.api.entity.ai.goal.builtin.LookIdleGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.WatchClosestGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidEntityGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RangeAgentGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.WanderGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
@@ -451,15 +451,15 @@ public final class CommonModuleRegistry {
                 .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
                 .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
                 .registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
-                .registerBuilderSupplier(WanderAITask.Builder.class, SpongeWanderAIBuilder::new)
-                .registerBuilderSupplier(AvoidEntityAITask.Builder.class, SpongeAvoidEntityAIBuilder::new)
-                .registerBuilderSupplier(RunAroundLikeCrazyAITask.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
-                .registerBuilderSupplier(SwimmingAITask.Builder.class, SpongeSwimmingAIBuilder::new)
-                .registerBuilderSupplier(WatchClosestAITask.Builder.class, SpongeWatchClosestAIBuilder::new)
-                .registerBuilderSupplier(FindNearestAttackableTargetAITask.Builder.class, SpongeFindNearestAttackableTargetAIBuilder::new)
-                .registerBuilderSupplier(AttackLivingAITask.Builder.class, SpongeAttackLivingAIBuilder::new)
-                .registerBuilderSupplier(RangeAgentAITask.Builder.class, SpongeRangeAgentAIBuilder::new)
-                .registerBuilderSupplier(LookIdleAITask.Builder.class, SpongeLookIdleAIBuilder::new)
+                .registerBuilderSupplier(WanderGoal.Builder.class, SpongeWanderAIBuilder::new)
+                .registerBuilderSupplier(AvoidEntityGoal.Builder.class, SpongeAvoidEntityAIBuilder::new)
+                .registerBuilderSupplier(RunAroundLikeCrazyGoal.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
+                .registerBuilderSupplier(SwimmingGoal.Builder.class, SpongeSwimmingAIBuilder::new)
+                .registerBuilderSupplier(WatchClosestGoal.Builder.class, SpongeWatchClosestAIBuilder::new)
+                .registerBuilderSupplier(FindNearestAttackableTargetGoal.Builder.class, SpongeFindNearestAttackableTargetAIBuilder::new)
+                .registerBuilderSupplier(AttackLivingGoal.Builder.class, SpongeAttackLivingAIBuilder::new)
+                .registerBuilderSupplier(RangeAgentGoal.Builder.class, SpongeRangeAgentAIBuilder::new)
+                .registerBuilderSupplier(LookIdleGoal.Builder.class, SpongeLookIdleAIBuilder::new)
                 .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
                 .registerBuilderSupplier(Task.Builder.class, () -> Sponge.getScheduler().createTaskBuilder())
                 .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
@@ -532,7 +532,7 @@ public final class CommonModuleRegistry {
         registry.registerModule(new ArgumentRegistryModule())
                 .registerModule(BlockChangeFlagRegistryModule.getInstance())
                 .registerModule(ChunkRegenerateFlagRegistryModule.getInstance())
-                .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
+                .registerModule(GoalType.class, AITaskTypeModule.getInstance())
                 .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
                 .registerModule(ArtType.class, new ArtRegistryModule())
                 .registerModule(BanType.class, new BanTypeRegistryModule())
@@ -573,7 +573,7 @@ public final class CommonModuleRegistry {
                 .registerModule(FluidType.class, FluidTypeRegistryModule.getInstance())
                 .registerModule(GameMode.class, new GameModeRegistryModule())
                 .registerModule(org.spongepowered.api.world.GeneratorType.class, GeneratorTypeRegistryModule.getInstance())
-                .registerModule(GoalType.class, GoalTypeModule.getInstance())
+                .registerModule(GoalExecutorType.class, GoalTypeModule.getInstance())
                 .registerModule(GoldenApple.class, new GoldenAppleRegistryModule())
                 .registerModule(Hinge.class, new HingeRegistryModule())
                 .registerModule(IntegerStateProperty.class, IntegerTraitRegistryModule.getInstance())

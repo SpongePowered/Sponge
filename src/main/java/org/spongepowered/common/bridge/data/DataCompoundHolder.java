@@ -29,16 +29,16 @@ import org.spongepowered.common.util.Constants;
 
 public interface DataCompoundHolder {
 
-    boolean data$hasRootCompound();
+    boolean data$hasSpongeCompound();
 
-    CompoundNBT data$getRootCompound();
+    CompoundNBT data$getSpongeCompound();
 
-    default boolean data$hasSpongeCompound() {
-        return this.data$hasRootCompound() && this.data$getRootCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
+    default boolean data$hasSpongeDataCompound() {
+        return this.data$hasSpongeCompound() && this.data$getSpongeCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
     }
 
-    default CompoundNBT data$getSpongeCompound() {
-        final CompoundNBT data = this.data$getRootCompound();
+    default CompoundNBT data$getSpongeDataCompound() {
+        final CompoundNBT data = this.data$getSpongeCompound();
         if (!data.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             data.put(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
         }

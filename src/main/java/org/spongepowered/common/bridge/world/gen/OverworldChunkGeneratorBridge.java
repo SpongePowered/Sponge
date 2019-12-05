@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.world.gen;
 
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.world.gen.BiomeGenerator;
 
 public interface OverworldChunkGeneratorBridge {
 

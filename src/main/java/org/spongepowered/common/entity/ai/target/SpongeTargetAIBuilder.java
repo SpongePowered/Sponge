@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.entity.ai.target;
 
-import org.spongepowered.api.entity.ai.task.builtin.creature.target.TargetAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.target.TargetGoal;
 
-public abstract class SpongeTargetAIBuilder<A extends TargetAITask<A>, B extends TargetAITask.Builder<A, B>> implements TargetAITask.Builder<A, B> {
+public abstract class SpongeTargetAIBuilder<A extends TargetGoal<A>, B extends TargetGoal.Builder<A, B>> implements TargetGoal.Builder<A, B> {
 
     protected boolean checkSight, onlyNearby;
     protected int searchDelay, interruptTargetUnseenTicks;

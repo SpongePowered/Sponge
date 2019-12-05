@@ -31,5 +31,5 @@ public interface NextTickListEntryBridge {
 
     void bridge$setWorld(World world);
 
-    Location<org.spongepowered.api.world.World> bridge$getLocation();
+    Location bridge$getLocation();
 }

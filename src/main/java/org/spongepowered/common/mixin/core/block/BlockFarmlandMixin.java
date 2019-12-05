@@ -96,7 +96,7 @@ public abstract class BlockFarmlandMixin extends BlockMixin {
     )
     private void impl$CheckIfGrieferCanGrief(final World world, final BlockPos pos, final World worldIn, final BlockPos samePos,
         final Entity entityIn, final float fallDistance) {
-        if (entityIn instanceof GrieferBridge && ((GrieferBridge) entityIn).bridge$CanGrief()) {
+        if (entityIn instanceof GrieferBridge && ((GrieferBridge) entityIn).bridge$canGrief()) {
             turnToDirt(world, pos);
         }
     }

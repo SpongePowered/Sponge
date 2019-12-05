@@ -29,10 +29,10 @@ import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.ai.GoalTypes;
-import org.spongepowered.api.entity.ai.task.AITask;
-import org.spongepowered.api.entity.ai.task.AITaskTypes;
-import org.spongepowered.api.entity.ai.task.AbstractAITask;
+import org.spongepowered.api.entity.ai.GoalExecutorTypes;
+import org.spongepowered.api.entity.ai.goal.Goal;
+import org.spongepowered.api.entity.ai.goal.GoalTypes;
+import org.spongepowered.api.entity.ai.goal.AbstractGoal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.player.Player;
@@ -64,7 +64,7 @@ public class HumanAITest implements LoadableModule {
         public void onSpawnEntity(SpawnEntityEvent event, @First Player player) {
             if (player != null) {
                 event.getEntities().stream().filter(entity -> entity instanceof Human).map(entity -> (Human) entity).forEach(human ->
-                        human.getGoal(GoalTypes.NORMAL).get().addTask(0, new MoveSillyToPlayerAITask(player)));
+                        human.getGoal(GoalExecutorTypes.NORMAL).get().addGoal(0, new MoveSillyToPlayerGoal(player)));
             }
         }
 
@@ -76,11 +76,11 @@ public class HumanAITest implements LoadableModule {
         }
     }
 
-    private static class MoveSillyToPlayerAITask extends AbstractAITask<Agent> {
+    private static class MoveSillyToPlayerGoal extends AbstractGoal<Agent> {
         final Player player;
 
-        protected MoveSillyToPlayerAITask(Player player) {
-            super(AITaskTypes.WANDER);
+        protected MoveSillyToPlayerGoal(Player player) {
+            super(GoalTypes.WANDER);
             this.player = player;
         }
 
@@ -114,7 +114,7 @@ public class HumanAITest implements LoadableModule {
         }
 
         @Override
-        public boolean canRunConcurrentWith(AITask<Agent> other) {
+        public boolean canRunConcurrentWith(Goal<Agent> other) {
             return false;
         }
 

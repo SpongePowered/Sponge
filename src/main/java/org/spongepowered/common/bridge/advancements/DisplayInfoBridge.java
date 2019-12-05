@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.bridge.advancements;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.Advancement;
-
-import javax.annotation.Nullable;
 
 public interface DisplayInfoBridge {
 

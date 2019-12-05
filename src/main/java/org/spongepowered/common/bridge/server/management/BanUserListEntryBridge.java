@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.server.management;
 
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 
 import java.util.Optional;

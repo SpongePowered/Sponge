@@ -24,7 +24,7 @@
         "advancements.ICriterionTrigger_ListenerMixin",
         "advancements.ICriterionTriggerMixin",
         "advancements.PlayerAdvancementsMixin",
-        "api.ai.AbstractAITaskMixin_API",
+        "api.ai.AbstractGoalMixin_API",
         "api.data.DataContainerMixin_API",
         "api.event.cause.damage.AbstractDamageSourceMixin_API",
         "api.event.cause.damage.AbstractEntityDamageSourceMixin_API",

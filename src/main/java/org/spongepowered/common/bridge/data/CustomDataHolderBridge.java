@@ -25,9 +25,12 @@
 package org.spongepowered.common.bridge.data;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
@@ -37,16 +40,14 @@ import org.spongepowered.common.util.Constants;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 
 public interface CustomDataHolderBridge {
 
-    DataTransactionResult bridge$offerCustom(Mutable<?, ?> manipulator, MergeFunction function);
+    DataTransactionResult bridge$offerCustom(Mutable manipulator, MergeFunction function);
 
-    <T extends Mutable<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass);
+    <T extends Mutable> Optional<T> bridge$getCustom(Class<T> customClass);
 
-    DataTransactionResult bridge$removeCustom(Class<? extends Mutable<?, ?>> customClass);
+    DataTransactionResult bridge$removeCustom(Class<? extends Mutable> customClass);
 
     boolean bridge$hasManipulators();
 
@@ -56,28 +57,28 @@ public interface CustomDataHolderBridge {
 
     <E, V extends Value<E>> Optional<V> bridge$getCustomValue(Key<V> key);
 
-    Collection<Mutable<?, ?>> bridge$getCustomManipulators();
+    Collection<Mutable> bridge$getCustomManipulators();
 
     <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value);
 
     DataTransactionResult bridge$removeCustom(Key<?> key);
 
-    default void bridge$removeCustomFromNbt(Mutable<?, ?> manipulator) {
+    default void bridge$removeCustomFromNBT(Mutable manipulator) {
         if (this instanceof DataCompoundHolder) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             if (spongeData.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
                 final ListNBT tagList = spongeData.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
                 if (!tagList.isEmpty()) {
-                    String id = DataUtil.getRegistrationFor(manipulator).getId();
-                    for (int i = 0; i < tagList.tagCount(); i++) {
+                    final CatalogKey key = DataUtil.getRegistrationFor(manipulator).getKey();
+                    for (int i = 0; i < tagList.size(); i++) {
                         final CompoundNBT tag = tagList.getCompound(i);
-                        if (id.equals(tag.getString(Constants.Sponge.MANIPULATOR_ID))) {
-                            tagList.removeTag(i);
+                        if (key.toString().equals(tag.getString(Constants.Sponge.MANIPULATOR_ID))) {
+                            tagList.remove(i);
                             break;
                         }
                         final String dataClass = tag.getString(Constants.Sponge.CUSTOM_DATA_CLASS);
                         if (dataClass.equalsIgnoreCase(manipulator.getClass().getName())) {
-                            tagList.removeTag(i);
+                            tagList.remove(i);
                             break;
                         }
                     }

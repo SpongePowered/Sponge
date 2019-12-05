@@ -42,6 +42,6 @@ public interface TileEntityBridge {
     void bridge$setCaptured(boolean captured);
 
     default String bridge$getPrettyPrinterString() {
-        return  this.toString();
+        return this.toString();
     }
 }

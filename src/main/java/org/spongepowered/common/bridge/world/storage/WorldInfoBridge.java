@@ -24,18 +24,17 @@
  */
 package org.spongepowered.common.bridge.world.storage;
 
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.Difficulty;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
 
 public interface WorldInfoBridge {
 

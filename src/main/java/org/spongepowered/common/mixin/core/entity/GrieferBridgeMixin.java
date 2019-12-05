@@ -40,19 +40,19 @@ public abstract class GrieferBridgeMixin implements GrieferBridge {
     private boolean griefer$canGrief = true;
 
     @Override
-    public boolean bridge$CanGrief() {
+    public boolean bridge$canGrief() {
         return this.griefer$canGrief;
     }
 
     @Override
-    public void bridge$SetCanGrief(final boolean grief) {
+    public void bridge$setCanGrief(final boolean grief) {
         this.griefer$canGrief = grief;
         if (grief) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             spongeData.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
         } else {
-            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-                ((DataCompoundHolder) this).data$getSpongeCompound().remove(Constants.Sponge.Entity.CAN_GRIEF);
+            if (((DataCompoundHolder) this).data$hasSpongeDataCompound()) {
+                ((DataCompoundHolder) this).data$getSpongeDataCompound().remove(Constants.Sponge.Entity.CAN_GRIEF);
             }
         }
     }

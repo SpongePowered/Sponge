@@ -25,9 +25,6 @@
 package org.spongepowered.common.bridge.tileentity;
 
 import com.mojang.authlib.GameProfile;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-
-import javax.annotation.Nullable;
 
 public interface SkullTileEntityBridge {
 

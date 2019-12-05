@@ -145,7 +145,7 @@ public abstract class EntityCreeperMixin extends EntityMobMixin implements Fused
                 .sourceExplosive(((Creeper) this))
                 .radius(strength)
                 .shouldPlaySmoke(smoking)
-                .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$CanGrief()))
+                .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$canGrief()))
                 .orElseGet(() -> {
                     this.detonationCancelled = true;
                     return null;

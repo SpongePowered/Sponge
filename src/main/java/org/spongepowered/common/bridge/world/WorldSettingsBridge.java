@@ -25,14 +25,13 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.storage.WorldInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.teleport.PortalAgentType;
-
-import javax.annotation.Nullable;
 
 public interface WorldSettingsBridge {
 

@@ -25,12 +25,8 @@
 package org.spongepowered.common.bridge.entity.projectile;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
-import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface WitherSkullEntityBridge {
 

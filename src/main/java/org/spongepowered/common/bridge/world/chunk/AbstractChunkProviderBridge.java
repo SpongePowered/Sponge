@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.world.chunk;
 
 import net.minecraft.world.chunk.Chunk;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AbstractChunkProviderBridge {
 

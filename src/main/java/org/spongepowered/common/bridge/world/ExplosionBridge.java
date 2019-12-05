@@ -26,8 +26,7 @@ package org.spongepowered.common.bridge.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface ExplosionBridge {
 

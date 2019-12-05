@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -37,8 +38,6 @@ import org.spongepowered.common.mixin.tracking.world.WorldMixin_TrackerAPI;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 /**
  * An optionally implemented interface to bridge getting the

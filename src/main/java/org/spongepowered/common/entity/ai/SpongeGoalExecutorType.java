@@ -25,21 +25,21 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.GoalType;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.GoalExecutorType;
 
-public final class SpongeGoalType implements GoalType {
+public final class SpongeGoalExecutorType implements GoalExecutorType {
     private final String id, name;
-    private final Class<? extends Goal<?>> goalClass;
+    private final Class<? extends GoalExecutor<?>> goalClass;
 
-    public SpongeGoalType(String id, String name, Class<? extends Goal<?>> goalClass) {
+    public SpongeGoalExecutorType(String id, String name, Class<? extends GoalExecutor<?>> goalClass) {
         this.id = id;
         this.name = name;
         this.goalClass = goalClass;
     }
 
     @Override
-    public Class<? extends Goal<?>> getGoalClass() {
+    public Class<? extends GoalExecutor<?>> getGoalClass() {
         return this.goalClass;
     }
 

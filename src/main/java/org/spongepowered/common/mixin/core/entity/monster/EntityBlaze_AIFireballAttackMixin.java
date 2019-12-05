@@ -42,7 +42,7 @@ public abstract class EntityBlaze_AIFireballAttackMixin extends Goal {
     @ModifyArg(method = "updateTask",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private Entity impl$setCanGrief(final Entity entity) {
-        ((GrieferBridge) entity).bridge$SetCanGrief(((GrieferBridge) this.blaze).bridge$CanGrief());
+        ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this.blaze).bridge$canGrief());
         return entity;
     }
 }

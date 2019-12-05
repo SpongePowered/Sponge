@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.math.vector.Vector3d;
 
 public interface LocationTargetingBridge {

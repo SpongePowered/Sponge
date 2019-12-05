@@ -26,15 +26,14 @@ package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidEntityGoal;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.util.Functional;
 
 import java.util.function.Predicate;
 import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 
-public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Builder {
+public final class SpongeAvoidEntityAIBuilder implements AvoidEntityGoal.Builder {
 
     Predicate<Entity> targetSelector;
     float searchDistance;
@@ -45,31 +44,31 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     }
 
     @Override
-    public AvoidEntityAITask.Builder targetSelector(Predicate<Entity> predicate) {
+    public AvoidEntityGoal.Builder targetSelector(Predicate<Entity> predicate) {
         this.targetSelector = predicate;
         return this;
     }
 
     @Override
-    public AvoidEntityAITask.Builder searchDistance(float distance) {
+    public AvoidEntityGoal.Builder searchDistance(float distance) {
         this.searchDistance = distance;
         return this;
     }
 
     @Override
-    public AvoidEntityAITask.Builder closeRangeSpeed(double speed) {
+    public AvoidEntityGoal.Builder closeRangeSpeed(double speed) {
         this.closeRangeSpeed = speed;
         return this;
     }
 
     @Override
-    public AvoidEntityAITask.Builder farRangeSpeed(double speed) {
+    public AvoidEntityGoal.Builder farRangeSpeed(double speed) {
         this.farRangeSpeed = speed;
         return this;
     }
 
     @Override
-    public AvoidEntityAITask.Builder from(AvoidEntityAITask value) {
+    public AvoidEntityGoal.Builder from(AvoidEntityGoal value) {
         return this.targetSelector(value.getTargetSelector())
             .searchDistance(value.getSearchDistance())
             .closeRangeSpeed(value.getCloseRangeSpeed())
@@ -77,7 +76,7 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     }
 
     @Override
-    public AvoidEntityAITask.Builder reset() {
+    public AvoidEntityGoal.Builder reset() {
         this.searchDistance = 1;
         this.closeRangeSpeed = 1;
         this.farRangeSpeed = 1;
@@ -86,10 +85,10 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public AvoidEntityAITask build(Creature owner) {
+    public AvoidEntityGoal build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);
-        return (AvoidEntityAITask) new AvoidEntityGoal((CreatureEntity) owner, Entity.class,
+        return (AvoidEntityGoal) new net.minecraft.entity.ai.goal.AvoidEntityGoal((CreatureEntity) owner, Entity.class,
                 Functional.java8ToGuava((Predicate) this.targetSelector),
                 this.searchDistance, this.closeRangeSpeed, this.farRangeSpeed);
     }

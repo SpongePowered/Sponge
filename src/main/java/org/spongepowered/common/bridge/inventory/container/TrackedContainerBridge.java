@@ -24,36 +24,39 @@
  */
 package org.spongepowered.common.bridge.inventory.container;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 public interface TrackedContainerBridge {
 
     void bridge$setShiftCrafting(boolean flag);
+
     boolean bridge$isShiftCrafting();
 
-    void bridge$setLastCraft(@Nullable CraftItemEvent.Craft event);
-    @Nullable CraftItemEvent.Craft bridge$getLastCraft();
+    void bridge$setLastCraft(CraftItemEvent.Craft event);
 
+    CraftItemEvent.Craft bridge$getLastCraft();
 
-    void bridge$setPreviousCursor(@Nullable net.minecraft.item.ItemStack stack);
-    @Nullable net.minecraft.item.ItemStack bridge$getPreviousCursor();
+    void bridge$setPreviousCursor(net.minecraft.item.ItemStack stack);
+
+    net.minecraft.item.ItemStack bridge$getPreviousCursor();
 
     void bridge$setFirePreview(boolean firePreview);
+
     boolean bridge$firePreview();
 
     List<SlotTransaction> bridge$getPreviewTransactions();
 
     boolean bridge$capturePossible();
+
     void bridge$setCapturePossible();
 
     void bridge$setMenu(@Nullable SpongeInventoryMenu menu);
+
     @Nullable SpongeInventoryMenu bridge$getMenu();
 
     void bridge$setViewed(Object viewed);

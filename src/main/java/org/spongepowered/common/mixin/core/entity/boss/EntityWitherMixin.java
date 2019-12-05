@@ -90,13 +90,13 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
             )
     )
     private int spongeImpl$onCanGrief(final WitherEntity thisEntity) {
-        return this.blockBreakCounter == 0 ? ((GrieferBridge) this).bridge$CanGrief() ? 0 : -1 : -1;
+        return this.blockBreakCounter == 0 ? ((GrieferBridge) this).bridge$canGrief() ? 0 : -1 : -1;
     }
 
     @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE",
                target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private Entity onSpawnWitherSkull(final Entity entity) {
-        ((GrieferBridge) entity).bridge$SetCanGrief(((GrieferBridge) this).bridge$CanGrief());
+        ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this).bridge$canGrief());
         return entity;
     }
 
@@ -155,7 +155,7 @@ public abstract class EntityWitherMixin extends EntityMobMixin implements FusedE
                 .radius(this.impl$explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking)
-                .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$CanGrief()))
+                .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$canGrief()))
                 .orElse(null);
     }
 

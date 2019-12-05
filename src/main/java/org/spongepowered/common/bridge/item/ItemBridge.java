@@ -26,9 +26,10 @@ package org.spongepowered.common.bridge.item;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataManipulator.Mutable;
+
 import java.util.List;
 
 public interface ItemBridge {
 
-    void bridge$gatherManipulators(ItemStack itemStack, List<Mutable<?, ?>> list);
+    void bridge$gatherManipulators(ItemStack itemStack, List<Mutable> manipulators);
 }

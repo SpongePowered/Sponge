@@ -315,9 +315,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             return;
         }
         final DataCompoundHolder oldEntity = (DataCompoundHolder) oldPlayer;
-        if (oldEntity.data$hasSpongeCompound()) {
-            ((DataCompoundHolder) this).data$getRootCompound().setTag(Constants.Sponge.SPONGE_DATA, oldEntity.data$getSpongeCompound());
-            this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeCompound());
+        if (oldEntity.data$hasSpongeDataCompound()) {
+            ((DataCompoundHolder) this).data$getSpongeCompound().setTag(Constants.Sponge.SPONGE_DATA, oldEntity.data$getSpongeDataCompound());
+            this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
         }
     }
 
@@ -794,11 +794,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         this.impl$cachedModifiedHealth = -1;
         this.lastHealth = -1.0F;
         if (scale != Constants.Entity.Player.DEFAULT_HEALTH_SCALE) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             spongeData.putDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, scale);
         } else {
-            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-                ((DataCompoundHolder) this).data$getSpongeCompound().remove(Constants.Sponge.Entity.Player.HEALTH_SCALE);
+            if (((DataCompoundHolder) this).data$hasSpongeDataCompound()) {
+                ((DataCompoundHolder) this).data$getSpongeDataCompound().remove(Constants.Sponge.Entity.Player.HEALTH_SCALE);
             }
         }
         this.bridge$refreshScaledHealth();

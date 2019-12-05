@@ -28,16 +28,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.entity.ai.task.AITask;
-import org.spongepowered.api.entity.ai.task.AITaskType;
-import org.spongepowered.api.entity.ai.task.AITaskTypes;
-import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
-import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
-import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
+import org.spongepowered.api.entity.ai.goal.Goal;
+import org.spongepowered.api.entity.ai.goal.GoalType;
+import org.spongepowered.api.entity.ai.goal.GoalTypes;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidEntityGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.WanderGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.WatchClosestGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
@@ -52,26 +52,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskType> {
+public class AITaskTypeModule implements AlternateCatalogRegistryModule<GoalType> {
 
     public static AITaskTypeModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(AITaskTypes.class)
-    private final Map<String, AITaskType> aiTaskTypes = new ConcurrentHashMap<>();
+    @RegisterCatalog(GoalTypes.class)
+    private final Map<String, GoalType> aiTaskTypes = new ConcurrentHashMap<>();
 
     @Override
-    public Map<String, AITaskType> provideCatalogMap() {
-        Map<String, AITaskType> aiMap = new HashMap<>();
-        for (Map.Entry<String, AITaskType> entry : this.aiTaskTypes.entrySet()) {
+    public Map<String, GoalType> provideCatalogMap() {
+        Map<String, GoalType> aiMap = new HashMap<>();
+        for (Map.Entry<String, GoalType> entry : this.aiTaskTypes.entrySet()) {
             aiMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
         return aiMap;
     }
 
     @Override
-    public Optional<AITaskType> getById(String id) {
+    public Optional<GoalType> getById(String id) {
         checkNotNull(id);
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
@@ -80,12 +80,12 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
     }
 
     @Override
-    public Collection<AITaskType> getAll() {
+    public Collection<GoalType> getAll() {
         return ImmutableList.copyOf(this.aiTaskTypes.values());
     }
 
-    public Optional<AITaskType> getByAIClass(Class<?> clazz) {
-        for (AITaskType type : this.aiTaskTypes.values()) {
+    public Optional<GoalType> getByAIClass(Class<?> clazz) {
+        for (GoalType type : this.aiTaskTypes.values()) {
             if (type.getAIClass().isAssignableFrom(clazz)) {
                 return Optional.of(type);
             }
@@ -96,22 +96,22 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
 
     @Override
     public void registerDefaults() {
-        this.createAITaskType("minecraft:wander", "Wander", WanderAITask.class);
-        this.createAITaskType("minecraft:avoid_entity", "Avoid Entity", AvoidEntityAITask.class);
-        this.createAITaskType("minecraft:run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyAITask.class);
-        this.createAITaskType("minecraft:swimming", "Swimming", SwimmingAITask.class);
-        this.createAITaskType("minecraft:watch_closest", "Watch Closest", WatchClosestAITask.class);
-        this.createAITaskType("minecraft:find_nearest_attackable_target", "Find Nearest Attackable Target", FindNearestAttackableTargetAITask.class);
-        this.createAITaskType("minecraft:attack_living", "Attack Living", AttackLivingAITask.class);
+        this.createAITaskType("minecraft:wander", "Wander", WanderGoal.class);
+        this.createAITaskType("minecraft:avoid_entity", "Avoid Entity", AvoidEntityGoal.class);
+        this.createAITaskType("minecraft:run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyGoal.class);
+        this.createAITaskType("minecraft:swimming", "Swimming", SwimmingGoal.class);
+        this.createAITaskType("minecraft:watch_closest", "Watch Closest", WatchClosestGoal.class);
+        this.createAITaskType("minecraft:find_nearest_attackable_target", "Find Nearest Attackable Target", FindNearestAttackableTargetGoal.class);
+        this.createAITaskType("minecraft:attack_living", "Attack Living", AttackLivingGoal.class);
     }
 
-    private AITaskType createAITaskType(String combinedId, String name, Class<? extends AITask<? extends Agent>> aiClass) {
+    private GoalType createAITaskType(String combinedId, String name, Class<? extends Goal<? extends Agent>> aiClass) {
         final SpongeAITaskType newType = new SpongeAITaskType(combinedId, name, aiClass);
         this.aiTaskTypes.put(combinedId, newType);
         return newType;
     }
 
-    public AITaskType createAITaskType(Object plugin, String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
+    public GoalType createAITaskType(Object plugin, String id, String name, Class<? extends Goal<? extends Agent>> aiClass) {
         final Optional<PluginContainer> optPluginContainer = SpongeImpl.getGame().getPluginManager().fromInstance(plugin);
         Preconditions.checkArgument(optPluginContainer.isPresent());
         final PluginContainer pluginContainer = optPluginContainer.get();

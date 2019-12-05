@@ -28,25 +28,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.LookRandomlyGoal;
-import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.LookIdleGoal;
 import org.spongepowered.api.entity.living.Agent;
 
-public final class SpongeLookIdleAIBuilder implements LookIdleAITask.Builder {
+public final class SpongeLookIdleAIBuilder implements LookIdleGoal.Builder {
 
     @Override
-    public LookIdleAITask.Builder from(LookIdleAITask value) {
+    public LookIdleGoal.Builder from(LookIdleGoal value) {
         return this;
     }
 
     @Override
-    public LookIdleAITask.Builder reset() {
+    public LookIdleGoal.Builder reset() {
         return this;
     }
 
     @Override
-    public LookIdleAITask build(Agent owner) {
+    public LookIdleGoal build(Agent owner) {
         checkNotNull(owner);
 
-        return (LookIdleAITask) new LookRandomlyGoal((MobEntity) owner);
+        return (LookIdleGoal) new LookRandomlyGoal((MobEntity) owner);
     }
 }

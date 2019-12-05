@@ -26,7 +26,7 @@ package org.spongepowered.common.entity.ai.target;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
-import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.util.Functional;
@@ -38,8 +38,8 @@ import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 
-public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTargetAIBuilder<FindNearestAttackableTargetAITask, FindNearestAttackableTargetAITask.Builder>
-        implements FindNearestAttackableTargetAITask.Builder {
+public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTargetAIBuilder<FindNearestAttackableTargetGoal, FindNearestAttackableTargetGoal.Builder>
+        implements FindNearestAttackableTargetGoal.Builder {
 
     private Class<? extends Living> targetClass;
     private int chance;
@@ -50,32 +50,32 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
     }
 
     @Override
-    public FindNearestAttackableTargetAITask.Builder target(Class<? extends Living> targetClass) {
+    public FindNearestAttackableTargetGoal.Builder target(Class<? extends Living> targetClass) {
         this.targetClass = targetClass;
         return this;
     }
 
     @Override
-    public FindNearestAttackableTargetAITask.Builder chance(int chance) {
+    public FindNearestAttackableTargetGoal.Builder chance(int chance) {
         this.chance = chance;
         return this;
     }
 
     @Override
-    public FindNearestAttackableTargetAITask.Builder filter(Predicate<? extends Living> predicate) {
+    public FindNearestAttackableTargetGoal.Builder filter(Predicate<? extends Living> predicate) {
         this.predicate = predicate;
         return this;
     }
 
     @Override
-    public FindNearestAttackableTargetAITask.Builder from(FindNearestAttackableTargetAITask value) {
+    public FindNearestAttackableTargetGoal.Builder from(FindNearestAttackableTargetGoal value) {
         return this.target(value.getTargetClass())
             .chance(value.getChance())
             .filter(value.getFilter());
     }
 
     @Override
-    public FindNearestAttackableTargetAITask.Builder reset() {
+    public FindNearestAttackableTargetGoal.Builder reset() {
         this.checkSight = false;
         this.onlyNearby = false;
         this.searchDelay = 0;
@@ -87,10 +87,10 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public FindNearestAttackableTargetAITask build(Creature owner) {
+    public FindNearestAttackableTargetGoal build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetClass);
-        return (FindNearestAttackableTargetAITask) new NearestAttackableTargetGoal<>((CreatureEntity) owner, (Class<? extends LivingEntity>) this.targetClass, this.chance, this.checkSight,
+        return (FindNearestAttackableTargetGoal) new NearestAttackableTargetGoal<>((CreatureEntity) owner, (Class<? extends LivingEntity>) this.targetClass, this.chance, this.checkSight,
             this.onlyNearby, this.predicate == null ? Predicates.alwaysTrue() : Functional.java8ToGuava((Predicate) this.predicate));
     }
 }

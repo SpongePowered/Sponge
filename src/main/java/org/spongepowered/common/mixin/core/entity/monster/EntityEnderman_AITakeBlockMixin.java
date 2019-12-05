@@ -61,6 +61,6 @@ public abstract class EntityEnderman_AITakeBlockMixin extends Goal {
     @Nullable
     private BlockState onCanGrief(final EndermanEntity entityEnderman) {
         final BlockState heldBlockState = entityEnderman.getHeldBlockState();
-        return ((GrieferBridge) this.enderman).bridge$CanGrief() ? heldBlockState : Blocks.AIR.getDefaultState();
+        return ((GrieferBridge) this.enderman).bridge$canGrief() ? heldBlockState : Blocks.AIR.getDefaultState();
     }
 }

@@ -193,11 +193,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     public void bridge$setMaxAir(final int air) {
         this.impl$maxAir = air;
         if (air != Constants.Sponge.Entity.DEFAULT_MAX_AIR) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             spongeData.putInt(Constants.Sponge.Entity.MAX_AIR, air);
         } else {
-            if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-                ((DataCompoundHolder) this).data$getSpongeCompound().remove(Constants.Sponge.Entity.MAX_AIR);
+            if (((DataCompoundHolder) this).data$hasSpongeDataCompound()) {
+                ((DataCompoundHolder) this).data$getSpongeDataCompound().remove(Constants.Sponge.Entity.MAX_AIR);
             }
         }
     }

@@ -151,8 +151,8 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         } else if (PlayerTracker.Type.NOTIFIER == type) {
             this.tracked$notifier = uuid;
         }
-        if (((DataCompoundHolder) this).data$hasRootCompound()) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+        if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
+            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             if (uuid == null) {
                 if (spongeData.contains(type.compoundKey)) {
                     spongeData.remove(type.compoundKey);
@@ -185,7 +185,7 @@ public class OwnershipTrackedBridgeMixin implements OwnershipTrackedBridge {
         } else if (this.tracked$notifier != null && PlayerTracker.Type.NOTIFIER == nbtKey) {
             return this.tracked$notifier;
         }
-        final CompoundNBT nbt = ((DataCompoundHolder) this).data$getSpongeCompound();
+        final CompoundNBT nbt = ((DataCompoundHolder) this).data$getSpongeDataCompound();
         if (!nbt.contains(nbtKey.compoundKey)) {
             return null;
         }

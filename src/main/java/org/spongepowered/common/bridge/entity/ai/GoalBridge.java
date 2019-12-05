@@ -24,20 +24,19 @@
  */
 package org.spongepowered.common.bridge.entity.ai;
 
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalType;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 public interface GoalBridge {
 
-    void bridge$setType(AITaskType type);
+    void bridge$setType(GoalType type);
 
-    Optional<Goal<?>> bridge$getAIGoal();
+    Optional<GoalExecutor<?>> bridge$getGoalExecutor();
 
-    void bridge$setGoal(@Nullable Goal<?> owner);
+    void bridge$setGoalExecutor(@Nullable GoalExecutor<?> goalExecutor);
 
-    AITaskType bridge$getType();
+    GoalType bridge$getType();
 }

@@ -25,8 +25,6 @@
 package org.spongepowered.common.bridge.scoreboard;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.scoreboard.Scoreboard;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;

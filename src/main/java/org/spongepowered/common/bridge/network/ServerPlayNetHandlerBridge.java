@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.bridge.network;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.world.Location;
-
-import javax.annotation.Nullable;
 
 public interface ServerPlayNetHandlerBridge {
 

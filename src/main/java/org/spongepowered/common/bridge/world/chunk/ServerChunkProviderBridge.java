@@ -24,21 +24,16 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
-import com.google.common.collect.Sets;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
-import java.util.Set;
+
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nullable;
-
 /**
- * Specific bridge for the {@link ChunkProviderServer}, with a direct
- * pairing to {@link WorldServer} as a hard requirement.
+ * Specific bridge for the {@link ServerChunkProvider}, with a direct
+ * pairing to {@link ServerWorld} as a hard requirement.
  */
 public interface ServerChunkProviderBridge {
 
@@ -64,5 +59,5 @@ public interface ServerChunkProviderBridge {
      * @return The chunk loaded forcefully
      * look at ChunkProviderServerMixin#impl$ProvideChunkForced(Chunk, int, int)
      */
-    Chunk bridge$loadChunkForce(final int x, final int z);
+    Chunk bridge$loadChunkForce(int x, int z);
 }

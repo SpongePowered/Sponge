@@ -25,22 +25,22 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.entity.ai.task.AITask;
-import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.goal.Goal;
+import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;
 
-public final class SpongeAITaskType implements AITaskType {
+public final class SpongeGoalType implements GoalType {
     private final String id, name;
-    private final Class<? extends AITask<? extends Agent>> aiClass;
+    private final Class<? extends Goal<? extends Agent>> aiClass;
 
-    public SpongeAITaskType(String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
+    public SpongeAITaskType(String id, String name, Class<? extends Goal<? extends Agent>> aiClass) {
         this.id = id;
         this.name = name;
         this.aiClass = aiClass;
     }
 
     @Override
-    public Class<? extends AITask<? extends Agent>> getAIClass() {
+    public Class<? extends Goal<? extends Agent>> getAIClass() {
         return this.aiClass;
     }
 

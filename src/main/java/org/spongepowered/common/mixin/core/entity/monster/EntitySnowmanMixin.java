@@ -38,7 +38,7 @@ public abstract class EntitySnowmanMixin extends EntityLivingMixin {
     @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor(D)I", ordinal = 3),
             cancellable = true)
     private void onCanGrief(CallbackInfo ci) {
-        if (!this.world.getGameRules().getBoolean("mobGriefing") || !((GrieferBridge) this).bridge$CanGrief()) {
+        if (!this.world.getGameRules().getBoolean("mobGriefing") || !((GrieferBridge) this).bridge$canGrief()) {
             ci.cancel();
         }
     }

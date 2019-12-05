@@ -25,12 +25,11 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal;
 import net.minecraft.entity.passive.horse.HorseEntity;
-import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
 import org.spongepowered.api.entity.living.animal.RideableHorse;
 
-public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCrazyAITask.Builder {
+public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCrazyGoal.Builder {
 
     double speed;
 
@@ -39,25 +38,25 @@ public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCra
     }
 
     @Override
-    public RunAroundLikeCrazyAITask.Builder speed(double speed) {
+    public RunAroundLikeCrazyGoal.Builder speed(double speed) {
         this.speed = speed;
         return this;
     }
 
     @Override
-    public RunAroundLikeCrazyAITask.Builder from(RunAroundLikeCrazyAITask value) {
+    public RunAroundLikeCrazyGoal.Builder from(RunAroundLikeCrazyGoal value) {
         return this.speed(value.getSpeed());
     }
 
     @Override
-    public RunAroundLikeCrazyAITask.Builder reset() {
+    public RunAroundLikeCrazyGoal.Builder reset() {
         this.speed = 1;
         return this;
     }
 
     @Override
-    public RunAroundLikeCrazyAITask build(RideableHorse owner) {
+    public RunAroundLikeCrazyGoal build(RideableHorse owner) {
         Preconditions.checkNotNull(owner);
-        return (RunAroundLikeCrazyAITask) new RunAroundLikeCrazyGoal((HorseEntity) owner, this.speed);
+        return (RunAroundLikeCrazyGoal) new net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal((HorseEntity) owner, this.speed);
     }
 }

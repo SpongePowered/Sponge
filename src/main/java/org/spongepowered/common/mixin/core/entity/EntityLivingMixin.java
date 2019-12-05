@@ -33,9 +33,9 @@ import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.GoalTypes;
-import org.spongepowered.api.entity.ai.task.AITask;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.GoalExecutorTypes;
+import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.CauseStackManager;
@@ -89,12 +89,12 @@ public abstract class EntityLivingMixin extends LivingEntityMixin {
     private void initSpongeAI() {
         if (!((GoalSelectorBridge) this.tasks).bridge$initialized()) {
             ((GoalSelectorBridge) this.tasks).bridge$setOwner((MobEntity) (Object) this);
-            ((GoalSelectorBridge) this.tasks).bridge$setType(GoalTypes.NORMAL);
+            ((GoalSelectorBridge) this.tasks).bridge$setType(GoalExecutorTypes.NORMAL);
             ((GoalSelectorBridge) this.tasks).bridge$setInitialized(true);
         }
         if (!((GoalSelectorBridge) this.targetTasks).bridge$initialized()) {
             ((GoalSelectorBridge) this.targetTasks).bridge$setOwner((MobEntity) (Object) this);
-            ((GoalSelectorBridge) this.targetTasks).bridge$setType(GoalTypes.TARGET);
+            ((GoalSelectorBridge) this.targetTasks).bridge$setType(GoalExecutorTypes.TARGET);
             ((GoalSelectorBridge) this.targetTasks).bridge$setInitialized(true);
         }
     }
@@ -114,10 +114,10 @@ public abstract class EntityLivingMixin extends LivingEntityMixin {
         while (taskItr.hasNext()) {
             final GoalSelector.EntityAITaskEntry task = taskItr.next();
             final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
-                    task.priority, task.priority, (Goal<? extends Agent>) tasks, (Agent) this, (AITask<?>) task.action);
+                    task.priority, task.priority, (GoalExecutor<? extends Agent>) tasks, (Agent) this, (Goal<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                ((GoalBridge) task.action).bridge$setGoal(null);
+                ((GoalBridge) task.action).bridge$setGoalExecutor(null);
                 taskItr.remove();
             }
         }
@@ -269,7 +269,7 @@ public abstract class EntityLivingMixin extends LivingEntityMixin {
      */
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;canPickUpLoot()Z"))
     private boolean onCanGrief(final MobEntity thisEntity) {
-        return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$CanGrief();
+        return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$canGrief();
     }
 
 

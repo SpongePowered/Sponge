@@ -106,7 +106,7 @@ public abstract class WitherSkullEntityMixin extends EntityFireballMixin impleme
         final net.minecraft.world.World worldObj, final Entity self, final double x,
         final double y, final double z, final float strength, final boolean flaming,
         final boolean smoking) {
-        final boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
+        final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             frame.addContext(EventContextKeys.THROWER, ((WitherSkull) this).getShooter()); // TODO - Remove in API 8/1.13

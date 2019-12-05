@@ -35,6 +35,7 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
  * The {@link InventoryAdapter} may be mixed into the inventory itself or provided by a wrapper. See {@link InventoryUtil#findAdapter}
  */
 public interface InventoryBridge {
+
     default InventoryAdapter bridge$getAdapter() {
         return InventoryUtil.findAdapter(this);
     }

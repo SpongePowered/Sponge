@@ -39,8 +39,7 @@ public interface ForgeITeleporterBridge {
     void bridge$placeEntity(World world, Entity entity, float yaw);
 
     // used internally to handle vanilla hardcoding
-    default boolean bridge$isVanilla()
-    {
+    default boolean bridge$isVanilla() {
         return this.getClass().equals(Teleporter.class);
     }
 }

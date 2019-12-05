@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,34 +41,34 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.entity.ai.goal.Goal.class)
 public abstract class EntityAIBaseMixin implements GoalBridge {
 
-    private AITaskType impl$type;
-    private Optional<Goal<?>> impl$owner = Optional.empty();
+    private GoalType impl$type;
+    private Optional<GoalExecutor<?>> impl$owner = Optional.empty();
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void assignAITaskType(final CallbackInfo ci) {
-        final Optional<AITaskType> optAiTaskType = AITaskTypeModule.getInstance().getByAIClass(this.getClass());
+        final Optional<GoalType> optAiTaskType = AITaskTypeModule.getInstance().getByAIClass(this.getClass());
         if (optAiTaskType.isPresent()) {
             this.impl$type = optAiTaskType.get();
         }
     }
 
     @Override
-    public AITaskType bridge$getType() {
+    public GoalType bridge$getType() {
         return this.impl$type;
     }
 
     @Override
-    public void bridge$setType(final AITaskType type) {
+    public void bridge$setType(final GoalType type) {
         this.impl$type = type;
     }
 
     @Override
-    public Optional<Goal<?>> bridge$getAIGoal() {
+    public Optional<GoalExecutor<?>> bridge$getGoalExecutor() {
         return this.impl$owner;
     }
 
     @Override
-    public void bridge$setGoal(@Nullable final Goal<?> owner) {
+    public void bridge$setGoalExecutor(@Nullable final GoalExecutor<?> owner) {
         this.impl$owner = Optional.ofNullable(owner);
     }
 

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.api.ai;
 
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.task.AITask;
-import org.spongepowered.api.entity.ai.task.AbstractAITask;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.Goal;
+import org.spongepowered.api.entity.ai.goal.AbstractGoal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -34,8 +34,8 @@ import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 
 import java.util.Optional;
 
-@Mixin(value = AbstractAITask.class, remap = false)
-public abstract class AbstractAITaskMixin_API<O extends Agent> implements AITask<O> {
+@Mixin(value = AbstractGoal.class, remap = false)
+public abstract class AbstractGoalMixin_API<O extends Agent> implements Goal<O> {
 
     /**
      * @author Zidane - when implemented
@@ -46,8 +46,8 @@ public abstract class AbstractAITaskMixin_API<O extends Agent> implements AITask
     @SuppressWarnings("unchecked")
     @Override
     @Overwrite
-    public final Optional<Goal<O>> getGoal() {
-        return (Optional<Goal<O>>) (Optional<?>) ((GoalBridge) this).bridge$getAIGoal();
+    public final Optional<GoalExecutor<O>> getGoal() {
+        return (Optional<GoalExecutor<O>>) (Optional<?>) ((GoalBridge) this).bridge$getGoalExecutor();
     }
 
 }

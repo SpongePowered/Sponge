@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.ai;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Final;
@@ -37,8 +37,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @SuppressWarnings("rawtypes")
 @Mixin(NearestAttackableTargetGoal.class)
-public abstract class EntityAINearestAttackableTargetMixin_API extends EntityAITargetMixin_API<FindNearestAttackableTargetAITask>
-        implements FindNearestAttackableTargetAITask {
+public abstract class EntityAINearestAttackableTargetMixin_API extends EntityAITargetMixin_API<FindNearestAttackableTargetGoal>
+        implements FindNearestAttackableTargetGoal {
 
     @Shadow @Final @Mutable protected Class targetClass;
     @Shadow @Final @Mutable private int targetChance;
@@ -51,7 +51,7 @@ public abstract class EntityAINearestAttackableTargetMixin_API extends EntityAIT
     }
 
     @Override
-    public FindNearestAttackableTargetAITask setTargetClass(final Class<? extends Living> targetClass) {
+    public FindNearestAttackableTargetGoal setTargetClass(final Class<? extends Living> targetClass) {
         this.targetClass = targetClass;
         return this;
     }
@@ -62,13 +62,13 @@ public abstract class EntityAINearestAttackableTargetMixin_API extends EntityAIT
     }
 
     @Override
-    public FindNearestAttackableTargetAITask setChance(final int chance) {
+    public FindNearestAttackableTargetGoal setChance(final int chance) {
         this.targetChance = chance;
         return this;
     }
 
     @Override
-    public FindNearestAttackableTargetAITask filter(final java.util.function.Predicate<Living> predicate) {
+    public FindNearestAttackableTargetGoal filter(final java.util.function.Predicate<Living> predicate) {
         this.targetEntitySelector = predicate == null ? null : Functional.java8ToGuava(predicate);
         return this;
     }

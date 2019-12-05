@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity.ai;
 
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.SwimGoal;
-import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -43,7 +43,7 @@ public abstract class EntityAISwimmingMixin {
      */
     @Overwrite
     public void updateTask() {
-        if (this.entity.getRNG().nextFloat() < ((SwimmingAITask) this).getSwimChance()) {
+        if (this.entity.getRNG().nextFloat() < ((SwimmingGoal) this).getSwimChance()) {
             this.entity.getJumpController().setJumping();
         }
     }

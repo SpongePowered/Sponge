@@ -31,8 +31,6 @@ import net.minecraft.util.ResourceLocation;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 public interface AdvancementListBridge {
 
     Map<ResourceLocation, Advancement> bridge$getAdvancements();
@@ -41,6 +39,5 @@ public interface AdvancementListBridge {
 
     Set<Advancement> bridge$getNonRootsSet();
 
-    @Nullable
     AdvancementList.IListener bridge$getListener();
 }

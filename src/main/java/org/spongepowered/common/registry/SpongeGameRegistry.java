@@ -46,8 +46,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.ai.task.AITaskType;
-import org.spongepowered.api.entity.ai.task.AbstractAITask;
+import org.spongepowered.api.entity.ai.goal.GoalType;
+import org.spongepowered.api.entity.ai.goal.AbstractGoal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
@@ -463,7 +463,7 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public AITaskType registerAITaskType(Object plugin, String id, String name, Class<? extends AbstractAITask<? extends Agent>> aiClass) {
+    public GoalType registerAITaskType(Object plugin, String id, String name, Class<? extends AbstractGoal<? extends Agent>> aiClass) {
 
         return AITaskTypeModule.getInstance().createAITaskType(plugin, id, name, aiClass);
     }

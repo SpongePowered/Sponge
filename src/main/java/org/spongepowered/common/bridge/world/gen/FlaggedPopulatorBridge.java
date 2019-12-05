@@ -25,8 +25,8 @@
 package org.spongepowered.common.bridge.world.gen;
 
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
+
 import java.util.List;
 import java.util.Random;
 
@@ -34,7 +34,7 @@ public interface FlaggedPopulatorBridge {
 
     void bridge$populate(World world, Extent extent, Random rand, List<String> flags);
 
-    default void bridge$populate(final World world, final Extent extent, final Random rand, final ImmutableBiomeVolume virtualBiomes, final List<String> flags) {
+    default void bridge$populate(World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes, List<String> flags) {
         this.bridge$populate(world, extent, rand, flags);
     }
 }

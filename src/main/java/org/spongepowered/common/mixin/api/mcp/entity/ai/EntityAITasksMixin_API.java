@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.GoalType;
-import org.spongepowered.api.entity.ai.task.AITask;
-import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.Goal;
+import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,7 +41,7 @@ import java.util.Set;
 import net.minecraft.entity.ai.goal.GoalSelector;
 
 @Mixin(GoalSelector.class)
-public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O> {
+public abstract class EntityAITasksMixin_API<O extends Agent> implements GoalExecutor<O> {
 
     @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> taskEntries;
     @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> executingTaskEntries;
@@ -56,30 +56,30 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
     }
 
     @Override
-    public GoalType getType() {
+    public GoalExecutorType getType() {
         return ((GoalSelectorBridge) this).bridge$getType();
     }
 
     @Override
-    public Goal<O> addTask(final int priority, final AITask<? extends O> task) {
+    public GoalExecutor<O> addGoal(final int priority, final Goal<? extends O> task) {
         this.shadow$addTask(priority, (net.minecraft.entity.ai.goal.Goal) task);
         return this;
     }
 
     @Override
-    public Goal<O> removeTask(final AITask<? extends O> task) {
-        this.shadow$removeTask((net.minecraft.entity.ai.goal.Goal) task);
+    public GoalExecutor<O> removeGoal(final Goal<? extends O> goal) {
+        this.shadow$removeTask((net.minecraft.entity.ai.goal.Goal) goal);
         return  this;
     }
 
     @Override
-    public Goal<O> removeTasks(final AITaskType type) {
+    public GoalExecutor<O> removeGoals(final GoalType type) {
         final Iterator<GoalSelector.EntityAITaskEntry> iterator = this.taskEntries.iterator();
 
         while (iterator.hasNext()) {
             final GoalSelector.EntityAITaskEntry entityaitaskentry = iterator.next();
             final net.minecraft.entity.ai.goal.Goal otherAiBase = entityaitaskentry.action;
-            final AITask<?> otherTask = (AITask<?>) otherAiBase;
+            final Goal<?> otherTask = (Goal<?>) otherAiBase;
 
             if (otherTask.getType().equals(type)) {
                 if (this.executingTaskEntries.contains(entityaitaskentry)) {
@@ -95,11 +95,11 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
     }
 
     @Override
-    public List<? super AITask<? extends O>> getTasksByType(final AITaskType type) {
-        final ImmutableList.Builder<AITask<?>> tasks = ImmutableList.builder();
+    public List<? super Goal<? extends O>> getTasksByType(final GoalType type) {
+        final ImmutableList.Builder<Goal<?>> tasks = ImmutableList.builder();
 
         for (final GoalSelector.EntityAITaskEntry entry : this.taskEntries) {
-            final AITask<?> task = (AITask<?>) entry.action;
+            final Goal<?> task = (Goal<?>) entry.action;
 
             if (task.getType().equals(type)) {
                 tasks.add(task);
@@ -110,12 +110,12 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
     }
 
     @Override
-    public List<? super AITask<? extends O>> getTasks() {
-        final ImmutableList.Builder<AITask<?>> tasks = ImmutableList.builder();
+    public List<? super Goal<? extends O>> getTasks() {
+        final ImmutableList.Builder<Goal<?>> tasks = ImmutableList.builder();
         for (final Object o : this.taskEntries) {
             final GoalSelector.EntityAITaskEntry entry = (GoalSelector.EntityAITaskEntry) o;
 
-            tasks.add((AITask<?>) entry.action);
+            tasks.add((Goal<?>) entry.action);
         }
         return tasks.build();
     }

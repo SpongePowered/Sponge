@@ -25,10 +25,9 @@
 package org.spongepowered.common.bridge.network;
 
 import net.minecraft.network.ServerStatusResponse;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nullable;
 
 public interface ServerStatusResponseBridge {
 
@@ -42,5 +41,5 @@ public interface ServerStatusResponseBridge {
 
     ServerStatusResponse.Players bridge$getPlayerBackup();
 
-    void bridge$setPlayerBackup(@Nullable ServerStatusResponse.Players players);
+    void bridge$setPlayerBackup(ServerStatusResponse.Players players);
 }

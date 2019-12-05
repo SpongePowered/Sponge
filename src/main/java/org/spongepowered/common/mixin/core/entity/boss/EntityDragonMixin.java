@@ -69,7 +69,7 @@ public abstract class EntityDragonMixin extends EntityLivingMixin {
         require = 0 // Forge rewrites the material request to block.isAir
     )
     private Block spongeImpl$onCanGrief(BlockState state) {
-        return ((GrieferBridge) this).bridge$CanGrief() ? state.getBlock() : Blocks.AIR;
+        return ((GrieferBridge) this).bridge$canGrief() ? state.getBlock() : Blocks.AIR;
     }
 
     /**

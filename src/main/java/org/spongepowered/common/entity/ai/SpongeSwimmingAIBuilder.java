@@ -27,10 +27,10 @@ package org.spongepowered.common.entity.ai;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.SwimGoal;
-import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
 import org.spongepowered.api.entity.living.Agent;
 
-public final class SpongeSwimmingAIBuilder implements SwimmingAITask.Builder {
+public final class SpongeSwimmingAIBuilder implements SwimmingGoal.Builder {
 
     float chance = 0.8f;
 
@@ -39,26 +39,26 @@ public final class SpongeSwimmingAIBuilder implements SwimmingAITask.Builder {
     }
 
     @Override
-    public SwimmingAITask.Builder swimChance(float chance) {
+    public SwimmingGoal.Builder swimChance(float chance) {
         this.chance = chance;
         return this;
     }
 
     @Override
-    public SwimmingAITask.Builder from(SwimmingAITask value) {
+    public SwimmingGoal.Builder from(SwimmingGoal value) {
         return this.swimChance(value.getSwimChance());
     }
 
     @Override
-    public SwimmingAITask.Builder reset() {
+    public SwimmingGoal.Builder reset() {
         this.chance = 0.8f;
         return this;
     }
 
     @Override
-    public SwimmingAITask build(Agent owner) {
+    public SwimmingGoal build(Agent owner) {
         Preconditions.checkNotNull(owner);
-        final SwimmingAITask task = (SwimmingAITask) new SwimGoal((MobEntity) owner);
+        final SwimmingGoal task = (SwimmingGoal) new SwimGoal((MobEntity) owner);
         task.setSwimChance(this.chance);
         return task;
     }

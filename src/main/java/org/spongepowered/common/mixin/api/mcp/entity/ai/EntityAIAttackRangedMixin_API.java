@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
 import net.minecraft.entity.ai.goal.RangedAttackGoal;
-import org.spongepowered.api.entity.ai.task.builtin.creature.RangeAgentAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RangeAgentGoal;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(RangedAttackGoal.class)
-public abstract class EntityAIAttackRangedMixin_API implements RangeAgentAITask {
+public abstract class EntityAIAttackRangedMixin_API implements RangeAgentGoal {
 
     @Shadow @Final @Mutable private double entityMoveSpeed;
     @Shadow @Final @Mutable private int maxRangedAttackTime;
@@ -45,7 +45,7 @@ public abstract class EntityAIAttackRangedMixin_API implements RangeAgentAITask 
     }
 
     @Override
-    public RangeAgentAITask setMoveSpeed(final double speed) {
+    public RangeAgentGoal setMoveSpeed(final double speed) {
         this.entityMoveSpeed = speed;
         return this;
     }
@@ -56,7 +56,7 @@ public abstract class EntityAIAttackRangedMixin_API implements RangeAgentAITask 
     }
 
     @Override
-    public RangeAgentAITask setDelayBetweenAttacks(final int delay) {
+    public RangeAgentGoal setDelayBetweenAttacks(final int delay) {
         this.maxRangedAttackTime = delay;
         return this;
     }
@@ -67,7 +67,7 @@ public abstract class EntityAIAttackRangedMixin_API implements RangeAgentAITask 
     }
 
     @Override
-    public RangeAgentAITask setAttackRadius(final float radius) {
+    public RangeAgentGoal setAttackRadius(final float radius) {
         this.attackRadius = radius;
         this.maxAttackDistance = this.attackRadius * this.attackRadius;
         return this;

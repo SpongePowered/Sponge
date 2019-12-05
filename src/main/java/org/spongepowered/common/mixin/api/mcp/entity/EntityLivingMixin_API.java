@@ -26,11 +26,10 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
-import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.GoalType;
-import org.spongepowered.api.entity.ai.GoalTypes;
+import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.GoalExecutorTypes;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -57,11 +56,11 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Agent> Optional<Goal<T>> getGoal(GoalType type) {
-        if (GoalTypes.NORMAL.equals(type)) {
-            return Optional.of((Goal<T>) this.tasks);
-        } else if (GoalTypes.TARGET.equals(type)) {
-            return Optional.of((Goal<T>) this.targetTasks);
+    public <T extends Agent> Optional<GoalExecutor<T>> getGoal(GoalExecutorType type) {
+        if (GoalExecutorTypes.NORMAL.equals(type)) {
+            return Optional.of((GoalExecutor<T>) this.tasks);
+        } else if (GoalExecutorTypes.TARGET.equals(type)) {
+            return Optional.of((GoalExecutor<T>) this.targetTasks);
         }
         return Optional.empty();
     }

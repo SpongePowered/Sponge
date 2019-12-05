@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.bridge.entity.ai;
 
-import org.spongepowered.api.entity.ai.GoalType;
-
-import java.util.Set;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.GoalSelector;
+import org.spongepowered.api.entity.ai.GoalExecutorType;
+
+import java.util.Set;
 
 public interface GoalSelectorBridge {
 
@@ -36,9 +36,9 @@ public interface GoalSelectorBridge {
 
     void bridge$setOwner(MobEntity living);
 
-    GoalType bridge$getType();
+    GoalExecutorType bridge$getType();
 
-    void bridge$setType(GoalType type);
+    void bridge$setType(GoalExecutorType type);
 
     Set<GoalSelector.EntityAITaskEntry> bridge$getTasksUnsafe();
 

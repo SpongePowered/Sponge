@@ -60,7 +60,7 @@ public abstract class EntityAIHarvestFarmlandMixin extends MoveToBlockGoal {
     )
     private void onCanGrief(final CallbackInfoReturnable<Boolean> cir) {
         if (this.runDelay <= 0) {
-            if (!((GrieferBridge) this.villager).bridge$CanGrief()) {
+            if (!((GrieferBridge) this.villager).bridge$canGrief()) {
                 cir.setReturnValue(false);
             }
         }

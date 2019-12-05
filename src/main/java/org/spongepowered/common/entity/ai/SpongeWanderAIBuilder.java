@@ -27,10 +27,10 @@ package org.spongepowered.common.entity.ai;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.goal.RandomWalkingGoal;
-import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.WanderGoal;
 import org.spongepowered.api.entity.living.Creature;
 
-public final class SpongeWanderAIBuilder implements WanderAITask.Builder {
+public final class SpongeWanderAIBuilder implements WanderGoal.Builder {
 
     private double speed;
     private int executionChance;
@@ -40,33 +40,33 @@ public final class SpongeWanderAIBuilder implements WanderAITask.Builder {
     }
 
     @Override
-    public WanderAITask.Builder speed(double speed) {
+    public WanderGoal.Builder speed(double speed) {
         this.speed = speed;
         return this;
     }
 
     @Override
-    public WanderAITask.Builder executionChance(int executionChance) {
+    public WanderGoal.Builder executionChance(int executionChance) {
         this.executionChance = executionChance;
         return this;
     }
 
     @Override
-    public WanderAITask.Builder from(WanderAITask value) {
+    public WanderGoal.Builder from(WanderGoal value) {
         return this.speed(value.getSpeed())
             .executionChance(value.getExecutionChance());
     }
 
     @Override
-    public WanderAITask.Builder reset() {
+    public WanderGoal.Builder reset() {
         this.speed = 1;
         this.executionChance = 120;
         return this;
     }
 
     @Override
-    public WanderAITask build(Creature owner) {
+    public WanderGoal build(Creature owner) {
         Preconditions.checkNotNull(owner);
-        return (WanderAITask) new RandomWalkingGoal((CreatureEntity) owner, this.speed, this.executionChance);
+        return (WanderGoal) new RandomWalkingGoal((CreatureEntity) owner, this.speed, this.executionChance);
     }
 }

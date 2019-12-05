@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.bridge.server.management;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.chunk.Chunk;
-
-import java.util.List;
 
 public interface PlayerChunkMapEntryBridge {
 

@@ -76,7 +76,7 @@ public abstract class EntityEnderman_AIPlaceBlockMixin extends Goal {
     @Nullable
     private BlockState onCanGrief(final EndermanEntity entityEnderman) {
         final BlockState heldBlockState = entityEnderman.getHeldBlockState();
-        return ((GrieferBridge) this.enderman).bridge$CanGrief() ? heldBlockState : null;
+        return ((GrieferBridge) this.enderman).bridge$canGrief() ? heldBlockState : null;
     }
 
     /**

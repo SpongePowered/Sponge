@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.bridge.block;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
-
-import javax.annotation.Nullable;
 
 public interface BlockEventDataBridge {
 

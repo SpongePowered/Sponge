@@ -45,7 +45,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.server.SDestroyEntitiesPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
-import net.minecraft.network.play.server.SPlayerListItemPacket.AddPlayerData;
 import net.minecraft.network.play.server.SSpawnPlayerPacket;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
@@ -172,7 +171,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void readAdditional(final CompoundNBT tagCompund) {
         super.readAdditional(tagCompund);
-        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinUuid");
+        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeDataCompound().getString("skinUuid");
         if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
         }
@@ -181,7 +180,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void writeEntityToNBT(final CompoundNBT tagCompound) {
         super.writeEntityToNBT(tagCompound);
-        final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeCompound();
+        final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
         if (this.skinUuid != null) {
             spongeData.putString("skinUuid", this.skinUuid.toString());
         } else {

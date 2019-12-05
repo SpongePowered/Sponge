@@ -27,6 +27,7 @@ package org.spongepowered.common.bridge.inventory.container;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.world.Location;
 
@@ -36,8 +37,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
-
 public interface ContainerBridge {
 
     Optional<Carrier> bridge$getCarrier();
@@ -45,14 +44,16 @@ public interface ContainerBridge {
     LinkedHashMap<IInventory, Set<net.minecraft.inventory.container.Slot>> bridge$getInventories();
 
     void bridge$setCanInteractWith(@Nullable Predicate<PlayerEntity> predicate);
+
     @Nullable Predicate<PlayerEntity> bridge$getCanInteractWith();
 
     @Nullable Location bridge$getOpenLocation();
+
     void bridge$setOpenLocation(@Nullable Location loc);
 
     void bridge$setInUse(boolean inUse);
+
     boolean bridge$isInUse();
 
     List<ServerPlayerEntity> listeners();
-
 }

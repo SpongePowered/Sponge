@@ -59,7 +59,7 @@ public abstract class EntityRabbit_AIRaidFarmMixin extends MoveToBlockGoal {
     )
     private void onCanGrief(final CallbackInfoReturnable<Boolean> cir) {
         if (this.runDelay <= 0) {
-            if (!((GrieferBridge) this.rabbit).bridge$CanGrief()) {
+            if (!((GrieferBridge) this.rabbit).bridge$canGrief()) {
                 cir.setReturnValue(false);
             }
         }

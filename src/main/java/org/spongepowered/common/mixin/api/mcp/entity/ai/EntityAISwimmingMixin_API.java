@@ -26,14 +26,14 @@ package org.spongepowered.common.mixin.api.mcp.entity.ai;
 
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.SwimGoal;
-import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(SwimGoal.class)
-public abstract class EntityAISwimmingMixin_API implements SwimmingAITask {
+public abstract class EntityAISwimmingMixin_API implements SwimmingGoal {
 
     @Shadow @Final private MobEntity entity;
 
