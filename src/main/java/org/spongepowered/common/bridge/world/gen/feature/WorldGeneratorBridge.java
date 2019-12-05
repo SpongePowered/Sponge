@@ -36,7 +36,7 @@ public interface WorldGeneratorBridge {
 
     boolean bridge$isLeaves(BlockState state, World worldIn, BlockPos pos);
 
-    boolean birdge$isWood(BlockState state, World worldIn, BlockPos pos);
+    boolean bridge$isWood(BlockState state, World worldIn, BlockPos pos);
 
     boolean bridge$canSustainPlant(Block block, World worldIn, BlockPos pos, Direction direction, Block plant);
 }

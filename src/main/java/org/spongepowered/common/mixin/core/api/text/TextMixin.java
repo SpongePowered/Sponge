@@ -34,12 +34,11 @@ import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.ShiftClickAction;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextFormat;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.api.text.TextBridge;
 import org.spongepowered.common.text.action.SpongeClickAction;
 import org.spongepowered.common.text.action.SpongeHoverAction;
@@ -121,7 +120,7 @@ public abstract class TextMixin implements TextBridge {
      */
     @Overwrite
     public final String toPlain() {
-        return ((ITextComponentBridge) this.getHandle()).bridge$toPlain();
+        return ((TextComponentBridge) this.getHandle()).bridge$toPlain();
     }
 
     /**
@@ -148,6 +147,6 @@ public abstract class TextMixin implements TextBridge {
 
     @Override
     public String bridge$toLegacy(char code) {
-        return ((ITextComponentBridge) this.getHandle()).bridge$toLegacy(code);
+        return ((TextComponentBridge) this.getHandle()).bridge$toLegacy(code);
     }
 }

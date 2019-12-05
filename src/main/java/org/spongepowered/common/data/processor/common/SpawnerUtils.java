@@ -41,7 +41,7 @@ import org.spongepowered.api.util.weighted.TableEntry;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.bridge.tileentity.MobSpawnerBaseLogicBridge;
+import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
@@ -54,7 +54,7 @@ import java.util.Set;
 
 public class SpawnerUtils {
 
-    public static WeightedSerializableObject<EntityArchetype> getNextEntity(final MobSpawnerBaseLogicBridge logicBridge) {
+    public static WeightedSerializableObject<EntityArchetype> getNextEntity(final AbstractSpawnerBridge logicBridge) {
         return getNextEntity((MobSpawnerBaseLogicAccessor) logicBridge);
     }
 

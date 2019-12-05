@@ -33,7 +33,7 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.ai.EntityAITasksBridge;
+import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
 
 import java.util.Iterator;
 import java.util.List;
@@ -52,12 +52,12 @@ public abstract class EntityAITasksMixin_API<O extends Agent> implements Goal<O>
     @SuppressWarnings("unchecked")
     @Override
     public O getOwner() {
-        return (O) ((EntityAITasksBridge) this).bridge$getOwner();
+        return (O) ((GoalSelectorBridge) this).bridge$getOwner();
     }
 
     @Override
     public GoalType getType() {
-        return ((EntityAITasksBridge) this).bridge$getType();
+        return ((GoalSelectorBridge) this).bridge$getType();
     }
 
     @Override

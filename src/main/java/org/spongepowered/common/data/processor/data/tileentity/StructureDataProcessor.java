@@ -38,7 +38,7 @@ import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeStructureData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
 import org.spongepowered.math.vector.Vector3i;
-import org.spongepowered.common.bridge.tileentity.TileEntityStructureBridge;
+import org.spongepowered.common.bridge.tileentity.StructureBlockTileEntityBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +61,7 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
     protected boolean set(StructureBlockTileEntity container, Map<Key<?>, Object> map) {
         @Nullable String author = (String) map.get(Keys.STRUCTURE_AUTHOR);
         if (author != null) {
-            ((TileEntityStructureBridge) container).bridge$setAuthor(author);
+            ((StructureBlockTileEntityBridge) container).bridge$setAuthor(author);
         }
 
         container.setIgnoresEntities((Boolean) map.get(Keys.STRUCTURE_IGNORE_ENTITIES));
@@ -69,12 +69,12 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
 
         @Nullable StructureMode mode = (StructureMode) map.get(Keys.STRUCTURE_MODE);
         if (mode != null) {
-            ((TileEntityStructureBridge) container).bridge$setMode(mode);
+            ((StructureBlockTileEntityBridge) container).bridge$setMode(mode);
         }
 
         @Nullable Vector3i position = (Vector3i) map.get(Keys.STRUCTURE_POSITION);
         if (position != null) {
-            ((TileEntityStructureBridge) container).bridge$setPosition(position);
+            ((StructureBlockTileEntityBridge) container).bridge$setPosition(position);
         }
 
         container.setPowered((Boolean) map.get(Keys.STRUCTURE_POWERED));
@@ -93,7 +93,7 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
 
         @Nullable Vector3i size = (Vector3i) map.get(Keys.STRUCTURE_SIZE);
         if (size != null) {
-            ((TileEntityStructureBridge) container).bridge$setSize(size);
+            ((StructureBlockTileEntityBridge) container).bridge$setSize(size);
         }
 
         return true;
@@ -102,15 +102,15 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
     @Override
     protected Map<Key<?>, ?> getValues(StructureBlockTileEntity container) {
         ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
-        builder.put(Keys.STRUCTURE_AUTHOR, ((TileEntityStructureBridge) container).bridge$getAuthor());
-        builder.put(Keys.STRUCTURE_IGNORE_ENTITIES, ((TileEntityStructureBridge) container).bridge$shouldIgnoreEntities());
-        builder.put(Keys.STRUCTURE_INTEGRITY, ((TileEntityStructureBridge) container).bridge$getIntegrity());
-        builder.put(Keys.STRUCTURE_MODE, ((TileEntityStructureBridge) container).bridge$getMode());
-        builder.put(Keys.STRUCTURE_POSITION, ((TileEntityStructureBridge) container).bridge$getPosition());
+        builder.put(Keys.STRUCTURE_AUTHOR, ((StructureBlockTileEntityBridge) container).bridge$getAuthor());
+        builder.put(Keys.STRUCTURE_IGNORE_ENTITIES, ((StructureBlockTileEntityBridge) container).bridge$shouldIgnoreEntities());
+        builder.put(Keys.STRUCTURE_INTEGRITY, ((StructureBlockTileEntityBridge) container).bridge$getIntegrity());
+        builder.put(Keys.STRUCTURE_MODE, ((StructureBlockTileEntityBridge) container).bridge$getMode());
+        builder.put(Keys.STRUCTURE_POSITION, ((StructureBlockTileEntityBridge) container).bridge$getPosition());
         builder.put(Keys.STRUCTURE_POWERED, container.isPowered());
-        builder.put(Keys.STRUCTURE_SHOW_AIR, ((TileEntityStructureBridge) container).bridge$shouldShowAir());
-        builder.put(Keys.STRUCTURE_SHOW_BOUNDING_BOX, ((TileEntityStructureBridge) container).bridge$shouldShowBoundingBox());
-        builder.put(Keys.STRUCTURE_SIZE, ((TileEntityStructureBridge) container).bridge$getSize());
+        builder.put(Keys.STRUCTURE_SHOW_AIR, ((StructureBlockTileEntityBridge) container).bridge$shouldShowAir());
+        builder.put(Keys.STRUCTURE_SHOW_BOUNDING_BOX, ((StructureBlockTileEntityBridge) container).bridge$shouldShowBoundingBox());
+        builder.put(Keys.STRUCTURE_SIZE, ((StructureBlockTileEntityBridge) container).bridge$getSize());
         return builder.build();
     }
 

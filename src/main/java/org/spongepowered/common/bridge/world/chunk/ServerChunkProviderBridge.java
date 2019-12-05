@@ -42,19 +42,6 @@ import javax.annotation.Nullable;
  */
 public interface ServerChunkProviderBridge {
 
-    // TODO Mixin 0.8
-    @Nullable
-    @Deprecated
-    ChunkGenerator accessor$getChunkGenerator();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    void accessor$setChunkGenerator(ChunkGenerator spongeGen);
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Long2ObjectMap<Chunk> accessor$getLoadedChunks();
-
     CompletableFuture<Boolean> bridge$doesChunkExistSync(Vector3i chunkCoords);
 
     boolean bridge$getForceChunkRequests();

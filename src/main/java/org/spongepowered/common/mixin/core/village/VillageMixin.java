@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 
 @Mixin(Village.class)
 public abstract class VillageMixin {
@@ -46,7 +46,7 @@ public abstract class VillageMixin {
         if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
-        final Chunk chunk = ((ChunkProviderBridge) this.world.getChunkProvider())
+        final Chunk chunk = ((AbstractChunkProviderBridge) this.world.getChunkProvider())
             .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         if (chunk == null || chunk.isEmpty()) {
             cir.setReturnValue(false);

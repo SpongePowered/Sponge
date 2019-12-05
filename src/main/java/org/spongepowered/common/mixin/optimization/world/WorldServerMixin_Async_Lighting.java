@@ -38,7 +38,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldServerBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge_AsyncLighting;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.util.Constants;
@@ -203,7 +203,7 @@ public abstract class WorldServerMixin_Async_Lighting extends WorldMixin impleme
         }
 
         if (currentChunk == null) {
-            currentChunk = ((ChunkProviderBridge) this.chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            currentChunk = ((AbstractChunkProviderBridge) this.chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         }
 
         final ChunkBridge_AsyncLighting spongeChunk = (ChunkBridge_AsyncLighting) currentChunk;

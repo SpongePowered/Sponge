@@ -35,7 +35,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.loader.HeaderMode;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.math.GenericMath;
 import java.io.IOException;
@@ -161,7 +161,7 @@ class PaginationCalculator {
     @VisibleForTesting
     int getWidth(Text text) {
         ITextComponent component = SpongeTexts.toComponent(text);
-        Iterable<ITextComponent> children = ((ITextComponentBridge) component).bridge$withChildren();
+        Iterable<ITextComponent> children = ((TextComponentBridge) component).bridge$withChildren();
         int total = 0;
 
         for(ITextComponent child : children) {

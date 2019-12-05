@@ -25,13 +25,8 @@
 package org.spongepowered.common.mixin.core.server.management;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.management.PlayerProfileCache;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheEntryBridge;
 
 import java.util.Date;
 

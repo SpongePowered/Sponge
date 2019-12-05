@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.network.datasync;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.bridge.packet.DataParameterBridge;
+import org.spongepowered.common.bridge.network.datasync.DataParameterBridge;
 
 import java.util.Optional;
 

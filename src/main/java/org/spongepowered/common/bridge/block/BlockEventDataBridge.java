@@ -40,7 +40,7 @@ public interface BlockEventDataBridge {
 
     void bridge$setTickingLocatable(@Nullable LocatableBlock tickBlock);
 
-    void bridge$setTileEntity(@Nullable BlockEntity bridge$TileEntity);
+    void bridge$setTileEntity(@Nullable BlockEntity blockEntity);
 
     void bridge$setSourceUser(@Nullable User user);
 }

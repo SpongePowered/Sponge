@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
+import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 
 import java.util.Optional;
@@ -39,7 +39,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.ai.goal.Goal.class)
-public abstract class EntityAIBaseMixin implements EntityAIBasesBridge {
+public abstract class EntityAIBaseMixin implements GoalBridge {
 
     private AITaskType impl$type;
     private Optional<Goal<?>> impl$owner = Optional.empty();

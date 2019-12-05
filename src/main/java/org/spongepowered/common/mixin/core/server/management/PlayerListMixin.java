@@ -81,7 +81,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.packet.SWorldBorderPacketBridge;
+import org.spongepowered.common.bridge.network.play.server.SWorldBorderPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;

@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.gen.WorldGenTreesBridge;
+import org.spongepowered.common.bridge.world.gen.feature.TreeFeatureBridge;
 import org.spongepowered.common.bridge.world.gen.feature.WorldGeneratorBridge;
 
 import java.util.Random;
@@ -52,12 +52,12 @@ public abstract class WorldGenTreesMixin_API extends AbstractTreeFeature impleme
 
     @Override
     public String getId() {
-        return ((WorldGenTreesBridge) this).bridge$getId();
+        return ((TreeFeatureBridge) this).bridge$getId();
     }
 
     @Override
     public String getName() {
-        return ((WorldGenTreesBridge) this).bridge$getName();
+        return ((TreeFeatureBridge) this).bridge$getName();
     }
 
     @Override
@@ -109,7 +109,7 @@ public abstract class WorldGenTreesMixin_API extends AbstractTreeFeature impleme
 
     @Override
     public void placeObject(final World world, final Random random, final int x, final int y, final int z) {
-        this.minTreeHeight = ((WorldGenTreesBridge) this).bridge$getMinimumHeight().getFlooredAmount(random);
+        this.minTreeHeight = ((TreeFeatureBridge) this).bridge$getMinimumHeight().getFlooredAmount(random);
         final BlockPos pos = new BlockPos(x, y, z);
         setDecorationDefaults();
         if (generate((net.minecraft.world.World) world, random, pos)) {

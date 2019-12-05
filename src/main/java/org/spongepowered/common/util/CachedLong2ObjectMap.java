@@ -25,7 +25,7 @@
 package org.spongepowered.common.util;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import org.spongepowered.common.bridge.util.CacheKeyBridge;
+import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
 
 import javax.annotation.Nullable;
 

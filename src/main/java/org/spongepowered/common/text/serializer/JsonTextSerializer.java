@@ -29,7 +29,7 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializer;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.api.text.TextBridge;
 
 /**
@@ -60,7 +60,7 @@ public final class JsonTextSerializer implements TextSerializer {
                 return Text.EMPTY;
             }
 
-            return ((ITextComponentBridge) component).bridge$toText();
+            return ((TextComponentBridge) component).bridge$toText();
         } catch (JsonParseException e) {
             throw new TextParseException("Failed to parse JSON", e);
         }

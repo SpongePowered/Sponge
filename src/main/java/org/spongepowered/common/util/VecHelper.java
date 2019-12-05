@@ -32,7 +32,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.common.bridge.world.LocationBridge;
+import org.spongepowered.common.bridge.api.LocationBridge;
 import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;

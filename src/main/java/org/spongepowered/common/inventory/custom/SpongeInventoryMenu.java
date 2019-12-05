@@ -21,7 +21,7 @@ import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
+import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;

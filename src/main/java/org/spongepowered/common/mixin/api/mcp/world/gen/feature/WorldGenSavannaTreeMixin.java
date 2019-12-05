@@ -112,7 +112,7 @@ public abstract class WorldGenSavannaTreeMixin extends AbstractTreeFeature imple
         final net.minecraft.block.BlockState state = world.getBlockState(pos);
         return ((WorldGeneratorBridge) this).bridge$isAir(state, world, pos)
                || ((WorldGeneratorBridge) this).bridge$isLeaves(state, world, pos)
-               || ((WorldGeneratorBridge) this).birdge$isWood(state, world, pos)
+               || ((WorldGeneratorBridge) this).bridge$isWood(state, world, pos)
                || canGrowInto(state.getBlock());
     }
 

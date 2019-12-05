@@ -47,7 +47,7 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
-import org.spongepowered.common.bridge.world.gen.WorldGenTreesBridge;
+import org.spongepowered.common.bridge.world.gen.feature.TreeFeatureBridge;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 import org.spongepowered.common.world.gen.type.SpongeBiomeTreeType;
 
@@ -82,7 +82,7 @@ public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogT
             .withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
             .withProperty(LeavesBlock.CHECK_DECAY, Boolean.valueOf(false));
 
-        WorldGenTreesBridge trees = (WorldGenTreesBridge) new TreeFeature(false, 4, jlog, jleaf, true);
+        TreeFeatureBridge trees = (TreeFeatureBridge) new TreeFeature(false, 4, jlog, jleaf, true);
         trees.bridge$setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
         MegaJungleFeature mega = new MegaJungleFeature(false, 10, 20, jlog, jleaf);
 

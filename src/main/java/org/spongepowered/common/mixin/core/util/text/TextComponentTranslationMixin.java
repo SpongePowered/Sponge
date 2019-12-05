@@ -31,7 +31,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.text.TextComponentIterable;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -66,8 +66,8 @@ public abstract class TextComponentTranslationMixin extends TextComponentBaseMix
     private static Object[] wrapFormatArgs(final Object... formatArgs) {
         final Object[] ret = new Object[formatArgs.length];
         for (int i = 0; i < formatArgs.length; ++i) {
-            if (formatArgs[i] instanceof ITextComponentBridge) {
-                ret[i] = ((ITextComponentBridge) formatArgs[i]).bridge$toText();
+            if (formatArgs[i] instanceof TextComponentBridge) {
+                ret[i] = ((TextComponentBridge) formatArgs[i]).bridge$toText();
             } else {
                 ret[i] = formatArgs[i];
             }

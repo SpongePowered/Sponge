@@ -65,9 +65,9 @@ public class ICriterionTrigger_ListenerMixin implements ICriterionTrigger_Listen
                 (org.spongepowered.api.advancement.Advancement) this.advancement;
         AdvancementCriterion advancementCriterion = (AdvancementCriterion)
                 this.advancement.getCriteria().get(this.criterionName);
-        final CriterionBridge mixinCriterion = (CriterionBridge) advancementCriterion;
-        if (mixinCriterion.bridge$getScoreCriterion() != null) {
-            advancementCriterion = mixinCriterion.bridge$getScoreCriterion();
+        final CriterionBridge criterionBridge = (CriterionBridge) advancementCriterion;
+        if (criterionBridge.bridge$getScoreCriterion() != null) {
+            advancementCriterion = criterionBridge.bridge$getScoreCriterion();
         }
         if (!SpongeImplHooks.isMainThread()) {
             // Some mods do advancement granting on async threads, and we can't allow for the spam to be thrown.

@@ -101,7 +101,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
@@ -117,8 +117,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseMixin;
+import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
@@ -133,7 +132,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(PlayerEntity.class)
-public abstract class PlayerEntityMixin extends EntityLivingBaseMixin implements PlayerEntityBridge, LocationTargetingBridge {
+public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge {
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;

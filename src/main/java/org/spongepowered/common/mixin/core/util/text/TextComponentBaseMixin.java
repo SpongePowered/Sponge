@@ -42,7 +42,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.util.text.StyleBridge;
 import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
 import org.spongepowered.common.bridge.util.text.event.ClickEventBridge;
@@ -55,7 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Mixin(TextComponent.class)
-public abstract class TextComponentBaseMixin implements ITextComponentBridge, ITextComponent {
+public abstract class TextComponentBaseMixin implements TextComponentBridge, ITextComponent {
 
     @Shadow private Style style;
     @Shadow protected List<ITextComponent> siblings;
@@ -219,7 +219,7 @@ public abstract class TextComponentBaseMixin implements ITextComponentBridge, IT
         }
 
         for (final ITextComponent child : this.siblings) {
-            builder.append(((ITextComponentBridge) child).bridge$toText());
+            builder.append(((TextComponentBridge) child).bridge$toText());
         }
 
         return builder.build();

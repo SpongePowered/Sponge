@@ -57,7 +57,7 @@ import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -131,7 +131,7 @@ public abstract class WorldEntitySpawnerMixin {
                         final boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
                         final Chunk
                             chunk =
-                            ((ChunkProviderBridge) world.getChunkProvider())
+                            ((AbstractChunkProviderBridge) world.getChunkProvider())
                                 .bridge$getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
                         if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
                             // Don't attempt to spawn in an unloaded chunk
@@ -320,7 +320,7 @@ public abstract class WorldEntitySpawnerMixin {
     private static BlockPos getRandomChunkPosition(final World worldIn, final int x, final int z)
     {
         // Sponge start
-        final Chunk chunk = ((ChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x, z);
+        final Chunk chunk = ((AbstractChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x, z);
         if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
             // Don't attempt to spawn in an unloaded chunk
             return null;

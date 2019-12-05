@@ -27,14 +27,14 @@ package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 import net.minecraft.entity.projectile.WitherSkullEntity;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.entity.item.EntityWitherSkullBridge;
+import org.spongepowered.common.bridge.entity.projectile.WitherSkullEntityBridge;
 
 @Mixin(WitherSkullEntity.class)
 public abstract class EntityWitherSkullMixin_API extends EntityFireballMixin_API implements WitherSkull {
 
     @Override
     public void detonate() {
-        ((EntityWitherSkullBridge) this).bridge$CreateAndProcessExplosionEvent(this.world, (WitherSkullEntity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
+        ((WitherSkullEntityBridge) this).bridge$CreateAndProcessExplosionEvent(this.world, (WitherSkullEntity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
         this.setDead();
     }
 }

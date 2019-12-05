@@ -36,7 +36,7 @@ import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.api.world.gen.feature.Feature;
-import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
+import org.spongepowered.common.bridge.world.gen.OverworldChunkGeneratorBridge;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 import java.util.List;
@@ -72,8 +72,8 @@ public final class SpongeWorldGenerator implements TerrainGenerator {
         this.generationPopulators = Lists.newArrayList();
         this.biomeSettings = Maps.newHashMap();
         ((DimensionAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
-        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
-            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
+        if (this.baseGenerator instanceof OverworldChunkGeneratorBridge) {
+            ((OverworldChunkGeneratorBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }
     }
 
@@ -107,8 +107,8 @@ public final class SpongeWorldGenerator implements TerrainGenerator {
         this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
         // Replace biome generator with possible modified one
         ((DimensionAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
-        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
-            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
+        if (this.baseGenerator instanceof OverworldChunkGeneratorBridge) {
+            ((OverworldChunkGeneratorBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }
     }
 
@@ -120,8 +120,8 @@ public final class SpongeWorldGenerator implements TerrainGenerator {
     @Override
     public void setBaseGenerationPopulator(final GenerationPopulator generator) {
         this.baseGenerator = checkNotNull(generator, "generator");
-        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
-            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
+        if (this.baseGenerator instanceof OverworldChunkGeneratorBridge) {
+            ((OverworldChunkGeneratorBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
         }
     }
 

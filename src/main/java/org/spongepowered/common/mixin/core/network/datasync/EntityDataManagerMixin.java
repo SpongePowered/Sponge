@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.bridge.packet.DataParameterBridge;
+import org.spongepowered.common.bridge.network.datasync.DataParameterBridge;
 
 import java.util.Map;
 import java.util.Optional;

@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.world.LightType;
 
-public interface ChunkBridge_AsyncLighting extends ChunkBridge {
+public interface ChunkBridge_AsyncLighting {
 
     AtomicInteger asyncLightingBridge$getPendingLightUpdates();
 

@@ -126,8 +126,4 @@ public interface ChunkBridge {
     void bridge$setTileEntity(BlockPos targetPos, TileEntity added);
 
     Chunk[] bridge$getNeighborArray();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    void accessor$populate(ChunkGenerator generator);
 }

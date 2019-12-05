@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.UnmodifiableIterator;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -37,11 +37,11 @@ import javax.annotation.Nullable;
 
 public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> {
 
-    private ITextComponentBridge component;
+    private TextComponentBridge component;
     private Iterator<ITextComponent> children;
     @Nullable private Iterator<ITextComponent> currentChildIterator;
 
-    public TextComponentIterator(final ITextComponentBridge component) {
+    public TextComponentIterator(final TextComponentBridge component) {
         this.component = checkNotNull(component, "component");
     }
 
@@ -96,7 +96,7 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
     }
 
     private void setCurrentChildIterator() {
-        this.currentChildIterator = ((ITextComponentBridge) this.children.next()).bridge$withChildren().iterator();
+        this.currentChildIterator = ((TextComponentBridge) this.children.next()).bridge$withChildren().iterator();
     }
 
 }

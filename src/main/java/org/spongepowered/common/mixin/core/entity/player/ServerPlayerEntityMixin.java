@@ -120,11 +120,10 @@ import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
-import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
+import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
@@ -543,7 +542,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void onPlayerActive(final CallbackInfo ci) {
-        ((NetHandlerPlayServerBridge) this.connection).bridge$resendLatestResourcePackRequest();
+        ((ServerPlayNetHandlerBridge) this.connection).bridge$resendLatestResourcePackRequest();
     }
 
     @Override

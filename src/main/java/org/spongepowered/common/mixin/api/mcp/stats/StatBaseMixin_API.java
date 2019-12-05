@@ -33,7 +33,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.stats.StatBaseBridge;
+import org.spongepowered.common.bridge.stats.StatBridge;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -54,12 +54,12 @@ public abstract class StatBaseMixin_API implements Statistic {
 
     @Override
     public String getId() {
-        return ((StatBaseBridge) this).bridge$getUnderlyingId();
+        return ((StatBridge) this).bridge$getUnderlyingId();
     }
 
     @Override
     public NumberFormat getFormat() {
-        return ((StatBaseBridge) this).bridge$getFormat();
+        return ((StatBridge) this).bridge$getFormat();
     }
 
     @Override

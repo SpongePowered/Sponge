@@ -32,7 +32,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 
-
 @Mixin(Vec3i.class)
 @Implements(@Interface(iface = BlockPosBridge.class, prefix = "inline$", unique = true))
 public abstract class Vec3iMixin implements BlockPosBridge {

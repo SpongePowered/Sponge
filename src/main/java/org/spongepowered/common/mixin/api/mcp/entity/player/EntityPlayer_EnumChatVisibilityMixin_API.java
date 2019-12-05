@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.entity.player.EnumChatVisibilityBridge;
+import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
@@ -50,7 +50,7 @@ public abstract class EntityPlayer_EnumChatVisibilityMixin_API implements ChatVi
     @Override
     public boolean isVisible(final ChatType type) {
         checkNotNull(type, "type");
-        return ((EnumChatVisibilityBridge) this).bridge$getVisibleChatTypes().contains(type);
+        return ((ChatVisibilityBridge) this).bridge$getVisibleChatTypes().contains(type);
     }
 
     @Override

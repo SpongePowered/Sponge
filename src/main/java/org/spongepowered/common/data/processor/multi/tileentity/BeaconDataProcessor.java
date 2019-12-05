@@ -36,7 +36,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
-import org.spongepowered.common.bridge.tileentity.TileEntityBeaconBridge;
+import org.spongepowered.common.bridge.tileentity.BeaconTileEntityBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -60,8 +60,8 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<BeaconT
         Effect primary = ((Optional<Effect>) keyValues.get(Keys.BEACON_PRIMARY_EFFECT)).orElse(null);
         Effect secondary = ((Optional<Effect>) keyValues.get(Keys.BEACON_SECONDARY_EFFECT)).orElse(null);
 
-        ((TileEntityBeaconBridge) dataHolder).bridge$forceSetPrimaryEffect(primary);
-        ((TileEntityBeaconBridge) dataHolder).bridge$forceSetSecondaryEffect(secondary);
+        ((BeaconTileEntityBridge) dataHolder).bridge$forceSetPrimaryEffect(primary);
+        ((BeaconTileEntityBridge) dataHolder).bridge$forceSetSecondaryEffect(secondary);
 
         dataHolder.markDirty();
         return true;

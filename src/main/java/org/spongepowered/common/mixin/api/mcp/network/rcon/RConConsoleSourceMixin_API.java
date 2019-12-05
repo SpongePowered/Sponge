@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.network.rcon.RConConsoleSourceBridge;
-import org.spongepowered.common.bridge.network.rcon.RConThreadClientBridge;
+import org.spongepowered.common.bridge.network.rcon.ClientThreadBridge;
 
 @Mixin(RConConsoleSource.class)
 @Implements(@Interface(iface = RconSource.class, prefix = "api$"))
@@ -49,12 +49,12 @@ public abstract class RConConsoleSourceMixin_API implements RconSource {
 
     @Override
     public void setLoggedIn(final boolean loggedIn) {
-        ((RConThreadClientBridge) ((RConConsoleSourceBridge) this).bridge$getClient()).bridge$setLoggedIn(loggedIn);
+        ((ClientThreadBridge) ((RConConsoleSourceBridge) this).bridge$getClient()).bridge$setLoggedIn(loggedIn);
     }
 
     @Override
     public boolean getLoggedIn() {
-        return  ((RConThreadClientBridge) ((RConConsoleSourceBridge) this).bridge$getClient()).bridge$getLoggedIn();
+        return  ((ClientThreadBridge) ((RConConsoleSourceBridge) this).bridge$getClient()).bridge$getLoggedIn();
     }
 
     @Override

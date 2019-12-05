@@ -26,8 +26,8 @@ package org.spongepowered.common.statistic;
 
 import net.minecraft.stats.StatCrafting;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.common.bridge.stats.StatBaseBridge;
-import org.spongepowered.common.mixin.core.stats.StatBaseMixin;
+import org.spongepowered.common.bridge.stats.StatBridge;
+import org.spongepowered.common.mixin.core.stats.StatMixin;
 
 import java.text.NumberFormat;
 
@@ -35,7 +35,7 @@ import java.text.NumberFormat;
  * Specifically a default implemented bridge for Sponge added statistics
  * base classes that extend {@link StatBase} and {@link StatCrafting} but
  * cannot specifically reference the implementation provided by
- * {@link StatBaseBridge} and therefor, {@link StatBaseMixin}. It is the
+ * {@link StatBridge} and therefor, {@link StatMixin}. It is the
  * premise that the bridge methods are implemented appropriately, and
  * handled the same way as if the statistics were implemented on the
  * classes themselves.
@@ -44,12 +44,12 @@ public interface SpongeStatistic extends Statistic {
 
     @Override
     default String getId() {
-        return ((StatBaseBridge) this).bridge$getUnderlyingId();
+        return ((StatBridge) this).bridge$getUnderlyingId();
     }
 
     @Override
     default NumberFormat getFormat() {
-        return ((StatBaseBridge) this).bridge$getFormat();
+        return ((StatBridge) this).bridge$getFormat();
     }
 
 }

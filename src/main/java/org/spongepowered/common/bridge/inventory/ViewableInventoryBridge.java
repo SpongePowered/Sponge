@@ -7,6 +7,8 @@ import java.util.List;
 public interface ViewableInventoryBridge {
 
     void bridge$addContainer(Container container);
+
     void bridge$removeContainer(Container container);
+
     List<Container> bridge$getContainers();
 }

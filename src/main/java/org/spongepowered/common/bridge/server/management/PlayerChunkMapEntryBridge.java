@@ -33,9 +33,5 @@ public interface PlayerChunkMapEntryBridge {
 
     void bridge$markBiomesForUpdate();
 
-    // TODO Mixin 0.8
-    @Deprecated
-    List<ServerPlayerEntity> accessor$getPlayers();
-
     void bridge$setChunk(Chunk newChunk);
 }

@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.bridge.entity.LivingEntityBaseBridge;
+import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
@@ -68,7 +68,7 @@ public class BreathingDataProcessor extends AbstractEntityDataProcessor<LivingEn
 
     @Override
     protected Map<Key<?>, ?> getValues(LivingEntity entity) {
-        return ImmutableMap.<Key<?>, Object>of(Keys.MAX_AIR, ((LivingEntityBaseBridge) entity).bridge$getMaxAir(), Keys.REMAINING_AIR, entity.getAir());
+        return ImmutableMap.<Key<?>, Object>of(Keys.MAX_AIR, ((LivingEntityBridge) entity).bridge$getMaxAir(), Keys.REMAINING_AIR, entity.getAir());
     }
 
     @Override

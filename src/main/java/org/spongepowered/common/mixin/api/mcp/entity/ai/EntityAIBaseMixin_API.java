@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
+import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 
 import java.util.Optional;
 
@@ -44,13 +44,13 @@ public abstract class EntityAIBaseMixin_API<O extends Agent> implements AITask<O
 
     @Override
     public AITaskType getType() {
-        return ((EntityAIBasesBridge) this).bridge$getType();
+        return ((GoalBridge) this).bridge$getType();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Optional<Goal<O>> getGoal() {
-        return (Optional<Goal<O>>) (Optional<?>) ((EntityAIBasesBridge) this).bridge$getAIGoal();
+        return (Optional<Goal<O>>) (Optional<?>) ((GoalBridge) this).bridge$getAIGoal();
     }
 
     @Override

@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.PickupDelayData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePickupDelayData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.bridge.entity.EntityItemBridge;
+import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public final class PickupDelayDataProcessor extends AbstractEntityDataProcessor<
 
     @Override
     protected boolean set(ItemEntity container, Map<Key<?>, Object> keyValues) {
-        ((EntityItemBridge) container).bridge$setPickupDelay(
+        ((ItemEntityBridge) container).bridge$setPickupDelay(
                 (Integer) keyValues.get(Keys.PICKUP_DELAY),
                 (Boolean) keyValues.get(Keys.INFINITE_PICKUP_DELAY)
         );
@@ -65,8 +65,8 @@ public final class PickupDelayDataProcessor extends AbstractEntityDataProcessor<
     @Override
     protected Map<Key<?>, ?> getValues(ItemEntity container) {
         return ImmutableMap.<Key<?>, Object> builder()
-                .put(Keys.PICKUP_DELAY, ((EntityItemBridge) container).bridge$getPickupDelay())
-                .put(Keys.INFINITE_PICKUP_DELAY, ((EntityItemBridge) container).bridge$infinitePickupDelay())
+                .put(Keys.PICKUP_DELAY, ((ItemEntityBridge) container).bridge$getPickupDelay())
+                .put(Keys.INFINITE_PICKUP_DELAY, ((ItemEntityBridge) container).bridge$infinitePickupDelay())
                 .build();
     }
 

@@ -27,8 +27,4 @@ package org.spongepowered.common.bridge.server.management;
 public interface PlayerChunkMapBridge {
 
     boolean bridge$isChunkInUse(int x, int z);
-
-    // TODO Mixin 0.8
-    @Deprecated
-    int accessor$getViewDistance();
 }

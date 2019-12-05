@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.bridge.tileentity.TileEntityBeaconBridge;
+import org.spongepowered.common.bridge.tileentity.BeaconTileEntityBridge;
 
 import java.util.Optional;
 import net.minecraft.potion.Effect;
@@ -52,7 +52,7 @@ public class BeaconPrimaryEffectValueProcessor
 
     @Override
     protected boolean set(BeaconTileEntity container, Optional<PotionEffectType> value) {
-        ((TileEntityBeaconBridge) container).bridge$forceSetPrimaryEffect((Effect) value.orElse(null));
+        ((BeaconTileEntityBridge) container).bridge$forceSetPrimaryEffect((Effect) value.orElse(null));
         container.markDirty();
         return true;
     }

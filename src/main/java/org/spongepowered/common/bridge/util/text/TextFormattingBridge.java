@@ -28,6 +28,5 @@ public interface TextFormattingBridge {
 
     String bridge$getName();
 
-    /** The formatting code that produces this format. */
     char bridge$getFormattingCode();
 }

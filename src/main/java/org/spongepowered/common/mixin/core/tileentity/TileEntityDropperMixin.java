@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 
 import java.util.ArrayList;
 import java.util.List;

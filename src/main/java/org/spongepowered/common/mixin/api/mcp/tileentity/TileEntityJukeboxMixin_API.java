@@ -30,12 +30,10 @@ import net.minecraft.block.JukeboxBlock;
 import net.minecraft.item.Item;
 import net.minecraft.item.MusicDiscItem;
 import org.spongepowered.api.block.entity.Jukebox;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.block.BlockJukeboxBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 

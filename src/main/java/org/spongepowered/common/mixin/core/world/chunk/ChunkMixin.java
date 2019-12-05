@@ -70,12 +70,12 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.util.CacheKeyBridge;
+import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -104,7 +104,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
@@ -225,7 +224,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     private void impl$UpdateNeighborsOnLoad(final CallbackInfo ci) {
         for (final Direction direction : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPosition = ((Chunk) this).getPosition().add(direction.asBlockOffset());
-            final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) this.world.getChunkProvider();
+            final AbstractChunkProviderBridge spongeChunkProvider = (AbstractChunkProviderBridge) this.world.getChunkProvider();
             final net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -248,7 +247,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     private void impl$UpdateNeighborsOnUnload(final CallbackInfo ci) {
         for (final Direction direction : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPosition = ((Chunk) this).getPosition().add(direction.asBlockOffset());
-            final ChunkProviderBridge spongeChunkProvider = (ChunkProviderBridge) this.world.getChunkProvider();
+            final AbstractChunkProviderBridge spongeChunkProvider = (AbstractChunkProviderBridge) this.world.getChunkProvider();
             final net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -687,7 +686,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     private net.minecraft.world.chunk.Chunk impl$GetChunkWithoutMarkingAsActive(final AbstractChunkProvider chunkProvider, final int x, final int z) {
         // Don't mark chunks as active
-        return ((ChunkProviderBridge) chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(x, z);
+        return ((AbstractChunkProviderBridge) chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(x, z);
     }
 
     @Inject(

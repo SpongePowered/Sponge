@@ -57,7 +57,7 @@ public abstract class WorldGeneratorMixin implements WorldGeneratorBridge {
     }
 
     @Override
-    public boolean birdge$isWood(final BlockState state, final World worldIn, final BlockPos pos) {
+    public boolean bridge$isWood(final BlockState state, final World worldIn, final BlockPos pos) {
         return state.getMaterial() == Material.WOOD;
     }
     

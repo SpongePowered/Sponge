@@ -29,7 +29,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.bridge.entity.EntityItemBridge;
+import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
@@ -55,13 +55,13 @@ public class DespawnDelayValueProcessor extends AbstractSpongeValueProcessor<Ite
 
     @Override
     protected boolean set(ItemEntity container, Integer value) {
-        ((EntityItemBridge) container).bridge$setDespawnDelay(value);
+        ((ItemEntityBridge) container).bridge$setDespawnDelay(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(ItemEntity container) {
-        return Optional.of(((EntityItemBridge) container).bridge$getDespawnDelay());
+        return Optional.of(((ItemEntityBridge) container).bridge$getDespawnDelay());
     }
 
     @Override

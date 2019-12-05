@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.api.text.TextBridge;
-import org.spongepowered.common.bridge.text.TitleBridge;
+import org.spongepowered.common.bridge.api.text.title.TitleBridge;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -81,7 +81,7 @@ import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -450,7 +450,7 @@ public abstract class WorldMixin implements WorldBridge {
         }
         final int l = MathHelper.floor(entity.posX / 16.0D);
         final int j1 = MathHelper.floor(entity.posZ / 16.0D);
-        final ChunkBridge newChunk = (ChunkBridge) ((ChunkProviderBridge) this.shadow$getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(l, j1);
+        final ChunkBridge newChunk = (ChunkBridge) ((AbstractChunkProviderBridge) this.shadow$getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(l, j1);
         final boolean isPositionDirty = entity.setPositionNonDirty();
         if (newChunk == null || (!isPositionDirty && newChunk.bridge$isQueuedForUnload() && !newChunk.bridge$isPersistedChunk())) {
             entity.addedToChunk = false;

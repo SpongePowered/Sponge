@@ -92,7 +92,7 @@ import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
+import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -372,7 +372,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if ((Entity) (Object) this instanceof ServerPlayerEntity) {
             final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
             if (player.connection != null) {
-                ((NetHandlerPlayServerBridge) player.connection).bridge$captureCurrentPlayerPosition();
+                ((ServerPlayNetHandlerBridge) player.connection).bridge$captureCurrentPlayerPosition();
             }
         }
     }

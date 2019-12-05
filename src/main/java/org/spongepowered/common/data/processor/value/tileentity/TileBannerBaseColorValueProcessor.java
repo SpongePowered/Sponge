@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.tileentity.TileEntityBannerBridge;
+import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -53,7 +53,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
     @Override
     protected boolean set(BannerTileEntity container, DyeColor value) {
         if (!container.getWorld().isRemote) {
-            ((TileEntityBannerBridge) container).bridge$setBaseColor(value);
+            ((BannerTileEntityBridge) container).bridge$setBaseColor(value);
             return true;
         }
         return false;
@@ -61,7 +61,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected Optional<DyeColor> getVal(BannerTileEntity container) {
-        return Optional.of(((TileEntityBannerBridge) container).bridge$getBaseColor());
+        return Optional.of(((BannerTileEntityBridge) container).bridge$getBaseColor());
     }
 
     @Override

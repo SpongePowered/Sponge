@@ -24,39 +24,7 @@
  */
 package org.spongepowered.common.bridge.scoreboard;
 
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreCriteria;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-
-import java.util.List;
-import java.util.Map;
-
 public interface ScoreboardBridge {
 
     boolean bridge$isClient();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<ScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<String, ScoreObjective> accessor$getScoreObjectives();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<String, Map<ScoreObjective, Score>> accessor$getEntitiesScoreObjectives();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<String, ScorePlayerTeam> accessor$getTeams();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<String, ScorePlayerTeam> accessor$getTeamMemberships();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    ScoreObjective[] accessor$getObjectiveDisplaySlots();
 }

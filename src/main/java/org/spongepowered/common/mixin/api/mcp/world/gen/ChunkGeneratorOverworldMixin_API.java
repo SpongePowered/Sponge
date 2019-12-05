@@ -35,7 +35,7 @@ import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
+import org.spongepowered.common.bridge.world.gen.OverworldChunkGeneratorBridge;
 import org.spongepowered.common.util.gen.ChunkBufferPrimer;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3i;
@@ -57,7 +57,7 @@ public abstract class ChunkGeneratorOverworldMixin_API
         final int x = GenericMath.floor(buffer.getBlockMin().getX() / 16f);
         final int z = GenericMath.floor(buffer.getBlockMin().getZ() / 16f);
         this.rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
-        this.biomesForGeneration = ((ChunkGeneratorOverworldBridge) this).bridge$getBiomesForGeneration(x, z);
+        this.biomesForGeneration = ((OverworldChunkGeneratorBridge) this).bridge$getBiomesForGeneration(x, z);
         final ChunkPrimer chunkprimer = new ChunkBufferPrimer(buffer);
         this.setBlocksInChunk(x, z, chunkprimer);
         this.apiImpl$setBedrock(buffer);

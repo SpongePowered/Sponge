@@ -36,7 +36,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.bridge.entity.monster.EntityShulkerBridge;
+import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
 
 import java.util.Optional;
 import net.minecraft.entity.monster.ShulkerEntity;
@@ -55,13 +55,13 @@ public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProces
 
     @Override
     protected boolean set(ShulkerEntity container, DyeColor value) {
-        ((EntityShulkerBridge) container).bridge$setColor(value);
+        ((ShulkerEntityBridge) container).bridge$setColor(value);
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(ShulkerEntity container) {
-        return Optional.of(((EntityShulkerBridge) container).bridge$getColor());
+        return Optional.of(((ShulkerEntityBridge) container).bridge$getColor());
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProces
 
     @Override
     public boolean supports(ShulkerEntity dataHolder) {
-        return dataHolder instanceof EntityShulkerBridge;
+        return dataHolder instanceof ShulkerEntityBridge;
     }
 
     @Override

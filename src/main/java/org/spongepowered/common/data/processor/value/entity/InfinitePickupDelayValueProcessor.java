@@ -29,7 +29,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.common.bridge.entity.EntityItemBridge;
+import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
@@ -50,13 +50,13 @@ public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected boolean set(ItemEntity container, Boolean value) {
-        ((EntityItemBridge) container).bridge$setPickupDelay(value ? Constants.Entity.Item.MAGIC_NO_PICKUP : Constants.Entity.Item.DEFAULT_PICKUP_DELAY, value);
+        ((ItemEntityBridge) container).bridge$setPickupDelay(value ? Constants.Entity.Item.MAGIC_NO_PICKUP : Constants.Entity.Item.DEFAULT_PICKUP_DELAY, value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(ItemEntity container) {
-        return Optional.of(((EntityItemBridge) container).bridge$infinitePickupDelay());
+        return Optional.of(((ItemEntityBridge) container).bridge$infinitePickupDelay());
     }
 
     @Override

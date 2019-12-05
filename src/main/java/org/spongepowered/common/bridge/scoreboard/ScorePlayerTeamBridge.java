@@ -31,16 +31,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
 
-public interface ScorePlayerTeamBridge extends TeamBridge {
-
-    // TODO Mixin 0.8
-    @Deprecated
-    @Nullable
-    Scoreboard accessor$getScoreboard();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    void accessor$setScoreboard(@Nullable Scoreboard scoreboard);
+public interface ScorePlayerTeamBridge {
 
     Text bridge$getDisplayName();
 

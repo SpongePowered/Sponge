@@ -102,10 +102,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.bridge.packet.SPacketResourcePackSendBridge;
+import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
+import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.bridge.world.WorldBorderBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -120,9 +119,8 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
-import org.spongepowered.common.bridge.text.TitleBridge;
-import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
+import org.spongepowered.common.bridge.api.text.title.TitleBridge;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.Constants;
@@ -445,13 +443,13 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     @Override
     public void sendResourcePack(final ResourcePack pack) {
         final SSendResourcePackPacket packet = new SSendResourcePackPacket();
-        ((SPacketResourcePackSendBridge) packet).bridge$setSpongePack(pack);
+        ((SSendResourcePackPacketBridge) packet).bridge$setSpongePack(pack);
         this.connection.sendPacket(packet);
     }
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void onPlayerActive(final CallbackInfo ci) {
-        ((NetHandlerPlayServerBridge) this.connection).bridge$resendLatestResourcePackRequest();
+        ((ServerPlayNetHandlerBridge) this.connection).bridge$resendLatestResourcePackRequest();
     }
 
     @Override

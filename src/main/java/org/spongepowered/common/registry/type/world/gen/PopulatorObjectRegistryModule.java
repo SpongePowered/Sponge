@@ -53,7 +53,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorObjects;
-import org.spongepowered.common.bridge.world.gen.WorldGenTreesBridge;
+import org.spongepowered.common.bridge.world.gen.feature.TreeFeatureBridge;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(PopulatorObjects.class)
@@ -90,7 +90,7 @@ public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalo
         BlockState jlog = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
         BlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(LeavesBlock.CHECK_DECAY, Boolean.valueOf(false));
         BlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(LeavesBlock.CHECK_DECAY, Boolean.valueOf(false));
-        WorldGenTreesBridge trees = (WorldGenTreesBridge) new TreeFeature(false, 4, jlog, jleaf, true);
+        TreeFeatureBridge trees = (TreeFeatureBridge) new TreeFeature(false, 4, jlog, jleaf, true);
         trees.bridge$setId("minecraft:jungle");
         trees.bridge$setName("Jungle tree");
         trees.bridge$setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));

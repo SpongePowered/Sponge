@@ -36,13 +36,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.AggressiveBridge;
+import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
 import org.spongepowered.common.mixin.core.entity.EntityAgeableMixin;
 
 import java.util.Random;
 
 @Mixin(WolfEntity.class)
-public abstract class EntityWolfMixin extends EntityAgeableMixin implements AggressiveBridge {
+public abstract class EntityWolfMixin extends EntityAgeableMixin implements AggressiveEntityBridge {
 
     @Shadow public abstract boolean shadow$isAngry();
     @Shadow public abstract void shadow$setAngry(boolean angry);

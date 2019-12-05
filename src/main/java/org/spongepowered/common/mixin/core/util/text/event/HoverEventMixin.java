@@ -40,8 +40,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
-import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
@@ -62,7 +61,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                 // This is inefficient, but at least we only need to do it once
                 switch (this.action) {
                     case SHOW_TEXT:
-                        this.bridge$setHandle(TextActions.showText(((ITextComponentBridge) this.value).bridge$toText()));
+                        this.bridge$setHandle(TextActions.showText(((TextComponentBridge) this.value).bridge$toText()));
                         break;
                     case SHOW_ITEM:
                         this.bridge$setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(this.loadNbt()))));

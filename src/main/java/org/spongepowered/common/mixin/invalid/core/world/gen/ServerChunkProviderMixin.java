@@ -53,7 +53,7 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -73,7 +73,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 
 @Mixin(ServerChunkProvider.class)
-public abstract class ServerChunkProviderMixin implements ServerChunkProviderBridge, ChunkProviderBridge {
+public abstract class ServerChunkProviderMixin implements ServerChunkProviderBridge, AbstractChunkProviderBridge {
 
     @Nullable private SpongeEmptyChunk impl$EMPTY_CHUNK;
     private boolean impl$denyChunkRequests = true;

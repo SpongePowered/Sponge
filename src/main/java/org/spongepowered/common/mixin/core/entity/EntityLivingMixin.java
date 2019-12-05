@@ -57,8 +57,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.entity.ai.EntityAIBasesBridge;
-import org.spongepowered.common.bridge.entity.ai.EntityAITasksBridge;
+import org.spongepowered.common.bridge.entity.ai.GoalBridge;
+import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -70,7 +70,7 @@ import java.util.Iterator;
 import javax.annotation.Nullable;
 
 @Mixin(MobEntity.class)
-public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
+public abstract class EntityLivingMixin extends LivingEntityMixin {
 
     @Shadow @Final protected GoalSelector tasks;
     @Shadow @Final protected GoalSelector targetTasks;
@@ -87,15 +87,15 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     }
 
     private void initSpongeAI() {
-        if (!((EntityAITasksBridge) this.tasks).bridge$initialized()) {
-            ((EntityAITasksBridge) this.tasks).bridge$setOwner((MobEntity) (Object) this);
-            ((EntityAITasksBridge) this.tasks).bridge$setType(GoalTypes.NORMAL);
-            ((EntityAITasksBridge) this.tasks).bridge$setInitialized(true);
+        if (!((GoalSelectorBridge) this.tasks).bridge$initialized()) {
+            ((GoalSelectorBridge) this.tasks).bridge$setOwner((MobEntity) (Object) this);
+            ((GoalSelectorBridge) this.tasks).bridge$setType(GoalTypes.NORMAL);
+            ((GoalSelectorBridge) this.tasks).bridge$setInitialized(true);
         }
-        if (!((EntityAITasksBridge) this.targetTasks).bridge$initialized()) {
-            ((EntityAITasksBridge) this.targetTasks).bridge$setOwner((MobEntity) (Object) this);
-            ((EntityAITasksBridge) this.targetTasks).bridge$setType(GoalTypes.TARGET);
-            ((EntityAITasksBridge) this.targetTasks).bridge$setInitialized(true);
+        if (!((GoalSelectorBridge) this.targetTasks).bridge$initialized()) {
+            ((GoalSelectorBridge) this.targetTasks).bridge$setOwner((MobEntity) (Object) this);
+            ((GoalSelectorBridge) this.targetTasks).bridge$setType(GoalTypes.TARGET);
+            ((GoalSelectorBridge) this.targetTasks).bridge$setInitialized(true);
         }
     }
 
@@ -103,13 +103,13 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
     public void bridge$fireConstructors() {
         super.bridge$fireConstructors();
         if (ShouldFire.A_I_TASK_EVENT_ADD) {
-            this.handleDelayedTaskEventFiring((EntityAITasksBridge) this.tasks);
-            this.handleDelayedTaskEventFiring((EntityAITasksBridge) this.targetTasks);
+            this.handleDelayedTaskEventFiring((GoalSelectorBridge) this.tasks);
+            this.handleDelayedTaskEventFiring((GoalSelectorBridge) this.targetTasks);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void handleDelayedTaskEventFiring(final EntityAITasksBridge tasks) {
+    private void handleDelayedTaskEventFiring(final GoalSelectorBridge tasks) {
         final Iterator<GoalSelector.EntityAITaskEntry> taskItr = tasks.bridge$getTasksUnsafe().iterator();
         while (taskItr.hasNext()) {
             final GoalSelector.EntityAITaskEntry task = taskItr.next();
@@ -117,7 +117,7 @@ public abstract class EntityLivingMixin extends EntityLivingBaseMixin {
                     task.priority, task.priority, (Goal<? extends Agent>) tasks, (Agent) this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                ((EntityAIBasesBridge) task.action).bridge$setGoal(null);
+                ((GoalBridge) task.action).bridge$setGoal(null);
                 taskItr.remove();
             }
         }

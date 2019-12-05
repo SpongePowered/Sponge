@@ -44,6 +44,7 @@ import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.advancements.ICriterionTrigger_ListenerBridge;
+import org.spongepowered.common.bridge.advancements.TriggerBridge;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;

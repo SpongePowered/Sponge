@@ -73,7 +73,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
+import org.spongepowered.common.bridge.world.gen.OverworldChunkGeneratorBridge;
 import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -136,8 +136,8 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
         this.stoneNoise = new double[256];
 
         ((DimensionAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(this.biomeGenerator));
-        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
-            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
+        if (this.baseGenerator instanceof OverworldChunkGeneratorBridge) {
+            ((OverworldChunkGeneratorBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
         }
 
         if (!this.getClass().getSimpleName().equalsIgnoreCase("SpongeChunkProviderForge")) {
@@ -161,8 +161,8 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
     @Override
     public void setBaseGenerationPopulator(GenerationPopulator baseGenerationPopulator) {
         this.baseGenerator = baseGenerationPopulator;
-        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
-            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
+        if (this.baseGenerator instanceof OverworldChunkGeneratorBridge) {
+            ((OverworldChunkGeneratorBridge) this.baseGenerator).bridge$setBiomeGenerator(this.biomeGenerator);
         }
     }
 
@@ -201,8 +201,8 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = biomeGenerator;
         ((DimensionAccessor) this.world.dimension).accessor$setBiomeProvider(CustomBiomeProvider.of(biomeGenerator));
-        if (this.baseGenerator instanceof ChunkGeneratorOverworldBridge) {
-            ((ChunkGeneratorOverworldBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
+        if (this.baseGenerator instanceof OverworldChunkGeneratorBridge) {
+            ((OverworldChunkGeneratorBridge) this.baseGenerator).bridge$setBiomeGenerator(biomeGenerator);
         }
     }
 

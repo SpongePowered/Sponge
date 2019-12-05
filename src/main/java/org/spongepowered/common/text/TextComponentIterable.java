@@ -25,16 +25,16 @@
 package org.spongepowered.common.text;
 
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 
 import java.util.Iterator;
 
 public class TextComponentIterable implements Iterable<ITextComponent> {
 
-    private final ITextComponentBridge component;
+    private final TextComponentBridge component;
     private final boolean includeSelf;
 
-    public TextComponentIterable(ITextComponentBridge component, boolean includeSelf) {
+    public TextComponentIterable(TextComponentBridge component, boolean includeSelf) {
         this.component = component;
         this.includeSelf = includeSelf;
     }

@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.world;
 
 import org.spongepowered.api.world.teleport.PortalAgentType;
 
-public interface TeleporterBridge extends ForgeITeleporterBridge {
+public interface TeleporterBridge {
 
     void bridge$removePortalPositionFromCache(Long portalLocation);
 

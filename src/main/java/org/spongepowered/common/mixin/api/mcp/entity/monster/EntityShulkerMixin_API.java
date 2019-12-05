@@ -28,12 +28,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.living.golem.Shulker;
 import org.spongepowered.api.entity.projectile.EntityTargetingProjectile;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.entity.monster.EntityShulkerBridge;
+import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -50,22 +49,22 @@ public abstract class EntityShulkerMixin_API extends EntityGolemMixin_API implem
 
     @Override
     public DyeableData getDyeData() {
-        return new SpongeDyeableData(((EntityShulkerBridge) this).bridge$getColor());
+        return new SpongeDyeableData(((ShulkerEntityBridge) this).bridge$getColor());
     }
 
     @Override
     public Mutable<DyeColor> color() {
-        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHULKER_COLOR, ((EntityShulkerBridge) this).bridge$getColor());
+        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHULKER_COLOR, ((ShulkerEntityBridge) this).bridge$getColor());
     }
 
     @Override
     public DirectionalData getDirectionalData() {
-        return new SpongeDirectionalData(((EntityShulkerBridge) this).bridge$getDirection());
+        return new SpongeDirectionalData(((ShulkerEntityBridge) this).bridge$getDirection());
     }
 
     @Override
     public Mutable<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, ((EntityShulkerBridge) this).bridge$getDirection());
+        return new SpongeValue<>(Keys.DIRECTION, ((ShulkerEntityBridge) this).bridge$getDirection());
     }
 
     @Override

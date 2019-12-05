@@ -37,7 +37,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.EntityVillagerBridge;
+import org.spongepowered.common.bridge.entity.merchant.villager.VillagerEntityBridge;
 
 import java.util.Optional;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
@@ -56,13 +56,13 @@ public class CareerDataProcessor
 
     @Override
     protected boolean set(VillagerEntity entity, Career value) {
-        ((EntityVillagerBridge) entity).bridge$setCareer(value);
+        ((VillagerEntityBridge) entity).bridge$setCareer(value);
         return true;
     }
 
     @Override
     protected Optional<Career> getVal(VillagerEntity entity) {
-        return Optional.of(((EntityVillagerBridge) entity).bridge$getCareer());
+        return Optional.of(((VillagerEntityBridge) entity).bridge$getCareer());
     }
 
     @Override

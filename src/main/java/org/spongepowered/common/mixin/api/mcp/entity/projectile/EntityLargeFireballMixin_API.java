@@ -28,7 +28,7 @@ import net.minecraft.entity.projectile.FireballEntity;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.item.EntityLargeFireballBridge;
+import org.spongepowered.common.bridge.entity.projectile.FireballEntityBridge;
 
 @Mixin(FireballEntity.class)
 public abstract class EntityLargeFireballMixin_API extends EntityFireballMixin_API implements LargeFireball {
@@ -37,7 +37,7 @@ public abstract class EntityLargeFireballMixin_API extends EntityFireballMixin_A
 
     @Override
     public void detonate() {
-        ((EntityLargeFireballBridge) this).bridge$throwExplosionEventAndExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
+        ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
         this.setDead();
     }
 

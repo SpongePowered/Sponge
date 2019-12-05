@@ -29,7 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.common.bridge.packet.DataParameterBridge;
+import org.spongepowered.common.bridge.network.datasync.DataParameterBridge;
 
 import java.util.List;
 import java.util.Objects;

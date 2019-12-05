@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.network.play.server;
 import net.minecraft.network.play.server.SWorldBorderPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.packet.SWorldBorderPacketBridge;
+import org.spongepowered.common.bridge.network.play.server.SWorldBorderPacketBridge;
 
 @Mixin(SWorldBorderPacket.class)
 public abstract class SWorldBorderPacketMixin implements SWorldBorderPacketBridge {

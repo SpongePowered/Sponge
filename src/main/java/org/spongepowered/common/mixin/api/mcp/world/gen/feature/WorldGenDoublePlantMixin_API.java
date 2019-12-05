@@ -38,7 +38,7 @@ import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.gen.feature.WorldGenDoublePlantBridge;
+import org.spongepowered.common.bridge.world.gen.feature.DoublePlantFeatureBridge;
 import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.Random;
@@ -63,7 +63,7 @@ public abstract class WorldGenDoublePlantMixin_API extends Feature implements Do
 
     @Override
     public void populate(final org.spongepowered.api.world.World worldIn, final Extent extent, final Random random) {
-        ((WorldGenDoublePlantBridge) this).bridge$setCurrentExtent(extent);
+        ((DoublePlantFeatureBridge) this).bridge$setCurrentExtent(extent);
         final Vector3i min = extent.getBlockMin();
         final Vector3i size = extent.getBlockSize();
         final World world = (World) worldIn;
@@ -79,7 +79,7 @@ public abstract class WorldGenDoublePlantMixin_API extends Feature implements Do
             y = this.nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
             generate(world, random, world.getHeight(chunkPos.add(x, y, z)));
         }
-        ((WorldGenDoublePlantBridge) this).bridge$setCurrentExtent(null);
+        ((DoublePlantFeatureBridge) this).bridge$setCurrentExtent(null);
     }
 
     private int nextInt(final Random rand, final int i) {

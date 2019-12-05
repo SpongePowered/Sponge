@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.advancements;
 import net.minecraft.advancements.ICriterionTrigger;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.advancement.TriggerBridge;
+import org.spongepowered.common.bridge.advancements.TriggerBridge;
 
 @Mixin(ICriterionTrigger.class)
 public interface ICriterionTriggerMixin extends TriggerBridge {

@@ -42,12 +42,12 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.damage.DamageEventHandler;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseMixin;
+import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
 
 import java.util.ArrayList;
 
 @Mixin(ArmorStandEntity.class)
-public abstract class EntityArmorStandMixin extends EntityLivingBaseMixin {
+public abstract class EntityArmorStandMixin extends LivingEntityMixin {
 
     @Shadow protected abstract void damageArmorStand(float damage);
 

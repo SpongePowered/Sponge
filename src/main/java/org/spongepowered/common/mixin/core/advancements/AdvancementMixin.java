@@ -56,7 +56,7 @@ import org.spongepowered.common.advancement.DefaultedAdvancementCriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
-import org.spongepowered.common.bridge.util.text.ITextComponentBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
@@ -147,7 +147,7 @@ public class AdvancementMixin implements AdvancementBridge {
             toastText.add(Text.builder(new SpongeTranslation("advancements.toast." + frameType.getName()))
                     .format(((AdvancementType) (Object) frameType).getTextFormat())
                     .build());
-            toastText.add(((ITextComponentBridge) this.display.getTitle()).bridge$toText());
+            toastText.add(((TextComponentBridge) this.display.getTitle()).bridge$toText());
         } else {
             toastText.add(Text.of("Unlocked advancement"));
             toastText.add(Text.of(this.impl$spongeId));

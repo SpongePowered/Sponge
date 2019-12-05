@@ -29,7 +29,6 @@ import net.minecraft.util.math.Vec3i;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.EnumFacingBridge;
 
 @Mixin(Direction.class)
 public class EnumFacingMixin implements EnumFacingBridge {

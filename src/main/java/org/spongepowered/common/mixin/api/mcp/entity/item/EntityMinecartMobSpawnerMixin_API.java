@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.vehicle.minecart.MobSpawnerMinecart;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.tileentity.MobSpawnerBaseLogicBridge;
+import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 
@@ -57,7 +56,7 @@ public abstract class EntityMinecartMobSpawnerMixin_API extends EntityMinecartMi
 //                (short) accessor.accessor$getSpawnRange(),
 //                SpawnerUtils.getNextEntity(accessor),
 //                SpawnerUtils.getEntities(this.mobSpawnerLogic));
-        final MobSpawnerBaseLogicBridge accessor = (MobSpawnerBaseLogicBridge) this.mobSpawnerLogic;
+        final AbstractSpawnerBridge accessor = (AbstractSpawnerBridge) this.mobSpawnerLogic;
         return new SpongeMobSpawnerData(
             (short) accessor.bridge$getSpawnDelay(),
             (short) accessor.bridge$getMinSpawnDelay(),

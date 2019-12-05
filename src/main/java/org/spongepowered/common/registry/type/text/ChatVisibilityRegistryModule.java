@@ -34,7 +34,7 @@ import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibilities;
 import org.spongepowered.api.text.chat.ChatVisibility;
-import org.spongepowered.common.bridge.entity.player.EnumChatVisibilityBridge;
+import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(ChatVisibilities.class)
@@ -52,9 +52,9 @@ public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAltern
         PlayerEntity.EnumChatVisibility SYSTEM = PlayerEntity.EnumChatVisibility.SYSTEM;
         PlayerEntity.EnumChatVisibility HIDDEN = PlayerEntity.EnumChatVisibility.HIDDEN;
 
-        ((EnumChatVisibilityBridge) (Object) FULL).bridge$setChatTypes(ImmutableSet.copyOf(Sponge.getRegistry().getAllOf(ChatType.class)));
-        ((EnumChatVisibilityBridge) (Object) SYSTEM).bridge$setChatTypes(ImmutableSet.of(ChatTypes.SYSTEM, ChatTypes.ACTION_BAR));
-        ((EnumChatVisibilityBridge) (Object) HIDDEN).bridge$setChatTypes(ImmutableSet.of());
+        ((ChatVisibilityBridge) (Object) FULL).bridge$setChatTypes(ImmutableSet.copyOf(Sponge.getRegistry().getAllOf(ChatType.class)));
+        ((ChatVisibilityBridge) (Object) SYSTEM).bridge$setChatTypes(ImmutableSet.of(ChatTypes.SYSTEM, ChatTypes.ACTION_BAR));
+        ((ChatVisibilityBridge) (Object) HIDDEN).bridge$setChatTypes(ImmutableSet.of());
     }
 
     @AdditionalRegistration

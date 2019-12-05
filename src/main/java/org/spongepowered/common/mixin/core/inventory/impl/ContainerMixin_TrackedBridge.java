@@ -31,9 +31,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
-import org.spongepowered.common.bridge.inventory.ContainerPlayerBridge;
-import org.spongepowered.common.bridge.inventory.TrackedContainerBridge;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.inventory.container.PlayerContainerBridge;
+import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -503,8 +503,8 @@ public abstract class ContainerMixin_TrackedBridge implements TrackedInventoryBr
         // like vanilla send property changes
         this.impl$detectAndSendPropertyChanges();
 
-        if (this instanceof ContainerPlayerBridge) {
-            ((ContainerPlayerBridge) this).bridge$markClean();
+        if (this instanceof PlayerContainerBridge) {
+            ((PlayerContainerBridge) this).bridge$markClean();
         }
     }
 

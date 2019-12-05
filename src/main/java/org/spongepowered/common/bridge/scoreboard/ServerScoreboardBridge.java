@@ -27,7 +27,7 @@ package org.spongepowered.common.bridge.scoreboard;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 
-public interface ServerScoreboardBridge extends ScoreboardBridge {
+public interface ServerScoreboardBridge {
 
     void bridge$addPlayer(ServerPlayerEntity player, boolean sendPackets);
 

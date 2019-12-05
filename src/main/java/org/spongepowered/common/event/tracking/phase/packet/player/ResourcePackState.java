@@ -34,7 +34,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
-import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
+import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.mixin.core.network.play.client.CPacketResourcePackStatusAccessor;
 
 public final class ResourcePackState extends BasicPacketState {
@@ -44,7 +44,7 @@ public final class ResourcePackState extends BasicPacketState {
         final ServerPlayerEntity player = phaseContext.getPacketPlayer();
 
         final ServerPlayNetHandler connection = player.connection;
-        final NetHandlerPlayServerBridge mixinHandler = (NetHandlerPlayServerBridge) connection;
+        final ServerPlayNetHandlerBridge mixinHandler = (ServerPlayNetHandlerBridge) connection;
         final CPacketResourcePackStatusAccessor resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack;

@@ -35,7 +35,7 @@ import net.minecraft.world.gen.feature.StructureStart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 
 import java.util.Random;
 
@@ -63,7 +63,7 @@ public abstract class MapGenStructureMixin extends MapGenBase {
         if (impl$isGeneratingStructures) {
             return false;
         }
-        final Chunk chunk = ((ChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkCoord.x, chunkCoord.z);
+        final Chunk chunk = ((AbstractChunkProviderBridge) worldIn.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkCoord.x, chunkCoord.z);
         if (chunk == null) {
             return false;
         }
