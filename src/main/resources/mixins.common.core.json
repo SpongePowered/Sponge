@@ -91,7 +91,7 @@
         "block.BlockLeverMixin",
         "block.BlockLiquidMixin",
         "block.BlockLogMixin",
-        "block.BlockMagmaMixin",
+        "block.MagmaBlockMixin",
         "block.BlockMixin",
         "block.BlockMyceliumMixin",
         "block.BlockNetherWartMixin",

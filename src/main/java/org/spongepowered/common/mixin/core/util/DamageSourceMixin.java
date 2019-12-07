@@ -33,6 +33,7 @@ import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Explosion;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
@@ -52,7 +53,7 @@ import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = net.minecraft.util.DamageSource.class)
+@Mixin(DamageSource.class)
 public abstract class DamageSourceMixin implements DamageSourceBridge {
 
     @Shadow @Final @Mutable public static DamageSource LAVA;
@@ -66,37 +67,32 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
 
     @Shadow public String damageType;
 
-    @Shadow @Nullable public abstract Entity getTrueSource();
+    @Shadow @Nullable public abstract Entity shadow$getTrueSource();
 
     DamageType impl$damageType;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void spongeSetDamageTypeFromConstructor(final String damageTypeIn, final CallbackInfo ci) {
-        if (!damageTypeIn.contains(":")) {
-            this.impl$damageType = DamageSourceToTypeProvider.getInstance().getOrCustom(damageTypeIn);
-        } else {
-            this.impl$damageType = Sponge.getRegistry().getType(DamageType.class, damageTypeIn).orElse(DamageTypes.CUSTOM);
-        }
+    private void impl$setDamageTypeOnConstruction(String damageType, CallbackInfo ci) {
+        this.bridge$resetDamageType();
     }
 
-    @Inject(method = "getDeathMessage(Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/text/ITextComponent;", cancellable = true,
-            at = @At(value = "RETURN"))
-    private void beforeGetDeathMessageReturn(final LivingEntity entityLivingBaseIn, final CallbackInfoReturnable<ITextComponent> cir) {
+    @Inject(method = "getDeathMessage", cancellable = true, at = @At(value = "RETURN"))
+    private void beforeGetDeathMessageReturn(LivingEntity livingEntity, final CallbackInfoReturnable<ITextComponent> cir) {
         // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
-        if (cir.getReturnValue().getUnformattedText().equals("death.attack." + this.damageType)) {
-            cir.setReturnValue(new TranslationTextComponent("death.attack.generic", entityLivingBaseIn.getDisplayName()));
+        if (cir.getReturnValue().getString().equals("death.attack." + this.damageType)) {
+            cir.setReturnValue(new TranslationTextComponent("death.attack.generic", livingEntity.getDisplayName()));
         }
     }
 
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
-    private static void onSetExplosionSource(@Nullable final Explosion explosionIn, final CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
-        if (explosionIn != null) {
-            final Entity entity = ((ExplosionBridge) explosionIn).bridge$getExploder();
-            if (entity != null && !((WorldBridge) ((ExplosionBridge) explosionIn).bridge$getWorld()).bridge$isFake()) {
-                if (explosionIn.getExplosivePlacedBy() == null && entity instanceof OwnershipTrackedBridge) {
+    private static void onSetExplosionSource(@Nullable Explosion explosion, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
+        if (explosion != null) {
+            final Entity entity = ((ExplosionBridge) explosion).bridge$getExploder();
+            if (entity != null && !((WorldBridge) ((ExplosionBridge) explosion).bridge$getWorld()).bridge$isFake()) {
+                if (explosion.getExplosivePlacedBy() == null && entity instanceof OwnershipTrackedBridge) {
                     // check creator
-                    final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) entity;
-                    spongeEntity.tracked$getOwnerReference()
+                    final OwnershipTrackedBridge ownerTrackedBridge = (OwnershipTrackedBridge) entity;
+                    ownerTrackedBridge.tracked$getOwnerReference()
                         .filter(user -> user instanceof PlayerEntity)
                         .map(user -> (PlayerEntity) user)
                         .ifPresent(player -> {
@@ -110,14 +106,6 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper("DamageSource")
-                .add("Name", this.damageType)
-                .add("Type", this.impl$damageType.getId())
-                .toString();
-    }
-
-    @Override
     public DamageType bridge$getDamageType() {
         return this.impl$damageType;
     }
@@ -127,7 +115,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
         if (!this.damageType.contains(":")) {
             this.impl$damageType = DamageSourceToTypeProvider.getInstance().getOrCustom(this.damageType);
         } else {
-            this.impl$damageType = Sponge.getRegistry().getType(DamageType.class, this.damageType).orElse(DamageTypes.CUSTOM);
+            this.impl$damageType = Sponge.getRegistry().getType(DamageType.class, CatalogKey.resolve(this.damageType)).orElse(DamageTypes.CUSTOM);
         }
     }
 
@@ -169,5 +157,13 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Override
     public void bridge$setCactusSource() {
         CACTUS = (DamageSource) (Object) this;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper("DamageSource")
+            .add("Name", this.damageType)
+            .add("Key", this.impl$damageType.getKey().toString())
+            .toString();
     }
 }

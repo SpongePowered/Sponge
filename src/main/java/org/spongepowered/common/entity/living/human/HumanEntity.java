@@ -83,7 +83,7 @@ import javax.annotation.Nullable;
  *
  * Hostile mobs don't attack the human, should this be default behaviour?
  */
-public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAttackMob {
+public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAttackMob {
 
     // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
     // you can access this data once per minute, lets cache for 2 minutes
@@ -104,7 +104,7 @@ public class EntityHuman extends CreatureEntity implements TeamMember, IRangedAt
     @Nullable private UUID skinUuid;
     private boolean aiDisabled = false, leftHanded = false;
 
-    public EntityHuman(final World worldIn) {
+    public HumanEntity(final World worldIn) {
         super(worldIn);
         this.fakeProfile = new GameProfile(this.entityUniqueID, "");
         this.setSize(0.6F, 1.8F);

@@ -22,42 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.event.cause.entity.damage;
+package org.spongepowered.common.mixin.api.entity.living;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
+import com.mojang.authlib.GameProfile;
+import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.mixin.api.mcp.util.DamageSourceMixin_API;
+import org.spongepowered.common.entity.living.human.HumanEntity;
+import org.spongepowered.common.mixin.api.mcp.entity.EntityCreatureMixin_API;
 
-@Mixin(value = MinecraftBlockDamageSource.class, priority = 991)
-public abstract class MinecraftBlockDamageSourceMixin_API extends DamageSourceMixin_API implements BlockDamageSource {
+@Mixin(value = HumanEntity.class, remap = false)
+public abstract class HumanEntityMixin_API extends EntityCreatureMixin_API implements Human {
 
-    @Shadow(remap = false) @Final private BlockSnapshot blockSnapshot;
-    @Shadow(remap = false) @Final private Location<World> location;
-
-    @Override
-    public Location<World> getLocation() {
-        return this.location;
-    }
+    @Shadow private GameProfile fakeProfile;
 
     @Override
-    public BlockSnapshot getBlockSnapshot() {
-        return this.blockSnapshot;
+    public String getName() {
+        return this.fakeProfile.getName();
     }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper("BlockDamageSource")
-            .add("Name", this.damageType)
-            .add("Type", this.getType().getId())
-            .add("BlockSnapshot", this.getBlockSnapshot())
-            .add("Location", this.location)
-            .toString();
-    }
 }

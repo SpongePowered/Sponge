@@ -22,23 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.entity;
+package org.spongepowered.common.mixin.api.data.property;
 
-import com.mojang.authlib.GameProfile;
-import org.spongepowered.api.entity.living.Human;
+import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.api.data.property.provider.PropertyProvider;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.mixin.api.mcp.entity.EntityCreatureMixin_API;
+import org.spongepowered.common.SpongeImpl;
 
-@Mixin(value = EntityHuman.class, remap = false)
-public abstract class EntityHumanMixin_API extends EntityCreatureMixin_API implements Human {
+import java.util.Collection;
+import java.util.Optional;
 
-    @Shadow private GameProfile fakeProfile;
+@Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
+public abstract class PropertyHolderMixin_API implements PropertyHolder {
 
     @Override
-    public String getName() {
-        return this.fakeProfile.getName();
+    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+        final Optional<PropertyProvider<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
+        if (optional.isPresent()) {
+            return optional.get().getFor(this);
+        }
+        return Optional.empty();
     }
 
+    @Override
+    public Collection<Property<?, ?>> getApplicableProperties() {
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
+
+    }
 }

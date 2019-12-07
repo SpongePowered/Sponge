@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.mixin.core.network.datasync.EntityDataManagerAccessor;
 import org.spongepowered.common.network.SpoofedEntityDataManager;
 
@@ -61,12 +61,12 @@ public abstract class EntityTrackerEntryMixin {
     @Redirect(method = "updatePlayerEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
     public void onSendSpawnPacket(final ServerPlayNetHandler thisCtx, final IPacket<?> spawnPacket, final ServerPlayerEntity playerIn) {
-        if (!(this.trackedEntity instanceof EntityHuman)) {
+        if (!(this.trackedEntity instanceof HumanEntity)) {
             // This is the method call that was @Redirected
             thisCtx.sendPacket(spawnPacket);
             return;
         }
-        final EntityHuman human = (EntityHuman) this.trackedEntity;
+        final HumanEntity human = (HumanEntity) this.trackedEntity;
         // Adds the GameProfile to the client
         thisCtx.sendPacket(human.createPlayerListPacket(SPlayerListItemPacket.Action.ADD_PLAYER));
         // Actually spawn the human (a player)
@@ -89,17 +89,17 @@ public abstract class EntityTrackerEntryMixin {
     // The spawn packet for a human is a player
     @Inject(method = "createSpawnPacket", at = @At("HEAD"), cancellable = true)
     public void onGetSpawnPacket(CallbackInfoReturnable<IPacket<?>> cir) {
-        if (this.trackedEntity instanceof EntityHuman) {
-            cir.setReturnValue(((EntityHuman) this.trackedEntity).createSpawnPacket());
+        if (this.trackedEntity instanceof HumanEntity) {
+            cir.setReturnValue(((HumanEntity) this.trackedEntity).createSpawnPacket());
         }
     }
 
     @Inject(method = "sendMetadata", at = @At("HEAD"))
     public void onSendMetadata(CallbackInfo ci) {
-        if (!(this.trackedEntity instanceof EntityHuman)) {
+        if (!(this.trackedEntity instanceof HumanEntity)) {
             return;
         }
-        EntityHuman human = (EntityHuman) this.trackedEntity;
+        HumanEntity human = (HumanEntity) this.trackedEntity;
         IPacket<?>[] packets = human.popQueuedPackets(null);
         for (ServerPlayerEntity player : this.trackingPlayers) {
             if (packets != null) {

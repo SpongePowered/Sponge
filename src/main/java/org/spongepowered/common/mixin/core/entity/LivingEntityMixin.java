@@ -89,7 +89,7 @@ import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
@@ -292,7 +292,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             }
 
             // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
-            if (!((LivingEntity) (Object) this instanceof EntityHuman)) {
+            if (!((LivingEntity) (Object) this instanceof HumanEntity)) {
                 this.world.setEntityState((LivingEntity) (Object) this, (byte) 3);
             }
 

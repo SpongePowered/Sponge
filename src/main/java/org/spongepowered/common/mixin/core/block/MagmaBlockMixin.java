@@ -35,13 +35,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(MagmaBlock.class)
-public abstract class BlockMagmaMixin extends BlockMixin {
+public abstract class MagmaBlockMixin extends BlockMixin {
 
-    @SuppressWarnings("ConstantConditions")
     @Redirect(
         method = "onEntityWalk",
         at = @At(
@@ -49,15 +49,14 @@ public abstract class BlockMagmaMixin extends BlockMixin {
             target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
         )
     )
-    private boolean impl$SwapDamageSourceForMagma(final Entity entity, final DamageSource source, final float damage, final World world,
-            final BlockPos pos, final Entity original) {
+    private boolean impl$swapDamageSourceForMagma(Entity entity, DamageSource source, float damage, World world, BlockPos pos, Entity original) {
         if (!world.isRemote) {
             try {
                 final Vector3i blockPosition = VecHelper.toVector3i(pos);
-                final Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) world, blockPosition);
+                final Location location = Location.of((org.spongepowered.api.world.World) world, blockPosition);
                 final MinecraftBlockDamageSource hotFloor = new MinecraftBlockDamageSource("hotFloor", location);
-                hotFloor.impl$setFireDamage();
-                ((DamageSourceBridge) hotFloor).bridge$setHotFloorSource();
+                ((DamageSourceAccessor) (Object) hotFloor).accessor$setFireDamage();
+                ((DamageSourceBridge) (Object) hotFloor).bridge$setHotFloorSource();
                 return entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
             } finally {
                 ((DamageSourceBridge) source).bridge$setHotFloorSource();
@@ -65,5 +64,4 @@ public abstract class BlockMagmaMixin extends BlockMixin {
         }
         return entity.attackEntityFrom(source, damage);
     }
-
 }

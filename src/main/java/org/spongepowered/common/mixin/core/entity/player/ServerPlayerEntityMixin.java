@@ -128,7 +128,7 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.data.type.SpongeSkinPart;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -203,8 +203,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
     private void impl$removeHumanHook(final Entity entityIn, final CallbackInfo ci) {
-        if (entityIn instanceof EntityHuman) {
-            ((EntityHuman) entityIn).onRemovedFrom((ServerPlayerEntity) (Object) this);
+        if (entityIn instanceof HumanEntity) {
+            ((HumanEntity) entityIn).onRemovedFrom((ServerPlayerEntity) (Object) this);
         }
     }
 

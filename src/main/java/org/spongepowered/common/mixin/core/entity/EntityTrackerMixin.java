@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(EntityTracker.class)
@@ -49,7 +49,7 @@ public abstract class EntityTrackerMixin {
 
     @Inject(method = "track(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
     private void impl$onTrackEntity(final Entity entityIn, final CallbackInfo ci) {
-        if (entityIn instanceof EntityHuman) {
+        if (entityIn instanceof HumanEntity) {
             this.track(entityIn, 512, 2);
             ci.cancel();
         }

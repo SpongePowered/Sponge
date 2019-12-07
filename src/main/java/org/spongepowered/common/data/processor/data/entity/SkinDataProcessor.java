@@ -35,24 +35,24 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.util.Optional;
 import java.util.UUID;
 
 public class SkinDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityHuman, UUID, Mutable<UUID>, SkinData, ImmutableSkinData> {
+        AbstractEntitySingleDataProcessor<HumanEntity, UUID, Mutable<UUID>, SkinData, ImmutableSkinData> {
 
     public SkinDataProcessor() {
-        super(EntityHuman.class, Keys.SKIN_UNIQUE_ID);
+        super(HumanEntity.class, Keys.SKIN_UNIQUE_ID);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof EntityHuman)) {
+        if (!(container instanceof HumanEntity)) {
             return DataTransactionResult.failNoData();
         }
-        return ((EntityHuman) container).removeSkin();
+        return ((HumanEntity) container).removeSkin();
     }
 
     @Override
@@ -61,12 +61,12 @@ public class SkinDataProcessor extends
     }
 
     @Override
-    protected boolean set(EntityHuman entity, UUID value) {
+    protected boolean set(HumanEntity entity, UUID value) {
         return entity.setSkinUuid(value);
     }
 
     @Override
-    protected Optional<UUID> getVal(EntityHuman entity) {
+    protected Optional<UUID> getVal(HumanEntity entity) {
         return Optional.ofNullable(entity.getSkinUuid());
     }
 

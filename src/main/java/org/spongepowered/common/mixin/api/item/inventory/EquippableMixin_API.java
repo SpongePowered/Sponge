@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.entity;
+package org.spongepowered.common.mixin.api.item.inventory;
 
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.monster.AbstractSkeletonEntity;
@@ -35,7 +35,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 
@@ -44,7 +44,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 // All living implementors of ArmorEquipable
-@Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, EntityHuman.class})
+@Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, HumanEntity.class})
 public abstract class EquippableMixin_API extends EntityLivingBaseMixin_API implements Equipable {
 
     @Override

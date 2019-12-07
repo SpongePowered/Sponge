@@ -51,8 +51,8 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(final CallbackInfo callbackInfo) {
         if (!(this.indirectEntity instanceof User) && this.damageSourceEntity != null) { // sources can be null
-            this.impl$owner = this.getTrueSource() instanceof OwnershipTrackedBridge
-                         ? ((OwnershipTrackedBridge) this.getTrueSource()).tracked$getOwnerReference().orElse(null)
+            this.impl$owner = this.shadow$getTrueSource() instanceof OwnershipTrackedBridge
+                         ? ((OwnershipTrackedBridge) this.shadow$getTrueSource()).tracked$getOwnerReference().orElse(null)
                          : null;
             if (this.indirectEntity == null && this.impl$owner instanceof Entity) {
                 this.indirectEntity = (Entity) this.impl$owner;
@@ -66,7 +66,7 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
             .add("Name", this.damageType)
             .add("Type", this.impl$damageType.getId())
             .add("Source", this.getImmediateSource())
-            .add("IndirectSource", this.getTrueSource());
+            .add("IndirectSource", this.shadow$getTrueSource());
         if (this.impl$owner != null) {
             helper.add("SourceOwner", this.impl$owner);
         }

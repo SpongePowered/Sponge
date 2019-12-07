@@ -36,7 +36,7 @@ public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 
     @SuppressWarnings("unused") private final ImmutableFallingBlockData fallingBlockData; // Used in the mixin
 
-    public MinecraftFallingBlockDamageSource(final String p_i1567_1_, final FallingBlockEntity damageSourceEntityIn) {
+    public MinecraftFallingBlockDamageSource(final String damageType, final FallingBlockEntity damageSourceEntityIn) {
         super(p_i1567_1_, damageSourceEntityIn);
         this.fallingBlockData = ((DataHolder) damageSourceEntityIn).get(FallingBlockData.class).get().asImmutable();
     }

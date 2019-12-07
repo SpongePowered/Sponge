@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.entity;
+package org.spongepowered.common.mixin.api.item.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,14 +36,14 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
 
 import javax.annotation.Nullable;
 
 // All living implementors of ArmorEquipable
-@Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, EntityHuman.class})
+@Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, HumanEntity.class})
 public abstract class ArmorEquippableMixin_API extends EntityLivingBaseMixin_API implements ArmorEquipable {
 
     @Override

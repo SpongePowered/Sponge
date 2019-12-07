@@ -46,7 +46,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
@@ -182,7 +182,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("weather", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
         this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", ServerPlayerEntity.class, new SpongeTranslation("soundCategory.player")));
         this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", MultiPartEntityPart.class, null));
-        this.entityTypeMappings.put("human", this.registerCustomEntity(EntityHuman.class, "human", "Human", 300, null)); // TODO: Figure out what id to use, as negative ids no longer work
+        this.entityTypeMappings.put("human", this.registerCustomEntity(HumanEntity.class, "human", "Human", 300, null)); // TODO: Figure out what id to use, as negative ids no longer work
         //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
 
         this.entityTypeMappings.put("parrot", this.newEntityTypeFromName("parrot"));
