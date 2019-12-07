@@ -94,8 +94,8 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.block.BlockFireAccessor;
-import org.spongepowered.common.mixin.core.world.WorldAccessor;
+import org.spongepowered.common.mixin.accessor.block.FireBlockAccessor;
+import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -187,7 +187,7 @@ public class SpongeImplHooks {
     // Block
 
     public static boolean isBlockFlammable(Block block, IBlockAccess world, BlockPos pos, Direction face) {
-        return ((BlockFireAccessor) Blocks.FIRE).accessor$getBlockFlamability(block) > 0;
+        return ((FireBlockAccessor) Blocks.FIRE).accessor$getFlammability(block) > 0;
     }
 
     public static int getBlockLightOpacity(BlockState state, IBlockAccess world, BlockPos pos) {
@@ -662,13 +662,13 @@ public class SpongeImplHooks {
     }
 
     public static TileEntity onChunkGetTileDuringRemoval(ServerWorld world, BlockPos pos) {
-        if (((WorldAccessor) world).accessor$getIsOutsideBuildHeight(pos)) {
+        if (((WorldAccessor) world).accessor$isOutsideBuildHeight(pos)) {
             return null;
         } else {
             TileEntity tileentity2 = null;
 
             if (((WorldAccessor) world).accessor$getProcessingLoadedTiles()) {
-                tileentity2 = ((WorldAccessor) world).accessPendingTileEntityAt(pos);
+                tileentity2 = ((WorldAccessor) world).accessor$getPendingTileEntityAt(pos);
             }
 
             if (tileentity2 == null) {
@@ -679,7 +679,7 @@ public class SpongeImplHooks {
             }
 
             if (tileentity2 == null) {
-                tileentity2 =  ((WorldAccessor) world).accessPendingTileEntityAt(pos);
+                tileentity2 =  ((WorldAccessor) world).accessor$getPendingTileEntityAt(pos);
             }
 
             return tileentity2;

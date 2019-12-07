@@ -36,7 +36,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.monster.EntitySlimeAccessor;
+import org.spongepowered.common.mixin.accessor.entity.monster.SlimeEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.monster.SlimeEntity;
@@ -50,7 +50,7 @@ public class SlimeDataProcessor
 
     @Override
     protected boolean set(final SlimeEntity entity, final Integer value) {
-        ((EntitySlimeAccessor) entity).accessor$setSlimeSize(value + 1, false);
+        ((SlimeEntityAccessor) entity).accessor$setSlimeSize(value + 1, false);
         return true;
     }
 

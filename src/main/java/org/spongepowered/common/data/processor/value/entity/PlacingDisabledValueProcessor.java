@@ -34,7 +34,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
-import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -73,7 +73,7 @@ public class PlacingDisabledValueProcessor
 	protected boolean set(final ArmorStandEntity container, final Set<EquipmentType> value) {
 		int chunk = 0;
 
-		int disabledSlots = ((EntityArmorStandAccessor) container).accessor$getDisabledSlots();
+		int disabledSlots = ((ArmorStandEntityAccessor) container).accessor$getDisabledSlots();
 		// try and keep the all chunk empty
 		final int allChunk = disabledSlots & 0b1111_1111;
 		if (allChunk != 0) {
@@ -89,7 +89,7 @@ public class PlacingDisabledValueProcessor
 		
 		disabledSlots |= (chunk << 816);
 
-		((EntityArmorStandAccessor) container).accessor$setDisabledSlots(disabledSlots);
+		((ArmorStandEntityAccessor) container).accessor$setDisabledSlots(disabledSlots);
 		
 		return true;
 	}
@@ -97,7 +97,7 @@ public class PlacingDisabledValueProcessor
 	@Override
 	protected Optional<Set<EquipmentType>> getVal(final ArmorStandEntity container) {
 		// include all chunk
-		final int disabled = ((EntityArmorStandAccessor) container).accessor$getDisabledSlots();
+		final int disabled = ((ArmorStandEntityAccessor) container).accessor$getDisabledSlots();
 		final int resultantChunk = ((disabled >> 16) & 0b1111_1111) | (disabled & 0b1111_1111);
 		
 		final HashSet<EquipmentType> val = new HashSet<EquipmentType>();

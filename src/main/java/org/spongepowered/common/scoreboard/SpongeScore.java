@@ -30,8 +30,8 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
-import org.spongepowered.common.mixin.core.scoreboard.ScoreAccessor;
-import org.spongepowered.common.mixin.core.scoreboard.ScoreObjectiveAccessor;
+import org.spongepowered.common.mixin.accessor.scoreboard.ScoreAccessor;
+import org.spongepowered.common.mixin.accessor.scoreboard.ScoreObjectiveAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 

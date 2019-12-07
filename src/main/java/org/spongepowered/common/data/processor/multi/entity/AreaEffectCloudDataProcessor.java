@@ -40,7 +40,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAreaEffectData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
-import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
+import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +82,7 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<Ar
         dataHolder.setRadius((float) radius);
         dataHolder.setRadiusOnUse((float) radiusOnUse);
         dataHolder.setDuration(duration);
-        ((EntityAreaEffectCloudAccessor) dataHolder).setDurationOnUse(durationOnUse);
+        ((AreaEffectCloudEntityAccessor) dataHolder).accessor$setDurationOnUse(durationOnUse);
         dataHolder.setWaitTime(waitTime);
         final EnumParticleTypes internalType = ((SpongeParticleType) particleType).getInternalType();
         dataHolder.setParticle(internalType == null ? EnumParticleTypes.SPELL_MOB : internalType);
@@ -91,8 +91,8 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<Ar
         for (PotionEffect effect : potionEffects) {
             effects.add((net.minecraft.potion.EffectInstance) effect);
         }
-        ((EntityAreaEffectCloudAccessor) dataHolder).setPotionEffects(effects);
-        ((EntityAreaEffectCloudAccessor) dataHolder).setReapplicationDelay(reapplicationDelay);
+        ((AreaEffectCloudEntityAccessor) dataHolder).accessor$setEffects(effects);
+        ((AreaEffectCloudEntityAccessor) dataHolder).accessor$setReapplicationDelay(reapplicationDelay);
         return true;
     }
 
@@ -102,19 +102,19 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<Ar
         map.put(Keys.AREA_EFFECT_CLOUD_AGE, dataHolder.ticksExisted);
         map.put(Keys.AREA_EFFECT_CLOUD_COLOR, Color.ofRgb(dataHolder.getColor()));
         map.put(Keys.AREA_EFFECT_CLOUD_RADIUS, dataHolder.getRadius());
-        final EntityAreaEffectCloudAccessor mixinAreaEffect = (EntityAreaEffectCloudAccessor) dataHolder;
-        final List<net.minecraft.potion.EffectInstance> potionEffects = mixinAreaEffect.getPotionEffects();
+        final AreaEffectCloudEntityAccessor mixinAreaEffect = (AreaEffectCloudEntityAccessor) dataHolder;
+        final List<net.minecraft.potion.EffectInstance> potionEffects = mixinAreaEffect.accessor$getEffects();
         final List<PotionEffect> effects = new ArrayList<>(potionEffects.size());
         for (net.minecraft.potion.EffectInstance potionEffect : potionEffects) {
             effects.add((PotionEffect) potionEffect);
         }
         map.put(Keys.POTION_EFFECTS, effects);
-        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, mixinAreaEffect.getRadiusOnUse());
-        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS_PER_TICK, mixinAreaEffect.getRadiusPerTick());
+        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, mixinAreaEffect.accessor$getRadiusOnUse());
+        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS_PER_TICK, mixinAreaEffect.accessor$getRadiusPerTick());
         map.put(Keys.AREA_EFFECT_CLOUD_DURATION, dataHolder.getDuration());
-        map.put(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, mixinAreaEffect.getDurationOnUse());
-        map.put(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, mixinAreaEffect.getReapplicationDelay());
-        map.put(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, mixinAreaEffect.getWaitTime());
+        map.put(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, mixinAreaEffect.accessor$getDurationOnUse());
+        map.put(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, mixinAreaEffect.accessor$getReapplicationDelay());
+        map.put(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, mixinAreaEffect.accessor$getWaitTime());
         map.put(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, ParticleTypes.MOB_SPELL);
 
         return map;

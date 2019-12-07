@@ -30,7 +30,7 @@ import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.common.mixin.core.world.border.WorldBorderAccessor;
+import org.spongepowered.common.mixin.accessor.world.border.WorldBorderAccessor;
 
 public class PlayerOwnBorderListener implements IBorderListener {
 

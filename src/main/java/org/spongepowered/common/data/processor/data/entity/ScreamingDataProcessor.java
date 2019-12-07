@@ -35,7 +35,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingD
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.monster.EntityEndermanAccessor;
+import org.spongepowered.common.mixin.accessor.entity.monster.EndermanEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.monster.EndermanEntity;
@@ -54,7 +54,7 @@ public class ScreamingDataProcessor
 
     @Override
     protected boolean set(final EndermanEntity entity, final Boolean value) {
-        entity.getDataManager().set(EntityEndermanAccessor.accessor$getScreamingParameter(), value);
+        entity.getDataManager().set(EndermanEntityAccessor.accessor$getScreaming(), value);
         return true;
     }
 

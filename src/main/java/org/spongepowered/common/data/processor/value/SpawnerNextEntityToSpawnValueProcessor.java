@@ -34,17 +34,17 @@ import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.MobSpawnerTileEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor,
+public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueProcessor<MobSpawnerTileEntityAccessor,
         WeightedSerializableObject<EntityArchetype>, Mutable<WeightedSerializableObject<EntityArchetype>>> {
 
     public SpawnerNextEntityToSpawnValueProcessor() {
-        super(TileEntityMobSpawnerAccessor.class, Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN);
+        super(MobSpawnerTileEntityAccessor.class, Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN);
     }
 
     @Override
@@ -54,14 +54,14 @@ public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueP
     }
 
     @Override
-    protected boolean set(final TileEntityMobSpawnerAccessor container, final WeightedSerializableObject<EntityArchetype> value) {
+    protected boolean set(final MobSpawnerTileEntityAccessor container, final WeightedSerializableObject<EntityArchetype> value) {
         SpawnerUtils.setNextEntity(container.accessor$getSpawnerLogic(), value);
         return true;
     }
 
     @Override
-    protected Optional<WeightedSerializableObject<EntityArchetype>> getVal(final TileEntityMobSpawnerAccessor container) {
-        return Optional.of(SpawnerUtils.getNextEntity((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic()));
+    protected Optional<WeightedSerializableObject<EntityArchetype>> getVal(final MobSpawnerTileEntityAccessor container) {
+        return Optional.of(SpawnerUtils.getNextEntity((AbstractSpawnerAccessor) container.accessor$getSpawnerLogic()));
     }
 
     @Override

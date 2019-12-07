@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -62,7 +62,7 @@ public class LeftArmRotationValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Optional<Vector3d> getVal(final ArmorStandEntity container) {
-        return Optional.of(VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getleftArmRotation()));
+        return Optional.of(VecHelper.toVector3d(((ArmorStandEntityAccessor) container).accessor$getLeftArmRotation()));
     }
 
     @Override

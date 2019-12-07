@@ -7,7 +7,7 @@
     "compatibilityLevel": "JAVA_8",
     "mixins": [
         "SpongeImplHooksMixin_Item_Pre_Merge",
-        "block.BlockRedstoneWireAccessor_Eigen",
+        "org.spongepowered.common.mixin.accessor.block.BlockRedstoneWireAccessor_Eigen",
         "block.BlockRedstoneWireMixin_Eigen",
         "block.BlockRedstoneWireMixin_Panda",
         "enchantment.EnchantmentHelperMixin_No_Source_Leak",

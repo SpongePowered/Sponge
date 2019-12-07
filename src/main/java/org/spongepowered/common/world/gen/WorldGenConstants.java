@@ -76,7 +76,7 @@ import org.spongepowered.api.world.gen.populator.WaterLily;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
-import org.spongepowered.common.mixin.core.world.biome.BiomeDecoratorAccessor;
+import org.spongepowered.common.mixin.invalid.accessor.world.biome.BiomeDecoratorAccessor;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.populators.FlowerForestSupplier;
 import org.spongepowered.common.world.gen.populators.HellMushroomPopulator;

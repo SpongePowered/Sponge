@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
-import org.spongepowered.common.mixin.core.network.datasync.EntityDataManagerAccessor;
+import org.spongepowered.common.mixin.accessor.network.datasync.EntityDataManagerAccessor;
 import org.spongepowered.common.network.SpoofedEntityDataManager;
 
 import java.util.Collection;

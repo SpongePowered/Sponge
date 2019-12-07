@@ -61,7 +61,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.mixin.core.world.WorldAccessor;
+import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.Constants;

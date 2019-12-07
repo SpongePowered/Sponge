@@ -62,11 +62,11 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.entity.EntityAccessor;
-import org.spongepowered.common.mixin.core.entity.passive.AbstractChestHorseAccessor;
-import org.spongepowered.common.mixin.core.entity.passive.EntityPigAccessor;
-import org.spongepowered.common.mixin.core.entity.passive.EntitySheepAccessor;
-import org.spongepowered.common.mixin.core.entity.passive.EntityWolfAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.passive.PigEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.passive.SheepEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.passive.WolfEntityAccessor;
 
 import java.util.List;
 
@@ -238,12 +238,12 @@ public final class PacketPhaseUtil {
         if (item == Items.DYE) {
             // ItemDye.itemInteractionForEntity
             if (entity instanceof SheepEntity) {
-                return EntitySheepAccessor.accessor$getDyeColorParameter();
+                return SheepEntityAccessor.accessor$getDyeColor();
             }
 
             // EntityWolf.processInteract
             if (entity instanceof WolfEntity) {
-                return EntityWolfAccessor.accessor$getCollarColorParameter();
+                return WolfEntityAccessor.accessor$getCollarColor();
             }
 
             return null;
@@ -251,17 +251,17 @@ public final class PacketPhaseUtil {
 
         if (item == Items.NAME_TAG) {
             // ItemNameTag.itemInteractionForEntity
-            return entity instanceof LivingEntity && !(entity instanceof PlayerEntity) && stack.hasDisplayName() ? EntityAccessor.accessor$getCustomNameParameter() : null;
+            return entity instanceof LivingEntity && !(entity instanceof PlayerEntity) && stack.hasDisplayName() ? EntityAccessor.accessor$getCustomName() : null;
         }
 
         if (item == Items.SADDLE) {
             // ItemSaddle.itemInteractionForEntity
-            return entity instanceof PigEntity ? EntityPigAccessor.accessor$getSaddledParameter() : null;
+            return entity instanceof PigEntity ? PigEntityAccessor.accessor$getSaddled() : null;
         }
 
         if (item instanceof BlockItem && ((BlockItem) item).getBlock() == Blocks.CHEST) {
             // AbstractChestHorse.processInteract
-            return entity instanceof AbstractChestedHorseEntity ? AbstractChestHorseAccessor.accessor$getDataIdChestParameter() : null;
+            return entity instanceof AbstractChestedHorseEntity ? AbstractChestedHorseEntityAccessor.accessor$getDataIdChest() : null;
         }
 
         return null;

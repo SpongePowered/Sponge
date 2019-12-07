@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.tileentity.CommandBlockBaseLogicAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.CommandBlockLogicAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
@@ -54,7 +54,7 @@ public class EntityCommandValueProcessor extends AbstractSpongeValueProcessor<Mi
 
     @Override
     protected boolean set(final MinecartCommandBlockEntity container, final String value) {
-        ((CommandBlockBaseLogicAccessor) container.getCommandBlockLogic()).accessor$setCommandStored(value);
+        ((CommandBlockLogicAccessor) container.getCommandBlockLogic()).accessor$setCommandStored(value);
         return true;
     }
 

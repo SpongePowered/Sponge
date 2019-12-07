@@ -39,7 +39,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.block.BlockFlowerPotAccessor;
+import org.spongepowered.common.mixin.accessor.block.FlowerPotBlockAccessor;
 
 import java.util.Optional;
 
@@ -71,7 +71,7 @@ public class FlowerPotDataProcessor extends
             flowerPot.setItemStack(ItemStack.EMPTY);
         } else {
             ItemStack stack = (ItemStack) stackSnapshot.createStack();
-            if (!((BlockFlowerPotAccessor) Blocks.FLOWER_POT).accessor$canItemBePotted(stack)) {
+            if (!((FlowerPotBlockAccessor) Blocks.FLOWER_POT).accessor$canBePotted(stack)) {
                 return false;
             }
             flowerPot.setItemStack(stack);

@@ -35,15 +35,15 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableD
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.mixin.core.entity.monster.EntityPigZombieAccessor;
+import org.spongepowered.common.mixin.accessor.entity.monster.ZombiePigmanEntityAccessor;
 
 import java.util.Optional;
 
 public class AngerableDataProcessor extends
-    AbstractSingleDataSingleTargetProcessor<EntityPigZombieAccessor, Integer, Mutable<Integer>, AngerableData, ImmutableAngerableData> {
+    AbstractSingleDataSingleTargetProcessor<ZombiePigmanEntityAccessor, Integer, Mutable<Integer>, AngerableData, ImmutableAngerableData> {
 
     public AngerableDataProcessor() {
-        super(Keys.ANGER, EntityPigZombieAccessor.class);
+        super(Keys.ANGER, ZombiePigmanEntityAccessor.class);
     }
 
     @Override
@@ -57,13 +57,13 @@ public class AngerableDataProcessor extends
     }
 
     @Override
-    protected boolean set(final EntityPigZombieAccessor entity, final Integer value) {
+    protected boolean set(final ZombiePigmanEntityAccessor entity, final Integer value) {
         entity.accessor$setAngerLevel(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(final EntityPigZombieAccessor entity) {
+    protected Optional<Integer> getVal(final ZombiePigmanEntityAccessor entity) {
         return Optional.of(entity.accessor$getAngerLevel());
     }
 

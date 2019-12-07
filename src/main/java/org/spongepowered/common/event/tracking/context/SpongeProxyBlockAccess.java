@@ -44,7 +44,7 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.core.world.WorldAccessor;
+import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayDeque;

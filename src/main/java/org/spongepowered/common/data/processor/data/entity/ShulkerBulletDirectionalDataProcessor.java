@@ -36,7 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectional
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.projectile.ShulkerBulletEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.projectile.ShulkerBulletEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

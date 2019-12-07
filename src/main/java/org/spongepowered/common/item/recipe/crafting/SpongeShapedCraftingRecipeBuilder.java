@@ -38,7 +38,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.item.crafting.ShapedRecipesAccessor;
+import org.spongepowered.common.mixin.accessor.item.crafting.ShapedRecipeAccessor;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.Collections;
@@ -170,7 +170,8 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
         ingredientsMap.putIfAbsent(" ", net.minecraft.item.crafting.Ingredient.EMPTY);
 
         // Throws JsonException when pattern is not complete or defines unused Ingredients
-        final NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipesAccessor.accessor$deserializeIngredients(keys, ingredientsMap, width, height);
+        final NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipeAccessor
+            .accessor$deserializeIngredients(keys, ingredientsMap, width, height);
 
         return ((ShapedCraftingRecipe) new SpongeShapedRecipe(plugin.getId() + ':' + id, this.groupName,
                 width, height, ingredients, ItemStackUtil.toNative(this.result)));
@@ -182,8 +183,8 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
         this.aisle.clear();
         this.ingredientMap.clear();
         this.groupName = "";
-        if (value instanceof ShapedRecipesAccessor) {
-            this.groupName = ((ShapedRecipesAccessor) value).accessor$getGroup();
+        if (value instanceof ShapedRecipeAccessor) {
+            this.groupName = ((ShapedRecipeAccessor) value).accessor$getGroup();
         }
 
         if (value != null) {

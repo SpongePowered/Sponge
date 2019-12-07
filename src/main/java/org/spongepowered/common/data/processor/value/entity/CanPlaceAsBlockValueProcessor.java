@@ -31,15 +31,15 @@ import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class CanPlaceAsBlockValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Boolean, Mutable<Boolean>> {
+public class CanPlaceAsBlockValueProcessor extends AbstractSpongeValueProcessor<FallingBlockEntityAccessor, Boolean, Mutable<Boolean>> {
 
     public CanPlaceAsBlockValueProcessor() {
-        super(EntityFallingBlockAccessor.class, Keys.CAN_PLACE_AS_BLOCK);
+        super(FallingBlockEntityAccessor.class, Keys.CAN_PLACE_AS_BLOCK);
     }
 
     @Override
@@ -48,14 +48,14 @@ public class CanPlaceAsBlockValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(final EntityFallingBlockAccessor container, final Boolean value) {
+    protected boolean set(final FallingBlockEntityAccessor container, final Boolean value) {
         container.accessor$setDontSetAsBlock(!value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(final EntityFallingBlockAccessor container) {
-        return Optional.of(!container.accessor$getDontSetAsBlock());
+    protected Optional<Boolean> getVal(final FallingBlockEntityAccessor container) {
+        return Optional.of(!container.accessor$getDontSetBlock());
     }
 
     @Override

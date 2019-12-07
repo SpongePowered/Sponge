@@ -54,7 +54,7 @@ import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
+import org.spongepowered.common.mixin.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;

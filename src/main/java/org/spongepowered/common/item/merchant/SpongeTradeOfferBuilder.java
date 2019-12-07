@@ -37,7 +37,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.village.MerchantRecipeAccessor;
+import org.spongepowered.common.mixin.invalid.accessor.village.MerchantRecipeAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

@@ -39,7 +39,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTradeOfferData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.passive.EntityVillagerAccessor;
+import org.spongepowered.common.mixin.accessor.entity.merchant.villager.VillagerEntityAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,18 +74,18 @@ public class TradeOfferDataProcessor
 
     @Override
     protected boolean set(final VillagerEntity entity, final List<TradeOffer> value) {
-        ((EntityVillagerAccessor) entity).accessor$setBuyingList(toMerchantRecipeList(value));
+        ((VillagerEntityAccessor) entity).accessor$setBuyingList(toMerchantRecipeList(value));
         return true;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     protected Optional<List<TradeOffer>> getVal(final VillagerEntity entity) {
-        final MerchantRecipeList recipes = ((EntityVillagerAccessor) entity).accessor$getBuyingList();
+        final MerchantRecipeList recipes = ((VillagerEntityAccessor) entity).accessor$getBuyingList();
         if (recipes == null) {
-            ((EntityVillagerAccessor) entity).accessor$PopulateBuyingList();
+            ((VillagerEntityAccessor) entity).accessor$populateBuyingList();
         }
-        return Optional.of(toTradeOfferList(((EntityVillagerAccessor) entity).accessor$getBuyingList()));
+        return Optional.of(toTradeOfferList(((VillagerEntityAccessor) entity).accessor$getBuyingList()));
     }
 
     @Override

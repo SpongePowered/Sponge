@@ -34,26 +34,26 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.item.XPOrbEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ExperienceOrbEntityAccessor;
 
 import java.util.Optional;
 
 public class ExpOrbDataProcessor extends
-    AbstractSingleDataSingleTargetProcessor<XPOrbEntityAccessor, Integer, Mutable<Integer>, ExpOrbData, ImmutableExpOrbData> {
+    AbstractSingleDataSingleTargetProcessor<ExperienceOrbEntityAccessor, Integer, Mutable<Integer>, ExpOrbData, ImmutableExpOrbData> {
 
     public ExpOrbDataProcessor() {
-        super(Keys.CONTAINED_EXPERIENCE, XPOrbEntityAccessor.class);
+        super(Keys.CONTAINED_EXPERIENCE, ExperienceOrbEntityAccessor.class);
     }
 
     @Override
-    protected boolean set(XPOrbEntityAccessor entity, Integer value) {
-        entity.accessor$setExperience(value);
+    protected boolean set(ExperienceOrbEntityAccessor entity, Integer value) {
+        entity.accessor$setXpValue(value);
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(XPOrbEntityAccessor entity) {
-        return Optional.of(entity.accessor$getExperience());
+    protected Optional<Integer> getVal(ExperienceOrbEntityAccessor entity) {
+        return Optional.of(entity.accessor$getXpValue());
     }
 
     @Override

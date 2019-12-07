@@ -73,8 +73,8 @@ import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.mixin.core.entity.EntityAccessor;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.mixin.entityactivation.util.math.AxisAlignedBBAccessor_EntityActivation;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
@@ -360,7 +360,7 @@ public class EntityActivationRange {
             if (living.hurtTime > 0 || living.getActivePotionEffects().size() > 0) {
                 return true;
             }
-            if (entity instanceof MobEntity && (((EntityLivingBaseAccessor) entity).accessor$getRevengeTarget() != null || ((MobEntity) entity).getAttackTarget() != null)) {
+            if (entity instanceof MobEntity && (((LivingEntityAccessor) entity).accessor$getRevengeTarget() != null || ((MobEntity) entity).getAttackTarget() != null)) {
                 return true;
             }
             if (entity instanceof VillagerEntity && ((VillagerEntity) entity).isMating()) {

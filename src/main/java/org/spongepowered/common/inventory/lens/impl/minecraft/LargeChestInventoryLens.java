@@ -31,7 +31,7 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.mixin.core.inventory.accessor.InventoryLargeChestAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.DoubleSidedInventoryAccessor;
 
 /**
  * This class is only used as an adapter when explicitly requested from the API, trough
@@ -44,7 +44,7 @@ public class LargeChestInventoryLens extends RealLens {
 
     public LargeChestInventoryLens(final InventoryAdapter adapter, final SlotLensProvider slots) {
         super(0, adapter.bridge$getFabric().fabric$getSize(), Inventory.class);
-        final InventoryLargeChestAccessor inventory = (InventoryLargeChestAccessor) adapter;
+        final DoubleSidedInventoryAccessor inventory = (DoubleSidedInventoryAccessor) adapter;
         this.upperChest = inventory.accessor$getUpperChest().getSizeInventory();
         this.lowerChest = inventory.accessor$getLowerChest().getSizeInventory();
         this.init(slots);
@@ -52,7 +52,7 @@ public class LargeChestInventoryLens extends RealLens {
 
     public LargeChestInventoryLens(final int base, final InventoryAdapter adapter, final SlotLensProvider slots) {
         super(base, adapter.bridge$getFabric().fabric$getSize(), Inventory.class);
-        final InventoryLargeChestAccessor inventory = (InventoryLargeChestAccessor) adapter.bridge$getFabric().fabric$get(0);
+        final DoubleSidedInventoryAccessor inventory = (DoubleSidedInventoryAccessor) adapter.bridge$getFabric().fabric$get(0);
         this.upperChest = inventory.accessor$getUpperChest().getSizeInventory();
         this.lowerChest = inventory.accessor$getLowerChest().getSizeInventory();
         this.init(slots);

@@ -37,7 +37,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.mixin.core.entity.projectile.EntityTippedArrowAccessor;
+import org.spongepowered.common.mixin.accessor.entity.projectile.ArrowEntityAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
 
     @Override
     protected boolean set(final ArrowEntity dataHolder, final List<PotionEffect> value) {
-        ((EntityTippedArrowAccessor) dataHolder).accessor$getCustomPotionEffects().clear();
+        ((ArrowEntityAccessor) dataHolder).accessor$getCustomPotionEffects().clear();
         for (final PotionEffect effect : value) {
             final net.minecraft.potion.EffectInstance mcEffect =
                 new net.minecraft.potion.EffectInstance(((net.minecraft.potion.EffectInstance) effect).getPotion(), effect.getDuration(),
@@ -67,7 +67,7 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
 
     @Override
     protected Optional<List<PotionEffect>> getVal(final ArrowEntity dataHolder) {
-        final Set<net.minecraft.potion.EffectInstance> effects = ((EntityTippedArrowAccessor) dataHolder).accessor$getCustomPotionEffects();
+        final Set<net.minecraft.potion.EffectInstance> effects = ((ArrowEntityAccessor) dataHolder).accessor$getCustomPotionEffects();
         if (effects.isEmpty()) {
             return Optional.empty();
         }
@@ -102,7 +102,7 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
         }
         final Optional<List<PotionEffect>> effects = this.getVal((ArrowEntity) container);
         if (effects.isPresent()) {
-            ((EntityTippedArrowAccessor) container).accessor$getCustomPotionEffects().clear();
+            ((ArrowEntityAccessor) container).accessor$getCustomPotionEffects().clear();
             return DataTransactionResult.successRemove(this.constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();

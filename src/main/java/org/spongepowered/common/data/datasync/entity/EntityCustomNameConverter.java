@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.mixin.core.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
@@ -40,7 +40,7 @@ import java.util.Optional;
 public class EntityCustomNameConverter extends DataParameterConverter<String> {
 
     public EntityCustomNameConverter() {
-        super(EntityAccessor.accessor$getCustomNameParameter());
+        super(EntityAccessor.accessor$getCustomName());
     }
 
     @Override

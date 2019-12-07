@@ -36,7 +36,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.monster.EntityEndermiteAccessor;
+import org.spongepowered.common.mixin.accessor.entity.monster.EndermiteEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.monster.EndermiteEntity;
@@ -60,13 +60,13 @@ public class EndermiteExpirableDataProcessor extends
         }
         checkArgument(value >= 0);
         checkArgument(value <= 2400);
-        ((EntityEndermiteAccessor) entity).accessor$setLifetime(value);
+        ((EndermiteEntityAccessor) entity).accessor$setLifetime(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(final EndermiteEntity entity) {
-        return entity.isNoDespawnRequired() ? Optional.empty() : Optional.of(((EntityEndermiteAccessor) entity).accessor$getLifetime());
+        return entity.isNoDespawnRequired() ? Optional.empty() : Optional.of(((EndermiteEntityAccessor) entity).accessor$getLifetime());
     }
 
     @Override

@@ -30,7 +30,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.mixin.core.entity.EntityAgeableAccessor;
+import org.spongepowered.common.mixin.accessor.entity.AgeableEntityAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +38,7 @@ import java.util.Optional;
 public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
 
     public EntityBabyConverter() {
-        super(EntityAgeableAccessor.accessor$getBabyParameter());
+        super(AgeableEntityAccessor.accessor$getBaby());
     }
 
     @Override

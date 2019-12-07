@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityBrewingStandAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.BrewingStandTileEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.tileentity.BrewingStandTileEntity;
@@ -48,7 +48,7 @@ public class BrewingStandDataProcessor extends
 
     @Override
     protected boolean set(final BrewingStandTileEntity entity, final Integer value) {
-        if (!((TileEntityBrewingStandAccessor) entity).accessor$canBrew()) {
+        if (!((BrewingStandTileEntityAccessor) entity).accessor$canBrew()) {
             return false;
         }
 
@@ -58,7 +58,7 @@ public class BrewingStandDataProcessor extends
 
     @Override
     protected Optional<Integer> getVal(final BrewingStandTileEntity entity) {
-        return Optional.of(((TileEntityBrewingStandAccessor) entity).accessor$canBrew() ? entity.getField(0) : 0);
+        return Optional.of(((BrewingStandTileEntityAccessor) entity).accessor$canBrew() ? entity.getField(0) : 0);
     }
 
     @Override

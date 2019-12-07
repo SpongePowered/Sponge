@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.player.PlayerCapabilitiesAccessor;
+import org.spongepowered.common.mixin.accessor.entity.player.PlayerCapabilitiesAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

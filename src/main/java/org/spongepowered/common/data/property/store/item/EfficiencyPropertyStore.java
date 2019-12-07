@@ -27,7 +27,7 @@ package org.spongepowered.common.data.property.store.item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.EfficiencyProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
-import org.spongepowered.common.mixin.core.item.ItemToolAccessor;
+import org.spongepowered.common.mixin.accessor.item.ToolItemAccessor;
 
 import java.util.Optional;
 
@@ -35,8 +35,8 @@ public class EfficiencyPropertyStore extends AbstractItemStackPropertyStore<Effi
 
     @Override
     protected Optional<EfficiencyProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemToolAccessor) {
-            final ItemToolAccessor tool = (ItemToolAccessor) itemStack.getItem();
+        if (itemStack.getItem() instanceof ToolItemAccessor) {
+            final ToolItemAccessor tool = (ToolItemAccessor) itemStack.getItem();
             return Optional.of(new EfficiencyProperty(tool.accessor$getEfficiency()));
         }
         return Optional.empty();

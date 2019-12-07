@@ -41,7 +41,7 @@ import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.effect.record.SpongeRecordType;
-import org.spongepowered.common.mixin.core.item.ItemRecordAccessor;
+import org.spongepowered.common.mixin.accessor.item.MusicDiscItemAccessor;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
@@ -97,11 +97,11 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Mus
 
     @CustomCatalogRegistration
     public void customRegistration() {
-        for (Map.Entry<SoundEvent, MusicDiscItem> recordEntry : ((ItemRecordAccessor) Items.RECORD_CAT).accessor$getRecords().entrySet()) {
+        for (Map.Entry<SoundEvent, MusicDiscItem> recordEntry : ((MusicDiscItemAccessor) Items.RECORD_CAT).accessor$getRecords().entrySet()) {
             final MusicDiscItem recordItem = recordEntry.getValue();
             final String key = Item.REGISTRY.getKey(recordItem).toString();
             if(!this.mappings.containsKey(key)) {
-                this.add(new SpongeRecordType(key, recordItem.getTranslationKey(), (ItemType) recordItem, (SoundType) ((ItemRecordAccessor) recordItem).accessor$getSoundEvent()));
+                this.add(new SpongeRecordType(key, recordItem.getTranslationKey(), (ItemType) recordItem, (SoundType) ((MusicDiscItemAccessor) recordItem).accessor$getSound()));
             }
         }
 

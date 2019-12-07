@@ -31,16 +31,16 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.MobSpawnerTileEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, Short, Mutable<Short>> {
+public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProcessor<MobSpawnerTileEntityAccessor, Short, Mutable<Short>> {
 
     public SpawnerMinimumDelayValueProcessor() {
-        super(TileEntityMobSpawnerAccessor.class, Keys.SPAWNER_MINIMUM_DELAY);
+        super(MobSpawnerTileEntityAccessor.class, Keys.SPAWNER_MINIMUM_DELAY);
     }
 
     @Override
@@ -54,14 +54,14 @@ public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected boolean set(final TileEntityMobSpawnerAccessor container, final Short value) {
-        ((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic()).accessor$setMinSpawnDelay(value);
+    protected boolean set(final MobSpawnerTileEntityAccessor container, final Short value) {
+        ((AbstractSpawnerAccessor) container.accessor$getSpawnerLogic()).accessor$setMinSpawnDelay(value);
         return true;
     }
 
     @Override
-    protected Optional<Short> getVal(final TileEntityMobSpawnerAccessor container) {
-        return Optional.of((short) ((MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic()).accessor$getMinSpawnDelay());
+    protected Optional<Short> getVal(final MobSpawnerTileEntityAccessor container) {
+        return Optional.of((short) ((AbstractSpawnerAccessor) container.accessor$getSpawnerLogic()).accessor$getMinSpawnDelay());
     }
 
     @Override

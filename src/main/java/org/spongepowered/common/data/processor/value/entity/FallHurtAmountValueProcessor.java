@@ -31,15 +31,15 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Double, Mutable<Double>> {
+public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<FallingBlockEntityAccessor, Double, Mutable<Double>> {
 
     public FallHurtAmountValueProcessor() {
-        super(EntityFallingBlockAccessor.class, Keys.FALL_DAMAGE_PER_BLOCK);
+        super(FallingBlockEntityAccessor.class, Keys.FALL_DAMAGE_PER_BLOCK);
     }
 
     @Override
@@ -53,13 +53,13 @@ public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    protected boolean set(final EntityFallingBlockAccessor container, final Double value) {
+    protected boolean set(final FallingBlockEntityAccessor container, final Double value) {
         container.accessor$setFallHurtAmount(value.floatValue());
         return true;
     }
 
     @Override
-    protected Optional<Double> getVal(final EntityFallingBlockAccessor container) {
+    protected Optional<Double> getVal(final FallingBlockEntityAccessor container) {
         return Optional.of((double)container.accessor$getFallHurtAmount());
     }
 

@@ -28,8 +28,8 @@ import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhase
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.mixin.core.entity.boss.PhaseListAccessor;
-import org.spongepowered.common.registry.type.entity.EnderDragonPhaseTypeRegistryModule.Holder;
+import org.spongepowered.common.mixin.accessor.entity.boss.dragon.phase.PhaseTypeAccessor;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class EnderDragonPhaseTypeRegistryModule implements CatalogRegistryModule
 
     @Override
     public void registerDefaults() {
-        for (final PhaseType<?> phaseType : PhaseListAccessor.accessor$getPhaseList()) {
+        for (final PhaseType<?> phaseType : PhaseTypeAccessor.accessor$getPhases()) {
             this.phaseTypeMap.put(((DragonPhaseType) phaseType).getId(), (DragonPhaseType) phaseType);
         }
     }

@@ -26,8 +26,8 @@ package org.spongepowered.common.util;
 
 import net.minecraft.server.management.UserList;
 import net.minecraft.server.management.UserListEntry;
-import org.spongepowered.common.mixin.core.server.management.UserLIstEntryAccessor;
-import org.spongepowered.common.mixin.core.server.management.UserListAccessor;
+import org.spongepowered.common.mixin.accessor.server.management.UserListEntryAccessor;
+import org.spongepowered.common.mixin.accessor.server.management.UserListAccessor;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class UserListUtils {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void addEntry(final UserList list, final UserListEntry entry) {
-        ((UserListAccessor) list).accessor$getValues().put(((UserListAccessor) list).accessor$getObjectKey(((UserLIstEntryAccessor) entry).accessor$getValue()), entry);
+        ((UserListAccessor) list).accessor$getValues().put(((UserListAccessor) list).accessor$getObjectKey(((UserListEntryAccessor) entry).accessor$getValue()), entry);
 
         try {
             list.writeChanges();

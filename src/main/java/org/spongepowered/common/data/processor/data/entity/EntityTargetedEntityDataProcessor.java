@@ -39,7 +39,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEn
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.projectile.ShulkerBulletEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.projectile.ShulkerBulletEntityAccessor;
 
 import java.util.Optional;
 
@@ -60,7 +60,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
             return false;
         }
         dataHolder.accessor$setTarget(newTarget);
-        dataHolder.accessor$setTargetId(newTarget.getUniqueID());
+        dataHolder.accessor$setTargetUniqueId(newTarget.getUniqueID());
         return true;
     }
 
@@ -103,7 +103,7 @@ public final class EntityTargetedEntityDataProcessor extends AbstractSingleDataS
                     .build();
 
             ((ShulkerBulletEntityAccessor) container).accessor$setTarget(null);
-            ((ShulkerBulletEntityAccessor) container).accessor$setTargetId(null);
+            ((ShulkerBulletEntityAccessor) container).accessor$setTargetUniqueId(null);
             return result;
         }
 

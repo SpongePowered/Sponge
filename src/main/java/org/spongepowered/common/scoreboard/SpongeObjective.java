@@ -35,9 +35,9 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
-import org.spongepowered.common.mixin.core.scoreboard.ScoreAccessor;
-import org.spongepowered.common.mixin.core.scoreboard.ScoreObjectiveAccessor;
-import org.spongepowered.common.mixin.core.scoreboard.ScoreboardAccessor;
+import org.spongepowered.common.mixin.accessor.scoreboard.ScoreAccessor;
+import org.spongepowered.common.mixin.accessor.scoreboard.ScoreObjectiveAccessor;
+import org.spongepowered.common.mixin.accessor.scoreboard.ScoreboardAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;
@@ -148,7 +148,7 @@ public class SpongeObjective implements Objective {
 
     private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
         final String name = score.getPlayerName();
-        final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectivesMap()
+        final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectives()
             .computeIfAbsent(name, k -> Maps.newHashMap());
 
         scoreMap.put(((ScoreAccessor) score).accessor$getObjective(), score);
@@ -186,14 +186,14 @@ public class SpongeObjective implements Objective {
             final net.minecraft.scoreboard.Scoreboard scoreboard = ((ScoreObjectiveAccessor) objective).accessor$getScoreboard();
 
 
-            final Map<?, ?> map = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectivesMap().get(name);
+            final Map<?, ?> map = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectives().get(name);
 
             if (map != null) {
                 final net.minecraft.scoreboard.Score score = (net.minecraft.scoreboard.Score) map.remove(objective);
 
 
                 if (map.size() < 1) {
-                    final Map<?, ?> map1 = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectivesMap().remove(name);
+                    final Map<?, ?> map1 = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectives().remove(name);
 
                     if (map1 != null) {
                         scoreboard.onPlayerRemoved(name);

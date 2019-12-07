@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.mixin.core.util.DamageSourceAccessor;
+import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
 
 import java.util.function.Function;
 import net.minecraft.entity.LivingEntity;
@@ -41,7 +41,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
     static {
         DAMAGE_SOURCE_CTOR = (id) -> {
             final net.minecraft.util.DamageSource source = net.minecraft.util.DamageSource.causeExplosionDamage((LivingEntity) null);
-            ((DamageSourceAccessor) source).accessor$setId(id);
+            ((DamageSourceAccessor) source).accessor$setDamageType(id);
             ((DamageSourceBridge) source).bridge$resetDamageType();
             return source;
         };

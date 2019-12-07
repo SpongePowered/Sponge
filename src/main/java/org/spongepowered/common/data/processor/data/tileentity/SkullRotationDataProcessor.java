@@ -37,7 +37,7 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectional
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.tileentity.TileEntitySkullAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.SkullTileEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.block.SkullBlock;
@@ -75,7 +75,7 @@ public class SkullRotationDataProcessor
         if (skull.getWorld().getBlockState(skull.getPos()).get(SkullBlock.FACING) != net.minecraft.util.Direction.UP) {
             return Optional.empty();
         }
-        final int rot = ((TileEntitySkullAccessor) skull).accessor$getSkullRotation() % 16;
+        final int rot = ((SkullTileEntityAccessor) skull).accessor$getSkullRotation() % 16;
         return Optional.of(Direction.values()[rot < 0 ? rot + 16 : rot]);
     }
 

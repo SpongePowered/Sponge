@@ -53,11 +53,11 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
-import org.spongepowered.common.mixin.core.entity.EntityAccessor;
-import org.spongepowered.common.mixin.core.entity.item.EntityFireworkRocketAccessor;
-import org.spongepowered.common.mixin.core.network.play.server.SPacketEntityMetadataAccessor;
-import org.spongepowered.common.mixin.core.network.play.server.SPacketEntityStatusAccessor;
-import org.spongepowered.common.mixin.core.network.play.server.SPacketSpawnObjectAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.FireworkRocketEntityAccessor;
+import org.spongepowered.common.mixin.accessor.network.play.server.SEntityMetadataPacketAccessor;
+import org.spongepowered.common.mixin.accessor.network.play.server.SEntityStatusPacketAccessor;
+import org.spongepowered.common.mixin.accessor.network.play.server.SSpawnObjectPacketAccessor;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3f;
 import java.util.ArrayList;
@@ -151,10 +151,10 @@ public final class SpongeParticleHelper {
                 final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
                 FireworkUtils.setFireworkEffects(itemStack, effects);
                 final SEntityMetadataPacket packetEntityMetadata = new SEntityMetadataPacket();
-                ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$setEntityId(CachedFireworkPacket.FIREWORK_ROCKET_ID);
-                ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$setManagerEntires(new ArrayList<>());
-                ((SPacketEntityMetadataAccessor) packetEntityMetadata).accessor$getManagerEntires().add(new EntityDataManager.DataEntry<>(
-                    EntityFireworkRocketAccessor.accessor$getFireworkItemParameter(), itemStack));
+                ((SEntityMetadataPacketAccessor) packetEntityMetadata).accessor$setEntityId(CachedFireworkPacket.FIREWORK_ROCKET_ID);
+                ((SEntityMetadataPacketAccessor) packetEntityMetadata).accessor$setDataManagerEntires(new ArrayList<>());
+                ((SEntityMetadataPacketAccessor) packetEntityMetadata).accessor$getDataManagerEntires().add(new EntityDataManager.DataEntry<>(
+                    FireworkRocketEntityAccessor.accessor$getFireworkItem(), itemStack));
                 return new CachedFireworkPacket(packetEntityMetadata);
             }
             if (type == ParticleTypes.FERTILIZER) {
@@ -347,18 +347,18 @@ public final class SpongeParticleHelper {
         private static final SEntityStatusPacket FIREWORK_ROCKET_DUMMY_EFFECT;
 
         static {
-            FIREWORK_ROCKET_ID = EntityAccessor.accessor$getNextEntityId();
-            EntityAccessor.accessor$setNextEntityId(FIREWORK_ROCKET_ID + 1);
+            FIREWORK_ROCKET_ID = EntityAccessor.accessor$getNextEntityID();
+            EntityAccessor.accessor$setNextEntityID(FIREWORK_ROCKET_ID + 1);
             FIREWORK_ROCKET_UNIQUE_ID = MathHelper.getRandomUUID(new Random());
 
             DESTROY_FIREWORK_ROCKET_DUMMY = new SDestroyEntitiesPacket(FIREWORK_ROCKET_ID);
 
             FIREWORK_ROCKET_DUMMY_EFFECT = new SEntityStatusPacket();
-            ((SPacketEntityStatusAccessor) FIREWORK_ROCKET_DUMMY_EFFECT).accessor$setEntityId(FIREWORK_ROCKET_ID);
+            ((SEntityStatusPacketAccessor) FIREWORK_ROCKET_DUMMY_EFFECT).accessor$setEntityId(FIREWORK_ROCKET_ID);
             // The status index that is used to trigger the fireworks effect,
             // can be found at: EntityFireworkRocket#handleStatusUpdate
             // or: EntityFireworkRocket#onUpdate -> setEntityState
-            ((SPacketEntityStatusAccessor) FIREWORK_ROCKET_DUMMY_EFFECT).accessor$setLogicOpcoe((byte) 17);
+            ((SEntityStatusPacketAccessor) FIREWORK_ROCKET_DUMMY_EFFECT).accessor$setLogicOpcoe((byte) 17);
         }
 
         private final SEntityMetadataPacket entityMetadataPacket;
@@ -370,7 +370,7 @@ public final class SpongeParticleHelper {
         @Override
         public void process(final Vector3d position, final List<IPacket<?>> output) {
             final SSpawnObjectPacket packetSpawnObject = new SSpawnObjectPacket();
-            final SPacketSpawnObjectAccessor accessor = ((SPacketSpawnObjectAccessor) packetSpawnObject);
+            final SSpawnObjectPacketAccessor accessor = ((SSpawnObjectPacketAccessor) packetSpawnObject);
             accessor.accessor$setEntityId(FIREWORK_ROCKET_ID);
             accessor.accessor$setUniqueId(FIREWORK_ROCKET_UNIQUE_ID);
             accessor.accessor$setX(position.getX());

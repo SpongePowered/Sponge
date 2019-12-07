@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
-import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Map;
@@ -74,10 +74,10 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<Ar
         
         values.put(BodyParts.HEAD, VecHelper.toVector3d(container.getHeadRotation()));
         values.put(BodyParts.CHEST, VecHelper.toVector3d(container.getBodyRotation()));
-        values.put(BodyParts.LEFT_ARM, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getleftArmRotation()));
-        values.put(BodyParts.RIGHT_ARM, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getrightArmRotation()));
-        values.put(BodyParts.LEFT_LEG, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getleftLegRotation()));
-        values.put(BodyParts.RIGHT_LEG, VecHelper.toVector3d(((EntityArmorStandAccessor) container).accessor$getrightLegRotation()));
+        values.put(BodyParts.LEFT_ARM, VecHelper.toVector3d(((ArmorStandEntityAccessor) container).accessor$getLeftArmRotation()));
+        values.put(BodyParts.RIGHT_ARM, VecHelper.toVector3d(((ArmorStandEntityAccessor) container).accessor$getRightArmRotation()));
+        values.put(BodyParts.LEFT_LEG, VecHelper.toVector3d(((ArmorStandEntityAccessor) container).accessor$getLeftLegRotation()));
+        values.put(BodyParts.RIGHT_LEG, VecHelper.toVector3d(((ArmorStandEntityAccessor) container).accessor$getRightLegRotation()));
         return Optional.of(values);
     }
 

@@ -45,8 +45,8 @@ import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.mixin.core.server.management.PlayerChunkMapAccessor;
-import org.spongepowered.common.mixin.core.server.management.PlayerchunkMapEntryAccessor;
+import org.spongepowered.common.mixin.invalid.accessor.server.management.PlayerChunkMapAccessor;
+import org.spongepowered.common.mixin.invalid.accessor.server.management.PlayerChunkMapEntryAccessor;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
@@ -130,8 +130,8 @@ public class TileEntityActivation {
     public static void activateTileEntities(final ServerWorld world) {
         final PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
         for (final PlayerChunkMapEntry playerChunkMapEntry : ((PlayerChunkMapAccessor) playerChunkMap).accessor$getEntries()) {
-            for (final PlayerEntity player : ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers()) {
-                final Chunk chunk = ((PlayerchunkMapEntryAccessor) playerChunkMapEntry).accessor$getChunk();
+            for (final PlayerEntity player : ((PlayerChunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers()) {
+                final Chunk chunk = ((PlayerChunkMapEntryAccessor) playerChunkMapEntry).accessor$getChunk();
                 if (chunk == null || chunk.unloadQueued || ((ChunkBridge) chunk).bridge$isPersistedChunk()) {
                     continue;
                 }

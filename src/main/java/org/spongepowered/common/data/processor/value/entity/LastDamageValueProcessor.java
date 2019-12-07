@@ -31,14 +31,14 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
+import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 
 import java.util.Optional;
 
-public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<EntityLivingBaseAccessor, Optional<Double>, Mutable<Double>> {
+public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<LivingEntityAccessor, Optional<Double>, Mutable<Double>> {
 
     public LastDamageValueProcessor() {
-        super(EntityLivingBaseAccessor.class, Keys.LAST_DAMAGE);
+        super(LivingEntityAccessor.class, Keys.LAST_DAMAGE);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<Entit
     }
 
     @Override
-    protected boolean set(final EntityLivingBaseAccessor container, final Optional<Double> value) {
+    protected boolean set(final LivingEntityAccessor container, final Optional<Double> value) {
         if (value.isPresent()) {
             container.accessor$setLastDamage(value.get().floatValue());
             return true;
@@ -56,7 +56,7 @@ public class LastDamageValueProcessor extends AbstractSpongeValueProcessor<Entit
     }
 
     @Override
-    protected Optional<Optional<Double>> getVal(final EntityLivingBaseAccessor container) {
+    protected Optional<Optional<Double>> getVal(final LivingEntityAccessor container) {
         return Optional.of(Optional.ofNullable(container.accessor$getRevengeTarget() == null ?
                 null : new Double(container.accessor$getLastDamage())));
     }

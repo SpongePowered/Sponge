@@ -35,7 +35,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedDat
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.monster.EntityCreeperAccessor;
+import org.spongepowered.common.mixin.accessor.entity.monster.CreeperEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.monster.CreeperEntity;
@@ -49,7 +49,7 @@ public class ChargedDataProcessor
 
     @Override
     protected boolean set(CreeperEntity entity, Boolean value) {
-        entity.getDataManager().set(EntityCreeperAccessor.accessor$getPoweredParameter(), value);
+        entity.getDataManager().set(CreeperEntityAccessor.accessor$getPowered(), value);
         return true;
     }
 

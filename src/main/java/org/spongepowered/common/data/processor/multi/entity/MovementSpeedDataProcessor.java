@@ -37,7 +37,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValueProcessor;
-import org.spongepowered.common.mixin.core.entity.player.PlayerCapabilitiesAccessor;
+import org.spongepowered.common.mixin.accessor.entity.player.PlayerCapabilitiesAccessor;
 
 import java.util.Map;
 import java.util.Optional;

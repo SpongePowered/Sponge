@@ -96,7 +96,7 @@ import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
-import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -743,12 +743,12 @@ public final class Constants {
                 }
             }
 
-            public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultHeadRotation());
-            public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultBodyRotation());
-            public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultLeftarmRotation());
-            public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultRightarmRotation());
-            public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultLeftlegRotation());
-            public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultRightlegRotation());
+            public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultHeadRotation());
+            public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultBodyRotation());
+            public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultLeftarmRotation());
+            public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultRightarmRotation());
+            public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultLeftlegRotation());
+            public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(ArmorStandEntityAccessor.accessor$getDefaultRightlegRotation());
         }
 
         public static final class Boat {

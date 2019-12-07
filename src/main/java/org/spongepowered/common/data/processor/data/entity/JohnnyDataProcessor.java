@@ -35,25 +35,25 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJohnnyData
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.monster.EntityVindicatorAccessor;
+import org.spongepowered.common.mixin.accessor.entity.monster.VindicatorEntityAccessor;
 
 import java.util.Optional;
 
 public class JohnnyDataProcessor extends
-    AbstractSingleDataSingleTargetProcessor<EntityVindicatorAccessor, Boolean, Mutable<Boolean>, JohnnyData, ImmutableJohnnyData> {
+    AbstractSingleDataSingleTargetProcessor<VindicatorEntityAccessor, Boolean, Mutable<Boolean>, JohnnyData, ImmutableJohnnyData> {
 
     public JohnnyDataProcessor() {
-        super(Keys.IS_JOHNNY, EntityVindicatorAccessor.class);
+        super(Keys.IS_JOHNNY, VindicatorEntityAccessor.class);
     }
 
     @Override
-    protected boolean set(EntityVindicatorAccessor dataHolder, Boolean value) {
+    protected boolean set(VindicatorEntityAccessor dataHolder, Boolean value) {
         dataHolder.accessor$setIsJohnny(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityVindicatorAccessor dataHolder) {
+    protected Optional<Boolean> getVal(VindicatorEntityAccessor dataHolder) {
         return Optional.of(dataHolder.accessor$getIsJohnny());
     }
 

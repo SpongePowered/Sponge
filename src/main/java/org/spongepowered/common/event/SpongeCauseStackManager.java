@@ -40,7 +40,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
+import org.spongepowered.common.mixin.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.util.ThreadUtil;
 
 import java.util.ArrayDeque;

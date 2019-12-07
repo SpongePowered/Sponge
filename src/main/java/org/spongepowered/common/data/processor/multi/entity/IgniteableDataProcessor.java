@@ -37,7 +37,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.mixin.core.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 
 import java.util.Map;
 import java.util.Optional;

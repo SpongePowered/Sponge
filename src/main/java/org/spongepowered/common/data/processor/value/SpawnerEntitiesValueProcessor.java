@@ -34,16 +34,16 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
-import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.MobSpawnerTileEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.world.spawner.AbstractSpawner;
 
-public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<TileEntityMobSpawnerAccessor, WeightedTable<EntityArchetype>, Mutable<EntityArchetype>> {
+public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<MobSpawnerTileEntityAccessor, WeightedTable<EntityArchetype>, Mutable<EntityArchetype>> {
 
     public SpawnerEntitiesValueProcessor() {
-        super(TileEntityMobSpawnerAccessor.class, Keys.SPAWNER_ENTITIES);
+        super(MobSpawnerTileEntityAccessor.class, Keys.SPAWNER_ENTITIES);
     }
 
     @Override
@@ -52,15 +52,15 @@ public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected boolean set(final TileEntityMobSpawnerAccessor container, final WeightedTable<EntityArchetype> value) {
-        final MobSpawnerBaseLogicAccessor logic = (MobSpawnerBaseLogicAccessor) container.accessor$getSpawnerLogic();
+    protected boolean set(final MobSpawnerTileEntityAccessor container, final WeightedTable<EntityArchetype> value) {
+        final AbstractSpawnerAccessor logic = (AbstractSpawnerAccessor) container.accessor$getSpawnerLogic();
         SpawnerUtils.setEntities(logic, value);
         SpawnerUtils.setNextEntity((AbstractSpawner) logic, SpawnerUtils.getNextEntity(logic));
         return true;
     }
 
     @Override
-    protected Optional<WeightedTable<EntityArchetype>> getVal(final TileEntityMobSpawnerAccessor container) {
+    protected Optional<WeightedTable<EntityArchetype>> getVal(final MobSpawnerTileEntityAccessor container) {
         return Optional.of(SpawnerUtils.getEntities(container.accessor$getSpawnerLogic()));
     }
 

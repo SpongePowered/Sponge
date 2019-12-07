@@ -40,7 +40,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAccelerati
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.projectile.EntityFireballAccessor;
+import org.spongepowered.common.mixin.accessor.entity.projectile.DamagingProjectileEntityAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
@@ -59,9 +59,9 @@ public class AccelerationDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected boolean set(final DamagingProjectileEntity fireball, final Vector3d value) {
-        ((EntityFireballAccessor) fireball).accessor$setAccelerationX(value.getX());
-        ((EntityFireballAccessor) fireball).accessor$setAccelerationY(value.getY());
-        ((EntityFireballAccessor) fireball).accessor$setAccelerationZ(value.getZ());
+        ((DamagingProjectileEntityAccessor) fireball).accessor$setAccelerationX(value.getX());
+        ((DamagingProjectileEntityAccessor) fireball).accessor$setAccelerationY(value.getY());
+        ((DamagingProjectileEntityAccessor) fireball).accessor$setAccelerationZ(value.getZ());
         return true;
     }
 

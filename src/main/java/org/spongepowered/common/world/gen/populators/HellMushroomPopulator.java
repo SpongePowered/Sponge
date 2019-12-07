@@ -37,7 +37,7 @@ import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.api.world.gen.populator.Mushroom;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
-import org.spongepowered.common.mixin.invalid.core.world.gen.feature.WorldGenBushAccessor;
+import org.spongepowered.common.mixin.accessor.world.gen.feature.BushFeatureAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 import java.util.List;
@@ -94,9 +94,9 @@ public class HellMushroomPopulator implements Mushroom {
                 type = result.get(0);
             }
             if (type == MushroomTypes.BROWN) {
-                ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.BROWN_MUSHROOM);
+                ((BushFeatureAccessor) this.feature).accessor$setBushBlock(Blocks.BROWN_MUSHROOM);
             } else {
-                ((WorldGenBushAccessor) this.feature).accessor$setBushBlock(Blocks.RED_MUSHROOM);
+                ((BushFeatureAccessor) this.feature).accessor$setBushBlock(Blocks.RED_MUSHROOM);
             }
             this.feature.generate((World) world, random, height);
 

@@ -34,8 +34,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
-import org.spongepowered.common.mixin.core.util.text.StyleAccessor;
-import org.spongepowered.common.mixin.core.util.text.TextComponentStringAccessor;
+import org.spongepowered.common.mixin.accessor.util.text.StyleAccessor;
+import org.spongepowered.common.mixin.accessor.util.text.StringTextComponentAccessor;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.ArrayList;
@@ -241,7 +241,7 @@ public final class LegacyTexts {
                             current = new StringTextComponent("");
                         }
 
-                        ((TextComponentStringAccessor) current).accessor$setText(text.substring(from, pos));
+                        ((StringTextComponentAccessor) current).accessor$setText(text.substring(from, pos));
                     } else if (current == null) {
                         current = new StringTextComponent("");
                     }

@@ -74,15 +74,15 @@ import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.inventory.accessor.ContainerAccessor;
-import org.spongepowered.common.mixin.core.inventory.accessor.ContainerBrewingStandAccessor;
-import org.spongepowered.common.mixin.core.inventory.accessor.ContainerDispenserAccessor;
-import org.spongepowered.common.mixin.core.inventory.accessor.ContainerFurnaceAccessor;
-import org.spongepowered.common.mixin.core.inventory.accessor.ContainerHopperAccessor;
-import org.spongepowered.common.mixin.core.inventory.accessor.ContainerHorseInventoryAccessor;
-import org.spongepowered.common.mixin.core.inventory.accessor.ContainerMerchantAccessor;
-import org.spongepowered.common.mixin.core.inventory.accessor.ContainerRepairAccessor;
-import org.spongepowered.common.mixin.core.inventory.accessor.SlotCraftingAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.ContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.BrewingStandContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.DispenserContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.FurnaceContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.HopperContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.HorseInventoryContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.MerchantContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.RepairContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.CraftingResultSlotAccessor;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -272,13 +272,13 @@ public final class ContainerUtil {
             final Slot slot = slotList.get(0);
             adapterLens = new CraftingOutputSlotLens(index, item -> slot.isItemValid((ItemStackUtil.toNative(item))),
                     itemType -> (slot.isItemValid(ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)))));
-            if (slot instanceof SlotCraftingAccessor) {
+            if (slot instanceof CraftingResultSlotAccessor) {
                 crafting.out = index;
                 if (crafting.base == null) {
                     // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
                     // e.g. for IC2 ContainerIndustrialWorkbench
                     crafting.base = index + 1;
-                    crafting.grid = ((SlotCraftingAccessor) slot).accessor$getCraftingMatrix();
+                    crafting.grid = ((CraftingResultSlotAccessor) slot).accessor$getCraftMatrix();
                 }
             }
         }
@@ -330,22 +330,22 @@ public final class ContainerUtil {
                 }
             }
             return carrierOrNull(inventory);
-        } else if (container instanceof ContainerHopperAccessor) {
-            return carrierOrNull(((ContainerHopperAccessor) container).accessor$getHopperInventory());
-        } else if (container instanceof ContainerDispenserAccessor) {
-            return carrierOrNull(((ContainerDispenserAccessor) container).accessor$getDispenserInventory());
-        } else if (container instanceof ContainerFurnaceAccessor) {
-            return carrierOrNull(((ContainerFurnaceAccessor) container).accessor$getFurnaceInventory());
-        } else if (container instanceof ContainerBrewingStandAccessor) {
-            return carrierOrNull(((ContainerBrewingStandAccessor) container).accessor$getBrewingStandInventory());
+        } else if (container instanceof HopperContainerAccessor) {
+            return carrierOrNull(((HopperContainerAccessor) container).accessor$getHopperInventory());
+        } else if (container instanceof DispenserContainerAccessor) {
+            return carrierOrNull(((DispenserContainerAccessor) container).accessor$getDispenserInventory());
+        } else if (container instanceof FurnaceContainerAccessor) {
+            return carrierOrNull(((FurnaceContainerAccessor) container).accessor$getTileFurnace());
+        } else if (container instanceof BrewingStandContainerAccessor) {
+            return carrierOrNull(((BrewingStandContainerAccessor) container).accessor$getTileBrewingStand());
         } else if (container instanceof BeaconContainer) {
             return carrierOrNull(((BeaconContainer) container).getTileEntity());
-        } else if (container instanceof ContainerHorseInventoryAccessor) {
-            return (Carrier) ((ContainerHorseInventoryAccessor) container).accessor$getHorseCarrier();
-        } else if (container instanceof ContainerMerchantAccessor && ((ContainerMerchantAccessor) container).accessor$getMerchantCarrier() instanceof Carrier) {
-            return (Carrier) ((ContainerMerchantAccessor) container).accessor$getMerchantCarrier();
-        } else if (container instanceof ContainerRepairAccessor) {
-            final PlayerEntity player = ((ContainerRepairAccessor) container).accessor$getPlayerCarrier();
+        } else if (container instanceof HorseInventoryContainerAccessor) {
+            return (Carrier) ((HorseInventoryContainerAccessor) container).accessor$getHorse();
+        } else if (container instanceof MerchantContainerAccessor && ((MerchantContainerAccessor) container).accessor$getMerchant() instanceof Carrier) {
+            return (Carrier) ((MerchantContainerAccessor) container).accessor$getMerchant();
+        } else if (container instanceof RepairContainerAccessor) {
+            final PlayerEntity player = ((RepairContainerAccessor) container).accessor$getPlayer();
             if (player instanceof ServerPlayerEntity) {
                 return (Carrier) player;
             }
@@ -353,7 +353,7 @@ public final class ContainerUtil {
 
         // Fallback: Try to find a Carrier owning the first Slot of the Container
         if (container instanceof ContainerAccessor) {
-            for (final Slot slot : ((ContainerAccessor) container).accessor$getSlots()) {
+            for (final Slot slot : ((ContainerAccessor) container).accessor$getInventorySlots()) {
                 // Slot Inventory is a Carrier?
                 if (slot.inventory instanceof Carrier) {
                     return ((Carrier) slot.inventory);

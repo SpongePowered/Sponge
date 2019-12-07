@@ -57,7 +57,7 @@ import org.spongepowered.common.bridge.entity.player.BedLocationHolder;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.mixin.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 

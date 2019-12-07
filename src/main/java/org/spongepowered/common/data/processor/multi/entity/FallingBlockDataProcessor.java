@@ -35,9 +35,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingB
 import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallingBlockData;
-import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
-import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -45,22 +44,22 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.FallingBlockEntity;
 
 public class FallingBlockDataProcessor extends
-    AbstractMultiDataSingleTargetProcessor<EntityFallingBlockAccessor, FallingBlockData, ImmutableFallingBlockData> {
+    AbstractMultiDataSingleTargetProcessor<FallingBlockEntityAccessor, FallingBlockData, ImmutableFallingBlockData> {
 
     public FallingBlockDataProcessor() {
-        super(EntityFallingBlockAccessor.class);
+        super(FallingBlockEntityAccessor.class);
     }
 
     @Override
-    protected boolean doesDataExist(final EntityFallingBlockAccessor entity) {
+    protected boolean doesDataExist(final FallingBlockEntityAccessor entity) {
         return true;
     }
 
     @Override
-    protected boolean set(final EntityFallingBlockAccessor entity, final Map<Key<?>, Object> keyValues) {
+    protected boolean set(final FallingBlockEntityAccessor entity, final Map<Key<?>, Object> keyValues) {
         entity.accessor$setFallHurtAmount(((Double) keyValues.get(Keys.FALL_DAMAGE_PER_BLOCK)).floatValue());
         entity.accessor$setFallHurtMax(((Double) keyValues.get(Keys.MAX_FALL_DAMAGE)).intValue());
-        entity.accessor$setFallBlockState((BlockState) keyValues.get(Keys.FALLING_BLOCK_STATE));
+        entity.accessor$setFallTile((BlockState) keyValues.get(Keys.FALLING_BLOCK_STATE));
         entity.accessor$setDontSetAsBlock(!(Boolean) keyValues.get(Keys.CAN_PLACE_AS_BLOCK));
         ((FallingBlockEntity) entity).shouldDropItem = (Boolean) keyValues.get(Keys.CAN_DROP_AS_ITEM);
         entity.accessor$setFallTime((Integer) keyValues.get(Keys.FALL_TIME));
@@ -69,12 +68,12 @@ public class FallingBlockDataProcessor extends
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(final EntityFallingBlockAccessor entity) {
+    protected Map<Key<?>, ?> getValues(final FallingBlockEntityAccessor entity) {
         return ImmutableMap.<Key<?>, Object> builder()
                 .put(Keys.FALL_DAMAGE_PER_BLOCK, (double)entity.accessor$getFallHurtAmount())
                 .put(Keys.MAX_FALL_DAMAGE, (double)entity.accessor$getFallHurtMax())
-                .put(Keys.FALLING_BLOCK_STATE, entity.accessor$getFallBlockState())
-                .put(Keys.CAN_PLACE_AS_BLOCK, !entity.accessor$getDontSetAsBlock())
+                .put(Keys.FALLING_BLOCK_STATE, entity.accessor$getFallTile())
+                .put(Keys.CAN_PLACE_AS_BLOCK, !entity.accessor$getDontSetBlock())
                 .put(Keys.CAN_DROP_AS_ITEM, ((FallingBlockEntity) entity).shouldDropItem)
                 .put(Keys.FALL_TIME, entity.accessor$getFallTime())
                 .put(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, entity.accessor$getHurtEntities())

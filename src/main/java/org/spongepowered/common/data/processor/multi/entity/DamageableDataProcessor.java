@@ -36,7 +36,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
+import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<LivingE
                 final Entity entity = optionalEntity.get();
                 if (entity.isLoaded() && entity instanceof LivingEntity) {
                     dataHolder.setRevengeTarget((LivingEntity) entity);
-                    ((EntityLivingBaseAccessor) dataHolder).accessor$setLastDamage(((Optional<Double>)keyValues.get(Keys.LAST_DAMAGE)).orElse(0D).floatValue());
+                    ((LivingEntityAccessor) dataHolder).accessor$setLastDamage(((Optional<Double>)keyValues.get(Keys.LAST_DAMAGE)).orElse(0D).floatValue());
                     return true;
                 }
             }
@@ -79,7 +79,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<LivingE
     protected Map<Key<?>, ?> getValues(LivingEntity dataHolder) {
         EntitySnapshot snapshot = dataHolder.getAttackingEntity() != null ? ((Entity) dataHolder.getAttackingEntity()).createSnapshot() : null;
         return ImmutableMap.of(Keys.LAST_ATTACKER, Optional.ofNullable(snapshot),
-                Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.getAttackingEntity() == null ? null : ((EntityLivingBaseAccessor) dataHolder).accessor$getLastDamage()));
+                Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.getAttackingEntity() == null ? null : ((LivingEntityAccessor) dataHolder).accessor$getLastDamage()));
     }
 
     @Override

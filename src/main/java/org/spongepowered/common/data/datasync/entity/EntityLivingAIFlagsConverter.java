@@ -30,7 +30,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.mixin.core.entity.EntityLivingAccessor;
+import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +38,7 @@ import java.util.Optional;
 public class EntityLivingAIFlagsConverter extends DataParameterConverter<Byte> {
 
     public EntityLivingAIFlagsConverter() {
-        super(EntityLivingAccessor.accessor$getAiFlagsParameter());
+        super(MobEntityAccessor.accessor$getAIFlags());
     }
 
     @Override

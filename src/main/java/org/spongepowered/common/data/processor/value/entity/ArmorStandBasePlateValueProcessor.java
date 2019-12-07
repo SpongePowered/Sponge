@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.item.ArmorStandEntity;
@@ -50,7 +50,7 @@ public class ArmorStandBasePlateValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected boolean set(final ArmorStandEntity container, final Boolean value) {
-        ((EntityArmorStandAccessor) container).accessor$setNoBasePlate(!value);
+        ((ArmorStandEntityAccessor) container).accessor$setNoBasePlate(!value);
         return true;
     }
 

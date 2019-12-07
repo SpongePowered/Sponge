@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityHopperAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.HopperTileEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.tileentity.HopperTileEntity;
@@ -51,13 +51,13 @@ public class CooldownDataProcessor
         if (value < 1) {
             return false;
         }
-        ((TileEntityHopperAccessor) entity ).accessor$setTransferCooldown(value);
+        ((HopperTileEntityAccessor) entity ).accessor$setTransferCooldown(value);
         return true;
     }
 
     @Override
     public Optional<Integer> getVal(final HopperTileEntity entity) {
-        return Optional.ofNullable(((TileEntityHopperAccessor) entity ).accessor$getTransferCooldown() < 1 ? null : ((TileEntityHopperAccessor) entity ).accessor$getTransferCooldown());
+        return Optional.ofNullable(((HopperTileEntityAccessor) entity ).accessor$getTransferCooldown() < 1 ? null : ((HopperTileEntityAccessor) entity ).accessor$getTransferCooldown());
     }
 
     @Override
@@ -88,7 +88,7 @@ public class CooldownDataProcessor
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            ((TileEntityHopperAccessor) hopper).accessor$setTransferCooldown(-1);
+            ((HopperTileEntityAccessor) hopper).accessor$setTransferCooldown(-1);
             return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();

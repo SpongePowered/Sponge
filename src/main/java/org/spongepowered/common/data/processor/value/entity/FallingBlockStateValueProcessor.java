@@ -32,15 +32,15 @@ import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, BlockState, Mutable<BlockState>> {
+public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcessor<FallingBlockEntityAccessor, BlockState, Mutable<BlockState>> {
 
     public FallingBlockStateValueProcessor() {
-        super(EntityFallingBlockAccessor.class, Keys.FALLING_BLOCK_STATE);
+        super(FallingBlockEntityAccessor.class, Keys.FALLING_BLOCK_STATE);
     }
 
     @Override
@@ -49,14 +49,14 @@ public class FallingBlockStateValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    protected boolean set(final EntityFallingBlockAccessor container, final BlockState value) {
-        container.accessor$setFallBlockState((net.minecraft.block.BlockState) value);
+    protected boolean set(final FallingBlockEntityAccessor container, final BlockState value) {
+        container.accessor$setFallTile((net.minecraft.block.BlockState) value);
         return true;
     }
 
     @Override
-    protected Optional<BlockState> getVal(final EntityFallingBlockAccessor container) {
-        return Optional.of((BlockState)container.accessor$getFallBlockState());
+    protected Optional<BlockState> getVal(final FallingBlockEntityAccessor container) {
+        return Optional.of((BlockState)container.accessor$getFallTile());
     }
 
     @Override

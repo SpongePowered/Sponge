@@ -31,15 +31,15 @@ import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.item.EntityFallingBlockAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlockAccessor, Boolean, Mutable<Boolean>> {
+public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeValueProcessor<FallingBlockEntityAccessor, Boolean, Mutable<Boolean>> {
 
     public FallingBlockCanHurtEntitiesValueProcessor() {
-        super(EntityFallingBlockAccessor.class, Keys.FALLING_BLOCK_CAN_HURT_ENTITIES);
+        super(FallingBlockEntityAccessor.class, Keys.FALLING_BLOCK_CAN_HURT_ENTITIES);
     }
 
     @Override
@@ -48,13 +48,13 @@ public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeVal
     }
 
     @Override
-    protected boolean set(final EntityFallingBlockAccessor container, final Boolean value) {
+    protected boolean set(final FallingBlockEntityAccessor container, final Boolean value) {
         container.accessor$setHurtEntities(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(final EntityFallingBlockAccessor container) {
+    protected Optional<Boolean> getVal(final FallingBlockEntityAccessor container) {
         return Optional.of(container.accessor$getHurtEntities());
     }
 

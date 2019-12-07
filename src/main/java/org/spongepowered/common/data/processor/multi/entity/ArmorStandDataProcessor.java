@@ -34,7 +34,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArmorStandData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -57,10 +57,10 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<ArmorSt
         final boolean hasBasePlate = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_BASE_PLATE);
         final boolean isSmall = (boolean) keyValues.get(Keys.ARMOR_STAND_IS_SMALL);
         final boolean isMarker = (boolean) keyValues.get(Keys.ARMOR_STAND_MARKER);
-        ((EntityArmorStandAccessor) dataHolder).accessor$setSmall(isSmall);
-        ((EntityArmorStandAccessor) dataHolder).accessor$setMarker(isMarker);
-        ((EntityArmorStandAccessor) dataHolder).accessor$setNoBasePlate(!hasBasePlate);
-        ((EntityArmorStandAccessor) dataHolder).accessor$setShowArms(hasArms);
+        ((ArmorStandEntityAccessor) dataHolder).accessor$setSmall(isSmall);
+        ((ArmorStandEntityAccessor) dataHolder).accessor$setMarker(isMarker);
+        ((ArmorStandEntityAccessor) dataHolder).accessor$setNoBasePlate(!hasBasePlate);
+        ((ArmorStandEntityAccessor) dataHolder).accessor$setShowArms(hasArms);
         return true;
     }
 

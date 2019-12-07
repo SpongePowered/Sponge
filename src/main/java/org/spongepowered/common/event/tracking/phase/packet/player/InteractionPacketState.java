@@ -58,7 +58,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
+import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -153,7 +153,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
         
         final net.minecraft.item.ItemStack endActiveItem = player.getActiveItemStack();
-        ((EntityLivingBaseAccessor) player).accessor$setActiveItemStack((net.minecraft.item.ItemStack) phaseContext.getActiveItem());
+        ((LivingEntityAccessor) player).accessor$setActiveItemStack((net.minecraft.item.ItemStack) phaseContext.getActiveItem());
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
@@ -251,7 +251,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
         }
         
-        ((EntityLivingBaseAccessor) player).accessor$setActiveItemStack(endActiveItem);
+        ((LivingEntityAccessor) player).accessor$setActiveItemStack(endActiveItem);
     }
 
     private void throwEntitySpawnEvents(final InteractionPacketContext phaseContext, final ServerPlayerEntity player, final ItemStackSnapshot usedSnapshot,

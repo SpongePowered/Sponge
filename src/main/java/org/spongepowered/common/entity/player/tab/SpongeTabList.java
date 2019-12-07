@@ -34,7 +34,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPlayerListHeaderFooterPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
-import net.minecraft.network.play.server.SPlayerListItemPacket.AddPlayerData;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameType;
@@ -43,8 +42,8 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.mixin.core.network.play.server.SPacketPlayerListHeaderFooterAccessor;
-import org.spongepowered.common.mixin.core.network.play.server.SPacketPlayerListItemAccessor;
+import org.spongepowered.common.mixin.accessor.network.play.server.SPlayerListHeaderFooterPacketAccessor;
+import org.spongepowered.common.mixin.accessor.network.play.server.SPlayerListItemPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;
@@ -115,8 +114,8 @@ public final class SpongeTabList implements TabList {
     private void refreshClientHeaderFooter() {
         final SPlayerListHeaderFooterPacket packet = new SPlayerListHeaderFooterPacket();
         // MC-98180 - Sending null as header or footer will cause an exception on the client
-        ((SPacketPlayerListHeaderFooterAccessor) packet).accessor$setHeader(this.header == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.header));
-        ((SPacketPlayerListHeaderFooterAccessor) packet).accessor$setFooter(this.footer == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.footer));
+        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setHeader(this.header == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.header));
+        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setFooter(this.footer == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.footer));
         this.player.connection.sendPacket(packet);
     }
 
@@ -191,11 +190,11 @@ public final class SpongeTabList implements TabList {
     @SuppressWarnings("ConstantConditions")
     void sendUpdate(final TabListEntry entry, final SPlayerListItemPacket.Action action) {
         final SPlayerListItemPacket packet = new SPlayerListItemPacket();
-        ((SPacketPlayerListItemAccessor) packet).accessor$setAction(action);
+        ((SPlayerListItemPacketAccessor) packet).accessor$setAction(action);
         final SPlayerListItemPacket.AddPlayerData data = packet.new AddPlayerData((GameProfile) entry.getProfile(),
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
             entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null);
-        ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas().add(data);
+        ((SPlayerListItemPacketAccessor) packet).accessor$getPlayers().add(data);
         this.player.connection.sendPacket(packet);
     }
 
@@ -209,8 +208,8 @@ public final class SpongeTabList implements TabList {
      */
     @SuppressWarnings("ConstantConditions")
     public void updateEntriesOnSend(final SPlayerListItemPacket packet) {
-        for (final SPlayerListItemPacket.AddPlayerData data : ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas()) {
-            final SPlayerListItemPacket.Action action = ((SPacketPlayerListItemAccessor) packet).accessor$getAction();
+        for (final SPlayerListItemPacket.AddPlayerData data : ((SPlayerListItemPacketAccessor) packet).accessor$getPlayers()) {
+            final SPlayerListItemPacket.Action action = ((SPlayerListItemPacketAccessor) packet).accessor$getAction();
             if (action == SPlayerListItemPacket.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(data);

@@ -35,6 +35,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.bridge.tileentity.SkullTileEntityBridge;
+import org.spongepowered.common.mixin.accessor.tileentity.SkullTileEntityAccessor;
 
 @Mixin(SkullTileEntity.class)
 public abstract class SkullTileEntityMixin extends TileEntityMixin implements SkullTileEntityBridge {
@@ -73,7 +74,7 @@ public abstract class SkullTileEntityMixin extends TileEntityMixin implements Sk
      */
     @Overwrite
     private void updatePlayerProfile() {
-        final org.spongepowered.api.profile.GameProfile profile = (org.spongepowered.api.profile.GameProfile) ((TileEntitySkullAccessor) this).accessor$getMojangProfile();
+        final org.spongepowered.api.profile.GameProfile profile = (org.spongepowered.api.profile.GameProfile) ((SkullTileEntityAccessor) this).accessor$getPlayerProfile();
         if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
             if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
                 ((TileEntityBridge) this).bridge$markDirty();

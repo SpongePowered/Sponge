@@ -30,7 +30,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.mixin.core.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +38,7 @@ import java.util.Optional;
 public class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
 
     public EntityNoGravityConverter() {
-        super(EntityAccessor.accessor$getNoGravityParameter());
+        super(EntityAccessor.accessor$getNoGravity());
     }
 
     @Override

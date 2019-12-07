@@ -62,10 +62,10 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
-import org.spongepowered.common.mixin.core.entity.player.EntityPlayerAccessor;
-import org.spongepowered.common.mixin.core.network.play.server.SPacketPlayerListItemAccessor;
-import org.spongepowered.common.mixin.core.network.play.server.SPacketSpawnPlayerAccessor;
+import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.player.PlayerEntityAccessor;
+import org.spongepowered.common.mixin.accessor.network.play.server.SPlayerListItemPacketAccessor;
+import org.spongepowered.common.mixin.accessor.network.play.server.SSpawnPlayerPacketAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,16 +120,16 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     protected void registerData() {
         // EntityLivingBase
-        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHandStatesParameter(), Byte.valueOf((byte)0));
-        this.dataManager.register(EntityLivingBaseAccessor.accessor$getPotionEffectsParameter(), Integer.valueOf(0));
-        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHideParticlesParameter(), Boolean.valueOf(false));
-        this.dataManager.register(EntityLivingBaseAccessor.accessor$getArrowCountInEntityParameter(), Integer.valueOf(0));
-        this.dataManager.register(EntityLivingBaseAccessor.accessor$getHealthParameter(), Float.valueOf(1.0F));
+        this.dataManager.register(LivingEntityAccessor.accessor$getHandStates(), Byte.valueOf((byte)0));
+        this.dataManager.register(LivingEntityAccessor.accessor$getPotionEffects(), Integer.valueOf(0));
+        this.dataManager.register(LivingEntityAccessor.accessor$getHideParticles(), Boolean.valueOf(false));
+        this.dataManager.register(LivingEntityAccessor.accessor$getArrowCountInEntity(), Integer.valueOf(0));
+        this.dataManager.register(LivingEntityAccessor.accessor$getHealth(), Float.valueOf(1.0F));
         // EntityPlayer
-        this.dataManager.register(EntityPlayerAccessor.accessor$getAbsorptionParameter(), Float.valueOf(0.0F));
-        this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerScoreParameter(), Integer.valueOf(0));
-        this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerModelFlagParameter(), Byte.valueOf((byte)0));
-        this.dataManager.register(EntityPlayerAccessor.accessor$getMainHandParameter(), Byte.valueOf((byte)1));
+        this.dataManager.register(PlayerEntityAccessor.accessor$getAbsorption(), Float.valueOf(0.0F));
+        this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerScore(), Integer.valueOf(0));
+        this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerModelFlag(), Byte.valueOf((byte)0));
+        this.dataManager.register(PlayerEntityAccessor.accessor$getMainHand(), Byte.valueOf((byte)1));
     }
 
     @Override
@@ -269,7 +269,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getDataManager().get(EntityPlayerAccessor.accessor$getAbsorptionParameter());
+        return this.getDataManager().get(PlayerEntityAccessor.accessor$getAbsorption());
     }
 
     @Override
@@ -277,7 +277,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.getDataManager().set(EntityPlayerAccessor.accessor$getAbsorptionParameter(), amount);
+        this.getDataManager().set(PlayerEntityAccessor.accessor$getAbsorption(), amount);
     }
 
     @Override
@@ -430,11 +430,11 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @SuppressWarnings("ConstantConditions")
     public SSpawnPlayerPacket createSpawnPacket() {
         final SSpawnPlayerPacket packet = new SSpawnPlayerPacket();
-        final SPacketSpawnPlayerAccessor accessor = (SPacketSpawnPlayerAccessor) packet;
-        accessor.accessor$setentityId(this.getEntityId());
-        accessor.accessor$setuniqueId(this.fakeProfile.getId());
-        accessor.accessor$setx(this.posX);
-        accessor.accessor$sety(this.posY);
+        final SSpawnPlayerPacketAccessor accessor = (SSpawnPlayerPacketAccessor) packet;
+        accessor.accessor$setEntityId(this.getEntityId());
+        accessor.accessor$setUniqueId(this.fakeProfile.getId());
+        accessor.accessor$setX(this.posX);
+        accessor.accessor$setY(this.posY);
         accessor.accessor$setZ(this.posZ);
         accessor.accessor$setYaw((byte) ((int) (this.rotationYaw * 256.0F / 360.0F)));
         accessor.accessor$setPitch((byte) ((int) (this.rotationPitch * 256.0F / 360.0F)));
@@ -451,7 +451,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @SuppressWarnings("ConstantConditions")
     public SPlayerListItemPacket createPlayerListPacket(final SPlayerListItemPacket.Action action) {
         final SPlayerListItemPacket packet = new SPlayerListItemPacket(action);
-        ((SPacketPlayerListItemAccessor) packet).accessor$getPlayerDatas()
+        ((SPlayerListItemPacketAccessor) packet).accessor$getPlayers()
             .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }

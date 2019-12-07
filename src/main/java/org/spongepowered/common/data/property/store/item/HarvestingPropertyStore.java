@@ -33,7 +33,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.property.item.HarvestingProperty;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
-import org.spongepowered.common.mixin.core.item.ItemToolAccessor;
+import org.spongepowered.common.mixin.accessor.item.ToolItemAccessor;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -45,8 +45,8 @@ public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<Harv
     @Override
     protected Optional<HarvestingProperty> getFor(ItemStack itemStack) {
         final Item item = itemStack.getItem();
-        if (item instanceof ItemToolAccessor && !(item instanceof PickaxeItem)) {
-            final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set) ((ItemToolAccessor) item).accessor$getEffectiveBlocks());
+        if (item instanceof ToolItemAccessor && !(item instanceof PickaxeItem)) {
+            final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set) ((ToolItemAccessor) item).accessor$getEffectiveBlocks());
             return Optional.of(new HarvestingProperty(blocks));
         }
         final Collection<BlockType> blockTypes = SpongeImpl.getRegistry().getAllOf(BlockType.class);

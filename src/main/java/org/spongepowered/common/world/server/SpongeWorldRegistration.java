@@ -29,7 +29,7 @@ import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.server.WorldRegistration;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.mixin.core.world.dimension.DimensionTypeAccessor;
+import org.spongepowered.common.mixin.accessor.world.dimension.DimensionTypeAccessor;
 
 public final class SpongeWorldRegistration implements WorldRegistration {
 

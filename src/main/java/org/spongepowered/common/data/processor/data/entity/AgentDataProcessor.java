@@ -35,25 +35,25 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.EntityLivingAccessor;
+import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 
 import java.util.Optional;
 
 public class AgentDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<EntityLivingAccessor, Boolean, Mutable<Boolean>, AgentData, ImmutableAgentData> {
+        extends AbstractSingleDataSingleTargetProcessor<MobEntityAccessor, Boolean, Mutable<Boolean>, AgentData, ImmutableAgentData> {
 
     public AgentDataProcessor() {
-        super(Keys.AI_ENABLED, EntityLivingAccessor.class);
+        super(Keys.AI_ENABLED, MobEntityAccessor.class);
     }
 
     @Override
-    protected boolean set(final EntityLivingAccessor entity, final Boolean value) {
+    protected boolean set(final MobEntityAccessor entity, final Boolean value) {
         entity.accessor$setNoAI(!value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(final EntityLivingAccessor entity) {
+    protected Optional<Boolean> getVal(final MobEntityAccessor entity) {
         return Optional.of(entity.accessor$isAIDisabled());
     }
 

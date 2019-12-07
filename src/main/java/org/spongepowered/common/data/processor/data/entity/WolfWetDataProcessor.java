@@ -35,36 +35,36 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.passive.EntityWolfAccessor;
+import org.spongepowered.common.mixin.accessor.entity.passive.WolfEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
 public class WolfWetDataProcessor extends
-    AbstractSingleDataSingleTargetProcessor<EntityWolfAccessor, Boolean, Mutable<Boolean>, WetData, ImmutableWetData> {
+    AbstractSingleDataSingleTargetProcessor<WolfEntityAccessor, Boolean, Mutable<Boolean>, WetData, ImmutableWetData> {
 
     public WolfWetDataProcessor() {
-        super(Keys.IS_WET, EntityWolfAccessor.class);
+        super(Keys.IS_WET, WolfEntityAccessor.class);
     }
 
     @Override
-    protected boolean set(final EntityWolfAccessor entity, final Boolean value) {
+    protected boolean set(final WolfEntityAccessor entity, final Boolean value) {
         if (value) {
             entity.accessor$setIsWet(true);
             entity.accessor$setIsShaking(true);
-            entity.accessor$setTimeShaking(0F);
-            entity.accessor$setPreviousTimeShaking(0F);
+            entity.accessor$setTimeWolfIsShaking(0F);
+            entity.accessor$setPrevTimeWolfIsShaking(0F);
         } else {
             entity.accessor$setIsWet(false);
             entity.accessor$setIsShaking(false);
-            entity.accessor$setTimeShaking(0F);
-            entity.accessor$setPreviousTimeShaking(0F);
+            entity.accessor$setTimeWolfIsShaking(0F);
+            entity.accessor$setPrevTimeWolfIsShaking(0F);
         }
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(final EntityWolfAccessor entity) {
+    protected Optional<Boolean> getVal(final WolfEntityAccessor entity) {
         final boolean isWet = entity.accessor$getIsWet() || entity.accessor$getIsShaking();
         return Optional.of(isWet);
     }

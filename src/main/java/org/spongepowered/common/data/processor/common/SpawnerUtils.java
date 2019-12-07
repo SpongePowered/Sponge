@@ -44,8 +44,8 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
-import org.spongepowered.common.mixin.core.util.WeightedRandom_ItemAccessor;
+import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.util.WeightedRandom_ItemAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.IdentityHashMap;
@@ -55,10 +55,10 @@ import java.util.Set;
 public class SpawnerUtils {
 
     public static WeightedSerializableObject<EntityArchetype> getNextEntity(final AbstractSpawnerBridge logicBridge) {
-        return getNextEntity((MobSpawnerBaseLogicAccessor) logicBridge);
+        return getNextEntity((AbstractSpawnerAccessor) logicBridge);
     }
 
-    public static WeightedSerializableObject<EntityArchetype> getNextEntity(final MobSpawnerBaseLogicAccessor logic) {
+    public static WeightedSerializableObject<EntityArchetype> getNextEntity(final AbstractSpawnerAccessor logic) {
         final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$getSpawnData()).accessor$getItemWeight();
 
         final EntityType type = EntityUtil.fromNameToType(logic.accessor$getSpawnData().getNbt().getString("id")).orElse(EntityTypes.PIG);
@@ -86,7 +86,7 @@ public class SpawnerUtils {
 
     public static WeightedTable<EntityArchetype> getEntities(final AbstractSpawner logic) {
         final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
-        for (final WeightedSpawnerEntity weightedEntity : ((MobSpawnerBaseLogicAccessor) logic).accessor$getPotentialSpawns()) {
+        for (final WeightedSpawnerEntity weightedEntity : ((AbstractSpawnerAccessor) logic).accessor$getPotentialSpawns()) {
 
             final CompoundNBT nbt = weightedEntity.getNbt();
 
@@ -104,7 +104,7 @@ public class SpawnerUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static void setEntities(final MobSpawnerBaseLogicAccessor logic, final WeightedTable<EntityArchetype> table) {
+    public static void setEntities(final AbstractSpawnerAccessor logic, final WeightedTable<EntityArchetype> table) {
         logic.accessor$getPotentialSpawns().clear();
         for (final TableEntry<EntityArchetype> entry : table) {
             if (!(entry instanceof WeightedObject)) {
@@ -124,7 +124,7 @@ public class SpawnerUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static void applyData(final MobSpawnerBaseLogicAccessor logic, final Map<Key<?>, Object> values) {
+    public static void applyData(final AbstractSpawnerAccessor logic, final Map<Key<?>, Object> values) {
         logic.accessor$setSpawnDelay((int) values.get(Keys.SPAWNER_REMAINING_DELAY));
         logic.accessor$setMinSpawnDelay((int) values.get(Keys.SPAWNER_MINIMUM_DELAY));
         logic.accessor$setMaxSpawnDelay((int) values.get(Keys.SPAWNER_MAXIMUM_DELAY));
@@ -142,7 +142,7 @@ public class SpawnerUtils {
         for (final Immutable<?> value : newValues) {
             map.put(value.getKey(), value.get());
         }
-        applyData(((MobSpawnerBaseLogicAccessor) logic), map);
+        applyData(((AbstractSpawnerAccessor) logic), map);
     }
 
 }

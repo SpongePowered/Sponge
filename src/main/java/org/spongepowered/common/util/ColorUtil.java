@@ -32,7 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.mixin.core.entity.passive.EntitySheepAccessor;
+import org.spongepowered.common.mixin.accessor.entity.passive.SheepEntityAccessor;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public final class ColorUtil {
 
     public static int dyeColorToMojangColor(final DyeColor dyeColor) {
         // For the dye
-        final float[] dyeRgbArray = EntitySheepAccessor.accessor$createSheepColor(net.minecraft.item.DyeColor.valueOf(dyeColor.getName().toUpperCase(Locale.ENGLISH)));
+        final float[] dyeRgbArray = SheepEntityAccessor.accessor$createSheepColor(net.minecraft.item.DyeColor.valueOf(dyeColor.getName().toUpperCase(Locale.ENGLISH)));
 
         // Convert!
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
@@ -79,7 +79,7 @@ public final class ColorUtil {
     }
 
     public static Color fromDyeColor(final DyeColor dyeColor) {
-        final float[] dyeRgbArray = EntitySheepAccessor.accessor$createSheepColor(net.minecraft.item.DyeColor.valueOf(dyeColor.getName().toUpperCase(Locale.ENGLISH)));
+        final float[] dyeRgbArray = SheepEntityAccessor.accessor$createSheepColor(net.minecraft.item.DyeColor.valueOf(dyeColor.getName().toUpperCase(Locale.ENGLISH)));
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
         final int trueGreen = (int) (dyeRgbArray[1] * 255.0F);
         final int trueBlue = (int) (dyeRgbArray[2] * 255.0F);

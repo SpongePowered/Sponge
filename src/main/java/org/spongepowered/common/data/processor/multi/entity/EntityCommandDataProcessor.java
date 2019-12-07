@@ -35,7 +35,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.mixin.core.tileentity.CommandBlockBaseLogicAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.CommandBlockLogicAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Map;
@@ -85,8 +85,8 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Mine
     protected boolean set(final MinecartCommandBlockEntity entity, final Map<Key<?>, Object> keyValues) {
         final CommandBlockLogic logic = entity.getCommandBlockLogic();
         logic.setLastOutput(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
-        ((CommandBlockBaseLogicAccessor) logic).accessor$setCommandStored((String) keyValues.get(Keys.COMMAND));
-        ((CommandBlockBaseLogicAccessor) logic).accessor$setSuccessCount((int) keyValues.get(Keys.SUCCESS_COUNT));
+        ((CommandBlockLogicAccessor) logic).accessor$setCommandStored((String) keyValues.get(Keys.COMMAND));
+        ((CommandBlockLogicAccessor) logic).accessor$setSuccessCount((int) keyValues.get(Keys.SUCCESS_COUNT));
         logic.setTrackOutput((boolean) keyValues.get(Keys.TRACKS_OUTPUT));
         entity.tick();
         return true;

@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.service.whitelist;
 
-import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.WhiteList;
 import net.minecraft.server.management.WhitelistEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
-import org.spongepowered.common.mixin.core.server.management.UserLIstEntryAccessor;
+import org.spongepowered.common.mixin.accessor.server.management.UserListEntryAccessor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class SpongeUserListWhitelist extends WhiteList {
     @SuppressWarnings("unchecked")
     @Override
     public void addEntry(final WhitelistEntry entry) {
-        getService().addProfile(((UserLIstEntryAccessor<GameProfile>) entry).accessor$getValue());
+        getService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$getValue());
     }
 
     @Override

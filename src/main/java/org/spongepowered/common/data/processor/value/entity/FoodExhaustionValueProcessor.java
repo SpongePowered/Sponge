@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.util.FoodStatsAccessor;
+import org.spongepowered.common.mixin.accessor.util.FoodStatsAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

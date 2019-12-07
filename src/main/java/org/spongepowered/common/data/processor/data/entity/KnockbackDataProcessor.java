@@ -35,7 +35,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeKnockbackD
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.mixin.core.entity.projectile.EntityArrowAccessor;
+import org.spongepowered.common.mixin.accessor.entity.projectile.AbstractArrowEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
@@ -70,7 +70,7 @@ public class KnockbackDataProcessor
 
     @Override
     protected Optional<Integer> getVal(final AbstractArrowEntity entity) {
-        return Optional.of(((EntityArrowAccessor) entity).accessor$getKnockbackStrength());
+        return Optional.of(((AbstractArrowEntityAccessor) entity).accessor$getKnockbackStrength());
     }
 
     @Override

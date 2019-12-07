@@ -44,9 +44,9 @@ import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.mixin.core.server.management.UserLIstEntryAccessor;
-import org.spongepowered.common.mixin.core.server.management.UserListAccessor;
-import org.spongepowered.common.mixin.core.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.mixin.accessor.server.management.UserListEntryAccessor;
+import org.spongepowered.common.mixin.accessor.server.management.UserListAccessor;
+import org.spongepowered.common.mixin.accessor.world.storage.SaveHandlerAccessor;
 
 import java.io.File;
 import java.util.Collection;
@@ -217,8 +217,8 @@ class UserDiscoverer {
             final PlayerProfileCache profileCache) {
 
         gameProfiles.stream()
-                .filter(x -> !profiles.containsKey(((UserLIstEntryAccessor<GameProfile>) x).accessor$getValue().getId()))
-                .map(entry -> ((UserLIstEntryAccessor<GameProfile>) entry).accessor$getValue())
+                .filter(x -> !profiles.containsKey(((UserListEntryAccessor<GameProfile>) x).accessor$getValue().getId()))
+                .map(entry -> ((UserListEntryAccessor<GameProfile>) entry).accessor$getValue())
                 .forEach(x -> {
                     // Get the known name, if it doesn't exist, then we don't add it - we assume no user backing
                     GameProfile profile = profileCache.getProfileByUUID(x.getId());
@@ -311,7 +311,7 @@ class UserDiscoverer {
         final WhiteList whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
         final WhitelistEntry whiteListData = whiteList.getEntry(new GameProfile(uniqueId, ""));
         if (whiteListData != null) {
-            profile = ((UserLIstEntryAccessor<GameProfile>) whiteListData).accessor$getValue();
+            profile = ((UserListEntryAccessor<GameProfile>) whiteListData).accessor$getValue();
         }
         if (profile != null) {
             return create(profile);
@@ -325,7 +325,7 @@ class UserDiscoverer {
         final BanList banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
         final BanEntry<GameProfile> banData = banList.getEntry(new GameProfile(uniqueId, ""));
         if (banData != null) {
-            profile = ((UserLIstEntryAccessor<GameProfile>) banData).accessor$getValue();
+            profile = ((UserListEntryAccessor<GameProfile>) banData).accessor$getValue();
         }
         if (profile != null) {
             return create(profile);

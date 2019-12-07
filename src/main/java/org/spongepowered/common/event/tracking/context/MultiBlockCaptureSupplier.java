@@ -52,7 +52,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.mixin.core.world.ServerWorldAccessor;
+import org.spongepowered.common.mixin.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.mixin.core.world.chunk.ChunkMixin;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -649,7 +649,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transaction.getOriginal();
                     original.getWorldServer().ifPresent(worldServer -> {
                         final ServerWorldAccessor accessor = (ServerWorldAccessor) worldServer;
-                        final ServerWorld.ServerBlockEventList queue = accessor.getBlockEventQueueForSponge()[accessor.getBlockEventCacheIndexForSponge()];
+                        final ServerWorld.ServerBlockEventList queue = accessor.accessor$getBlockEventQueue()[accessor.getBlockEventCacheIndexForSponge()];
                         for (final BlockEventData blockEventData : scheduledEvents.get(original.getBlockPos())) {
                             boolean equals = false;
                             for (final BlockEventData eventData : queue) {

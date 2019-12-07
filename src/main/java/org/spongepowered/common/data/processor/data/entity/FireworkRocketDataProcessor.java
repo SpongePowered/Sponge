@@ -41,8 +41,8 @@ import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataPr
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.mixin.core.entity.EntityAccessor;
-import org.spongepowered.common.mixin.core.entity.item.EntityFireworkRocketAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.FireworkRocketEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -80,7 +80,7 @@ public class FireworkRocketDataProcessor extends
         final ItemStack item = FireworkUtils.getItem(firework);
         final CompoundNBT fireworks = item.getOrCreateChildTag("Fireworks");
         fireworks.putByte("Flight", modifier.byteValue());
-        ((EntityFireworkRocketAccessor) firework).spongeImpl$setLifeTime(10 * modifier.byteValue() + ((EntityAccessor) firework).accessor$getRandom().nextInt(6) + ((EntityAccessor) firework).accessor$getRandom().nextInt(7));
+        ((FireworkRocketEntityAccessor) firework).accessor$setLifeTime(10 * modifier.byteValue() + ((EntityAccessor) firework).accessor$getRand().nextInt(6) + ((EntityAccessor) firework).accessor$getRand().nextInt(7));
         return true;
     }
 

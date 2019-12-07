@@ -35,7 +35,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongePersisting
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.EntityLivingAccessor;
+import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.MobEntity;
@@ -49,7 +49,7 @@ public class PersistingDataProcessor
 
     @Override
     protected boolean set(final MobEntity entity, final Boolean value) {
-        ((EntityLivingAccessor) entity).accessor$setPersisting(value);
+        ((MobEntityAccessor) entity).accessor$setPersistingRequired(value);
         return true;
     }
 

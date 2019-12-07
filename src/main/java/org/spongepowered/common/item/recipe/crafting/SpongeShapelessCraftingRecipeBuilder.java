@@ -38,7 +38,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.item.crafting.ShapelessRecipesAccessor;
+import org.spongepowered.common.mixin.accessor.item.crafting.ShapelessRecipeAccessor;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import javax.annotation.Nullable;
@@ -86,7 +86,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
 
         this.groupName = "";
         if (value instanceof ShapelessRecipe) {
-            this.groupName = ((ShapelessRecipesAccessor) value).accessor$getGroup();
+            this.groupName = ((ShapelessRecipeAccessor) value).accessor$getGroup();
         }
 
         super.reset();

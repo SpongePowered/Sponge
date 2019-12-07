@@ -28,7 +28,7 @@ import org.spongepowered.api.block.entity.carrier.Hopper;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityHopperAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.HopperTileEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
                 ((HopperTileEntity) hopper).remove();
                 return Optional.empty();
             }
-            ((TileEntityHopperAccessor) hopper).accessor$setTransferCooldown(container.getInt(Keys.COOLDOWN.getQuery()).get());
+            ((HopperTileEntityAccessor) hopper).accessor$setTransferCooldown(container.getInt(Keys.COOLDOWN.getQuery()).get());
             ((HopperTileEntity) hopper).validate();
             return Optional.of(hopper);
         });

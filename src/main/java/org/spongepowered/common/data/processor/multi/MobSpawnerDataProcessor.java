@@ -36,34 +36,34 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.mixin.core.tileentity.MobSpawnerBaseLogicAccessor;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityMobSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.MobSpawnerTileEntityAccessor;
 
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.world.spawner.AbstractSpawner;
 
-public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProcessor<TileEntityMobSpawnerAccessor, MobSpawnerData, ImmutableMobSpawnerData> {
+public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProcessor<MobSpawnerTileEntityAccessor, MobSpawnerData, ImmutableMobSpawnerData> {
 
     public MobSpawnerDataProcessor() {
-        super(TileEntityMobSpawnerAccessor.class);
+        super(MobSpawnerTileEntityAccessor.class);
     }
 
     @Override
-    protected boolean doesDataExist(TileEntityMobSpawnerAccessor entity) {
+    protected boolean doesDataExist(MobSpawnerTileEntityAccessor entity) {
         return true;
     }
 
     @Override
-    protected boolean set(TileEntityMobSpawnerAccessor entity, Map<Key<?>, Object> values) {
+    protected boolean set(MobSpawnerTileEntityAccessor entity, Map<Key<?>, Object> values) {
         AbstractSpawner logic = entity.accessor$getSpawnerLogic();
-        SpawnerUtils.applyData(((MobSpawnerBaseLogicAccessor) logic), values);
+        SpawnerUtils.applyData(((AbstractSpawnerAccessor) logic), values);
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(TileEntityMobSpawnerAccessor spawner) {
-        MobSpawnerBaseLogicAccessor logic = (MobSpawnerBaseLogicAccessor) spawner.accessor$getSpawnerLogic();
+    protected Map<Key<?>, ?> getValues(MobSpawnerTileEntityAccessor spawner) {
+        AbstractSpawnerAccessor logic = (AbstractSpawnerAccessor) spawner.accessor$getSpawnerLogic();
         Map<Key<?>, Object> values = Maps.newIdentityHashMap();
 
         values.put(Keys.SPAWNER_REMAINING_DELAY, (short) logic.accessor$getSpawnDelay());

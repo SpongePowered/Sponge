@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.tileentity.TileEntityEndGatewayAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.EndGatewayTileEntityAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
@@ -50,13 +50,13 @@ public class EndGatewayExitPositionValueProcessor extends AbstractSpongeValuePro
 
     @Override
     protected boolean set(EndGatewayTileEntity container, Vector3i value) {
-        ((TileEntityEndGatewayAccessor) container).accessor$SetExit(VecHelper.toBlockPos(value));
+        ((EndGatewayTileEntityAccessor) container).accessor$setExitPortal(VecHelper.toBlockPos(value));
         return true;
     }
 
     @Override
     protected Optional<Vector3i> getVal(EndGatewayTileEntity container) {
-        return Optional.of(VecHelper.toVector3i(((TileEntityEndGatewayAccessor) container).accessor$getExitPortal()));
+        return Optional.of(VecHelper.toVector3i(((EndGatewayTileEntityAccessor) container).accessor$getExitPortal()));
     }
 
     @Override

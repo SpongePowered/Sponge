@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.mixin.core.util.FoodStatsAccessor;
+import org.spongepowered.common.mixin.accessor.util.FoodStatsAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Map;

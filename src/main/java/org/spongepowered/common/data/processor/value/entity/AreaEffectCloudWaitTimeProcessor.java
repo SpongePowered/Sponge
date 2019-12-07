@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
+import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 import net.minecraft.entity.AreaEffectCloudEntity;
@@ -60,7 +60,7 @@ public class AreaEffectCloudWaitTimeProcessor extends AbstractSpongeValueProcess
 
     @Override
     protected Optional<Integer> getVal(AreaEffectCloudEntity container) {
-        return Optional.of(((EntityAreaEffectCloudAccessor) container).getWaitTime());
+        return Optional.of(((AreaEffectCloudEntityAccessor) container).accessor$getWaitTime());
     }
 
     @Override

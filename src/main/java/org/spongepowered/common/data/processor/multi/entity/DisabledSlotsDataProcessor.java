@@ -35,18 +35,16 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDisabledSlotsData;
-import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeSetValue;
-import org.spongepowered.common.mixin.core.entity.item.EntityArmorStandAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 
 import java.util.*;
 
 public class DisabledSlotsDataProcessor extends
-    AbstractMultiDataSingleTargetProcessor<EntityArmorStandAccessor, DisabledSlotsData, ImmutableDisabledSlotsData> {
+    AbstractMultiDataSingleTargetProcessor<ArmorStandEntityAccessor, DisabledSlotsData, ImmutableDisabledSlotsData> {
 
     public DisabledSlotsDataProcessor() {
-        super(EntityArmorStandAccessor.class);
+        super(ArmorStandEntityAccessor.class);
     }
 
     private int populateChunkFromSet(final Set<EquipmentType> value) {
@@ -60,13 +58,13 @@ public class DisabledSlotsDataProcessor extends
     }
 
     @Override
-    protected boolean doesDataExist(final EntityArmorStandAccessor dataHolder) {
+    protected boolean doesDataExist(final ArmorStandEntityAccessor dataHolder) {
         return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean set(final EntityArmorStandAccessor dataHolder, final Map<Key<?>, Object> keyValues) {
+    protected boolean set(final ArmorStandEntityAccessor dataHolder, final Map<Key<?>, Object> keyValues) {
         int disabledSlots = 0;
 
         if (keyValues.containsKey(Keys.ARMOR_STAND_TAKING_DISABLED)) {
@@ -84,7 +82,7 @@ public class DisabledSlotsDataProcessor extends
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(final EntityArmorStandAccessor dataHolder) {
+    protected Map<Key<?>, ?> getValues(final ArmorStandEntityAccessor dataHolder) {
         // try and keep the all chunk empty
         int disabledSlotsValue = dataHolder.accessor$getDisabledSlots();
         final int allChunk = disabledSlotsValue & 0b1111_1111;

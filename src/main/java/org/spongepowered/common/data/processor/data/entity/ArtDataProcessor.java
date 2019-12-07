@@ -43,9 +43,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.mixin.core.entity.EntityHangingAccessor;
-import org.spongepowered.common.mixin.core.entity.EntityTrackerAccessor;
-import org.spongepowered.common.mixin.core.entity.EntityTrackerEntryAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.HangingEntityAccessor;
+import org.spongepowered.common.mixin.invalid.accessor.entity.EntityTrackerAccessor;
+import org.spongepowered.common.mixin.invalid.accessor.entity.EntityTrackerEntryAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -66,15 +66,15 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<Painting
         if (!entity.world.isRemote) {
             final PaintingEntity.EnumArt oldArt = entity.art;
             entity.art = (PaintingEntity.EnumArt) (Object) value;
-            ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.facingDirection);
+            ((HangingEntityAccessor) entity).accessor$updateFacingWithBoundingBox(entity.facingDirection);
             if (!entity.onValidSurface()) {
                 entity.art = oldArt;
-                ((EntityHangingAccessor) entity).accessor$updateFacingWithBoundingBox(entity.facingDirection);
+                ((HangingEntityAccessor) entity).accessor$updateFacingWithBoundingBox(entity.facingDirection);
                 return false;
             }
 
             final EntityTracker paintingTracker = ((ServerWorld) entity.world).getEntityTracker();
-            final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityTable().lookup(entity.getEntityId());
+            final EntityTrackerEntry paintingEntry = ((EntityTrackerAccessor) paintingTracker).accessor$getTrackedEntityHashTable().lookup(entity.getEntityId());
             final List<ServerPlayerEntity> playerMPs = new ArrayList<>();
             for (final ServerPlayerEntity player : ((EntityTrackerEntryAccessor) paintingEntry).accessor$getTrackingPlayers()) {
                 final SDestroyEntitiesPacket packet = new SDestroyEntitiesPacket(entity.getEntityId());

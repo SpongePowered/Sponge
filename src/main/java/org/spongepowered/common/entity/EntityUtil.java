@@ -97,8 +97,8 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.InvokingTeleporterContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.entity.EntityAccessor;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -257,7 +257,7 @@ public final class EntityUtil {
                 return entity;
             }
 
-            ((EntityAccessor) toReturn).accessor$CopyDataFromOldEntity(entity);
+            ((EntityAccessor) toReturn).accessor$copyDataFromOld(entity);
         } else {
             toReturn = entity;
         }
@@ -659,7 +659,7 @@ public final class EntityUtil {
     public static boolean isEntityDead(final net.minecraft.entity.Entity entity) {
         if (entity instanceof LivingEntity) {
             final LivingEntity base = (LivingEntity) entity;
-            return base.getHealth() <= 0 || base.deathTime > 0 || ((EntityLivingBaseAccessor) entity).accessor$isLivingDead();
+            return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$getDead();
         }
         return entity.removed;
     }

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.type;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.mixin.core.block.BlockNoteAccessor;
+import org.spongepowered.common.mixin.accessor.block.NoteBlockAccessor;
 
 public class SpongeInstrumentType extends SpongeCatalogType implements InstrumentType {
 
@@ -37,7 +37,7 @@ public class SpongeInstrumentType extends SpongeCatalogType implements Instrumen
     public SpongeInstrumentType(final String id, final String name, final int internalId) {
         super(id);
         this.name = name;
-        this.soundType = (SoundType) BlockNoteAccessor.accessor$getInstruments().get(internalId);
+        this.soundType = (SoundType) NoteBlockAccessor.accessor$getInstruments().get(internalId);
     }
 
     @Override

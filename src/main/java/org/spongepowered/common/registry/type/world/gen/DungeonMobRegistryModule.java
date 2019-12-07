@@ -35,7 +35,7 @@ import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
-import org.spongepowered.common.mixin.core.world.gen.feature.WorldGenDungeonsAccessor;
+import org.spongepowered.common.mixin.accessor.world.gen.feature.DungeonsFeatureAccessor;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Arrays;
@@ -60,7 +60,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
     @Override
     public void registerDefaults() {
         final DungeonsFeature worldGenDungeons = new DungeonsFeature();
-        final Map<String, Long> types = Arrays.stream(((WorldGenDungeonsAccessor) worldGenDungeons).accessor$getSpawnerTypes())
+        final Map<String, Long> types = Arrays.stream(((DungeonsFeatureAccessor) worldGenDungeons).accessor$getSpawnerTypes())
                 .collect(Collectors.groupingBy(ResourceLocation::toString, Collectors.counting()));
 
         for(final String mob : types.keySet()) {
