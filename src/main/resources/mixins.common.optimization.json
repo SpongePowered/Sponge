@@ -7,7 +7,6 @@
     "compatibilityLevel": "JAVA_8",
     "mixins": [
         "SpongeImplHooksMixin_Item_Pre_Merge",
-        "org.spongepowered.common.mixin.accessor.block.BlockRedstoneWireAccessor_Eigen",
         "block.BlockRedstoneWireMixin_Eigen",
         "block.BlockRedstoneWireMixin_Panda",
         "enchantment.EnchantmentHelperMixin_No_Source_Leak",
@@ -16,15 +15,11 @@
         "entity.EntityTrackerEntryMixin_MapOptimization",
         "entity.item.EntityItemFrameMixin_MapOptimization",
         "item.ItemMapMixin_MapOptimization",
-        "network.play.server.SPacketChunkDataMixin_Async_Lighting",
         "server.MinecraftServerMixin_MapOptimization",
         "tileentity.TileEntityHopperMixin_HopperOptimization",
         "tileentity.TileEntityMixin_HopperOptimization",
         "world.WorldMixin_UseActiveChunkForCollisions",
-        "world.WorldServerMixin_Async_Lighting",
         "world.WorldServerMixin_UseActiveChunkForCollisions",
-        "world.chunk.ChunkMixin_Async_Lighting",
-        "world.gen.ChunkProviderServerMixin_Async_Lighting",
         "world.gen.structure.MapGenStructureMixin_Structure_Saving",
         "world.storage.MapDataMixin_MapOptimization",
         "world.storage.MapInfoMixin_MapOptimization"

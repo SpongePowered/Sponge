@@ -70,10 +70,7 @@
         "scoreboard.ScoreAccessor",
         "scoreboard.ScoreboardAccessor",
         "scoreboard.ScoreObjectiveAccessor",
-        "server.dedicated.DedicatedServerAccessor",
         "server.management.PlayerListAccessor",
-        "server.management.UserListAccessor",
-        "server.management.UserListEntryAccessor",
         "server.MinecraftServerAccessor",
         "tileentity.BrewingStandTileEntityAccessor",
         "tileentity.CommandBlockLogicAccessor",
@@ -104,5 +101,11 @@
         "world.GameRules_RuleValueAccessor",
         "world.GameRulesAccessor",
         "world.WorldAccessor",
-        "world.WorldTypeAccessor",
+        "world.WorldTypeAccessor"
+        ],
+    "server": [
+        "server.dedicated.DedicatedServerAccessor",
+        "server.management.UserListAccessor",
+        "server.management.UserListEntryAccessor"
+    ]
 }
