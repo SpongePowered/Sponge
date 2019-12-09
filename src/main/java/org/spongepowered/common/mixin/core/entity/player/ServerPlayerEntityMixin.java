@@ -102,6 +102,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -171,7 +172,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
-    private final User impl$user = this.bridge$getUserObject();
+    private final User impl$user = this.impl$getUserObjectOnConstruction();
     private ImmutableSet<SkinPart> impl$skinParts = ImmutableSet.of();
     private int impl$viewDistance;
     @Nullable private GameType impl$pendingGameType;
@@ -181,7 +182,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     private float impl$cachedModifiedHealth = -1;
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((ServerPlayerEntity) (Object) this);
-    private boolean impl$keepInventory = false;
+    @Nullable private Boolean impl$keepInventory = null;
     @Nullable private Text impl$displayName = null;
 
     @Override
@@ -208,9 +209,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
     }
 
-
     @Override
     public boolean bridge$keepInventory() {
+        if (this.impl$keepInventory == null) {
+            return this.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY);
+        }
         return this.impl$keepInventory;
     }
 
@@ -373,6 +376,15 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
         }
         return service.getOrCreate((GameProfile) this.getGameProfile());
+    }
+
+    private User impl$getUserObjectOnConstruction() {
+        final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        if (this.isFake || !(service instanceof SpongeUserStorageService)) {
+            return bridge$getUserObject();
+        }
+        // Emnsure that the game profile is up to date.
+        return ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
     }
 
     @Override

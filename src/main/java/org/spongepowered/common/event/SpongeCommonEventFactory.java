@@ -134,6 +134,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -1018,7 +1019,7 @@ public class SpongeCommonEventFactory {
             final Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source == null ? entity : source);
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
                 originalChannel, Optional.of(channel), formatter,
-                (Living) entity, entity.world.getGameRules().getBoolean("keepInventory"), messageCancelled);
+                (Living) entity, entity.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY), messageCancelled);
             SpongeImpl.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
             final Text message = event.getMessage();
             // Check the event isn't cancelled either. If it is, then don't spawn the message.

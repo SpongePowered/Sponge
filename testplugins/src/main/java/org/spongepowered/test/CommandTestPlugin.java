@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test;
 
+import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -46,6 +47,12 @@ import javax.annotation.Nullable;
 
 @Plugin(id = "command-test", name = "Command Test", description = "Tests command related functions", version = "0.0.0")
 public class CommandTestPlugin {
+
+    private final ImmutableMap<String, String> CHOICES = ImmutableMap.<String, String>builder()
+            .put("opt1", "opt1")
+            .put("opt2", "opt2")
+            .put("opt3", "opt3")
+            .build();
 
     @Listener
     public void onInit(GameInitializationEvent event) {
@@ -135,6 +142,42 @@ public class CommandTestPlugin {
                             return CommandResult.success();
                         })).build(),
                 "user-parse");
+
+        CommandSpec cmd = CommandSpec.builder()
+                .arguments(
+                        GenericArguments.onlyOne(GenericArguments.integer(Text.of("i"))),
+                        GenericArguments.onlyOne(GenericArguments.choices(Text.of("test"), CHOICES, true))
+                )
+                .executor((src, args) -> {
+                    src.sendMessage(Text.of("Chosen: ", args.getOne("test").get()));
+                    return CommandResult.success();
+                })
+                .build();
+
+        CommandSpec cmd2 = CommandSpec.builder()
+                .arguments(
+                        GenericArguments.onlyOne(GenericArguments.choices(Text.of("test"), CHOICES, true)),
+                        GenericArguments.onlyOne(GenericArguments.integer(Text.of("i")))
+                )
+                .executor((src, args) -> {
+                    src.sendMessage(Text.of("Chosen: ", args.getOne("test").get()));
+                    return CommandResult.success();
+                })
+                .build();
+
+        CommandSpec parent = CommandSpec.builder()
+                .child(cmd, "cmd1")
+                .child(cmd2, "cmd2")
+                .executor((src, args) -> {
+                    src.sendMessage(Text.of("test"));
+                    return CommandResult.success();
+                })
+                .build();
+
+        Sponge.getCommandManager().register(this, parent, "child-choices-test");
+        Sponge.getCommandManager().register(this, cmd, "child-choices-test-child1");
+        Sponge.getCommandManager().register(this, cmd2, "child-choices-test-child2");
+
     }
 
     @NonnullByDefault
