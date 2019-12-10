@@ -61,6 +61,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
+import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -112,7 +113,7 @@ public class AdvancementMixin implements AdvancementBridge {
             this.impl$name = SpongeTexts.toPlain(displayIn.getTitle());
         }
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
-            final Object event = ((EventListenerPhaseContext) PhaseTracker.getInstance().getCurrentContext()).getEvent();
+            final Object event = ((ListenerPhaseContext<?>) PhaseTracker.getInstance().getCurrentContext()).getEvent();
             if (event instanceof GameRegistryEvent.Register) {
                 final Class<? extends CatalogType> catalogType = ((GameRegistryEvent.Register<?>) event).getCatalogType();
                 if (catalogType.equals(org.spongepowered.api.advancement.Advancement.class) || catalogType.equals(AdvancementTree.class)) {
