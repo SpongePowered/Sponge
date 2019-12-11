@@ -189,11 +189,11 @@ public interface DefaultedExtent extends Extent {
                 tiles.put(new Vector3i(x - ox, y - oy, z - oz), archetype);
             }
         });
-        if (backing.getBlockSize().equals(Vector3i.ONE)) {
-            // We can't get entities within a 1x1x1 block area because of AABB...
-            return new SpongeArchetypeVolume(backing, tiles, Collections.emptyList());
-        }
-        final Set<Entity> intersectingEntities = volume.getIntersectingEntities(new AABB(min, max), entity -> !(entity instanceof Player));
+        // Note that AABB is in real co-ordinate space, but the passed Vector3is are in block co-ordinate space.
+        // This means that in order to capture all of the blocks in the volume, you must go to the maximum
+        // real co-ordinate of the block located at the max Vector3i position, which is +1 in all axes
+        final Set<Entity> intersectingEntities = volume.getIntersectingEntities(
+                new AABB(min, max.add(Vector3i.ONE)), entity -> !(entity instanceof Player));
         if (intersectingEntities.isEmpty()) {
             return new SpongeArchetypeVolume(backing, tiles, Collections.emptyList());
         }
