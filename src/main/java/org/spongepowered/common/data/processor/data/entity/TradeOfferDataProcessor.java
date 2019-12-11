@@ -39,7 +39,6 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTradeOfferData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.accessor.entity.merchant.villager.VillagerEntityAccessor;
 
 import java.util.List;
 import java.util.Optional;

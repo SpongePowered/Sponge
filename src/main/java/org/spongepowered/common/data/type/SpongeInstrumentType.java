@@ -27,7 +27,6 @@ package org.spongepowered.common.data.type;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.mixin.accessor.block.NoteBlockAccessor;
 
 public class SpongeInstrumentType extends SpongeCatalogType implements InstrumentType {
 

@@ -35,5 +35,4 @@ public interface CriteriaTriggersAccessor {
     @Invoker("register") static <T extends ICriterionTrigger> T accessor$register(T criterion) {
         throw new IllegalStateException("Untransformed Accessor!");
     }
-
 }

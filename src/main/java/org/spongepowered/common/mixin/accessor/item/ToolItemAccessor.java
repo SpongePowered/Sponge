@@ -37,7 +37,5 @@ public interface ToolItemAccessor {
 
     @Accessor("effectiveBlocks") Set<Block> accessor$getEffectiveBlocks();
 
-    @Accessor("toolMaterial") Item.ToolMaterial accessor$getToolMaterial();
-
     @Accessor("efficiency") float accessor$getEfficiency();
 }

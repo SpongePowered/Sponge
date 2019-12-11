@@ -38,8 +38,7 @@ public interface ShapedRecipeAccessor {
 
     @Accessor("group") String accessor$getGroup();
 
-    @Invoker("deserializeIngredients")
-    static NonNullList<Ingredient> accessor$deserializeIngredients(String[] pattern, Map<String, Ingredient> keys, int patternWidth, int patternHeight) {
+    @Invoker("deserializeIngredients") static NonNullList<Ingredient> accessor$deserializeIngredients(String[] pattern, Map<String, Ingredient> keys, int patternWidth, int patternHeight) {
         throw new IllegalStateException("Untransformed Accessor");
     }
 }

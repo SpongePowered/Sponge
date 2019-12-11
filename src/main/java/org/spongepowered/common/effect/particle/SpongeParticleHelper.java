@@ -152,8 +152,8 @@ public final class SpongeParticleHelper {
                 FireworkUtils.setFireworkEffects(itemStack, effects);
                 final SEntityMetadataPacket packetEntityMetadata = new SEntityMetadataPacket();
                 ((SEntityMetadataPacketAccessor) packetEntityMetadata).accessor$setEntityId(CachedFireworkPacket.FIREWORK_ROCKET_ID);
-                ((SEntityMetadataPacketAccessor) packetEntityMetadata).accessor$setDataManagerEntires(new ArrayList<>());
-                ((SEntityMetadataPacketAccessor) packetEntityMetadata).accessor$getDataManagerEntires().add(new EntityDataManager.DataEntry<>(
+                ((SEntityMetadataPacketAccessor) packetEntityMetadata).accessor$setDataManagerEntries(new ArrayList<>());
+                ((SEntityMetadataPacketAccessor) packetEntityMetadata).accessor$getDataManagerEntries().add(new EntityDataManager.DataEntry<>(
                     FireworkRocketEntityAccessor.accessor$getFireworkItem(), itemStack));
                 return new CachedFireworkPacket(packetEntityMetadata);
             }
@@ -358,7 +358,7 @@ public final class SpongeParticleHelper {
             // The status index that is used to trigger the fireworks effect,
             // can be found at: EntityFireworkRocket#handleStatusUpdate
             // or: EntityFireworkRocket#onUpdate -> setEntityState
-            ((SEntityStatusPacketAccessor) FIREWORK_ROCKET_DUMMY_EFFECT).accessor$setLogicOpcoe((byte) 17);
+            ((SEntityStatusPacketAccessor) FIREWORK_ROCKET_DUMMY_EFFECT).accessor$setLogicOpcode((byte) 17);
         }
 
         private final SEntityMetadataPacket entityMetadataPacket;

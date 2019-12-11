@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.accessor.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.FireBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -32,5 +33,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(FireBlock.class)
 public interface FireBlockAccessor {
 
-    @Invoker("getFlammability") int accessor$getFlammability(Block block);
+    @Invoker("func_220274_q") int accessor$func_220274_q(BlockState block);
 }

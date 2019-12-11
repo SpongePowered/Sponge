@@ -42,6 +42,4 @@ public abstract class PropertyMixin_API implements ProfileProperty {
     public Optional<String> getSignature() { // We don't need to make this @Implements because the signature difference
         return Optional.ofNullable(this.shadow$getSignature());
     }
-
-
 }

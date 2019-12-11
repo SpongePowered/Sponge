@@ -120,7 +120,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     protected void registerData() {
         // EntityLivingBase
-        this.dataManager.register(LivingEntityAccessor.accessor$getHandStates(), Byte.valueOf((byte)0));
+        this.dataManager.register(LivingEntityAccessor.accessor$getLivingFlags(), Byte.valueOf((byte)0));
         this.dataManager.register(LivingEntityAccessor.accessor$getPotionEffects(), Integer.valueOf(0));
         this.dataManager.register(LivingEntityAccessor.accessor$getHideParticles(), Boolean.valueOf(false));
         this.dataManager.register(LivingEntityAccessor.accessor$getArrowCountInEntity(), Integer.valueOf(0));

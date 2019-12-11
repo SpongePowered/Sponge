@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.accessor.network.play.server;
 
+import net.minecraft.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -43,5 +44,5 @@ public interface SSpawnObjectPacketAccessor {
 
     @Accessor("z") void accessor$setZ(double value);
 
-    @Accessor("type") void accessor$setType(int value);
+    @Accessor("type") void accessor$setType(EntityType<?> value);
 }

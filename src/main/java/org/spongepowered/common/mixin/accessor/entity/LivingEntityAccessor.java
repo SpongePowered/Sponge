@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 @Mixin(LivingEntity.class)
 public interface LivingEntityAccessor {
 
-    @Accessor("HAND_STATES") static DataParameter<Byte> accessor$getHandStates() {
+    @Accessor("LIVING_FLAGS") static DataParameter<Byte> accessor$getLivingFlags() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 

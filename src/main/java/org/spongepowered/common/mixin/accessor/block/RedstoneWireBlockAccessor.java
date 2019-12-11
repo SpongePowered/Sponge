@@ -36,6 +36,4 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface RedstoneWireBlockAccessor {
 
     @Accessor("canProvidePower") void accessor$setCanProvidePower(boolean can);
-
-    @Invoker("calculateCurrentChanges") BlockState accessor$calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, BlockState state);
 }

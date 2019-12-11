@@ -36,7 +36,6 @@ import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.mixin.accessor.world.chunk.storage.RegionFileCacheAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 import java.io.DataInputStream;

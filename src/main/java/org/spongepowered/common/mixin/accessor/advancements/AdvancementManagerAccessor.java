@@ -32,8 +32,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(AdvancementManager.class)
 public interface AdvancementManagerAccessor {
 
-    @Accessor("ADVANCEMENT_LIST")
-    static AdvancementList accessor$getAdvancementList() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
+    @Accessor("advancementList") AdvancementList accessor$getAdvancementList();
 }

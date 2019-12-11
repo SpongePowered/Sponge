@@ -29,8 +29,6 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.ToolTypeProperty;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
-import org.spongepowered.common.mixin.accessor.item.HoeItemAccessor;
-import org.spongepowered.common.mixin.accessor.item.SwordItemAccessor;
 import org.spongepowered.common.mixin.accessor.item.ToolItemAccessor;
 
 import java.util.Optional;

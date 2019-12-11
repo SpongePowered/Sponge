@@ -36,7 +36,7 @@ public interface SEntityMetadataPacketAccessor {
 
     @Accessor("entityId") void accessor$setEntityId(int id);
 
-    @Accessor("dataManagerEntries") List< EntityDataManager.DataEntry<? >> accessor$getDataManagerEntires();
+    @Accessor("dataManagerEntries") List< EntityDataManager.DataEntry<? >> accessor$getDataManagerEntries();
 
-    @Accessor("dataManagerEntries") void accessor$setDataManagerEntires(List< EntityDataManager.DataEntry<? >> entries);
+    @Accessor("dataManagerEntries") void accessor$setDataManagerEntries(List< EntityDataManager.DataEntry<? >> entries);
 }

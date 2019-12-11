@@ -34,7 +34,5 @@ import net.minecraft.tileentity.SkullTileEntity;
 @Mixin(SkullTileEntity.class)
 public interface SkullTileEntityAccessor {
 
-    @Invoker("getPlayerProfile") GameProfile accessor$getPlayerProfile();
-
-    @Accessor("skullRotation") int accessor$getSkullRotation();
+    @Accessor("playerProfile") GameProfile accessor$getPlayerProfile();
 }

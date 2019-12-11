@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.accessor.world.gen.feature;
 
+import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.DungeonsFeature;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,5 +33,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DungeonsFeature.class)
 public interface DungeonsFeatureAccessor {
 
-    @Accessor("SPAWNERTYPES") ResourceLocation[] accessor$getSpawnerTypes();
+    @Accessor("SPAWNERTYPES") EntityType<?>[] accessor$getSpawnerTypes();
 }

@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.accessor.item;
+package org.spongepowered.common.mixin.accessor.inventory.container;
 
-import net.minecraft.item.HoeItem;
-import net.minecraft.item.Item;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.AbstractFurnaceContainer;
+import net.minecraft.inventory.container.FurnaceContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(HoeItem.class)
-public interface HoeItemAccessor {
+@Mixin(AbstractFurnaceContainer.class)
+public interface AbstractFurnaceContainerAccessor {
 
-    @Accessor("toolMaterial") Item.ToolMaterial accessor$getToolMaterial();
+    @Accessor("furnaceInventory") IInventory accessor$getFurnaceInventory();
 }

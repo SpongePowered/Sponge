@@ -45,14 +45,14 @@ import javax.annotation.Nullable;
 @Implements(value = @Interface(iface = org.spongepowered.api.profile.GameProfile.class, prefix = "profile$"))
 public abstract class GameProfileMixin_API implements org.spongepowered.api.profile.GameProfile {
 
-    @Shadow public abstract UUID getId();
+    @Shadow public abstract UUID shadow$getId();
     @Nullable @Shadow public abstract String shadow$getName();
-    @Shadow public abstract PropertyMap getProperties();
-    @Shadow public abstract boolean isComplete();
+    @Shadow public abstract PropertyMap shadow$getProperties();
+    @Shadow public abstract boolean shadow$isComplete();
 
     @Override
     public UUID getUniqueId() {
-        return this.getId();
+        return this.shadow$getId();
     }
 
     @Override
@@ -60,15 +60,14 @@ public abstract class GameProfileMixin_API implements org.spongepowered.api.prof
         return Optional.ofNullable(this.shadow$getName());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Multimap<String, ProfileProperty> getPropertyMap() {
-        return (Multimap<String, ProfileProperty>) (Object) this.getProperties();
+        return (Multimap<String, ProfileProperty>) (Object) this.shadow$getProperties();
     }
 
     @Override
     public boolean isFilled() {
-        return this.isComplete();
+        return this.shadow$isComplete();
     }
 
     @Override

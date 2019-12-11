@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.common.entity.player;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
@@ -72,25 +71,18 @@ public abstract class SpongeUserMixin_API implements User {
         return this.getPlayer().isPresent();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<Player> getPlayer() {
         return Optional.ofNullable((Player) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public Optional<CommandSource> getCommandSource() {
-        return (Optional) this.getPlayer();
-    }
-
-    @Override
-    public boolean validateRawData(final DataView container) {
+    public boolean validateRawData(DataView container) {
         throw new UnsupportedOperationException(); // TODO Data API
     }
 
     @Override
-    public void setRawData(final DataView container) throws InvalidDataException {
+    public void setRawData(DataView container) throws InvalidDataException {
         throw new UnsupportedOperationException(); // TODO Data API
     }
 
@@ -112,7 +104,7 @@ public abstract class SpongeUserMixin_API implements User {
     }
 
     @Override
-    public boolean setLocation(final Vector3d position, final UUID world) {
+    public boolean setLocation(Vector3d position, UUID world) {
         final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.get().setLocation(position, world);
@@ -165,5 +157,4 @@ public abstract class SpongeUserMixin_API implements User {
     public String getIdentifier() {
         return this.profile.getId().toString();
     }
-
 }

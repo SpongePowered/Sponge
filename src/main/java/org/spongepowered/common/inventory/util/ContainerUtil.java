@@ -77,7 +77,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.inventory.container.ContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.BrewingStandContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.DispenserContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.FurnaceContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.AbstractFurnaceContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.HopperContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.HorseInventoryContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.MerchantContainerAccessor;
@@ -278,7 +278,7 @@ public final class ContainerUtil {
                     // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
                     // e.g. for IC2 ContainerIndustrialWorkbench
                     crafting.base = index + 1;
-                    crafting.grid = ((CraftingResultSlotAccessor) slot).accessor$getCraftMatrix();
+                    crafting.grid = ((CraftingResultSlotAccessor) slot).accessor$getField_75239_a();
                 }
             }
         }
@@ -334,8 +334,8 @@ public final class ContainerUtil {
             return carrierOrNull(((HopperContainerAccessor) container).accessor$getHopperInventory());
         } else if (container instanceof DispenserContainerAccessor) {
             return carrierOrNull(((DispenserContainerAccessor) container).accessor$getDispenserInventory());
-        } else if (container instanceof FurnaceContainerAccessor) {
-            return carrierOrNull(((FurnaceContainerAccessor) container).accessor$getTileFurnace());
+        } else if (container instanceof AbstractFurnaceContainerAccessor) {
+            return carrierOrNull(((AbstractFurnaceContainerAccessor) container).accessor$getFurnaceInventory());
         } else if (container instanceof BrewingStandContainerAccessor) {
             return carrierOrNull(((BrewingStandContainerAccessor) container).accessor$getTileBrewingStand());
         } else if (container instanceof BeaconContainer) {

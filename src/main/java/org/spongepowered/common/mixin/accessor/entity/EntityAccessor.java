@@ -31,15 +31,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(Entity.class)
 public interface EntityAccessor {
 
-    @Accessor("nextEntityID") static int accessor$getNextEntityID() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Accessor("nextEntityID") static void accessor$setNextEntityID(int id) {
+    @Accessor("NEXT_ENTITY_ID") static AtomicInteger accessor$getNextEntityID() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
