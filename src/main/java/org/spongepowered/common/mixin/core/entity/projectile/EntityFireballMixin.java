@@ -28,7 +28,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.DamagingProjectileEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.RayTraceResult;
-import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
+import org.spongepowered.api.entity.projectile.explosive.fireball.FireballEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,13 +46,13 @@ public abstract class EntityFireballMixin extends EntityMixin {
     @Override
     public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, ((Fireball) this));
+        ProjectileSourceSerializer.readSourceFromNbt(compound, ((FireballEntity) this));
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Fireball) this).getShooter(), this.shootingEntity);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((FireballEntity) this).getShooter(), this.shootingEntity);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
@@ -62,7 +62,7 @@ public abstract class EntityFireballMixin extends EntityMixin {
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((Fireball) this).getShooter(), movingObjectPosition)) {
+        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((FireballEntity) this).getShooter(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
     }

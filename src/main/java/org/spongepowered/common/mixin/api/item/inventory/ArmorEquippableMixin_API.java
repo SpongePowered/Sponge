@@ -38,13 +38,13 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
+import org.spongepowered.common.mixin.api.mcp.entity.LivingEntityMixin_API;
 
 import javax.annotation.Nullable;
 
 // All living implementors of ArmorEquipable
 @Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, HumanEntity.class})
-public abstract class ArmorEquippableMixin_API extends EntityLivingBaseMixin_API implements ArmorEquipable {
+public abstract class ArmorEquippableMixin_API extends LivingEntityMixin_API implements ArmorEquipable {
 
     @Override
     public ItemStack getItemInHand(HandType handType) {

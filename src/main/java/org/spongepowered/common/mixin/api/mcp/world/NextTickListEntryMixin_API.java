@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
-import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

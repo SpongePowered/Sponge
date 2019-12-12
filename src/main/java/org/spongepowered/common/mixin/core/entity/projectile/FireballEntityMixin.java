@@ -28,7 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireballEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
+import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.Location;
@@ -76,12 +76,12 @@ public abstract class FireballEntityMixin extends EntityFireballMixin implements
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, ((LargeFireball) this).getShooter()); // TODO - Remove in 1.13/API 8
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((LargeFireball) this).getShooter());
+            frame.addContext(EventContextKeys.THROWER, ((ExplosiveFireball) this).getShooter()); // TODO - Remove in 1.13/API 8
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((ExplosiveFireball) this).getShooter());
             frame.pushCause(((Projectile) this).getShooter());
             final Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
-                .sourceExplosive(((LargeFireball) this))
+                .sourceExplosive(((ExplosiveFireball) this))
                 .radius(strength)
                 .canCauseFire(flaming && griefer)
                 .shouldPlaySmoke(smoking && griefer)

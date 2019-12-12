@@ -32,12 +32,10 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.block.entity.BlockEntityType;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -52,12 +50,8 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-import java.util.Collection;
-import java.util.List;
-
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class TileEntityMixin_API implements BlockEntity {
 

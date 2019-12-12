@@ -26,14 +26,12 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.BannerPattern;
 import org.spongepowered.api.data.type.BannerPatternShape;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(BannerPattern.class)
-public class BannerPatternMixin_API implements BannerPatternShape {
+public abstract class BannerPatternMixin_API implements BannerPatternShape {
 
     @Shadow @Final private String fileName;
     @Shadow @Final private String hashname;

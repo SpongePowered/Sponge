@@ -24,76 +24,44 @@
  */
 package org.spongepowered.common.mixin.api.mcp.potion;
 
-import net.minecraft.potion.Effect;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
+import net.minecraft.util.registry.DefaultedRegistry;
+import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 
-@Mixin(Effect.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class PotionMixin_API implements PotionEffectType {
+@Mixin(net.minecraft.potion.Potion.class)
+public abstract class PotionMixin_API implements PotionType {
 
-    @Shadow @Final public static SimpleRegistry<ResourceLocation, Effect> REGISTRY;
+    @Shadow @Final public static DefaultedRegistry<ResourceLocation, net.minecraft.potion.Potion> REGISTRY;
+    @Shadow @Final private ImmutableList<net.minecraft.potion.EffectInstance> effects;
 
-    @Shadow public abstract String shadow$getName();
-    @Shadow public abstract boolean shadow$isInstant();
-
-    @Nullable private Translation api$translation;
-    @Nullable private Translation api$potionTranslation;
     @Nullable private String spongeResourceID;
 
-    @Intrinsic
-    public String potion$getId() {
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<PotionEffect> getEffects() {
+        return ((List) this.effects); // PotionEffect is mixed into
+    }
+
+    @Override
+    public String getId() {
         if (this.spongeResourceID == null) {
-            final ResourceLocation location = REGISTRY.getKey((Effect) (Object) this);
-            if (location == null) {
-                this.spongeResourceID = "unknown";
-            } else {
-                this.spongeResourceID = location.toString();
-            }
+            this.spongeResourceID = REGISTRY.getKey((net.minecraft.potion.Potion) (Object) this).toString();
         }
         return this.spongeResourceID;
     }
 
-    @Intrinsic
-    public boolean potion$isInstant() {
-        return this.shadow$isInstant();
-    }
-
-    @Intrinsic
-    public String potion$getName() {
-        return this.shadow$getName();
-    }
-
     @Override
-    public Translation getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
-        if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(this.shadow$getName());
-        }
-        return this.api$translation;
-    }
-
-    // TODO: Remove this from the API or change return type to Optional
-    @Override
-    public Translation getPotionTranslation() {
-        if (this.api$potionTranslation == null) {
-            String name = this.shadow$getName();
-            final String potionId = "potion." + PotionEffectTypeRegistryModule.potionMapping.getOrDefault(name, "effect.missing");
-            this.api$potionTranslation = new SpongeTranslation(potionId);
-        }
-        return this.api$potionTranslation;
+    public String getName() {
+        return this.getId();
     }
 
 }

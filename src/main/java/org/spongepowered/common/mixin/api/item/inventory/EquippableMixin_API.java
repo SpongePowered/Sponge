@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
+import org.spongepowered.common.mixin.api.mcp.entity.LivingEntityMixin_API;
 
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 
 // All living implementors of ArmorEquipable
 @Mixin({ArmorStandEntity.class, GiantEntity.class, ServerPlayerEntity.class, AbstractSkeletonEntity.class, ZombieEntity.class, HumanEntity.class})
-public abstract class EquippableMixin_API extends EntityLivingBaseMixin_API implements Equipable {
+public abstract class EquippableMixin_API extends LivingEntityMixin_API implements Equipable {
 
     @Override
     public boolean canEquip(final EquipmentType type) {

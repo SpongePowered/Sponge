@@ -37,7 +37,6 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -54,15 +53,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nullable;
 
 /**
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
-@NonnullByDefault
 @Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class,
         SpongeUser.class}, targets = "net/minecraft/tileentity/TileEntitySign$1")
 public abstract class SubjectMixin_API implements Subject {
