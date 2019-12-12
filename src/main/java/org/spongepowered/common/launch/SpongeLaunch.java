@@ -129,17 +129,17 @@ public class SpongeLaunch {
         // Register common mixin configurations
         Mixins.addConfiguration("mixins.common.api.json");
         Mixins.addConfiguration("mixins.common.bungeecord.json");
-        Mixins.addConfiguration("mixins.common.concurrentchecks.json");
+        Mixins.addConfiguration("mixins.common.concurrentcheck.json");
         Mixins.addConfiguration("mixins.common.core.json");
         Mixins.addConfiguration("mixins.common.entityactivation.json");
-        Mixins.addConfiguration("mixins.common.entitycollisions.json");
+        Mixins.addConfiguration("mixins.common.entitycollision.json");
         Mixins.addConfiguration("mixins.common.exploit.json");
-        Mixins.addConfiguration("mixins.common.movementchecks.json");
+        Mixins.addConfiguration("mixins.common.movementcheck.json");
         Mixins.addConfiguration("mixins.common.multi-world-command.json");
         Mixins.addConfiguration("mixins.common.optimization.json");
         Mixins.addConfiguration("mixins.common.realtime.json");
         Mixins.addConfiguration("mixins.common.tileentityactivation.json");
-        Mixins.addConfiguration("mixins.common.tracking.json");
+        Mixins.addConfiguration("mixins.common.tracker.json");
         Mixins.addConfiguration("mixins.common.vanilla-command.json");
         final VersionNumber environment = VersionNumber.parse(MixinEnvironment.getCurrentEnvironment().getVersion());
         final VersionNumber required = VersionNumber.parse("0.7.11");
