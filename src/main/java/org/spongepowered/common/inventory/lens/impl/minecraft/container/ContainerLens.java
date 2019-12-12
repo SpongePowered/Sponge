@@ -25,7 +25,7 @@
 package org.spongepowered.common.inventory.lens.impl.minecraft.container;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.PropertyEntry;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -39,11 +39,11 @@ public class ContainerLens extends RealLens {
     protected List<Lens> viewedInventories;
     private List<Lens> additonal;
 
-    public ContainerLens(int size, Class<? extends Inventory> adapter, SlotLensProvider slots, List<Lens> lenses) {
+    public ContainerLens(int size, Class adapter, SlotLensProvider slots, List<Lens> lenses) {
         this(size, adapter, slots, lenses, Collections.emptyList());
     }
 
-    public ContainerLens(int size, Class<? extends Inventory> adapter, SlotLensProvider slots, List<Lens> lenses, List<Lens> additonal) {
+    public ContainerLens(int size, Class adapter, SlotLensProvider slots, List<Lens> lenses, List<Lens> additonal) {
         this(size, adapter);
         this.viewedInventories = lenses;
         this.additonal = additonal;

@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.PropertyEntry;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -51,7 +51,7 @@ import javax.annotation.Nullable;
 
 public abstract class AbstractLens implements Lens {
 
-    protected final Class<? extends Inventory> adapterType;
+    protected Class<? extends Inventory> adapterType;
 
     protected final int base;
     protected Lens parent;
@@ -63,6 +63,14 @@ public abstract class AbstractLens implements Lens {
     protected int size;
 
     private int maxOrdinal = 0;
+
+    public AbstractLens(final int base, final int size) {
+        checkArgument(base >= 0, "Invalid offset: %s", base);
+        checkArgument(size > 0, "Invalid size: %s", size);
+
+        this.base = base;
+        this.size = size;
+    }
 
     public AbstractLens(final int base, final int size, final Class<? extends Inventory> adapterType) {
         checkArgument(base >= 0, "Invalid offset: %s", base);
@@ -77,7 +85,7 @@ public abstract class AbstractLens implements Lens {
     protected void addChild(final Lens lens, final PropertyEntry... properties) {
         checkNotNull(lens, "Attempted to register a null lens");
         LensHandle handle = this.handleMap.computeIfAbsent(lens, l -> new LensHandle(lens));
-        if (this.children.contains(lens)) {
+        if (!this.children.contains(lens)) {
             this.children.add(lens);
         }
         for (PropertyEntry property : properties) {

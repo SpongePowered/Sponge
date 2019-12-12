@@ -28,7 +28,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.CustomInventory;
-import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
@@ -49,20 +49,20 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
     private Lens finalLens; // always set before build
     @Nullable private UUID identity;
     @Nullable private Carrier carrier;
-    private CompoundSlotProvider finalProvider;
+    private CompoundSlotLensProvider finalProvider;
 
     public BuildingStep slots(int amount) {
         this.size += amount;
         net.minecraft.inventory.Inventory adapter = new net.minecraft.inventory.Inventory(amount);
         this.inventories.add((Inventory) adapter);
-        this.lenses.add(new DefaultIndexedLens(0, amount, ((InventoryAdapter) adapter).bridge$getSlotProvider()));
+        this.lenses.add(new DefaultIndexedLens(0, amount, ((InventoryAdapter) adapter).inventoryAdapter$getSlotLensProvider()));
         return this;
     }
 
     public BuildingStep grid(int sizeX, int sizeY) {
         this.size += sizeX * sizeY;
         net.minecraft.inventory.Inventory adapter = new net.minecraft.inventory.Inventory(sizeX * sizeY);
-        this.lenses.add(new GridInventoryLens(0, sizeX, sizeY, ((InventoryAdapter) adapter).bridge$getSlotProvider()));
+        this.lenses.add(new GridInventoryLens(0, sizeX, sizeY, ((InventoryAdapter) adapter).inventoryAdapter$getSlotLensProvider()));
         this.inventories.add((Inventory) adapter);
         return this;
     }
@@ -70,7 +70,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
     public BuildingStep inventory(Inventory inventory) {
         InventoryAdapter adapter = (InventoryAdapter) inventory;
         this.size += inventory.capacity();
-        this.lenses.add(adapter.bridge$getRootLens());
+        this.lenses.add(adapter.inventoryAdapter$getRootLens());
         this.inventories.add(inventory);
         return this;
     }
@@ -80,7 +80,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
         for (Lens lens : this.lenses) {
             lensBuilder.add(lens);
         }
-        CompoundSlotProvider provider = new CompoundSlotProvider();
+        CompoundSlotLensProvider provider = new CompoundSlotLensProvider();
         for (Inventory inventory : this.inventories) {
             provider.add(((InventoryAdapter) inventory));
         }
@@ -117,6 +117,5 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
 
         return this;
     }
-
 
 }

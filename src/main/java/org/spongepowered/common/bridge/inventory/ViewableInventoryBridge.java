@@ -1,14 +1,20 @@
 package org.spongepowered.common.bridge.inventory;
 
 import net.minecraft.inventory.container.Container;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ContainerType;
 
-import java.util.List;
+import java.util.Set;
 
 public interface ViewableInventoryBridge {
 
-    void bridge$addContainer(Container container);
+    void viewableBridge$addContainer(Container container);
 
-    void bridge$removeContainer(Container container);
+    void viewableBridge$removeContainer(Container container);
 
-    List<Container> bridge$getContainers();
+    Set<Player> viewableBridge$getViewers();
+
+    ContainerType viewableBridge$getType();
+
+    boolean viewableBridge$hasViewers();
 }

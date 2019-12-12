@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
-import static org.spongepowered.api.item.ItemTypes.BLAZE_POWDER;
-
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
+import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens.ItemStackFilter;
 import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -42,27 +39,20 @@ public class BrewingStandInventoryLens extends RealLens {
     private InputSlotLens fuel;
 
     public BrewingStandInventoryLens(SlotLensProvider slots) {
-        super(0, 5, BasicInventoryAdapter.class);
-        this.init(slots);
+        this(5, BasicInventoryAdapter.class, slots);
     }
 
     @SuppressWarnings("unchecked")
-    public BrewingStandInventoryLens(final InventoryAdapter adapter, final SlotLensProvider slots) {
-        super(0, adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass());
-        this.init(slots);
-    }
-
-    @SuppressWarnings("unchecked")
-    public BrewingStandInventoryLens(final int base, final InventoryAdapter adapter, final SlotLensProvider slots) {
-        super(base, adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass());
+    public BrewingStandInventoryLens(int size, Class clazz, final SlotLensProvider slots) {
+        super(0, size, clazz);
         this.init(slots);
     }
 
     protected void init(final SlotLensProvider slots) {
 
-        this.potions = new DefaultIndexedLens(0, 3, slots); // TODO correct type
-        this.ingredient = new InputSlotLens(3, (i) -> true, (i) -> true); // TODO filter PotionIngredients
-        this.fuel = new FuelSlotLens(4, (i) -> BLAZE_POWDER.equals(i.getType()), BLAZE_POWDER::equals);
+        this.potions = new DefaultIndexedLens(0, 3, slots); // TODO filter
+        this.ingredient = new InputSlotLens(slots.getSlotLens(3), ItemStackFilter.filterIInventory(3));
+        this.fuel = new FuelSlotLens(slots.getSlotLens(4), ItemStackFilter.filterIInventory(4));
 
         this.addSpanningChild(this.potions);
         this.addSpanningChild(this.ingredient);

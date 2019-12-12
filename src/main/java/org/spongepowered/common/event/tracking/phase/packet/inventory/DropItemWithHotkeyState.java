@@ -104,7 +104,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     } else {
                         final CClickWindowPacket packetIn = context.getPacket();
                         usedButton = packetIn.getUsedButton();
-                        slot = ((InventoryAdapter) player.inventory).bridge$getSlot(packetIn.getSlotId()).orElse(null);
+                        slot = ((InventoryAdapter) player.inventory).inventoryAdapter$getSlot(packetIn.getSlotId()).orElse(null);
                     }
 
                     final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);

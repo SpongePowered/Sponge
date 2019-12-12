@@ -30,9 +30,9 @@ import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.HeldSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
@@ -85,7 +85,7 @@ public class HeldHandSlotLens implements SlotLens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Slot getAdapter(Fabric fabric, Inventory parent) {
         return new HeldSlotAdapter(fabric, this, parent);
     }
 

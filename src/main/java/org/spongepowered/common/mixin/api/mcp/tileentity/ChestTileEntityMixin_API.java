@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
+import net.minecraft.tileentity.ChestTileEntity;
 import org.spongepowered.api.block.entity.carrier.chest.Chest;
-import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.inventory.util.InventoryUtil;
+
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.tileentity.ChestTileEntity;
 
 @Mixin(ChestTileEntity.class)
 public abstract class ChestTileEntityMixin_API extends LockableLootTileEntityMixin_API<Chest> implements Chest {
@@ -51,11 +51,6 @@ public abstract class ChestTileEntityMixin_API extends LockableLootTileEntityMix
         if (connectedChestData.isPresent()) {
             manipulators.add(connectedChestData.get());
         }
-    }
-
-    @Override
-    public Optional<Inventory> getDoubleChestInventory() {
-        return InventoryUtil.getDoubleChestInventory(((ChestTileEntity)(Object) this));
     }
 
     @Override

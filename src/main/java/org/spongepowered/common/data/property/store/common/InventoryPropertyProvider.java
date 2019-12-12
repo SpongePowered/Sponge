@@ -75,14 +75,14 @@ public class InventoryPropertyProvider<V> implements PropertyProvider<V> {
 
     public static <V> Optional<V> getProperty(Inventory inventory, Inventory child, Property<V> property) {
         InventoryAdapter adapter = ((InventoryBridge) inventory).bridge$getAdapter();
-        return getProperty(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), child, property);
+        return getProperty(adapter.inventoryAdapter$getFabric(), adapter.inventoryAdapter$getRootLens(), child, property);
     }
 
     public static <V> Optional<V> getProperty(Fabric fabric, Lens lens, Inventory child, Property<V> property) {
         // TODO properties that do not come from lenses
         checkNotNull(property, "property");
         InventoryAdapter childAdapter = ((InventoryBridge) child).bridge$getAdapter();
-        V propertyValue = (V) lens.getProperties(childAdapter.bridge$getRootLens()).get(property);
+        V propertyValue = (V) lens.getProperties(childAdapter.inventoryAdapter$getRootLens()).get(property);
         return Optional.ofNullable(propertyValue);
     }
 
@@ -106,7 +106,7 @@ public class InventoryPropertyProvider<V> implements PropertyProvider<V> {
     }
 
     private static Optional<Integer> getMaxStackSize(InventoryBridge inventory) {
-        Integer i = inventory.bridge$getAdapter().bridge$getFabric().fabric$getMaxStackSize();
+        Integer i = inventory.bridge$getAdapter().inventoryAdapter$getFabric().fabric$getMaxStackSize();
         return Optional.of(i);
     }
 

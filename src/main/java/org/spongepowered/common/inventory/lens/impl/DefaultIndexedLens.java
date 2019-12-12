@@ -25,19 +25,26 @@
 package org.spongepowered.common.inventory.lens.impl;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public class DefaultIndexedLens extends SlotBasedLens {
 
+    public DefaultIndexedLens(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
+        super(base, size, stride, adapterType, slots);
+    }
+
+    public DefaultIndexedLens(int size, int stride, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
+        super(size, stride, adapterType, slots);
+    }
+
     public DefaultIndexedLens(int base, int size, SlotLensProvider slots) {
         super(base, size, 1, BasicInventoryAdapter.class, slots);
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         return new BasicInventoryAdapter(fabric, this, parent);
     }
 }

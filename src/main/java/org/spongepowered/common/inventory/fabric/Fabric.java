@@ -25,7 +25,6 @@
 package org.spongepowered.common.inventory.fabric;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 
 import java.util.Collection;

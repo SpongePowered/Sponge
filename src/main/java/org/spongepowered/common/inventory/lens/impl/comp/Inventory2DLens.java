@@ -28,8 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.common.inventory.PropertyEntry;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.adapter.impl.comp.Inventory2DAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.SlotBasedLens;
@@ -89,7 +88,7 @@ public class Inventory2DLens extends SlotBasedLens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         return new Inventory2DAdapter(fabric, this, parent);
     }
 

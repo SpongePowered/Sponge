@@ -26,7 +26,6 @@ package org.spongepowered.common.inventory.lens.impl;
 
 import net.minecraft.inventory.container.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -54,7 +53,7 @@ public class DelegatingLens extends AbstractLens {
     public DelegatingLens(final int base, final List<Slot> containerSlots, final Lens lens, final SlotLensProvider slots) {
         super(base, containerSlots.size(), BasicInventoryAdapter.class);
         this.delegate = lens;
-        final org.spongepowered.common.inventory.lens.impl.DelegatingLens.CustomSlotProvider slotProvider = new org.spongepowered.common.inventory.lens.impl.DelegatingLens.CustomSlotProvider();
+        final CustomSlotProvider slotProvider = new CustomSlotProvider();
         for (final Slot slot : containerSlots) {
             // Get slots from original slot provider and add them to custom slot provider in order of actual containerSlots.
             slotProvider.add(slots.getSlotLens(((SlotAccessor) slot).accessor$getSlotNumber()));
@@ -71,7 +70,7 @@ public class DelegatingLens extends AbstractLens {
 
     @SuppressWarnings("unchecked")
     @Override
-    public InventoryAdapter getAdapter(final Fabric fabric, final Inventory parent) {
+    public Inventory getAdapter(final Fabric fabric, final Inventory parent) {
         return new BasicInventoryAdapter(fabric, this, parent);
     }
 

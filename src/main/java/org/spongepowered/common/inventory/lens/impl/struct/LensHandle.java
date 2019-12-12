@@ -25,7 +25,7 @@
 package org.spongepowered.common.inventory.lens.impl.struct;
 
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.common.inventory.PropertyEntry;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.lens.Lens;
 
 import java.util.Collections;

@@ -32,7 +32,6 @@ import org.spongepowered.api.entity.living.animal.horse.Horse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.api.mcp.entity.passive.horse.AbstractHorseMixin_API;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
 import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 import org.spongepowered.common.util.Constants;

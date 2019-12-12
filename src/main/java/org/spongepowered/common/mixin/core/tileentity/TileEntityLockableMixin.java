@@ -26,24 +26,10 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.ReusableLensProvider;
-import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
-import org.spongepowered.common.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 @NonnullByDefault
 @Mixin(LockableTileEntity.class)
-public abstract class TileEntityLockableMixin extends TileEntityMixin implements ReusableLensProvider, InventoryAdapter, InventoryAdapterBridge {
-
-    @Override
-    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return ReusableLens.getLens(DefaultIndexedLens.class, adapter,
-                () -> new SlotLensCollection.Builder().add(((LockableTileEntity) (Object) this).getSizeInventory()).build(),
-                (slots) -> new DefaultIndexedLens(0, ((LockableTileEntity) (Object) this).getSizeInventory(), slots));
-    }
+public abstract class TileEntityLockableMixin extends TileEntityMixin {
 
 }

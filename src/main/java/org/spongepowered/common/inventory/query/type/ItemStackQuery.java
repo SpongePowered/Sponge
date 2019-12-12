@@ -44,7 +44,7 @@ public abstract class ItemStackQuery<T> extends SpongeDepthQuery {
     @Override
     public boolean matches(Lens lens, Lens parent, Inventory inventory) {
         if (lens instanceof SlotLens) {
-            Fabric fabric = ((InventoryBridge) inventory).bridge$getAdapter().bridge$getFabric();
+            Fabric fabric = ((InventoryBridge) inventory).bridge$getAdapter().inventoryAdapter$getFabric();
             ItemStack stack = ItemStackUtil.fromNative(((SlotLens) lens).getStack(fabric));
             if (stack == null) {
                 return false;

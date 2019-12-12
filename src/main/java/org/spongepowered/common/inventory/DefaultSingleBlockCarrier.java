@@ -28,8 +28,13 @@ import net.minecraft.inventory.ISidedInventory;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.SingleBlockCarrier;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.item.inventory.slot.SlotMatchers;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+
+import java.util.Arrays;
 
 public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
 
@@ -43,8 +48,18 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
         if (thisThing instanceof ISidedInventory) {
             net.minecraft.util.Direction facing = DirectionFacingProvider.getInstance().get(from).get();
             int[] slots = ((ISidedInventory) thisThing).getSlotsForFace(facing);
-            // TODO query
-            return thisThing.getInventory().query(slots);
+
+            if (slots.length == 0) {
+                return new EmptyInventoryImpl(thisThing.getInventory());
+            }
+
+            // build query for each slot
+            Query.Builder builder = Query.builder();
+            Arrays.stream(slots).mapToObj(slot -> QueryTypes.PROPERTY.of(SlotMatchers.index(slot)))
+                    .forEach(builder::and);
+            Query query = builder.build();
+
+            return thisThing.getInventory().query(query);
         }
         return thisThing.getInventory();
     }

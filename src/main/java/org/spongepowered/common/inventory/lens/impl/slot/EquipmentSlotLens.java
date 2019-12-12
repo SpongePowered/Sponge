@@ -24,13 +24,16 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import org.spongepowered.api.item.ItemType;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.function.Predicate;
 
@@ -38,13 +41,23 @@ public class EquipmentSlotLens extends FilteringSlotLens {
     
     private final Predicate<EquipmentType> equipmentTypeFilter;
 
-    public EquipmentSlotLens(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter, Predicate<EquipmentType> equipmentTypeFilter) {
-        this(index, EquipmentSlotAdapter.class, stackFilter, typeFilter, equipmentTypeFilter);
+    public EquipmentSlotLens(SlotLens lens, EquipmentType type) {
+        super(lens, equipmentTypeFilter(type), EquipmentSlotAdapter.class);
+        this.equipmentTypeFilter = e -> e == type;
     }
 
-    public EquipmentSlotLens(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter, Predicate<EquipmentType> equipmentTypeFilter) {
-        super(index, adapterType, stackFilter, typeFilter);
-        this.equipmentTypeFilter = equipmentTypeFilter;
+    private static FilteringSlotLens.ItemStackFilter equipmentTypeFilter(EquipmentType type) {
+        return (fabric, item) -> {
+            EquipmentSlotType itemSlotType = MobEntity.getSlotForItemStack(ItemStackUtil.toNative(item));
+            if (type instanceof SpongeEquipmentType) {
+                for (EquipmentSlotType slotType : ((SpongeEquipmentType) type).getSlots()) {
+                    if (slotType == itemSlotType) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
     }
 
     public Predicate<EquipmentType> getEquipmentTypeFilter() {
@@ -52,7 +65,7 @@ public class EquipmentSlotLens extends FilteringSlotLens {
     }
     
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Slot getAdapter(Fabric fabric, Inventory parent) {
         return new EquipmentSlotAdapter(fabric, this, parent);
     }
 

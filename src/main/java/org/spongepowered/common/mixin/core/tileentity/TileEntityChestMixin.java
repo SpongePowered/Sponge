@@ -28,21 +28,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
 import org.spongepowered.plugin.meta.util.NonnullByDefault;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
@@ -58,21 +49,6 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
 
     @Shadow public abstract void checkForAdjacentChests();
     @Shadow public abstract int getSizeInventory();
-
-    @Override
-    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
-    }
-
-    private SlotLensProvider impl$generateSlotProvider() {
-        return new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
-    }
-
-    @SuppressWarnings("unchecked")
-    private GridInventoryLens impl$generateRootLens(final SlotLensProvider slots) {
-        final int size = this.getSizeInventory();
-        return new GridInventoryLens(0, 9, size / 9, (Class<? extends Inventory>) this.getClass(), slots);
-    }
 
     /**
      * @author bloodmc - July 21st, 2016

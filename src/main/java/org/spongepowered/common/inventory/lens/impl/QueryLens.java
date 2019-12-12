@@ -1,7 +1,6 @@
 package org.spongepowered.common.inventory.lens.impl;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -18,7 +17,7 @@ public class QueryLens extends AbstractLens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         return new BasicInventoryAdapter(fabric, this, parent);
     }
 

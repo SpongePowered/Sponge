@@ -34,14 +34,5 @@ import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 @Mixin(ContainerMinecartEntity.class)
 public abstract class ContainerMinecartMixin_API<M extends CarrierMinecart<M>> extends AbstractMinecartEntityMixin_API implements CarrierMinecart<M> {
 
-    @Override
-    public CarriedInventory<M> getInventory() {
-        return this;
-    }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Optional<M> getCarrier() {
-        return Optional.of((M) this);
-    }
 }

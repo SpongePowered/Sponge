@@ -79,8 +79,6 @@ public abstract class MobEntityMixin_API extends LivingEntityMixin_API implement
         }
     }
 
-
-
     @Override
     public AgentData getAgentData() {
         return new SpongeAgentData(!this.isAIDisabled());

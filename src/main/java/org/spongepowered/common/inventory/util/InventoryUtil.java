@@ -35,6 +35,7 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -45,6 +46,7 @@ import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridg
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
+import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
@@ -66,7 +68,7 @@ public final class InventoryUtil {
     }
 
     public static CraftingInventory toNativeInventory(CraftingGridInventory inv) {
-        Fabric fabric = ((CraftingGridInventoryAdapter) inv).bridge$getFabric();
+        Fabric fabric = ((CraftingGridInventoryAdapter) inv).inventoryAdapter$getFabric();
         for (Object inventory : fabric.fabric$allInventories()) {
             if (inventory instanceof CraftingInventory) {
                 return ((CraftingInventory) inventory);
@@ -182,5 +184,10 @@ public final class InventoryUtil {
             });
         }
         return container;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Carrier> CarriedInventory<T> carriedWrapperInventory(net.minecraft.inventory.IInventory inventory, T carrier) {
+        return (CarriedInventory<T>) new CarriedWrapperInventory(inventory, carrier);
     }
 }

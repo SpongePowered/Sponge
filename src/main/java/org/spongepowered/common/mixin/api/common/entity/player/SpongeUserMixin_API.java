@@ -31,7 +31,6 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -43,7 +42,6 @@ import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import java.util.UUID;
-import net.minecraft.inventory.EnderChestInventory;
 
 @Mixin(value = SpongeUser.class, remap = false)
 public abstract class SpongeUserMixin_API implements User {
@@ -56,10 +54,8 @@ public abstract class SpongeUserMixin_API implements User {
     @Shadow private int dimension;
     @Shadow private float rotationPitch;
     @Shadow private float rotationYaw;
-    @Shadow private EnderChestInventory enderChest;
 
     @Shadow public abstract void markDirty();
-    @Shadow protected abstract SpongeUser loadEnderInventory();
 
     @Override
     public GameProfile getProfile() {
@@ -141,17 +137,6 @@ public abstract class SpongeUserMixin_API implements User {
         this.rotationPitch = ((float) rotation.getX()) % 360.0F;
         this.rotationYaw = ((float) rotation.getY()) % 360.0F;
     }
-
-    @Override
-    public Inventory getEnderChestInventory() {
-        final Optional<Player> playerOpt = this.getPlayer();
-        if (playerOpt.isPresent()) {
-            return playerOpt.get().getEnderChestInventory();
-        }
-        this.loadEnderInventory();
-        return ((Inventory) this.enderChest);
-    }
-
 
     @Override
     public String getIdentifier() {

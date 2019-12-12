@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static net.minecraft.inventory.container.FurnaceFuelSlot.isBucket;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.Transaction;
@@ -49,18 +46,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.FuelSlotAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.InputSlotAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.OutputSlotAdapter;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collections;
@@ -73,29 +58,6 @@ public abstract class TileEntityFurnaceMixin extends TileEntityLockableMixin imp
     @Shadow private int currentItemBurnTime;
 
     @Shadow protected abstract boolean canSmelt();
-
-
-    @Override
-    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return ReusableLens.getLens(FurnaceInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
-    }
-
-    private SlotLensProvider impl$generateSlotProvider() {
-        return new SlotLensCollection.Builder().add(InputSlotAdapter.class, InputSlotLens::new)
-                .add(FuelSlotAdapter.class,
-                        (i) -> new FuelSlotLens(i, (s) -> FurnaceTileEntity.isItemFuel(ItemStackUtil.toNative(s)) || isBucket(ItemStackUtil.toNative(s)),
-                        t -> {
-                            final ItemStack nmsStack = ItemStackUtil.toNative(org.spongepowered.api.item.inventory.ItemStack.of(t, 1));
-                            return FurnaceTileEntity.isItemFuel(nmsStack) || isBucket(nmsStack);
-                        }))
-                // TODO represent the filtering in the API somehow
-                .add(OutputSlotAdapter.class, (i) -> new OutputSlotLens(i, (s) -> true, (t) -> true))
-                .build();
-    }
-
-    private FurnaceInventoryLens impl$generateRootLens(final SlotLensProvider slots) {
-        return new FurnaceInventoryLens(this, slots);
-    }
 
     @Override
     public void bridge$setCustomDisplayName(final String customName) {

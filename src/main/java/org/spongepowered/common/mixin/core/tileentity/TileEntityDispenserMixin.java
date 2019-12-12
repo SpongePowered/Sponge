@@ -25,30 +25,9 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.DispenserTileEntity;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.inventory.lens.impl.collections.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 
 @Mixin(DispenserTileEntity.class)
 public abstract class TileEntityDispenserMixin extends TileEntityLockableLootMixin {
-
-    @Override
-    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
-    }
-
-    private SlotLensProvider impl$generateSlotProvider() {
-        return new SlotLensCollection.Builder().add(9).build();
-    }
-
-    @SuppressWarnings("unchecked")
-    private GridInventoryLens impl$generateRootLens(final SlotLensProvider slots) {
-        return new GridInventoryLens(0, 3, 3, (Class<? extends Inventory>) this.getClass(), slots);
-    }
 
 }

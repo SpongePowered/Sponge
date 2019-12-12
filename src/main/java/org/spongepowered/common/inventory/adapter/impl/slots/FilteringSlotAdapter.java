@@ -51,8 +51,7 @@ public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
 
     @Override
     public boolean isValidItem(ItemType type) {
-        Predicate<ItemType> filter = this.filteringSlot.getItemTypeFilter();
-        return filter == null || filter.test(type);
+        return this.isValidItem(ItemStack.of(type));
     }
 
     /*

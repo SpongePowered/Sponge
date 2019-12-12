@@ -908,7 +908,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             if (entity instanceof ServerPlayerEntity) {
                 final SlotLens slotLens;
                 final PlayerInventoryBridge inventory = (PlayerInventoryBridge) ((ServerPlayerEntity) entity).inventory;
-                final Lens inventoryLens = ((InventoryAdapter) inventory).bridge$getRootLens();
+                final Lens inventoryLens = ((InventoryAdapter) inventory).inventoryAdapter$getRootLens();
                 if (inventoryLens instanceof PlayerInventoryLens) {
                     switch (entityEquipmentSlot) {
                         case OFFHAND:
@@ -916,7 +916,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                             break;
                         case MAINHAND:
                             final HotbarLens hotbarLens = ((PlayerInventoryLens) inventoryLens).getPrimaryInventoryLens().getHotbar();
-                            slotLens = hotbarLens.getSlotLens(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).bridge$getFabric()));
+                            slotLens = hotbarLens.getSlotLens(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).inventoryAdapter$getFabric()));
                             break;
                         default:
                             slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlotLens(entityEquipmentSlot.getIndex());
@@ -925,7 +925,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     slotLens = inventoryLens.getSlotLens(entityEquipmentSlot.getIndex());
                 }
 
-                slotAdapter = slotLens.getAdapter(((InventoryAdapter) inventory).bridge$getFabric(), (Inventory) inventory);
+                slotAdapter = slotLens.getAdapter(((InventoryAdapter) inventory).inventoryAdapter$getFabric(), (Inventory) inventory);
             } else {
                 if (this.slotLens.isEmpty()) {
                     for (final EquipmentSlotType slot : EquipmentSlotType.values()) {

@@ -44,7 +44,7 @@ public abstract class RealLens extends AbstractLens {
 
     @SuppressWarnings("unchecked")
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
-        return fabric.fabric$get(this.base).bridge$getAdapter();
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
+        return (Inventory) fabric.fabric$get(this.base).bridge$getAdapter();
     }
 }

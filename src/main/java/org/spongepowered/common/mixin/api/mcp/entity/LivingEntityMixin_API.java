@@ -73,7 +73,7 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     @Shadow public abstract float getHealth();
     @Shadow public abstract float getMaxHealth();
     @Shadow public abstract float getRotationYawHead();
-    @Shadow public abstract ItemStack getItemStackFromSlot(EquipmentSlotType slotIn);
+
     @Shadow public abstract ItemStack getHeldItem(Hand hand);
     @Shadow public abstract ItemStack getHeldItemMainhand();
 

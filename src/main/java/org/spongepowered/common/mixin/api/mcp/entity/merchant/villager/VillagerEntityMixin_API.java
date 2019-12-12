@@ -51,7 +51,7 @@ import net.minecraft.entity.player.PlayerEntity;
 
 @Mixin(VillagerEntity.class)
 @Implements(@Interface(iface = Villager.class, prefix = "apiVillager$"))
-public abstract class VillagerEntityMixin_API extends AgeableEntityMixin_API implements Villager, CarriedInventory<Villager> {
+public abstract class VillagerEntityMixin_API extends AgeableEntityMixin_API implements Villager {
 
     @Shadow public abstract void setProfession(int professionId);
     @Shadow public abstract void setCustomer(PlayerEntity player);
@@ -93,13 +93,4 @@ public abstract class VillagerEntityMixin_API extends AgeableEntityMixin_API imp
         manipulators.add(this.getCareerData());
     }
 
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return this;
-    }
-
-    @Override
-    public Optional<Villager> getCarrier() {
-        return Optional.of(this);
-    }
 }

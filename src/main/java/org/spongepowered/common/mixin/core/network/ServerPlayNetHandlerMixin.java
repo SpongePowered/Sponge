@@ -824,7 +824,8 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
 
                             if (hand == Hand.OFF_HAND) {
                                 // A window id of -2 can be used to set the off hand, even if a container is open.
-                                this.sendPacket(new SSetSlotPacket(-2, ((PlayerContainerBridge) this.player.container).bridge$getOffHandSlot(), itemstack));
+                                // TODO is it correct to just use slotindex 45?
+                                this.sendPacket(new SSetSlotPacket(-2, 45, itemstack));
                             } else { // MAIN_HAND
                                 // TODO correct?
                                 this.sendPacket(new SSetSlotPacket(this.player.openContainer.windowId, this.player.inventory.currentItem, itemstack));

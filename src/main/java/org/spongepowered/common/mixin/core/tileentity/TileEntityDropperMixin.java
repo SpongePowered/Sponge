@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
+import net.minecraft.tileentity.DropperTileEntity;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.tileentity.DropperTileEntity;
 
 @NonnullByDefault
 @Mixin(DropperTileEntity.class)

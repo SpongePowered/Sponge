@@ -719,7 +719,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     private void onSetContainer(final IInventory chestInventory, final CallbackInfo ci) {
         if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ChestContainer && this.isSpectator()) {
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
-            ((InventoryAdapter) this.openContainer).bridge$setSpectatorChest(true);
+            ((InventoryAdapter) this.openContainer).inventoryAdapter$setSpectatorChest(true);
         }
     }
 
@@ -748,7 +748,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             inventory = ((Carrier) inventory).getInventory();
         }
         if (inventory instanceof Inventory) {
-            ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).bridge$addContainer(this.openContainer));
+            ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).viewableBridge$addContainer(this.openContainer));
         }
         ((TrackedContainerBridge) this.openContainer).bridge$setViewed(inventory);
         // TODO else unknown inventory - try to provide wrapper Interactable

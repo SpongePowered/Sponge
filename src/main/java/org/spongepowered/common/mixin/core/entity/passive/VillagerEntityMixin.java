@@ -46,7 +46,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.merchant.villager.VillagerEntityBridge;
-import org.spongepowered.common.bridge.inventory.InventoryAdapterBridge;
+import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -65,7 +65,7 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @Mixin(VillagerEntity.class)
-public abstract class VillagerEntityMixin extends EntityAgeableMixin implements VillagerEntityBridge, InventoryAdapter, InventoryAdapterBridge {
+public abstract class VillagerEntityMixin extends EntityAgeableMixin implements VillagerEntityBridge {
 
     @Shadow private int careerId; // careerId
     @Shadow private int careerLevel; // careerLevel
@@ -80,16 +80,6 @@ public abstract class VillagerEntityMixin extends EntityAgeableMixin implements 
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
     private void onSetProfession(final int professionId, final CallbackInfo ci) {
         this.impl$profession = SpongeImplHooks.validateProfession(professionId);
-    }
-
-    @Override
-    public SlotLensProvider bridge$generateSlotProvider() {
-        return new SlotLensCollection.Builder().add(8).build();
-    }
-
-    @Override
-    public Lens bridge$generateLens(SlotLensProvider slots) {
-        return new DefaultIndexedLens(0, 8, slots);
     }
 
     @Override

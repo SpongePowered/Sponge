@@ -28,7 +28,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.GridInventoryAdapter;
-import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.query.SpongeQuery;
 import org.spongepowered.math.vector.Vector2i;
@@ -59,7 +59,7 @@ public class GridQuery extends SpongeQuery {
         }
 
         // Get slots for new grid
-        CompoundSlotProvider slotProvider = new CompoundSlotProvider();
+        CompoundSlotLensProvider slotProvider = new CompoundSlotLensProvider();
 
         for (int dy = 0; dy < this.size.getY(); dy++) {
             for (int dx = 0; dx < this.size.getX(); dx++) {
@@ -69,7 +69,7 @@ public class GridQuery extends SpongeQuery {
 
         // build new grid lens
         GridInventoryLens lens = new GridInventoryLens(0, this.size.getX(), this.size.getY(), slotProvider);
-        return new GridInventoryAdapter(adapter.bridge$getFabric(), lens, inventory);
+        return new GridInventoryAdapter(adapter.inventoryAdapter$getFabric(), lens, inventory);
     }
 
 

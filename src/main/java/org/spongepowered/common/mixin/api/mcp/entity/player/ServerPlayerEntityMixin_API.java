@@ -64,17 +64,10 @@ import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -100,9 +93,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.api.text.title.TitleBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
+import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
@@ -113,14 +109,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.bridge.advancements.AdvancementBridge;
-import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
-import org.spongepowered.common.bridge.api.text.title.TitleBridge;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.Constants;
@@ -129,6 +117,7 @@ import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -287,63 +276,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public Optional<Container> getOpenInventory() {
-        return Optional.ofNullable((Container) this.openContainer);
-    }
-
-    @Override
-    public Optional<Container> openInventory(final Inventory inventory) throws IllegalArgumentException {
-        return this.openInventory(inventory, null);
-    }
-
-    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
-    @Override
-    public Optional<Container> openInventory(final Inventory inventory, final Text displayName) {
-        if (((ContainerBridge) this.openContainer).bridge$isInUse()) {
-            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
-                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    cause.all().forEach(frame::pushCause);
-                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
-                    this.closeInventory(); // Cause close event first. So cursor item is not lost.
-                    this.openInventory(inventory); // Then open the inventory
-                }
-            }).submit(SpongeImpl.getPlugin());
-            return this.getOpenInventory();
-        }
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((ServerPlayerEntity) (Object) this, inventory, displayName));
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public boolean closeInventory() throws IllegalArgumentException {
-        if (((ContainerBridge) this.openContainer).bridge$isInUse()) {
-            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
-                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    cause.all().forEach(frame::pushCause);
-                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
-                    this.closeInventory();
-                }
-            }).submit(SpongeImpl.getPlugin());
-            return false;
-        }
-        // Create Close_Window to capture item drops
-        try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
-                .source(this)
-                .packetPlayer(((ServerPlayerEntity)(Object) this))
-                .openContainer(this.openContainer)
-             // intentionally missing the lastCursor to not double throw close event
-                ) {
-            ctx.buildAndSwitch();
-            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-            return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (ServerPlayerEntity) (Object) this, cursor, cursor, false).isCancelled();
-        }
-    }
-
-    @Override
     public void setScoreboard(final Scoreboard scoreboard) {
         if (((ServerPlayerEntityBridge) this).bridge$hasDelegate()) {
             ((Player) ((ServerPlayerEntityBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
@@ -471,11 +403,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.inventory;
-    }
-
-    @Override
     public TabList getTabList() {
         return this.api$tabList;
     }
@@ -539,11 +466,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     public void resetBlockChange(final int x, final int y, final int z) {
         final SChangeBlockPacket packet = new SChangeBlockPacket(this.world, new BlockPos(x, y, z));
         this.connection.sendPacket(packet);
-    }
-
-    @Override
-    public Inventory getEnderChestInventory() {
-        return (Inventory) this.enderChest;
     }
 
     @Override

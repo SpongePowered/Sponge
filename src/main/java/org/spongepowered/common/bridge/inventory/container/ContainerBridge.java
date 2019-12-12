@@ -28,18 +28,14 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.world.Location;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
 public interface ContainerBridge {
-
-    Optional<Carrier> bridge$getCarrier();
 
     LinkedHashMap<IInventory, Set<net.minecraft.inventory.container.Slot>> bridge$getInventories();
 
@@ -55,5 +51,6 @@ public interface ContainerBridge {
 
     boolean bridge$isInUse();
 
-    List<ServerPlayerEntity> listeners();
+    List<ServerPlayerEntity> bridge$listeners();
+
 }

@@ -29,18 +29,14 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.world.LockCode;
-import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.block.entity.carrier.CarrierBlockEntity;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.manipulator.mutable.item.InventoryItemData;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.type.BlockEntityInventory;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -49,8 +45,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(LockableTileEntity.class)
-public abstract class LockableTileEntityMixin_API<T extends BlockEntity & Carrier> extends TileEntityMixin_API
-    implements CarrierBlockEntity, BlockEntityInventory<T> {
+public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API {
 
     @Shadow @Nullable private LockCode code;
 
@@ -87,28 +82,4 @@ public abstract class LockableTileEntityMixin_API<T extends BlockEntity & Carrie
             manipulators.add(this.get(DisplayNameData.class).get());
         }
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public BlockEntityInventory<CarrierBlockEntity> getInventory() {
-        return (BlockEntityInventory<CarrierBlockEntity>) this;
-    }
-
-    @Override
-    public Inventory getInventory(final Direction from) {
-        return DefaultSingleBlockCarrier.getInventory(from, this);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Optional<T> getTileEntity() {
-        return Optional.of((T) this);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Optional<T> getCarrier() {
-        return Optional.of((T) this);
-    }
-
 }

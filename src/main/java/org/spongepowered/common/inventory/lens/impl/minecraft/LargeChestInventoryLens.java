@@ -26,8 +26,6 @@ package org.spongepowered.common.inventory.lens.impl.minecraft;
 
 import net.minecraft.tileentity.ChestTileEntity;
 import org.spongepowered.api.block.entity.carrier.chest.Chest;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -42,19 +40,10 @@ public class LargeChestInventoryLens extends RealLens {
     private int upperChest;
     private int lowerChest;
 
-    public LargeChestInventoryLens(final InventoryAdapter adapter, final SlotLensProvider slots) {
-        super(0, adapter.bridge$getFabric().fabric$getSize(), Inventory.class);
-        final DoubleSidedInventoryAccessor inventory = (DoubleSidedInventoryAccessor) adapter;
-        this.upperChest = inventory.accessor$getField_70477_b().getSizeInventory();
-        this.lowerChest = inventory.accessor$getField_70478_c().getSizeInventory();
-        this.init(slots);
-    }
-
-    public LargeChestInventoryLens(final int base, final InventoryAdapter adapter, final SlotLensProvider slots) {
-        super(base, adapter.bridge$getFabric().fabric$getSize(), Inventory.class);
-        final DoubleSidedInventoryAccessor inventory = (DoubleSidedInventoryAccessor) adapter.bridge$getFabric().fabric$get(0);
-        this.upperChest = inventory.accessor$getField_70477_b().getSizeInventory();
-        this.lowerChest = inventory.accessor$getField_70478_c().getSizeInventory();
+    public LargeChestInventoryLens(int size, Class clazz, SlotLensProvider slots) {
+        super(0, size, clazz);
+        this.upperChest = size / 2;
+        this.lowerChest = size / 2;
         this.init(slots);
     }
 

@@ -54,18 +54,19 @@ import java.util.Optional;
  */
 public interface InventoryAdapter {
     
-    SlotLensProvider bridge$getSlotProvider();
+    SlotLensProvider inventoryAdapter$getSlotLensProvider();
 
-    Lens bridge$getRootLens();
+    Lens inventoryAdapter$getRootLens();
 
-    Fabric bridge$getFabric();
+    Fabric inventoryAdapter$getFabric();
 
-    default Optional<Slot> bridge$getSlot(final int ordinal) {
-        final SlotLens slotLens = this.bridge$getRootLens().getSlotLens(ordinal);
-        return BasicInventoryAdapter.forSlot(this.bridge$getFabric(), slotLens, (Inventory) this);
+    // TODO override this to provide caching when possible
+    default Optional<Slot> inventoryAdapter$getSlot(final int ordinal) {
+        final SlotLens slotLens = this.inventoryAdapter$getRootLens().getSlotLens(ordinal);
+        return BasicInventoryAdapter.forSlot(this.inventoryAdapter$getFabric(), slotLens, (Inventory) this);
     }
 
     // TODO check if this is needed?
-    default void bridge$setSpectatorChest(boolean spectatorChest) {}
+    default void inventoryAdapter$setSpectatorChest(boolean spectatorChest) {}
 
 }

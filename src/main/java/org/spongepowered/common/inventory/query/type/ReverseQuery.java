@@ -31,7 +31,7 @@ import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.inventory.query.SpongeQuery;
 
@@ -57,14 +57,14 @@ public class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
         List<Slot> slots = new ArrayList<>(((Inventory) inventory).slots());
         Collections.reverse(slots);
 
-        CompoundSlotProvider slotProvider = new CompoundSlotProvider();
+        CompoundSlotLensProvider slotProvider = new CompoundSlotLensProvider();
         slots.forEach(s -> slotProvider.add((InventoryAdapter) s));
 
         InventoryAdapter adapter = ((InventoryBridge) inventory).bridge$getAdapter();
 
-        CompoundLens lens = CompoundLens.builder().add(adapter.bridge$getRootLens()).build(slotProvider);
+        CompoundLens lens = CompoundLens.builder().add(adapter.inventoryAdapter$getRootLens()).build(slotProvider);
 
-        return (Inventory) lens.getAdapter(adapter.bridge$getFabric(), (Inventory) inventory);
+        return (Inventory) lens.getAdapter(adapter.inventoryAdapter$getFabric(), (Inventory) inventory);
     }
 
     @Override
