@@ -22,34 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.passive;
+package org.spongepowered.common.mixin.invalid.core.village;
 
-import net.minecraft.entity.merchant.IMerchant;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
-import org.spongepowered.api.item.merchant.Merchant;
-import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.item.merchant.TradeOfferListMutator;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.village.Village;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.util.TradeOfferUtil;
-import java.util.List;
-import java.util.Random;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 
-@Mixin(VillagerEntity.ITradeList.class)
-public interface EntityVillager_ITradeListMixin_API extends TradeOfferListMutator, VillagerEntity.ITradeList {
+// 1.14 Removes the concept of a village being based on doors, instead it is based on points of interest now.
+@Mixin(Village.class)
+public abstract class VillageMixin {
 
-    @Override
-    default void accept(final Merchant owner, final List<TradeOffer> tradeOffers, final Random random) {
-        final MerchantRecipeList tempList = new MerchantRecipeList();
-        for (final TradeOffer offer : tradeOffers) {
-            tempList.add(TradeOfferUtil.toNative(offer));
+    @Shadow private World world;
+
+    @Inject(method = "isWoodDoor", at = @At("HEAD"), cancellable = true)
+    private void impl$IgnoreEmptyChunks(final BlockPos pos, final CallbackInfoReturnable<Boolean> cir) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
+            return;
         }
-        addMerchantRecipe((IMerchant) owner, tempList, random);
-        tradeOffers.clear();
-        for (final MerchantRecipe recipe : tempList) {
-            tradeOffers.add(TradeOfferUtil.fromNative(recipe));
+        final Chunk chunk = ((AbstractChunkProviderBridge) this.world.getChunkProvider())
+            .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null || chunk.isEmpty()) {
+            cir.setReturnValue(false);
         }
     }
-
 }

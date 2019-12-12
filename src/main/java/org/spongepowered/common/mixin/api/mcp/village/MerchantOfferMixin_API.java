@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.village;
 
-import net.minecraft.village.MerchantRecipe;
+import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -40,59 +40,58 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @NonnullByDefault
-@Mixin(MerchantRecipe.class)
-public abstract class MerchantRecipeMixin_API implements TradeOffer {
+@Mixin(MerchantOffer.class)
+public abstract class MerchantOfferMixin_API implements TradeOffer {
 
-    @Shadow public abstract net.minecraft.item.ItemStack getItemToBuy();
-    @Shadow public abstract boolean hasSecondItemToBuy();
-    @Shadow @Nullable public abstract net.minecraft.item.ItemStack getSecondItemToBuy();
-    @Shadow public abstract net.minecraft.item.ItemStack getItemToSell();
-    @Shadow public abstract int getToolUses();
-    @Shadow public abstract int getMaxTradeUses();
-    @Shadow public abstract boolean isRecipeDisabled();
-    @Shadow public abstract boolean getRewardsExp();
+    @Shadow public abstract net.minecraft.item.ItemStack getBuyingStackFirst();
+    @Shadow @Nullable public abstract net.minecraft.item.ItemStack getBuyingStackSecond();
+    @Shadow public abstract net.minecraft.item.ItemStack getSellingStack();
+    @Shadow public abstract int shadow$getUses();
+    @Shadow public abstract int func_222214_i(); // getMaxUses
+    @Shadow public abstract boolean hasNoUsesLeft();
+    @Shadow public abstract boolean getDoesRewardExp();
 
     @Override
     public ItemStackSnapshot getFirstBuyingItem() {
-        return ((ItemStack) this.getItemToBuy()).createSnapshot();
+        return ((ItemStack) this.getBuyingStackFirst()).createSnapshot();
     }
 
     @Override
     public boolean hasSecondItem() {
-        return this.hasSecondItemToBuy();
+        return this.getBuyingStackSecond() != net.minecraft.item.ItemStack.EMPTY;
     }
 
     @Override
     public Optional<ItemStackSnapshot> getSecondBuyingItem() {
-        if (this.getSecondItemToBuy() == null) {
+        if (this.getBuyingStackSecond() == null) {
             return Optional.empty();
         }
-        return Optional.of(((ItemStack) this.getSecondItemToBuy()).createSnapshot());
+        return Optional.of(((ItemStack) this.getBuyingStackSecond()).createSnapshot());
     }
 
     @Override
     public ItemStackSnapshot getSellingItem() {
-        return ((ItemStack) this.getItemToSell()).createSnapshot();
+        return ((ItemStack) this.getSellingStack()).createSnapshot();
     }
 
     @Override
     public int getUses() {
-        return this.getToolUses();
+        return this.shadow$getUses();
     }
 
     @Override
     public int getMaxUses() {
-        return this.getMaxTradeUses();
+        return this.func_222214_i();
     }
 
     @Override
     public boolean hasExpired() {
-        return this.isRecipeDisabled();
+        return this.hasNoUsesLeft();
     }
 
     @Override
     public boolean doesGrantExperience() {
-        return this.getRewardsExp();
+        return this.getDoesRewardExp();
     }
 
     @Override
@@ -106,9 +105,9 @@ public abstract class MerchantRecipeMixin_API implements TradeOffer {
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Item.TradeOffer.FIRST_QUERY, this.getFirstBuyingItem())
                 .set(Constants.Item.TradeOffer.SECOND_QUERY, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
-                .set(Constants.Item.TradeOffer.BUYING_QUERY, this.getItemToBuy())
+                .set(Constants.Item.TradeOffer.BUYING_QUERY, this.getBuyingStackFirst())
                 .set(Constants.Item.TradeOffer.EXPERIENCE_QUERY, this.doesGrantExperience())
-                .set(Constants.Item.TradeOffer.MAX_QUERY, this.getMaxTradeUses())
+                .set(Constants.Item.TradeOffer.MAX_QUERY, this.func_222214_i())
                 .set(Constants.Item.TradeOffer.USES_QUERY, this.getUses());
     }
 

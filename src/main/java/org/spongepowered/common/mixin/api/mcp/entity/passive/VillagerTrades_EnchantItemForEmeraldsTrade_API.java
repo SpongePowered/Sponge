@@ -27,10 +27,9 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.village.MerchantRecipe;
+import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
@@ -44,25 +43,27 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(VillagerEntity.ListEnchantedItemForEmeralds.class)
-public class EntityVillager_ListEnchantedItemForEmeraldsMixin_API implements TradeOfferGenerator {
+//
+// i509VCB: Yes the classes which implement ITrade, like ItemsForEmeraldsAndItemsTrade are package private
+// For clarification this trade is Emeralds -> Enchanted Item
+// TODO: These need a new home
+@Mixin(targets = "net/minecraft/entity/merchant/villager/VillagerTrades$EnchantedItemForEmeraldsTrade")
+public class VillagerTrades_EnchantItemForEmeraldsTrade_API implements TradeOfferGenerator {
 
-    @Shadow public ItemStack enchantedItemStack;
-    @Shadow public VillagerEntity.PriceInfo priceInfo;
+    @Shadow public ItemStack sellingStack; // Note this is not enchanted yet.
+    @Shadow public int emeraldCount;
+    @Shadow public int maxUses;
+    @Shadow public int xpValue;
+    @Shadow public float priceMultiplier;
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
-        int emeraldCount = 1;
-
-        if (this.priceInfo != null) {
-            emeraldCount = this.priceInfo.getPrice(random);
-        }
-
-        ItemStack itemstack = new ItemStack(Items.EMERALD, emeraldCount, 0);
-        ItemStack itemstack1 = new ItemStack(this.enchantedItemStack.getItem(), 1, this.enchantedItemStack.getMetadata());
-        itemstack1 = EnchantmentHelper.addRandomEnchantment(random, itemstack1, 5 + random.nextInt(15), false);
-        return (TradeOffer) new MerchantRecipe(itemstack, itemstack1);
+        ItemStack emeraldItemStack = new ItemStack(Items.EMERALD, emeraldCount);
+        ItemStack enchantedItemStack = new ItemStack(this.sellingStack.getItem(), 1);
+        enchantedItemStack.setTag(this.sellingStack.getTag().copy());
+        enchantedItemStack = EnchantmentHelper.addRandomEnchantment(random, enchantedItemStack, 5 + random.nextInt(15), false);
+        return (TradeOffer) new MerchantOffer(emeraldItemStack, enchantedItemStack, maxUses, xpValue, priceMultiplier);
     }
 
 

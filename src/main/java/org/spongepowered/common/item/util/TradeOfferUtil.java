@@ -24,19 +24,20 @@
  */
 package org.spongepowered.common.item.util;
 
+import net.minecraft.item.MerchantOffer;
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.item.merchant.TradeOffer;
 
 public class TradeOfferUtil {
 
-    public static MerchantRecipe toNative(TradeOffer tradeOffer) {
-        if (tradeOffer instanceof MerchantRecipe) {
-            return (MerchantRecipe) tradeOffer;
+    public static MerchantOffer toNative(TradeOffer tradeOffer) {
+        if (tradeOffer instanceof MerchantOffer) {
+            return (MerchantOffer) tradeOffer;
         }
         throw new NativeTradeOfferException("The supplied trade offer was not native to the current platform");
     }
 
-    public static TradeOffer fromNative(MerchantRecipe merchantRecipe) {
+    public static TradeOffer fromNative(MerchantOffer merchantRecipe) {
         if (merchantRecipe instanceof TradeOffer || merchantRecipe == null) {
             return (TradeOffer) merchantRecipe;
         }

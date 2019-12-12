@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util.datafix;
+package org.spongepowered.common.mixin.invalid.core.util.datafix;
 
 import net.minecraft.util.datafix.DataFixer;
 import org.spongepowered.asm.mixin.Final;
@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
+// i509VCB: DataFixerUpper makes this redundant due to the entire infrastructure changing.
 @Mixin(DataFixer.class)
 public abstract class DataFixerMixin {
 

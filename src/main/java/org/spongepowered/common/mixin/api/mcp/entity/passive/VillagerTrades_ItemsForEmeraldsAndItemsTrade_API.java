@@ -26,10 +26,9 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.village.MerchantRecipe;
+import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
@@ -43,33 +42,33 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(VillagerEntity.ItemAndEmeraldToItem.class)
-public class EntityVillager_ItemAndEmeraldToItemMixin_API implements TradeOfferGenerator {
+//
+// i509VCB: Yes the classes which implement ITrade, like ItemsForEmeraldsAndItemsTrade are package private
+// For clarification this trade is Emeralds + Item(s) -> A related item.
+// This is similar to the Raw Cod + Emeralds -> Cooked Cod trade.
+// TODO: These need a new home
+@Mixin(targets = "net/minecraft/entity/merchant/villager/VillagerTrades$ItemsForEmeraldsAndItemsTrade")
+public class VillagerTrades_ItemsForEmeraldsAndItemsTrade_API implements TradeOfferGenerator {
 
-    @Shadow public ItemStack buyingItemStack;
-    @Shadow public VillagerEntity.PriceInfo buyingPriceInfo;
-    @Shadow public ItemStack sellingItemstack;
-    @Shadow public VillagerEntity.PriceInfo sellingPriceInfo;
+    @Shadow private ItemStack buyingItem;
+    @Shadow private int buyingItemCount;
+    @Shadow private int emeraldCount;
+    @Shadow private ItemStack sellingItem;
+    @Shadow private int sellingItemCount;
+    @Shadow private int maxUses;
+    @Shadow private int xpValue;
+    @Shadow private float priceMultiplier;
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
-        int buyingCount = 1;
 
-        if (this.buyingPriceInfo != null) {
-            buyingCount = this.buyingPriceInfo.getPrice(random);
-        }
-
-        int sellingCount = 1;
-
-        if (this.sellingPriceInfo != null) {
-            sellingCount = this.sellingPriceInfo.getPrice(random);
-        }
-
-        final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.getItem(), buyingCount, this.buyingItemStack.getMetadata());
-        final ItemStack emeraldStack = new ItemStack(Items.EMERALD);
-        final ItemStack itemStackSelling = new ItemStack(this.sellingItemstack.getItem(), sellingCount, this.sellingItemstack.getMetadata());
-        return (TradeOffer) new MerchantRecipe(itemStackBuying, emeraldStack, itemStackSelling);
+        final ItemStack itemStackBuying = new ItemStack(this.buyingItem.getItem(), buyingItemCount);
+        itemStackBuying.setTag(this.buyingItem.getTag().copy());
+        final ItemStack emeraldStack = new ItemStack(Items.EMERALD, emeraldCount);
+        final ItemStack itemStackSelling = new ItemStack(this.sellingItem.getItem(), sellingItemCount);
+        itemStackSelling.setTag(sellingItem.getTag().copy());
+        return (TradeOffer) new MerchantOffer(itemStackBuying, emeraldStack, itemStackSelling, maxUses, xpValue, priceMultiplier);
     }
 
 

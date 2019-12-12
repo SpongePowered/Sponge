@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.village;
 
-import net.minecraft.village.MerchantRecipe;
+import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,18 +32,20 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 
-@Mixin(MerchantRecipe.class)
-public abstract class MerchantRecipeMixin {
+@Mixin(MerchantOffer.class)
+public abstract class MerchantOfferMixin {
 
-    @Shadow public abstract net.minecraft.item.ItemStack getItemToBuy();
-    @Shadow @Nullable public abstract net.minecraft.item.ItemStack getSecondItemToBuy();
-    @Shadow public abstract net.minecraft.item.ItemStack getItemToSell();
-    @Shadow public abstract int getToolUses();
-    @Shadow public abstract int getMaxTradeUses();
-    @Shadow public abstract boolean getRewardsExp();
+    @Shadow public abstract net.minecraft.item.ItemStack getBuyingStackFirst();
+    @Shadow @Nullable public abstract net.minecraft.item.ItemStack getBuyingStackSecond();
+    @Shadow public abstract net.minecraft.item.ItemStack getSellingStack();
+    @Shadow public abstract int getUses();
+    @Shadow public abstract boolean getDoesRewardExp();
+    @Shadow public abstract int func_222214_i(); // getMaxUses
 
-    // This is a little questionable, since we're mixing into a Mixnecraft class.
-    // However, Vanill adoesn't override equals(), so no one except plugins
+    @Shadow public abstract int getGivenExp();
+
+    // This is a little questionable, since we're mixing into a Minecraft class.
+    // However, Vanilla doesn't override equals(), so no one except plugins
     // should be calling it,
     @Override
     public boolean equals(Object o) {
@@ -53,12 +55,12 @@ public abstract class MerchantRecipeMixin {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        MerchantRecipe other = (MerchantRecipe) o;
-        return ItemStackComparators.ALL.compare((ItemStack) this.getItemToBuy(), (ItemStack) other.getItemToBuy()) == 0
-                && ItemStackComparators.ALL.compare((ItemStack) this.getSecondItemToBuy(), (ItemStack) other.getSecondItemToBuy()) == 0
-                && ItemStackComparators.ALL.compare((ItemStack) this.getItemToSell(), (ItemStack) other.getItemToSell()) == 0
-                && this.getToolUses() == other.getToolUses()
-                && this.getMaxTradeUses() == other.getMaxTradeUses()
-                && this.getRewardsExp() == other.getRewardsExp();
+        MerchantOffer other = (MerchantOffer) o;
+        return ItemStackComparators.ALL.compare((ItemStack) this.getBuyingStackFirst(), (ItemStack) other.getBuyingStackFirst()) == 0
+                && ItemStackComparators.ALL.compare((ItemStack) this.getBuyingStackSecond(), (ItemStack) other.getBuyingStackSecond()) == 0
+                && ItemStackComparators.ALL.compare((ItemStack) this.getSellingStack(), (ItemStack) other.getSellingStack()) == 0
+                && this.getUses() == other.getUses()
+                && this.func_222214_i() == other.func_222214_i()
+                && this.getGivenExp() == other.getGivenExp();
     }
 }

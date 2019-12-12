@@ -26,10 +26,14 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentData;
+import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.village.MerchantRecipe;
+import net.minecraft.item.MerchantOffer;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
@@ -43,33 +47,31 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(VillagerEntity.ListItemForEmeralds.class)
-public class EntityVillager_ListItemForEmeraldsMixin_API implements TradeOfferGenerator {
-
-    @Shadow public ItemStack itemToBuy;
-    @Shadow public VillagerEntity.PriceInfo priceInfo;
+//
+// i509VCB: Yes the classes which implement ITrade, like ItemsForEmeraldsAndItemsTrade are package private
+// For clarification this trade is Emeralds + Book -> Enchanted Book
+// TODO: These need a new home
+@Mixin(targets = "net/minecraft/entity/merchant/villager/VillagerTrades$EnchantedBookForEmeraldsTrade")
+public class VillagerTrades_EnchantedBookForEmeraldsTradeMixin_API implements TradeOfferGenerator {
+    @Shadow int xpValue;
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
-        int amount = 1;
+        Enchantment enchantment = Registry.ENCHANTMENT.getRandom(random);
+        int enchantmentLevel = MathHelper.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+        ItemStack itemstack = EnchantedBookItem.getEnchantedItemStack(new EnchantmentData(enchantment, enchantmentLevel));
+        int emeraldCount = 2 + random.nextInt(5 + enchantmentLevel * 10) + 3 * enchantmentLevel;
 
-        if (this.priceInfo != null) {
-            amount = this.priceInfo.getPrice(random);
+        if (enchantment.isTreasureEnchantment()) {
+            emeraldCount *= 2;
         }
 
-        ItemStack itemstack;
-        ItemStack itemstack1;
-
-        if (amount < 0) {
-            itemstack = new ItemStack(Items.EMERALD, 1, 0);
-            itemstack1 = new ItemStack(this.itemToBuy.getItem(), -amount, this.itemToBuy.getMetadata());
-        } else {
-            itemstack = new ItemStack(Items.EMERALD, amount, 0);
-            itemstack1 = new ItemStack(this.itemToBuy.getItem(), 1, this.itemToBuy.getMetadata());
+        if (emeraldCount > 64) {
+            emeraldCount = 64;
         }
-
-        return (TradeOffer) new MerchantRecipe(itemstack, itemstack1);
+        // Vanilla seems to hardcode the max uses to 12 and a multiplier of 0.2
+        return (TradeOffer) new MerchantOffer(new ItemStack(Items.BOOK), new ItemStack(Items.EMERALD, emeraldCount), itemstack, 12, this.xpValue, 0.2F);
     }
 
 
