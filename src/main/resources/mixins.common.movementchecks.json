@@ -1,12 +1,12 @@
 {
   "minVersion": "0.7.10",
-  "package": "org.spongepowered.common.mixin.movementchecks",
+  "package": "org.spongepowered.common.mixin.movementcheck",
   "refmap": "mixins.common.refmap.json",
-  "plugin": "org.spongepowered.common.mixin.plugin.MovementChecksPlugin",
+  "plugin": "org.spongepowered.common.mixin.plugin.MovementCheckPlugin",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-      "NetHandlerPlayServerMixin_MovementChecks"
+    "network.play.ServerPlayNetHandlerMixin_MovementCheck"
   ],
   "injectors": {
     "defaultRequire": 1

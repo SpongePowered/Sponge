@@ -74,7 +74,7 @@ import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.core.world.chunk.ChunkMixin;
-import org.spongepowered.common.mixin.tracking.world.ChunkMixin_Tracker;
+import org.spongepowered.common.mixin.tracker.world.chunk.ChunkMixin_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;

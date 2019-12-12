@@ -73,6 +73,7 @@
         "tileentity.HopperTileEntityAccessor",
         "tileentity.MobSpawnerTileEntityAccessor",
         "tileentity.SkullTileEntityAccessor",
+        "util.math.AxisAlignedBBAccessor",
         "util.text.StringTextComponentAccessor",
         "util.text.StyleAccessor",
         "util.CombatEntryAccessor",

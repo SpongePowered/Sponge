@@ -163,7 +163,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
-import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
+import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
@@ -373,8 +373,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 if (entity instanceof ActivationCapability) {
                     ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
                 }
-                if (entity instanceof CollisionsCapability) {
-                    ((CollisionsCapability) entity).collision$requiresCollisionsCacheRefresh(true);
+                if (entity instanceof CollisionCapabilityBridge) {
+                    ((CollisionCapabilityBridge) entity).collision$requiresCollisionsCacheRefresh(true);
                 }
             }
         }

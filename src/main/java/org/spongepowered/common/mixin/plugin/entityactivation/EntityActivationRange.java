@@ -75,7 +75,7 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
-import org.spongepowered.common.mixin.entityactivation.util.math.AxisAlignedBBAccessor_EntityActivation;
+import org.spongepowered.common.mixin.accessor.util.math.AxisAlignedBBAccessor;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 import java.util.Map;
@@ -206,12 +206,12 @@ public class EntityActivationRange {
      * @param z The z value to expand by
      */
     public static void growBb(final AxisAlignedBB target, final AxisAlignedBB source, final int x, final int y, final int z) {
-        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMinX(source.minX - x);
-        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMinY(source.minY - y);
-        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMinZ(source.minZ - z);
-        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMaxX(source.maxX + x);
-        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMaxY(source.maxY + y);
-        ((AxisAlignedBBAccessor_EntityActivation) target).accessor$setMaxZ(source.maxZ + z);
+        ((AxisAlignedBBAccessor) target).accessor$setMinX(source.minX - x);
+        ((AxisAlignedBBAccessor) target).accessor$setMinY(source.minY - y);
+        ((AxisAlignedBBAccessor) target).accessor$setMinZ(source.minZ - z);
+        ((AxisAlignedBBAccessor) target).accessor$setMaxX(source.maxX + x);
+        ((AxisAlignedBBAccessor) target).accessor$setMaxY(source.maxY + y);
+        ((AxisAlignedBBAccessor) target).accessor$setMaxZ(source.maxZ + z);
     }
 
     /**

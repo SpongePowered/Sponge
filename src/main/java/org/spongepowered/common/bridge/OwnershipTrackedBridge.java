@@ -31,10 +31,10 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.tracking.bridge.OwnershipTrackedBridgeMixin;
-import org.spongepowered.common.mixin.tracking.entity.EntityMixin_TrackerAPI;
-import org.spongepowered.common.mixin.tracking.world.ChunkMixin_Tracker;
-import org.spongepowered.common.mixin.tracking.world.WorldMixin_TrackerAPI;
+import org.spongepowered.common.mixin.tracker.bridge.OwnershipTrackedBridgeMixin_Tracker;
+import org.spongepowered.common.mixin.tracker.entity.EntityMixin_Tracker;
+import org.spongepowered.common.mixin.tracker.world.chunk.ChunkMixin_Tracker;
+import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,9 +42,9 @@ import java.util.UUID;
 /**
  * An optionally implemented interface to bridge getting the
  * {@link UUID} and/or {@link User} from the targets. This
- * is implemented by {@link OwnershipTrackedBridgeMixin}
- * backing hooks and implementation by {@link EntityMixin_TrackerAPI},
- * {@link ChunkMixin_Tracker}, and {@link WorldMixin_TrackerAPI}.
+ * is implemented by {@link OwnershipTrackedBridgeMixin_Tracker}
+ * backing hooks and implementation by {@link EntityMixin_Tracker},
+ * {@link ChunkMixin_Tracker}, and {@link WorldMixin_Tracker}.
  * Note that it is not guaranteed this interface is mixed onto
  * {@link Entity} and {@link TileEntity} because of the option
  * for {@link ModuleCategory#useTracking()}. If the tracking is

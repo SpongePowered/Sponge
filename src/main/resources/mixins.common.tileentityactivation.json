@@ -7,10 +7,10 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1300,
     "server": [
-        "ChunkMixin_TileEntityActivation",
+        "mcp.world.chunk.ChunkMixin_TileEntityActivation",
         "SpongeImplHooksMixin_TileEntityActivation",
-        "TileEntityMixin_Activation",
-        "WorldServerMixin_TileEntityActivation"
+        "mcp.tileentity.TileEntityMixin_Activation",
+        "mcp.world.server.ServerWorldMixin_TileEntityActivation"
     ],
     "injectors": {
         "defaultRequire": 1

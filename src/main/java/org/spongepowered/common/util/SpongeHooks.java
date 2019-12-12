@@ -63,7 +63,7 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
-import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
+import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -464,8 +464,8 @@ public class SpongeHooks {
 
     public static void refreshActiveConfigs() {
         for (final BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
-            if (blockType instanceof CollisionsCapability) {
-                ((CollisionsCapability) blockType).collision$requiresCollisionsCacheRefresh(true);
+            if (blockType instanceof CollisionCapabilityBridge) {
+                ((CollisionCapabilityBridge) blockType).collision$requiresCollisionsCacheRefresh(true);
             }
             if (blockType instanceof TrackableBridge) {
                 ((BlockBridge) blockType).bridge$initializeTrackerState();
@@ -487,8 +487,8 @@ public class SpongeHooks {
                 if (entity instanceof ActivationCapability) {
                     ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
                 }
-                if (entity instanceof CollisionsCapability) {
-                    ((CollisionsCapability) entity).collision$requiresCollisionsCacheRefresh(true);
+                if (entity instanceof CollisionCapabilityBridge) {
+                    ((CollisionCapabilityBridge) entity).collision$requiresCollisionsCacheRefresh(true);
                 }
                 if (entity instanceof TrackableBridge) {
                     ((TrackableBridge) entity).bridge$refreshTrackerStates();
