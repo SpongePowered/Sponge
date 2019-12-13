@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
@@ -33,7 +34,7 @@ public class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
     private final byte id;
 
     public SpongeNotePitch(byte id, String name) {
-        super(name);
+        super(CatalogKey.minecraft(name.toLowerCase()));
         this.id = id;
     }
 

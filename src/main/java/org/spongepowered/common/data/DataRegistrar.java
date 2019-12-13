@@ -27,19 +27,7 @@ package org.spongepowered.common.data;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.Comparator;
-import org.spongepowered.api.block.entity.DaylightDetector;
-import org.spongepowered.api.block.entity.EnchantmentTable;
-import org.spongepowered.api.block.entity.EndPortal;
-import org.spongepowered.api.block.entity.EnderChest;
-import org.spongepowered.api.block.entity.MobSpawner;
 import org.spongepowered.api.block.entity.PlayerHead;
-import org.spongepowered.api.block.entity.carrier.Beacon;
-import org.spongepowered.api.block.entity.carrier.BrewingStand;
-import org.spongepowered.api.block.entity.carrier.Dispenser;
-import org.spongepowered.api.block.entity.carrier.Dropper;
-import org.spongepowered.api.block.entity.carrier.Hopper;
-import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.block.tileentity.*;
 import org.spongepowered.api.block.tileentity.carrier.*;
@@ -917,7 +905,7 @@ public final class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_TAKING_DISABLED, new TakingDisabledValueProcessor());
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_PLACING_DISABLED, new PlacingDisabledValueProcessor());
-        
+
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();
 

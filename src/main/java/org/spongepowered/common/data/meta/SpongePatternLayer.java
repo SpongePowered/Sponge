@@ -60,8 +60,8 @@ public class SpongePatternLayer implements PatternLayer {
     public DataContainer toContainer() {
         return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.TileEntity.Banner.SHAPE, this.id.getId())
-            .set(Constants.TileEntity.Banner.COLOR, this.color.getName());
+            .set(Constants.TileEntity.Banner.SHAPE, this.id.getKey())
+            .set(Constants.TileEntity.Banner.COLOR, this.color.getKey());
     }
 
 }

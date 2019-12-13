@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import java.util.function.Predicate;
 

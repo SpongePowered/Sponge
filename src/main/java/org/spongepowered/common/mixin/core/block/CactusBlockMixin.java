@@ -24,28 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.CactusBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-
-import java.util.Optional;
 
 @Mixin(CactusBlock.class)
 public abstract class CactusBlockMixin extends BlockMixin {
@@ -67,38 +56,4 @@ public abstract class CactusBlockMixin extends BlockMixin {
             ((DamageSourceBridge) source).bridge$setCactusSource();
         }
     }
-
-    @SuppressWarnings("RedundantTypeArguments")
-    @Override
-    public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(this.impl$getGrowthData(blockState));
-    }
-
-    @Override
-    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
-        return ImmutableGrowthData.class.isAssignableFrom(immutable);
-    }
-
-    @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableGrowthData) {
-            final int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            return Optional.of((BlockState) blockState.withProperty(CactusBlock.AGE, growth));
-        }
-        return super.bridge$getStateWithData(blockState, manipulator);
-    }
-
-    @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
-        if (key.equals(Keys.GROWTH_STAGE)) {
-            final int growth = (Integer) value;
-            return Optional.of((BlockState) blockState.withProperty(CactusBlock.AGE, growth));
-        }
-        return super.bridge$getStateWithValue(blockState, key, value);
-    }
-
-    private ImmutableGrowthData impl$getGrowthData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(CactusBlock.AGE), 0, 15);
-    }
-
 }

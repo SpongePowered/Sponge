@@ -27,9 +27,9 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 import org.spongepowered.common.util.Constants;
 
@@ -45,11 +45,10 @@ public class EntityAirConverter extends DataParameterConverter<Integer> {
     @Override
     public Optional<DataTransactionResult> createTransaction(Entity entity, Integer currentValue, Integer value) {
         return Optional.of(DataTransactionResult.builder()
-            .replace(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, Constants.Sponge.Entity.DEFAULT_MAX_AIR, currentValue, Integer::compareTo, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
-            .success(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, Constants.Sponge.Entity.DEFAULT_MAX_AIR, value, Integer::compareTo, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
+            .replace(BoundedValue.immutableOf(Keys.REMAINING_AIR, currentValue, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
+            .success(BoundedValue.immutableOf(Keys.REMAINING_AIR, value, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
             .result(DataTransactionResult.Type.SUCCESS)
-            .build()
-            );
+            .build());
     }
 
     @Override

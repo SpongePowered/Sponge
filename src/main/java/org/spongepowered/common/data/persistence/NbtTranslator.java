@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
@@ -36,27 +35,29 @@ import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.FloatNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntArrayNBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.LongArrayNBT;
 import net.minecraft.nbt.LongNBT;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.ShortNBT;
 import net.minecraft.nbt.StringNBT;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.mixin.accessor.nbt.LongArrayNBTAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Map;
 
-public final class NbtTranslator implements DataTranslator<CompoundNBT> {
+public final class NbtTranslator extends SpongeCatalogType implements DataTranslator<CompoundNBT> {
 
     private static final NbtTranslator instance = new NbtTranslator();
     private static final TypeToken<CompoundNBT> TOKEN = TypeToken.of(CompoundNBT.class);
@@ -66,7 +67,9 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
         return instance;
     }
 
-    private NbtTranslator() { } // #NOPE
+    private NbtTranslator() {
+        super(CatalogKey.sponge("nbt"));
+    }
 
     private static CompoundNBT containerToCompound(final DataView container) {
         checkNotNull(container);
@@ -96,7 +99,7 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static NBTBase getBaseFromObject(Object value) {
+    private static INBT getBaseFromObject(Object value) {
         checkNotNull(value);
         if (value instanceof Boolean) {
             return new ByteNBT((Boolean) value ? (byte) 1 : 0);
@@ -183,7 +186,7 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void setInternal(NBTBase base, byte type, DataView view, String key) {
+    private static void setInternal(INBT base, byte type, DataView view, String key) {
         checkNotNull(base);
         checkNotNull(view);
         checkNotNull(key);
@@ -221,7 +224,7 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;
                 byte listType = (byte) list.getTagType();
-                int count = list.tagCount();
+                int count = list.size();
                 List objectList = Lists.newArrayListWithCapacity(count);
                 for (int i = 0; i < count; i++) {
                     objectList.add(fromTagBase(list.get(i), listType));
@@ -232,7 +235,7 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
                 DataView internalView = view.createView(of(key));
                 CompoundNBT compound = (CompoundNBT) base;
                 for (String internalKey : compound.keySet()) {
-                    NBTBase internalBase = compound.get(internalKey);
+                    INBT internalBase = compound.get(internalKey);
                     byte internalType = internalBase.getId();
                     // Basically.... more recursion.
                     // Reasoning: This avoids creating a new DataContainer which would
@@ -253,7 +256,7 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object fromTagBase(NBTBase base, byte type) {
+    private static Object fromTagBase(INBT base, byte type) {
         switch (type) {
             case Constants.NBT.TAG_BYTE:
                 return ((ByteNBT) base).getByte();
@@ -274,10 +277,10 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;
                 byte listType = (byte) list.getTagType();
-                int count = list.tagCount();
+                int count = list.size();
                 List objectList = Lists.newArrayListWithCapacity(count);
-                for (int i = 0; i < list.tagCount(); i++) {
-                    objectList.add(fromTagBase(list.get(i), listType));
+                for (INBT inbt : list) {
+                    objectList.add(fromTagBase(inbt, listType));
                 }
                 return objectList;
             case Constants.NBT.TAG_COMPOUND:
@@ -321,20 +324,10 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
     @Override
     public DataView addTo(CompoundNBT compound, DataView container) {
         for (String key : compound.keySet()) {
-            NBTBase base = compound.get(key);
+            INBT base = compound.get(key);
             byte type = base.getId();
             setInternal(base, type, container, key); // gotta love recursion
         }
         return container;
-    }
-
-    @Override
-    public String getId() {
-        return "sponge:nbt";
-    }
-
-    @Override
-    public String getName() {
-        return "NbtTagCompoundTranslator";
     }
 }

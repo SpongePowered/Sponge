@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
@@ -67,8 +68,8 @@ public class DataFormatRegistryModule implements AdditionalCatalogRegistryModule
 
     @Override
     public void registerDefaults() {
-        this.dataFormatMappings.put("nbt", new NbtDataFormat("nbt"));
-        this.dataFormatMappings.put("json", new JsonDataFormat());
-        this.dataFormatMappings.put("hocon", new HoconDataFormat("hocon"));
+        this.dataFormatMappings.put("nbt", new NbtDataFormat(CatalogKey.sponge("nbt")));
+        this.dataFormatMappings.put("json", new JsonDataFormat(CatalogKey.sponge("json")));
+        this.dataFormatMappings.put("hocon", new HoconDataFormat(CatalogKey.sponge("hocon")));
     }
 }

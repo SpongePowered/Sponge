@@ -52,8 +52,8 @@ public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProces
     @Override
     public Optional<CommandData> fill(final DataContainer container, final CommandData commandData) {
         if (!container.contains(
-                Keys.LAST_COMMAND_OUTPUT.getQuery(), 
-                Keys.SUCCESS_COUNT.getQuery(), 
+                Keys.LAST_COMMAND_OUTPUT.getQuery(),
+                Keys.SUCCESS_COUNT.getQuery(),
                 Keys.COMMAND.getQuery(),
                 Keys.TRACKS_OUTPUT.getQuery())) {
             return Optional.empty();
@@ -62,7 +62,7 @@ public class TileEntityCommandDataProcessor extends AbstractTileEntityDataProces
         final int successCount = container.getInt(Keys.SUCCESS_COUNT.getQuery()).get();
         final String command = container.getString(Keys.COMMAND.getQuery()).get();
         final boolean tracksOutput = container.getBoolean(Keys.TRACKS_OUTPUT.getQuery()).get();
-        
+
         commandData.set(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);
         commandData.set(Keys.SUCCESS_COUNT, successCount);
         commandData.set(Keys.COMMAND, command);

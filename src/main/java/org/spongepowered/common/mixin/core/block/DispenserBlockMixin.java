@@ -33,17 +33,10 @@ import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -57,17 +50,13 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -78,39 +67,6 @@ public abstract class DispenserBlockMixin extends BlockMixin {
     private PhaseContext<?> impl$context = PhaseContext.empty();
 
     @Shadow protected abstract void dispense(World worldIn, BlockPos pos);
-
-    @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
-    @Override
-    public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>of(this.impl$getDirectionalData(blockState));
-    }
-
-    @Override
-    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
-        return ImmutableDirectionalData.class.isAssignableFrom(immutable);
-    }
-
-    @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableDirectionalData) {
-            return Optional.of((BlockState) blockState.withProperty(DispenserBlock.FACING, Constants.DirectionFunctions
-                .getFor(((ImmutableDirectionalData) manipulator).direction().get())));
-        }
-        return super.bridge$getStateWithData(blockState, manipulator);
-    }
-
-    @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
-        if (key.equals(Keys.DIRECTION)) {
-            return Optional.of((BlockState) blockState.withProperty(DispenserBlock.FACING, Constants.DirectionFunctions.getFor((Direction) value)));
-        }
-        return super.bridge$getStateWithValue(blockState, key, value);
-    }
-
-    private ImmutableDirectionalData impl$getDirectionalData(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                Constants.DirectionFunctions.getFor(blockState.get(DispenserBlock.FACING)));
-    }
 
     @Inject(method = "dispense", at = @At(value = "HEAD"))
     private void impl$CreateContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {

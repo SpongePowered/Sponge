@@ -26,76 +26,42 @@ package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.translation.FixedTranslation;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.CatalogBuilder;
 import org.spongepowered.api.util.ResettableBuilder;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
-@NonnullByDefault
+@DefaultQualifier(NonNull.class)
 public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends ResettableBuilder<C, B>>
         implements CatalogBuilder<C, B> {
 
-    @Nullable protected Translation name;
-    protected String id;
+    @Nullable protected CatalogKey key;
 
     @Override
-    public B name(String name) {
-        checkNotNull(name, "name");
-        checkState(!name.isEmpty(), "The name may not be empty");
-        this.name = new FixedTranslation(name);
-        return (B) this;
-    }
-
-    public Translation getName() {
-        if (this.name != null) {
-            return this.name;
-        }
-        return new FixedTranslation(this.id);
-    }
-
-    @Override
-    public B name(Translation name) {
-        checkNotNull(name, "name");
-        checkState(!name.getId().isEmpty(), "The translation id may not be empty");
-        this.name = name;
-        return (B) this;
-    }
-
-    @Override
-    public B id(String id) {
-        checkNotNull(id, "id");
-        checkArgument(!id.isEmpty(), "The id may not be empty.");
-        this.id = id;
+    public B key(CatalogKey key) {
+        checkNotNull(key, "key");
+        checkArgument(!key.getNamespace().isEmpty(), "The key namespace may not be empty.");
+        checkArgument(!key.getValue().isEmpty(), "The key value may not be empty.");
+        this.key = key;
         return (B) this;
     }
 
     @Override
     public C build() {
-        checkNotNull(this.id, "The id must be set.");
-        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
-                .orElseThrow(() -> new IllegalStateException("Couldn't find a PluginContainer in the cause stack."));
-        Translation name = this.name;
-        if (name == null) {
-            name = new FixedTranslation(this.id);
-        }
-        return this.build(plugin, this.id, name);
+        checkNotNull(this.key, "The key must be set.");
+        return this.build(this.key);
     }
 
-    protected abstract C build(PluginContainer plugin, String id, Translation name);
+    protected abstract C build(CatalogKey key);
 
     @Override
     public B reset() {
-        this.name = null;
-        this.id = null;
+        this.key = null;
         return (B) this;
     }
 }

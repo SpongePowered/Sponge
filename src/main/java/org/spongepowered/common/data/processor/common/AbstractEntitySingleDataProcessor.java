@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.common;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -46,5 +45,5 @@ public abstract class AbstractEntitySingleDataProcessor<E extends Entity, ValueT
     public AbstractEntitySingleDataProcessor(Class<E> entityClass, Key<ValueClassType> key) {
         super(key, entityClass);
     }
-    
+
 }

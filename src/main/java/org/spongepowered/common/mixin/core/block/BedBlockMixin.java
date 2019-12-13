@@ -24,60 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BedBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableOccupiedData;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOccupiedData;
-
-import java.util.Optional;
 
 @Mixin(BedBlock.class)
 public abstract class BedBlockMixin extends HorizontalBlockMixin {
-
-    @Override
-    public ImmutableList<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.<Immutable<?, ?>>builder()
-                .addAll(super.bridge$getManipulators(blockState))
-                .add(this.impl$getIsOccupiedFor(blockState))
-                .build();
-    }
-
-    @Override
-    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
-        return super.bridge$supports(immutable) || ImmutableOccupiedData.class.isAssignableFrom(immutable);
-    }
-
-    @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableOccupiedData) {
-            return Optional.of((BlockState) blockState);
-        }
-        return super.bridge$getStateWithData(blockState, manipulator);
-    }
-
-    @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
-        if (key.equals(Keys.OCCUPIED)) {
-            return Optional.of((BlockState) blockState);
-        }
-        return super.bridge$getStateWithValue(blockState, key, value);
-    }
-
-    private ImmutableOccupiedData impl$getIsOccupiedFor(final net.minecraft.block.BlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.get(BedBlock.OCCUPIED));
-    }
 
     @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)
     private static void onHasRoomForPlayer(final World world, final BlockPos pos, final CallbackInfoReturnable<Boolean> ci ) {
