@@ -34,7 +34,7 @@ import java.util.Locale;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
 
 @Mixin(PhaseType.class)
-public class PhaseTypeMixin_API implements DragonPhaseType {
+public abstract class PhaseTypeMixin_API implements DragonPhaseType {
 
     private String spongeId;
     @Shadow @Final private String name;

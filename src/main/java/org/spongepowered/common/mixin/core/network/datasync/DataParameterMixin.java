@@ -34,7 +34,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(DataParameter.class)
-public class DataParameterMixin<T> implements DataParameterBridge<T> {
+public abstract class DataParameterMixin<T> implements DataParameterBridge<T> {
 
     @Nullable private DataParameterConverter<T> impl$converter;
 

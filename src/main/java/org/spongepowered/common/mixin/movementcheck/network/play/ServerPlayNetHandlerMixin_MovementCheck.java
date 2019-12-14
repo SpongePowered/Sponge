@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.SpongeImpl;
 
 @Mixin(ServerPlayNetHandler.class)
-public class ServerPlayNetHandlerMixin_MovementCheck {
+public abstract class ServerPlayNetHandlerMixin_MovementCheck {
 
     @Shadow public ServerPlayerEntity player;
 

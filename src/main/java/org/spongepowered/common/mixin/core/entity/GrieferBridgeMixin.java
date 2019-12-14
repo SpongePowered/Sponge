@@ -34,7 +34,7 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.util.Constants;
 
-@Mixin({ LivingEntity.class, FireballEntity.class, WitherSkullEntity.class, SmallFireballEntity.class })
+@Mixin({LivingEntity.class, FireballEntity.class, WitherSkullEntity.class, SmallFireballEntity.class})
 public abstract class GrieferBridgeMixin implements GrieferBridge {
 
     private boolean griefer$canGrief = true;

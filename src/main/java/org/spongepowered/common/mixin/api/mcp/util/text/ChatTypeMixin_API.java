@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.util.Locale;
 
 @Mixin(ChatType.class)
-public class ChatTypeMixin_API implements org.spongepowered.api.text.chat.ChatType {
+public abstract class ChatTypeMixin_API implements org.spongepowered.api.text.chat.ChatType {
 
     @Override
     public String getId() {

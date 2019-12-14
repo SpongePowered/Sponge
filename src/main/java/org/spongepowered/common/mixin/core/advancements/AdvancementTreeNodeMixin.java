@@ -39,7 +39,7 @@ import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeTreeLayout;
 
 @Mixin(AdvancementTreeNode.class)
-public class AdvancementTreeNodeMixin {
+public abstract class AdvancementTreeNodeMixin {
 
     @Inject(method = "layout", at = @At("RETURN"))
     private static void onLayout(final Advancement root, final CallbackInfo ci) {

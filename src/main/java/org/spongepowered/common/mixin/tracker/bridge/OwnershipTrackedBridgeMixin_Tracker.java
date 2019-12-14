@@ -50,7 +50,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(value = {Entity.class, TileEntity.class}, priority = 1100)
-public class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTrackedBridge {
+public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTrackedBridge {
 
     @Nullable private UUID tracked$owner;
     @Nullable private UUID tracked$notifier;

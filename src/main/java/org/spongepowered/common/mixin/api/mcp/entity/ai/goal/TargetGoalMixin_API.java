@@ -29,10 +29,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.entity.ai.EntityAIBaseMixin;
+import org.spongepowered.common.mixin.core.entity.ai.goal.GoalMixin;
 
 @Mixin(net.minecraft.entity.ai.goal.TargetGoal.class)
-public abstract class TargetGoalMixin_API<A extends TargetGoal<A>> extends EntityAIBaseMixin implements TargetGoal<A> {
+public abstract class TargetGoalMixin_API<A extends TargetGoal<A>> extends GoalMixin implements TargetGoal<A> {
 
     @Shadow protected boolean shouldCheckSight;
     @Shadow @Final @Mutable private boolean nearbyOnly;

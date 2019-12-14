@@ -37,9 +37,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.io.File;
 import java.util.List;
 
-/**
- * A note, this is ONLY TO BE APPLIED TO THE SERVER!!
- */
 @Mixin(UserList.class)
 public abstract class UserListMixin {
 

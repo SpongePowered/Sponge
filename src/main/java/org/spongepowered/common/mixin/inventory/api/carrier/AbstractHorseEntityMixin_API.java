@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
 @Mixin(AbstractHorseEntity.class)
-public class AbstractHorseEntityMixin_API implements Carrier {
+public abstract class AbstractHorseEntityMixin_API implements Carrier {
 
     @Shadow protected Inventory horseChest;
 

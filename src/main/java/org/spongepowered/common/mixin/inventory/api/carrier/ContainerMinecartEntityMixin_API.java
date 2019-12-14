@@ -31,7 +31,7 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ContainerMinecartEntity.class)
-public class ContainerMinecartEntityMixin_API<M extends CarrierMinecart<M>> implements Carrier {
+public abstract class ContainerMinecartEntityMixin_API<M extends CarrierMinecart<M>> implements Carrier {
 
     @Override
     public CarriedInventory<M> getInventory() {

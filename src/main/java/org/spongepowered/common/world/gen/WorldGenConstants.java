@@ -523,7 +523,7 @@ public final class WorldGenConstants {
         ((BiomeDecoratorAccessor) decorator).accessor$setGrassPerChunk(0);
     }
 
-    public static void buildHellPopulators(final net.minecraft.world.World world, final SpongeBiomeGenerationSettings gensettings) {
+    public static void buildNetherPopulators(final net.minecraft.world.World world, final SpongeBiomeGenerationSettings gensettings) {
         final RandomBlock lava1 = RandomBlock.builder()
                 .block((BlockState) Blocks.FLOWING_LAVA.getDefaultState())
                 .perChunk(8)

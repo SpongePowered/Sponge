@@ -33,9 +33,10 @@ import org.spongepowered.common.ProtocolMinecraftVersion;
 import org.spongepowered.common.SpongeMinecraftVersion;
 
 @Mixin(ServerStatusResponse.Version.class)
-public abstract class ServerStatusResponse_VersionMixin_API implements MinecraftVersion {
+public abstract class ServerStatusResponse_VersionMixin_API implements MinecraftVersion, ProtocolMinecraftVersion {
 
     @Shadow @Final private String name;
+    @Shadow @Final private int protocol;
 
     @Override
     public String getName() {
@@ -45,6 +46,11 @@ public abstract class ServerStatusResponse_VersionMixin_API implements Minecraft
     @Override
     public boolean isLegacy() {
         return false;
+    }
+
+    @Override
+    public int getProtocol() {
+        return this.protocol;
     }
 
     @Override

@@ -50,7 +50,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @Mixin(Teleporter.class)
-public class TeleporterMixin_API implements PortalAgent {
+public abstract class TeleporterMixin_API implements PortalAgent {
 
     @Shadow @Final private ServerWorld world;
     @Shadow @Final private Random random;

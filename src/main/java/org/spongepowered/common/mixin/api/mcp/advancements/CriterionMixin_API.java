@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import java.util.Optional;
 
 @Mixin(Criterion.class)
-public class CriterionMixin_API implements DefaultedAdvancementCriterion {
+public abstract class CriterionMixin_API implements DefaultedAdvancementCriterion {
 
     @Shadow @Final private ICriterionInstance criterionInstance;
 

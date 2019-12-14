@@ -13,7 +13,7 @@
         "entity.item.ItemEntityMixin_EntityActivation",
         "entity.projectile.AbstractArrowEntityMixin_EntityActivation",
         "org.spongepowered.common.mixin.accessor.AxisAlignedBBAccessor_EntityActivation",
-        "world.ServerWorldMixin_EntityActivation"
+        "world.server.ServerWorldMixin_EntityActivation"
     ],
     "injectors": {
         "defaultRequire": 1

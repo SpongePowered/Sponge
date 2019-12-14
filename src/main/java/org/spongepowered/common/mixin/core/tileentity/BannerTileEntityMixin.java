@@ -50,7 +50,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.world.server.ServerWorld;
 
-@NonnullByDefault
 @Mixin(BannerTileEntity.class)
 public abstract class BannerTileEntityMixin extends TileEntityMixin implements BannerTileEntityBridge {
 

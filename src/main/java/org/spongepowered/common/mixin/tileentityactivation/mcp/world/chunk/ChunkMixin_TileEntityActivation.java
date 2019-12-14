@@ -42,7 +42,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.Activat
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
 @Mixin(Chunk.class)
-public class ChunkMixin_TileEntityActivation {
+public abstract class ChunkMixin_TileEntityActivation {
 
     @Shadow @Final private World world;
 

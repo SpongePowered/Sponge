@@ -119,7 +119,6 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(value = LivingEntity.class, priority = 999)
 public abstract class LivingEntityMixin extends EntityMixin implements LivingEntityBridge {
 

@@ -55,7 +55,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(AdvancementList.class)
-public class AdvancementListMixin implements AdvancementListBridge {
+public abstract class AdvancementListMixin implements AdvancementListBridge {
 
     @Shadow @Final private static Logger LOGGER;
 

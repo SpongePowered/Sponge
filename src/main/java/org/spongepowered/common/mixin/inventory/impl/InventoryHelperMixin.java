@@ -36,7 +36,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 
 @Mixin(InventoryHelper.class)
-public class InventoryHelperMixin {
+public abstract class InventoryHelperMixin {
 
     @Redirect(method = "dropInventoryItems(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/inventory/IInventory;)V",
         at = @At(

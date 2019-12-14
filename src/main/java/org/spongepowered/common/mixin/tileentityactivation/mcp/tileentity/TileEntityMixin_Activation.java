@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 
 @Mixin(TileEntity.class)
-public class TileEntityMixin_Activation implements ActivationCapability {
+public abstract class TileEntityMixin_Activation implements ActivationCapability {
 
     private boolean tileActivationImpl$refreshCache = false;
     private boolean tileActivationImpl$defaultActivationState = true;

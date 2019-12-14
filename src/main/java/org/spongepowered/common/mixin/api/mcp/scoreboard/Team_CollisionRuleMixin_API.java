@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import javax.annotation.Nullable;
 
 @Mixin(Team.CollisionRule.class)
-public class Team_CollisionRuleMixin_API implements CollisionRule {
+public abstract class Team_CollisionRuleMixin_API implements CollisionRule {
 
     @Shadow @Final public String name;
 

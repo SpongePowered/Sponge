@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 
 @Mixin(AbstractArrowEntity.PickupStatus.class)
-public class AbstractArrowEntity_PickupStatusMixin_API implements PickupRule {
+public abstract class AbstractArrowEntity_PickupStatusMixin_API implements PickupRule {
 
     @Nullable private String api$id;
     @Nullable private String api$name;

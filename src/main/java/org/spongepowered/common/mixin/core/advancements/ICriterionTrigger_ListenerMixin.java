@@ -52,7 +52,7 @@ import org.spongepowered.common.bridge.advancements.ICriterionTrigger_ListenerBr
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 
 @Mixin(ICriterionTrigger.Listener.class)
-public class ICriterionTrigger_ListenerMixin implements ICriterionTrigger_ListenerBridge {
+public abstract class ICriterionTrigger_ListenerMixin implements ICriterionTrigger_ListenerBridge {
 
     @Shadow @Final private ICriterionInstance criterionInstance;
     @Shadow @Final private Advancement advancement;

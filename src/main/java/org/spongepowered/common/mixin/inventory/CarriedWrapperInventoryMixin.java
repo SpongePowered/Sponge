@@ -37,7 +37,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import java.util.Optional;
 
 @Mixin(CarriedWrapperInventory.class)
-public class CarriedWrapperInventoryMixin implements InventoryAdapter {
+public abstract class CarriedWrapperInventoryMixin implements InventoryAdapter {
 
     @Shadow public InventoryBridge shadow$getWrapped() {
         throw new AbstractMethodError("Shadow");

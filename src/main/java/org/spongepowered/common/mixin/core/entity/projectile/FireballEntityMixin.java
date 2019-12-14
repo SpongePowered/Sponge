@@ -49,7 +49,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(FireballEntity.class)
-public abstract class FireballEntityMixin extends EntityFireballMixin implements FireballEntityBridge, ExplosiveBridge {
+public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin implements FireballEntityBridge, ExplosiveBridge {
 
     @Shadow public int explosionPower;
 

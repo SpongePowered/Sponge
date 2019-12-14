@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 
 @Mixin(ClassInheritanceMultiMap.class)
-public class ClassInheritanceMultiMapMixin_ConcurrentCheck {
+public abstract class ClassInheritanceMultiMapMixin_ConcurrentCheck {
 
     @Inject(method = "addForClass", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkServerThreadedSide(final Object entity, final Class<?> parentClass, final CallbackInfo ci) {

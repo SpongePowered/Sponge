@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.optimization.HopperOptimizationBridge;
 
 @Mixin(value = HopperTileEntity.class, priority = 1300)
-public class HopperTileEntityMixin_Optimization_Hopper extends TileEntityMixin_Optimization_Hopper {
+public abstract class HopperTileEntityMixin_Optimization_Hopper extends TileEntityMixin_Optimization_Hopper {
 
     @Redirect(method = "insertStack",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))

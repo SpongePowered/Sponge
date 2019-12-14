@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 
 @Mixin(value = ViewableCustomInventory.class)
-public class ViewableCustomInventoryMixin extends ViewableInventoryMixin {
+public abstract class ViewableCustomInventoryMixin extends ViewableInventoryMixin {
 
     @Shadow(remap = false) private ContainerType type;
 

@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 
 @Mixin(FilledMapItem.class)
-public class FilledMapItem_Optimization_Map {
+public abstract class FilledMapItem_Optimization_Map {
 
     @Redirect(method = "onUpdate",
         at = @At(

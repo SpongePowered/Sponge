@@ -47,7 +47,7 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
-public class EntityMixin_EntityCollision implements CollisionCapabilityBridge {
+public abstract class EntityMixin_EntityCollision implements CollisionCapabilityBridge {
 
     @Shadow public World world;
     private int collision$maxCollisions = 8;

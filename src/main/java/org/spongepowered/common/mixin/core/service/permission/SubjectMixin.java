@@ -54,7 +54,6 @@ import javax.annotation.Nullable;
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
-@NonnullByDefault
 @Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class,
         SpongeUser.class}, targets = "net/minecraft/tileentity/TileEntitySign$1")
 public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge {

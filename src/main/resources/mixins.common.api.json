@@ -12,7 +12,7 @@
         "common.entity.player.SpongeUserMixin_API",
         "data.DataHolderMixin_API",
         "data.property.PropertyHolderMixin_API",
-        "common.entity.human.HumanEntityMixin_API",
+        "common.entity.living.HumanEntityMixin_API",
         "common.event.cause.block.damage.MinecraftFallingBlockDamageSourceMixin_API",
         "mcp.advancements.AdvancementMixin_API",
         "mcp.advancements.AdvancementProgressMixin_API",

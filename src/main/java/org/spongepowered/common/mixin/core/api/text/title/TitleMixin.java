@@ -38,7 +38,6 @@ import java.util.Optional;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.STitlePacket;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Mixin(value = Title.class, remap = false)
 public abstract class TitleMixin implements TitleBridge {
 

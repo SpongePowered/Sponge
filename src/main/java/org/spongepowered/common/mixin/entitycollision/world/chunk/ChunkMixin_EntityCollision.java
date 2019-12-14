@@ -47,7 +47,7 @@ import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge
 import java.util.List;
 
 @Mixin(net.minecraft.world.chunk.Chunk.class)
-public class ChunkMixin_EntityCollision {
+public abstract class ChunkMixin_EntityCollision {
 
     @Shadow @Final private World world;
 

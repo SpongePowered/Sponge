@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.tileentity.BeaconTileEntityBridge;
 import javax.annotation.Nullable;
 
 @Mixin(BeaconTileEntity.class)
-public abstract class BeaconTileEntityMixin extends TileEntityLockableMixin implements CustomNameableBridge, BeaconTileEntityBridge {
+public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin implements CustomNameableBridge, BeaconTileEntityBridge {
 
     @Shadow private Effect primaryEffect;
     @Shadow private Effect secondaryEffect;

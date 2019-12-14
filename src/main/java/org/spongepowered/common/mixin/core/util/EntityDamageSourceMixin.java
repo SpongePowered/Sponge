@@ -25,12 +25,13 @@
 package org.spongepowered.common.mixin.core.util;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.util.EntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = net.minecraft.util.EntityDamageSource.class)
+@Mixin(EntityDamageSource.class)
 public abstract class EntityDamageSourceMixin extends DamageSourceMixin {
 
     @Shadow @Nullable protected net.minecraft.entity.Entity damageSourceEntity;

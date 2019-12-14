@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.optimization.HopperOptimizationBridge;
 
 @Mixin(value = TileEntity.class, priority = 1300)
-public class TileEntityMixin_Optimization_Hopper implements HopperOptimizationBridge {
+public abstract class TileEntityMixin_Optimization_Hopper implements HopperOptimizationBridge {
 
     private boolean hopper$shouldCancelDirtyUpdate = false;
 

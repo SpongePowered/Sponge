@@ -33,7 +33,7 @@ import java.util.Locale;
 import javax.annotation.Nullable;
 
 @Mixin(BossInfo.Color.class)
-public class BossInfo_ColorMixin_API implements BossBarColor {
+public abstract class BossInfo_ColorMixin_API implements BossBarColor {
 
     @Nullable private String api$name;
     @Nullable private String api$id;

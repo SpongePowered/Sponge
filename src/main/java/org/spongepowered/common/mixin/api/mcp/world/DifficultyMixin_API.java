@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(net.minecraft.world.Difficulty.class)
-public class DifficultyMixin_API implements Difficulty {
+public abstract class DifficultyMixin_API implements Difficulty {
 
     @Shadow @Final private int id;
     @Shadow @Final private String translationKey;

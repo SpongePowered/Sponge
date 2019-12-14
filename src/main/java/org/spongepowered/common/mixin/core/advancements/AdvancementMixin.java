@@ -77,7 +77,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(Advancement.class)
-public class AdvancementMixin implements AdvancementBridge {
+public abstract class AdvancementMixin implements AdvancementBridge {
 
     @Shadow @Final @Mutable @Nullable private Advancement parent;
     @Shadow @Final @Mutable private String[][] requirements;

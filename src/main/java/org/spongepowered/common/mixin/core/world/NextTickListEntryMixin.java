@@ -40,7 +40,7 @@ import org.spongepowered.common.util.VecHelper;
 import javax.annotation.Nullable;
 
 @Mixin(NextTickListEntry.class)
-public class NextTickListEntryMixin implements NextTickListEntryBridge {
+public abstract class NextTickListEntryMixin implements NextTickListEntryBridge {
 
     @Shadow @Final public BlockPos position;
     @Shadow public int priority;

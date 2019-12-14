@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 
 @Mixin(AbstractVillagerEntity.class)
-public class AbstractVillagerEntity_API implements Carrier {
+public abstract class AbstractVillagerEntity_API implements Carrier {
 
     @Shadow @Final private Inventory villagerInventory;
 

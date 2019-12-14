@@ -31,7 +31,7 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ServerPlayerEntity.class)
-public class ServerPlayerEntityMixin_API implements Carrier {
+public abstract class ServerPlayerEntityMixin_API implements Carrier {
 
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {

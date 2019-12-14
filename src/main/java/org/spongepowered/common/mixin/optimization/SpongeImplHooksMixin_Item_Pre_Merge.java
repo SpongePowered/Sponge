@@ -32,7 +32,7 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import java.util.Collection;
 
 @Mixin(value = SpongeImplHooks.class, remap = false)
-public class SpongeImplHooksMixin_Item_Pre_Merge {
+public abstract class SpongeImplHooksMixin_Item_Pre_Merge {
 
     /**
      * @author gabizou - April 7th, 2016

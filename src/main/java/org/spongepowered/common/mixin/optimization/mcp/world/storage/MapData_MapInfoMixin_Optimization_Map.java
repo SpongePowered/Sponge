@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
 
 @Mixin(MapData.MapInfo.class)
-public class MapData_MapInfoMixin_Optimization_Map implements OptimizedMapInfoBridge {
+public abstract class MapData_MapInfoMixin_Optimization_Map implements OptimizedMapInfoBridge {
 
     private boolean mapOptimization$valid;
 

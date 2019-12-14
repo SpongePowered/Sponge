@@ -42,7 +42,6 @@ import java.net.UnknownHostException;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("rawtypes")
 @Mixin(NetworkManager.class)
 public abstract class NetworkManagerMixin extends SimpleChannelInboundHandler implements NetworkManagerBridge {
 

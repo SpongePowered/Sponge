@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Mixin(AdvancementProgress.class)
-public class AdvancementProgressMixin_API implements org.spongepowered.api.advancement.AdvancementProgress {
+public abstract class AdvancementProgressMixin_API implements org.spongepowered.api.advancement.AdvancementProgress {
 
     @Override
     public Optional<Instant> get() {

@@ -35,7 +35,7 @@ import java.lang.ref.WeakReference;
 import javax.annotation.Nullable;
 
 @Mixin({Entity.class, TileEntity.class})
-public class ActiveChunkReferentMixin implements ActiveChunkReferantBridge {
+public abstract class ActiveChunkReferentMixin implements ActiveChunkReferantBridge {
 
     private WeakReference<ChunkBridge> activeChunk$chunkReference = new WeakReference<>(null);
 

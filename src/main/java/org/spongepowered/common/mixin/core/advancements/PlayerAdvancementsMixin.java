@@ -65,7 +65,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(PlayerAdvancements.class)
-public class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
+public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
 
     @Shadow @Final private Map<Advancement, AdvancementProgress> progress;
     @Shadow private ServerPlayerEntity player;

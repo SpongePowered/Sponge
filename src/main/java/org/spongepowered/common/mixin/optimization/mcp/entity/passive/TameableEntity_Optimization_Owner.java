@@ -31,14 +31,14 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.entity.EntityAgeableMixin;
+import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 @Mixin(TameableEntity.class)
-public abstract class TameableEntity_Optimization_Owner extends EntityAgeableMixin {
+public abstract class TameableEntity_Optimization_Owner extends AgeableEntityMixin {
 
     @Shadow @Final protected static DataParameter<Optional<UUID>> OWNER_UNIQUE_ID;
     @Nullable private UUID cachedOwner$OwnerId;

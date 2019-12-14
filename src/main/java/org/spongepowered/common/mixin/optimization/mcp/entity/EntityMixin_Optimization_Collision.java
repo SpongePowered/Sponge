@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
 @Mixin(value = Entity.class, priority = 1500)
-public class EntityMixin_Optimization_Collision {
+public abstract class EntityMixin_Optimization_Collision {
 
     @Inject(method = "doBlockCollisions", at = @At("HEAD"), cancellable = true)
     private void activeCollision$checkForNeighboringChunkIfAvailable(final CallbackInfo ci) {

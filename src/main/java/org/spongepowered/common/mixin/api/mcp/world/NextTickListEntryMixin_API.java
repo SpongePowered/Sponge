@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
 
 @Mixin(NextTickListEntry.class)
-public class NextTickListEntryMixin_API implements ScheduledBlockUpdate {
+public abstract class NextTickListEntryMixin_API implements ScheduledBlockUpdate {
 
     @Shadow @Final public BlockPos position;
     @Shadow public int priority;
