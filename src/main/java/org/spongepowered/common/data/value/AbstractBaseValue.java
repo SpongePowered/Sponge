@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import java.util.Optional;
 

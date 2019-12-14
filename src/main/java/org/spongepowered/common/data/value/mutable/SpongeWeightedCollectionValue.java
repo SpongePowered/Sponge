@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.value.mutable;
 
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue.Mutable;
 import org.spongepowered.api.data.value.WeightedcollectionValue.Immutable;

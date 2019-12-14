@@ -28,7 +28,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;

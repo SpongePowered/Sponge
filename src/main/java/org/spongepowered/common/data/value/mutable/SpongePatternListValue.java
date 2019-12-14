@@ -26,7 +26,7 @@ package org.spongepowered.common.data.value.mutable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;

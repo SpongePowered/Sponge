@@ -34,7 +34,7 @@ import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataManipulator.Mutable.Factory;
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;

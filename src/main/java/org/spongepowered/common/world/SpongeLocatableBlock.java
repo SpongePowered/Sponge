@@ -30,7 +30,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.property.Property;

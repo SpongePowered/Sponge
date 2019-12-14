@@ -26,7 +26,7 @@ package org.spongepowered.common.data.util;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;

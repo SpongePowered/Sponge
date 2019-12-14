@@ -46,7 +46,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityTypes;

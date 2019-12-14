@@ -25,7 +25,7 @@
 package org.spongepowered.common.data;
 
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;

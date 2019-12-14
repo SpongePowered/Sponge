@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMappedData;
 import org.spongepowered.api.data.manipulator.mutable.MappedData;
 import org.spongepowered.api.data.value.MapValue.Immutable;

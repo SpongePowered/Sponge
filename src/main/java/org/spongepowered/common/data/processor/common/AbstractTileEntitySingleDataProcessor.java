@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.common;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
 public abstract class AbstractTileEntitySingleDataProcessor<E extends TileEntity, T, V extends Value<T>, M extends Mutable<M, I>, I extends Immutable<I, M>>

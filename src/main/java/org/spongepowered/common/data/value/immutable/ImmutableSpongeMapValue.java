@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.MapValue.Immutable;
 import org.spongepowered.api.data.value.MapValue.Mutable;
 import org.spongepowered.api.data.value.Value;

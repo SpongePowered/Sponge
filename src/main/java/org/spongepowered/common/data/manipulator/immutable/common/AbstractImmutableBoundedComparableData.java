@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;

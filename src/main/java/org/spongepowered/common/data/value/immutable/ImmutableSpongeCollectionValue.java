@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.value.immutable;
 
 import com.google.common.collect.Iterables;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.CollectionValue.Immutable;
 import org.spongepowered.api.data.value.CollectionValue.Mutable;
 import org.spongepowered.api.data.value.Value;

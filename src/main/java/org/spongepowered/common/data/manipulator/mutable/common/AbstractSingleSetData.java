@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.util.ReflectionUtil;

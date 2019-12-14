@@ -30,7 +30,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.SpongeImpl;
 

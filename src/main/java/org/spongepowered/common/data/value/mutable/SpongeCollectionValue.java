@@ -26,7 +26,7 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.CollectionValue.Immutable;
 import org.spongepowered.api.data.value.CollectionValue.Mutable;
 import org.spongepowered.api.data.value.Value;

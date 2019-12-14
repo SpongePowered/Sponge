@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDespawnDelayData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
 import org.spongepowered.api.data.persistence.DataContainer;

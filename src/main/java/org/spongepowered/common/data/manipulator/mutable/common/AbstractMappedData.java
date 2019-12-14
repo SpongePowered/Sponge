@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMappedData;
 import org.spongepowered.api.data.manipulator.mutable.MappedData;
 import org.spongepowered.api.data.value.MapValue.Mutable;

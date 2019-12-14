@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.plugin.PluginContainer;

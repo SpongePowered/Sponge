@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.value.item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;

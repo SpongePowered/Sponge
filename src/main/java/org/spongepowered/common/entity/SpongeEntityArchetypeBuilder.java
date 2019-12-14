@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.entity.EntityTypes.UNKNOWN;
 
 import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;

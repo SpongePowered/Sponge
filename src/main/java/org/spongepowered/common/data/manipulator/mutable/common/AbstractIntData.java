@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.common;
 
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.util.ReflectionUtil;
