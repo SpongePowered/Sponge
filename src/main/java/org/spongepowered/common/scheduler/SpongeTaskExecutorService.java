@@ -99,16 +99,16 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
     }
 
     @Override
-    public <T> TaskFuture<T> submit(Callable<T> command) {
-        final FutureTask<T> runnable = new FutureTask<>(command);
+    public <T> TaskFuture<T> submit(Runnable command, @Nullable T result) {
+        final FutureTask<T> runnable = new FutureTask<>(command, result);
         final Task task = this.createTask(runnable)
                 .build();
         return new LanternScheduledFuture<>(runnable, submitTask(task), this.scheduler);
     }
 
     @Override
-    public <T> TaskFuture<T> submit(Runnable command, @Nullable T result) {
-        final FutureTask<T> runnable = new FutureTask<>(command, result);
+    public <T> TaskFuture<T> submit(Callable<T> command) {
+        final FutureTask<T> runnable = new FutureTask<>(command);
         final Task task = this.createTask(runnable)
                 .build();
         return new LanternScheduledFuture<>(runnable, submitTask(task), this.scheduler);
@@ -321,5 +321,4 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
             super.runAndReset();
         }
     }
-
 }

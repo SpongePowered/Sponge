@@ -35,12 +35,90 @@ import java.util.UUID;
  */
 public final class SpongeScheduledTask implements ScheduledTask {
 
-    final SpongeScheduler scheduler;
     final SpongeTask task;
+    private final SpongeScheduler scheduler;
     private final UUID id;
     private final String name;
     private long timestamp;
     private ScheduledTaskState state;
+
+    SpongeScheduledTask(SpongeScheduler scheduler, SpongeTask task, String taskName) {
+        this.scheduler = scheduler;
+        this.id = UUID.randomUUID();
+        this.name = taskName;
+        this.task = task;
+        // All tasks begin waiting.
+        this.state = ScheduledTaskState.WAITING;
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public Task getTask() {
+        return this.task;
+    }
+
+    @Override
+    public boolean cancel() {
+        boolean success = false;
+        if (this.getState() != ScheduledTaskState.RUNNING
+                && this.getState() != ScheduledTaskState.EXECUTING) {
+            success = true;
+        }
+        this.state = ScheduledTaskState.CANCELED;
+        return success;
+    }
+
+    public SpongeScheduler getScheduler() {
+        return this.scheduler;
+    }
+
+    long getTimestamp() {
+        return this.timestamp;
+    }
+
+    void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    /**
+     * Returns a timestamp after which the next execution will take place.
+     * Should only be compared to
+     * {@link SpongeScheduler#getTimestamp(SpongeScheduledTask)}.
+     *
+     * @return The next execution timestamp
+     */
+    long nextExecutionTimestamp() {
+        if (this.state.isActive) {
+            return this.timestamp + this.task.interval;
+        }
+        return this.timestamp + this.task.delay;
+    }
+
+    ScheduledTaskState getState() {
+        return this.state;
+    }
+
+    void setState(ScheduledTaskState state) {
+        this.state = state;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("name", this.name)
+                .add("id", this.id)
+                .add("task", this.task)
+                .toString();
+    }
 
     // Internal Task state. Not for user-service use.
     public enum ScheduledTaskState {
@@ -70,83 +148,5 @@ public final class SpongeScheduledTask implements ScheduledTask {
         ScheduledTaskState(boolean active) {
             this.isActive = active;
         }
-    }
-
-    SpongeScheduledTask(SpongeScheduler scheduler, SpongeTask task, String taskName) {
-        this.scheduler = scheduler;
-        this.id = UUID.randomUUID();
-        this.name = taskName;
-        this.task = task;
-        // All tasks begin waiting.
-        this.setState(ScheduledTaskState.WAITING);
-    }
-
-    @Override
-    public boolean cancel() {
-        boolean success = false;
-        if (this.getState() != ScheduledTaskState.RUNNING
-                && this.getState() != ScheduledTaskState.EXECUTING) {
-            success = true;
-        }
-        this.setState(SpongeScheduledTask.ScheduledTaskState.CANCELED);
-        return success;
-    }
-
-    @Override
-    public UUID getUniqueId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Task getTask() {
-        return this.task;
-    }
-
-    public SpongeScheduler getScheduler() {
-        return this.scheduler;
-    }
-
-    long getTimestamp() {
-        return this.timestamp;
-    }
-
-    /**
-     * Returns a timestamp after which the next execution will take place.
-     * Should only be compared to
-     * {@link SpongeScheduler#getTimestamp(SpongeScheduledTask)}.
-     *
-     * @return The next execution timestamp
-     */
-    long nextExecutionTimestamp() {
-        if (this.state.isActive) {
-            return this.timestamp + this.task.interval;
-        }
-        return this.timestamp + this.task.delay;
-    }
-
-    void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    ScheduledTaskState getState() {
-        return this.state;
-    }
-
-    void setState(ScheduledTaskState state) {
-        this.state = state;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("name", this.name)
-                .add("id", this.id)
-                .add("task", this.task)
-                .toString();
     }
 }

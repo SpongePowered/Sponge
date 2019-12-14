@@ -41,10 +41,10 @@ public final class SpongeTask implements Task {
     final long delay; // nanos
     final long interval; // nanos
     final boolean tickBased;
+    @Nullable final String customName;
     private final PluginContainer owner;
     private final Consumer<ScheduledTask> consumer;
     private final String name;
-    @Nullable final String customName;
     private final String toString;
 
     @Nullable private Timing taskTimer;
@@ -64,6 +64,11 @@ public final class SpongeTask implements Task {
                 .add("interval", this.interval)
                 .add("owner", this.owner)
                 .toString();
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     @Override
@@ -87,16 +92,11 @@ public final class SpongeTask implements Task {
     }
 
     @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
     public String toString() {
         return this.toString;
     }
 
-    public Timing getTimingsHandler() {
+    Timing getTimingsHandler() {
         if (this.taskTimer == null) {
             this.taskTimer = SpongeTimings.getPluginSchedulerTimings(this.owner);
         }

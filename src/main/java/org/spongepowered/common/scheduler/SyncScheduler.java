@@ -29,7 +29,7 @@ public abstract class SyncScheduler extends SpongeScheduler {
     // The number of ticks elapsed since this scheduler began.
     private volatile long counter = 0L;
 
-    protected SyncScheduler(String tag) {
+    SyncScheduler(String tag) {
         super(tag);
     }
 

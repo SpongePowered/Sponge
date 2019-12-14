@@ -38,16 +38,16 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class AsyncScheduler extends SpongeScheduler {
+public final class AsyncScheduler extends SpongeScheduler {
 
-    // Adjustable timeout for pending Tasks
-    private long minimumTimeout = Long.MAX_VALUE;
-    private long lastProcessingTimestamp;
     // Locking mechanism
     private final Lock lock = new ReentrantLock();
     private final Condition condition = this.lock.newCondition();
     // The dynamic thread pooling executor of asynchronous tasks.
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    // Adjustable timeout for pending Tasks
+    private long minimumTimeout = Long.MAX_VALUE;
+    private long lastProcessingTimestamp;
 
     public AsyncScheduler() {
         super("A");
@@ -109,6 +109,17 @@ public class AsyncScheduler extends SpongeScheduler {
     }
 
     @Override
+    protected void addTask(SpongeScheduledTask task) {
+        this.lock.lock();
+        try {
+            super.addTask(task);
+            this.condition.signalAll();
+        } finally {
+            this.lock.unlock();
+        }
+    }
+
+    @Override
     protected void preTick() {
         this.lock.lock();
         try {
@@ -132,28 +143,17 @@ public class AsyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
-        this.executor.submit(runnable);
-    }
-
-    @Override
-    protected void addTask(SpongeScheduledTask task) {
-        this.lock.lock();
-        try {
-            super.addTask(task);
-            this.condition.signalAll();
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    @Override
     protected void onTaskCompletion(SpongeScheduledTask task) {
         // This will likely be run from an executor thread rather than
         // the thread that owns the task, hence no lock.
         if (task.getState() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
             this.condition.signalAll();
         }
+    }
+
+    @Override
+    protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
+        this.executor.submit(runnable);
     }
 
     public <T> CompletableFuture<T> submit(Callable<T> callable) {

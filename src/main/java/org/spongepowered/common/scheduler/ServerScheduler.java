@@ -33,7 +33,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
-public class ServerScheduler extends SyncScheduler {
+public final class ServerScheduler extends SyncScheduler {
 
     public ServerScheduler() {
         super("S");
