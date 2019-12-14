@@ -49,7 +49,6 @@ import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.math.vector.Vector3d;
-import ScheduledBlockUpdate;
 import java.util.function.Function;
 
 public interface ServerWorldBridge {

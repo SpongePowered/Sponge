@@ -26,7 +26,6 @@ package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import MapStorage;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import net.minecraft.block.Block;

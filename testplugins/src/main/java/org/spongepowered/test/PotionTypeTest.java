@@ -27,6 +27,7 @@ package org.spongepowered.test;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -51,6 +52,7 @@ public class PotionTypeTest {
 
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
+        Keys
         Sponge.getCommandManager().register(this, CommandSpec.builder()
                 .description(Text.of("Fills inventory with random potions"))
                 .executor((src, args) -> {
