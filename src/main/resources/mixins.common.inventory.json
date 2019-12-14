@@ -7,13 +7,11 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 900,
     "mixins": [
-
         "api.carried.CarriedInventoryMixin_API",
         "api.carried.ContainerMinecartEntityMixin_API",
         "api.carried.DoubleSidedInventoryMixin_API",
         "api.carried.LockableTileEntityMixin_API",
         "api.carried.CarriedWrapperInventoryMixin_API",
-
         "api.carrier.AbstractHorseEntityMixin_API",
         "api.carrier.ContainerMinecartEntityMixin_API",
         "api.carrier.EnchantmentContainerMixin_API",
@@ -23,12 +21,9 @@
         "api.carrier.SingleBlockCarrierMixin_API",
         "api.carrier.AbstractVillagerEntity_API",
         "api.carrier.WorkbenchContainerMixin_API",
-
         "api.container.ContainerMixin_API",
         "api.container.SlotMixin_API",
-
         "api.viewable.ViewableInventoryMixin_API",
-
         "api.equipable.ArmorEquippableMixin_API",
         "api.equipable.EquippableMixin_API",
         "api.inventory.ContainerMixin_API",
@@ -36,25 +31,19 @@
         "api.PlayerInventoryMixin_API",
         "api.ServerPlayerEntityMixin_API",
         "api.inventory.SlotMixin_API",
-
         "bridge.container.ContainerMixin_Container",
         "bridge.container.PlayerContainerMixin",
-
         "bridge.lensgenerator.AbstractVillagerEntityMixin",
         "bridge.lensgenerator.LensGeneratorMixin",
         "bridge.lensgenerator.SlotMixin",
-
         "bridge.viewable.ViewableCustomInventoryMixin",
         "bridge.viewable.ViewableInventoryMixin",
-
         "bridge.TraitContainerAdapterMixin",
         "bridge.TraitInventoryAdapterMixin",
-
         "fabric.ContainerMixin_Fabric",
         "fabric.IInventoryMixin_Fabric",
         "fabric.LivingEntityMixin_EquipmentFabric",
         "fabric.SlotMixin_Fabric",
-
         "impl.ContainerMixin_TrackedBridge",
         "impl.CraftingResultSlotMixin",
         "impl.EnchantmentContainerMixin",
@@ -63,7 +52,6 @@
         "impl.RepairContainerMixin",
         "impl.VanillaContainerMixin",
         "impl.WorkbenchContainerMixin",
-
         "CarriedWrapperInventoryMixin",
         "CustomInventoryMixin",
         "PlayerInventoryMixin",

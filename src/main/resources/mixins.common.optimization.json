@@ -12,7 +12,6 @@
         "mcp.enchantment.EnchantmentHelperMixin_Optimization_No_Source_Leak",
         "mcp.entity.EntityMixin_Optimization_Collision",
         "mcp.entity.passive.TameableEntity_Optimization_Owner",
-        "org.spongepowered.common.mixin.invalid.optimization.entity.EntityTrackerEntryMixin_MapOptimization",
         "mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
         "mcp.item.FilledMapItem_Optimization_Map",
         "mcp.server.MinecraftServerMixin_Optimization_Map",
@@ -20,7 +19,6 @@
         "mcp.tileentity.TileEntityMixin_Optimization_Hopper",
         "mcp.world.WorldMixin_Optimization_Collision",
         "mcp.world.server.ServerWorldMixin_Optimization_Collision",
-        "org.spongepowered.common.mixin.invalid.optimization.world.gen.structure.MapGenStructureMixin_Structure_Saving",
         "mcp.world.storage.MapDataMixin_Optimization_Map",
         "mcp.world.storage.MapData_MapInfoMixin_Optimization_Map"
     ],
