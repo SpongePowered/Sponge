@@ -92,6 +92,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -272,93 +273,6 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         Sponge.getCauseStackManager().popCause();
         tileentitysign.markDirty();
         worldserver.getPlayerChunkMap().markBlockForUpdate(blockpos);
-    }
-
-    /**
-     * @author blood - June 6th, 2016
-     * @author gabizou - June 20th, 2016 - Update for 1.9.4 and minor refactors.
-     * @reason Since mojang handles creative packets different than survival, we need to
-     * restructure this method to prevent any packets being sent to client as we will
-     * not be able to properly revert them during drops.
-     *
-     * @param packetIn The creative inventory packet
-     */
-    @Overwrite
-    public void processCreativeInventoryAction(final CCreativeInventoryActionPacket packetIn) {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, (ServerPlayNetHandler) (Object) this, this.player.getServerWorld());
-
-        if (this.player.interactionManager.isCreative()) {
-            final PacketContext<?> context = (PacketContext<?>) PhaseTracker.getInstance().getCurrentContext();
-            final boolean ignoresCreative = context.getIgnoringCreative();
-            final boolean clickedOutside = packetIn.getSlotId() < 0;
-            final ItemStack itemstack = packetIn.getStack();
-
-            if (!itemstack.isEmpty() && itemstack.hasTag() && itemstack.getTag().contains(Constants.Item.BLOCK_ENTITY_TAG, 10)) {
-                final CompoundNBT nbttagcompound = itemstack.getTag().getCompound(Constants.Item.BLOCK_ENTITY_TAG);
-
-                if (nbttagcompound.contains("x") && nbttagcompound.contains("y") && nbttagcompound.contains("z")) {
-                    final BlockPos blockpos = new BlockPos(nbttagcompound.getInt("x"), nbttagcompound.getInt("y"), nbttagcompound.getInt("z"));
-                    final TileEntity tileentity = this.player.world.getTileEntity(blockpos);
-
-                    if (tileentity != null) {
-                        final CompoundNBT nbttagcompound1 = new CompoundNBT();
-                        tileentity.write(nbttagcompound1);
-                        nbttagcompound1.remove("x");
-                        nbttagcompound1.remove("y");
-                        nbttagcompound1.remove("z");
-                        itemstack.setTagInfo(Constants.Item.BLOCK_ENTITY_TAG, nbttagcompound1);
-                    }
-                }
-            }
-
-            final boolean clickedInsideNotOutput = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
-            final boolean itemValidCheck = itemstack.isEmpty() || itemstack.getMetadata() >= 0 && itemstack.getCount() <= itemstack.getMaxStackSize() && !itemstack.isEmpty();
-
-            // Sponge start - handle CreativeInventoryEvent
-            if (itemValidCheck) {
-                if (!ignoresCreative) {
-                    final ClickInventoryEvent.Creative clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.player, packetIn);
-                    if (clickEvent.isCancelled()) {
-                        // Reset slot on client
-                        if (packetIn.getSlotId() >= 0 && packetIn.getSlotId() < this.player.container.inventorySlots.size()) {
-                            this.player.connection.sendPacket(
-                                    new SSetSlotPacket(this.player.container.windowId, packetIn.getSlotId(),
-                                            this.player.container.getSlot(packetIn.getSlotId()).getStack()));
-                            this.player.connection.sendPacket(new SSetSlotPacket(-1, -1, ItemStack.EMPTY));
-                        }
-                        return;
-                    }
-                }
-
-                if (clickedInsideNotOutput) {
-                    if (itemstack.isEmpty()) {
-                        this.player.container.putStackInSlot(packetIn.getSlotId(), ItemStack.EMPTY);
-                    } else {
-                        this.player.container.putStackInSlot(packetIn.getSlotId(), itemstack);
-                    }
-
-                    this.player.container.setCanCraft(this.player, true);
-                } else if (clickedOutside && this.itemDropThreshold < 200) {
-                    this.itemDropThreshold += 20;
-                    final ItemEntity entityitem = this.player.dropItem(itemstack, true);
-
-                    if (entityitem != null)
-                    {
-                        entityitem.setAgeToCreativeDespawnTime();
-                    }
-                }
-            }
-            // Sponge end
-        }
-    }
-
-    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/IntHashMap;addKey(ILjava/lang/Object;)V"))
-    private void impl$updateOpenContainer(final CClickWindowPacket packet, final CallbackInfo ci) {
-        // We want to treat an 'invalid' click just like a regular click - we still fire events, do restores, etc.
-
-        // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
-        // Passing 'captureOnly' as 'true' allows capturing to happen for event firing, but doesn't send any pointless packets
-        ((TrackedContainerBridge) this.player.openContainer).bridge$detectAndSendChanges(true);
     }
 
     @Redirect(method = "processChatMessage",

@@ -40,9 +40,9 @@ import org.spongepowered.common.entity.PlayerTracker;
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixin extends LockableLootTileEntityMixin {
 
-    @Inject(method = "putDropInInventoryAllSlots",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))
-    private static void impl$trackNotifierWhenTransferring(final IInventory inventory, final IInventory hopper, final ItemEntity entityItem,
+    @Inject(method = "captureItem",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;getItem()Lnet/minecraft/item/ItemStack;"))
+    private static void impl$trackNotifierWhenTransferring(final IInventory inventory, final ItemEntity entityItem,
         final CallbackInfoReturnable<Boolean> callbackInfo) {
         if (entityItem instanceof OwnershipTrackedBridge) {
             ((OwnershipTrackedBridge) entityItem).tracked$getOwnerReference().ifPresent(owner -> {

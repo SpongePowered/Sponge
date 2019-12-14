@@ -61,6 +61,10 @@ public class ViewableCustomInventory extends CustomInventory implements INamedCo
         return this;
     }
 
+    public ContainerType getType() {
+        return this.type;
+    }
+
     @Override
     public void openInventory(PlayerEntity player) {
         this.viewers.add(player); // TODO check if this is always called

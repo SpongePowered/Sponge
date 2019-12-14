@@ -36,6 +36,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDoor;
@@ -51,6 +52,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
@@ -75,6 +77,7 @@ import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
@@ -219,37 +222,25 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
      * @author Morph - Bring the interactions up to date for 1.12.2 and in sync with Forge
      * @author gabizou - April 23rd, 2019 - 1.12.2 - Re-merge the overwrite in common so we do not have to manually
      *    sync the changes between SpongeForge and Common
+     * @author faithcaio December 13th, 2019 TODO I only fixed the first part (gametype==SPECTATOR)
      *
      * @reason Fire interact block event.
      */
     @Overwrite
-    public ActionResultType processRightClickBlock(
-        final PlayerEntity player, final net.minecraft.world.World worldIn, final ItemStack stack, final Hand hand, final BlockPos
-            pos, final Direction facing, final float hitX, final float hitY, final float hitZ) {
+    public ActionResultType func_219441_a( // processRightClickBlock
+        final PlayerEntity player, final net.minecraft.world.World worldIn, final ItemStack stack, final Hand hand, final BlockRayTraceResult blockRayTraceResult) {
+
+        BlockPos blockpos = blockRayTraceResult.getPos();
+        BlockState blockstate = worldIn.getBlockState(blockpos);
+
         if (this.gameType == GameType.SPECTATOR) {
-            final TileEntity tileentity = worldIn.getTileEntity(pos);
-
-            if (tileentity instanceof ILockableContainer) {
-                final Block block = worldIn.getBlockState(pos).getBlock();
-                ILockableContainer ilockablecontainer = (ILockableContainer) tileentity;
-
-                if (ilockablecontainer instanceof ChestTileEntity && block instanceof ChestBlock) {
-                    ilockablecontainer = ((ChestBlock) block).getLockableContainer(worldIn, pos);
-                }
-
-                if (ilockablecontainer != null) {
-                    // TODO - fire event
-                    player.displayGUIChest(ilockablecontainer);
-                    return ActionResultType.SUCCESS;
-                }
-            } else if (tileentity instanceof IInventory) {
+            INamedContainerProvider inamedcontainerprovider = blockstate.getContainer(worldIn, blockpos);
+            if (inamedcontainerprovider != null) {
+                player.openContainer(inamedcontainerprovider);
                 // TODO - fire event
-                player.displayGUIChest((IInventory) tileentity);
                 return ActionResultType.SUCCESS;
             }
-
             return ActionResultType.PASS;
-
         } // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
         // Store reference of current player's itemstack in case it changes
@@ -341,7 +332,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
                         frame.pushCause(player);
                         frame.addContext(EventContextKeys.BLOCK_HIT, currentSnapshot);
                         ((ContainerBridge) player.openContainer).bridge$setOpenLocation(currentSnapshot.getLocation().orElse(null));
-                        if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(this.player)) {
+                        if (!InventoryEventFactory.callInteractInventoryOpenEvent(this.player)) {
                             result = ActionResultType.FAIL;
                             this.impl$interactBlockRightClickEventCancelled = true;
                         }

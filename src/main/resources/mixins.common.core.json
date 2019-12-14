@@ -230,7 +230,6 @@
         "tileentity.ChestTileEntityMixin",
         "tileentity.CommandBlockTileEntityMixin",
         "tileentity.DispenserTileEntityMixin",
-        "tileentity.DropperTileEntityMixin",
         "tileentity.EnchantmentTableTileEntityMixin",
         "tileentity.EnderChestTileEntityMixin",
         "tileentity.FurnaceTileEntityMixin",

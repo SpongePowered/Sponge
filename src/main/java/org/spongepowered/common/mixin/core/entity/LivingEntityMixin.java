@@ -93,6 +93,7 @@ import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
+import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -881,74 +882,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             }
         } else {
             this.onDeathUpdate();
-        }
-    }
-
-    private EnumMap<EquipmentSlotType, SlotLens> slotLens = new EnumMap<>(EquipmentSlotType.class);
-
-    @Surrogate
-    private void onGetItemStackFromSlot(final CallbackInfo ci, final EquipmentSlotType[] slots, final int j, final int k,
-            final EquipmentSlotType entityEquipmentSlot, final ItemStack before) {
-        this.onGetItemStackFromSlot(ci, 0, slots, j, k, entityEquipmentSlot, before);
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Inject(method = "onUpdate", locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemStackFromSlot(Lnet/minecraft/inventory/EntityEquipmentSlot;)Lnet/minecraft/item/ItemStack;"))
-    private void onGetItemStackFromSlot(final CallbackInfo ci, final int i_unused, final EquipmentSlotType[] slots, final int j, final int k,
-                                        final EquipmentSlotType entityEquipmentSlot, final ItemStack before) {
-        if (this.ticksExisted == 1 && (LivingEntity) (Object) this instanceof PlayerEntity) {
-            return; // Ignore Equipment on player spawn/respawn
-        }
-        final ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
-        final LivingEntity entity = (LivingEntity) (LivingEntityBridge) this;
-        if (!ItemStack.areItemStacksEqual(after, before)) {
-            final InventoryAdapter slotAdapter;
-            if (entity instanceof ServerPlayerEntity) {
-                final SlotLens slotLens;
-                final PlayerInventoryBridge inventory = (PlayerInventoryBridge) ((ServerPlayerEntity) entity).inventory;
-                final Lens inventoryLens = ((InventoryAdapter) inventory).inventoryAdapter$getRootLens();
-                if (inventoryLens instanceof PlayerInventoryLens) {
-                    switch (entityEquipmentSlot) {
-                        case OFFHAND:
-                            slotLens = ((PlayerInventoryLens) inventoryLens).getOffhandLens();
-                            break;
-                        case MAINHAND:
-                            final HotbarLens hotbarLens = ((PlayerInventoryLens) inventoryLens).getPrimaryInventoryLens().getHotbar();
-                            slotLens = hotbarLens.getSlotLens(hotbarLens.getSelectedSlotIndex(((InventoryAdapter) inventory).inventoryAdapter$getFabric()));
-                            break;
-                        default:
-                            slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlotLens(entityEquipmentSlot.getIndex());
-                    }
-                } else {
-                    slotLens = inventoryLens.getSlotLens(entityEquipmentSlot.getIndex());
-                }
-
-                slotAdapter = slotLens.getAdapter(((InventoryAdapter) inventory).inventoryAdapter$getFabric(), (Inventory) inventory);
-            } else {
-                if (this.slotLens.isEmpty()) {
-                    for (final EquipmentSlotType slot : EquipmentSlotType.values()) {
-                        this.slotLens.put(slot, new BasicSlotLens(slot.getSlotIndex()));
-                    }
-                }
-                slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter((Fabric) this, null);
-            }
-            final ChangeEntityEquipmentEvent event = SpongeCommonEventFactory.callChangeEntityEquipmentEvent(entity,
-                    ItemStackUtil.snapshotOf(before), ItemStackUtil.snapshotOf(after), (SlotAdapter) slotAdapter);
-            if (event.isCancelled()) {
-                this.setItemStackToSlot(entityEquipmentSlot, before);
-                return;
-            }
-            final Transaction<ItemStackSnapshot> transaction = event.getTransaction();
-            if (!transaction.isValid()) {
-                this.setItemStackToSlot(entityEquipmentSlot, before);
-                return;
-            }
-            final Optional<ItemStackSnapshot> optional = transaction.getCustom();
-            if (optional.isPresent()) {
-                final ItemStack custom = ItemStackUtil.fromSnapshotToNative(optional.get());
-                this.setItemStackToSlot(entityEquipmentSlot, custom);
-            }
         }
     }
 

@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -53,7 +54,7 @@ public abstract class ServerPlayerEntityMixin_API implements Player {
             }).plugin(SpongeImpl.getPlugin()).build();
             return this.getOpenInventory();
         }
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((ServerPlayerEntity) (Object) this, inventory, displayName));
+        return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((ServerPlayerEntity) (Object) this, inventory, displayName));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

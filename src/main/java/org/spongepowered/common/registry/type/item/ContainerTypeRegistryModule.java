@@ -70,11 +70,11 @@ import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeContainerType;
 import org.spongepowered.common.data.type.SpongeContainerTypeEntity;
+import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 import org.spongepowered.common.inventory.lens.LensCreator;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
-import org.spongepowered.common.mixin.inventory.bridge.viewable.ViewableInventoryMixin;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -199,7 +199,11 @@ public class ContainerTypeRegistryModule implements CatalogRegistryModule<Contai
     private ContainerTypeRegistryModule() {
     }
 
-    public ContainerType getTypeFor(Class clazz) {
+    public ContainerType getTypeFor(Object inventory) {
+        if (inventory instanceof ViewableCustomInventory) {
+            return ((ViewableCustomInventory) inventory).getType();
+        }
+        // TODO implement me
         return null;
     }
 

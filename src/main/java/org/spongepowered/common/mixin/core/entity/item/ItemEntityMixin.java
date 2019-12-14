@@ -188,20 +188,6 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     }
 
     @Inject(
-        method = "onCollideWithPlayer",
-        at = @At(
-            value = "INVOKE",
-            ordinal = 0,
-            target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"),
-        cancellable = true
-    )
-    private void spongeImpl$ThrowPickupEvent(final PlayerEntity entityIn, final CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (ItemEntity) (Object) this, this.pickupDelay)) {
-            ci.cancel();
-        }
-    }
-    
-    @Inject(
         method = "onUpdate",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"),
         slice = @Slice(
@@ -220,19 +206,6 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
             final ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(frame.getCurrentCause(), (Item) this);
             SpongeImpl.postEvent(event);
         }
-    }
-
-    @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
-    private boolean spongeImpl$throwPikcupEventForAddItem(final PlayerInventory inventory, final ItemStack itemStack, final PlayerEntity player) {
-        final TrackedInventoryBridge inv = (TrackedInventoryBridge) inventory;
-        inv.bridge$setCaptureInventory(true);
-        final boolean added = inventory.addItemStackToInventory(itemStack);
-        inv.bridge$setCaptureInventory(false);
-        inv.bridge$getCapturedSlotTransactions();
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(player, inv)) {
-            return false;
-        }
-        return added;
     }
 
 }
