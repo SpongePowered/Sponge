@@ -170,7 +170,7 @@ class UserDiscoverer {
         userCache.asMap().values().stream().map(User::getProfile).forEach(p -> profiles.put(p.getUniqueId(), p));
 
         // Add all known profiles from the data files
-        final SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
+        final SaveHandler saveHandler = (SaveHandler) SpongeImpl.getWorldManager().getDefaultWorld().getSaveHandler();
         final String[] uuids = saveHandler.func_75754_f();
         final PlayerProfileCache profileCache = SpongeImpl.getServer().getPlayerProfileCache();
         for (final String playerUuid : uuids) {
@@ -337,13 +337,13 @@ class UserDiscoverer {
         // This may be called triggered by mods using FakePlayer during
         // initial world gen (before the overworld is registered). Because of
         // this, we need to check if the overworld is actually registered yet
-        final Optional<ServerWorld> worldServer = WorldManager.getWorldByDimensionId(0);
-        if (!worldServer.isPresent()) {
+        final ServerWorld world = SpongeImpl.getWorldManager().getDefaultWorld();
+        if (world == null) {
             return null;
         }
 
         // Note: Uses the overworld's player data
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) worldServer.get().getSaveHandler();
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) world.getSaveHandler();
         final File file = new File(saveHandler.accessor$getPlayersDirectory(), uniqueId.toString() + ".dat");
         if (file.exists()) {
             return file;

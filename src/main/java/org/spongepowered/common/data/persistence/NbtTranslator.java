@@ -86,11 +86,11 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
             if (value instanceof DataView) {
                 CompoundNBT inner = new CompoundNBT();
                 containerToCompound(container.getView(entry.getKey()).get(), inner);
-                compound.setTag(key, inner);
+                compound.put(key, inner);
             } else if (value instanceof Boolean) {
-                compound.setTag(key + BOOLEAN_IDENTIFIER, new ByteNBT(((Boolean) value) ? (byte) 1 : 0));
+                compound.put(key + BOOLEAN_IDENTIFIER, new ByteNBT(((Boolean) value) ? (byte) 1 : 0));
             } else {
-                compound.setTag(key, getBaseFromObject(value));
+                compound.put(key, getBaseFromObject(value));
             }
         }
     }
@@ -148,7 +148,7 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
             for (Object object : (List) value) {
                 // Oh hey, we already have a translation already
                 // since DataView only supports some primitive types anyways...
-                list.appendTag(getBaseFromObject(object));
+                list.add(getBaseFromObject(object));
             }
             return list;
         } else if (value instanceof Map) {
@@ -158,12 +158,12 @@ public final class NbtTranslator implements DataTranslator<CompoundNBT> {
                     if (entry.getValue() instanceof Boolean) {
                         compound.putBoolean(((DataQuery) entry.getKey()).asString('.') + BOOLEAN_IDENTIFIER, (Boolean) entry.getValue());
                     } else {
-                        compound.setTag(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
+                        compound.put(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
                     }
                 } else if (entry.getKey() instanceof String) {
-                    compound.setTag((String) entry.getKey(), getBaseFromObject(entry.getValue()));
+                    compound.put((String) entry.getKey(), getBaseFromObject(entry.getValue()));
                 } else {
-                    compound.setTag(entry.getKey().toString(), getBaseFromObject(entry.getValue()));
+                    compound.put(entry.getKey().toString(), getBaseFromObject(entry.getValue()));
                 }
             }
             return compound;

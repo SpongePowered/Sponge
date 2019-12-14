@@ -473,11 +473,11 @@ public final class DataUtil {
 
     public static DataTransactionResult apply(final CompoundNBT compound, final Mutable<?, ?> manipulator) {
         if (!compound.contains(Constants.Forge.FORGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            compound.setTag(Constants.Forge.FORGE_DATA, new CompoundNBT());
+            compound.put(Constants.Forge.FORGE_DATA, new CompoundNBT());
         }
         final CompoundNBT forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
         if (!forgeCompound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            forgeCompound.setTag(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
+            forgeCompound.put(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
         }
         final CompoundNBT spongeTag = forgeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
 
@@ -496,7 +496,7 @@ public final class DataUtil {
                     final Optional<Mutable<?, ?>> existingManipulator = deserializeManipulator(dataId, currentView);
                     final DataContainer replacement = manipulator.toContainer();
                     final CompoundNBT replacementCompound = NbtTranslator.getInstance().translateData(replacement);
-                    dataCompound.setTag(Constants.Sponge.CUSTOM_DATA, replacementCompound);
+                    dataCompound.put(Constants.Sponge.CUSTOM_DATA, replacementCompound);
                     return DataTransactionResult.successReplaceResult(manipulator.getValues(), existingManipulator.map(Mutable::getValues)
                         .orElseGet(ImmutableSet::of));
                 }
@@ -508,9 +508,9 @@ public final class DataUtil {
             newCompound.putString(Constants.Sponge.MANIPULATOR_ID, registration.getId());
             final DataContainer dataContainer = manipulator.toContainer();
             final CompoundNBT dataCompound = NbtTranslator.getInstance().translateData(dataContainer);
-            newCompound.setTag(Constants.Sponge.CUSTOM_DATA, dataCompound);
-            list.appendTag(newCompound);
-            spongeTag.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, list);
+            newCompound.put(Constants.Sponge.CUSTOM_DATA, dataCompound);
+            list.add(newCompound);
+            spongeTag.put(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, list);
         }
 
         return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).success(manipulator.getValues()).build();
@@ -615,17 +615,17 @@ public final class DataUtil {
                 final List<DataView> manipulatorViews = getSerializedManipulatorList(manipulators);
                 final ListNBT manipulatorTagList = new ListNBT();
                 for (final DataView dataView : manipulatorViews) {
-                    manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
+                    manipulatorTagList.add(NbtTranslator.getInstance().translateData(dataView));
                 }
-                compound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+                compound.put(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
             final List<DataView> failedData = ((CustomDataHolderBridge) dataHolder).bridge$getFailedData();
             if (!failedData.isEmpty()) {
                 final ListNBT failedList = new ListNBT();
                 for (final DataView failedDatum : failedData) {
-                    failedList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
+                    failedList.add(NbtTranslator.getInstance().translateData(failedDatum));
                 }
-                compound.setTag(Constants.Sponge.FAILED_CUSTOM_DATA, failedList);
+                compound.put(Constants.Sponge.FAILED_CUSTOM_DATA, failedList);
             }
         }
     }

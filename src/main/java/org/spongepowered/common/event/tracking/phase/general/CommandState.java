@@ -148,9 +148,10 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                     final UUID key = entry.getKey();
                     @Nullable
                     net.minecraft.entity.Entity foundEntity = null;
-                    for (final ServerWorld worldServer : WorldManager.getWorlds())
+                    for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeImpl.getWorldManager().getWorlds())
                     {
-                        final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
+                        final ServerWorld world = (ServerWorld) apiWorld;
+                        final net.minecraft.entity.Entity entityFromUuid = world.getEntityByUuid(key);
                         if (entityFromUuid != null)
                         {
                             foundEntity = entityFromUuid;

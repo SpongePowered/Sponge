@@ -248,6 +248,6 @@
     "server": [
         "mcp.network.rcon.RConConsoleSourceMixin_API",
         "mcp.network.rcon.ClientThreadMixin_API",
-        "mcp.server.DedicatedServerMixin_API"
+        "mcp.server.dedicated.DedicatedServerMixin_API"
     ]
 }

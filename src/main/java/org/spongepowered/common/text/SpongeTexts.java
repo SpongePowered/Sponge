@@ -125,7 +125,7 @@ public final class SpongeTexts {
     public static ListNBT asJsonNBT(List<Text> list) {
         final ListNBT legacy = new ListNBT();
         for (Text line : list) {
-            legacy.appendTag(new StringNBT(TextSerializers.JSON.serialize(line)));
+            legacy.add(new StringNBT(TextSerializers.JSON.serialize(line)));
         }
         return legacy;
     }
@@ -157,7 +157,7 @@ public final class SpongeTexts {
     public static ListNBT asLegacy(List<Text> list) {
         final ListNBT legacy = new ListNBT();
         for (Text line : list) {
-            legacy.appendTag(new StringNBT(toLegacy(line)));
+            legacy.add(new StringNBT(toLegacy(line)));
         }
         return legacy;
     }

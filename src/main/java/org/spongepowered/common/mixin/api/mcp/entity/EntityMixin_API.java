@@ -35,6 +35,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPlayerPositionLookPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -149,6 +150,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Shadow public abstract void dismountRidingEntity();
 
+    @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
+
     @Override
     public EntitySnapshot createSnapshot() {
         return new SpongeEntitySnapshotBuilder().from(this).build();
@@ -182,13 +185,13 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Override
-    public boolean setLocation(Location<World> location) {
+    public boolean setLocation(Location location) {
         checkNotNull(location, "The location was null!");
         if (this.isRemoved()) {
             return false;
         }
 
-        if (!WorldManager.isKnownWorld((ServerWorld) location.getExtent())) {
+        if (!SpongeImpl.getWorldManager().isDimensionTypeRegistered(((ServerWorld) location.getWorld()).getDimension().getType())) {
             return false;
         }
 

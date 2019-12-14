@@ -54,7 +54,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.entity.player.PlayerEntity;
 
-@Singleton
 public class SpongeScheduler implements Scheduler {
 
     public static final int TICK_DURATION_MS = 50;
@@ -63,7 +62,6 @@ public class SpongeScheduler implements Scheduler {
     private final SyncScheduler syncScheduler = new SyncScheduler();
     private final PluginManager pluginManager;
 
-    @Inject
     private SpongeScheduler(PluginManager pluginManager) {
         this.pluginManager = pluginManager;
     }

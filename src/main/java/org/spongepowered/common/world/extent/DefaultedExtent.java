@@ -202,9 +202,9 @@ public interface DefaultedExtent extends Extent {
             final SpongeEntityArchetype archetype = (SpongeEntityArchetype) hit.createArchetype();
             final ListNBT tagList = archetype.getData().getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             if (tagList.isEmpty()) {
-                tagList.appendTag(new DoubleNBT(nms.posX - ox));
-                tagList.appendTag(new DoubleNBT(nms.posY - oy));
-                tagList.appendTag(new DoubleNBT(nms.posZ - oz));
+                tagList.add(new DoubleNBT(nms.posX - ox));
+                tagList.add(new DoubleNBT(nms.posY - oy));
+                tagList.add(new DoubleNBT(nms.posZ - oz));
             } else {
                 tagList.set(0, new DoubleNBT(nms.posX - ox));
                 tagList.set(1, new DoubleNBT(nms.posY - oy));

@@ -37,6 +37,7 @@ import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.ClassInheritanceMultiMap;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
@@ -131,9 +132,11 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
     @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority);
     @Shadow protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
 
+    @Shadow public abstract void shadow$save(@Nullable IProgressUpdate p_217445_1_, boolean p_217445_2_, boolean p_217445_3_) throws SessionLockException;
+
     @Override
     public boolean isLoaded() {
-        return WorldManager.isKnownWorld((ServerWorld) (Object) this);
+        return SpongeImpl.getWorldManager().getWorld(this.shadow$getDimension().getType()) == (ServerWorld) (Object) this;
     }
 
     @Override
@@ -174,16 +177,12 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
 
     @Override
     public boolean save() throws IOException {
-        if (!this.getChunkProvider().canSave()) {
-            return false;
+        try {
+            this.shadow$save((IProgressUpdate) null, false, false);
+        } catch (SessionLockException e) {
+            throw new IOException(e);
         }
 
-        // TODO: Expose flush parameter in SpongeAPI?
-        try {
-            WorldManager.saveWorld((ServerWorld) (Object) this, true);
-        } catch (SessionLockException e) {
-            throw new RuntimeException(e);
-        }
         return true;
     }
 

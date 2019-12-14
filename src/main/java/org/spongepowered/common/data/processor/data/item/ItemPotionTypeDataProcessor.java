@@ -55,7 +55,7 @@ public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor
     @Override
     protected boolean set(ItemStack dataHolder, PotionType value) {
         if (!dataHolder.hasTag()) {
-            dataHolder.setTag(new CompoundNBT());
+            dataHolder.put(new CompoundNBT());
         }
 
         PotionUtils.addPotionToItemStack(dataHolder, ((net.minecraft.potion.Potion) value));

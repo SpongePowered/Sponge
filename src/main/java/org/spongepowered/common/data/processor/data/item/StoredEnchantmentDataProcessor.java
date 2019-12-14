@@ -62,16 +62,16 @@ public class StoredEnchantmentDataProcessor extends
     @Override
     protected boolean set(ItemStack entity, List<Enchantment> value) {
         if (!entity.hasTag()) {
-            entity.setTag(new CompoundNBT());
+            entity.put(new CompoundNBT());
         }
         ListNBT list = new ListNBT();
         for (Enchantment enchantment : value) {
             CompoundNBT tag = new CompoundNBT();
             tag.putShort(Constants.Item.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getType()));
             tag.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
-            list.appendTag(tag);
+            list.add(tag);
         }
-        entity.getTag().setTag(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, list);
+        entity.getTag().put(Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST, list);
         return true;
     }
 

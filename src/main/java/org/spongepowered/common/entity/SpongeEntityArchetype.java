@@ -128,7 +128,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             return Optional.empty();
         }
 
-        this.data.setTag("Pos", Constants.NBT.newDoubleNBTList(x, y, z));
+        this.data.put("Pos", Constants.NBT.newDoubleNBTList(x, y, z));
         this.data.putInt("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
         final boolean requiresInitialSpawn;
         if (this.data.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
@@ -168,7 +168,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
         CompoundNBT newCompound = this.data.copy();
-        newCompound.setTag("Pos", Constants.NBT
+        newCompound.put("Pos", Constants.NBT
                 .newDoubleNBTList(new double[] { location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ() }));
         newCompound.putInt("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
         builder.compound = newCompound;

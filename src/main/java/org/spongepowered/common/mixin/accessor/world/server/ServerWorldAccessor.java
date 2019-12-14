@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.accessor.world.server;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.entity.Entity;
@@ -34,6 +35,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ServerWorld.class)
 public interface ServerWorldAccessor {
+
+    @Accessor("entitiesById") Int2ObjectMap<Entity> accessor$getEntitiesById();
 
     @Accessor("blockEventQueue") ObjectLinkedOpenHashSet<BlockEventData> accessor$getBlockEventQueue();
 

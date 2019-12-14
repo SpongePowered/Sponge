@@ -280,11 +280,11 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
-    private MapStorage impl$createMapStorageIfOverworldOrGetOverworldMapStorage(final SaveHandler saveHandler) {
-        final ServerWorld overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
+    private MapStorage impl$createMapStorageIfOverworldOrGetOverworldMapStorage(SaveHandler saveHandler) {
+        final ServerWorld world = SpongeImpl.getWorldManager().getDefaultWorld();
         // if overworld has loaded, use its mapstorage
-        if (this.impl$dimensionId != 0 && overWorld != null) {
-            return overWorld.getMapStorage();
+        if (this.impl$dimensionId != 0 && world != null) {
+            return world.getMapStorage();
         }
 
         // if we are loading overworld, create a new mapstorage
@@ -731,8 +731,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setDifficulty(Lnet/minecraft/world/EnumDifficulty;)V"))
-    private void syncDifficultyDueToHardcore(final WorldInfo worldInfo, final Difficulty newDifficulty) {
-        WorldManager.adjustWorldForDifficulty((ServerWorld) (Object) this, newDifficulty, false);
+    private void impl$syncDifficultyDueToHardcore(WorldInfo info, Difficulty newDifficulty) {
+        SpongeImpl.getWorldManager().adjustWorldForDifficulty((ServerWorld) (Object) this, newDifficulty, false);
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target= "Lnet/minecraft/world/WorldServer;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))

@@ -46,7 +46,7 @@ public final class BreakablePlaceableUtils {
             if (stackTag != null) {
                 stackTag.remove(nbtKey);
                 if (stackTag.isEmpty()) {
-                    stack.setTag(null);
+                    stack.put(null);
                 }
             }
         } else {
@@ -56,13 +56,13 @@ public final class BreakablePlaceableUtils {
                 if (id.startsWith("minecraft:")) {
                     id = id.substring("minecraft:".length());
                 }
-                breakableIds.appendTag(new StringNBT(id));
+                breakableIds.add(new StringNBT(id));
             }
             if (stackTag == null) {
                 stackTag = new CompoundNBT();
-                stack.setTag(stackTag);
+                stack.put(stackTag);
             }
-            stackTag.setTag(nbtKey, breakableIds);
+            stackTag.put(nbtKey, breakableIds);
         }
 
         return true;

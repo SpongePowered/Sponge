@@ -128,17 +128,17 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
             final ListNBT newList = new ListNBT();
             final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(this.bridge$getCustomManipulators());
             for (DataView dataView : manipulatorViews) {
-                newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
+                newList.add(NbtTranslator.getInstance().translateData(dataView));
             }
             final CompoundNBT spongeCompound = this.getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
-            spongeCompound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
+            spongeCompound.put(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else if (!this.failedData.isEmpty()) {
             final ListNBT newList = new ListNBT();
             for (DataView failedDatum : this.failedData) {
-                newList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
+                newList.add(NbtTranslator.getInstance().translateData(failedDatum));
             }
             final CompoundNBT spongeCompound = this.getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
-            spongeCompound.setTag(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
+            spongeCompound.put(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
         } else {
             if (this.hasTagCompound()) {
                 this.getTagCompound().remove(Constants.Sponge.SPONGE_DATA);

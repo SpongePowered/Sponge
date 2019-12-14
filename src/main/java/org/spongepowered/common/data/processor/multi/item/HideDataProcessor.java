@@ -55,7 +55,7 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
     @Override
     protected boolean set(ItemStack dataHolder, Map<Key<?>, Object> keyValues) {
         if (!dataHolder.hasTag()) {
-            dataHolder.setTag(new CompoundNBT());
+            dataHolder.put(new CompoundNBT());
         }
         int flag = 0;
         if ((boolean) keyValues.get(Keys.HIDE_ENCHANTMENTS)) {

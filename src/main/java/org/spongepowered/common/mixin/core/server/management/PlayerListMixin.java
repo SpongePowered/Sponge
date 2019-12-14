@@ -63,9 +63,9 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.dimension.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.dimension.Dimension;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -109,8 +109,6 @@ import java.util.UUID;
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin implements PlayerListBridge {
 
-    @Shadow @Final private MinecraftServer server;
-    @Shadow @Final private List<ServerPlayerEntity> players;
     @Shadow @Final private Map<UUID, ServerPlayerEntity> uuidToPlayerMap;
     @Shadow private IPlayerFileData playerDataManager;
     @Shadow @Final private Map<UUID, PlayerAdvancements> advancements;
@@ -119,6 +117,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow protected abstract void shadow$setPlayerGameTypeBasedOnOther(ServerPlayerEntity target, ServerPlayerEntity source, IWorld worldIn);
     @Shadow public abstract void shadow$sendWorldInfo(ServerPlayerEntity playerIn, ServerWorld worldIn);
     @Shadow public abstract void shadow$updatePermissionLevel(ServerPlayerEntity player);
+    @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
 
     @Nullable private DimensionType impl$updatePermissionLevelDimensionType;
 
@@ -173,11 +172,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         if (toWorld == null) { // Target world doesn't exist? Use global
             toLocation = temp;
         } else {
-            DimensionType toDimensionType = toWorld.dimension.getType();
+            DimensionType toDimensionType = toWorld.getDimension().getType();
             // Cannot respawn in requested world, use the fallback dimension for
             // that world. (Usually overworld unless a mod says otherwise).
-            if (!((Dimension) toWorld.dimension).allowsPlayerRespawns()) {
-                toDimensionType = SpongeImplHooks.getRespawnDimensionType(toWorld.dimension, player);
+            if (!((Dimension) toWorld.getDimension()).allowsPlayerRespawns()) {
+                toDimensionType = SpongeImplHooks.getRespawnDimensionType(toWorld.getDimension(), player);
                 toWorld = toWorld.getServer().getWorld(toDimensionType);
             }
 
@@ -197,7 +196,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         }
 
         Transform toTransform = Transform.of(toLocation.getPosition(), ((Player) player).getRotation(), Vector3d.ONE);
-        targetDimension = ((ServerWorld) toLocation.getWorld()).dimension.getType();
+        targetDimension = ((ServerWorld) toLocation.getWorld()).getDimension().getType();
 
         // If coming from end, fire a teleport event for plugins
         if (conqueredEnd) {
@@ -212,16 +211,16 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             toLocation = Location.of(teleportEvent.getToWorld(), toTransform.getPosition());
         }
 
-        this.players.remove(player);
+        this.shadow$getPlayers().remove(player);
         player.getServerWorld().removePlayer(player);
 
         // Recreate the player object in order to support Forge's PlayerEvent.Clone
         final PlayerInteractionManager playerinteractionmanager;
 
-        if (this.server.isDemo()) {
-            playerinteractionmanager = new DemoPlayerInteractionManager(this.server.getWorld(targetDimension));
+        if (this.shadow$getServer().isDemo()) {
+            playerinteractionmanager = new DemoPlayerInteractionManager(this.shadow$getServer().getWorld(targetDimension));
         } else {
-            playerinteractionmanager = new PlayerInteractionManager(this.server.getWorld(targetDimension));
+            playerinteractionmanager = new PlayerInteractionManager(this.shadow$getServer().getWorld(targetDimension));
         }
 
         final ServerPlayerEntity newPlayer = new ServerPlayerEntity(SpongeImpl.getServer(), toWorld, player.getGameProfile(), playerinteractionmanager);
@@ -267,16 +266,16 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         toWorld = (ServerWorld) toLocation.getWorld();
 
         // Set the dimension again in case a plugin changed the target world during RespawnPlayerEvent
-        newPlayer.dimension = toWorld.dimension.getType();
+        newPlayer.dimension = toWorld.getDimension().getType();
         newPlayer.setWorld(toWorld);
         newPlayer.interactionManager.setWorld(toWorld);
 
         // Send dimension registration
         if (((ServerPlayerEntityBridge) newPlayer).bridge$usesCustomClient()) {
-            NetworkUtil.sendDimensionRegistration(newPlayer, toWorld.dimension);
+            NetworkUtil.sendDimensionRegistration(newPlayer, toWorld.getDimension());
         } else {
-            final SpongeDimensionType fromClientDimensionType = ((DimensionBridge) fromWorld.dimension).bridge$getClientDimensionType(newPlayer);
-            final SpongeDimensionType toClientDimensionType = ((DimensionBridge) toWorld.dimension).bridge$getClientDimensionType(newPlayer);
+            final SpongeDimensionType fromClientDimensionType = ((DimensionBridge) fromWorld.getDimension()).bridge$getClientDimensionType(newPlayer);
+            final SpongeDimensionType toClientDimensionType = ((DimensionBridge) toWorld.getDimension()).bridge$getClientDimensionType(newPlayer);
 
             // Force vanilla client to refresh its chunk cache if same dimension type
             if (fromWorld != toWorld && fromClientDimensionType == toClientDimensionType) {
@@ -295,7 +294,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.shadow$sendWorldInfo(newPlayer, toWorld);
         this.shadow$updatePermissionLevel(newPlayer);
         toWorld.addRespawnedPlayer(newPlayer);
-        this.players.add(newPlayer);
+        this.shadow$getPlayers().add(newPlayer);
         this.uuidToPlayerMap.put(newPlayer.getUniqueID(), newPlayer);
         newPlayer.addSelfToInternalCraftingInventory();
 
@@ -315,7 +314,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Inject(method = "func_212504_a", at = @At("HEAD"), cancellable = true)
     private void impl$usePlayerDataFromOverworldAndSetPerWorldBorderListener(ServerWorld world, CallbackInfo ci) {
-        if (world.dimension.getType().getId() == 0) {
+        if (world.getDimension().getType().getId() == 0) {
             this.playerDataManager = world.getSaveHandler();
         }
 
@@ -330,8 +329,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "sendWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket(Lnet/minecraft/network/IPacket;)V", ordinal = 0))
     private void impl$adjustWorldBorderCoordinatesForMovementFactor(ServerPlayNetHandler handler, IPacket<?> packet, ServerPlayerEntity player, ServerWorld world) {
-        if (((DimensionBridge) world.dimension).bridge$getMovementFactor() != 1.0f) {
-            ((SWorldBorderPacketBridge) packet).bridge$changeCoordinatesForMovementFactor(((DimensionBridge) world.dimension).bridge$getMovementFactor());
+        if (((DimensionBridge) world.getDimension()).bridge$getMovementFactor() != 1.0f) {
+            ((SWorldBorderPacketBridge) packet).bridge$changeCoordinatesForMovementFactor(((DimensionBridge) world.getDimension()).bridge$getMovementFactor());
         }
 
         handler.sendPacket(packet);
@@ -361,7 +360,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$sendJoiningPlayerToOthersIfVisibleByThem(PlayerList playerList, IPacket<?> packet, ServerPlayerEntity player) {
         final SPlayerListItemPacket noSpecificViewerPacket = new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, player);
 
-        for (final ServerPlayerEntity otherPlayer : this.players) {
+        for (final ServerPlayerEntity otherPlayer : this.shadow$getPlayers()) {
             if (otherPlayer != player && ((Player) otherPlayer).canSee((Player) player)) {
                 otherPlayer.connection.sendPacket(noSpecificViewerPacket);
             }
@@ -421,7 +420,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
      */
     @Overwrite
     public void sendMessage(ITextComponent component, boolean isSystem) {
-        ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.server, !isSystem);
+        ChatUtil.sendMessage(component, MessageChannel.toPlayersAndServer(), (CommandSource) this.server, !isSystem);
     }
 
     @Override

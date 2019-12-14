@@ -161,7 +161,7 @@ public class FireworkUtils {
                 return true;
             }
             if(!effects.isEmpty()) {
-                tag.setTag(Constants.Entity.Firework.EXPLOSION, toNbt(effects.get(0)));
+                tag.put(Constants.Entity.Firework.EXPLOSION, toNbt(effects.get(0)));
             } else {
                 tag.remove(Constants.Entity.Firework.EXPLOSION);
             }
@@ -171,7 +171,7 @@ public class FireworkUtils {
             effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::appendTag);
 
             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
-            fireworks.setTag(Constants.Item.Fireworks.EXPLOSIONS, nbtEffects);
+            fireworks.put(Constants.Item.Fireworks.EXPLOSIONS, nbtEffects);
             return true;
         }
         return false;

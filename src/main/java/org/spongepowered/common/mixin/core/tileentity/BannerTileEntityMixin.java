@@ -111,7 +111,7 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
             final CompoundNBT compound = new CompoundNBT();
             compound.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, layer.getShape().getName());
             compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).getDyeDamage());
-            this.patterns.appendTag(compound);
+            this.patterns.add(compound);
         }
         this.impl$markDirtyAndUpdate();
     }

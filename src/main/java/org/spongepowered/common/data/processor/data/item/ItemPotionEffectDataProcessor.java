@@ -58,16 +58,16 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
     @Override
     protected boolean set(ItemStack dataHolder, List<PotionEffect> value) {
         if (!dataHolder.hasTag()) {
-            dataHolder.setTag(new CompoundNBT());
+            dataHolder.put(new CompoundNBT());
         }
         final CompoundNBT mainCompound = dataHolder.getTag();
         final ListNBT potionList = new ListNBT();
         for (PotionEffect effect : value) {
             final CompoundNBT potionCompound = new CompoundNBT();
             ((net.minecraft.potion.EffectInstance) effect).write(potionCompound);
-            potionList.appendTag(potionCompound);
+            potionList.add(potionCompound);
         }
-        mainCompound.setTag(Constants.Item.CUSTOM_POTION_EFFECTS, potionList);
+        mainCompound.put(Constants.Item.CUSTOM_POTION_EFFECTS, potionList);
         return true;
     }
 
@@ -109,11 +109,11 @@ public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcess
 
         Optional<List<PotionEffect>> currentEffects = this.getVal(itemStack);
         if (!itemStack.hasTag()) {
-            itemStack.setTag(new CompoundNBT());
+            itemStack.put(new CompoundNBT());
         }
 
         final CompoundNBT tagCompound = itemStack.getTag();
-        tagCompound.setTag(Constants.Item.CUSTOM_POTION_EFFECTS, new ListNBT());
+        tagCompound.put(Constants.Item.CUSTOM_POTION_EFFECTS, new ListNBT());
         if (currentEffects.isPresent()) {
             return DataTransactionResult.successRemove(this.constructImmutableValue(currentEffects.get()));
         }

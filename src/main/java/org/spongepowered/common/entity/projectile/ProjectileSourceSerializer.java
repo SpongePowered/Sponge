@@ -80,7 +80,7 @@ public class ProjectileSourceSerializer {
         }
         NBTBase projectileNbt = toNbt(projectileSource);
         if (projectileNbt != null) {
-            compound.setTag("projectileSource", projectileNbt);
+            compound.put("projectileSource", projectileNbt);
         }
     }
 

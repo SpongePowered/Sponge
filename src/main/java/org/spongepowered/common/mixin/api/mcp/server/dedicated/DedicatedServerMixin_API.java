@@ -22,12 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.server;
+package org.spongepowered.common.mixin.api.mcp.server.dedicated;
 
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Server;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.mcp.server.MinecraftServerMixin_API;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
@@ -35,16 +36,19 @@ import java.util.Optional;
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin_API extends MinecraftServerMixin_API implements Server {
 
-    @Shadow public abstract String getHostname();
-    @Shadow public abstract int getPort();
+    @Shadow public abstract String shadow$getHostname();
+    @Shadow public abstract int shadow$getPort();
 
     @Override
     public Optional<InetSocketAddress> getBoundAddress() {
-        //noinspection ConstantConditions
-        if (this.getHostname() == null) {
+        if (this.shadow$getHostname() == null) {
             return Optional.empty();
         }
-        return Optional.of(new InetSocketAddress(this.getHostname(), this.getPort()));
+        return Optional.of(new InetSocketAddress(this.shadow$getHostname(), this.shadow$getPort()));
     }
 
+    @Override
+    public boolean isDedicatedServer() {
+        return true;
+    }
 }

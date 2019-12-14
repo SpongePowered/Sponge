@@ -214,7 +214,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             final Optional<CompoundNBT> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
                 this.compound = new CompoundNBT();
-                this.compound.setTag(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
+                this.compound.put(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
             }
             // todo probably needs more testing, but this'll do donkey...
         } else { // TODO handle through the API specifically handling the rest of the data stuff
@@ -275,7 +275,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             fixEnchantmentData(itemType, compound);
-            itemStack.setTag(compound);
+            itemStack.put(compound);
         }
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
@@ -313,7 +313,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
         final ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, this.damageValue);
         if (this.compound != null) {
-            ((net.minecraft.item.ItemStack) stack).setTag(this.compound.copy());
+            ((net.minecraft.item.ItemStack) stack).put(this.compound.copy());
         }
         if (this.itemDataSet != null) {
             this.itemDataSet.forEach(stack::offer);

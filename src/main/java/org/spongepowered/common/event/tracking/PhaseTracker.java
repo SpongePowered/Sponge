@@ -326,9 +326,9 @@ public final class PhaseTracker {
         this.stack.pop();
 
         if (this.stack.isEmpty()) {
-            for (final ServerWorld world : WorldManager.getWorlds()) {
-                final ServerWorldBridge mixinWorld = (ServerWorldBridge) world;
-                if (mixinWorld.bridge$getProxyAccess().hasProxy()) {
+            for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeImpl.getWorldManager().getWorlds()) {
+                final ServerWorldBridge serverBridge = (ServerWorldBridge) apiWorld;
+                if (serverBridge.bridge$getProxyAccess().hasProxy()) {
                     new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
                         .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
                         .add()

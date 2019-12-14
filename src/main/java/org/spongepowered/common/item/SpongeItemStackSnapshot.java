@@ -180,7 +180,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStack createStack() {
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
         if(this.compound != null) {
-            nativeStack.setTag(this.compound.copy());
+            nativeStack.put(this.compound.copy());
         }
         for (Immutable<?, ?> manipulator : this.manipulators) {
             ((ItemStack) nativeStack).offer(manipulator.asMutable());

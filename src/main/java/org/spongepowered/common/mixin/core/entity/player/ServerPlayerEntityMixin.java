@@ -319,7 +319,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
         final DataCompoundHolder oldEntity = (DataCompoundHolder) oldPlayer;
         if (oldEntity.data$hasSpongeDataCompound()) {
-            ((DataCompoundHolder) this).data$getSpongeCompound().setTag(Constants.Sponge.SPONGE_DATA, oldEntity.data$getSpongeDataCompound());
+            ((DataCompoundHolder) this).data$getSpongeCompound().put(Constants.Sponge.SPONGE_DATA, oldEntity.data$getSpongeDataCompound());
             this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
         }
     }

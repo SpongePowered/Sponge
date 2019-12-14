@@ -62,7 +62,7 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
     @Override
     public boolean set(final ItemStack itemStack, final Map<Key<?>, Object> keyValues) {
         if (itemStack.getTag() == null) {
-            itemStack.setTag(new CompoundNBT());
+            itemStack.put(new CompoundNBT());
         }
         final CompoundNBT blockEntity = itemStack.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
         final DyeColor baseColor = (DyeColor) keyValues.get(Keys.BANNER_BASE_COLOR);
@@ -74,9 +74,9 @@ public class ShieldBannerDataProcessor extends AbstractItemDataProcessor<BannerD
                 final CompoundNBT compound = new CompoundNBT();
                 compound.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).getHashname());
                 compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).getDyeDamage());
-                patterns.appendTag(compound);
+                patterns.add(compound);
             }
-            blockEntity.setTag(Constants.TileEntity.Banner.BANNER_PATTERNS, patterns);
+            blockEntity.put(Constants.TileEntity.Banner.BANNER_PATTERNS, patterns);
         }
         blockEntity.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) baseColor).getDyeDamage());
         return true;

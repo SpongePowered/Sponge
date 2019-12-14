@@ -60,7 +60,7 @@ public class DurabilityDataProcessor extends AbstractItemDataProcessor<Durabilit
             itemStack.setItemDamage(0);
         }
         if (!itemStack.hasTag()) {
-            itemStack.setTag(new CompoundNBT());
+            itemStack.put(new CompoundNBT());
         }
         itemStack.getTag().putBoolean(Constants.Item.ITEM_UNBREAKABLE, unbreakable);
         return true;

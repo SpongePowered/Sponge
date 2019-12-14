@@ -68,7 +68,7 @@ public class ItemEnchantmentDataProcessor
         final CompoundNBT compound;
         if (itemStack.getTag() == null) {
             compound = new CompoundNBT();
-            itemStack.setTag(compound);
+            itemStack.put(compound);
         } else {
             compound = itemStack.getTag();
         }
@@ -86,9 +86,9 @@ public class ItemEnchantmentDataProcessor
                 enchantmentCompound.putShort(Constants.Item.ITEM_ENCHANTMENT_ID,
                     (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
                 enchantmentCompound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
-                newList.appendTag(enchantmentCompound);
+                newList.add(enchantmentCompound);
             }
-            compound.setTag(Constants.Item.ITEM_ENCHANTMENT_LIST, newList);
+            compound.put(Constants.Item.ITEM_ENCHANTMENT_LIST, newList);
         }
 
         return true;

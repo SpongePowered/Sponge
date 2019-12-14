@@ -55,7 +55,7 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
     @Override
     protected boolean set(ItemStack container, Boolean value) {
         if (!container.hasTag()) {
-            container.setTag(new CompoundNBT());
+            container.put(new CompoundNBT());
         }
         if (container.getTag().contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
             int flag = container.getTag().getInt(Constants.Item.ITEM_HIDE_FLAGS);

@@ -162,7 +162,7 @@ public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTr
             if (!spongeData.contains(type.compoundKey)) {
                 final CompoundNBT sourceNbt = new CompoundNBT();
                 sourceNbt.putUniqueId(Constants.UUID, uuid);
-                spongeData.setTag(type.compoundKey, sourceNbt);
+                spongeData.put(type.compoundKey, sourceNbt);
             } else {
                 final CompoundNBT compoundTag = spongeData.getCompound(type.compoundKey);
                 compoundTag.putUniqueId(Constants.UUID, uuid);

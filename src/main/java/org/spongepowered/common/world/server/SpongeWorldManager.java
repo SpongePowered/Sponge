@@ -26,18 +26,47 @@ package org.spongepowered.common.world.server;
 
 import com.google.gson.JsonElement;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.WorldInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.WorldManager;
+import org.spongepowered.api.world.storage.WorldProperties;
+
+import java.util.Collection;
+import java.util.UUID;
 
 public interface SpongeWorldManager extends WorldManager {
 
     MinecraftServer getServer();
 
+    boolean isDimensionTypeRegistered(DimensionType dimensionType);
+
+    default UUID getDimensionTypeUniqueId(DimensionType dimensionType) {
+        final WorldInfo info = this.getInfo(dimensionType);
+        if (info == null) {
+            return null;
+        }
+
+        return ((WorldProperties) info).getUniqueId();
+    }
+
+    @Nullable
     default ServerWorld getWorld(DimensionType dimensionType) {
         return this.getServer().getWorld(dimensionType);
     }
 
+    @Nullable
+    default ServerWorld getDefaultWorld() {
+        return this.getWorld(DimensionType.OVERWORLD);
+    }
+
+    WorldInfo getInfo(DimensionType dimensionType);
+
     void loadAllWorlds(MinecraftServer server, String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions);
+
+    void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean isCustom);
 }

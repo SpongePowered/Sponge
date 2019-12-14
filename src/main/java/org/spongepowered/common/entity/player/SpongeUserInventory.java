@@ -139,7 +139,7 @@ public class SpongeUserInventory implements IInventory {
                 CompoundNBT nbttagcompound = new CompoundNBT();
                 nbttagcompound.putByte("Slot", (byte) i);
                 this.mainInventory.get(i).write(nbttagcompound);
-                nbtTagListIn.appendTag(nbttagcompound);
+                nbtTagListIn.add(nbttagcompound);
             }
         }
 
@@ -148,7 +148,7 @@ public class SpongeUserInventory implements IInventory {
                 CompoundNBT nbttagcompound1 = new CompoundNBT();
                 nbttagcompound1.putByte("Slot", (byte) (j + 100));
                 this.armorInventory.get(j).write(nbttagcompound1);
-                nbtTagListIn.appendTag(nbttagcompound1);
+                nbtTagListIn.add(nbttagcompound1);
             }
         }
 
@@ -157,7 +157,7 @@ public class SpongeUserInventory implements IInventory {
                 CompoundNBT nbttagcompound2 = new CompoundNBT();
                 nbttagcompound2.putByte("Slot", (byte) (k + 150));
                 this.offHandInventory.get(k).write(nbttagcompound2);
-                nbtTagListIn.appendTag(nbttagcompound2);
+                nbtTagListIn.add(nbttagcompound2);
             }
         }
 

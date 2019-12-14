@@ -54,7 +54,7 @@ public class ItemPotionColorDataProcessor extends AbstractItemSingleDataProcesso
     @Override
     protected boolean set(ItemStack dataHolder, Color value) {
         if (!dataHolder.hasTag()) {
-            dataHolder.setTag(new CompoundNBT());
+            dataHolder.put(new CompoundNBT());
         }
 
         final CompoundNBT mainCompound = dataHolder.getTag();

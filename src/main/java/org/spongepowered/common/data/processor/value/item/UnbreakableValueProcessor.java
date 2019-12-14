@@ -59,7 +59,7 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
             container.setItemDamage(0);
         }
         if (!container.hasTag()) {
-            container.setTag(new CompoundNBT());
+            container.put(new CompoundNBT());
         }
         container.getTag().putBoolean(Constants.Item.ITEM_UNBREAKABLE, value);
         return true;

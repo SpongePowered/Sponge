@@ -25,88 +25,65 @@
 package org.spongepowered.common.mixin.api.mcp.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import net.minecraft.profiler.Profiler;
+import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameType;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.ConsoleSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.chunk.ChunkTicketManager;
+import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.storage.ChunkLayout;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftServer.class)
-@Implements(@Interface(iface = CommandSource.class, prefix = "command$"))
-public abstract class MinecraftServerMixin_API implements Server, ConsoleSource {
+@Implements(value = @Interface(iface = Server.class, prefix = "server$"))
+public abstract class MinecraftServerMixin_API implements Server {
 
-    @Shadow @Final public Profiler profiler;
     @Shadow @Final public long[] tickTimeArray;
-    @Shadow private int tickCounter;
-    @Shadow private String motd;
-    @Shadow public ServerWorld[] worlds;
-    @Shadow private Thread serverThread;
+    @Shadow @Final protected Thread serverThread;
 
-    @Shadow public abstract void sendMessage(ITextComponent message);
-    @Shadow public abstract void initiateShutdown();
-    @Shadow public abstract boolean isServerInOnlineMode();
-    @Shadow public abstract String getFolderName();
-    @Shadow public abstract PlayerList getPlayerList();
-    @Shadow public abstract Difficulty getDifficulty();
-    @Shadow public abstract GameType getGameType();
-    @Shadow public abstract int getMaxPlayerIdleMinutes();
+    @Shadow public abstract PlayerList shadow$getPlayerList();
+    @Shadow public abstract boolean shadow$isServerInOnlineMode();
+    @Shadow public abstract String shadow$getMOTD();
+    @Shadow public abstract int shadow$getTickCounter();
+    @Shadow public abstract void shadow$initiateShutdown(boolean p_71263_1_);
+    @Shadow public abstract int shadow$getMaxPlayerIdleMinutes();
+    @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
 
-    @Shadow public abstract String shadow$getName();
-
-    private GameProfileManager profileManager;
-    private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
-
-    @Override
-    public ConsoleSource getConsole() {
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Optional<World> getWorld(final String worldName) {
-        return (Optional<World>) (Object) WorldManager.getWorld(worldName);
-    }
+    // TODO 1.14 - Scheduler
+    private SpongeScheduler api$scheduler;
+    @Nullable private ServerScoreboard api$scoreboard;
+    private GameProfileManager api$profileManager;
+    private MessageChannel api$broadcastChannel = MessageChannel.toPlayersAndServer();
 
     @Override
     public ChunkLayout getChunkLayout() {
@@ -114,23 +91,13 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
     }
 
     @Override
-    public Optional<WorldProperties> getWorldProperties(final String worldName) {
-        return WorldManager.getWorldProperties(worldName);
-    }
-
-    @Override
-    public Collection<WorldProperties> getAllWorldProperties() {
-        return WorldManager.getAllWorldProperties();
-    }
-
-    @Override
     public MessageChannel getBroadcastChannel() {
-        return this.broadcastChannel;
+        return this.api$broadcastChannel;
     }
 
     @Override
     public void setBroadcastChannel(final MessageChannel channel) {
-        this.broadcastChannel = checkNotNull(channel, "channel");
+        this.api$broadcastChannel = checkNotNull(channel, "channel");
     }
 
     @Override
@@ -140,60 +107,65 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public boolean hasWhitelist() {
-        return this.getPlayerList().isWhiteListEnabled();
+        return this.shadow$getPlayerList().isWhiteListEnabled();
     }
 
     @Override
     public void setHasWhitelist(final boolean enabled) {
-        this.getPlayerList().setWhiteListEnabled(enabled);
+        this.shadow$getPlayerList().setWhiteListEnabled(enabled);
     }
 
     @Override
     public boolean getOnlineMode() {
-        return this.isServerInOnlineMode();
+        return this.shadow$isServerInOnlineMode();
+    }
+
+    @Override
+    public WorldManager getWorldManager() {
+        return SpongeImpl.getWorldManager();
     }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Player> getOnlinePlayers() {
-        if (this.getPlayerList() == null || this.getPlayerList().getPlayers() == null) {
+        if (this.shadow$getPlayerList() == null || this.shadow$getPlayerList().getPlayers() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List) this.getPlayerList().getPlayers());
+        return ImmutableList.copyOf((List) this.shadow$getPlayerList().getPlayers());
     }
 
     @Override
-    public Optional<Player> getPlayer(final UUID uniqueId) {
-        if (this.getPlayerList() == null) {
+    public Optional<Player> getPlayer(UUID uniqueId) {
+        if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) this.getPlayerList().getPlayerByUUID(uniqueId));
+        return Optional.ofNullable((Player) this.shadow$getPlayerList().getPlayerByUUID(uniqueId));
     }
 
     @Override
-    public Optional<Player> getPlayer(final String name) {
-        if (this.getPlayerList() == null) {
+    public Optional<Player> getPlayer(String name) {
+        if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) this.getPlayerList().getPlayerByUsername(name));
+        return Optional.ofNullable((Player) this.shadow$getPlayerList().getPlayerByUsername(name));
     }
 
     @Override
     public Text getMotd() {
-        return SpongeTexts.fromLegacy(this.motd);
+        return SpongeTexts.fromLegacy(this.shadow$getMOTD());
     }
 
     @Override
     public int getMaxPlayers() {
-        if (this.getPlayerList() == null) {
+        if (this.shadow$getPlayerList() == null) {
             return 0;
         }
-        return this.getPlayerList().getMaxPlayers();
+        return this.shadow$getPlayerList().getMaxPlayers();
     }
 
     @Override
     public int getRunningTimeTicks() {
-        return this.tickCounter;
+        return this.shadow$getTickCounter();
     }
 
     @Override
@@ -205,7 +177,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public void shutdown() {
-        this.initiateShutdown();
+        this.shadow$initiateShutdown(false);
     }
 
     @Override
@@ -214,97 +186,7 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
             player.kick(kickMessage);
         }
 
-        this.initiateShutdown();
-    }
-
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Override
-    public Optional<World> loadWorld(final UUID uuid) {
-        return (Optional) WorldManager.loadWorld(uuid);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Optional<World> loadWorld(final WorldProperties properties) {
-        return (Optional) WorldManager.loadWorld(properties);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Optional<World> loadWorld(final String worldName) {
-        return (Optional) WorldManager.loadWorld(worldName);
-    }
-
-    @Override
-    public WorldProperties createWorldProperties(final String folderName, final WorldArchetype archetype) {
-        return WorldManager.createWorldProperties(folderName, archetype);
-    }
-
-    @Override
-    public boolean unloadWorld(final World world) {
-        // API is not allowed to unload overworld
-        return ((ServerWorldBridge) world).bridge$getDimensionId() != 0 && WorldManager.unloadWorld((ServerWorld) world, false, false);
-
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<World> getWorlds() {
-        return (Collection<World>) (Object) Collections.unmodifiableCollection(WorldManager.getWorlds());
-    }
-
-    @Override
-    public Optional<World> getWorld(final UUID uniqueId) {
-        for (final ServerWorld worldserver : WorldManager.getWorlds()) {
-            if (((World) worldserver).getUniqueId().equals(uniqueId)) {
-                return Optional.of((World) worldserver);
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<WorldProperties> getDefaultWorld() {
-        return WorldManager.getWorldByDimensionId(0).map(worldServer -> ((World) worldServer).getProperties());
-    }
-
-    @Override
-    public String getDefaultWorldName() {
-        checkState(this.getFolderName() != null, "Attempt made to grab default world name too early!");
-        return this.getFolderName();
-    }
-
-    @Override
-    public Collection<WorldProperties> getUnloadedWorlds() {
-        return WorldManager.getAllWorldProperties().stream()
-                .filter(props -> !this.getWorld(props.getUniqueId()).isPresent())
-                .collect(ImmutableSet.toImmutableSet());
-    }
-
-    @Override
-    public Optional<WorldProperties> getWorldProperties(final UUID uniqueId) {
-        return WorldManager.getWorldProperties(uniqueId);
-    }
-
-    @Override
-    public CompletableFuture<Optional<WorldProperties>> copyWorld(final WorldProperties worldProperties, final String copyName) {
-        return WorldManager.copyWorld(worldProperties, copyName);
-    }
-
-    @Override
-    public Optional<WorldProperties> renameWorld(final WorldProperties worldProperties, final String newName) {
-        return WorldManager.renameWorld(worldProperties, newName);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> deleteWorld(final WorldProperties worldProperties) {
-        return WorldManager.deleteWorld(worldProperties);
-    }
-
-    @Override
-    public boolean saveWorldProperties(final WorldProperties properties) {
-        return WorldManager.saveWorldProperties(properties);
+        this.shadow$initiateShutdown(false);
     }
 
     @Override
@@ -314,10 +196,10 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public GameProfileManager getGameProfileManager() {
-        if (this.profileManager == null) {
-            this.profileManager = new SpongeProfileManager();
+        if (this.api$profileManager == null) {
+            this.api$profileManager = new SpongeProfileManager();
         }
-        return this.profileManager;
+        return this.api$profileManager;
     }
 
     @Override
@@ -327,7 +209,15 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
-        return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
+        if (this.api$scoreboard == null) {
+            final ServerWorld world = SpongeImpl.getWorldManager().getDefaultWorld();
+            if (world == null) {
+                return Optional.empty();
+            }
+            this.api$scoreboard = world.getScoreboard();
+        }
+
+        return Optional.ofNullable((Scoreboard) this.api$scoreboard);
     }
 
     @Override
@@ -335,27 +225,23 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
         return this.getClass().getSimpleName();
     }
 
-
-
-
     @Override
     public int getPlayerIdleTimeout() {
-        return this.getMaxPlayerIdleMinutes();
-    }
-
-
-    @Override
-    public boolean isMainThread() {
-        return this.serverThread == Thread.currentThread();
-    }
-
-    @Override
-    public String getIdentifier() {
-        return ((CommandSourceBridge) this).bridge$getIdentifier();
+        return this.shadow$getMaxPlayerIdleMinutes();
     }
 
     @Intrinsic
-    public String command$getName() {
-        return this.shadow$getName();
+    public void server$setPlayerIdleTimeout(int timeout) {
+        this.shadow$setPlayerIdleTimeout(timeout);
+    }
+
+    @Override
+    public Scheduler getScheduler() {
+        return this.api$scheduler;
+    }
+
+    @Override
+    public boolean onMainThread() {
+        return this.serverThread == Thread.currentThread();
     }
 }

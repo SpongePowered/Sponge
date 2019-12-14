@@ -91,8 +91,8 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         if (chunk.bridge$getTrackedShortPlayerPositions().size() > 0 || chunk.bridge$getTrackedIntPlayerPositions().size() > 0) {
             final CompoundNBT trackedNbt = new CompoundNBT();
             final ListNBT positions = new ListNBT();
-            trackedNbt.setTag(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
-            compound.setTag(Constants.Sponge.SPONGE_DATA, trackedNbt);
+            trackedNbt.put(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
+            compound.put(Constants.Sponge.SPONGE_DATA, trackedNbt);
 
             for (final Map.Entry<Short, PlayerTracker> mapEntry : chunk.bridge$getTrackedShortPlayerPositions().entrySet()) {
                 final Short pos = mapEntry.getKey();
@@ -102,7 +102,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 valueNbt.putInt("owner", ownerUniqueIdIndex);
                 valueNbt.putInt("notifier", notifierUniqueIdIndex);
                 valueNbt.putShort("pos", pos);
-                positions.appendTag(valueNbt);
+                positions.add(valueNbt);
             }
 
             for (final Map.Entry<Integer, PlayerTracker> mapEntry : chunk.bridge$getTrackedIntPlayerPositions().entrySet()) {
@@ -113,7 +113,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 valueNbt.putInt("owner", ownerUniqueIdIndex);
                 valueNbt.putInt("notifier", notifierUniqueIdIndex);
                 valueNbt.putInt("ipos", pos);
-                positions.appendTag(valueNbt);
+                positions.add(valueNbt);
             }
         }
     }

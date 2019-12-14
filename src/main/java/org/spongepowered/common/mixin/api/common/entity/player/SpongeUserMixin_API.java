@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.common.entity.player;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
@@ -54,8 +55,7 @@ public abstract class SpongeUserMixin_API implements User {
     @Shadow private int dimension;
     @Shadow private float rotationPitch;
     @Shadow private float rotationYaw;
-
-    @Shadow public abstract void markDirty();
+    @Shadow public abstract void shadow$markDirty();
 
     @Override
     public GameProfile getProfile() {
@@ -95,26 +95,29 @@ public abstract class SpongeUserMixin_API implements User {
         if (playerOpt.isPresent()) {
             return playerOpt.get().getWorldUniqueId();
         }
-        final Optional<String> folder = WorldManager.getWorldFolderByDimensionId(this.dimension);
-        return folder.map(WorldManager::getWorldProperties).flatMap(e -> e.map(WorldProperties::getUniqueId));
+        final DimensionType dimensionType = DimensionType.getById(this.dimension);
+        if (dimensionType == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(SpongeImpl.getWorldManager().getDimensionTypeUniqueId(dimensionType));
     }
 
     @Override
-    public boolean setLocation(Vector3d position, UUID world) {
+    public boolean setLocation(Vector3d position, UUID worldUniqueId) {
         final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
-            return playerOpt.get().setLocation(position, world);
+            return playerOpt.get().setLocation(position, worldUniqueId);
         }
-        final WorldProperties prop = WorldManager.getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
-        final Integer dimensionId = ((WorldInfoBridge) prop).bridge$getDimensionId();
-        if (dimensionId == null) {
-            throw new IllegalArgumentException("Invalid World: missing dimensionID)");
-        }
+        final WorldProperties properties =
+                SpongeImpl.getWorldManager().getProperties(worldUniqueId).orElseThrow(() -> new IllegalArgumentException(String.format("Unknown "
+                        + "World UUID '%s' given when setting location of user!", worldUniqueId)));
+        final Integer dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionType().getId();
         this.dimension = dimensionId;
         this.posX = position.getX();
         this.posY = position.getY();
         this.posZ = position.getZ();
-        this.markDirty();
+        this.shadow$markDirty();
         return true;
     }
 
@@ -133,7 +136,7 @@ public abstract class SpongeUserMixin_API implements User {
             playerOpt.get().setRotation(rotation);
             return;
         }
-        this.markDirty();
+        this.shadow$markDirty();
         this.rotationPitch = ((float) rotation.getX()) % 360.0F;
         this.rotationYaw = ((float) rotation.getY()) % 360.0F;
     }

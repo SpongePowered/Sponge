@@ -77,7 +77,7 @@ abstract class AbstractItemBookPagesProcessor<T, M extends Mutable<M, I>, I exte
             }
             final CompoundNBT tag = stack.getTag();
             if (tag != null) {
-                tag.setTag(Constants.Item.Book.ITEM_BOOK_PAGES, new ListNBT());
+                tag.put(Constants.Item.Book.ITEM_BOOK_PAGES, new ListNBT());
             }
             return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));
         }
@@ -89,7 +89,7 @@ abstract class AbstractItemBookPagesProcessor<T, M extends Mutable<M, I>, I exte
     protected boolean set(final ItemStack itemStack, final List<T> value) {
         final ListNBT list = new ListNBT();
         for (final T page : value) {
-            list.appendTag(this.translateTo(page));
+            list.add(this.translateTo(page));
         }
         itemStack.setTagInfo(Constants.Item.Book.ITEM_BOOK_PAGES, list);
         final CompoundNBT compound = itemStack.getTag();
