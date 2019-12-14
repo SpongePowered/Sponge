@@ -26,7 +26,7 @@ package org.spongepowered.common.data.processor.data.tileentity;
 
 import org.spongepowered.api.block.entity.Jukebox;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.Value.Immutable;

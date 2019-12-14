@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.Item;

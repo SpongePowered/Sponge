@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.BlockQuartz;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableQuartzData;
 import org.spongepowered.api.data.manipulator.mutable.block.QuartzData;
 import org.spongepowered.api.data.type.QuartzType;

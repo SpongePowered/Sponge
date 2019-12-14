@@ -34,6 +34,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPlayerListHeaderFooterPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
+import net.minecraft.network.play.server.SPlayerListItemPacket.AddPlayerData;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameType;

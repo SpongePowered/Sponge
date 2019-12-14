@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.Value.Immutable;

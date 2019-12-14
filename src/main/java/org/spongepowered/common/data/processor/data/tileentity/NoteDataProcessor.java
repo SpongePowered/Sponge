@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.tileentity.TileEntityNote;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.NoteData;
 import org.spongepowered.api.data.type.NotePitch;

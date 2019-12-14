@@ -44,7 +44,7 @@ import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.block.tileentity.*;
 import org.spongepowered.api.block.tileentity.carrier.*;
 import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.*;
 import org.spongepowered.api.data.manipulator.immutable.block.*;
 import org.spongepowered.api.data.manipulator.immutable.entity.*;
@@ -155,23 +155,23 @@ public final class DataRegistrar {
         // TileEntities
         dataManager.registerBuilder(Banner.class, new SpongeBannerBuilder());
         dataManager.registerBuilder(PatternLayer.class, new SpongePatternLayerBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.carrier.BrewingStand.class, new SpongeBrewingStandBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.carrier.Chest.class, new SpongeChestBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.carrier.BrewingStand.class, new SpongeBrewingStandBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.carrier.chest.Chest.class, new SpongeChestBuilder());
         dataManager.registerBuilder(CommandBlock.class, new SpongeCommandBlockBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.Comparator.class, new SpongeComparatorBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.DaylightDetector.class, new SpongeDaylightBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.carrier.Dispenser.class, new SpongeDispenserBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.carrier.Dropper.class, new SpongeDropperBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.EnchantmentTable.class, new SpongeEnchantmentTableBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.EnderChest.class, new SpongeEnderChestBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.EndPortal.class, new SpongeEndPortalBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.Comparator.class, new SpongeComparatorBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.DaylightDetector.class, new SpongeDaylightBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.carrier.Dispenser.class, new SpongeDispenserBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.carrier.Dropper.class, new SpongeDropperBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.EnchantmentTable.class, new SpongeEnchantmentTableBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.EnderChest.class, new SpongeEnderChestBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.EndPortal.class, new SpongeEndPortalBuilder());
         dataManager.registerBuilder(FurnaceBlockEntity.class, new SpongeFurnaceBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.carrier.Hopper.class, new SpongeHopperBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.MobSpawner.class, new SpongeMobSpawnerBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.carrier.Hopper.class, new SpongeHopperBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.MobSpawner.class, new SpongeMobSpawnerBuilder());
         dataManager.registerBuilder(Note.class, new SpongeNoteBuilder());
         dataManager.registerBuilder(Sign.class, new SpongeSignBuilder());
         dataManager.registerBuilder(PlayerHead.class, new SpongeSkullBuilder());
-        dataManager.registerBuilder(org.spongepowered.api.block.tileentity.carrier.Beacon.class, new SpongeBeaconBuilder());
+        dataManager.registerBuilder(org.spongepowered.api.block.entity.carrier.Beacon.class, new SpongeBeaconBuilder());
         dataManager.registerBuilder(LocatableBlock.class, new SpongeLocatableBlockBuilder());
 
         // Block stuff

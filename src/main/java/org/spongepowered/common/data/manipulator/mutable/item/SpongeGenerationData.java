@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
 import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;

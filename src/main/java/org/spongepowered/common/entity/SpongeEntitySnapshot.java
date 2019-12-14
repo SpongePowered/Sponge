@@ -26,6 +26,7 @@ package org.spongepowered.common.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import Immutable;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

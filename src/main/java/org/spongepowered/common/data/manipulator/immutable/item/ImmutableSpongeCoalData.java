@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.item;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCoalData;
 import org.spongepowered.api.data.manipulator.mutable.item.CoalData;
 import org.spongepowered.api.data.type.CoalType;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDisarmedData;
 import org.spongepowered.api.data.manipulator.mutable.block.DisarmedData;
 import org.spongepowered.api.data.value.Value.Mutable;

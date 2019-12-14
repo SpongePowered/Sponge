@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.DoublePlantBlock;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDoublePlantData;
 import org.spongepowered.api.data.manipulator.mutable.block.DoublePlantData;
 import org.spongepowered.api.data.type.DoublePlantType;

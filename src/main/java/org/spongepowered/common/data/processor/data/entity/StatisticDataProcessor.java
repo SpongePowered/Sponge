@@ -32,7 +32,7 @@ import net.minecraft.stats.ServerStatisticsManager;
 import net.minecraft.stats.Stat;
 import net.minecraft.util.TupleIntJsonSerializable;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableStatisticData;
 import org.spongepowered.api.data.manipulator.mutable.entity.StatisticData;
 import org.spongepowered.api.data.value.MapValue.Mutable;

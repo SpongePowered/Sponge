@@ -44,6 +44,8 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.BlockTransaction.TransactionContext;
+import org.spongepowered.common.event.tracking.context.BlockTransaction.TransactionProcessState;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 

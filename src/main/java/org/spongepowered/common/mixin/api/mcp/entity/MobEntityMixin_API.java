@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.GoalExecutor;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-
+import Mutable;
 import java.util.Collection;
 import java.util.Optional;
 

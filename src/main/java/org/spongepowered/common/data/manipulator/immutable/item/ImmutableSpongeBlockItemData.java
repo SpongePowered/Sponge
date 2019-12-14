@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBlockItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
 import org.spongepowered.api.data.persistence.DataContainer;

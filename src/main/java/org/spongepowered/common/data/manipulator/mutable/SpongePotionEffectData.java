@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
 import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
 import org.spongepowered.api.data.persistence.DataContainer;

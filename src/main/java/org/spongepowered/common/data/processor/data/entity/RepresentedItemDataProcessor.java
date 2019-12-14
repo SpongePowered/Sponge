@@ -29,7 +29,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.Value.Immutable;

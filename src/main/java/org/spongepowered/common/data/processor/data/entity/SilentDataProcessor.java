@@ -26,7 +26,7 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSilentData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SilentData;
 import org.spongepowered.api.data.value.Value.Immutable;

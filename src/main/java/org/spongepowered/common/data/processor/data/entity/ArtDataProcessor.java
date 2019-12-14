@@ -32,7 +32,7 @@ import net.minecraft.network.play.server.SDestroyEntitiesPacket;
 import net.minecraft.network.play.server.SSpawnPaintingPacket;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArtData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
 import org.spongepowered.api.data.type.ArtType;

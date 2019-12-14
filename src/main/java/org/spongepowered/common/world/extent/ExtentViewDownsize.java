@@ -540,7 +540,7 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
+    public Set<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         final Vector3i max = this.blockMax.add(Vector3i.ONE);
         return this.extent.getIntersectingEntities(start, direction, distance,
@@ -548,7 +548,7 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
+    public Set<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<org.spongepowered.api.world.volume.entity.ReadableEntityVolume.EntityHit> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         final Vector3i max = this.blockMax.add(Vector3i.ONE);
         return this.extent.getIntersectingEntities(start, end,

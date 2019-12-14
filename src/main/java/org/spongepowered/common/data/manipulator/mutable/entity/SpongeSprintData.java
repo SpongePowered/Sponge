@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSprintData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SprintData;
 import org.spongepowered.api.data.value.Value.Mutable;

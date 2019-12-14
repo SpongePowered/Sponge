@@ -36,7 +36,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
 import org.spongepowered.common.util.Constants;
-
+import MobSpawnerData;
+import Mutable;
 import net.minecraft.tileentity.MobSpawnerTileEntity;
 import net.minecraft.world.spawner.AbstractSpawner;
 

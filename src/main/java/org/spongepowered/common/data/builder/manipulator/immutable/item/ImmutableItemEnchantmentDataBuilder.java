@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.ImmutableDataHolder;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;

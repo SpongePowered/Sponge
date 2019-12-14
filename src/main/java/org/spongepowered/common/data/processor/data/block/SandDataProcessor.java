@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.SandBlock;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandData;
 import org.spongepowered.api.data.manipulator.mutable.block.SandData;
 import org.spongepowered.api.data.type.SandType;

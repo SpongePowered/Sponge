@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
 import org.spongepowered.api.data.value.Value.Immutable;

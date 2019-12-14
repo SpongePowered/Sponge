@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.item;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCookedFishData;
 import org.spongepowered.api.data.manipulator.mutable.item.CookedFishData;
 import org.spongepowered.api.data.type.CookedFish;

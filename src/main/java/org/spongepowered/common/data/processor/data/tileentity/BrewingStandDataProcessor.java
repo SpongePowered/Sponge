@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;

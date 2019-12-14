@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.block;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
 import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;

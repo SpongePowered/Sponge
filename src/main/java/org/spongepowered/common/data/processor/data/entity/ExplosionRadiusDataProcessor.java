@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.data.entity;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExplosionRadiusData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExplosionRadiusData;
 import org.spongepowered.api.data.value.OptionalValue.Mutable;

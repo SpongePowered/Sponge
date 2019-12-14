@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive.horse;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
@@ -35,7 +35,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
 import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 import org.spongepowered.common.util.Constants;
-
+import Mutable;
 import java.util.Collection;
 import net.minecraft.entity.passive.horse.HorseEntity;
 

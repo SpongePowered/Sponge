@@ -26,7 +26,7 @@ package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
 import org.spongepowered.api.data.value.Value.Immutable;

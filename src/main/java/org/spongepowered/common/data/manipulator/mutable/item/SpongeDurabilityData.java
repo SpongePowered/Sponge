@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.item;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableDurabilityData;
 import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
 import org.spongepowered.api.data.persistence.DataContainer;

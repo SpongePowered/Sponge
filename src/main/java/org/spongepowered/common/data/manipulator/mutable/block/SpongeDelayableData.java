@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 
 import static org.spongepowered.common.util.Constants.Functional.intComparator;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDelayableData;
 import org.spongepowered.api.data.manipulator.mutable.block.DelayableData;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -41,7 +41,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.AgeableEntityMixin_API;
 import org.spongepowered.common.util.Constants;
-
+import Mutable;
 import java.util.Collection;
 import java.util.Optional;
 

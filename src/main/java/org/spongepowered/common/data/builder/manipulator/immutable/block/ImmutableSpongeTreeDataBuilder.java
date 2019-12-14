@@ -28,7 +28,7 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.ImmutableDataHolder;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;

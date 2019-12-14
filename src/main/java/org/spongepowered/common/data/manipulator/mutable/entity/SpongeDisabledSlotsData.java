@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDisabledSlotsData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DisabledSlotsData;
 import org.spongepowered.api.data.persistence.DataContainer;

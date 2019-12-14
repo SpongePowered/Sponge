@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAreaEffectCloudData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
 import org.spongepowered.api.data.persistence.DataContainer;

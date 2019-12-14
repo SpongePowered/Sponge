@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.data.entity;
 import static org.spongepowered.common.util.Constants.Catalog.DEFAULT_HAND;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDominantHandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DominantHandData;
 import org.spongepowered.api.data.type.HandPreference;

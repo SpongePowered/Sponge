@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import Mutable;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -52,7 +53,7 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive.horse;
 
+import Mutable;
 import net.minecraft.entity.passive.horse.LlamaEntity;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.entity.living.animal.horse.llama.Llama;

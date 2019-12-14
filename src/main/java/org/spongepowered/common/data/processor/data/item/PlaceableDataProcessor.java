@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
 import org.spongepowered.api.data.value.SetValue.Immutable;

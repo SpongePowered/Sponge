@@ -28,7 +28,6 @@ import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Banner;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.persistence.DataView;

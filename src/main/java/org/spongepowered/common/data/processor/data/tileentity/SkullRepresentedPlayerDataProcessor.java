@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.type.SkullTypes;

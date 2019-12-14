@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.entity.hanging.Painting;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
-
+import Mutable;
 import java.util.Collection;
 import net.minecraft.entity.item.PaintingEntity;
 

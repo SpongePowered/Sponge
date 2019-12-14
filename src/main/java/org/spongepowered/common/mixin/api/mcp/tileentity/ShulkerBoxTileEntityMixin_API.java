@@ -31,7 +31,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
-
+import DyeableData;
+import Mutable;
 import net.minecraft.tileentity.ShulkerBoxTileEntity;
 
 @Mixin(ShulkerBoxTileEntity.class)

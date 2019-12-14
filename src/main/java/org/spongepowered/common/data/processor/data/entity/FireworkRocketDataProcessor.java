@@ -28,7 +28,7 @@ import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkRocketData;
 import org.spongepowered.api.data.manipulator.mutable.FireworkRocketData;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;

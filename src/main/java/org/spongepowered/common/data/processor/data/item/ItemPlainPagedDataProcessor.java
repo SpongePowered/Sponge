@@ -26,7 +26,7 @@ package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.item.Items;
 import net.minecraft.nbt.StringNBT;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlainPagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlainPagedData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePlainPagedData;

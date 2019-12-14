@@ -27,7 +27,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.util.Constants;

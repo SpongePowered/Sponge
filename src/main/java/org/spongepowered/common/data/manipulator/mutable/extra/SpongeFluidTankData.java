@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.manipulator.mutable.extra;
 
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.MapValue.Mutable;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidTankData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidTankData;

@@ -29,7 +29,7 @@ import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTradeOfferData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
 import org.spongepowered.api.data.value.ListValue.Mutable;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePickupRuleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PickupRuleData;
 import org.spongepowered.api.data.type.PickupRule;

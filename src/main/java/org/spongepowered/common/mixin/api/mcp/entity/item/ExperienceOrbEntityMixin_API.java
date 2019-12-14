@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.ExperienceOrb;

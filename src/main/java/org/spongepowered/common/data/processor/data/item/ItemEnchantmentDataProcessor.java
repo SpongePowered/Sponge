@@ -32,7 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.persistence.DataContainer;

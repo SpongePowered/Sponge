@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import org.spongepowered.api.block.entity.carrier.Hopper;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.mixin.accessor.tileentity.HopperTileEntityAccessor;

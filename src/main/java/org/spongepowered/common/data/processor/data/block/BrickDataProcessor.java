@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.BlockStoneBrick;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBrickData;
 import org.spongepowered.api.data.manipulator.mutable.block.BrickData;
 import org.spongepowered.api.data.type.BrickType;

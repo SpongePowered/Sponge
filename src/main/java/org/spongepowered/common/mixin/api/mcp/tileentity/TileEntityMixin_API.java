@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
+import Collection;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;

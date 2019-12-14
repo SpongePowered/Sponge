@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableTargetedLocationData;
 import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
 import org.spongepowered.api.data.value.Value.Immutable;

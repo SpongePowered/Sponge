@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import static org.spongepowered.common.util.Constants.Functional.intComparator;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;

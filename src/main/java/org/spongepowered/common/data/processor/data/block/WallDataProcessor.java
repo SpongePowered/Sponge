@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.WallBlock;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.manipulator.mutable.block.WallData;
 import org.spongepowered.api.data.type.WallType;

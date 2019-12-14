@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.projectile.ShulkerBullet;

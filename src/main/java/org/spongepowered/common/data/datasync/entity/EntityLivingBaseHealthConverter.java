@@ -27,7 +27,7 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;

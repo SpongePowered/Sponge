@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
+import Mutable;
 import net.minecraft.entity.AgeableEntity;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;

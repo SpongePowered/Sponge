@@ -88,6 +88,7 @@ import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.entity.EntityUtil.EntityTrace;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;

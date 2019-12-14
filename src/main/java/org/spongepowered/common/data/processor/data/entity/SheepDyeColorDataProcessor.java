@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;

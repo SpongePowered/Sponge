@@ -28,7 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.Value.Immutable;

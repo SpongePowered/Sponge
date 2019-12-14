@@ -30,7 +30,8 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
-
+import Mutable;
+import SkullData;
 import net.minecraft.tileentity.SkullTileEntity;
 
 @Mixin(SkullTileEntity.class)

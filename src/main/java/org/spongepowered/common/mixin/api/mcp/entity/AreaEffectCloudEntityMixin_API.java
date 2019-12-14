@@ -28,7 +28,7 @@ import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.EnumParticleTypes;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.effect.particle.ParticleType;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.item;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableFishData;
 import org.spongepowered.api.data.manipulator.mutable.item.FishData;
 import org.spongepowered.api.data.type.Fish;

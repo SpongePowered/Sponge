@@ -102,7 +102,6 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -212,7 +211,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public boolean bridge$keepInventory() {
         if (this.impl$keepInventory == null) {
-            return this.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY);
+            return this.world.getGameRules().getBoolean(org.spongepowered.api.world.gamerule.GameRules.KEEP_INVENTORY);
         }
         return this.impl$keepInventory;
     }

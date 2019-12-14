@@ -29,7 +29,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.PotionUtils;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionColorData;
 import org.spongepowered.api.data.manipulator.mutable.PotionColorData;
 import org.spongepowered.api.data.value.Value.Immutable;

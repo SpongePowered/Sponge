@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
 import org.spongepowered.api.data.persistence.DataContainer;

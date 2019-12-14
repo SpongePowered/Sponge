@@ -26,7 +26,7 @@ package org.spongepowered.common.data.processor.value.block;
 
 import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.SetValue.Mutable;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;

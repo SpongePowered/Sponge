@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.data.entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.GameType;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.value.Value.Immutable;

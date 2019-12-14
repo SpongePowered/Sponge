@@ -31,7 +31,7 @@ import static org.spongepowered.api.data.persistence.Queries.POSITION_Z;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBodyPartRotationalData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
 import org.spongepowered.api.data.persistence.DataContainer;

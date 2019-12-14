@@ -28,7 +28,7 @@ import com.google.common.collect.Iterables;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppleData;
 import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
 import org.spongepowered.api.data.type.GoldenApple;

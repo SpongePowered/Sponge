@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.value.Value.Immutable;

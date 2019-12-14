@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
 import org.spongepowered.api.data.persistence.DataContainer;

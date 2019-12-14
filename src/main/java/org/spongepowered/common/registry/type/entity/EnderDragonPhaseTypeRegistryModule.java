@@ -29,7 +29,7 @@ import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhase
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.mixin.accessor.entity.boss.dragon.phase.PhaseTypeAccessor;
-
+import org.spongepowered.common.registry.type.entity.EnderDragonPhaseTypeRegistryModule.Holder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.extra;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;

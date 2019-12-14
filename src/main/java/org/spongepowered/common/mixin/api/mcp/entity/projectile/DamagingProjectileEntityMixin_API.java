@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.DamagingProjectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,6 +33,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAccelerati
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import org.spongepowered.math.vector.Vector3d;
+import Mutable;
 import java.util.Collection;
 
 import javax.annotation.Nullable;

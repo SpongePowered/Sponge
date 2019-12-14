@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.WoodType;

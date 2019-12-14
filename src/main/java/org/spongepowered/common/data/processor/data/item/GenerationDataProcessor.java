@@ -28,7 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.IntNBT;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
 import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;

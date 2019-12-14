@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
 import org.spongepowered.api.data.persistence.DataContainer;

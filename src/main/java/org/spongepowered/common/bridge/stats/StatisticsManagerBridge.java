@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.stats;
 
+import Map;
 import net.minecraft.stats.Stat;
 
 public interface StatisticsManagerBridge {

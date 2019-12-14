@@ -17,7 +17,9 @@ import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.math.vector.Vector2i;
-
+import BuildingStep;
+import DummyStep;
+import EndStep;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

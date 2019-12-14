@@ -36,7 +36,7 @@ import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;

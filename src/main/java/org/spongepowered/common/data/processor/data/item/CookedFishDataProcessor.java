@@ -28,7 +28,7 @@ import net.minecraft.item.ItemFishFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCookedFishData;
 import org.spongepowered.api.data.manipulator.mutable.item.CookedFishData;
 import org.spongepowered.api.data.type.CookedFish;

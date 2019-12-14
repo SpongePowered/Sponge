@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRotationalData;
 import org.spongepowered.api.data.manipulator.mutable.RotationalData;
 import org.spongepowered.api.util.rotation.Rotation;

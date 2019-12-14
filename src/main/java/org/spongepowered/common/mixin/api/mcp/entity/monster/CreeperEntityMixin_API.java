@@ -26,8 +26,9 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import Mutable;
 import net.minecraft.entity.monster.CreeperEntity;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.asm.mixin.Mixin;

@@ -32,7 +32,7 @@ import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.Hand;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;

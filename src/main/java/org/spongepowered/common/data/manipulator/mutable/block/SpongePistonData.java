@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePistonData;
 import org.spongepowered.api.data.manipulator.mutable.block.PistonData;
 import org.spongepowered.api.data.type.PistonType;

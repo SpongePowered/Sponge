@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.TallGrassBlock;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableShrubData;
 import org.spongepowered.api.data.manipulator.mutable.block.ShrubData;
 import org.spongepowered.api.data.type.ShrubType;

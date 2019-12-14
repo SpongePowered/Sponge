@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.ValueContainer;

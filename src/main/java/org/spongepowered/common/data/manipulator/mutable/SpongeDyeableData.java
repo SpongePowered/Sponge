@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;

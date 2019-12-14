@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.block;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
 import org.spongepowered.api.data.manipulator.mutable.block.PlantData;
 import org.spongepowered.api.data.type.PlantType;

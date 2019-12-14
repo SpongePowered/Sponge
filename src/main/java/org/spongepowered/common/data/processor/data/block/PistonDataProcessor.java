@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePistonData;
 import org.spongepowered.api.data.manipulator.mutable.block.PistonData;
 import org.spongepowered.api.data.type.PistonType;

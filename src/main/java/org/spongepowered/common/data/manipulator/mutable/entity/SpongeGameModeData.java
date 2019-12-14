@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;

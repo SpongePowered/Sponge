@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
 import org.spongepowered.api.data.manipulator.mutable.SkullData;
 import org.spongepowered.api.data.type.SkullType;

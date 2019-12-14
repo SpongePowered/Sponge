@@ -43,7 +43,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.persistence.DataContainer;

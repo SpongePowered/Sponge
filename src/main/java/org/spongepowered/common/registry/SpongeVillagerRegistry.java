@@ -36,6 +36,7 @@ import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.registry.SpongeVillagerRegistry.Holder;
 import org.spongepowered.common.registry.type.entity.CareerRegistryModule;
 
 import java.util.ArrayList;

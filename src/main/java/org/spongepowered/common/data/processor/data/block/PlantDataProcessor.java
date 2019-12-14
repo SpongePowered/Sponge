@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.data.block;
 import net.minecraft.block.FlowerBlock;
 import net.minecraft.block.FlowerBlock.EnumFlowerColor;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePlantData;
 import org.spongepowered.api.data.manipulator.mutable.block.PlantData;
 import org.spongepowered.api.data.type.PlantType;

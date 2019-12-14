@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
+import FurnaceData;
+import Mutable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.value.entity;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;

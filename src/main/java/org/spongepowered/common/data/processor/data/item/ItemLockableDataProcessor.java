@@ -34,7 +34,7 @@ import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
 import org.spongepowered.api.data.value.Value.Immutable;

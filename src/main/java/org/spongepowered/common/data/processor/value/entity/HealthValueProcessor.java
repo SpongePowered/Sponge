@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.value.entity;
 import static org.spongepowered.common.util.Constants.Functional.doubleComparator;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.BoundedValue.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;

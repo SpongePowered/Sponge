@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.manipulator.immutable.block;
 
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWireAttachmentData;
 import org.spongepowered.api.data.manipulator.mutable.block.WireAttachmentData;
 import org.spongepowered.api.data.persistence.DataContainer;

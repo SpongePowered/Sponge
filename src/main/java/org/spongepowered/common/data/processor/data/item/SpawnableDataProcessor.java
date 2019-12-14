@@ -32,7 +32,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableData;
 import org.spongepowered.api.data.manipulator.mutable.item.SpawnableData;
 import org.spongepowered.api.data.value.Value.Immutable;

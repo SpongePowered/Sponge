@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.manipulator.mutable;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkEffectData;
 import org.spongepowered.api.data.manipulator.mutable.FireworkEffectData;
 import org.spongepowered.api.data.persistence.DataContainer;

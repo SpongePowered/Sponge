@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDominantHandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DominantHandData;
 import org.spongepowered.api.data.type.HandPreference;

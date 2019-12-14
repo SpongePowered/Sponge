@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableEndGatewayData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.EndGatewayData;
 import org.spongepowered.api.data.persistence.DataContainer;

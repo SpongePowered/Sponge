@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.util.Constants;
 
 public class HideMiscellaneousValueProcessor extends AbstractHideFlagsValueProcessor {

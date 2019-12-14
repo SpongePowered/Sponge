@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableHingeData;
 import org.spongepowered.api.data.manipulator.mutable.block.HingeData;
 import org.spongepowered.api.data.type.Hinge;

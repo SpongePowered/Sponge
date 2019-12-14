@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.effect;
 
+import Mutable;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.weather.LightningBolt;

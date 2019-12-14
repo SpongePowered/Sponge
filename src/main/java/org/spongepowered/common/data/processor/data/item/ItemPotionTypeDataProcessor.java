@@ -31,7 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionTypeData;
 import org.spongepowered.api.data.manipulator.mutable.PotionTypeData;
 import org.spongepowered.api.data.value.Value.Immutable;

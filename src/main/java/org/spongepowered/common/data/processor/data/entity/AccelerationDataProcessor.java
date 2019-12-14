@@ -28,7 +28,7 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAccelerationData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AccelerationData;
 import org.spongepowered.api.data.persistence.DataContainer;

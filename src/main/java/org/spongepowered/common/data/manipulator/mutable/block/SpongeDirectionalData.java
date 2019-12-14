@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.block;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.value.Value.Mutable;

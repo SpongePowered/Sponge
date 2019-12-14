@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.type.DyeColor;
@@ -39,7 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.mixin.api.mcp.entity.passive.GolemEntityMixin_API;
 import org.spongepowered.common.util.Constants;
-
+import Mutable;
 import java.util.Collection;
 import java.util.Optional;
 import net.minecraft.entity.monster.ShulkerEntity;
