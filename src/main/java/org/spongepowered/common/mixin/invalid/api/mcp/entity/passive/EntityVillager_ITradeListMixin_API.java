@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.invalid.api.mcp.entity.passive;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.item.MerchantOffer;
-import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;

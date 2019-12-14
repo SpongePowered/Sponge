@@ -49,7 +49,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(WitherSkullEntity.class)
-public abstract class WitherSkullEntityMixin extends EntityFireballMixin implements WitherSkullEntityBridge, ExplosiveBridge {
+public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMixin implements WitherSkullEntityBridge, ExplosiveBridge {
 
     private int explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
     private float impl$damage = 0.0f;

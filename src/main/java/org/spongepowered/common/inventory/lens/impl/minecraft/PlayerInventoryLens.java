@@ -32,16 +32,15 @@ import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.common.inventory.PropertyEntry;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.impl.comp.ArmorInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.HeldHandSlotLens;
-import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -58,7 +57,7 @@ public class PlayerInventoryLens extends AbstractLens {
     private SlotLens offhand;
     private final boolean isContainer;
 
-    public PlayerInventoryLens(int size, Class<? extends Inventory> adapter, SlotLensProvider slots) {
+    public PlayerInventoryLens(int size, Class adapter, SlotLensProvider slots) {
         super(0, size, adapter);
         this.isContainer = false;
         this.init(slots);
@@ -131,16 +130,16 @@ public class PlayerInventoryLens extends AbstractLens {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         if (this.isContainer && fabric instanceof Container) {
             // If Lens is for Container extract the PlayerInventory
             Container container = (Container) fabric;
             Optional carrier = ((CarriedInventory) container).getCarrier();
             if (carrier.isPresent() && carrier.get() instanceof Player) {
-                return ((InventoryAdapter) ((Player) carrier.get()).getInventory());
+                return ((Player) carrier.get()).getInventory();
             }
         }
-        return fabric.fabric$get(this.base).bridge$getAdapter();
+        return (Inventory) fabric.fabric$get(this.base).bridge$getAdapter();
     }
 
     public PrimaryPlayerInventoryLens getPrimaryInventoryLens() {

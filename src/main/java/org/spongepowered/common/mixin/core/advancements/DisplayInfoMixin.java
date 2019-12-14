@@ -38,7 +38,7 @@ import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import javax.annotation.Nullable;
 
 @Mixin(DisplayInfo.class)
-public class DisplayInfoMixin implements DisplayInfoBridge {
+public abstract class DisplayInfoMixin implements DisplayInfoBridge {
 
     @Shadow @Final @Mutable @Nullable private ResourceLocation background;
 

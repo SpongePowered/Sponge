@@ -24,32 +24,25 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.common.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-
-import java.util.function.Predicate;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 public class InputSlotLens extends FilteringSlotLens {
 
-    public InputSlotLens(int index) {
-        this(index, (s) -> true, (s) -> true);
+    public InputSlotLens(SlotLens lens, ItemStackFilter filter) {
+        super(lens, filter, InputSlotAdapter.class);
     }
 
-    public InputSlotLens(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
-        this(index, InputSlotAdapter.class, stackFilter, typeFilter);
-    }
-
-    public InputSlotLens(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
-        super(index, adapterType, stackFilter, typeFilter);
+    public InputSlotLens(SlotLens lens, ItemStackFilter filter, Class<? extends Inventory> adapterType) {
+        super(lens, filter, adapterType);
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Slot getAdapter(Fabric fabric, Inventory parent) {
         return new InputSlotAdapter(fabric, this, parent);
     }
 

@@ -26,7 +26,6 @@ package org.spongepowered.common.inventory.lens.impl.comp;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
@@ -73,7 +72,7 @@ public class CraftingInventoryLens extends DefaultIndexedLens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         return new CraftingInventoryAdapter(fabric, this, parent);
     }
 

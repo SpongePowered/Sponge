@@ -26,7 +26,6 @@ package org.spongepowered.common.inventory.lens;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
@@ -65,7 +64,7 @@ public interface Lens extends LensCollection {
      * 
      * @return adapter for this lens
      */
-    InventoryAdapter getAdapter(Fabric fabric, Inventory parent);
+    Inventory getAdapter(Fabric fabric, Inventory parent);
     
     /**
      * Get the number of slots referenced by this lens
@@ -120,7 +119,8 @@ public interface Lens extends LensCollection {
      * @param ordinal slot ordinal
      * @return the item stack in the specified slot
      */
-    @Nullable default ItemStack getStack(Fabric fabric, int ordinal) {
+    @Nullable 
+    default ItemStack getStack(Fabric fabric, int ordinal) {
         SlotLens slot = this.getSlotLens(ordinal);
         if (slot != null) {
             return slot.getStack(fabric);

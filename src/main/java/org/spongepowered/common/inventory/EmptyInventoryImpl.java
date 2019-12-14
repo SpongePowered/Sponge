@@ -32,10 +32,10 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,8 +50,6 @@ import javax.annotation.Nullable;
  * Bottom type / empty results set for inventory queries.
  */
 public class EmptyInventoryImpl implements EmptyInventory {
-
-    private static final Translation EMPTY_NAME = new SpongeTranslation("inventory.empty.title");
 
     private final Inventory parent;
 
@@ -151,11 +149,6 @@ public class EmptyInventoryImpl implements EmptyInventory {
         return this;
     }
 
-    @Override
-    public Inventory query(QueryOperation<?>... operations) {
-        return null;
-    }
-
     public Inventory query(Query query) {
         return query.execute(this);
     }
@@ -216,11 +209,6 @@ public class EmptyInventoryImpl implements EmptyInventory {
 
     public InventoryTransactionResult set(int index, ItemStack stack) {
         return InventoryTransactionResult.builder().type(Type.NO_SLOT).reject(stack).build();
-    }
-
-    @Override
-    public Inventory transform(InventoryTransformation transformation) {
-        return this;
     }
 
     @Override

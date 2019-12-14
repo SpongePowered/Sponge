@@ -71,7 +71,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(AdvancementProgress.class)
-public class AdvancementProgressMixin implements AdvancementProgressBridge {
+public abstract class AdvancementProgressMixin implements AdvancementProgressBridge {
 
     @Shadow @Final private Map<String, net.minecraft.advancements.CriterionProgress> criteria;
 

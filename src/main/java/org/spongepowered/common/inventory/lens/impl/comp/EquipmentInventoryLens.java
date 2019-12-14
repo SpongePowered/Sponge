@@ -29,8 +29,8 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.common.inventory.PropertyEntry;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.lens.impl.slot.EquipmentSlotLens;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
@@ -48,13 +48,13 @@ public class EquipmentInventoryLens extends RealLens {
 
     private void init(Map<EquipmentType, SlotLens> lenses) {
         for (Map.Entry<EquipmentType, SlotLens> entry : lenses.entrySet()) {
-            this.addSpanningChild(entry.getValue(), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, entry.getKey()));
+            this.addSpanningChild(new EquipmentSlotLens(entry.getValue(), entry.getKey()), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, entry.getKey()));
         }
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         Equipable carrier = null;
         if (parent instanceof CarriedInventory) {
             Optional opt = ((CarriedInventory) parent).getCarrier();

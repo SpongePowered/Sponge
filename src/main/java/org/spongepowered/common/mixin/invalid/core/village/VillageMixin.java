@@ -36,7 +36,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 
-// 1.14 Removes the concept of a village being based on doors, instead it is based on points of interest now.
 @Mixin(Village.class)
 public abstract class VillageMixin {
 

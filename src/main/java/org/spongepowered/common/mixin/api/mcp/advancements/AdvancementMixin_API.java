@@ -50,7 +50,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(Advancement.class)
-public class AdvancementMixin_API implements org.spongepowered.api.advancement.Advancement {
+public abstract class AdvancementMixin_API implements org.spongepowered.api.advancement.Advancement {
 
     @Shadow @Final @Mutable @Nullable private Advancement parent;
     @Shadow @Final @Mutable private String[][] requirements;

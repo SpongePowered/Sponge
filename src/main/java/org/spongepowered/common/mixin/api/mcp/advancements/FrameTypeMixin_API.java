@@ -39,9 +39,9 @@ import org.spongepowered.common.text.format.SpongeTextStyle;
 
 import javax.annotation.Nullable;
 
-@Implements(@Interface(iface = AdvancementType.class, prefix = "type$"))
 @Mixin(FrameType.class)
-public class FrameTypeMixin_API {
+@Implements(@Interface(iface = AdvancementType.class, prefix = "type$"))
+public abstract class FrameTypeMixin_API {
 
     @Shadow @Final private String name;
     @Shadow @Final private TextFormatting format;

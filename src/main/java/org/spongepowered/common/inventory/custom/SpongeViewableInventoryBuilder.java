@@ -188,7 +188,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         if (this.slotDefinitions.isEmpty()) {
             Inventory inventory = Inventory.builder().slots(this.size).completeStructure().build();
             this.finalInventories = Arrays.asList(inventory);
-            this.finalProvider = ((InventoryBridge) inventory).bridge$getAdapter().bridge$getSlotProvider();
+            this.finalProvider = ((InventoryBridge) inventory).bridge$getAdapter().inventoryAdapter$getSlotLensProvider();
         } else {
             this.fillDummy();
             this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());

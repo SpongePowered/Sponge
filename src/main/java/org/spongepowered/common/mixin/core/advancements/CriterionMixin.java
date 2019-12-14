@@ -42,7 +42,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(Criterion.class)
-public class CriterionMixin implements CriterionBridge {
+public abstract class CriterionMixin implements CriterionBridge {
 
     @Shadow @Final @Nullable private ICriterionInstance criterionInstance;
 

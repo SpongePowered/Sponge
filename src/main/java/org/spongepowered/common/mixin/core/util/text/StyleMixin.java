@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.bridge.util.text.StyleBridge;
 
 @Mixin(Style.class)
-public class StyleMixin implements StyleBridge {
+public abstract class StyleMixin implements StyleBridge {
 
     @Shadow private Style parentStyle;
     @Shadow private TextFormatting color;

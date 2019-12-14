@@ -66,7 +66,7 @@ public abstract class DimensionMixin_API {
         return !this.shadow$isNether();
     }
 
-    public boolean dimension$hasSkyLight() {
+    public boolean dimension$hasSkylight() {
         return this.shadow$hasSkyLight();
     }
 

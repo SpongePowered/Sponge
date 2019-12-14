@@ -31,7 +31,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
+import org.spongepowered.api.entity.projectile.explosive.fireball.FireballEntity;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -51,7 +51,7 @@ public class AccelerationDataTest implements LoadableModule {
     public static final String VERSION = "0.0.0";
 
     @Nullable private Task task;
-    @Nullable private Fireball fireball;
+    @Nullable private FireballEntity fireball;
 
     @Override
     public void disable(final CommandSource src) {
@@ -108,7 +108,7 @@ public class AccelerationDataTest implements LoadableModule {
         final Vector3i origin = player.getLocation().getBlockPosition().add(offset);
 
         // Spawn the fireball
-        this.fireball = (Fireball) player.getWorld().createEntity(EntityTypes.FIREBALL, origin);
+        this.fireball = (FireballEntity) player.getWorld().createEntity(EntityTypes.FIREBALL, origin);
 
         // Set initial velocity
         this.fireball.offer(Keys.VELOCITY, Direction.UP.asOffset());

@@ -60,24 +60,24 @@ public class Inventory2DAdapter extends BasicInventoryAdapter implements Invento
     }
 
     public Optional<Slot> getSlot(Vector2i pos) {
-        return BasicInventoryAdapter.forSlot(this.bridge$getFabric(), this.getSlotLens(pos), this);
+        return BasicInventoryAdapter.forSlot(this.inventoryAdapter$getFabric(), this.getSlotLens(pos), this);
     }
 
     public InventoryTransactionResult.Poll poll(Vector2i pos) {
-        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(pos), null);
+        return AdapterLogic.pollSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(pos), null);
     }
 
     public InventoryTransactionResult.Poll poll(Vector2i pos, int limit) {
-        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(pos), limit);
+        return AdapterLogic.pollSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(pos), limit);
     }
 
     public Optional<ItemStack> peek(Vector2i pos) {
-        return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(pos));
+        return AdapterLogic.peekSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(pos));
     }
 
     @Override
     public InventoryTransactionResult set(Vector2i pos, ItemStack stack) {
-        return AdapterLogic.insertSequential(this.bridge$getFabric(), this.getSlotLens(pos), stack);
+        return AdapterLogic.insertSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(pos), stack);
     }
 
 }

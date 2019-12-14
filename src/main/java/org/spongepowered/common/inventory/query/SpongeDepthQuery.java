@@ -47,11 +47,11 @@ public abstract class SpongeDepthQuery extends SpongeQuery {
     public abstract boolean matches(Lens lens, Lens parent, Inventory inventory);
 
     public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
-        Fabric fabric = adapter.bridge$getFabric();
-        Lens lens = adapter.bridge$getRootLens();
+        Fabric fabric = adapter.inventoryAdapter$getFabric();
+        Lens lens = adapter.inventoryAdapter$getRootLens();
 
         if (this.matches(lens, null, inventory)) {
-            return (Inventory) lens.getAdapter(fabric, inventory);
+            return lens.getAdapter(fabric, inventory);
         }
 
         return this.toResult(inventory, fabric, this.reduce(lens, this.depthFirstSearch(inventory, lens)));
@@ -62,11 +62,11 @@ public abstract class SpongeDepthQuery extends SpongeQuery {
             return new EmptyInventoryImpl(inventory);
         }
         if (matches.size() == 1) {
-            return (Inventory) matches.iterator().next().getAdapter(fabric, inventory);
+            return matches.iterator().next().getAdapter(fabric, inventory);
         }
 
         QueryLens lens = new QueryLens(matches);
-        return (Inventory) lens.getAdapter(fabric, inventory);
+        return lens.getAdapter(fabric, inventory);
     }
 
     private Set<Lens> depthFirstSearch(Inventory inventory, Lens lens) {

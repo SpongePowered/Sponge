@@ -37,6 +37,7 @@ import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.property.InventoryPropertyHolder;
 import org.spongepowered.common.inventory.query.SpongeQueryTypes;
 
 import java.util.List;
@@ -51,12 +52,12 @@ public interface DefaultImplementedAdapterInventory extends InventoryPropertyHol
     // Helpers
     default Lens impl$getLens()
     {
-        return ((InventoryBridge) this).bridge$getAdapter().bridge$getRootLens();
+        return ((InventoryBridge) this).bridge$getAdapter().inventoryAdapter$getRootLens();
     }
 
     default Fabric impl$getFabric()
     {
-        return ((InventoryBridge) this).bridge$getAdapter().bridge$getFabric();
+        return ((InventoryBridge) this).bridge$getAdapter().inventoryAdapter$getFabric();
     }
 
     /**
@@ -66,7 +67,7 @@ public interface DefaultImplementedAdapterInventory extends InventoryPropertyHol
 
         @Override
         default void clear() {
-            ((InventoryBridge) this).bridge$getAdapter().bridge$getFabric().fabric$clear();
+            ((InventoryBridge) this).bridge$getAdapter().inventoryAdapter$getFabric().fabric$clear();
         }
     }
 
@@ -177,18 +178,18 @@ public interface DefaultImplementedAdapterInventory extends InventoryPropertyHol
 
     @Override
     default boolean containsInventory(Inventory inventory) {
-        Inventory result = SpongeQueryTypes.LENS.of(((InventoryBridge) inventory).bridge$getAdapter().bridge$getRootLens()).execute(this);
-        return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).bridge$getRootLens() == ((InventoryAdapter) inventory).bridge$getRootLens();
+        Inventory result = SpongeQueryTypes.LENS.of(((InventoryBridge) inventory).bridge$getAdapter().inventoryAdapter$getRootLens()).execute(this);
+        return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).inventoryAdapter$getRootLens() == ((InventoryAdapter) inventory).inventoryAdapter$getRootLens();
     }
 
     @Override
     default boolean containsChild(Inventory child) {
-        return this.impl$getLens().getSpanningChildren().contains(((InventoryBridge) child).bridge$getAdapter().bridge$getRootLens());
+        return this.impl$getLens().getSpanningChildren().contains(((InventoryBridge) child).bridge$getAdapter().inventoryAdapter$getRootLens());
     }
 
     @Override
     default Optional<Slot> getSlot(int index) {
-        return ((InventoryBridge) this).bridge$getAdapter().bridge$getSlot(index);
+        return ((InventoryBridge) this).bridge$getAdapter().inventoryAdapter$getSlot(index);
     }
 
     @Override

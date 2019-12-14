@@ -33,7 +33,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.Activat
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
 @Mixin(value = SpongeImplHooks.class)
-public class SpongeImplHooksMixin_TileEntityActivation {
+public abstract class SpongeImplHooksMixin_TileEntityActivation {
 
     /**
      * @author blood - unknown

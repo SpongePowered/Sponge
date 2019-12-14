@@ -45,7 +45,6 @@ import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-@SuppressWarnings("SuspiciousMethodCalls")
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridge {
 

@@ -71,7 +71,7 @@ import org.spongepowered.api.entity.projectile.arrow.TippedArrow;
 import org.spongepowered.api.entity.projectile.explosive.DragonFireball;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
-import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
+import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
@@ -281,19 +281,19 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), pearl);
             }
         });
-        registerProjectileLogic(LargeFireball.class, new SimpleDispenserLaunchLogic<LargeFireball>(LargeFireball.class) {
+        registerProjectileLogic(ExplosiveFireball.class, new SimpleDispenserLaunchLogic<ExplosiveFireball>(ExplosiveFireball.class) {
 
             @Override
-            protected Optional<LargeFireball> createProjectile(LivingEntity source, Location<?> loc) {
+            protected Optional<ExplosiveFireball> createProjectile(LivingEntity source, Location<?> loc) {
                 Vec3d lookVec = source.getLook(1);
-                LargeFireball fireball = (LargeFireball) new FireballEntity(source.world, source,
+                ExplosiveFireball fireball = (ExplosiveFireball) new FireballEntity(source.world, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 ((FireballEntity) fireball).posY += source.getEyeHeight();
                 return doLaunch(loc.getExtent(), fireball);
             }
 
             @Override
-            public Optional<LargeFireball> createProjectile(ProjectileSource source, Class<LargeFireball> projectileClass, Location<?> loc) {
+            public Optional<ExplosiveFireball> createProjectile(ProjectileSource source, Class<ExplosiveFireball> projectileClass, Location<?> loc) {
                 if (!(source instanceof DispenserTileEntity)) {
                     return super.createProjectile(source, projectileClass, loc);
                 }
@@ -305,7 +305,7 @@ public class ProjectileLauncher {
                 double d5 = random.nextGaussian() * 0.05D + enumfacing.getZOffset();
                 LivingEntity thrower = new ArmorStandEntity(dispenser.getWorld(), loc.getX() + enumfacing.getXOffset(),
                         loc.getY() + enumfacing.getYOffset(), loc.getZ() + enumfacing.getZOffset());
-                LargeFireball fireball = (LargeFireball) new FireballEntity(dispenser.getWorld(), thrower, d3, d4, d5);
+                ExplosiveFireball fireball = (ExplosiveFireball) new FireballEntity(dispenser.getWorld(), thrower, d3, d4, d5);
                 return doLaunch(loc.getExtent(), fireball);
             }
         });

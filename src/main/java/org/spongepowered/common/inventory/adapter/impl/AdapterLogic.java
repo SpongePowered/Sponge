@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory.adapter.impl;
 
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -159,7 +160,7 @@ public abstract class AdapterLogic {
             int push = Math.min(remaining, maxStackSize);
             net.minecraft.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
             if (lens.setStack(fabric, ord, newStack)) {
-                InventoryAdapter adapter = lens.getAdapter(fabric, null);
+                Inventory adapter = lens.getAdapter(fabric, null);
                 SlotTransaction trans = new SlotTransaction((Slot) adapter, ItemStackUtil.snapshotOf(old), ItemStackUtil.snapshotOf(newStack));
                 result.transaction(trans);
                 remaining -= push;
@@ -237,11 +238,11 @@ public abstract class AdapterLogic {
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemStack stack) {
-        return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack, stack.getQuantity());
+        return AdapterLogic.contains(adapter.inventoryAdapter$getFabric(), adapter.inventoryAdapter$getRootLens(), stack, stack.getQuantity());
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemStack stack, int quantity) {
-        return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), stack, quantity);
+        return AdapterLogic.contains(adapter.inventoryAdapter$getFabric(), adapter.inventoryAdapter$getRootLens(), stack, quantity);
     }
 
     /**
@@ -278,7 +279,7 @@ public abstract class AdapterLogic {
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemType type) {
-        return AdapterLogic.contains(adapter.bridge$getFabric(), adapter.bridge$getRootLens(), type);
+        return AdapterLogic.contains(adapter.inventoryAdapter$getFabric(), adapter.inventoryAdapter$getRootLens(), type);
     }
 
     public static boolean contains(Fabric fabric, Lens lens, ItemType type) {

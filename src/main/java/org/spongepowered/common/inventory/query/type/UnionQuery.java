@@ -27,9 +27,9 @@ package org.spongepowered.common.inventory.query.type;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
-import org.spongepowered.common.inventory.lens.impl.fabric.CompoundFabric;
+import org.spongepowered.common.inventory.fabric.CompoundFabric;
 import org.spongepowered.common.inventory.query.SpongeQuery;
 
 public final class UnionQuery extends SpongeQuery {
@@ -42,15 +42,15 @@ public final class UnionQuery extends SpongeQuery {
 
     @Override
     public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
-        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.bridge$getRootLens());
-        final CompoundFabric fabric = new CompoundFabric(adapter.bridge$getFabric(), ((InventoryBridge)this.other).bridge$getAdapter().bridge$getFabric());
-        final CompoundSlotProvider provider = new CompoundSlotProvider().add(adapter);
+        final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.inventoryAdapter$getRootLens());
+        final CompoundFabric fabric = new CompoundFabric(adapter.inventoryAdapter$getFabric(), ((InventoryBridge)this.other).bridge$getAdapter().inventoryAdapter$getFabric());
+        final CompoundSlotLensProvider provider = new CompoundSlotLensProvider().add(adapter);
         for (final Inventory inv : this.other.children()) {
-            lensBuilder.add(((InventoryAdapter) inv).bridge$getRootLens());
+            lensBuilder.add(((InventoryAdapter) inv).inventoryAdapter$getRootLens());
             provider.add((InventoryAdapter) inv);
         }
         final CompoundLens lens = lensBuilder.build(provider);
-        return (Inventory) lens.getAdapter(fabric, inventory);
+        return lens.getAdapter(fabric, inventory);
     }
 
 

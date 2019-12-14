@@ -26,13 +26,8 @@ package org.spongepowered.common.inventory.lens.impl.slot;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.SlotCollection;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.ArrayList;
@@ -101,14 +96,5 @@ public class SlotLensCollection implements SlotLensProvider {
     public SlotLens getSlotLens(int index) {
         return this.lenses.get(index);
     }
-
-    public SlotCollection getSlots(InventoryAdapter adapter) {
-        return this.getSlots(((Inventory) adapter), adapter.bridge$getFabric(), adapter.bridge$getRootLens());
-    }
-
-    private SlotCollection getSlots(Inventory parent, Fabric inv, Lens lens) {
-        return new SlotCollection(parent, inv, lens, this);
-    }
-
 
 }

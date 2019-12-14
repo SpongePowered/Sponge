@@ -110,6 +110,7 @@ import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
@@ -1126,7 +1127,7 @@ public class SpongeCommonEventFactory {
             org.spongepowered.api.item.inventory.Slot slot = null;
             if (((TrackedInventoryBridge) player.openContainer).bridge$getCapturedSlotTransactions().isEmpty() && packetIn.getSlotId() >= 0
                 && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
-                slot = ((InventoryAdapter)player.openContainer).bridge$getSlot(packetIn.getSlotId()).orElse(null);
+                slot = ((InventoryAdapter)player.openContainer).inventoryAdapter$getSlot(packetIn.getSlotId()).orElse(null);
                 if (slot != null) {
                     final ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.peek());
                     final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(packetIn.getStack());
@@ -1362,9 +1363,9 @@ public class SpongeCommonEventFactory {
         return true;
     }
 
-    public static ChangeInventoryEvent.Transfer.Pre callTransferPre(final Inventory source, final Inventory destination) {
+    public static TransferInventoryEvent.Pre callTransferPre(final Inventory source, final Inventory destination) {
         Sponge.getCauseStackManager().pushCause(source);
-        final ChangeInventoryEvent.Transfer.Pre event = SpongeEventFactory.createChangeInventoryEventTransferPre(
+        final TransferInventoryEvent.Pre event = SpongeEventFactory.createTransferInventoryEventPre(
                 Sponge.getCauseStackManager().getCurrentCause(), source, destination);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
@@ -1377,8 +1378,8 @@ public class SpongeCommonEventFactory {
             return true;
         }
         Sponge.getCauseStackManager().pushCause(source);
-        final ChangeInventoryEvent.Transfer.Post event =
-                SpongeEventFactory.createChangeInventoryEventTransferPost(Sponge.getCauseStackManager().getCurrentCause(),
+        final TransferInventoryEvent.Post event =
+                SpongeEventFactory.createTransferInventoryEventPost(Sponge.getCauseStackManager().getCurrentCause(),
                         source, destination, captureSource.bridge$getCapturedSlotTransactions());
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {

@@ -45,7 +45,7 @@ public class SlotCollection {
     
     private final List<Slot> slots;
 
-    public SlotCollection(Inventory parent, Fabric fabric, Lens lens, SlotLensProvider slots) {
+    private SlotCollection(Inventory parent, Fabric fabric, Lens lens, SlotLensProvider slots) {
         this.parent = parent;
         this.fabric = fabric;
         this.slots = this.traverseSpanningTree(fabric, lens, ImmutableList.<Slot>builder()).build();
@@ -76,6 +76,6 @@ public class SlotCollection {
     }
 
     public static SlotCollection of(Inventory parent, InventoryAdapter adapter) {
-        return new SlotCollection(parent, adapter.bridge$getFabric(), adapter.bridge$getRootLens(), adapter.bridge$getSlotProvider());
+        return new SlotCollection(parent, adapter.inventoryAdapter$getFabric(), adapter.inventoryAdapter$getRootLens(), adapter.inventoryAdapter$getSlotLensProvider());
     }
 }

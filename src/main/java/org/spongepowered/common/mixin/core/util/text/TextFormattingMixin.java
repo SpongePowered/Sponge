@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
 
 @Mixin(TextFormatting.class)
-public class TextFormattingMixin implements TextFormattingBridge {
+public abstract class TextFormattingMixin implements TextFormattingBridge {
 
     @Shadow @Final private String name;
     @Shadow @Final private char formattingCode;

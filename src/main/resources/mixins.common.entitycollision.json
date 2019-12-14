@@ -1,0 +1,17 @@
+{
+    "minVersion": "0.7.10",
+    "package": "org.spongepowered.common.mixin.entitycollision",
+    "plugin": "org.spongepowered.common.mixin.plugin.entitycollision.EntityCollisionPlugin",
+    "refmap": "mixins.common.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+        "block.BlockMixin_EntityCollision",
+        "world.chunk.ChunkMixin_EntityCollision",
+        "entity.EntityMixin_EntityCollision",
+        "entity.LivingEntityMixin_EntityCollision"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

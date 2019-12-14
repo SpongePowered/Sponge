@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.registry.type.advancement.TriggerTypeRegistryModule;
 
 @Mixin(CriteriaTriggers.class)
-public class CriteriaTriggersMixin {
+public abstract class CriteriaTriggersMixin {
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "register", at = @At("RETURN"))

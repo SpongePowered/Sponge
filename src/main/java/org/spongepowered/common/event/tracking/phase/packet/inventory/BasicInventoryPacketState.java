@@ -203,7 +203,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
         Slot slot = null;
         if (packetIn.getSlotId() >= 0) {
-            slot = ((InventoryAdapter) trackedInventory).bridge$getSlot(packetIn.getSlotId()).orElse(null);
+            slot = ((InventoryAdapter) trackedInventory).inventoryAdapter$getSlot(packetIn.getSlotId()).orElse(null);
         }
         // else TODO slot for ClickInventoryEvent.Drag
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -121,7 +121,7 @@ public final class PacketPhaseUtil {
             if (slot != null) {
                 final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(slot.getStack());
                 final SlotTransaction slotTransaction = new SlotTransaction(
-                        ((InventoryAdapter) openContainer).bridge$getSlot(slotId).get(), snapshot, snapshot);
+                        ((InventoryAdapter) openContainer).inventoryAdapter$getSlot(slotId).get(), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
         }

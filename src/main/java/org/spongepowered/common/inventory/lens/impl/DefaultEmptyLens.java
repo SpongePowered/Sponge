@@ -27,7 +27,6 @@ package org.spongepowered.common.inventory.lens.impl;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -52,7 +51,7 @@ public class DefaultEmptyLens implements Lens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(final Fabric fabric, final Inventory parent) {
+    public Inventory getAdapter(final Fabric fabric, final Inventory parent) {
         return this.adapter;
     }
 

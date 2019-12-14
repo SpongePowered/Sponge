@@ -27,7 +27,6 @@ package org.spongepowered.common.inventory.lens.impl.comp;
 import net.minecraft.util.Hand;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -43,7 +42,7 @@ public class HotbarLens extends InventoryRowLens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         return new HotbarAdapter(fabric, this, parent);
     }
 

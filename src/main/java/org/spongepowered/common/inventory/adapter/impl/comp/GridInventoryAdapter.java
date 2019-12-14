@@ -71,14 +71,14 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
 
     @Override
     public Optional<Slot> getSlot(int x, int y) {
-        return BasicInventoryAdapter.forSlot(this.bridge$getFabric(), this.getSlotLens(x, y), this);
+        return BasicInventoryAdapter.forSlot(this.inventoryAdapter$getFabric(), this.getSlotLens(x, y), this);
     }
 
     @Override
     public Optional<InventoryRow> getRow(int y) {
         try {
             InventoryRowLens rowLens = this.gridLens.getRow(y);
-            return Optional.<InventoryRow>ofNullable((InventoryRow) rowLens.getAdapter(this.bridge$getFabric(), this));
+            return Optional.<InventoryRow>ofNullable((InventoryRow) rowLens.getAdapter(this.inventoryAdapter$getFabric(), this));
         } catch (IndexOutOfBoundsException ex) {
             return Optional.<InventoryRow>empty();
         }
@@ -88,7 +88,7 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     public Optional<InventoryColumn> getColumn(int x) {
         try {
             InventoryColumnLens columnLens = this.gridLens.getColumn(x);
-            return Optional.<InventoryColumn>ofNullable((InventoryColumn) columnLens.getAdapter(this.bridge$getFabric(), this));
+            return Optional.<InventoryColumn>ofNullable((InventoryColumn) columnLens.getAdapter(this.inventoryAdapter$getFabric(), this));
         } catch (IndexOutOfBoundsException ex) {
             return Optional.<InventoryColumn>empty();
         }
@@ -96,22 +96,22 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
 
     @Override
     public InventoryTransactionResult.Poll poll(int x, int y) {
-        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(x, y), null);
+        return AdapterLogic.pollSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(x, y), null);
     }
 
     @Override
     public InventoryTransactionResult.Poll poll(int x, int y, int limit) {
-        return AdapterLogic.pollSequential(this.bridge$getFabric(), this.getSlotLens(x, y), limit);
+        return AdapterLogic.pollSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(x, y), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(int x, int y) {
-        return AdapterLogic.peekSequential(this.bridge$getFabric(), this.getSlotLens(x, y));
+        return AdapterLogic.peekSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(x, y));
     }
 
     @Override
     public InventoryTransactionResult set(int x, int y, ItemStack stack) {
-        return AdapterLogic.insertSequential(this.bridge$getFabric(), this.getSlotLens(x, y), stack);
+        return AdapterLogic.insertSequential(this.inventoryAdapter$getFabric(), this.getSlotLens(x, y), stack);
     }
 
 }

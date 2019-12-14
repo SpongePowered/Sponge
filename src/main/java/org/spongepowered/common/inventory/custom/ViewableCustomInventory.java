@@ -27,7 +27,9 @@ package org.spongepowered.common.inventory.custom;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerProvider;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -42,7 +44,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class ViewableCustomInventory extends CustomInventory implements IContainerProvider {
+public class ViewableCustomInventory extends CustomInventory implements INamedContainerProvider {
 
     private ContainerType type;
     private boolean vanilla = false;
@@ -75,5 +77,10 @@ public class ViewableCustomInventory extends CustomInventory implements IContain
             return ((SpongeContainerType) this.type).provideContainer(id, this, player);
         }
         return new CustomContainer(id, player, this);
+    }
+
+    @Override
+    public ITextComponent getDisplayName() {
+        return new StringTextComponent("ViewableCustomInventory");
     }
 }

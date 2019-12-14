@@ -24,25 +24,30 @@
  */
 package org.spongepowered.common.mixin.core.potion;
 
-import net.minecraft.potion.Effect;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.effect.potion.PotionEffectType;
+import net.minecraft.util.registry.DefaultedRegistry;
+import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
+import org.spongepowered.common.registry.type.item.PotionTypeRegistryModule;
 
-@Mixin(Effect.class)
+@Mixin(Potion.class)
 public abstract class PotionMixin {
 
+
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "registerPotions",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
-    private static void impl$registerForSponge(final SimpleRegistry registry, final int id, final Object location, final Object potion) {
+    @Redirect(method = "registerPotionType",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/registry/RegistryNamespacedDefaultedByKey;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
+    private static void impl$registerForSponge(final DefaultedRegistry registry, final int id, final Object location,
+        final Object potion) {
         final ResourceLocation resource = (ResourceLocation) location;
-        final Effect mcPotion = (Effect) potion;
-        PotionEffectTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionEffectType) mcPotion);
+        final net.minecraft.potion.Potion mcPotion = (net.minecraft.potion.Potion) potion;
+
+        PotionTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionType) mcPotion);
         registry.register(id, location, potion);
     }
 

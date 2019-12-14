@@ -25,11 +25,10 @@
 package org.spongepowered.common.inventory.lens.impl;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.PropertyEntry;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
@@ -45,7 +44,7 @@ public class CompoundLens extends SlotBasedLens {
     protected final List<Lens> inventories;
 
     private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotLensProvider slots, List<Lens> lenses) {
-        super(0, size, 1, adapterType, slots);
+        super(size, 1, adapterType, slots);
         this.inventories = lenses;
         this.init(slots);
     }
@@ -61,7 +60,7 @@ public class CompoundLens extends SlotBasedLens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         return new BasicInventoryAdapter(fabric, this, parent);
     }
 
@@ -80,7 +79,7 @@ public class CompoundLens extends SlotBasedLens {
         }
 
         @SuppressWarnings({"rawtypes", "unchecked"})
-        public CompoundLens build(CompoundSlotProvider provider) {
+        public CompoundLens build(CompoundSlotLensProvider provider) {
             return new CompoundLens(provider.size(), BasicInventoryAdapter.class, provider, this.lenses);
         }
     }

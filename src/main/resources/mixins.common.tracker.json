@@ -1,0 +1,19 @@
+{
+    "minVersion": "0.7.10",
+    "package": "org.spongepowered.common.mixin.tracker",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.TrackerPlugin",
+    "mixinPriority" : 1111,
+    "mixins": [
+        "bridge.OwnershipTrackedBridgeMixin_Tracker",
+        "entity.EntityMixin_Tracker",
+        "world.chunk.ChunkMixin_Tracker",
+        "world.WorldMixin_Tracker"
+    ],
+    "server": [
+
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

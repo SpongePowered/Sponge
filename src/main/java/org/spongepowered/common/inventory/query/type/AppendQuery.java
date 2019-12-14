@@ -28,7 +28,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.MultiInventoryAdapter;
 import org.spongepowered.common.inventory.query.SpongeQuery;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class AppendQuery extends SpongeQuery {
         }
 
         List<Inventory> results = this.queryList.stream().map(q -> q.execute(inventory)).collect(Collectors.toList());
-        return new BasicInventoryAdapter(adapter.bridge$getFabric(), results, inventory);
+        return new MultiInventoryAdapter(results);
     }
 
 

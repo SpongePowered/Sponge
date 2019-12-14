@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.PropertyEntry;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
+import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens.ItemStackFilter;
 import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 
 public class FurnaceInventoryLens extends RealLens {
 
@@ -46,27 +45,21 @@ public class FurnaceInventoryLens extends RealLens {
         this.init(sp);
     }
 
-    public FurnaceInventoryLens(final InventoryAdapter adapter, final SlotLensProvider slots) {
-        this(0, adapter, slots);
-    }
-
-    @SuppressWarnings("unchecked")
-    public FurnaceInventoryLens(final int base, final InventoryAdapter adapter, final SlotLensProvider slots) {
-        super(base, adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass());
-        this.init(slots);
+    public FurnaceInventoryLens(int size, Class clazz, SlotLensProvider slotLensProvider) {
+        super(0, size, clazz);
+        this.init(slotLensProvider);
     }
 
     protected void init(final SlotLensProvider slots) {
         this.addChild(new DefaultIndexedLens(0, 3, slots));
 
-        this.input = new InputSlotLens(0, (i) -> true, (i) -> true);
-        this.fuel = new FuelSlotLens(1, (i) -> true, (i) -> true);       // TODO SlotFurnaceFuel
-
-        // TODO represent the filtering in the API somehow
-        this.output = new OutputSlotLens(2, (i) -> true, (i) -> true); // SlotFurnaceOutput
+        this.input = new InputSlotLens(slots.getSlotLens(0), ItemStackFilter.filterIInventory(0));
+        this.fuel = new FuelSlotLens(slots.getSlotLens(1), ItemStackFilter.filterIInventory(1));
+        this.output = new OutputSlotLens(slots.getSlotLens(2), ItemStackFilter.filterIInventory(2));
 
         this.addSpanningChild(this.input, PropertyEntry.slotIndex(0));
         this.addSpanningChild(this.fuel, PropertyEntry.slotIndex(1));
         this.addSpanningChild(this.output, PropertyEntry.slotIndex(2));
     }
+
 }

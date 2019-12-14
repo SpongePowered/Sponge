@@ -33,7 +33,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 
 @Mixin(AdvancementManager.class)
-public class AdvancementManagerMixin {
+public abstract class AdvancementManagerMixin {
 
     @Inject(method = "reload", at = @At("RETURN"))
     private void impl$reloadAdvancementProgressforPlayerList(final CallbackInfo ci) {

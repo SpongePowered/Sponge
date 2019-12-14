@@ -26,22 +26,25 @@ package org.spongepowered.common.inventory.custom;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.inventory.CarriedBridge;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class CustomInventory implements IInventory {
+public class CustomInventory implements IInventory, CarriedBridge {
 
     // shadow usage
     private SlotLensProvider slotLensProvider;
@@ -66,6 +69,11 @@ public class CustomInventory implements IInventory {
 
     public Carrier getCarrier() {
         return this.carrier;
+    }
+
+    @Override
+    public Optional<Carrier> bridge$getCarrier() {
+        return Optional.ofNullable(this.carrier);
     }
 
     public PluginContainer getPlugin() {

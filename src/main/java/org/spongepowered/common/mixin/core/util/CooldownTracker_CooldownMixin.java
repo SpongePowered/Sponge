@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.CooldownTracker_CooldownBridge;
 
 @Mixin(targets = "net/minecraft/util/CooldownTracker$Cooldown")
-public class CooldownTracker_CooldownMixin implements CooldownTracker_CooldownBridge {
+public abstract class CooldownTracker_CooldownMixin implements CooldownTracker_CooldownBridge {
 
     @Shadow @Final int expireTicks;
 

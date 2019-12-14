@@ -29,15 +29,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.InvalidOrdinalException;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -58,7 +56,7 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Slot getAdapter(Fabric fabric, Inventory parent) {
         return new SlotAdapter(fabric, this, parent);
     }
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.inventory.lens.impl.comp;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -43,7 +42,7 @@ public class GridInventoryLens extends Inventory2DLens {
         this(base, width, height, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLens(int base, int width, int height, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
+    public GridInventoryLens(int base, int width, int height, Class adapterType, SlotLensProvider slots) {
         super(base, width, height, 1, 0, 0, adapterType, slots);
         this.init(slots);
     }
@@ -80,7 +79,7 @@ public class GridInventoryLens extends Inventory2DLens {
 
     @SuppressWarnings("unchecked")
     @Override
-    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
         return new GridInventoryAdapter(fabric, this, parent);
     }
 
