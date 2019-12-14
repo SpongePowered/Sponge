@@ -32,8 +32,11 @@ import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.scheduler.AsyncScheduler;
+import org.spongepowered.common.scheduler.SpongeScheduledTask;
 
 public final class SpongeTimings {
 
@@ -80,8 +83,8 @@ public final class SpongeTimings {
      * @param period
      * @return
      */
-    public static Timing getPluginTaskTimings(Task task, long period) {
-        if (task.isAsynchronous()) {
+    public static Timing getPluginTaskTimings(ScheduledTask task, long period) {
+        if (((SpongeScheduledTask) task).getScheduler() instanceof AsyncScheduler) {
             return null;
         }
         PluginContainer plugin = task.getOwner();
@@ -104,7 +107,7 @@ public final class SpongeTimings {
      * @return
      */
     public static Timing getEntityTiming(SpongeEntityType entity) {
-        String entityType = entity != null ? entity.getId() : entity.getClass().getName();
+        String entityType = entity.getKey().toString();
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + entityType);
     }
 
@@ -115,7 +118,7 @@ public final class SpongeTimings {
      */
     public static Timing getTileEntityTiming(BlockEntity entity) {
         BlockEntityType type = entity.getType();
-        String entityType = type != null ? type.getId() : entity.getClass().getName();
+        String entityType = type != null ? type.getKey().toString() : entity.getClass().getName();
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickTileEntity - " + entityType);
     }
 
@@ -145,6 +148,6 @@ public final class SpongeTimings {
 
     public static Timing getBlockTiming(Block block) {
         BlockType type = (BlockType) block;
-        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + type != null ? type.getId() : block.getTranslationKey());
+        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + type != null ? type.getKey().toString() : block.getTranslationKey());
     }
 }

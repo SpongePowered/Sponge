@@ -57,6 +57,8 @@ import org.spongepowered.common.event.SpongeCommonEventHooks;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.scheduler.AsyncScheduler;
+import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
@@ -156,12 +158,12 @@ public final class SpongeImpl {
         return check(propertyRegistry);
     }
 
-    public static SpongeScheduler getScheduler() {
-        return check(scheduler);
+    public static ServerScheduler getServerScheduler() {
+        return (ServerScheduler) Sponge.getServer().getScheduler();
     }
 
-    public static SpongeCommandManager getCommandManager() {
-        return check(commandManager);
+    public static AsyncScheduler getAsyncScheduler() {
+        return getGame().getAsyncScheduler();
     }
 
     public static SpongeCauseStackManager getCauseStackManager() {

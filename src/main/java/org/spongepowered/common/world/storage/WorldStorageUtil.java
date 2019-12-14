@@ -53,7 +53,7 @@ import java.util.function.Function;
 public class WorldStorageUtil {
 
     public static CompletableFuture<Boolean> doesChunkExist(ServerWorld world, ChunkLoader chunkLoader, Vector3i chunkCoords) {
-        return doesChunkExist(world, chunkLoader, chunkCoords, SpongeImpl.getScheduler()::submitAsyncTask);
+        return doesChunkExist(world, chunkLoader, chunkCoords, SpongeImpl.getAsyncScheduler()::submit);
     }
 
     public static CompletableFuture<Boolean> doesChunkExistSync(ServerWorld world, ChunkLoader chunkLoader, Vector3i chunkCoords) {
@@ -78,7 +78,7 @@ public class WorldStorageUtil {
             return CompletableFuture.completedFuture(Optional.empty());
         }
         File worldDir = ((AnvilChunkLoaderBridge) chunkLoader).bridge$getWorldDir().toFile();
-        return SpongeImpl.getScheduler().submitAsyncTask(() -> {
+        return SpongeImpl.getAsyncScheduler().submit(() -> {
             DataInputStream stream = RegionFileCache.getChunkInputStream(worldDir, x, z);
             return Optional.ofNullable(readDataFromRegion(stream));
         });

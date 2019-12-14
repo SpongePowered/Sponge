@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.scheduler;
 
-import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.scheduler.ScheduledTask;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +38,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class AsyncScheduler extends SchedulerBase {
+public class AsyncScheduler extends SpongeScheduler {
 
     // Adjustable timeout for pending Tasks
     private long minimumTimeout = Long.MAX_VALUE;
@@ -46,17 +49,13 @@ public class AsyncScheduler extends SchedulerBase {
     // The dynamic thread pooling executor of asynchronous tasks.
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    AsyncScheduler() {
-        super(ScheduledTask.TaskSynchronicity.ASYNCHRONOUS);
+    public AsyncScheduler() {
+        super("A");
 
-        Thread thread = new Thread(AsyncScheduler.this::mainLoop);
+        final Thread thread = new Thread(AsyncScheduler.this::mainLoop);
         thread.setName("Sponge Async Scheduler Thread");
         thread.setDaemon(true);
         thread.start();
-    }
-
-    ExecutorService getExecutor() {
-        return this.executor;
     }
 
     private void mainLoop() {
@@ -70,30 +69,30 @@ public class AsyncScheduler extends SchedulerBase {
     private void recalibrateMinimumTimeout() {
         this.lock.lock();
         try {
-            Set<Task> tasks = this.getScheduledTasks();
+            final Set<ScheduledTask> tasks = this.getTasks();
             this.minimumTimeout = Long.MAX_VALUE;
-            long now = System.nanoTime();
-            for (Task tmpTask : tasks) {
-                ScheduledTask task = (ScheduledTask) tmpTask;
-                if (task.getState() == ScheduledTask.ScheduledTaskState.EXECUTING) {
+            final long now = System.nanoTime();
+            for (final ScheduledTask tmpTask : tasks) {
+                final SpongeScheduledTask task = (SpongeScheduledTask) tmpTask;
+                if (task.getState() == SpongeScheduledTask.ScheduledTaskState.EXECUTING) {
                     // bail out for this task. We'll signal when we complete the task.
                     continue;
                 }
                 // Recalibrate the wait delay for processing tasks before new
                 // tasks cause the scheduler to process pending tasks.
-                if (task.offset == 0 && task.period == 0) {
+                if (task.task.delay == 0 && task.task.interval == 0) {
                     this.minimumTimeout = 0;
                 }
                 // The time since the task last executed or was added to the map
                 long timeSinceLast = now - task.getTimestamp();
 
-                if (task.offset > 0 && task.getState() == ScheduledTask.ScheduledTaskState.WAITING) {
-                    // There is an offset and the task hasn't run yet
-                    this.minimumTimeout = Math.min(task.offset - timeSinceLast, this.minimumTimeout);
+                if (task.task.delay > 0 && task.getState() == SpongeScheduledTask.ScheduledTaskState.WAITING) {
+                    // There is an delay and the task hasn't run yet
+                    this.minimumTimeout = Math.min(task.task.delay - timeSinceLast, this.minimumTimeout);
                 }
-                if (task.period > 0 && task.getState().isActive) {
+                if (task.task.interval > 0 && task.getState().isActive) {
                     // The task repeats and has run after the initial delay
-                    this.minimumTimeout = Math.min(task.period - timeSinceLast, this.minimumTimeout);
+                    this.minimumTimeout = Math.min(task.task.interval - timeSinceLast, this.minimumTimeout);
                 }
                 if (this.minimumTimeout <= 0) {
                     break;
@@ -133,12 +132,12 @@ public class AsyncScheduler extends SchedulerBase {
     }
 
     @Override
-    protected void executeTaskRunnable(ScheduledTask task, Runnable runnable) {
+    protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
         this.executor.submit(runnable);
     }
 
     @Override
-    protected void addTask(ScheduledTask task) {
+    protected void addTask(SpongeScheduledTask task) {
         this.lock.lock();
         try {
             super.addTask(task);
@@ -149,12 +148,15 @@ public class AsyncScheduler extends SchedulerBase {
     }
 
     @Override
-    protected void onTaskCompletion(ScheduledTask task) {
+    protected void onTaskCompletion(SpongeScheduledTask task) {
         // This will likely be run from an executor thread rather than
         // the thread that owns the task, hence no lock.
-        if (task.getState() == ScheduledTask.ScheduledTaskState.RUNNING) {
+        if (task.getState() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
             this.condition.signalAll();
         }
     }
 
+    public <T> CompletableFuture<T> submit(Callable<T> callable) {
+        return Functional.asyncFailableFuture(callable, this.executor);
+    }
 }

@@ -29,12 +29,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
+import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.common.scheduler.AsyncScheduler;
 
 import java.nio.file.Path;
 
 public abstract class SpongeGame implements Game {
 
     private GameState state = GameState.CONSTRUCTION;
+    private AsyncScheduler asyncScheduler = new AsyncScheduler();
 
     @Override
     public GameState getState() {
@@ -48,6 +51,11 @@ public abstract class SpongeGame implements Game {
     @Override
     public Path getGameDirectory() {
         return SpongeImpl.getGameDir();
+    }
+
+    @Override
+    public AsyncScheduler getAsyncScheduler() {
+        return this.asyncScheduler;
     }
 
     @Override

@@ -25,40 +25,27 @@
 package org.spongepowered.common.scheduler;
 
 import com.google.common.base.MoreObjects;
-
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
-import co.aikar.timings.Timing;
-
-import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 
 import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.concurrent.TimeUnit;
 
 /**
  * An internal representation of a {@link Task} created by a plugin.
  */
-public class ScheduledTask implements Task {
+public final class SpongeScheduledTask implements ScheduledTask {
 
-    final long offset; //nanoseconds or ticks
-    final long period; //nanoseconds or ticks
-    final boolean delayIsTicks;
-    final boolean intervalIsTicks;
-    private final PluginContainer owner;
-    private final Consumer<Task> consumer;
-    private long timestamp;
-    private ScheduledTaskState state;
+    final SpongeScheduler scheduler;
+    final SpongeTask task;
     private final UUID id;
     private final String name;
-    private final TaskSynchronicity syncType;
-    private final String stringRepresentation;
-    private Timing taskTimer;
+    private long timestamp;
+    private ScheduledTaskState state;
 
     // Internal Task state. Not for user-service use.
     public enum ScheduledTaskState {
         /**
-         * Never ran before, waiting for the offset to pass.
+         * Never ran before, waiting for the delay to pass.
          */
         WAITING(false),
         /**
@@ -85,64 +72,24 @@ public class ScheduledTask implements Task {
         }
     }
 
-    ScheduledTask(TaskSynchronicity syncType, Consumer<Task> task, String taskName, long delay, boolean delayIsTicks, long interval,
-            boolean intervalIsTicks, PluginContainer pluginContainer) {
-        // All tasks begin waiting.
-        this.setState(ScheduledTaskState.WAITING);
-        this.offset = delay;
-        this.delayIsTicks = delayIsTicks;
-        this.period = interval;
-        this.intervalIsTicks = intervalIsTicks;
-        this.owner = pluginContainer;
-        this.consumer = task;
+    SpongeScheduledTask(SpongeScheduler scheduler, SpongeTask task, String taskName) {
+        this.scheduler = scheduler;
         this.id = UUID.randomUUID();
         this.name = taskName;
-        this.syncType = syncType;
-
-        this.stringRepresentation = MoreObjects.toStringHelper(this)
-                .add("name", this.name)
-                .add("delay", this.offset)
-                .add("interval", this.period)
-                .add("owner", this.owner)
-                .add("id", this.id)
-                .add("isAsync", this.isAsynchronous())
-                .toString();
-    }
-
-    @Override
-    public PluginContainer getOwner() {
-        return this.owner;
-    }
-
-    @Override
-    public long getDelay() {
-        if (this.delayIsTicks) {
-            return this.offset;
-        }
-        return TimeUnit.NANOSECONDS.toMillis(this.offset);
-    }
-
-    @Override
-    public long getInterval() {
-        if (this.intervalIsTicks) {
-            return this.period;
-        }
-        return TimeUnit.NANOSECONDS.toMillis(this.period);
+        this.task = task;
+        // All tasks begin waiting.
+        this.setState(ScheduledTaskState.WAITING);
     }
 
     @Override
     public boolean cancel() {
         boolean success = false;
-        if (this.getState() != ScheduledTask.ScheduledTaskState.RUNNING && this.getState() != ScheduledTaskState.EXECUTING) {
+        if (this.getState() != ScheduledTaskState.RUNNING
+                && this.getState() != ScheduledTaskState.EXECUTING) {
             success = true;
         }
-        this.setState(ScheduledTask.ScheduledTaskState.CANCELED);
+        this.setState(SpongeScheduledTask.ScheduledTaskState.CANCELED);
         return success;
-    }
-
-    @Override
-    public Consumer<Task> getConsumer() {
-        return this.consumer;
     }
 
     @Override
@@ -156,8 +103,12 @@ public class ScheduledTask implements Task {
     }
 
     @Override
-    public boolean isAsynchronous() {
-        return this.syncType == TaskSynchronicity.ASYNCHRONOUS;
+    public Task getTask() {
+        return this.task;
+    }
+
+    public SpongeScheduler getScheduler() {
+        return this.scheduler;
     }
 
     long getTimestamp() {
@@ -167,15 +118,15 @@ public class ScheduledTask implements Task {
     /**
      * Returns a timestamp after which the next execution will take place.
      * Should only be compared to
-     * {@link SchedulerBase#getTimestamp(ScheduledTask)}.
+     * {@link SpongeScheduler#getTimestamp(SpongeScheduledTask)}.
      *
      * @return The next execution timestamp
      */
     long nextExecutionTimestamp() {
         if (this.state.isActive) {
-            return this.timestamp + this.period;
+            return this.timestamp + this.task.interval;
         }
-        return this.timestamp + this.offset;
+        return this.timestamp + this.task.delay;
     }
 
     void setTimestamp(long timestamp) {
@@ -187,25 +138,15 @@ public class ScheduledTask implements Task {
     }
 
     void setState(ScheduledTaskState state) {
-        if (this.state != ScheduledTaskState.CANCELED) {
-            this.state = state;
-        }
+        this.state = state;
     }
 
     @Override
     public String toString() {
-        return this.stringRepresentation;
-    }
-
-    public enum TaskSynchronicity {
-        SYNCHRONOUS,
-        ASYNCHRONOUS
-    }
-
-    public Timing getTimingsHandler() {
-        if (this.taskTimer == null) {
-            this.taskTimer = SpongeTimings.getPluginSchedulerTimings(this.owner);
-        }
-        return this.taskTimer;
+        return MoreObjects.toStringHelper(this)
+                .add("name", this.name)
+                .add("id", this.id)
+                .add("task", this.task)
+                .toString();
     }
 }

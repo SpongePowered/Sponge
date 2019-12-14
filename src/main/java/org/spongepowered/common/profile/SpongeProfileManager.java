@@ -132,7 +132,7 @@ public final class SpongeProfileManager implements GameProfileManager {
     }
 
     private <T> CompletableFuture<T> submitTask(Callable<T> callable) {
-        return SpongeImpl.getScheduler().submitAsyncTask(callable);
+        return SpongeImpl.getAsyncScheduler().submit(callable);
     }
 
 }

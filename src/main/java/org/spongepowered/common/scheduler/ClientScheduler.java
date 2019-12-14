@@ -24,35 +24,11 @@
  */
 package org.spongepowered.common.scheduler;
 
-public abstract class SyncScheduler extends SpongeScheduler {
+public class ClientScheduler extends SyncScheduler {
 
-    // The number of ticks elapsed since this scheduler began.
-    private volatile long counter = 0L;
-
-    protected SyncScheduler(String tag) {
-        super(tag);
+    public ClientScheduler() {
+        super("C");
     }
 
-    /**
-     * The hook to update the Ticks known by the SyncScheduler.
-     */
-    public void tick() {
-        this.counter++;
-        this.runTick();
-    }
-
-    @Override
-    protected long getTimestamp(SpongeScheduledTask task) {
-        // The task is based on minecraft ticks, so we generate
-        // a timestamp based on the elapsed ticks
-        if (task.task.tickBased) {
-            return this.counter * SpongeScheduler.TICK_DURATION_NS;
-        }
-        return super.getTimestamp(task);
-    }
-
-    @Override
-    protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
-        runnable.run();
-    }
+    // TODO: Also track tasks on the client scheduler?
 }
