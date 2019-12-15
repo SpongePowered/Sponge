@@ -34,4 +34,7 @@ public interface FoodStatsAccessor {
     @Accessor("foodSaturationLevel") void accessor$setFoodSaturationLevel(float foodSaturationLevel);
 
     @Accessor("foodExhaustionLevel") float accessor$getFoodExhaustionLevel();
+
+    @Accessor("foodExhaustionLevel") void accessor$setFoodExhaustionLevel(float foodExhaustionLevel);
+
 }

@@ -22,27 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.sheep;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.SheepEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class SheepEntityIsShearedProvider extends GenericMutableDataProvider<SheepEntity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public SheepEntityIsShearedProvider() {
+        super(Keys.IS_SHEARED);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(SheepEntity dataHolder) {
+        return Optional.of(dataHolder.getSheared());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(SheepEntity dataHolder, Boolean value) {
+        dataHolder.setSheared(value);
+        return true;
     }
 }

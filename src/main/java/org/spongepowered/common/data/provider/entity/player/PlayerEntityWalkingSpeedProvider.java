@@ -22,27 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.player;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.player.PlayerCapabilitiesAccessor;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class PlayerEntityWalkingSpeedProvider extends GenericMutableDataProvider<PlayerEntity, Double> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public PlayerEntityWalkingSpeedProvider() {
+        super(Keys.WALKING_SPEED);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Double> getFrom(PlayerEntity dataHolder) {
+        return Optional.of(((double) dataHolder.abilities.getWalkSpeed()));
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
+    protected boolean set(PlayerEntity dataHolder, Double value) {
+        ((PlayerCapabilitiesAccessor) dataHolder.abilities).accessor$setWalkSpeed(value.floatValue());
+        final IAttributeInstance attribute = dataHolder.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+        attribute.setBaseValue(value);
+        dataHolder.sendPlayerAbilities();
         return false;
     }
 }

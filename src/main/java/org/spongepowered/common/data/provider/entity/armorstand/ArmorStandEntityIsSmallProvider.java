@@ -22,27 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.armorstand;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.ArmorStandEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class ArmorStandEntityIsSmallProvider extends GenericMutableDataProvider<ArmorStandEntity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public ArmorStandEntityIsSmallProvider() {
+        super(Keys.ARMOR_STAND_IS_SMALL);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(ArmorStandEntity dataHolder) {
+        return Optional.of(dataHolder.isSmall());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(ArmorStandEntity dataHolder, Boolean value) {
+        ((ArmorStandEntityAccessor) dataHolder).accessor$setSmall(value);
+        return true;
     }
 }

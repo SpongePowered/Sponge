@@ -24,25 +24,27 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.BlazeEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.monster.BlazeEntityAccessor;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class BlazeEntityIsAflameProvider extends GenericMutableDataProvider<BlazeEntity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public BlazeEntityIsAflameProvider() {
+        super(Keys.IS_AFLAME);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(BlazeEntity dataHolder) {
+        return Optional.of(dataHolder.isBurning());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(BlazeEntity dataHolder, Boolean value) {
+        ((BlazeEntityAccessor) dataHolder).accessor$setOnFire(value);
+        return true;
     }
 }

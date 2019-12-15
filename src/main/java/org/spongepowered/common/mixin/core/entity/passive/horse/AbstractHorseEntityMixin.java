@@ -22,37 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.passive;
+package org.spongepowered.common.mixin.core.entity.passive.horse;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
-import org.spongepowered.api.entity.living.animal.Pig;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import Mutable;
-import java.util.Collection;
-import net.minecraft.entity.passive.PigEntity;
+import org.spongepowered.common.bridge.entity.passive.horse.AbstractHorseEntityBridge;
+import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 
-@Mixin(PigEntity.class)
-public abstract class PigEntityMixin_API extends AnimalEntityMixin_API implements Pig {
+@Mixin(AbstractHorseEntity.class)
+public abstract class AbstractHorseEntityMixin extends AgeableEntityMixin implements AbstractHorseEntityBridge {
 
-    @Shadow public abstract boolean getSaddled();
+    @Shadow protected Inventory horseChest;
+    @Shadow public abstract void shadow$setHorseSaddled(boolean saddled);
+    @Shadow protected abstract boolean shadow$getHorseWatchableBoolean(int index);
 
     @Override
-    public PigSaddleData getPigSaddleData() {
-        return new SpongePigSaddleData(this.getSaddled());
+    public boolean bridge$isSaddled() {
+        return this.shadow$getHorseWatchableBoolean(4);
     }
 
     @Override
-    public Mutable<Boolean> saddled() {
-        return new SpongeValue<>(Keys.IS_SADDLED, false, this.getSaddled());
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getPigSaddleData());
+    public void bridge$setSaddled(boolean saddled) {
+        this.shadow$setHorseSaddled(saddled);
+        if (saddled && this.horseChest.getStackInSlot(0).getItem() != Items.SADDLE) {
+            this.horseChest.setInventorySlotContents(0, new ItemStack(Items.SADDLE));
+        } else if (!saddled) {
+            this.horseChest.removeStackFromSlot(0);
+        }
     }
 }

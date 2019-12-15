@@ -30,19 +30,20 @@ import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class EntitySprintingProvider extends GenericMutableDataProvider<Entity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public EntitySprintingProvider() {
+        super(Keys.IS_SPRINTING);
     }
 
     @Override
     protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+        return Optional.of(dataHolder.isSprinting());
     }
 
     @Override
     protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+        dataHolder.setSprinting(value);
+        return true;
     }
 }

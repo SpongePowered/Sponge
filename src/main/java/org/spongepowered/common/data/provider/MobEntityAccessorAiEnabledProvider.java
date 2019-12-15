@@ -22,27 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class MobEntityAccessorAiEnabledProvider extends GenericMutableDataProvider<MobEntityAccessor, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public MobEntityAccessorAiEnabledProvider() {
+        super(Keys.IS_AI_ENABLED);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(MobEntityAccessor dataHolder) {
+        return Optional.of(!dataHolder.accessor$isAIDisabled());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(MobEntityAccessor dataHolder, Boolean value) {
+        dataHolder.accessor$setNoAI(!value);
+        return true;
     }
 }

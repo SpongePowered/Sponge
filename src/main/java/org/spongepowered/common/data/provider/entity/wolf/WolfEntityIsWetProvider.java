@@ -22,27 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.wolf;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.WolfEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.passive.WolfEntityAccessor;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class WolfEntityIsWetProvider extends GenericMutableDataProvider<WolfEntity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public WolfEntityIsWetProvider() {
+        super(Keys.IS_WET);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(WolfEntity dataHolder) {
+        final WolfEntityAccessor accessor = (WolfEntityAccessor) dataHolder;
+        return Optional.of(accessor.accessor$getIsWet() || accessor.accessor$getIsShaking());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(WolfEntity dataHolder, Boolean value) {
+        final WolfEntityAccessor accessor = (WolfEntityAccessor) dataHolder;
+        accessor.accessor$setIsWet(value);
+        accessor.accessor$setIsShaking(value);
+        accessor.accessor$setTimeWolfIsShaking(0f);
+        accessor.accessor$setPrevTimeWolfIsShaking(0f);
+        return true;
     }
 }

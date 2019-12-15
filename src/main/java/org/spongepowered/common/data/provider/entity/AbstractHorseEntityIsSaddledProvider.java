@@ -24,25 +24,27 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.entity.passive.horse.AbstractHorseEntityBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class AbstractHorseEntityIsSaddledProvider extends GenericMutableDataProvider<AbstractHorseEntity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AbstractHorseEntityIsSaddledProvider() {
+        super(Keys.IS_SADDLED);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(AbstractHorseEntity dataHolder) {
+        return Optional.of(((AbstractHorseEntityBridge) dataHolder).bridge$isSaddled());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(AbstractHorseEntity dataHolder, Boolean value) {
+        ((AbstractHorseEntityBridge) dataHolder).bridge$setSaddled(value);
+        return true;
     }
 }

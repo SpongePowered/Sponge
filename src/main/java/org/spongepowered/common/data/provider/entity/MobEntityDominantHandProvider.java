@@ -24,25 +24,29 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.MobEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+@SuppressWarnings("ConstantConditions")
+public class MobEntityDominantHandProvider extends GenericMutableDataProvider<MobEntity, HandPreference> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public MobEntityDominantHandProvider() {
+        super(Keys.DOMINANT_HAND);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<HandPreference> getFrom(MobEntity dataHolder) {
+        return Optional.of((HandPreference) (Object) dataHolder.getPrimaryHand());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(MobEntity dataHolder, HandPreference value) {
+        dataHolder.setLeftHanded(value.equals(HandPreferences.LEFT));
+        return true;
     }
 }

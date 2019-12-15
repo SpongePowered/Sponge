@@ -22,27 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.living;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class LivingEntityLastAttackerProvider extends GenericMutableDataProvider<LivingEntity, Entity> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public LivingEntityLastAttackerProvider() {
+        super(Keys.LAST_ATTACKER);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Entity> getFrom(LivingEntity dataHolder) {
+        @Nullable final LivingEntity revengeTarget = dataHolder.getRevengeTarget();
+        return Optional.ofNullable((Entity) revengeTarget);
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
+    protected boolean set(LivingEntity dataHolder, Entity value) {
+        if (value instanceof LivingEntity) {
+            dataHolder.setRevengeTarget((LivingEntity) value);
+            return true;
+        }
         return false;
+    }
+
+    @Override
+    protected boolean removeFrom(LivingEntity dataHolder) {
+        dataHolder.setRevengeTarget(null);
+        return true;
     }
 }

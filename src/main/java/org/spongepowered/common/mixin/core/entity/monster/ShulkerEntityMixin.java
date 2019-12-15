@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.ShulkerEntity;
 import net.minecraft.network.datasync.DataParameter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
@@ -35,23 +36,27 @@ import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
 import org.spongepowered.common.mixin.core.entity.MobEntityMixin;
 import org.spongepowered.common.util.Constants;
 
+@SuppressWarnings("ConstantConditions")
 @Mixin(ShulkerEntity.class)
 public abstract class ShulkerEntityMixin extends MobEntityMixin implements ShulkerEntityBridge {
 
     @Shadow @Final protected static DataParameter<Byte> COLOR;
-
     @Shadow @Final protected static DataParameter<net.minecraft.util.Direction> ATTACHED_FACE;
 
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public DyeColor bridge$getColor() {
-        return (DyeColor) (Object) net.minecraft.item.DyeColor.byMetadata(this.dataManager.get(COLOR) & 15);
+    public @Nullable DyeColor bridge$getColor() {
+        final int color = this.dataManager.get(COLOR);
+        // The non colored variant
+        if (color > 15) {
+            return null;
+        }
+        return (DyeColor) (Object) net.minecraft.item.DyeColor.byId(color);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public void bridge$setColor(final DyeColor color) {
-        this.dataManager.set(COLOR, (byte) (this.dataManager.get(COLOR) & 240 | ((net.minecraft.item.DyeColor) (Object) color).getMetadata() & 15));
+    public void bridge$setColor(final @Nullable DyeColor color) {
+        final int value = color == null ? 16 : ((net.minecraft.item.DyeColor) (Object) color).getId();
+        this.dataManager.set(COLOR, (byte) value);
     }
 
     @Override

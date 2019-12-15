@@ -43,7 +43,7 @@ public class PigSaddleDataProcessor
         extends AbstractEntitySingleDataProcessor<PigEntity, Boolean, Mutable<Boolean>, PigSaddleData, ImmutablePigSaddleData> {
 
     public PigSaddleDataProcessor() {
-        super(PigEntity.class, Keys.PIG_SADDLE);
+        super(PigEntity.class, Keys.IS_SADDLED);
     }
 
     @Override

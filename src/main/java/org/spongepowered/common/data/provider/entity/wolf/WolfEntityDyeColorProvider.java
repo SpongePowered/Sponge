@@ -22,27 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.wolf;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.WolfEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+@SuppressWarnings("ConstantConditions")
+public class WolfEntityDyeColorProvider extends GenericMutableDataProvider<WolfEntity, DyeColor> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public WolfEntityDyeColorProvider() {
+        super(Keys.DYE_COLOR);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<DyeColor> getFrom(WolfEntity dataHolder) {
+        return Optional.of((DyeColor) (Object) dataHolder.getCollarColor());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(WolfEntity dataHolder, DyeColor value) {
+        dataHolder.setCollarColor((net.minecraft.item.DyeColor) (Object) value);
+        return true;
     }
 }

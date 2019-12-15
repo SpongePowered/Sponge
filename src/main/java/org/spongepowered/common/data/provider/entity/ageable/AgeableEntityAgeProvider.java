@@ -22,27 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.ageable;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.AgeableEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class AgeableEntityAgeProvider extends GenericMutableDataProvider<AgeableEntity, Integer> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AgeableEntityAgeProvider() {
+        super(Keys.AGEABLE_AGE);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Integer> getFrom(AgeableEntity dataHolder) {
+        return Optional.of(dataHolder.getGrowingAge());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(AgeableEntity dataHolder, Integer value) {
+        dataHolder.setGrowingAge(value);
+        return true;
     }
 }

@@ -24,25 +24,31 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class GrieferBridgeCanGriefProvider extends GenericMutableDataProvider<GrieferBridge, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public GrieferBridgeCanGriefProvider() {
+        super(Keys.CAN_GRIEF);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected boolean supports(GrieferBridge dataHolder) {
+        return dataHolder.bridge$isGriefer();
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected Optional<Boolean> getFrom(GrieferBridge dataHolder) {
+        return Optional.of(dataHolder.bridge$canGrief());
+    }
+
+    @Override
+    protected boolean set(GrieferBridge dataHolder, Boolean value) {
+        dataHolder.bridge$setCanGrief(value);
+        return true;
     }
 }

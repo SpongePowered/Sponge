@@ -22,27 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.armorstand;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.ArmorStandEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class ArmorStandEntityChestRotationProvider extends GenericMutableDataProvider<ArmorStandEntity, Vector3d> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public ArmorStandEntityChestRotationProvider() {
+        super(Keys.CHEST_ROTATION);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Vector3d> getFrom(ArmorStandEntity dataHolder) {
+        return Optional.of(VecHelper.toVector3d(dataHolder.getBodyRotation()));
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(ArmorStandEntity dataHolder, Vector3d value) {
+        dataHolder.setBodyRotation(VecHelper.toRotation(value));
+        return true;
     }
 }

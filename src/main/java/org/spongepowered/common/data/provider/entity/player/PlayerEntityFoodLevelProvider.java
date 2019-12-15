@@ -22,27 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.player;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.common.data.provider.GenericMutableBoundedDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class PlayerEntityFoodLevelProvider extends GenericMutableBoundedDataProvider<PlayerEntity, Integer> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    private static final int MAX = 20;
+
+    public PlayerEntityFoodLevelProvider() {
+        super(Keys.FOOD_LEVEL);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected BoundedValue<Integer> constructValue(PlayerEntity dataHolder, Integer element) {
+        return BoundedValue.immutableOf(this.getKey(), element, 0, MAX);
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected Optional<Integer> getFrom(PlayerEntity dataHolder) {
+        return Optional.of(dataHolder.getFoodStats().getFoodLevel());
+    }
+
+    @Override
+    protected boolean set(PlayerEntity dataHolder, Integer value) {
+        dataHolder.getFoodStats().setFoodLevel(MathHelper.clamp(value, 0, MAX));
+        return true;
     }
 }

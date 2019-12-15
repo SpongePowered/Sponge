@@ -24,25 +24,34 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.ShulkerEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class ShulkerEntityDyeColorProvider extends GenericMutableDataProvider<ShulkerEntity, DyeColor> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public ShulkerEntityDyeColorProvider() {
+        super(Keys.DYE_COLOR);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<DyeColor> getFrom(ShulkerEntity dataHolder) {
+        return Optional.ofNullable(((ShulkerEntityBridge) dataHolder).bridge$getColor());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    public boolean set(ShulkerEntity dataHolder, DyeColor value) {
+        ((ShulkerEntityBridge) dataHolder).bridge$setColor(value);
+        return true;
+    }
+
+    @Override
+    protected boolean removeFrom(ShulkerEntity dataHolder) {
+        ((ShulkerEntityBridge) dataHolder).bridge$setColor(null);
+        return true;
     }
 }

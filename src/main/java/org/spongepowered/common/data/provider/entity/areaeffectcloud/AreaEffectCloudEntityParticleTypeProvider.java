@@ -22,27 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.areaeffectcloud;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class AreaEffectCloudEntityParticleTypeProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, ParticleEffect> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AreaEffectCloudEntityParticleTypeProvider() {
+        super(Keys.AREA_EFFECT_CLOUD_PARTICLE_EFFECT);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<ParticleEffect> getFrom(AreaEffectCloudEntity dataHolder) {
+        // TODO: Update particle effects and convert particle effect from particle data
+        return Optional.of(ParticleEffect.builder().type(ParticleTypes.ENTITY_EFFECT).build());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
+    protected boolean set(AreaEffectCloudEntity dataHolder, ParticleEffect value) {
+        // TODO: Update particle effects and convert particle effect to particle data
         return false;
     }
 }

@@ -30,19 +30,23 @@ import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class EntityInvisibleProvider extends GenericMutableDataProvider<Entity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public EntityInvisibleProvider() {
+        super(Keys.INVISIBLE);
     }
 
     @Override
     protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+        return Optional.of(dataHolder.isInvisible());
     }
 
     @Override
     protected boolean set(Entity dataHolder, Boolean value) {
+        if (!dataHolder.world.isRemote) {
+            dataHolder.setInvisible(value);
+            return true;
+        }
         return false;
     }
 }

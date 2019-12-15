@@ -22,27 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.areaeffectcloud;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class AreaEffectCloudEntityWaitTimeProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, Integer> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AreaEffectCloudEntityWaitTimeProvider() {
+        super(Keys.AREA_EFFECT_CLOUD_WAIT_TIME);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Integer> getFrom(AreaEffectCloudEntity dataHolder) {
+        return Optional.of(((AreaEffectCloudEntityAccessor) dataHolder).accessor$getWaitTime());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(AreaEffectCloudEntity dataHolder, Integer value) {
+        dataHolder.setWaitTime(value);
+        return true;
     }
 }

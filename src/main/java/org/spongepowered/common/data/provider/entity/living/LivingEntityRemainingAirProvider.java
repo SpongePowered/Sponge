@@ -22,27 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.living;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.common.data.provider.GenericMutableBoundedDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class LivingEntityRemainingAirProvider extends GenericMutableBoundedDataProvider<LivingEntity, Integer> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public LivingEntityRemainingAirProvider() {
+        super(Keys.REMAINING_AIR);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected BoundedValue<Integer> constructValue(LivingEntity dataHolder, Integer element) {
+        return BoundedValue.immutableOf(this.getKey(), element, 0, dataHolder.getMaxAir());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected Optional<Integer> getFrom(LivingEntity dataHolder) {
+        // Air can go down to -20 for the damage counter, so prevent this
+        return Optional.of(Math.max(0, dataHolder.getAir()));
+    }
+
+    @Override
+    protected boolean set(LivingEntity dataHolder, Integer value) {
+        final int air = MathHelper.clamp(value, 0, dataHolder.getMaxAir());
+        if (air == 0 && dataHolder.getAir() < 0) {
+            return true;
+        }
+        dataHolder.setAir(air);
+        return true;
     }
 }

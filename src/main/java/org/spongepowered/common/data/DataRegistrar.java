@@ -885,7 +885,7 @@ public final class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.SPAWNER_ENTITIES, new SpawnerEntitiesValueProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_COLOR, new AreaEffectCloudColorProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_AGE, new AreaEffectCloudAgeProcessor());
-        DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, new AreaEffectCloudParticleTypeProcessor());
+        DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_PARTICLE_EFFECT, new AreaEffectCloudParticleTypeProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_DURATION, new AreaEffectCloudDurationProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, new AreaEffectCloudDurationOnUseProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_RADIUS, new AreaEffectCloudRadiusProcessor());

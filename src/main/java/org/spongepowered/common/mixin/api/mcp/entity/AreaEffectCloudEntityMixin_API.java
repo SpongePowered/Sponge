@@ -30,7 +30,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
-import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -100,7 +99,7 @@ public abstract class AreaEffectCloudEntityMixin_API extends EntityMixin_API imp
 
     @Override
     public Mutable<ParticleType> particleType() {
-        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, ParticleTypes.MOB_SPELL, ParticleTypes.MOB_SPELL);
+        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_PARTICLE_EFFECT, ParticleTypes.MOB_SPELL, ParticleTypes.MOB_SPELL);
     }
 
     @Override

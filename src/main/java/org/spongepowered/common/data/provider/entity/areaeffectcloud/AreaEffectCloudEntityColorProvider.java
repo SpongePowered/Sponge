@@ -22,27 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.areaeffectcloud;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class AreaEffectCloudEntityColorProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, Color> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AreaEffectCloudEntityColorProvider() {
+        super(Keys.AREA_EFFECT_CLOUD_COLOR);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Color> getFrom(AreaEffectCloudEntity dataHolder) {
+        return Optional.of(Color.ofRgb(dataHolder.getColor()));
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(AreaEffectCloudEntity dataHolder, Color value) {
+        dataHolder.setColor(value.getRgb());
+        return true;
     }
 }

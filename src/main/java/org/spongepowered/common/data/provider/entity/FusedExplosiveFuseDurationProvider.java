@@ -24,25 +24,30 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class FusedExplosiveFuseDurationProvider extends GenericMutableDataProvider<FusedExplosive, Integer> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public FusedExplosiveFuseDurationProvider() {
+        super(Keys.FUSE_DURATION);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Integer> getFrom(FusedExplosive dataHolder) {
+        return Optional.of(((FusedExplosiveBridge) dataHolder).bridge$getFuseDuration());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(FusedExplosive dataHolder, Integer value) {
+        if (value < 0) {
+            return false;
+        }
+        ((FusedExplosiveBridge) dataHolder).bridge$setFuseDuration(value);
+        return true;
     }
 }

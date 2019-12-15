@@ -22,27 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.mixin.accessor.entity.monster;
 
-import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import net.minecraft.entity.monster.BlazeEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(BlazeEntity.class)
+public interface BlazeEntityAccessor {
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
-
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
-    }
-
-    @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
-    }
-
-    @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
-    }
+    @Accessor("setOnFire") void accessor$setOnFire(boolean onFire);
 }

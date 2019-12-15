@@ -24,25 +24,27 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.SlimeEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.monster.SlimeEntityAccessor;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class SlimeEntitySizeProvider extends GenericMutableDataProvider<SlimeEntity, Integer> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public SlimeEntitySizeProvider() {
+        super(Keys.SLIME_SIZE);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Integer> getFrom(SlimeEntity dataHolder) {
+        return Optional.of(dataHolder.getSlimeSize() - 1);
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(SlimeEntity dataHolder, Integer value) {
+        ((SlimeEntityAccessor) dataHolder).accessor$setSlimeSize(value + 1, false);
+        return true;
     }
 }

@@ -22,27 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.living;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class LivingEntityMaxAirProvider extends GenericMutableDataProvider<LivingEntity, Integer> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public LivingEntityMaxAirProvider() {
+        super(Keys.MAX_AIR);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Integer> getFrom(LivingEntity dataHolder) {
+        return Optional.of(dataHolder.getMaxAir());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(LivingEntity dataHolder, Integer value) {
+        // TODO: Figure out if custom max air is actually working,
+        //  check if player max air will scale on the client interface.
+        ((LivingEntityBridge) dataHolder).bridge$setMaxAir(value);
+        return true;
     }
 }

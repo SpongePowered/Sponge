@@ -22,27 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.living;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class LivingEntityActiveItemProvider extends GenericMutableDataProvider<LivingEntity, ItemStackSnapshot> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public LivingEntityActiveItemProvider() {
+        super(Keys.ACTIVE_ITEM);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<ItemStackSnapshot> getFrom(LivingEntity dataHolder) {
+        return Optional.of(ItemStackUtil.snapshotOf(dataHolder.getActiveItemStack()));
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
+    protected boolean set(LivingEntity dataHolder, ItemStackSnapshot value) {
+        if (value.isEmpty()) {
+            dataHolder.stopActiveHand();
+            return true;
+        }
         return false;
+    }
+
+    @Override
+    protected boolean removeFrom(LivingEntity dataHolder) {
+        dataHolder.stopActiveHand();
+        return true;
     }
 }

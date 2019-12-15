@@ -181,7 +181,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     private int impl$deathEventsPosted;
-    private int impl$maxAir = Constants.Sponge.Entity.DEFAULT_MAX_AIR;
+    private int impl$maxAir = getMaxAir();
     @Nullable private ItemStack impl$activeItemStackCopy;
 
     @Override

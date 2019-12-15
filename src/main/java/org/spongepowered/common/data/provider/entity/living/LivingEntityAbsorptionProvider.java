@@ -22,27 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.living;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class LivingEntityAbsorptionProvider extends GenericMutableDataProvider<LivingEntity, Double> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public LivingEntityAbsorptionProvider() {
+        super(Keys.ABSORPTION);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Double> getFrom(LivingEntity dataHolder) {
+        return Optional.of((double) dataHolder.getAbsorptionAmount());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
+    protected boolean set(LivingEntity dataHolder, Double value) {
+        dataHolder.setAbsorptionAmount(value.floatValue());
         return false;
     }
 }

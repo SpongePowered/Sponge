@@ -30,19 +30,20 @@ import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class EntitySneakingProvider extends GenericMutableDataProvider<Entity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public EntitySneakingProvider() {
+        super(Keys.IS_SNEAKING);
     }
 
     @Override
     protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+        return Optional.of(dataHolder.isSneaking());
     }
 
     @Override
     protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+        dataHolder.setSneaking(value);
+        return true;
     }
 }

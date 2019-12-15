@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.bridge.entity.monster;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Direction;
 
 public interface ShulkerEntityBridge {
 
-    DyeColor bridge$getColor();
+    @Nullable DyeColor bridge$getColor();
 
-    void bridge$setColor(DyeColor color);
+    void bridge$setColor(@Nullable DyeColor color);
 
     Direction bridge$getDirection();
 

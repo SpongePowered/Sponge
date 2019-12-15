@@ -22,27 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.areaeffectcloud;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class AreaEffectCloudEntityRadiusProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, Double> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AreaEffectCloudEntityRadiusProvider() {
+        super(Keys.AREA_EFFECT_CLOUD_RADIUS);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Double> getFrom(AreaEffectCloudEntity dataHolder) {
+        return Optional.of((double) dataHolder.getRadius());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(AreaEffectCloudEntity dataHolder, Double value) {
+        dataHolder.setRadius(value.floatValue());
+        return true;
     }
 }

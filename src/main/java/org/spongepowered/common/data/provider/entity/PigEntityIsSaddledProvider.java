@@ -24,25 +24,26 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.PigEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class PigEntityIsSaddledProvider extends GenericMutableDataProvider<PigEntity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public PigEntityIsSaddledProvider() {
+        super(Keys.IS_SADDLED);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(PigEntity dataHolder) {
+        return Optional.of(dataHolder.getSaddled());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(PigEntity dataHolder, Boolean value) {
+        dataHolder.setSaddled(value);
+        return true;
     }
 }

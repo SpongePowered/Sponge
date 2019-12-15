@@ -22,27 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.user;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class UserFirstDatePlayedProvider extends GenericMutableDataProvider<Identifiable, Instant> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public UserFirstDatePlayedProvider() {
+        super(Keys.FIRST_DATE_PLAYED);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected boolean supports(Identifiable dataHolder) {
+        return dataHolder instanceof PlayerEntity || dataHolder instanceof SpongeUser;
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected Optional<Instant> getFrom(Identifiable dataHolder) {
+        return SpongePlayerDataHandler.getFirstJoined(dataHolder.getUniqueId());
+    }
+
+    @Override
+    protected boolean set(Identifiable dataHolder, Instant value) {
+        final UUID id = dataHolder.getUniqueId();
+        final Instant played = SpongePlayerDataHandler.getFirstJoined(id).orElse(value);
+        SpongePlayerDataHandler.setPlayerInfo(id, played, value);
+        return true;
     }
 }

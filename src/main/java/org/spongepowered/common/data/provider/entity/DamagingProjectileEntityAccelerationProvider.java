@@ -24,25 +24,30 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.DamagingProjectileEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.projectile.DamagingProjectileEntityAccessor;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class DamagingProjectileEntityAccelerationProvider extends GenericMutableDataProvider<DamagingProjectileEntity, Vector3d> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public DamagingProjectileEntityAccelerationProvider() {
+        super(Keys.ACCELERATION);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Vector3d> getFrom(DamagingProjectileEntity dataHolder) {
+        return Optional.of(new Vector3d(dataHolder.accelerationX, dataHolder.accelerationY, dataHolder.accelerationZ));
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(DamagingProjectileEntity dataHolder, Vector3d value) {
+        ((DamagingProjectileEntityAccessor) dataHolder).accessor$setAccelerationX(value.getX());
+        ((DamagingProjectileEntityAccessor) dataHolder).accessor$setAccelerationY(value.getY());
+        ((DamagingProjectileEntityAccessor) dataHolder).accessor$setAccelerationZ(value.getZ());
+        return true;
     }
 }

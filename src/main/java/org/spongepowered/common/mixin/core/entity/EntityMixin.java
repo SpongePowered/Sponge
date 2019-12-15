@@ -194,6 +194,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow @Nullable public Entity changeDimension(final int dimension) { return null; } // Shadow
     @Shadow public abstract boolean isInvisible();
     @Shadow public abstract void setInvisible(boolean invisible);
+    @Shadow public abstract int getMaxAir();
 
     // @formatter:on
 

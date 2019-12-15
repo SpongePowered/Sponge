@@ -76,14 +76,14 @@ public class AbstractSkullBlockAttachedProvider extends BlockStateDataProvider<B
         @Nullable final Pair pair = this.wallAndGroundPairs.computeIfAbsent(type, type1 -> {
             @Nullable final SkullBlock groundBlock = (SkullBlock) Registry.BLOCK.stream()
                     .filter(b -> b instanceof SkullBlock &&
-                            ((AbstractSkullBlockAccessor) block).accessor$getSkullType() == type)
+                            ((AbstractSkullBlockAccessor) b).accessor$getSkullType() == type)
                     .findFirst().orElse(null);
             if (groundBlock == null) {
                 return null;
             }
             @Nullable final WallSkullBlock wallBlock = (WallSkullBlock) Registry.BLOCK.stream()
                     .filter(b -> b instanceof WallSkullBlock &&
-                            ((AbstractSkullBlockAccessor) block).accessor$getSkullType() == type)
+                            ((AbstractSkullBlockAccessor) b).accessor$getSkullType() == type)
                     .findFirst().orElse(null);
             if (wallBlock == null) {
                 return null;

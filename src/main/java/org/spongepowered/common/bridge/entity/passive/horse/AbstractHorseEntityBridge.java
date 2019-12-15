@@ -22,27 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.bridge.entity.passive.horse;
 
-import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+public interface AbstractHorseEntityBridge {
 
-import java.util.Optional;
+    void bridge$setSaddled(boolean saddled);
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
-
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
-    }
-
-    @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
-    }
-
-    @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
-    }
+    boolean bridge$isSaddled();
 }

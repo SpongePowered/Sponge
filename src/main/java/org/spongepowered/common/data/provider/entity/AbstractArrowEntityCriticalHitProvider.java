@@ -24,25 +24,26 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class AbstractArrowEntityCriticalHitProvider extends GenericMutableDataProvider<AbstractArrowEntity, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AbstractArrowEntityCriticalHitProvider() {
+        super(Keys.CRITICAL_HIT);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(AbstractArrowEntity dataHolder) {
+        return Optional.of(dataHolder.getIsCritical());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(AbstractArrowEntity dataHolder, Boolean value) {
+        dataHolder.setIsCritical(value);
+        return true;
     }
 }

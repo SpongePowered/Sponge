@@ -24,25 +24,26 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+public class AggressiveEntityBridgeAngryProvider extends GenericMutableDataProvider<AggressiveEntityBridge, Boolean> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AggressiveEntityBridgeAngryProvider() {
+        super(Keys.IS_ANGRY);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<Boolean> getFrom(AggressiveEntityBridge dataHolder) {
+        return Optional.of(dataHolder.bridge$isAngry());
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(AggressiveEntityBridge dataHolder, Boolean value) {
+        dataHolder.bridge$setAngry(value);
+        return true;
     }
 }

@@ -22,27 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.entity.areaeffectcloud;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-public class EntityIsOnGroundProvider extends GenericMutableDataProvider<Entity, Boolean> {
+@SuppressWarnings("unchecked")
+public class AreaEffectCloudEntityPotionEffectsProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, List<PotionEffect>> {
 
-    public EntityIsOnGroundProvider() {
-        super(Keys.ON_GROUND);
+    public AreaEffectCloudEntityPotionEffectsProvider() {
+        super(Keys.POTION_EFFECTS);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(Entity dataHolder) {
-        return Optional.of(dataHolder.onGround);
+    protected Optional<List<PotionEffect>> getFrom(AreaEffectCloudEntity dataHolder) {
+        return Optional.of(((List<PotionEffect>) (List<?>) ((AreaEffectCloudEntityAccessor) dataHolder).accessor$getEffects()));
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Boolean value) {
-        return false;
+    protected boolean set(AreaEffectCloudEntity dataHolder, List<PotionEffect> value) {
+        ((AreaEffectCloudEntityAccessor) dataHolder).accessor$setEffects(new ArrayList(value));
+        return true;
     }
 }
