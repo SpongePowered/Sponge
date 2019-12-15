@@ -37,5 +37,4 @@ public abstract class ServerWorldMixin_TileEntityActivation extends WorldMixin {
     protected void impl$tileActivationStart(final CallbackInfo callbackInfo) {
         TileEntityActivation.activateTileEntities((ServerWorld) (Object) this);
     }
-
 }

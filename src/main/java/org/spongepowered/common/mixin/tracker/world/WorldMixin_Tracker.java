@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.tracker.world;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.Chunk;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,17 +37,14 @@ import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 @Mixin(value = net.minecraft.world.World.class, priority = 1111)
 public abstract class WorldMixin_Tracker implements World {
 
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
-    @Shadow public abstract AbstractChunkProvider getChunkProvider();
+    @Shadow public abstract AbstractChunkProvider shadow$getChunkProvider();
 
     @Override
-    public Optional<UUID> getCreator(final int x, final int y, final int z) {
-        final Chunk chunk = ((AbstractChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+    public Optional<UUID> getCreator(int x, int y, int z) {
+        final Chunk chunk = ((AbstractChunkProviderBridge) this.shadow$getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -58,8 +56,8 @@ public abstract class WorldMixin_Tracker implements World {
     }
 
     @Override
-    public Optional<UUID> getNotifier(final int x, final int y, final int z) {
-        final Chunk chunk = ((AbstractChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+    public Optional<UUID> getNotifier(int x, int y, int z) {
+        final Chunk chunk = ((AbstractChunkProviderBridge) this.shadow$getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -71,8 +69,8 @@ public abstract class WorldMixin_Tracker implements World {
     }
 
     @Override
-    public void setCreator(final int x, final int y, final int z, @Nullable final UUID uuid) {
-        final Chunk chunk = ((AbstractChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+    public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
+        final Chunk chunk = ((AbstractChunkProviderBridge) this.shadow$getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
@@ -82,8 +80,8 @@ public abstract class WorldMixin_Tracker implements World {
     }
 
     @Override
-    public void setNotifier(final int x, final int y, final int z, @Nullable final UUID uuid) {
-        final Chunk chunk = ((AbstractChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+    public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
+        final Chunk chunk = ((AbstractChunkProviderBridge) this.shadow$getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
@@ -91,5 +89,4 @@ public abstract class WorldMixin_Tracker implements World {
         final BlockPos pos = new BlockPos(x, y, z);
         ((ChunkBridge) chunk).bridge$setBlockNotifier(pos, uuid);
     }
-
 }

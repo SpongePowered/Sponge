@@ -9,7 +9,7 @@
     "server": [
         "mcp.world.chunk.ChunkMixin_TileEntityActivation",
         "SpongeImplHooksMixin_TileEntityActivation",
-        "mcp.tileentity.TileEntityMixin_Activation",
+        "mcp.tileentity.TileEntityMixin_TileEntityActivation",
         "mcp.world.server.ServerWorldMixin_TileEntityActivation"
     ],
     "injectors": {

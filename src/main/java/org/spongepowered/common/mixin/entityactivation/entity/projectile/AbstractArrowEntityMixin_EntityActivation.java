@@ -35,10 +35,10 @@ public abstract class AbstractArrowEntityMixin_EntityActivation extends EntityMi
     @Shadow private int ticksInGround;
 
     @Override
-    public void entityActivation$inactiveTick() {
+    public void activation$inactiveTick() {
         if (this.onGround) {
             this.ticksInGround += 1;
         }
-        super.entityActivation$inactiveTick();
+        super.activation$inactiveTick();
     }
 }

@@ -38,7 +38,7 @@ public abstract class ItemEntityMixin_EntityActivation extends EntityMixin_Entit
     @Shadow private int age;
 
     @Override
-    public void entityActivation$inactiveTick() {
+    public void activation$inactiveTick() {
         if (this.pickupDelay > 0 && this.pickupDelay != Constants.Entity.Item.INFINITE_PICKUP_DELAY) {
             --this.pickupDelay;
         }

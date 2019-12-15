@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.mixin.tileentityactivation.mcp.world.chunk;
 
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,38 +37,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
 @Mixin(Chunk.class)
 public abstract class ChunkMixin_TileEntityActivation {
 
-    @Shadow @Final private World world;
+    @Shadow public abstract World shadow$getWorld();
 
     @Inject(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At("RETURN"))
-    private void tileActivationImpl$onAddTileEntityActivateCheck(
-        final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
-        if (tileEntityIn.getWorld() == null) {
-            tileEntityIn.setWorld(this.world);
+    private void tileEntityActivation$onAddTileEntityActivateCheck(BlockPos pos, TileEntity tileEntity, CallbackInfo ci) {
+        if (tileEntity.getWorld() == null) {
+            return;
         }
-        if (!(tileEntityIn instanceof ITickable)) {
+        if (!(tileEntity instanceof ITickableTileEntity)) {
             return;
         }
 
-        if (((WorldInfoBridge) this.world.getWorldInfo()).bridge$isValid()) {
-            final ActivationCapability spongeTile = (ActivationCapability) tileEntityIn;
-            final ChunkBridge spongeChunk = (ChunkBridge) this;
-            if (spongeChunk.bridge$isPersistedChunk()) {
+        if (((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$isValid()) {
+            final ActivationCapabilityBridge activationBridge = (ActivationCapabilityBridge) tileEntity;
+            final ChunkBridge chunkBridge = (ChunkBridge) this;
+            if (chunkBridge.bridge$isPersistedChunk()) {
                 // always activate TE's in persisted chunks
-                spongeTile.entityActivation$setDefaultActivationState(true);
+                activationBridge.activation$setDefaultActivationState(true);
                 return;
             }
-            final SpongeTileEntityType tileType = (SpongeTileEntityType) ((org.spongepowered.api.block.entity.BlockEntity) tileEntityIn).getType();
-            if (tileType == null) {
-                return;
-            }
-            TileEntityActivation.initializeTileEntityActivationState(tileEntityIn);
-            TileEntityActivation.addTileEntityToConfig(this.world, tileType);
+            final SpongeTileEntityType tileType = (SpongeTileEntityType) ((org.spongepowered.api.block.entity.BlockEntity) tileEntity).getType();
+            TileEntityActivation.initializeTileEntityActivationState(tileEntity);
+            TileEntityActivation.addTileEntityToConfig(this.shadow$getWorld(), tileType);
         }
     }
 }

@@ -66,7 +66,7 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.mixin.accessor.world.server.ServerWorldAccessor;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
@@ -476,8 +476,8 @@ public final class SpongeHooks {
             configAdapter.load();
             ((ServerWorldBridge) world).bridge$updateConfigCache();
             for (final Entity entity : ((ServerWorldAccessor) world).accessor$getEntitiesById().values()) {
-                if (entity instanceof ActivationCapability) {
-                    ((ActivationCapability) entity).entityActivation$requiresActivationCacheRefresh(true);
+                if (entity instanceof ActivationCapabilityBridge) {
+                    ((ActivationCapabilityBridge) entity).activation$requiresActivationCacheRefresh(true);
                 }
                 if (entity instanceof CollisionCapabilityBridge) {
                     ((CollisionCapabilityBridge) entity).collision$requiresCollisionsCacheRefresh(true);
@@ -487,8 +487,8 @@ public final class SpongeHooks {
                 }
             }
             for (final TileEntity tileEntity : world.loadedTileEntityList) {
-                if (tileEntity instanceof ActivationCapability) {
-                    ((ActivationCapability) tileEntity).entityActivation$requiresActivationCacheRefresh(true);
+                if (tileEntity instanceof ActivationCapabilityBridge) {
+                    ((ActivationCapabilityBridge) tileEntity).activation$requiresActivationCacheRefresh(true);
                 }
                 if (tileEntity instanceof TrackableBridge) {
                     ((TrackableBridge) tileEntity).bridge$refreshTrackerStates();

@@ -34,8 +34,8 @@ public abstract class LivingEntityMixin_Activation extends EntityMixin_EntityAct
     @Shadow protected int idleTime;
 
     @Override
-    public void entityActivation$inactiveTick() {
-        super.entityActivation$inactiveTick();
+    public void activation$inactiveTick() {
+        super.activation$inactiveTick();
         ++this.idleTime;
     }
 }

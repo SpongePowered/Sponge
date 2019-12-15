@@ -24,34 +24,31 @@
  */
 package org.spongepowered.common.mixin.tileentityactivation;
 
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
 @Mixin(value = SpongeImplHooks.class)
 public abstract class SpongeImplHooksMixin_TileEntityActivation {
 
     /**
-     * @author blood - unknown
-     * @reason TIleEntityActivation check.
-     * @param tickable The tile to tick
-     * @return True if the tile should tick, false if not
+     * @author blood - Minecraft 1.14.4
+     * @reason Hook TileEntityActivation
      */
     @Overwrite(remap = false)
-    public static boolean shouldTickTile(final ITickable tickable) {
-        final TileEntity tileEntity = (TileEntity) tickable;
+    public static boolean shouldTickTile(ITickableTileEntity tickableTileEntity) {
+        final TileEntity tileEntity = (TileEntity) tickableTileEntity;
         final boolean canUpdate = TileEntityActivation.checkIfActive(tileEntity);
 
         if (!canUpdate) {
-            ((ActivationCapability) tileEntity).activation$incrementSpongeTicksExisted();
-            ((ActivationCapability) tileEntity).entityActivation$inactiveTick();
+            ((ActivationCapabilityBridge) tileEntity).activation$incrementSpongeTicksExisted();
+            ((ActivationCapabilityBridge) tileEntity).activation$inactiveTick();
             return false;
         }
         return true;
     }
-
 }

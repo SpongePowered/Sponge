@@ -163,7 +163,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
@@ -371,8 +371,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             ((AbstractChunkProviderBridge) this.getChunkProvider()).bridge$setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
             ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setDenyChunkRequests(worldCategory.getDenyChunkRequests());
             for (final net.minecraft.entity.Entity entity : this.loadedEntityList) {
-                if (entity instanceof ActivationCapability) {
-                    ((ActivationCapability) entity).entityActivation$requiresActivationCacheRefresh(true);
+                if (entity instanceof ActivationCapabilityBridge) {
+                    ((ActivationCapabilityBridge) entity).activation$requiresActivationCacheRefresh(true);
                 }
                 if (entity instanceof CollisionCapabilityBridge) {
                     ((CollisionCapabilityBridge) entity).collision$requiresCollisionsCacheRefresh(true);

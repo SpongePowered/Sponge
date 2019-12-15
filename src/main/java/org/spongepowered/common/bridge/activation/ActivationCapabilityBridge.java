@@ -22,30 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entityactivation.interfaces;
+package org.spongepowered.common.bridge.activation;
 
-public interface ActivationCapability {
+public interface ActivationCapabilityBridge {
 
-    // entity activation
-    void entityActivation$inactiveTick();
+    void activation$inactiveTick();
 
-    byte entityActivation$getActivationType();
+    byte activation$getActivationType();
 
-    long entityActivation$getActivatedTick();
+    long activation$getActivatedTick();
 
-    boolean entityActivation$getDefaultActivationState();
+    boolean activation$getDefaultActivationState();
 
-    void entityActivation$setActivatedTick(long tick);
+    void activation$setActivatedTick(long tick);
 
-    int entityActivation$getActivationRange();
+    int activation$getActivationRange();
 
-    void entityActivation$setActivationRange(int range);
+    void activation$setActivationRange(int range);
 
-    void entityActivation$requiresActivationCacheRefresh(boolean flag);
+    void activation$requiresActivationCacheRefresh(boolean flag);
 
-    boolean entityActivation$requiresActivationCacheRefresh();
+    boolean activation$requiresActivationCacheRefresh();
 
-    void entityActivation$setDefaultActivationState(boolean defaultState);
+    void activation$setDefaultActivationState(boolean defaultState);
 
     int activation$getSpongeTicksExisted();
 
@@ -54,5 +53,4 @@ public interface ActivationCapability {
     int activation$getSpongeTickRate();
 
     void activation$setSpongeTickRate(int tickRate);
-
 }

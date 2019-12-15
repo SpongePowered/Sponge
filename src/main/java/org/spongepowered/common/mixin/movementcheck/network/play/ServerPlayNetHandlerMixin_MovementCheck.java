@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.movementcheck.network.play;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
@@ -38,10 +37,8 @@ import org.spongepowered.common.SpongeImpl;
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin_MovementCheck {
 
-    @Shadow public ServerPlayerEntity player;
-
     @Redirect(method = "processPlayer",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 0))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isInvulnerableDimensionChange()Z", ordinal = 0))
     private boolean movementCheck$onPlayerMovedTooQuicklyCheck(ServerPlayerEntity player) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().playerMovedTooQuickly()) {
             return player.isInvulnerableDimensionChange();
@@ -50,7 +47,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
     }
 
     @Redirect(method = "processPlayer",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 1))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isInvulnerableDimensionChange()Z", ordinal = 1))
     private boolean movementCheck$onMovedWronglyCheck(ServerPlayerEntity player) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
             return player.isInvulnerableDimensionChange();
@@ -58,9 +55,11 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
     }
 
-    @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 100, ordinal = 0), slice = @Slice(
-            from = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;motionZ:D", ordinal = 1),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isSinglePlayer()Z", ordinal = 0)))
+    @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 100, ordinal = 0), slice =
+        @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;lengthSquared()D", ordinal = 1),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;func_217264_d()Z", ordinal = 0))
+    )
     private double movementCheck$onVehicleMovedTooQuicklyCheck(double val) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().playerVehicleMovedTooQuickly()) {
             return val;
@@ -73,7 +72,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/Entity;move(Lnet/minecraft/entity/MoverType;DDD)V",
+                target = "Lnet/minecraft/entity/Entity;move(Lnet/minecraft/entity/MoverType;Lnet/minecraft/util/math/Vec3d;)V",
                 ordinal = 0),
             to  = @At(
                 value = "INVOKE",

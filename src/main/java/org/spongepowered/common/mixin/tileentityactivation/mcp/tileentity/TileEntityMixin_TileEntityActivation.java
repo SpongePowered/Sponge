@@ -26,84 +26,84 @@ package org.spongepowered.common.mixin.tileentityactivation.mcp.tileentity;
 
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 
 @Mixin(TileEntity.class)
-public abstract class TileEntityMixin_Activation implements ActivationCapability {
+public abstract class TileEntityMixin_TileEntityActivation implements ActivationCapabilityBridge {
 
-    private boolean tileActivationImpl$refreshCache = false;
-    private boolean tileActivationImpl$defaultActivationState = true;
-    private long tileActivationImpl$activatedTick = Integer.MIN_VALUE;
-    private int tileActivationImpl$activationRange;
-    private int tileActivationImpl$ticksExisted;
-    private int tileActivationImpl$tickRate = 1;
+    private boolean tileEntityActivation$refreshCache = false;
+    private boolean tileEntityActivation$defaultActivationState = true;
+    private long tileEntityActivation$activatedTick = Integer.MIN_VALUE;
+    private int tileEntityActivation$activationRange;
+    private int tileEntityActivation$ticksExisted;
+    private int tileEntityActivation$tickRate = 1;
 
     @Override
     public final void activation$incrementSpongeTicksExisted() {
-        this.tileActivationImpl$ticksExisted++;
+        this.tileEntityActivation$ticksExisted++;
     }
 
     @Override
     public int activation$getSpongeTicksExisted() {
-        return this.tileActivationImpl$ticksExisted;
+        return this.tileEntityActivation$ticksExisted;
     }
 
     @Override
-    public void entityActivation$inactiveTick() {
+    public void activation$inactiveTick() {
     }
 
     @Override
-    public byte entityActivation$getActivationType() {
+    public byte activation$getActivationType() {
         return 0;
     }
 
     @Override
-    public long entityActivation$getActivatedTick() {
-        return this.tileActivationImpl$activatedTick;
+    public long activation$getActivatedTick() {
+        return this.tileEntityActivation$activatedTick;
     }
 
     @Override
-    public boolean entityActivation$getDefaultActivationState() {
-        return this.tileActivationImpl$defaultActivationState;
+    public boolean activation$getDefaultActivationState() {
+        return this.tileEntityActivation$defaultActivationState;
     }
 
     @Override
-    public void entityActivation$setDefaultActivationState(boolean defaultState) {
-        this.tileActivationImpl$defaultActivationState = defaultState;
+    public void activation$setDefaultActivationState(boolean defaultState) {
+        this.tileEntityActivation$defaultActivationState = defaultState;
     }
 
     @Override
-    public void entityActivation$setActivatedTick(long tick) {
-        this.tileActivationImpl$activatedTick = tick;
+    public void activation$setActivatedTick(long tick) {
+        this.tileEntityActivation$activatedTick = tick;
     }
 
     @Override
     public int activation$getSpongeTickRate() {
-        return this.tileActivationImpl$tickRate;
+        return this.tileEntityActivation$tickRate;
     }
 
     @Override
     public void activation$setSpongeTickRate(int tickRate) {
-        this.tileActivationImpl$tickRate = tickRate;
+        this.tileEntityActivation$tickRate = tickRate;
     }
 
     @Override
-    public int entityActivation$getActivationRange() {
-        return this.tileActivationImpl$activationRange;
+    public int activation$getActivationRange() {
+        return this.tileEntityActivation$activationRange;
     }
 
     @Override
-    public void entityActivation$setActivationRange(int range) {
-        this.tileActivationImpl$activationRange = range;
+    public void activation$setActivationRange(int range) {
+        this.tileEntityActivation$activationRange = range;
     }
 
     @Override
-    public void entityActivation$requiresActivationCacheRefresh(boolean flag) {
-        this.tileActivationImpl$refreshCache = flag;
+    public void activation$requiresActivationCacheRefresh(boolean flag) {
+        this.tileEntityActivation$refreshCache = flag;
     }
 
     @Override
-    public boolean entityActivation$requiresActivationCacheRefresh() {
-        return this.tileActivationImpl$refreshCache;
+    public boolean activation$requiresActivationCacheRefresh() {
+        return this.tileEntityActivation$refreshCache;
     }
 }

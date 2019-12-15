@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
-public abstract class EntityMixin_EntityActivation implements ActivationCapability {
+public abstract class EntityMixin_EntityActivation implements ActivationCapabilityBridge {
 
     @Shadow public boolean onGround;
     @Shadow public abstract World shadow$getEntityWorld();
@@ -57,51 +57,51 @@ public abstract class EntityMixin_EntityActivation implements ActivationCapabili
     }
 
     @Override
-    public void entityActivation$inactiveTick() {
+    public void activation$inactiveTick() {
     }
 
     @Override
-    public byte entityActivation$getActivationType() {
+    public byte activation$getActivationType() {
         return this.entityActivation$type;
     }
 
     @Override
-    public long entityActivation$getActivatedTick() {
+    public long activation$getActivatedTick() {
         return this.entityActivation$activatedTick;
     }
 
     @Override
-    public boolean entityActivation$getDefaultActivationState() {
+    public boolean activation$getDefaultActivationState() {
         return this.entityActivation$defaultState;
     }
 
     @Override
-    public void entityActivation$setDefaultActivationState(final boolean defaultState) {
+    public void activation$setDefaultActivationState(final boolean defaultState) {
         this.entityActivation$defaultState = defaultState;
     }
 
     @Override
-    public void entityActivation$setActivatedTick(final long tick) {
+    public void activation$setActivatedTick(final long tick) {
         this.entityActivation$activatedTick = tick;
     }
 
     @Override
-    public int entityActivation$getActivationRange() {
+    public int activation$getActivationRange() {
         return this.entityActivation$range;
     }
 
     @Override
-    public void entityActivation$setActivationRange(final int range) {
+    public void activation$setActivationRange(final int range) {
         this.entityActivation$range = range;
     }
 
     @Override
-    public void entityActivation$requiresActivationCacheRefresh(final boolean flag) {
+    public void activation$requiresActivationCacheRefresh(final boolean flag) {
         this.entityActivation$refreshCache = flag;
     }
 
     @Override
-    public boolean entityActivation$requiresActivationCacheRefresh() {
+    public boolean activation$requiresActivationCacheRefresh() {
         return this.entityActivation$refreshCache;
     }
 }

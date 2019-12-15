@@ -37,8 +37,8 @@ public abstract class AgeableEntityMixin_EntityActivation extends EntityMixin_En
 
     @Override
     @SoftOverride
-    public void entityActivation$inactiveTick() {
-        super.entityActivation$inactiveTick();
+    public void activation$inactiveTick() {
+        super.activation$inactiveTick();
 
         if (!this.shadow$getEntityWorld().isRemote()) {
             int i = this.shadow$getGrowingAge();

@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.bridge;
+package org.spongepowered.common.mixin.tracker;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -47,41 +47,39 @@ import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 @Mixin(value = {Entity.class, TileEntity.class}, priority = 1100)
-public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTrackedBridge {
+public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedBridge {
 
-    @Nullable private UUID tracked$owner;
-    @Nullable private UUID tracked$notifier;
-    @Nullable private WeakReference<User> tracked$ownerUser;
-    @Nullable private WeakReference<User> tracked$notifierUser;
-    @Nullable private SpongeProfileManager tracked$profileManager;
-    @Nullable private UserStorageService tracked$userService;
+    @Nullable private UUID tracker$owner;
+    @Nullable private UUID tracker$notifier;
+    @Nullable private WeakReference<User> tracker$ownerUser;
+    @Nullable private WeakReference<User> tracker$notifierUser;
+    @Nullable private SpongeProfileManager tracker$profileManager;
+    @Nullable private UserStorageService tracker$userService;
 
     @Override
     public Optional<UUID> tracked$getOwnerUUID() {
-        return Optional.ofNullable(this.tracked$owner);
+        return Optional.ofNullable(this.tracker$owner);
     }
 
     @Override
     public Optional<UUID> tracked$getNotifierUUID() {
-        return Optional.ofNullable(this.tracked$notifier);
+        return Optional.ofNullable(this.tracker$notifier);
     }
 
     @Override
-    public void tracked$setOwnerReference(@Nullable final User owner) {
-        this.tracked$ownerUser = new WeakReference<>(owner);
-        this.tracked$owner = owner == null ? null : owner.getUniqueId();
+    public void tracked$setOwnerReference(@Nullable User owner) {
+        this.tracker$ownerUser = new WeakReference<>(owner);
+        this.tracker$owner = owner == null ? null : owner.getUniqueId();
     }
 
     @Override
     public Optional<User> tracked$getOwnerReference() {
-        final User value = this.tracked$ownerUser == null ? null : this.tracked$ownerUser.get();
+        final User value = this.tracker$ownerUser == null ? null : this.tracker$ownerUser.get();
         if (value == null) {
-            if (this.tracked$owner != null) {
+            if (this.tracker$owner != null) {
                 final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.OWNER);
-                user.ifPresent(owner -> this.tracked$ownerUser = new WeakReference<>(owner));
+                user.ifPresent(owner -> this.tracker$ownerUser = new WeakReference<>(owner));
                 return user;
             }
         }
@@ -89,18 +87,18 @@ public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTr
     }
 
     @Override
-    public void tracked$setNotifier(@Nullable final User notifier) {
-        this.tracked$notifierUser = new WeakReference<>(notifier);
-        this.tracked$notifier = notifier == null ? null : notifier.getUniqueId();
+    public void tracked$setNotifier(@Nullable User notifier) {
+        this.tracker$notifierUser = new WeakReference<>(notifier);
+        this.tracker$notifier = notifier == null ? null : notifier.getUniqueId();
     }
 
     @Override
     public Optional<User> tracked$getNotifierReference() {
-        final User value = this.tracked$notifierUser == null ? null : this.tracked$notifierUser.get();
+        final User value = this.tracker$notifierUser == null ? null : this.tracker$notifierUser.get();
         if (value == null) {
-            if (this.tracked$owner != null) {
+            if (this.tracker$owner != null) {
                 final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.NOTIFIER);
-                user.ifPresent(owner -> this.tracked$notifierUser = new WeakReference<>(owner));
+                user.ifPresent(owner -> this.tracker$notifierUser = new WeakReference<>(owner));
                 return user;
             }
         }
@@ -108,7 +106,7 @@ public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTr
     }
 
     @Override
-    public Optional<User> tracked$getTrackedUser(final PlayerTracker.Type nbtKey) {
+    public Optional<User> tracked$getTrackedUser(PlayerTracker.Type nbtKey) {
         final UUID uuid = this.getTrackedUniqueId(nbtKey);
 
         if (uuid == null) {
@@ -120,36 +118,36 @@ public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTr
             return Optional.of(player);
         }
         // player is not online, get user from storage if one exists
-        if (this.tracked$profileManager == null) {
-            this.tracked$profileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
+        if (this.tracker$profileManager == null) {
+            this.tracker$profileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
         }
-        if (this.tracked$userService == null) {
-            this.tracked$userService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
+        if (this.tracker$userService == null) {
+            this.tracker$userService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
 
         // check username cache
         final String username = SpongeUsernameCache.getLastKnownUsername(uuid);
         if (username != null) {
-            return this.tracked$userService.get(GameProfile.of(uuid, username));
+            return this.tracker$userService.get(GameProfile.of(uuid, username));
         }
 
         // check mojang cache
-        final GameProfile profile = this.tracked$profileManager.getCache().getById(uuid).orElse(null);
+        final GameProfile profile = this.tracker$profileManager.getCache().getById(uuid).orElse(null);
         if (profile != null) {
-            return this.tracked$userService.get(profile);
+            return this.tracker$userService.get(profile);
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        this.tracked$profileManager.lookupUserAsync(uuid);
+        this.tracker$profileManager.lookupUserAsync(uuid);
         return Optional.empty();
     }
 
     @Override
-    public void tracked$setTrackedUUID(final PlayerTracker.Type type, @Nullable final UUID uuid) {
+    public void tracked$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid) {
         if (PlayerTracker.Type.OWNER == type) {
-            this.tracked$owner = uuid;
+            this.tracker$owner = uuid;
         } else if (PlayerTracker.Type.NOTIFIER == type) {
-            this.tracked$notifier = uuid;
+            this.tracker$notifier = uuid;
         }
         if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
@@ -171,9 +169,9 @@ public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTr
     }
 
     @Nullable
-    private UUID getTrackedUniqueId(final PlayerTracker.Type nbtKey) {
-        if (this.tracked$owner != null && PlayerTracker.Type.OWNER == nbtKey) {
-            return this.tracked$owner;
+    private UUID getTrackedUniqueId(PlayerTracker.Type type) {
+        if (this.tracker$owner != null && PlayerTracker.Type.OWNER == type) {
+            return this.tracker$owner;
         }
         if (this instanceof IEntityOwnable) {
             final IEntityOwnable ownable = (IEntityOwnable) this;
@@ -182,14 +180,14 @@ public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTr
                 this.tracked$setTrackedUUID(PlayerTracker.Type.OWNER, owner.getUniqueID());
                 return owner.getUniqueID();
             }
-        } else if (this.tracked$notifier != null && PlayerTracker.Type.NOTIFIER == nbtKey) {
-            return this.tracked$notifier;
+        } else if (this.tracker$notifier != null && PlayerTracker.Type.NOTIFIER == type) {
+            return this.tracker$notifier;
         }
-        final CompoundNBT nbt = ((DataCompoundHolder) this).data$getSpongeDataCompound();
-        if (!nbt.contains(nbtKey.compoundKey)) {
+        final CompoundNBT compound = ((DataCompoundHolder) this).data$getSpongeDataCompound();
+        if (!compound.contains(type.compoundKey)) {
             return null;
         }
-        final CompoundNBT creatorNbt = nbt.getCompound(nbtKey.compoundKey);
+        final CompoundNBT creatorNbt = compound.getCompound(type.compoundKey);
 
 
         if (!creatorNbt.contains(Constants.UUID_MOST) && !creatorNbt.contains(Constants.UUID_LEAST)) {
@@ -197,13 +195,11 @@ public abstract class OwnershipTrackedBridgeMixin_Tracker implements OwnershipTr
         }
 
         final UUID uniqueId = creatorNbt.getUniqueId(Constants.UUID);
-        if (PlayerTracker.Type.OWNER == nbtKey) {
-            this.tracked$owner = uniqueId;
-        } else if (PlayerTracker.Type.NOTIFIER == nbtKey) {
-            this.tracked$notifier = uniqueId;
+        if (PlayerTracker.Type.OWNER == type) {
+            this.tracker$owner = uniqueId;
+        } else if (PlayerTracker.Type.NOTIFIER == type) {
+            this.tracker$notifier = uniqueId;
         }
         return uniqueId;
     }
-
-
 }
