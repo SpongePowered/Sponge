@@ -29,11 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.util.ResourceLocation;
-import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
@@ -42,13 +43,12 @@ import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
-public class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, Advancement.Builder> implements Advancement.Builder {
+public final class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, Advancement.Builder> implements Advancement.Builder {
 
     @Nullable private Advancement parent;
     private AdvancementCriterion criterion;
     @Nullable private DisplayInfo displayInfo;
+    private Translation translation;
 
     public SpongeAdvancementBuilder() {
         this.reset();
@@ -74,10 +74,22 @@ public class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, 
     }
 
     @Override
-    protected Advancement build(PluginContainer plugin, String id, Translation name) {
+    public Advancement.Builder name(String name) {
+        this.translation = new FixedTranslation(name);
+        return this;
+    }
+
+    @Override
+    public Advancement.Builder name(Translation translation) {
+        this.translation = translation;
+        return this;
+    }
+
+    @Override
+    protected Advancement build(CatalogKey key) {
         final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
-        final ResourceLocation resourceLocation = new ResourceLocation(plugin.getId(), this.id);
+        final ResourceLocation resourceLocation = (ResourceLocation) (Object) key;
         final net.minecraft.advancements.DisplayInfo displayInfo = this.displayInfo == null ? null :
                 (net.minecraft.advancements.DisplayInfo) DisplayInfo.builder().from(this.displayInfo).build(); // Create a copy
         net.minecraft.advancements.Advancement parent = (net.minecraft.advancements.Advancement) this.parent;
@@ -87,20 +99,18 @@ public class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, 
         final Advancement advancement = (Advancement) new net.minecraft.advancements.Advancement(
                 resourceLocation, parent, displayInfo, rewards, result.getFirst(), result.getSecond());
         ((AdvancementBridge) advancement).bridge$setCriterion(this.criterion);
-        final String plainName = name.get();
-        if (StringUtils.isNotEmpty(plainName)) {
-            ((AdvancementBridge) advancement).bridge$setName(plainName);
+        if (this.translation != null) {
+            ((AdvancementBridge) advancement).bridge$setTranslation(this.translation);
         }
         return advancement;
     }
 
     @Override
     public Advancement.Builder reset() {
-        this.criterion = AdvancementCriterion.EMPTY;
+        this.criterion = AdvancementCriterion.empty();
         this.displayInfo = null;
         this.parent = null;
-        this.id = null;
-        this.name = null;
+        this.key = null;
         return this;
     }
 }

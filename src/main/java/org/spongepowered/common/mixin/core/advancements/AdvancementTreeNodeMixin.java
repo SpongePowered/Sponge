@@ -42,10 +42,10 @@ import org.spongepowered.common.advancement.SpongeTreeLayout;
 public abstract class AdvancementTreeNodeMixin {
 
     @Inject(method = "layout", at = @At("RETURN"))
-    private static void onLayout(final Advancement root, final CallbackInfo ci) {
+    private static void onLayout(Advancement root, CallbackInfo ci) {
         final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).getTree().get();
         final TreeLayout layout = new SpongeTreeLayout((SpongeAdvancementTree) advancementTree);
-        SpongeImpl.postEvent(SpongeEventFactory.createAdvancementTreeEventGenerateLayout(
-                Sponge.getCauseStackManager().getCurrentCause(), layout, advancementTree));
+        SpongeImpl.postEvent(SpongeEventFactory.createAdvancementTreeEventGenerateLayout(Sponge.getCauseStackManager().getCurrentCause(), layout,
+                advancementTree));
     }
 }

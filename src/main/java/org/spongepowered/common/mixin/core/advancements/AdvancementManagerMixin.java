@@ -35,8 +35,8 @@ import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 @Mixin(AdvancementManager.class)
 public abstract class AdvancementManagerMixin {
 
-    @Inject(method = "reload", at = @At("RETURN"))
-    private void impl$reloadAdvancementProgressforPlayerList(final CallbackInfo ci) {
+    @Inject(method = "apply", at = @At("RETURN"))
+    private void impl$reloadAdvancementProgressforPlayerList(CallbackInfo ci) {
         ((PlayerListBridge) SpongeImpl.getServer().getPlayerList()).bridge$reloadAdvancementProgress();
     }
 }

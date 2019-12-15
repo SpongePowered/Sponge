@@ -43,7 +43,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
+import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
@@ -149,7 +149,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Override
     public BlockEntityArchetype createArchetype() {
-        return new SpongeTileEntityArchetypeBuilder().tile(this).build();
+        return new SpongeBlockEntityArchetypeBuilder().tile(this).build();
     }
 
     @Override

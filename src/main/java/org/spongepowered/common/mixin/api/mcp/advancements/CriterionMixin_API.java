@@ -42,13 +42,11 @@ public abstract class CriterionMixin_API implements DefaultedAdvancementCriterio
 
     @Override
     public String getName() {
-        return  ((CriterionBridge) this).bridge$getName();
+        return ((CriterionBridge) this).bridge$getName();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<FilteredTrigger<?>> getTrigger() {
         return Optional.ofNullable((FilteredTrigger<?>) this.criterionInstance);
     }
-
 }

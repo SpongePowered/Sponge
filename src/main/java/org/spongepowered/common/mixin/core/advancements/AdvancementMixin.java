@@ -35,6 +35,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
@@ -44,6 +45,7 @@ import org.spongepowered.api.advancement.criteria.OrCriterion;
 import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.FixedTranslation;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -56,11 +58,11 @@ import org.spongepowered.common.advancement.DefaultedAdvancementCriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.bridge.advancements.CriterionBridge;
+import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
-import org.spongepowered.common.bridge.advancements.CriterionBridge;
-import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -85,31 +87,29 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private ITextComponent displayText;
 
+    private CatalogKey impl$key;
     private AdvancementCriterion impl$criterion;
     @Nullable private AdvancementTree impl$tree;
     private List<Text> impl$toastText;
     private Text impl$text;
-    private String impl$spongeId;
-    private String impl$name;
+    private Translation impl$translation;
     @Nullable private Advancement impl$tempParent;
-
 
     @SuppressWarnings({"ConstantConditions"})
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setUpSpongeFields(final ResourceLocation id, @Nullable final Advancement parentIn, @Nullable final DisplayInfo displayIn,
-            final AdvancementRewards rewardsIn, final Map<String, Criterion> criteriaIn, final String[][] requirementsIn, final CallbackInfo ci) {
+    private void impl$setUpSpongeFields(ResourceLocation location, @Nullable Advancement parent, @Nullable DisplayInfo displayInfo,
+            AdvancementRewards rewards, Map<String, Criterion> criteria, String[][] requirements, CallbackInfo ci) {
         // Don't do anything on the client, unless we're performing registry initialization
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             return;
         }
-        if (displayIn != null) {
-            ((DisplayInfoBridge) displayIn).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this);
+        this.impl$key = (CatalogKey) (Object) location;
+        if (displayInfo != null) {
+            ((DisplayInfoBridge) displayInfo).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this);
         }
-        String path = id.getPath();
-        this.impl$name = path.replace('/', '_');
-        this.impl$spongeId = id.getNamespace() + ':' + this.impl$name;
-        if (displayIn != null) {
-            this.impl$name = SpongeTexts.toPlain(displayIn.getTitle());
+        this.impl$translation = new SpongeTranslation(location.getPath().replace('/', '_'));
+        if (displayInfo != null) {
+            this.impl$translation = new FixedTranslation(SpongeTexts.toPlain(displayInfo.getTitle()));
         }
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             final Object event = ((EventListenerPhaseContext) PhaseTracker.getInstance().getCurrentContext()).getEvent();
@@ -117,28 +117,25 @@ public abstract class AdvancementMixin implements AdvancementBridge {
                 final Class<? extends CatalogType> catalogType = ((GameRegistryEvent.Register<?>) event).getCatalogType();
                 if (catalogType.equals(org.spongepowered.api.advancement.Advancement.class) || catalogType.equals(AdvancementTree.class)) {
                     // Wait to set the parent until the advancement is registered
-                    this.impl$tempParent = parentIn;
+                    this.impl$tempParent = parent;
                     this.parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT;
                 }
             }
         }
 
+        String fixedPath = this.impl$key.getValue();
         // This is only possible when REGISTER_ADVANCEMENTS_ON_CONSTRUCT is true
-        if (parentIn == null) {
+        if (parent == null) {
             // Remove the root suffix from json file tree ids
-            if (path.endsWith("/root")) {
-                path = path.substring(0, path.lastIndexOf('/'));
+            if (fixedPath.endsWith("/root")) {
+                fixedPath = fixedPath.substring(0, fixedPath.lastIndexOf('/'));
             }
-            path = path.replace('/', '_');
-            String name = path;
-            if (displayIn != null) {
-                name = this.impl$name;
-            }
-            path = id.getNamespace() + ':' + path;
-            this.impl$tree = new SpongeAdvancementTree((org.spongepowered.api.advancement.Advancement) this, path, new FixedTranslation(name));
+            fixedPath = fixedPath.replace('/', '_');
+            this.impl$tree = new SpongeAdvancementTree((org.spongepowered.api.advancement.Advancement) this, CatalogKey.of(this.impl$key
+                    .getNamespace(), fixedPath), displayInfo != null ? this.impl$translation : new FixedTranslation(fixedPath));
             AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.impl$tree);
         } else {
-            this.impl$tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);
+            this.impl$tree = ((org.spongepowered.api.advancement.Advancement) parent).getTree().orElse(null);
         }
         this.impl$text = SpongeTexts.toText(this.displayText);
         final ImmutableList.Builder<Text> toastText = ImmutableList.builder();
@@ -150,12 +147,12 @@ public abstract class AdvancementMixin implements AdvancementBridge {
             toastText.add(((TextComponentBridge) this.display.getTitle()).bridge$toText());
         } else {
             toastText.add(Text.of("Unlocked advancement"));
-            toastText.add(Text.of(this.impl$spongeId));
+            toastText.add(Text.of(this.impl$key));
         }
         this.impl$toastText = toastText.build();
         final Set<String> scoreCriteria = new HashSet<>();
         final Map<String, DefaultedAdvancementCriterion> criterionMap = new HashMap<>();
-        for (final Map.Entry<String, Criterion> entry : new HashMap<>(criteriaIn).entrySet()) {
+        for (final Map.Entry<String, Criterion> entry : new HashMap<>(criteria).entrySet()) {
             final CriterionBridge mixinCriterion = (CriterionBridge) entry.getValue();
             final DefaultedAdvancementCriterion criterion;
             if (mixinCriterion.bridge$getScoreGoal() != null) {
@@ -163,7 +160,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
                         entry.getValue().getCriterionInstance());
                 scoreCriteria.add(entry.getKey());
                 ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
-                        criterion1 -> criteriaIn.put(criterion1.getName(), (Criterion) criterion1));
+                        criterion1 -> criteria.put(criterion1.getName(), (Criterion) criterion1));
             } else {
                 criterion = (DefaultedAdvancementCriterion) mixinCriterion;
                 ((CriterionBridge) criterion).bridge$setName(entry.getKey());
@@ -172,15 +169,15 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         }
         final List<String[]> entries = new ArrayList<>();
         final List<AdvancementCriterion> andCriteria = new ArrayList<>();
-        for (final String[] array : requirementsIn) {
+        for (final String[] array : requirements) {
             final Set<AdvancementCriterion> orCriteria = new HashSet<>();
             for (final String name : array) {
                 final DefaultedAdvancementCriterion criterion = criterionMap.get(name);
                 if (criterion instanceof SpongeScoreCriterion) {
                     ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
-                            criterion1 -> entries.add(new String[] { criterion1.getName() }));
+                            criterion1 -> entries.add(new String[]{criterion1.getName()}));
                 } else {
-                    entries.add(new String[] { criterion.getName() });
+                    entries.add(new String[]{criterion.getName()});
                 }
                 orCriteria.add(criterion);
             }
@@ -188,57 +185,74 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         }
         this.impl$criterion = AndCriterion.of(andCriteria);
         if (!scoreCriteria.isEmpty()) {
-            scoreCriteria.forEach(criteriaIn::remove);
-            this.criteria = ImmutableMap.copyOf(criteriaIn);
+            scoreCriteria.forEach(criteria::remove);
+            this.criteria = ImmutableMap.copyOf(criteria);
             this.requirements = entries.toArray(new String[entries.size()][]);
         }
     }
 
     @Override
-    public Optional<AdvancementTree> bridge$getTree() {
-        checkState(SpongeImplHooks.isMainThread());
-        return Optional.ofNullable(this.impl$tree);
+    public CatalogKey bridge$getKey() {
+        return this.impl$key;
+    }
+
+    @Override
+    public void bridge$setTranslation(Translation name) {
+        checkState(SpongeImplHooks.onServerThread());
+        this.impl$translation = name;
+    }
+
+    @Override
+    public Optional<Advancement> bridge$getParent() {
+        checkState(SpongeImplHooks.onServerThread());
+        if (this.impl$tempParent != null) {
+            return Optional.of(this.impl$tempParent);
+        }
+        if (this.parent == AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(this.parent);
     }
 
     @Override
     public void bridge$setParent(@Nullable final Advancement advancement) {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         this.parent = advancement;
     }
 
     @Override
+    public Optional<AdvancementTree> bridge$getTree() {
+        checkState(SpongeImplHooks.onServerThread());
+        return Optional.ofNullable(this.impl$tree);
+    }
+
+    @Override
     public void bridge$setTree(final AdvancementTree tree) {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         this.impl$tree = tree;
     }
 
     @Override
     public AdvancementCriterion bridge$getCriterion() {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         return this.impl$criterion;
     }
 
     @Override
     public void bridge$setCriterion(final AdvancementCriterion criterion) {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         this.impl$criterion = criterion;
     }
 
     @Override
-    public void bridge$setName(final String name) {
-        checkState(SpongeImplHooks.isMainThread());
-        this.impl$name = name;
-    }
-
-    @Override
     public boolean bridge$isRegistered() {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         return this.impl$tempParent == null;
     }
 
     @Override
     public void bridge$setRegistered() {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         if (this.impl$tempParent == null) {
             return;
         }
@@ -249,40 +263,14 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     }
 
     @Override
-    public Optional<Advancement> bridge$getParent() {
-        checkState(SpongeImplHooks.isMainThread());
-        if (this.impl$tempParent != null) {
-            return Optional.of(this.impl$tempParent);
-        }
-        if (this.parent == AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(this.parent);
+    public Text bridge$getText() {
+        checkState(SpongeImplHooks.onServerThread());
+        return this.impl$text;
     }
-
-
 
     @Override
     public List<Text> bridge$getToastText() {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         return this.impl$toastText;
-    }
-
-    @Override
-    public String bridge$getId() {
-        checkState(SpongeImplHooks.isMainThread());
-        return this.impl$spongeId;
-    }
-
-    @Override
-    public String bridge$getName() {
-        checkState(SpongeImplHooks.isMainThread());
-        return this.impl$name;
-    }
-
-    @Override
-    public Text bridge$getText() {
-        checkState(SpongeImplHooks.isMainThread());
-        return this.impl$text;
     }
 }

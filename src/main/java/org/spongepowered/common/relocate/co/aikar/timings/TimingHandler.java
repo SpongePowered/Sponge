@@ -102,7 +102,7 @@ class TimingHandler implements Timing {
             return;
         }
 
-        if (SpongeImplHooks.isMainThread()) {
+        if (SpongeImplHooks.onServerThread()) {
             this.stopTiming();
         }
     }
@@ -128,7 +128,7 @@ class TimingHandler implements Timing {
         }
 
         if (--this.timingDepth == 0 && this.start != 0) {
-            if (!SpongeImplHooks.isMainThread()) {
+            if (!SpongeImplHooks.onServerThread()) {
                 SpongeImpl.getLogger().fatal("stopTiming called async for " + this.name);
                 new Throwable().printStackTrace();
                 this.start = 0;

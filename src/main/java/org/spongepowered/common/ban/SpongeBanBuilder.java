@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.mojang.authlib.GameProfile;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
@@ -46,7 +45,7 @@ import net.minecraft.server.management.IPBanEntry;
 import net.minecraft.server.management.IPBanList;
 import net.minecraft.server.management.ProfileBanEntry;
 
-public class SpongeBanBuilder implements Ban.Builder {
+public final class SpongeBanBuilder implements Ban.Builder {
 
     private org.spongepowered.api.profile.GameProfile profile;
     private InetAddress address;

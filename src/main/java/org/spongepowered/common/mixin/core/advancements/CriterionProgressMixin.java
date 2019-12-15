@@ -33,9 +33,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.advancement.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
+import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 
 import java.util.Date;
 
@@ -46,19 +46,17 @@ public abstract class CriterionProgressMixin implements CriterionProgressBridge,
 
     @Shadow @Final private AdvancementProgress advancementProgress;
     @Shadow @Nullable private Date obtained;
-
-    @Shadow public abstract void obtain();
-    @Shadow public abstract void reset();
-
     @Nullable private AdvancementCriterion impl$criterion;
 
+    @Shadow public abstract void shadow$reset();
+
     @Inject(method = "obtain", at = @At("RETURN"))
-    private void onObtain(final CallbackInfo ci) {
+    private void onObtain(CallbackInfo ci) {
         ((AdvancementProgressBridge) this.advancementProgress).bridge$invalidateAchievedState();
     }
 
     @Inject(method = "reset", at = @At("RETURN"))
-    private void onReset(final CallbackInfo ci) {
+    private void onReset(CallbackInfo ci) {
         ((AdvancementProgressBridge) this.advancementProgress).bridge$invalidateAchievedState();
     }
 
@@ -68,11 +66,7 @@ public abstract class CriterionProgressMixin implements CriterionProgressBridge,
     }
 
     @Override
-    public void invalidateAchievedState() {
-    }
-
-    @Override
-    public void bridge$setCriterion(final AdvancementCriterion criterion) {
+    public void bridge$setCriterion(AdvancementCriterion criterion) {
         this.impl$criterion = criterion;
     }
 
@@ -84,5 +78,9 @@ public abstract class CriterionProgressMixin implements CriterionProgressBridge,
     @Override
     public boolean bridge$isCriterionAvailable() {
         return this.impl$criterion != null;
+    }
+
+    @Override
+    public void invalidateAchievedState() {
     }
 }

@@ -1771,7 +1771,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     private boolean impl$forceSpawnEntity(final net.minecraft.entity.Entity entity, final int chunkX, final int chunkZ) {
-        if (!this.bridge$isFake() && SpongeImplHooks.isMainThread()) {
+        if (!this.bridge$isFake() && SpongeImplHooks.onServerThread()) {
             SpongeHooks.logEntitySpawn(entity);
         }
         if (entity instanceof PlayerEntity) {

@@ -377,7 +377,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     private void tracker$startLoad(CallbackInfo callbackInfo) {
         final boolean isFake = ((WorldBridge) this.shadow$getWorld()).bridge$isFake();
         if (!isFake) {
-            if (!SpongeImplHooks.isMainThread()) {
+            if (!SpongeImplHooks.onServerThread()) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
                     .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
                                 + " to the parented world for management. These operations are generally not"
@@ -404,7 +404,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void tracker$endLoad(CallbackInfo callbackInfo) {
-        if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && SpongeImplHooks.isMainThread()) {
+        if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && SpongeImplHooks.onServerThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }

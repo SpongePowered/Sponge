@@ -33,6 +33,7 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("unchecked")
 public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B extends AdvancementCriterion.BaseBuilder<T, B>>
         implements ScoreAdvancementCriterion.BaseBuilder<T, B> {
 
@@ -40,7 +41,6 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
     @Nullable protected String name;
 
     @Override
-    @SuppressWarnings("unchecked")
     public B trigger(FilteredTrigger<?> trigger) {
         checkNotNull(trigger, "trigger");
         this.trigger = trigger;
@@ -48,7 +48,6 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public B name(String name) {
         checkNotNull(name, "name");
         this.name = name;
@@ -64,7 +63,6 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
     abstract T build0();
 
     @Override
-    @SuppressWarnings("unchecked")
     public B from(T value) {
         this.trigger = value.getTrigger().orElse(null);
         this.name = value.getName();
@@ -72,7 +70,6 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public B reset() {
         this.trigger = null;
         this.name = null;

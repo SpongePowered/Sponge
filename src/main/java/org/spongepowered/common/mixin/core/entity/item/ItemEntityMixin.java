@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.Sponge;
@@ -41,15 +39,12 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
@@ -196,7 +191,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         )
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
-        if (!SpongeImplHooks.isMainThread() || this.getItem().isEmpty()) {
+        if (!SpongeImplHooks.onServerThread() || this.getItem().isEmpty()) {
             // In the rare case the first if block is actually at the end of the method instruction list, we don't want to 
             // erroneously be calling this twice.
             return;

@@ -31,8 +31,8 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
+import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 
 import java.time.Instant;
 import java.util.Date;
@@ -40,7 +40,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("RedundantCast")
 @Mixin(CriterionProgress.class)
 public abstract class CriterionProgressMixin_API implements org.spongepowered.api.advancement.criteria.CriterionProgress {
 

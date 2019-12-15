@@ -66,9 +66,9 @@ public abstract class AdvancementListMixin implements AdvancementListBridge {
 
     @Inject(method = "loadAdvancements", at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
             target = "Ljava/util/Map;size()I", remap = false))
-    private void impl$postRegisterAdvancements(final Map<ResourceLocation, Advancement.Builder> advancementsIn, final CallbackInfo ci) {
+    private void impl$postRegisterAdvancements(Map<ResourceLocation, Advancement.Builder> advancements, CallbackInfo ci) {
         // Don't post events when loading advancements on the client
-        if (!SpongeImplHooks.isMainThread() || !ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
+        if (!SpongeImplHooks.onServerThread() || !ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
             return;
         }
         try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
@@ -85,9 +85,9 @@ public abstract class AdvancementListMixin implements AdvancementListBridge {
     }
 
     @Inject(method = "loadAdvancements", at = @At(value = "RETURN"))
-    private void impl$postRegisterTreeEvent(final Map<ResourceLocation, Advancement.Builder> advancementsIn, final CallbackInfo ci) {
+    private void impl$postRegisterTreeEvent(Map<ResourceLocation, Advancement.Builder> advancements, CallbackInfo ci) {
         // Don't post events when loading advancements on the client
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             return;
         }
         try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()

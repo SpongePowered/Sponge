@@ -51,7 +51,7 @@ import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
+import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.mixin.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
@@ -171,7 +171,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 upgraded = NbtTranslator.getInstance().translate(tileNbt);
 
                 if (type!= null && SpongeImplHooks.hasBlockTileEntity(((Block) state.getType()), (net.minecraft.block.BlockState) state)) {
-                    BlockEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
+                    BlockEntityArchetype archetype = new SpongeBlockEntityArchetypeBuilder()
                         .state(state)
                         .tileData(upgraded)
                         .tile(type)

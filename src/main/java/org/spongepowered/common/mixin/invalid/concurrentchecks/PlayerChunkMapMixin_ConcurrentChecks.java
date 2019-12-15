@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.invalid.concurrentchecks;
 
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,7 +38,7 @@ public abstract class PlayerChunkMapMixin_ConcurrentChecks {
 
     @Inject(method = "entryChanged", at = @At(value = "HEAD"), cancellable = true)
     private void concurrentChecks$checkforMainThreadOnChanged(final PlayerChunkMapEntry entry, final CallbackInfo ci) {
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             SpongeImpl.getLogger().error(String.format("Tried to mark PlayerChunkMapEntry %s as dirty from off the main thread!", entry), new Exception("Dummy exception"));
             ci.cancel();
         }
@@ -47,7 +46,7 @@ public abstract class PlayerChunkMapMixin_ConcurrentChecks {
 
     @Inject(method = "removeEntry", at = @At(value = "HEAD"), cancellable = true)
     private void concurrentChecks$checkforMainThreadOnRemove(final PlayerChunkMapEntry entry, final CallbackInfo ci) {
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             SpongeImpl.getLogger().error(String.format("Tried to remove PlayerChunkMapEntry %s from off the main thread!", entry), new Exception("Dummy exception"));
             ci.cancel();
         }

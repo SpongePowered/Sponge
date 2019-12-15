@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.entity.EntityTypes.UNKNOWN;
 
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -39,7 +38,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.common.data.nbt.NbtDataTypes;
+import org.spongepowered.common.data.nbt.NBTDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
@@ -134,7 +133,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
             this.entityData = DataContainer.createNew();
             this.compound = null;
         }
-        DataUtil.getRawNbtProcessor(NbtDataTypes.ENTITY, manipulator.getClass())
+        DataUtil.getRawNbtProcessor(NBTDataTypes.ENTITY, manipulator.getClass())
                 .ifPresent(processor -> processor.storeToView(this.entityData, manipulator));
         return this;
     }
@@ -147,7 +146,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
             this.compound = null;
         }
         this.compound = null;
-        DataUtil.getRawNbtProcessor(NbtDataTypes.ENTITY, value.getKey())
+        DataUtil.getRawNbtProcessor(NBTDataTypes.ENTITY, value.getKey())
                 .ifPresent(processor -> processor.offer(this.entityData, value));
         return this;
     }
@@ -159,7 +158,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
             this.entityData = DataContainer.createNew();
         }
         this.compound = null;
-        DataUtil.getRawNbtProcessor(NbtDataTypes.ENTITY, key)
+        DataUtil.getRawNbtProcessor(NBTDataTypes.ENTITY, key)
                 .ifPresent(processor -> processor.offer(this.entityData, value));
         return this;
     }

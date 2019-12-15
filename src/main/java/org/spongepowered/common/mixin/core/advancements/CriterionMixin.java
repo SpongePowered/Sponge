@@ -27,10 +27,8 @@ package org.spongepowered.common.mixin.core.advancements;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.ICriterionInstance;
-import org.spongepowered.asm.mixin.Final;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -39,16 +37,21 @@ import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 @Mixin(Criterion.class)
 public abstract class CriterionMixin implements CriterionBridge {
-
-    @Shadow @Final @Nullable private ICriterionInstance criterionInstance;
 
     @Nullable private String impl$name;
     @Nullable private SpongeScoreCriterion impl$scoreCriterion;
     @Nullable private Integer impl$scoreGoal;
+
+    @Inject(method = "criterionFromJson", at = @At("RETURN"))
+    private static void impl$fixTriggerTimeDeserializer(final JsonObject json, final JsonDeserializationContext context,
+            final CallbackInfoReturnable<Criterion> ci) {
+        final Criterion criterion = ci.getReturnValue();
+        if (json.has("trigger_times")) {
+            ((CriterionBridge) criterion).bridge$setScoreGoal(json.get("trigger_times").getAsInt());
+        }
+    }
 
     @Override
     public String bridge$getName() {
@@ -59,7 +62,7 @@ public abstract class CriterionMixin implements CriterionBridge {
     }
 
     @Override
-    public void bridge$setName(final String name) {
+    public void bridge$setName(String name) {
         this.impl$name = name;
     }
 
@@ -83,13 +86,5 @@ public abstract class CriterionMixin implements CriterionBridge {
     @Override
     public void bridge$setScoreGoal(@Nullable final Integer goal) {
         this.impl$scoreGoal = goal;
-    }
-
-    @Inject(method = "criterionFromJson", at = @At("RETURN"))
-    private static void impl$fixTriggerTimeDeserializer(final JsonObject json, final JsonDeserializationContext context, final CallbackInfoReturnable<Criterion> ci) {
-        final Criterion criterion = ci.getReturnValue();
-        if (json.has("trigger_times")) {
-            ((CriterionBridge) criterion).bridge$setScoreGoal(json.get("trigger_times").getAsInt());
-        }
     }
 }

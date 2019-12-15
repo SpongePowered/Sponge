@@ -28,14 +28,13 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.util.ResourceLocation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
-
-import javax.annotation.Nullable;
 
 @Mixin(DisplayInfo.class)
 public abstract class DisplayInfoMixin implements DisplayInfoBridge {
@@ -51,7 +50,7 @@ public abstract class DisplayInfoMixin implements DisplayInfoBridge {
     }
 
     @Override
-    public void bridge$setAdvancement(final Advancement advancement) {
+    public void bridge$setAdvancement(Advancement advancement) {
         this.impl$advancement = advancement;
     }
 
@@ -62,8 +61,7 @@ public abstract class DisplayInfoMixin implements DisplayInfoBridge {
     }
 
     @Override
-    public void bridge$setBackground(@Nullable final String background) {
+    public void bridge$setBackground(@Nullable String background) {
         this.background = background == null ? null : new ResourceLocation(background);
     }
-
 }

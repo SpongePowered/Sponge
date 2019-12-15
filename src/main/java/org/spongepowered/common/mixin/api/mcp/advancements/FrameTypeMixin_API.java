@@ -26,51 +26,40 @@ package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.text.TextFormatting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.text.format.TextFormat;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.format.SpongeTextColor;
 import org.spongepowered.common.text.format.SpongeTextStyle;
 
 import javax.annotation.Nullable;
 
 @Mixin(FrameType.class)
-@Implements(@Interface(iface = AdvancementType.class, prefix = "type$"))
-public abstract class FrameTypeMixin_API {
+public abstract class FrameTypeMixin_API implements AdvancementType {
 
-    @Shadow @Final private String name;
-    @Shadow @Final private TextFormatting format;
-
-    @Nullable private String api$id;
-    @Nullable private String api$spongeName;
+    @Nullable private CatalogKey api$key;
     @Nullable private TextFormat api$textFormat;
 
-    public String type$getId() {
-        if (this.api$id == null) {
-            this.api$id = "minecraft:" + this.name;
-        }
-        return this.api$id;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setFields(String enumName, int ordinal, String name, int icon, TextFormatting format, CallbackInfo ci) {
+        this.api$key = CatalogKey.minecraft(name);
+        this.api$textFormat = TextFormat.of(
+                SpongeTextColor.of(format),
+                SpongeTextStyle.of(format)
+        );
     }
 
-    @Intrinsic
-    public String type$getName() {
-        if (this.api$spongeName == null) {
-            this.api$spongeName = Character.toUpperCase(this.name.charAt(0)) + this.name.substring(1);
-        }
-        return this.api$spongeName;
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
-    public TextFormat type$getTextFormat() {
-        if (this.api$textFormat == null) {
-            this.api$textFormat = TextFormat.of(
-                    SpongeTextColor.of(this.format),
-                    SpongeTextStyle.of(this.format));
-        }
+    @Override
+    public TextFormat getTextFormat() {
         return this.api$textFormat;
     }
 }

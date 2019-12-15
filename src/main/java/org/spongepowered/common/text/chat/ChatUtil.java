@@ -37,6 +37,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
@@ -47,11 +48,10 @@ public final class ChatUtil {
     }
 
     public static void sendMessage(ITextComponent component, MessageChannel channel, CommandSource source, boolean isChat) {
-        Text raw = SpongeTexts.toText(component);
-        MessageFormatter formatter = new MessageEvent.MessageFormatter(raw);
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
-        Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
-        MessageChannelEvent event;
+        final Text raw = SpongeTexts.toText(component);
+        final MessageFormatter formatter = new MessageEvent.MessageFormatter(raw);
+        final Cause cause = SpongeImplHooks.onServerThread() ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
+        final MessageChannelEvent event;
         if (isChat) {
             event = SpongeEventFactory.createMessageChannelEventChat(cause, channel, Optional.of(channel), formatter, raw, false);
         } else {
@@ -61,5 +61,4 @@ public final class ChatUtil {
             event.getChannel().get().send(source, event.getMessage(), isChat ? ChatTypes.CHAT : ChatTypes.SYSTEM);
         }
     }
-
 }

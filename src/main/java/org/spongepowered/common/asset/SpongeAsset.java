@@ -31,10 +31,10 @@ import java.net.URL;
 
 public final class SpongeAsset implements Asset {
 
-    final PluginContainer plugin;
-    final URL url;
+    private final PluginContainer plugin;
+    private final URL url;
 
-    protected SpongeAsset(PluginContainer plugin, URL url) {
+    SpongeAsset(PluginContainer plugin, URL url) {
         this.plugin = plugin;
         this.url = url;
     }
@@ -48,5 +48,4 @@ public final class SpongeAsset implements Asset {
     public URL getUrl() {
         return this.url;
     }
-
 }

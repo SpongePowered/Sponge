@@ -52,7 +52,7 @@ public abstract class RepairContainerMixin {
 
     @Inject(method = "updateRepairOutput", at = @At(value = "RETURN"))
     private void impl$throwUpdateAnvilEvent(final CallbackInfo ci) {
-        if (!ShouldFire.UPDATE_ANVIL_EVENT || !SpongeImplHooks.isMainThread()) {
+        if (!ShouldFire.UPDATE_ANVIL_EVENT || !SpongeImplHooks.onServerThread()) {
             return;
         }
 

@@ -27,5 +27,4 @@ package org.spongepowered.common.advancement;
 public interface ImplementationBackedCriterionProgress {
 
     void invalidateAchievedState();
-
 }

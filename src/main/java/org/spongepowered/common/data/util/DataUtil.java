@@ -65,7 +65,7 @@ import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
 import org.spongepowered.common.data.fixer.entity.player.PlayerRespawnData;
 import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
-import org.spongepowered.common.data.nbt.NbtDataType;
+import org.spongepowered.common.data.nbt.NBTDataType;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
@@ -437,25 +437,25 @@ public final class DataUtil {
         return new DelegateDataValidator(ImmutableList.of(), validationType);
     }
 
-    public static <E, V extends Value<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(final NbtDataType dataType, final Key<V> key) {
+    public static <E, V extends Value<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(final NBTDataType dataType, final Key<V> key) {
         return Optional.ofNullable((NbtValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getNbtProcessor(dataType, key));
     }
 
     @SuppressWarnings("rawtypes")
-    public static Optional<NbtDataProcessor> getRawNbtProcessor(final NbtDataType dataType, final Class<? extends Mutable> aClass) {
+    public static Optional<NbtDataProcessor> getRawNbtProcessor(final NBTDataType dataType, final Class<? extends Mutable> aClass) {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getNbtDelegate(dataType, aClass));
     }
 
     @SuppressWarnings("rawtypes")
-    public static Optional<NbtValueProcessor> getRawNbtProcessor(final NbtDataType dataType, final Key<?> key) {
+    public static Optional<NbtValueProcessor> getRawNbtProcessor(final NBTDataType dataType, final Key<?> key) {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getNbtProcessor(dataType, key));
     }
 
-    public static Collection<NbtDataProcessor<?, ?>> getNbtProcessors(final NbtDataType type) {
+    public static Collection<NbtDataProcessor<?, ?>> getNbtProcessors(final NBTDataType type) {
         return SpongeManipulatorRegistry.getInstance().getNbtProcessors(type);
     }
 
-    public static Collection<NbtValueProcessor<?, ?>> getNbtValueProcessors(final NbtDataType type) {
+    public static Collection<NbtValueProcessor<?, ?>> getNbtValueProcessors(final NBTDataType type) {
         return SpongeManipulatorRegistry.getInstance().getNbtValueProcessors(type);
     }
 

@@ -85,7 +85,7 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
 
     @Override
     public void registerAdditionalCatalog(Advancement advancement) {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         ((AdvancementBridge) advancement).bridge$setRegistered();
         final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
         final AdvancementListBridge advList = getAdvancementList();

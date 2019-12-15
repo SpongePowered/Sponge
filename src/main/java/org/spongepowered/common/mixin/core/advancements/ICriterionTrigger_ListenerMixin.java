@@ -60,7 +60,7 @@ public abstract class ICriterionTrigger_ListenerMixin implements ICriterionTrigg
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "grantCriterion", at = @At("HEAD"), cancellable = true)
-    private void impl$throwEventForSponge(final PlayerAdvancements playerAdvancements, final CallbackInfo ci) {
+    private void impl$callEvents(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
         final org.spongepowered.api.advancement.Advancement advancement =
                 (org.spongepowered.api.advancement.Advancement) this.advancement;
         AdvancementCriterion advancementCriterion = (AdvancementCriterion)
@@ -69,7 +69,7 @@ public abstract class ICriterionTrigger_ListenerMixin implements ICriterionTrigg
         if (criterionBridge.bridge$getScoreCriterion() != null) {
             advancementCriterion = criterionBridge.bridge$getScoreCriterion();
         }
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             // Some mods do advancement granting on async threads, and we can't allow for the spam to be thrown.
             return;
         }
@@ -101,7 +101,7 @@ public abstract class ICriterionTrigger_ListenerMixin implements ICriterionTrigg
     }
 
     @Inject(method = "grantCriterion", at = @At("RETURN"))
-    private void impl$popCauseAtEndOfEvent(final PlayerAdvancements playerAdvancements, final CallbackInfo ci) {
+    private void impl$popCauseAtEndOfEvent(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
         SpongeImpl.getCauseStackManager().popCause();
     }
 

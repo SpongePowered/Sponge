@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.advancement;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.DisplayInfo;
@@ -32,26 +33,26 @@ import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 
 import java.util.Optional;
 
-public class SpongeAdvancementTree implements AdvancementTree {
+public final class SpongeAdvancementTree implements AdvancementTree {
 
     private final Advancement rootAdvancement;
-    private final String id;
-    private final Translation name;
+    private final CatalogKey key;
+    private final Translation translation;
 
-    public SpongeAdvancementTree(final Advancement rootAdvancement, final String id, final Translation name) {
+    public SpongeAdvancementTree(Advancement rootAdvancement, CatalogKey key, Translation translation) {
         this.rootAdvancement = rootAdvancement;
-        this.name = name;
-        this.id = id;
+        this.key = key;
+        this.translation = translation;
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
     public String getName() {
-        return this.name.get();
+        return this.translation.get();
     }
 
     @Override
@@ -59,7 +60,6 @@ public class SpongeAdvancementTree implements AdvancementTree {
         return this.rootAdvancement;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public String getBackgroundPath() {
         final Optional<DisplayInfo> displayInfo = this.rootAdvancement.getDisplayInfo();

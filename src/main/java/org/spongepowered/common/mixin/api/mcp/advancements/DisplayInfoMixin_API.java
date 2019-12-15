@@ -45,7 +45,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.math.vector.Vector2d;
 
 @Mixin(DisplayInfo.class)
-@Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "info$"))
+@Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "displayInfo$"))
 public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spongepowered.api.advancement.DisplayInfo {
 
     @Shadow @Final private FrameType frame;
@@ -56,7 +56,8 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @Shadow private float x;
     @Shadow private float y;
 
-    @Shadow public abstract boolean shouldAnnounceToChat();
+    @Shadow public abstract boolean shadow$shouldAnnounceToChat();
+
     @Shadow public abstract boolean shadow$isHidden();
 
     @Override
@@ -70,7 +71,7 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     }
 
     @Override
-    public void setPosition(final double x, final double y) {
+    public void setPosition(double x, double y) {
         this.x = (float) x;
         this.y = (float) y;
     }
@@ -88,7 +89,7 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
 
     @Override
     public ItemStackSnapshot getIcon() {
-        return new SpongeItemStackSnapshot((org.spongepowered.api.item.inventory.ItemStack) this.icon);
+        return new SpongeItemStackSnapshot((org.spongepowered.api.item.inventory.ItemStack) (Object) this.icon);
     }
 
     @Override
@@ -103,13 +104,11 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
 
     @Override
     public boolean doesAnnounceToChat() {
-        return this.shouldAnnounceToChat();
+        return this.shadow$shouldAnnounceToChat();
     }
-
 
     @Intrinsic
-    public boolean info$isHidden() {
+    public boolean displayInfo$isHidden() {
         return this.shadow$isHidden();
     }
-
 }

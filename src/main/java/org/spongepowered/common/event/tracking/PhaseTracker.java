@@ -234,7 +234,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings("rawtypes")
     void switchToPhase(final IPhaseState<?> state, final PhaseContext<?> phaseContext) {
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -264,7 +264,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings({"rawtypes", "unused", "try"})
     void completePhase(final IPhaseState<?> prevState) {
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -744,7 +744,7 @@ public final class PhaseTracker {
     @SuppressWarnings("rawtypes")
     public void notifyBlockOfStateChange(final ServerWorldBridge mixinWorld, final net.minecraft.block.BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos) {
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -825,7 +825,7 @@ public final class PhaseTracker {
      */
     @SuppressWarnings("rawtypes")
     public boolean setBlockState(final ServerWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) {
-        if (!SpongeImplHooks.isMainThread()) {
+        if (!SpongeImplHooks.onServerThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async Block Change").centre().hr()
                 .addWrapped(ASYNC_BLOCK_CHANGE_MESSAGE)

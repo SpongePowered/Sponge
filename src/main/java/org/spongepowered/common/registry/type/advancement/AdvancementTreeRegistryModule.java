@@ -54,7 +54,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
     @SuppressWarnings("unchecked")
     @Override
     public void registerAdditionalCatalog(final AdvancementTree advancementTree) {
-        checkState(SpongeImplHooks.isMainThread());
+        checkState(SpongeImplHooks.onServerThread());
         final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();
         final AdvancementListBridge advancementList = (AdvancementListBridge) AdvancementManagerAccessor.accessor$getAdvancementList();
         advancementList.bridge$getRootsSet().add(advancement);

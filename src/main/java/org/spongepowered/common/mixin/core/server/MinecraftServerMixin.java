@@ -348,7 +348,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     private void impl$dontExecuteServerStopOffThread(CallbackInfo ci) {
         // If the server is already stopping, don't allow stopServer to be called off the main thread
         // (from the shutdown handler thread in MinecraftServer)
-        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !Sponge.getServer().onMainThread())) {
+        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !SpongeImplHooks.onServerThread())) {
             ci.cancel();
         }
     }
@@ -360,7 +360,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             remap = false))
     private Object impl$callOnMainThreadWithPhaseState(Callable<?> callable) throws Exception {
         // This method can be called async while server is stopping
-        if (this.shadow$isServerStopped() && !SpongeImplHooks.isMainThread()) {
+        if (this.shadow$isServerStopped() && !SpongeImplHooks.onServerThread()) {
             return callable.call();
         }
 

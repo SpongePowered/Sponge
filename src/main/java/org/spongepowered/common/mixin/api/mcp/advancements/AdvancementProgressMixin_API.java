@@ -51,28 +51,6 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
     }
 
     @Override
-    public Advancement getAdvancement() {
-        return ((AdvancementProgressBridge) this).bridge$getAdvancement();
-    }
-
-    @Override
-    public Optional<CriterionProgress> get(final AdvancementCriterion criterion) {
-        checkState(SpongeImplHooks.isMainThread());
-        checkNotNull(criterion, "criterion");
-        final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
-        checkState(map != null, "progressMap isn't initialized");
-        return Optional.ofNullable((CriterionProgress) map.get(criterion));
-    }
-
-    @Override
-    public Optional<ScoreCriterionProgress> get(final ScoreAdvancementCriterion criterion) {
-        checkState(SpongeImplHooks.isMainThread());
-        final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
-        checkState(map != null, "progressMap isn't initialized");
-        return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion));
-    }
-
-    @Override
     public Instant grant() {
         return this.get(this.getAdvancement().getCriterion()).get().grant();
     }
@@ -80,5 +58,27 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
     @Override
     public Optional<Instant> revoke() {
         return this.get(this.getAdvancement().getCriterion()).get().revoke();
+    }
+
+    @Override
+    public Advancement getAdvancement() {
+        return ((AdvancementProgressBridge) this).bridge$getAdvancement();
+    }
+
+    @Override
+    public Optional<CriterionProgress> get(AdvancementCriterion criterion) {
+        checkState(SpongeImplHooks.onServerThread());
+        checkNotNull(criterion, "criterion");
+        final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
+        checkState(map != null, "progressMap isn't initialized");
+        return Optional.ofNullable((CriterionProgress) map.get(criterion));
+    }
+
+    @Override
+    public Optional<ScoreCriterionProgress> get(ScoreAdvancementCriterion criterion) {
+        checkState(SpongeImplHooks.onServerThread());
+        final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
+        checkState(map != null, "progressMap isn't initialized");
+        return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion));
     }
 }

@@ -40,26 +40,24 @@ import java.util.Optional;
 @Singleton
 public final class SpongeAssetManager implements AssetManager {
 
-    public static final String DEFAULT_ASSET_DIR = "assets/";
-    public static final ClassLoader CLASS_LOADER = Sponge.class.getClassLoader();
+    private static final String DEFAULT_ASSET_DIR = "assets/";
+    private static final ClassLoader CLASS_LOADER = Sponge.class.getClassLoader();
 
     @Override
-    public Optional<Asset> getAsset(Object instance, String name) {
-        checkNotNull(instance, "plugin instance");
-        checkNotNull(name, "name");
+    public Optional<Asset> getAsset(PluginContainer container, String name) {
+        checkNotNull(container);
+        checkNotNull(name);
         checkArgument(!name.isEmpty(), "name cannot be empty");
-        PluginContainer plugin = Sponge.getPluginManager().fromInstance(instance).get();
 
-        URL url = CLASS_LOADER.getResource(DEFAULT_ASSET_DIR + plugin.getId() + '/' + name);
+        URL url = CLASS_LOADER.getResource(DEFAULT_ASSET_DIR + container.getId() + '/' + name);
         if (url == null) {
             return Optional.empty();
         }
-        return Optional.of(new SpongeAsset(plugin, url));
+        return Optional.of(new SpongeAsset(container, url));
     }
 
     @Override
     public Optional<Asset> getAsset(String name) {
         return this.getAsset(SpongeImpl.getPlugin(), name);
     }
-
 }

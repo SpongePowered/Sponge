@@ -49,7 +49,7 @@ import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
 import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
+import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_2;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
@@ -302,7 +302,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                                     upgraded = tile;
                                 }
 
-                                final BlockEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
+                                final BlockEntityArchetype archetype = new SpongeBlockEntityArchetypeBuilder()
                                     .state(buffer.getBlock(pos[0] - offset[0], pos[1] - offset[1], pos[2] - offset[2]))
                                     .tileData(upgraded)
                                     .tile(type)

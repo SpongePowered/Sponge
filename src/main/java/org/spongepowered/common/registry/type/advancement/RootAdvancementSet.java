@@ -36,7 +36,7 @@ public final class RootAdvancementSet extends LinkedHashSet<Advancement> {
     @Override
     public boolean add(Advancement advancement) {
         if (super.add(advancement)) {
-            if (SpongeImplHooks.isMainThread()) {
+            if (SpongeImplHooks.onServerThread()) {
                 AdvancementTreeRegistryModule.getInstance().registerSilently(advancement);
             }
             return true;
@@ -47,7 +47,7 @@ public final class RootAdvancementSet extends LinkedHashSet<Advancement> {
     @Override
     public boolean remove(Object o) {
         if (super.remove(o)) {
-            if (SpongeImplHooks.isMainThread()) {
+            if (SpongeImplHooks.onServerThread()) {
                 AdvancementTreeRegistryModule.getInstance().remove((Advancement) o);
             }
             return true;
@@ -58,7 +58,7 @@ public final class RootAdvancementSet extends LinkedHashSet<Advancement> {
     @Override
     public void clear() {
         super.clear();
-        if (SpongeImplHooks.isMainThread()) {
+        if (SpongeImplHooks.onServerThread()) {
             AdvancementTreeRegistryModule.getInstance().clear();
         }
     }

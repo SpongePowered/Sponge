@@ -30,9 +30,9 @@ import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 
 public abstract class AbstractSpongeNbtProcessor<T extends Mutable<T, I>, I extends Immutable<I, T>> implements NbtDataProcessor<T, I> {
 
-    private final NbtDataType dataType;
+    private final NBTDataType dataType;
 
-    protected AbstractSpongeNbtProcessor(NbtDataType dataType) {
+    protected AbstractSpongeNbtProcessor(NBTDataType dataType) {
         this.dataType = dataType;
     }
 
@@ -42,7 +42,7 @@ public abstract class AbstractSpongeNbtProcessor<T extends Mutable<T, I>, I exte
     }
 
     @Override
-    public final NbtDataType getTargetType() {
+    public final NBTDataType getTargetType() {
         return this.dataType;
     }
 }

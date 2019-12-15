@@ -502,7 +502,7 @@ public class SpongeImplHooks {
 
     }
 
-    public static boolean isMainThread() {
+    public static boolean onServerThread() {
         // Return true when the server isn't yet initialized, this means on a client
         // that the game is still being loaded. This is needed to support initialization
         // events with cause tracking.

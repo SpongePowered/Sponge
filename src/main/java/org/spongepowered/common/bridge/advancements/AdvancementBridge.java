@@ -25,9 +25,11 @@
 package org.spongepowered.common.bridge.advancements;
 
 import net.minecraft.advancements.Advancement;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.translation.Translation;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +37,12 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public interface AdvancementBridge {
+
+    CatalogKey bridge$getKey();
+
+    Translation bridge$getTranslation();
+
+    void bridge$setTranslation(Translation translation);
 
     Optional<Advancement> bridge$getParent();
 
@@ -47,12 +55,6 @@ public interface AdvancementBridge {
     AdvancementCriterion bridge$getCriterion();
 
     void bridge$setCriterion(AdvancementCriterion criterion);
-
-    String bridge$getName();
-
-    void bridge$setName(String name);
-
-    String bridge$getId();
 
     boolean bridge$isRegistered();
 

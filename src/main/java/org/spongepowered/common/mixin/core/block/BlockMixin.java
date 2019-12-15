@@ -208,7 +208,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Inject(method = "spawnAsEntity", at = @At("HEAD"), cancellable = true)
     private static void impl$checkMainThreadAndRestoring(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
         final CallbackInfo ci) {
-        if (!SpongeImplHooks.isMainThread() || PhaseTracker.getInstance().getCurrentState().isRestoring()) {
+        if (!SpongeImplHooks.onServerThread() || PhaseTracker.getInstance().getCurrentState().isRestoring()) {
             ci.cancel();
         }
     }

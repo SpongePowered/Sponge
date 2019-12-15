@@ -62,7 +62,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
 
     @Override
     public boolean supports(final DataHolder dataHolder) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             if (callingFromMinecraftThread) {
@@ -84,7 +84,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
     @SuppressWarnings("unused")
     @Override
     public boolean supports(final EntityType entityType) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             try (final Timing timing = callingFromMinecraftThread ? tuple.getSecond() : null) {
                 if (timing != null) {
@@ -100,7 +100,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
 
     @Override
     public Optional<M> from(final DataHolder dataHolder) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             if (callingFromMinecraftThread) {
@@ -125,7 +125,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
 
     @Override
     public Optional<M> fill(final DataHolder dataHolder, final M manipulator, final MergeFunction overlap) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             if (callingFromMinecraftThread) {
@@ -150,7 +150,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
 
     @Override
     public Optional<M> fill(final DataContainer container, final M m) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             if (callingFromMinecraftThread) {
@@ -169,7 +169,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
 
     @Override
     public DataTransactionResult set(final DataHolder dataHolder, final M manipulator, final MergeFunction function) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             if (callingFromMinecraftThread) {
@@ -193,7 +193,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
 
     @Override
     public Optional<I> with(final Key<? extends Value<?>> key, final Object value, final I immutable) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             if (callingFromMinecraftThread) {
@@ -213,7 +213,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
 
     @Override
     public DataTransactionResult remove(final DataHolder dataHolder) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             if (callingFromMinecraftThread) {
@@ -238,7 +238,7 @@ public final class DataProcessorDelegate<M extends Mutable<M, I>, I extends Immu
 
     @Override
     public Optional<M> createFrom(final DataHolder dataHolder) {
-        final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
+        final boolean callingFromMinecraftThread = SpongeImplHooks.onServerThread();
 
         for (final Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             if (callingFromMinecraftThread) {

@@ -42,7 +42,7 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
         NbtDataProcessor<FlyingData, ImmutableFlyingData> {
 
     public IsFlyingNbtProcessor() {
-        super(NbtDataTypes.ENTITY);
+        super(NBTDataTypes.ENTITY);
     }
 
     @Override

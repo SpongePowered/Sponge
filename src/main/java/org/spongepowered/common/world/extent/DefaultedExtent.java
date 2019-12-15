@@ -27,7 +27,6 @@ package org.spongepowered.common.world.extent;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.living.player.Player;
@@ -47,7 +46,7 @@ import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
 import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
-import org.spongepowered.common.block.SpongeTileEntityArchetype;
+import org.spongepowered.common.block.entity.SpongeBlockEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.gen.ArrayImmutableBlockBuffer;
@@ -173,17 +172,17 @@ public interface DefaultedExtent extends Extent {
         final int oy = origin.getY();
         final int oz = origin.getZ();
         final MutableBlockVolume backing = new ArrayMutableBlockBuffer(min.sub(origin), max.sub(min).add(1, 1, 1));
-        final Map<Vector3i, BlockEntityArchetype> tiles = Maps.newHashMap();
+        final Map<Vector3i, org.spongepowered.api.block.entity.BlockEntityArchetype> tiles = Maps.newHashMap();
         volume.getBlockWorker().iterate((extent, x, y, z) -> {
             final BlockState state = extent.getBlock(x, y, z);
             backing.setBlock(x - ox, y - oy, z - oz, state);
             final Optional<BlockEntity> tile = extent.getTileEntity(x, y, z);
             if (tile.isPresent()) {
-                final BlockEntityArchetype archetype = tile.get().createArchetype();
-                if (archetype instanceof SpongeTileEntityArchetype) {
+                final org.spongepowered.api.block.entity.BlockEntityArchetype archetype = tile.get().createArchetype();
+                if (archetype instanceof SpongeBlockEntityArchetype) {
                     final int[] apos = new int[] {(x - ox) - tmin.getX(), y - tmin.getY(), (z - oz) - tmin.getZ()};
-                    final SpongeTileEntityArchetype sponge = (SpongeTileEntityArchetype) archetype;
-                    sponge.getCompound().putIntArray(Constants.Sponge.TileEntityArchetype.TILE_ENTITY_POS, apos);
+                    final SpongeBlockEntityArchetype sponge = (SpongeBlockEntityArchetype) archetype;
+                    sponge.getCompound().putIntArray(Constants.Sponge.BlockEntityArchetype.TILE_ENTITY_POS, apos);
                 }
                 tiles.put(new Vector3i(x - ox, y - oy, z - oz), archetype);
             }

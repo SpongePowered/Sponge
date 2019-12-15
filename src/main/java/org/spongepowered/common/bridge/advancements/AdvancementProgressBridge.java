@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.advancements;
 
 import net.minecraft.advancements.PlayerAdvancements;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.common.advancement.ImplementationBackedCriterionProgress;
@@ -39,7 +40,7 @@ public interface AdvancementProgressBridge {
 
     void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
 
-    void bridge$setAdvancement(String advancement);
+    void bridge$setAdvancementKey(CatalogKey key);
 
     void bridge$invalidateAchievedState();
 

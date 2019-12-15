@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.common.data.nbt.NbtDataType;
+import org.spongepowered.common.data.nbt.NBTDataType;
 
 import java.util.Optional;
 import net.minecraft.nbt.CompoundNBT;
@@ -37,7 +37,7 @@ public interface NbtDataProcessor<M extends Mutable<M, I>, I extends Immutable<I
 
     int getPriority();
 
-    NbtDataType getTargetType();
+    NBTDataType getTargetType();
 
     boolean isCompatible(CompoundNBT compound);
 

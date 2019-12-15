@@ -45,8 +45,8 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.AbstractArchetype;
-import org.spongepowered.common.data.nbt.NbtDataType;
-import org.spongepowered.common.data.nbt.NbtDataTypes;
+import org.spongepowered.common.data.nbt.NBTDataType;
+import org.spongepowered.common.data.nbt.NBTDataTypes;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -191,8 +191,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
-    protected NbtDataType getDataType() {
-        return NbtDataTypes.ENTITY;
+    protected NBTDataType getDataType() {
+        return NBTDataTypes.ENTITY;
     }
 
     @Override

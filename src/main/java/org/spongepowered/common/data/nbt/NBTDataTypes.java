@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.data.nbt;
 
-import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
 
-public interface NbtDataType extends CatalogType {
+public class NBTDataTypes {
+
+    public static final NBTDataType ENTITY = DummyObjectProvider.createFor(NBTDataType.class, "ENTITY");
+    public static final NBTDataType TILE_ENTITY = DummyObjectProvider.createFor(NBTDataType.class, "TILE_ENTITY");
 
 }

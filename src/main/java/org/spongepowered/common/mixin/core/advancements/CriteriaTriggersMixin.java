@@ -38,7 +38,7 @@ public abstract class CriteriaTriggersMixin {
 
     @SuppressWarnings("rawtypes")
     @Inject(method = "register", at = @At("RETURN"))
-    private static void onRegister(final ICriterionTrigger criterion, final CallbackInfoReturnable<ICriterionTrigger> ci) {
+    private static void onRegister(ICriterionTrigger criterion, CallbackInfoReturnable<ICriterionTrigger> ci) {
         TriggerTypeRegistryModule.getInstance().register((Trigger) criterion);
     }
 }

@@ -22,24 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.block;
+package org.spongepowered.common.block.entity;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.AbstractArchetype;
-import org.spongepowered.common.data.nbt.NbtDataType;
-import org.spongepowered.common.data.nbt.NbtDataTypes;
+import org.spongepowered.common.data.nbt.NBTDataType;
+import org.spongepowered.common.data.nbt.NBTDataTypes;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -49,12 +50,13 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Objects;
 import java.util.Optional;
 
-public class SpongeTileEntityArchetype extends AbstractArchetype<BlockEntityType, BlockSnapshot, org.spongepowered.api.block.entity.BlockEntity> implements BlockEntityArchetype {
+public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEntityType, BlockSnapshot, BlockEntity> implements
+        org.spongepowered.api.block.entity.BlockEntityArchetype {
 
     final BlockState blockState;
 
-    SpongeTileEntityArchetype(SpongeTileEntityArchetypeBuilder builder) {
-        super(builder.tileEntityType, NbtTranslator.getInstance().translateData(builder.tileData));
+    SpongeBlockEntityArchetype(SpongeBlockEntityArchetypeBuilder builder) {
+        super(builder.type, NbtTranslator.getInstance().translateData(builder.data));
         this.blockState = builder.blockState;
     }
 
@@ -64,25 +66,26 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<BlockEntityType
     }
 
     @Override
-    public BlockEntityType getTileEntityType() {
+    public BlockEntityType getBlockEntityType() {
         return this.type;
     }
 
     @Override
-    public DataContainer getTileData() {
+    public DataContainer getBlockEntityData() {
         return NbtTranslator.getInstance().translateFrom(this.data);
     }
 
     @Override
-    public Optional<org.spongepowered.api.block.entity.BlockEntity> apply(Location<World> location) {
+    public Optional<BlockEntity> apply(Location location) {
         final BlockState currentState = location.getBlock();
         final Block currentBlock = ((net.minecraft.block.BlockState) currentState).getBlock();
         final Block newBlock = ((net.minecraft.block.BlockState) this.blockState).getBlock();
-        final net.minecraft.world.World minecraftWorld = (net.minecraft.world.World) location.getExtent();
+        final World minecraftWorld = (net.minecraft.world.World) location.getWorld();
 
         BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
-            ((World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState, BlockChangeFlags.ALL);
+            ((org.spongepowered.api.world.World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState,
+                    BlockChangeFlags.ALL);
         }
         final CompoundNBT compound = this.data.copy();
 
@@ -99,32 +102,32 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<BlockEntityType
     }
 
     @Override
-    public BlockSnapshot toSnapshot(Location<World> location) {
+    public BlockSnapshot toSnapshot(Location location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState = this.blockState;
         builder.compound = this.data.copy();
-        builder.worldUuid = location.getExtent().getUniqueId();
+        builder.worldUuid = location.getWorldUniqueId();
         builder.coords = location.getBlockPosition();
         return builder.build();
     }
 
     @Override
     public int getContentVersion() {
-        return Constants.Sponge.TileEntityArchetype.BASE_VERSION;
+        return Constants.Sponge.BlockEntityArchetype.BASE_VERSION;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Constants.Sponge.TileEntityArchetype.TILE_TYPE, this.type)
-                .set(Constants.Sponge.TileEntityArchetype.BLOCK_STATE, this.blockState)
-                .set(Constants.Sponge.TileEntityArchetype.TILE_DATA, this.getTileData())
+                .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE, this.type)
+                .set(Constants.Sponge.BlockEntityArchetype.BLOCK_STATE, this.blockState)
+                .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_DATA, this.getBlockEntityData())
                 ;
     }
 
     @Override
-    protected NbtDataType getDataType() {
-        return NbtDataTypes.TILE_ENTITY;
+    protected NBTDataType getDataType() {
+        return NBTDataTypes.TILE_ENTITY;
     }
 
     @Override
@@ -133,10 +136,10 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<BlockEntityType
     }
 
     @Override
-    public BlockEntityArchetype copy() {
-        final SpongeTileEntityArchetypeBuilder builder = new SpongeTileEntityArchetypeBuilder();
-        builder.tileEntityType = this.type;
-        builder.tileData = NbtTranslator.getInstance().translate(this.data);
+    public org.spongepowered.api.block.entity.BlockEntityArchetype copy() {
+        final SpongeBlockEntityArchetypeBuilder builder = new SpongeBlockEntityArchetypeBuilder();
+        builder.type = this.type;
+        builder.data = NbtTranslator.getInstance().translate(this.data);
         builder.blockState = this.blockState;
         return builder.build();
     }
@@ -152,7 +155,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<BlockEntityType
         if (!super.equals(o)) {
             return false;
         }
-        SpongeTileEntityArchetype that = (SpongeTileEntityArchetype) o;
+        SpongeBlockEntityArchetype that = (SpongeBlockEntityArchetype) o;
         return this.blockState.equals(that.blockState);
     }
 

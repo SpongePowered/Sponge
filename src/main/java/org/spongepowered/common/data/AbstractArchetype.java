@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
@@ -37,11 +36,10 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.world.Archetype;
 import org.spongepowered.api.world.LocatableSnapshot;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.nbt.NbtDataType;
+import org.spongepowered.common.data.nbt.NBTDataType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
@@ -63,7 +61,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
         this.data = data;
     }
 
-    protected abstract NbtDataType getDataType();
+    protected abstract NBTDataType getDataType();
 
     protected abstract ValidationType getValidationType();
 

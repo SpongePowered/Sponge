@@ -37,9 +37,9 @@ import net.minecraft.nbt.CompoundNBT;
 public class SpongeNbtProcessorDelegate<M extends Mutable<M, I>, I extends Immutable<I, M>> implements NbtDataProcessor<M, I> {
 
     private final ImmutableList<? extends NbtDataProcessor<M, I>> processors;
-    private final NbtDataType nbtDataType;
+    private final NBTDataType nbtDataType;
 
-    public SpongeNbtProcessorDelegate(final ImmutableList<? extends NbtDataProcessor<M, I>> processors, final NbtDataType nbtDataType) {
+    public SpongeNbtProcessorDelegate(final ImmutableList<? extends NbtDataProcessor<M, I>> processors, final NBTDataType nbtDataType) {
         this.processors = processors;
         this.nbtDataType = nbtDataType;
     }
@@ -50,7 +50,7 @@ public class SpongeNbtProcessorDelegate<M extends Mutable<M, I>, I extends Immut
     }
 
     @Override
-    public NbtDataType getTargetType() {
+    public NBTDataType getTargetType() {
         return this.nbtDataType;
     }
 

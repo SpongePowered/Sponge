@@ -37,7 +37,7 @@ public final class AdvancementMap extends HashMap<ResourceLocation, Advancement>
     @Override
     public Advancement put(ResourceLocation key, Advancement value) {
         final Advancement old = super.put(key, value);
-        if (SpongeImplHooks.isMainThread() && old != value) {
+        if (SpongeImplHooks.onServerThread() && old != value) {
             AdvancementRegistryModule.getInstance().registerSilently(value);
         }
         return old;
@@ -46,7 +46,7 @@ public final class AdvancementMap extends HashMap<ResourceLocation, Advancement>
     @Override
     public Advancement remove(Object key) {
         final Advancement old = super.remove(key);
-        if (SpongeImplHooks.isMainThread() && old != null) {
+        if (SpongeImplHooks.onServerThread() && old != null) {
             AdvancementRegistryModule.getInstance().remove(old);
         }
         return old;
@@ -54,7 +54,7 @@ public final class AdvancementMap extends HashMap<ResourceLocation, Advancement>
 
     @Override
     public void clear() {
-        if (SpongeImplHooks.isMainThread()) {
+        if (SpongeImplHooks.onServerThread()) {
             AdvancementRegistryModule.getInstance().clear();
         }
         super.clear();

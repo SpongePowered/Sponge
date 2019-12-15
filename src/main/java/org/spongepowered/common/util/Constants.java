@@ -314,13 +314,13 @@ public final class Constants {
             public static final DataQuery BIOME_PALETTE_MAX = of("BiomePaletteMax");
 
         }
-        public static final class TileEntityArchetype {
+        public static final class BlockEntityArchetype {
             public static final int BASE_VERSION = 1;
             public static final String TILE_ENTITY_ID = "Id";
             public static final String TILE_ENTITY_POS = "Pos";
-            public static final DataQuery TILE_TYPE = of("TileEntityType");
+            public static final DataQuery BLOCK_ENTITY_TYPE = of("TileEntityType");
             public static final DataQuery BLOCK_STATE = of("BlockState");
-            public static final DataQuery TILE_DATA = of("TileEntityData");
+            public static final DataQuery BLOCK_ENTITY_DATA = of("TileEntityData");
         }
         public static final class BlockSnapshot {
             public static final String TILE_ENTITY_POSITION_X = "x";
