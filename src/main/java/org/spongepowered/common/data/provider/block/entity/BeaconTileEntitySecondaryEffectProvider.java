@@ -22,14 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.accessor.entity.monster;
+package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.entity.monster.BlazeEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.mixin.accessor.block.tileentity.BeaconTileEntityAccessor;
 
-@Mixin(BlazeEntity.class)
-public interface BlazeEntityAccessor {
+public class BeaconTileEntitySecondaryEffectProvider extends BeaconTileEntityEffectProvider {
 
-    @Invoker("setOnFire") void accessor$setOnFire(boolean onFire);
+    public BeaconTileEntitySecondaryEffectProvider() {
+        super(Keys.BEACON_SECONDARY_EFFECT,
+                BeaconTileEntityAccessor::accessor$getSecondaryEffect,
+                BeaconTileEntityAccessor::accessor$setSecondaryEffect);
+    }
 }

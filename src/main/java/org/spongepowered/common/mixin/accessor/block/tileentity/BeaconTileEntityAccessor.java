@@ -22,14 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.accessor.entity.monster;
+package org.spongepowered.common.mixin.accessor.block.tileentity;
 
-import net.minecraft.entity.monster.BlazeEntity;
+import net.minecraft.potion.Effect;
+import net.minecraft.tileentity.BeaconTileEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BlazeEntity.class)
-public interface BlazeEntityAccessor {
+import java.util.Set;
 
-    @Invoker("setOnFire") void accessor$setOnFire(boolean onFire);
+@Mixin(BeaconTileEntity.class)
+public interface BeaconTileEntityAccessor {
+
+    @Accessor("VALID_EFFECTS") static Set<Effect> getValidEffects() {
+        throw new IllegalStateException("Untransformed accessor!");
+    }
+
+    @Accessor("primaryEffect") @Nullable Effect accessor$getPrimaryEffect();
+
+    @Accessor("primaryEffect") void accessor$setPrimaryEffect(@Nullable Effect effect);
+
+    @Accessor("secondaryEffect") @Nullable Effect accessor$getSecondaryEffect();
+
+    @Accessor("secondaryEffect") void accessor$setSecondaryEffect(@Nullable Effect effect);
 }

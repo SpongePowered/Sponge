@@ -195,6 +195,9 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract boolean isInvisible();
     @Shadow public abstract void setInvisible(boolean invisible);
     @Shadow public abstract int getMaxAir();
+    @Shadow protected abstract int getFireImmuneTicks();
+
+    private int customFireImmuneTicks = this.getFireImmuneTicks();
 
     // @formatter:on
 
@@ -867,4 +870,13 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
     }
 
+    @Inject(method = "getFireImmuneTicks", at = @At(value = "RETURN"))
+    private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
+        ci.setReturnValue(this.customFireImmuneTicks);
+    }
+
+    @Override
+    public void bridge$setFireImmuneTicks(int ticks) {
+        this.customFireImmuneTicks = ticks;
+    }
 }

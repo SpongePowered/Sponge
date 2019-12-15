@@ -31,15 +31,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.data.CustomNameableBridge;
-import org.spongepowered.common.bridge.tileentity.BeaconTileEntityBridge;
 
 import javax.annotation.Nullable;
 
 @Mixin(BeaconTileEntity.class)
-public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin implements CustomNameableBridge, BeaconTileEntityBridge {
+public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin implements CustomNameableBridge {
 
-    @Shadow private Effect primaryEffect;
-    @Shadow private Effect secondaryEffect;
     @Shadow private String customName;
 
     /**
@@ -62,15 +59,5 @@ public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin impl
     @Override
     public void bridge$setCustomDisplayName(final String customName) {
         this.customName = customName;
-    }
-
-    @Override
-    public void bridge$forceSetPrimaryEffect(final Effect potion) {
-        this.primaryEffect = potion;
-    }
-
-    @Override
-    public void bridge$forceSetSecondaryEffect(final Effect potion) {
-        this.secondaryEffect = potion;
     }
 }

@@ -56,7 +56,6 @@ import net.minecraft.block.NetherPortalBlock;
 import net.minecraft.block.NetherWartBlock;
 import net.minecraft.block.PaneBlock;
 import net.minecraft.block.PistonBlock;
-import net.minecraft.block.PistonHeadBlock;
 import net.minecraft.block.PoweredRailBlock;
 import net.minecraft.block.PressurePlateBlock;
 import net.minecraft.block.RedstoneDiodeBlock;
@@ -65,7 +64,6 @@ import net.minecraft.block.RedstoneWireBlock;
 import net.minecraft.block.RepeaterBlock;
 import net.minecraft.block.RotatedPillarBlock;
 import net.minecraft.block.SaplingBlock;
-import net.minecraft.block.SkullBlock;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.block.SnowyDirtBlock;
 import net.minecraft.block.StairsBlock;
@@ -86,7 +84,6 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.properties.RedstoneSide;
-import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.BoundedValue;
@@ -96,31 +93,26 @@ import org.spongepowered.common.data.provider.BlockStateBooleanDataProvider;
 import org.spongepowered.common.data.provider.BlockStateBoundedIntDataProvider;
 import org.spongepowered.common.data.provider.BlockStateDirectionDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
 
 import java.util.Map;
 
-public class BlockDataProviders {
-
-    private final DataProviderRegistry registry;
+public class BlockDataProviders extends DataProviderRegistryBuilder {
 
     public BlockDataProviders(DataProviderRegistry registry) {
-        this.registry = registry;
-    }
-
-    private void register(DataProvider<?,?> dataProvider) {
-        this.registry.register(dataProvider);
+        super(registry);
     }
 
     private void registerBoolean(Class<? extends Block> blockType, Key<? extends Value<Boolean>> key, BooleanProperty property) {
-        this.registry.register(new BlockStateBooleanDataProvider(key, blockType, property));
+        register(new BlockStateBooleanDataProvider(key, blockType, property));
     }
 
     private void registerDirection(Class<? extends Block> blockType, DirectionProperty property) {
-        this.registry.register(new BlockStateDirectionDataProvider(blockType, property));
+        register(new BlockStateDirectionDataProvider(blockType, property));
     }
 
     private void registerBoundedInt(Class<? extends Block> blockType, Key<? extends BoundedValue<Integer>> key, IntegerProperty property) {
-        this.registry.register(new BlockStateBoundedIntDataProvider(key, blockType, property));
+        register(new BlockStateBoundedIntDataProvider(key, blockType, property));
     }
 
     private void registerHorizontalConnectedSides(Class<? extends Block> blockType,

@@ -66,6 +66,8 @@ public interface EntityBridge {
 
     void bridge$setLocationAndAngles(Transform transform);
 
+    void bridge$setFireImmuneTicks(int ticks);
+
     default void bridge$onJoinWorld() {
 
     }

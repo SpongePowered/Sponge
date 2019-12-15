@@ -22,13 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
+package org.spongepowered.common.data.provider.entity.base;
 
-import net.minecraft.potion.Effect;
+import net.minecraft.entity.Entity;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 
-public interface BeaconTileEntityBridge {
+import java.util.Optional;
 
-    void bridge$forceSetPrimaryEffect(Effect potion);
+public class EntityFireDamageDelayProvider extends GenericMutableDataProvider<Entity, Integer> {
 
-    void bridge$forceSetSecondaryEffect(Effect potion);
+    public EntityFireDamageDelayProvider() {
+        super(Keys.FIRE_DAMAGE_DELAY);
+    }
+
+    @Override
+    protected Optional<Integer> getFrom(Entity dataHolder) {
+        return Optional.of(((EntityAccessor) dataHolder).accessor$getFireImmuneTicks());
+    }
+
+    @Override
+    protected boolean set(Entity dataHolder, Integer value) {
+        ((EntityBridge) dataHolder).bridge$setFireImmuneTicks(value);
+        return ((EntityAccessor) dataHolder).accessor$getFireImmuneTicks() == value;
+    }
 }

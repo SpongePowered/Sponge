@@ -50,6 +50,7 @@ import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntity
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityRotationProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityTakingDisabledProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityDisplayNameProvider;
+import org.spongepowered.common.data.provider.entity.base.EntityFireDamageDelayProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvisibleProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvulnerabilityTicksProvider;
 import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityIsSaddledProvider;
@@ -79,6 +80,7 @@ import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntity
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishProvider;
 import org.spongepowered.common.data.provider.entity.wolf.WolfEntityIsWetProvider;
 import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.BlazeEntityAccessor;
@@ -291,6 +293,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(Entity.class, Keys.ON_GROUND, entity -> entity.onGround);
 
         register(new EntityDisplayNameProvider());
+        register(new EntityFireDamageDelayProvider());
         register(new EntityInvisibleProvider());
         register(new EntityInvulnerabilityTicksProvider());
     }
