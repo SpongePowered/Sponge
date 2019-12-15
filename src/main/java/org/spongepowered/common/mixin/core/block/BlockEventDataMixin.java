@@ -27,14 +27,13 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-
-import javax.annotation.Nullable;
 
 @Mixin(BlockEventData.class)
 public abstract class BlockEventDataMixin implements BlockEventDataBridge {

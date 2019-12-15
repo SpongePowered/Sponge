@@ -31,7 +31,6 @@
         "authlib.yggdrasil.response.ProfileSearchResultsResponseSerializerMixin",
         "authlib.PropertyMapMixin",
         "authlib.properties.PropertyMixin",
-        "block.BeaconBlockMixin",
         "block.BedBlockMixin",
         "block.CactusBlockMixin",
         "block.CommandBlockMixin",
