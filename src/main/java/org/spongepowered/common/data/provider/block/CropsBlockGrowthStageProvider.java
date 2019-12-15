@@ -9,9 +9,9 @@ import org.spongepowered.common.data.provider.BlockStateBoundedDataProvider;
 
 import java.util.Optional;
 
-public class CropsBlockGrowthStageStateProvider extends BlockStateBoundedDataProvider<Integer> {
+public class CropsBlockGrowthStageProvider extends BlockStateBoundedDataProvider<Integer> {
 
-    public CropsBlockGrowthStageStateProvider() {
+    public CropsBlockGrowthStageProvider() {
         super(Keys.GROWTH_STAGE, CropsBlock.class);
     }
 

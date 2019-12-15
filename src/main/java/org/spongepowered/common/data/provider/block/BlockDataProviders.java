@@ -12,15 +12,26 @@ import net.minecraft.block.CakeBlock;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.CocoaBlock;
 import net.minecraft.block.DaylightDetectorBlock;
+import net.minecraft.block.DetectorRailBlock;
 import net.minecraft.block.DirectionalBlock;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.DoublePlantBlock;
+import net.minecraft.block.EndPortalFrameBlock;
+import net.minecraft.block.EnderChestBlock;
 import net.minecraft.block.FarmlandBlock;
+import net.minecraft.block.FenceBlock;
+import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.HopperBlock;
 import net.minecraft.block.HorizontalBlock;
+import net.minecraft.block.HugeMushroomBlock;
 import net.minecraft.block.NetherPortalBlock;
+import net.minecraft.block.NetherWartBlock;
 import net.minecraft.block.PaneBlock;
 import net.minecraft.block.PressurePlateBlock;
+import net.minecraft.block.RedstoneDiodeBlock;
+import net.minecraft.block.RedstoneWireBlock;
+import net.minecraft.block.RepeaterBlock;
 import net.minecraft.block.RotatedPillarBlock;
 import net.minecraft.block.SaplingBlock;
 import net.minecraft.block.SnowBlock;
@@ -38,7 +49,9 @@ import net.minecraft.block.WallSignBlock;
 import net.minecraft.block.WeightedPressurePlateBlock;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.EnumProperty;
 import net.minecraft.state.IntegerProperty;
+import net.minecraft.state.properties.RedstoneSide;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
@@ -49,6 +62,8 @@ import org.spongepowered.common.data.provider.BlockStateBooleanDataProvider;
 import org.spongepowered.common.data.provider.BlockStateBoundedIntDataProvider;
 import org.spongepowered.common.data.provider.BlockStateDirectionDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
+
+import java.util.Map;
 
 public class BlockDataProviders {
 
@@ -72,6 +87,34 @@ public class BlockDataProviders {
 
     private void registerBoundedInt(Class<? extends Block> blockType, Key<? extends BoundedValue<Integer>> key, IntegerProperty property) {
         this.registry.register(new BlockStateBoundedIntDataProvider(key, blockType, property));
+    }
+
+    private void registerHorizontalConnectedSides(Class<? extends Block> blockType,
+            BooleanProperty north, BooleanProperty south, BooleanProperty east, BooleanProperty west) {
+        registerBoolean(blockType, Keys.CONNECTED_EAST, east);
+        registerBoolean(blockType, Keys.CONNECTED_WEST, west);
+        registerBoolean(blockType, Keys.CONNECTED_SOUTH, south);
+        registerBoolean(blockType, Keys.CONNECTED_NORTH, north);
+        register(new BlockDirectionalSetProvider(Keys.CONNECTED_DIRECTIONS, blockType, ImmutableMap.of(
+                Direction.EAST, east,
+                Direction.WEST, west,
+                Direction.SOUTH, south,
+                Direction.NORTH, north)));
+    }
+
+    private void registerHorizontalAndUpConnectedSides(Class<? extends Block> blockType,
+            BooleanProperty north, BooleanProperty south, BooleanProperty east, BooleanProperty west, BooleanProperty up) {
+        registerBoolean(blockType, Keys.CONNECTED_EAST, east);
+        registerBoolean(blockType, Keys.CONNECTED_WEST, west);
+        registerBoolean(blockType, Keys.CONNECTED_SOUTH, south);
+        registerBoolean(blockType, Keys.CONNECTED_NORTH, north);
+        registerBoolean(blockType, Keys.CONNECTED_UP, up);
+        register(new BlockDirectionalSetProvider(Keys.CONNECTED_DIRECTIONS, blockType, ImmutableMap.of(
+                Direction.EAST, east,
+                Direction.WEST, west,
+                Direction.SOUTH, south,
+                Direction.NORTH, north,
+                Direction.UP, up)));
     }
 
     public void register() {
@@ -99,11 +142,28 @@ public class BlockDataProviders {
         registerDirection(AttachedStemBlock.class, AttachedStemBlock.FACING);
 
         // BannerBlock
-        register(new BannerBlockDirectionStateProvider());
+        register(new BannerBlockDirectionProvider());
 
         // BedBlock
         registerBoolean(BedBlock.class, Keys.OCCUPIED, BedBlock.OCCUPIED);
         // TODO: Part
+
+        // HugeMushroomBlock
+        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_EAST, HugeMushroomBlock.EAST);
+        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_WEST, HugeMushroomBlock.WEST);
+        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_NORTH, HugeMushroomBlock.NORTH);
+        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_SOUTH, HugeMushroomBlock.SOUTH);
+        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_UP, HugeMushroomBlock.UP);
+        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_DOWN, HugeMushroomBlock.DOWN);
+        register(new BlockDirectionalSetProvider(Keys.BIG_MUSHROOM_PORES, HugeMushroomBlock.class,
+                ImmutableMap.<Direction, BooleanProperty>builder()
+                        .put(Direction.EAST, HugeMushroomBlock.EAST)
+                        .put(Direction.WEST, HugeMushroomBlock.WEST)
+                        .put(Direction.SOUTH, HugeMushroomBlock.SOUTH)
+                        .put(Direction.NORTH, HugeMushroomBlock.NORTH)
+                        .put(Direction.UP, HugeMushroomBlock.UP)
+                        .put(Direction.DOWN, HugeMushroomBlock.DOWN)
+                        .build()));
 
         // CactusBlock
         registerBoundedInt(CactusBlock.class, Keys.GROWTH_STAGE, CactusBlock.AGE);
@@ -114,8 +174,11 @@ public class BlockDataProviders {
         // CocoaBlock
         registerBoundedInt(CocoaBlock.class, Keys.GROWTH_STAGE, CocoaBlock.AGE);
 
+        // ComparatorBlock
+        register(new ComparatorBlockTypeProvider());
+
         // CropsBlock
-        register(new CropsBlockGrowthStageStateProvider());
+        register(new CropsBlockGrowthStageProvider());
 
         // ChestBlock
         registerDirection(ChestBlock.class, ChestBlock.FACING);
@@ -125,15 +188,19 @@ public class BlockDataProviders {
         registerBoundedInt(DaylightDetectorBlock.class, Keys.POWER, DaylightDetectorBlock.POWER);
         registerBoolean(DaylightDetectorBlock.class, Keys.INVERTED, DaylightDetectorBlock.INVERTED);
 
+        // DetectorRailBlock
+        registerBoolean(DetectorRailBlock.class, Keys.POWERED, DetectorRailBlock.POWERED);
+        // TODO: Shape
+
         // DoorBlock
         registerDirection(DoorBlock.class, DoorBlock.FACING);
         registerBoolean(DoorBlock.class, Keys.POWERED, DoorBlock.POWERED);
         registerBoolean(DoorBlock.class, Keys.OPEN, DoorBlock.OPEN);
-        register(new DoorBlockHingeStateProvider());
-        register(new DoubleBlockPortionStateProvider(DoorBlock.class, DoorBlock.HALF));
+        register(new DoorBlockHingeProvider());
+        register(new DoubleBlockPortionProvider(DoorBlock.class, DoorBlock.HALF));
 
         // DoublePlantBlock
-        register(new DoubleBlockPortionStateProvider(DoublePlantBlock.class, DoublePlantBlock.HALF));
+        register(new DoubleBlockPortionProvider(DoublePlantBlock.class, DoublePlantBlock.HALF));
 
         // DirectionalBlock
         registerDirection(DirectionalBlock.class, DirectionalBlock.FACING);
@@ -142,8 +209,25 @@ public class BlockDataProviders {
         registerDirection(DispenserBlock.class, DispenserBlock.FACING);
         // registerBoolean(DispenserBlock.class, Keys.TRIGGERED, DispenserBlock.TRIGGERED); // TODO
 
+        // EndPortalFrameBlock
+        registerDirection(EndPortalFrameBlock.class, EndPortalFrameBlock.FACING);
+        // registerBoolean(EndPortalFrameBlock.class, Keys.HAS_EYE, EndPortalFrameBlock.EYE); // TODO
+
+        // EnderChestBlock
+        registerDirection(EnderChestBlock.class, EnderChestBlock.FACING);
+        // TODO: Waterlogged
+
         // FarmlandBlock
         registerBoundedInt(FarmlandBlock.class, Keys.MOISTURE, FarmlandBlock.MOISTURE);
+
+        // FenceBlock
+        registerHorizontalConnectedSides(FenceBlock.class,
+                FenceBlock.NORTH, FenceBlock.SOUTH, FenceBlock.EAST, FenceBlock.WEST);
+
+        // FenceGateBlock
+        registerBoolean(FenceGateBlock.class, Keys.OPEN, FenceGateBlock.OPEN);
+        registerBoolean(FenceGateBlock.class, Keys.POWERED, FenceGateBlock.POWERED);
+        registerBoolean(FenceGateBlock.class, Keys.IN_WALL, FenceGateBlock.IN_WALL);
 
         // HorizontalBlock
         registerDirection(HorizontalBlock.class, HorizontalBlock.HORIZONTAL_FACING);
@@ -151,11 +235,43 @@ public class BlockDataProviders {
         // HorizontalFaceBlock
         // TODO: Attach Face
 
+        // HopperBlock
+        registerDirection(HopperBlock.class, HopperBlock.FACING);
+        // registerBoolean(HopperBlock.class, Keys.ENABLED, HopperBlock.ENABLED); // TODO
+
         // NetherPortalBlock
-        register(new AxisBlockStateProvider(NetherPortalBlock.class, NetherPortalBlock.AXIS));
+        register(new AxisBlockAxisProvider(NetherPortalBlock.class, NetherPortalBlock.AXIS));
+
+        // NetherWartBlock
+        registerBoundedInt(NetherWartBlock.class, Keys.GROWTH_STAGE, NetherWartBlock.AGE);
+
+        // RedstoneWireBlock
+        registerBoundedInt(RedstoneWireBlock.class, Keys.POWER, RedstoneWireBlock.POWER);
+        final Map<Direction, EnumProperty<RedstoneSide>> redstoneSides = ImmutableMap.of(
+                Direction.EAST, RedstoneWireBlock.EAST,
+                Direction.WEST, RedstoneWireBlock.WEST,
+                Direction.SOUTH, RedstoneWireBlock.SOUTH,
+                Direction.NORTH, RedstoneWireBlock.NORTH
+        );
+        register(new RedstoneWireBlockWireAttachmentProvider(Keys.WIRE_ATTACHMENT_EAST, RedstoneWireBlock.EAST));
+        register(new RedstoneWireBlockWireAttachmentProvider(Keys.WIRE_ATTACHMENT_WEST, RedstoneWireBlock.WEST));
+        register(new RedstoneWireBlockWireAttachmentProvider(Keys.WIRE_ATTACHMENT_NORTH, RedstoneWireBlock.NORTH));
+        register(new RedstoneWireBlockWireAttachmentProvider(Keys.WIRE_ATTACHMENT_SOUTH, RedstoneWireBlock.SOUTH));
+        register(new RedstoneWireBlockWireAttachmentsProvider(Keys.WIRE_ATTACHMENTS, RedstoneWireBlock.class, redstoneSides));
+        register(new RedstoneWireBlockConnectedProvider(Keys.CONNECTED_EAST, RedstoneWireBlock.EAST));
+        register(new RedstoneWireBlockConnectedProvider(Keys.CONNECTED_WEST, RedstoneWireBlock.WEST));
+        register(new RedstoneWireBlockConnectedProvider(Keys.CONNECTED_NORTH, RedstoneWireBlock.NORTH));
+        register(new RedstoneWireBlockConnectedProvider(Keys.CONNECTED_SOUTH, RedstoneWireBlock.SOUTH));
+        register(new RedstoneWireBlockConnectedDirectionsProvider(Keys.CONNECTED_DIRECTIONS, RedstoneWireBlock.class, redstoneSides));
+
+        // RedstoneDiodeBlock
+        registerBoolean(RedstoneDiodeBlock.class, Keys.POWERED, RedstoneDiodeBlock.POWERED);
+
+        // RepeaterBlock
+        registerBoundedInt(RepeaterBlock.class, Keys.DELAY, RepeaterBlock.DELAY);
 
         // RotatedPillarBlock
-        register(new AxisBlockStateProvider(RotatedPillarBlock.class, RotatedPillarBlock.AXIS));
+        register(new AxisBlockAxisProvider(RotatedPillarBlock.class, RotatedPillarBlock.AXIS));
 
         // SaplingBlock
         registerBoundedInt(SaplingBlock.class, Keys.GROWTH_STAGE, SaplingBlock.STAGE);
@@ -173,21 +289,14 @@ public class BlockDataProviders {
         register(new SpongeBlockIsWetProvider());
 
         // StandingSignBlock
-        register(new StandingSignBlockDirectionStateProvider());
+        register(new StandingSignBlockDirectionProvider());
 
         // StemBlock
         registerBoundedInt(StemBlock.class, Keys.GROWTH_STAGE, StemBlock.AGE);
 
         // PaneBlock
-        registerBoolean(PaneBlock.class, Keys.CONNECTED_EAST, PaneBlock.EAST);
-        registerBoolean(PaneBlock.class, Keys.CONNECTED_WEST, PaneBlock.WEST);
-        registerBoolean(PaneBlock.class, Keys.CONNECTED_SOUTH, PaneBlock.SOUTH);
-        registerBoolean(PaneBlock.class, Keys.CONNECTED_NORTH, PaneBlock.NORTH);
-        register(new ConnectedDirectionsBlockStateProvider(PaneBlock.class, ImmutableMap.of(
-                Direction.EAST, PaneBlock.EAST,
-                Direction.WEST, PaneBlock.WEST,
-                Direction.SOUTH, PaneBlock.SOUTH,
-                Direction.NORTH, PaneBlock.NORTH)));
+        registerHorizontalConnectedSides(PaneBlock.class,
+                PaneBlock.NORTH, PaneBlock.SOUTH, PaneBlock.EAST, PaneBlock.WEST);
 
         // PressurePlateBlock
         registerBoolean(PressurePlateBlock.class, Keys.POWERED, PressurePlateBlock.POWERED);
@@ -204,15 +313,8 @@ public class BlockDataProviders {
         registerBoolean(TripWireBlock.class, Keys.ATTACHED, TripWireBlock.ATTACHED);
         registerBoolean(TripWireBlock.class, Keys.DISARMED, TripWireBlock.DISARMED);
         registerBoolean(TripWireBlock.class, Keys.POWERED, TripWireBlock.POWERED);
-        registerBoolean(TripWireBlock.class, Keys.CONNECTED_EAST, TripWireBlock.EAST);
-        registerBoolean(TripWireBlock.class, Keys.CONNECTED_WEST, TripWireBlock.WEST);
-        registerBoolean(TripWireBlock.class, Keys.CONNECTED_SOUTH, TripWireBlock.SOUTH);
-        registerBoolean(TripWireBlock.class, Keys.CONNECTED_NORTH, TripWireBlock.NORTH);
-        register(new ConnectedDirectionsBlockStateProvider(TripWireBlock.class, ImmutableMap.of(
-                Direction.EAST, TripWireBlock.EAST,
-                Direction.WEST, TripWireBlock.WEST,
-                Direction.SOUTH, TripWireBlock.SOUTH,
-                Direction.NORTH, TripWireBlock.NORTH)));
+        registerHorizontalConnectedSides(TripWireBlock.class,
+                TripWireBlock.NORTH, TripWireBlock.SOUTH, TripWireBlock.EAST, TripWireBlock.WEST);
 
         // TripWireHookBlock
         registerDirection(TripWireHookBlock.class, TripWireHookBlock.FACING);
@@ -220,17 +322,8 @@ public class BlockDataProviders {
         registerBoolean(TripWireHookBlock.class, Keys.POWERED, TripWireHookBlock.POWERED);
 
         // VineBlock
-        registerBoolean(VineBlock.class, Keys.CONNECTED_EAST, VineBlock.EAST);
-        registerBoolean(VineBlock.class, Keys.CONNECTED_WEST, VineBlock.WEST);
-        registerBoolean(VineBlock.class, Keys.CONNECTED_SOUTH, VineBlock.SOUTH);
-        registerBoolean(VineBlock.class, Keys.CONNECTED_NORTH, VineBlock.NORTH);
-        registerBoolean(VineBlock.class, Keys.CONNECTED_UP, VineBlock.UP);
-        register(new ConnectedDirectionsBlockStateProvider(VineBlock.class, ImmutableMap.of(
-                Direction.EAST, VineBlock.EAST,
-                Direction.WEST, VineBlock.WEST,
-                Direction.SOUTH, VineBlock.SOUTH,
-                Direction.NORTH, VineBlock.NORTH,
-                Direction.UP, VineBlock.UP)));
+        registerHorizontalAndUpConnectedSides(VineBlock.class,
+                VineBlock.NORTH, VineBlock.SOUTH, VineBlock.EAST, VineBlock.WEST, VineBlock.UP);
 
         // WallBannerBlock
         registerDirection(WallBannerBlock.class, WallBannerBlock.HORIZONTAL_FACING);
@@ -240,17 +333,8 @@ public class BlockDataProviders {
         // TODO: Waterlogged
 
         // WallBlock
-        registerBoolean(WallBlock.class, Keys.CONNECTED_EAST, WallBlock.EAST);
-        registerBoolean(WallBlock.class, Keys.CONNECTED_WEST, WallBlock.WEST);
-        registerBoolean(WallBlock.class, Keys.CONNECTED_SOUTH, WallBlock.SOUTH);
-        registerBoolean(WallBlock.class, Keys.CONNECTED_NORTH, WallBlock.NORTH);
-        registerBoolean(WallBlock.class, Keys.CONNECTED_UP, WallBlock.UP);
-        register(new ConnectedDirectionsBlockStateProvider(WallBlock.class, ImmutableMap.of(
-                Direction.EAST, WallBlock.EAST,
-                Direction.WEST, WallBlock.WEST,
-                Direction.SOUTH, WallBlock.SOUTH,
-                Direction.NORTH, WallBlock.NORTH,
-                Direction.UP, WallBlock.UP)));
+        registerHorizontalAndUpConnectedSides(WallBlock.class,
+                WallBlock.NORTH, WallBlock.SOUTH, WallBlock.EAST, WallBlock.WEST, WallBlock.UP);
         // TODO: Waterlogged
 
         // WeightedPressurePlateBlock

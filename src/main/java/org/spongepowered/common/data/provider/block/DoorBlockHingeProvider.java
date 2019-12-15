@@ -10,9 +10,9 @@ import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
 
-public class DoorBlockHingeStateProvider extends BlockStateDataProvider<Hinge> {
+public class DoorBlockHingeProvider extends BlockStateDataProvider<Hinge> {
 
-    public DoorBlockHingeStateProvider() {
+    public DoorBlockHingeProvider() {
         super(Keys.HINGE_POSITION, DoorBlock.class);
     }
 

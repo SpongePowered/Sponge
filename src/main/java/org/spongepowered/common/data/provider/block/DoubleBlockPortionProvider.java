@@ -11,11 +11,11 @@ import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
 
-public class DoubleBlockPortionStateProvider extends BlockStateDataProvider<PortionType> {
+public class DoubleBlockPortionProvider extends BlockStateDataProvider<PortionType> {
 
     private final EnumProperty<DoubleBlockHalf> property;
 
-    DoubleBlockPortionStateProvider(Class<? extends Block> blockType, EnumProperty<DoubleBlockHalf> property) {
+    DoubleBlockPortionProvider(Class<? extends Block> blockType, EnumProperty<DoubleBlockHalf> property) {
         super(Keys.PORTION_TYPE, blockType);
         this.property = property;
     }

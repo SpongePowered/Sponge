@@ -3,7 +3,8 @@ package org.spongepowered.common.data.provider.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.BooleanProperty;
-import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
@@ -12,13 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class ConnectedDirectionsBlockStateProvider extends BlockStateDataProvider<Set<Direction>> {
+public class BlockDirectionalSetProvider extends BlockStateDataProvider<Set<Direction>> {
 
     private final Map<Direction, BooleanProperty> sides;
 
-    ConnectedDirectionsBlockStateProvider(Class<? extends Block> blockType,
+    BlockDirectionalSetProvider(Key<? extends Value<Set<Direction>>> key, Class<? extends Block> blockType,
             Map<Direction, BooleanProperty> sides) {
-        super(Keys.CONNECTED_DIRECTIONS, blockType);
+        super(key, blockType);
         this.sides = sides;
     }
 

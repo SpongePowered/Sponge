@@ -10,12 +10,12 @@ import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
 
-public class AxisBlockStateProvider extends BlockStateDataProvider<Axis> {
+public class AxisBlockAxisProvider extends BlockStateDataProvider<Axis> {
 
     private final EnumProperty<Direction.Axis> property;
     private final boolean validateValue;
 
-    AxisBlockStateProvider(Class<? extends Block> blockType, EnumProperty<Direction.Axis> property) {
+    AxisBlockAxisProvider(Class<? extends Block> blockType, EnumProperty<Direction.Axis> property) {
         super(Keys.AXIS, blockType);
         this.property = property;
         this.validateValue = property.getAllowedValues().size() < 3;
