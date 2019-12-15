@@ -22,28 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.entity.vanishable;
 
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.OptBool;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class VanishableEntityVanishProvider extends GenericMutableDataProvider<VanishableBridge, Boolean> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public VanishableEntityVanishProvider() {
+        super(Keys.VANISH);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<Boolean> getFrom(VanishableBridge dataHolder) {
+        return OptBool.of(dataHolder.bridge$isVanished());
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected boolean set(VanishableBridge dataHolder, Boolean value) {
+        if (dataHolder instanceof Entity && ((Entity) dataHolder).world.isRemote) {
+            return false;
+        }
+        dataHolder.bridge$setVanished(value);
         return true;
     }
 }

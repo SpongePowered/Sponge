@@ -22,28 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.entity.horse;
 
+import net.minecraft.entity.passive.horse.HorseEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
+import org.spongepowered.common.entity.SpongeHorseColor;
+import org.spongepowered.common.entity.SpongeHorseStyle;
+import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
+import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class HorseEntityHorseColorProvider extends GenericMutableDataProvider<HorseEntity, HorseColor> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public HorseEntityHorseColorProvider() {
+        super(Keys.HORSE_COLOR);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<HorseColor> getFrom(HorseEntity dataHolder) {
+        return Optional.of(HorseColorRegistryModule.getHorseColor(dataHolder));
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected boolean set(HorseEntity dataHolder, HorseColor value) {
+        final SpongeHorseStyle style = (SpongeHorseStyle) HorseStyleRegistryModule.getHorseStyle(dataHolder);
+        dataHolder.setHorseVariant(((SpongeHorseColor) value).getBitMask() | style.getBitMask());
         return true;
     }
 }

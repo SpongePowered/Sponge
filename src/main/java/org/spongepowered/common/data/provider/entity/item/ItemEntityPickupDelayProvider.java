@@ -22,28 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.entity.item;
 
+import net.minecraft.entity.item.ItemEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class ItemEntityPickupDelayProvider extends GenericMutableDataProvider<ItemEntity, Integer> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public ItemEntityPickupDelayProvider() {
+        super(Keys.PICKUP_DELAY);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<Integer> getFrom(ItemEntity dataHolder) {
+        return Optional.of(((ItemEntityBridge) dataHolder).bridge$getPickupDelay());
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected boolean set(ItemEntity dataHolder, Integer value) {
+        dataHolder.setPickupDelay(value);
         return true;
     }
 }

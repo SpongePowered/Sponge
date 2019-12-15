@@ -89,6 +89,9 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @return The value
      */
     protected V constructValue(H dataHolder, E element) {
+        // TODO: Figure out how to prevent lookups for value factories
+        //   based on the key. Maybe store it in the key? Or store a
+        //   factory in this provider.
         return Value.genericImmutableOf(this.getKey(), element);
     }
 

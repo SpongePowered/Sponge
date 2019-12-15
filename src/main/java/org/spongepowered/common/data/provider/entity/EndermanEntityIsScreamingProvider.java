@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.monster.EndermanEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.mixin.accessor.entity.monster.EndermanEntityAccessor;
 
@@ -39,7 +40,7 @@ public class EndermanEntityIsScreamingProvider extends GenericMutableDataProvide
 
     @Override
     protected Optional<Boolean> getFrom(EndermanEntity dataHolder) {
-        return Optional.of(dataHolder.isScreaming());
+        return OptBool.of(dataHolder.isScreaming());
     }
 
     @Override

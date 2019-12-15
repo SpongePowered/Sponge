@@ -22,28 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.generic;
 
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class GrieferCanGriefProvider extends GenericMutableDataProvider<GrieferBridge, Boolean> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public GrieferCanGriefProvider() {
+        super(Keys.CAN_GRIEF);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected boolean supports(GrieferBridge dataHolder) {
+        return dataHolder.bridge$isGriefer();
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected Optional<Boolean> getFrom(GrieferBridge dataHolder) {
+        return Optional.of(dataHolder.bridge$canGrief());
+    }
+
+    @Override
+    protected boolean set(GrieferBridge dataHolder, Boolean value) {
+        dataHolder.bridge$setCanGrief(value);
         return true;
     }
 }

@@ -22,28 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.entity.base;
 
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class EntityDisplayNameProvider extends GenericMutableDataProvider<Entity, Text> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public EntityDisplayNameProvider() {
+        super(Keys.DISPLAY_NAME);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<Text> getFrom(Entity dataHolder) {
+        return Optional.ofNullable(((EntityBridge) dataHolder).bridge$getDisplayNameText());
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected boolean set(Entity dataHolder, Text value) {
+        ((EntityBridge) dataHolder).bridge$setDisplayName(value);
+        return true;
+    }
+
+    @Override
+    protected boolean removeFrom(Entity dataHolder) {
+        ((EntityBridge) dataHolder).bridge$setDisplayName(null);
         return true;
     }
 }

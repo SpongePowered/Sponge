@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.entity.areaeffectcloud;
 
-import net.minecraft.entity.AreaEffectCloudEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
@@ -35,20 +34,20 @@ import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
-public class AreaEffectCloudEntityPotionEffectsProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, List<PotionEffect>> {
+public class AreaEffectCloudEntityPotionEffectsProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, List<PotionEffect>> {
 
     public AreaEffectCloudEntityPotionEffectsProvider() {
         super(Keys.POTION_EFFECTS);
     }
 
     @Override
-    protected Optional<List<PotionEffect>> getFrom(AreaEffectCloudEntity dataHolder) {
-        return Optional.of(((List<PotionEffect>) (List<?>) ((AreaEffectCloudEntityAccessor) dataHolder).accessor$getEffects()));
+    protected Optional<List<PotionEffect>> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
+        return Optional.of(((List<PotionEffect>) (List<?>) dataHolder.accessor$getEffects()));
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntity dataHolder, List<PotionEffect> value) {
-        ((AreaEffectCloudEntityAccessor) dataHolder).accessor$setEffects(new ArrayList(value));
+    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, List<PotionEffect> value) {
+        dataHolder.accessor$setEffects(new ArrayList(value));
         return true;
     }
 }

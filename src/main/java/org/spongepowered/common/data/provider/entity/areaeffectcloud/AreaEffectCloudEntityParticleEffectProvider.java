@@ -24,26 +24,29 @@
  */
 package org.spongepowered.common.data.provider.entity.areaeffectcloud;
 
+import net.minecraft.entity.AreaEffectCloudEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class AreaEffectCloudEntityParticleEffectProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, ParticleEffect> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public AreaEffectCloudEntityParticleEffectProvider() {
+        super(Keys.AREA_EFFECT_CLOUD_PARTICLE_EFFECT);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<ParticleEffect> getFrom(AreaEffectCloudEntity dataHolder) {
+        // TODO: Update particle effects and convert particle effect from particle data
+        return Optional.of(ParticleEffect.builder().type(ParticleTypes.ENTITY_EFFECT).build());
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
-        return true;
+    protected boolean set(AreaEffectCloudEntity dataHolder, ParticleEffect value) {
+        // TODO: Update particle effects and convert particle effect to particle data
+        return false;
     }
 }

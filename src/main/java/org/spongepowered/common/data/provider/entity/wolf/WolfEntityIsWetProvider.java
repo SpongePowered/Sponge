@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.entity.wolf;
 
 import net.minecraft.entity.passive.WolfEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.mixin.accessor.entity.passive.WolfEntityAccessor;
 
@@ -40,7 +41,7 @@ public class WolfEntityIsWetProvider extends GenericMutableDataProvider<WolfEnti
     @Override
     protected Optional<Boolean> getFrom(WolfEntity dataHolder) {
         final WolfEntityAccessor accessor = (WolfEntityAccessor) dataHolder;
-        return Optional.of(accessor.accessor$getIsWet() || accessor.accessor$getIsShaking());
+        return OptBool.of(accessor.accessor$getIsWet() || accessor.accessor$getIsShaking());
     }
 
     @Override

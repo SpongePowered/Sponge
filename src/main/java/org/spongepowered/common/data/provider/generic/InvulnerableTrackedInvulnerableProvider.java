@@ -22,28 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.generic;
 
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class InvulnerableTrackedInvulnerableProvider extends GenericMutableDataProvider<InvulnerableTrackedBridge, Boolean> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public InvulnerableTrackedInvulnerableProvider() {
+        super(Keys.INVULNERABLE);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<Boolean> getFrom(InvulnerableTrackedBridge dataHolder) {
+        return Optional.of(dataHolder.bridge$getIsInvulnerable());
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected boolean set(InvulnerableTrackedBridge dataHolder, Boolean value) {
+        dataHolder.bridge$setInvulnerable(value);
         return true;
     }
 }

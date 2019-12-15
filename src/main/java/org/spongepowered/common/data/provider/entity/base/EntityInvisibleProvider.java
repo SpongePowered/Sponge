@@ -22,28 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.entity.base;
 
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class EntityInvisibleProvider extends GenericMutableDataProvider<Entity, Boolean> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public EntityInvisibleProvider() {
+        super(Keys.INVISIBLE);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<Boolean> getFrom(Entity dataHolder) {
+        return OptBool.of(dataHolder.isInvisible());
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
-        return true;
+    protected boolean set(Entity dataHolder, Boolean value) {
+        if (!dataHolder.world.isRemote) {
+            dataHolder.setInvisible(value);
+            return true;
+        }
+        return false;
     }
 }

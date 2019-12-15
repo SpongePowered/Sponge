@@ -22,28 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
+import net.minecraft.util.text.ITextComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.CommandBlockLogicAccessor;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class MinecartCommandBlockEntityLastCommandOutputProvider extends GenericMutableDataProvider<MinecartCommandBlockEntity, Optional<Text>> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public MinecartCommandBlockEntityLastCommandOutputProvider() {
+        super(Keys.LAST_COMMAND_OUTPUT);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<Optional<Text>> getFrom(MinecartCommandBlockEntity dataHolder) {
+        @Nullable final ITextComponent component = ((CommandBlockLogicAccessor) dataHolder.getCommandBlockLogic()).accessor$getNullableLastOutput();
+        return Optional.of(Optional.ofNullable(component == null ? null : SpongeTexts.toText(component)));
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected boolean set(MinecartCommandBlockEntity dataHolder, Optional<Text> value) {
+        dataHolder.getCommandBlockLogic().setLastOutput(value.map(SpongeTexts::toComponent).orElse(null));
         return true;
+    }
+
+    @Override
+    protected boolean removeFrom(MinecartCommandBlockEntity dataHolder) {
+        return this.set(dataHolder, Optional.empty());
     }
 }

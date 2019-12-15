@@ -22,28 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.entity.horse;
 
+import net.minecraft.entity.passive.horse.HorseEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
+import org.spongepowered.common.entity.SpongeHorseColor;
+import org.spongepowered.common.entity.SpongeHorseStyle;
+import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
+import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class HorseEntityHorseStyleProvider extends GenericMutableDataProvider<HorseEntity, HorseStyle> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    public HorseEntityHorseStyleProvider() {
+        super(Keys.HORSE_STYLE);
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<HorseStyle> getFrom(HorseEntity dataHolder) {
+        return Optional.of(HorseStyleRegistryModule.getHorseStyle(dataHolder));
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected boolean set(HorseEntity dataHolder, HorseStyle value) {
+        final SpongeHorseColor color = (SpongeHorseColor) HorseColorRegistryModule.getHorseColor(dataHolder);
+        dataHolder.setHorseVariant((color.getBitMask() | ((SpongeHorseStyle) value).getBitMask()));
         return true;
     }
 }

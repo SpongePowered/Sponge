@@ -22,28 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.entity.armorstand;
 
-import org.spongepowered.api.data.Keys;
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.util.math.Rotations;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
-public class AreaEffectCloudEntityDurationOnUseProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, Integer> {
+public class ArmorStandEntityRotationProvider<G, S> extends GenericMutableDataProvider<ArmorStandEntity, Vector3d> {
 
-    public AreaEffectCloudEntityDurationOnUseProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);
+    private final Function<G, Rotations> getter;
+    private final BiConsumer<S, Rotations> setter;
+
+    public ArmorStandEntityRotationProvider(Key<? extends Value<Vector3d>> key,
+            Function<G, Rotations> getter, BiConsumer<S, Rotations> setter) {
+        super(key);
+        this.getter = getter;
+        this.setter = setter;
     }
 
     @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(dataHolder.accessor$getDurationOnUse());
+    protected Optional<Vector3d> getFrom(ArmorStandEntity dataHolder) {
+        return Optional.of(VecHelper.toVector3d(this.getter.apply((G) dataHolder)));
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, Integer value) {
-        dataHolder.accessor$setDurationOnUse(value);
+    protected boolean set(ArmorStandEntity dataHolder, Vector3d value) {
+        this.setter.accept((S) dataHolder, VecHelper.toRotation(value));
         return true;
     }
 }
