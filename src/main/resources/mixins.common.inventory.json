@@ -41,7 +41,6 @@
         "impl.bridge.lensgenerator.LensGeneratorMixin",
         "impl.bridge.lensgenerator.CustomInventoryMixin",
         "impl.bridge.lensgenerator.SlotMixin",
-        "impl.bridge.viewable.ViewableCustomInventoryMixin",
         "impl.bridge.CarriedWrapperInventoryMixin",
         "impl.bridge.viewable.ViewableInventoryMixin",
         "impl.bridge.TraitContainerAdapterMixin",

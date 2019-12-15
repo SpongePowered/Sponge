@@ -6,7 +6,6 @@
     "mixinPriority" : 1111,
     "mixins": [
         "OwnershipTrackedMixin_Tracker",
-        "entity.EntityMixin_Tracker",
         "world.chunk.ChunkMixin_Tracker",
         "world.WorldMixin_Tracker"
     ],

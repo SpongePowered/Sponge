@@ -48,7 +48,6 @@ import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 @Mixin(NoteBlock.class)
 public abstract class NoteBlockMixin extends BlockMixin {
 
-
     @Shadow protected abstract SoundEvent getInstrument(int eventId);
 
     @SuppressWarnings("ConstantConditions")

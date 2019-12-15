@@ -39,16 +39,15 @@ import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 @Mixin(CactusBlock.class)
 public abstract class CactusBlockMixin extends BlockMixin {
 
-    @SuppressWarnings("ConstantConditions")
     @Redirect(method = "onEntityCollision",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private boolean impl$reAssignForBlockDamageSource(final Entity entity, final DamageSource source, final float damage,
-        final net.minecraft.world.World world, final BlockPos pos, final net.minecraft.block.BlockState state, final Entity entityIn) {
-        if (world.isRemote) {
+    private boolean impl$reAssignForBlockDamageSource(Entity this$, DamageSource source, float damage,
+        net.minecraft.world.World world, BlockPos pos, net.minecraft.block.BlockState state, Entity entity) {
+        if (world.isRemote()) {
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            final Location<World> location = new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ());
+            final Location location = Location.of((World) world, pos.getX(), pos.getY(), pos.getZ());
             final MinecraftBlockDamageSource cactus = new MinecraftBlockDamageSource("cactus", location);
             ((DamageSourceBridge) cactus).bridge$setCactusSource();
             return entity.attackEntityFrom(DamageSource.CACTUS, damage);

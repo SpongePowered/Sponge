@@ -45,7 +45,7 @@ import org.spongepowered.common.service.permission.SpongePermissionService;
 public abstract class CommandBlockMixin {
 
     @Inject(method = "onBlockActivated", at = @At(value = "RETURN", ordinal = 1))
-    private void impl$CheckCommandBlockPermission(
+    private void impl$checkCommandBlockPermission(
         final World worldIn, final BlockPos pos, final BlockState state, final PlayerEntity playerIn, final Hand hand, final Direction side,
         final float hitX, final float hitY, final float hitZ, final CallbackInfoReturnable<Boolean> cir) {
         // In Vanilla, the command block will never even open, since the client will do the permission check.

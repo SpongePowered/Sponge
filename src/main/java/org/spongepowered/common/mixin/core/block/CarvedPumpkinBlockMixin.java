@@ -22,18 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.block;
+package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.DoorBlock;
-import org.spongepowered.api.text.translation.Translation;
+import net.minecraft.block.CarvedPumpkinBlock;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(DoorBlock.class)
-public abstract class DoorBlockMixin_API extends BlockMixin_API {
+@Mixin(CarvedPumpkinBlock.class)
+public abstract class CarvedPumpkinBlockMixin {
 
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey().replaceAll("tile", "item") + ".name");
+    @Inject(method = "trySpawnGolem", at = @At("HEAD"), cancellable = true)
+    private void impl$checkChunkBeforeTrySpawnGolem(World world, BlockPos pos, CallbackInfo callbackInfo) {
+        final Chunk chunk = world.getChunkAt(pos);
+        if (chunk.isEmpty()) {
+            callbackInfo.cancel();
+        }
     }
 }

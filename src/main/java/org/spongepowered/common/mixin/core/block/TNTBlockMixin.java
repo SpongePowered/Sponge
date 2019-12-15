@@ -53,8 +53,8 @@ public abstract class TNTBlockMixin extends BlockMixin {
 
     private boolean primeCancelled;
 
-    private boolean impl$onRemove(final World world, final BlockPos pos) {
-        final boolean removed = !this.primeCancelled && world.setBlockToAir(pos);
+    private boolean impl$onRemove(World world, BlockPos pos) {
+        final boolean removed = !this.primeCancelled && world.removeBlock(pos, false);
         this.primeCancelled = false;
         return removed;
     }

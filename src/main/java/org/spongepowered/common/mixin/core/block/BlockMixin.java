@@ -35,7 +35,6 @@ import net.minecraft.block.EnderChestBlock;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.SpawnerBlock;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
@@ -47,14 +46,12 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
@@ -86,13 +83,11 @@ import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(value = Block.class)
 public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {
 

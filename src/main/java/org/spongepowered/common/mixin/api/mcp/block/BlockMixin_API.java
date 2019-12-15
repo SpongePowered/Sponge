@@ -26,63 +26,41 @@ package org.spongepowered.common.mixin.api.mcp.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.registry.Registry;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Collection;
 import java.util.Optional;
 
-@NonnullByDefault
 @Mixin(value = Block.class, priority = 999)
-@Implements(@Interface(iface = BlockType.class, prefix = "block$"))
 public abstract class BlockMixin_API implements BlockType {
 
-    @Shadow @Final protected BlockStateContainer blockState;
-    @Shadow protected boolean needsRandomTick;
-    @Shadow protected SoundType blockSoundType;
-
-    @Shadow public abstract String getTranslationKey();
-    @Shadow public abstract Material getMaterial(net.minecraft.block.BlockState state);
+    @Shadow @Final @org.spongepowered.asm.mixin.Mutable protected boolean ticksRandomly;
+    @Shadow @Final protected SoundType soundType;
+    @Shadow public abstract Item shadow$asItem();
+    @Shadow public abstract String shadow$getTranslationKey();
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
-    @Shadow public abstract boolean shadow$getTickRandomly();
-    @Shadow public abstract BlockStateContainer getBlockState();
+
+    @Nullable private CatalogKey api$key;
 
     @Override
-    public final String getId() {
-        return this.getNameFromRegistry();
-    }
-
-    @Override
-    public String getName() {
-        return this.getNameFromRegistry();
-    }
-
-    private String getNameFromRegistry() {
-        // This should always succeed when things are working properly,
-        // so we just catch the exception instead of doing a null check.
-        try {
-            return Block.REGISTRY.getKey((Block) (Object) this).toString();
-        } catch (NullPointerException e) {
-            throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
+    public CatalogKey getKey() {
+        if (this.api$key == null) {
+            this.api$key = (CatalogKey) (Object) Registry.BLOCK.getKey((Block) (Object) this);
         }
+
+        return this.api$key;
     }
 
     @Override
@@ -90,50 +68,32 @@ public abstract class BlockMixin_API implements BlockType {
         return (BlockState) this.shadow$getDefaultState();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<BlockState> getAllBlockStates() {
-        return (Collection<BlockState>) (Collection<?>) this.blockState.getValidStates();
-    }
-
     @Override
     public Optional<ItemType> getItem() {
-        if (this == BlockTypes.AIR) {
-            return Optional.of(ItemTypes.AIR);
+        final Item item = this.shadow$asItem();
+        if (item == Items.AIR) {
+            return Optional.empty();
         }
-        ItemType itemType = (ItemType) Item.getItemFromBlock((Block) (Object) this);
-        return Items.AIR.equals(itemType) ? Optional.empty() : Optional.of(itemType);
+        return Optional.ofNullable((ItemType) item);
     }
 
     @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + ".name");
-    }
-
-    @Intrinsic
-    public boolean block$getTickRandomly() {
-        return this.shadow$getTickRandomly();
+    public boolean doesUpdateRandomly() {
+        return this.ticksRandomly;
     }
 
     @Override
-    public void setTickRandomly(boolean tickRandomly) {
-        this.needsRandomTick = tickRandomly;
-    }
-
-
-    @Override
-    public Collection<StateProperty<?>> getTraits() {
-        return this.getDefaultState().getTraits();
-    }
-
-    @Override
-    public Optional<StateProperty<?>> getTrait(String blockTrait) {
-        return this.getDefaultState().getTrait(blockTrait);
+    public void setUpdateRandomly(boolean updateRandomly) {
+        this.ticksRandomly = updateRandomly;
     }
 
     @Override
     public BlockSoundGroup getSoundGroup() {
-        return (BlockSoundGroup) this.blockSoundType;
+        return (BlockSoundGroup) (Object) this.soundType;
     }
 
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(this.shadow$getTranslationKey());
+    }
 }
