@@ -31,8 +31,6 @@ import java.util.UUID;
 
 public interface NetworkManagerBridge_Bungee {
 
-    void bungeeBridge$setRemoteAddress(SocketAddress socketAddress);
-
     UUID bungeeBridge$getSpoofedUUID();
 
     void bungeeBridge$setSpoofedUUID(UUID uuid);

@@ -32,29 +32,24 @@ import org.spongepowered.asm.mixin.SoftOverride;
 @Mixin(AgeableEntity.class)
 public abstract class AgeableEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
 
-    @Shadow public abstract int getGrowingAge();
-    @Shadow public abstract void setGrowingAge(int age);
-    @Shadow public abstract void setScaleForAge(boolean baby);
-    @Shadow public abstract boolean isChild();
+    @Shadow public abstract int shadow$getGrowingAge();
+    @Shadow public abstract void shadow$setGrowingAge(int age);
 
     @Override
     @SoftOverride
-    public void activation$inactiveTick() {
-        super.activation$inactiveTick();
+    public void entityActivation$inactiveTick() {
+        super.entityActivation$inactiveTick();
 
-        if (this.world.isRemote) {
-            this.setScaleForAge(this.isChild());
-        } else {
-            int i = this.getGrowingAge();
+        if (!this.shadow$getEntityWorld().isRemote()) {
+            int i = this.shadow$getGrowingAge();
 
             if (i < 0) {
                 ++i;
-                this.setGrowingAge(i);
+                this.shadow$setGrowingAge(i);
             } else if (i > 0) {
                 --i;
-                this.setGrowingAge(i);
+                this.shadow$setGrowingAge(i);
             }
         }
     }
-
 }

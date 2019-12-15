@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.entityactivation.entity.item;
 
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
@@ -35,20 +34,17 @@ import org.spongepowered.common.util.Constants;
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
 
-    @Shadow public abstract ItemStack getItem();
-
     @Shadow private int pickupDelay;
     @Shadow private int age;
 
     @Override
-    public void activation$inactiveTick() {
+    public void entityActivation$inactiveTick() {
         if (this.pickupDelay > 0 && this.pickupDelay != Constants.Entity.Item.INFINITE_PICKUP_DELAY) {
             --this.pickupDelay;
         }
 
         if (!this.world.isRemote && this.age >= ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
-            this.setDead();
+            this.shadow$remove();
         }
     }
-
 }

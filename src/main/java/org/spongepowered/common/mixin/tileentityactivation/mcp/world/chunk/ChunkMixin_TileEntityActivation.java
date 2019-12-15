@@ -61,7 +61,7 @@ public abstract class ChunkMixin_TileEntityActivation {
             final ChunkBridge spongeChunk = (ChunkBridge) this;
             if (spongeChunk.bridge$isPersistedChunk()) {
                 // always activate TE's in persisted chunks
-                spongeTile.activation$setDefaultActivationState(true);
+                spongeTile.entityActivation$setDefaultActivationState(true);
                 return;
             }
             final SpongeTileEntityType tileType = (SpongeTileEntityType) ((org.spongepowered.api.block.entity.BlockEntity) tileEntityIn).getType();

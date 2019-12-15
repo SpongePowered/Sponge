@@ -77,31 +77,31 @@ public class TileEntityActivation {
         final int defaultTickRate = tileEntityActCat.getDefaultTickRate();
         if (tileEntityActModCat == null) {
             // use default activation range
-            spongeTileEntity.activation$setActivationRange(defaultActivationRange);
+            spongeTileEntity.entityActivation$setActivationRange(defaultActivationRange);
             spongeTileEntity.activation$setSpongeTickRate(defaultTickRate);
             if (defaultTickRate <= 0) {
-                spongeTileEntity.activation$setDefaultActivationState(false);
+                spongeTileEntity.entityActivation$setDefaultActivationState(false);
             }
             if (defaultActivationRange > 0) {
-                spongeTileEntity.activation$setDefaultActivationState(false);
+                spongeTileEntity.entityActivation$setDefaultActivationState(false);
             }
         } else {
             if (!tileEntityActModCat.isEnabled()) {
-                spongeTileEntity.activation$setDefaultActivationState(true);
+                spongeTileEntity.entityActivation$setDefaultActivationState(true);
                 return;
             }
 
             final Integer defaultModActivationRange = tileEntityActModCat.getDefaultBlockRange();
             final Integer tileEntityActivationRange = tileEntityActModCat.getTileEntityRangeList().get(type.getName().toLowerCase());
             if (defaultModActivationRange != null && tileEntityActivationRange == null) {
-                spongeTileEntity.activation$setActivationRange(defaultModActivationRange);
+                spongeTileEntity.entityActivation$setActivationRange(defaultModActivationRange);
                 if (defaultModActivationRange > 0) {
-                    spongeTileEntity.activation$setDefaultActivationState(false);
+                    spongeTileEntity.entityActivation$setDefaultActivationState(false);
                 }
             } else if (tileEntityActivationRange != null) {
-                spongeTileEntity.activation$setActivationRange(tileEntityActivationRange);
+                spongeTileEntity.entityActivation$setActivationRange(tileEntityActivationRange);
                 if (tileEntityActivationRange > 0) {
-                    spongeTileEntity.activation$setDefaultActivationState(false);
+                    spongeTileEntity.entityActivation$setDefaultActivationState(false);
                 }
             }
 
@@ -110,12 +110,12 @@ public class TileEntityActivation {
             if (defaultModTickRate != null && tileEntityTickRate == null) {
                 spongeTileEntity.activation$setSpongeTickRate(defaultModTickRate);
                 if (defaultModTickRate <= 0) {
-                    spongeTileEntity.activation$setDefaultActivationState(false);
+                    spongeTileEntity.entityActivation$setDefaultActivationState(false);
                 }
             } else if (tileEntityTickRate != null) {
                 spongeTileEntity.activation$setSpongeTickRate(tileEntityTickRate);
                 if (tileEntityTickRate <= 0) {
-                    spongeTileEntity.activation$setDefaultActivationState(false);
+                    spongeTileEntity.entityActivation$setDefaultActivationState(false);
                 }
             }
         }
@@ -157,28 +157,28 @@ public class TileEntityActivation {
                 // never activate
                 continue;
             }
-            if (!(tileEntity instanceof ITickable) || spongeTileEntity.activation$getActivatedTick() == currentTick) {
+            if (!(tileEntity instanceof ITickable) || spongeTileEntity.entityActivation$getActivatedTick() == currentTick) {
                 // already activated
                 continue;
             }
 
             final Vector3i tilePos = VecHelper.toVector3i(tileEntity.getPos());
-            if (currentTick > ((ActivationCapability) tileEntity).activation$getActivatedTick()) {
-                if (spongeTileEntity.activation$getDefaultActivationState()) {
-                    ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
+            if (currentTick > ((ActivationCapability) tileEntity).entityActivation$getActivatedTick()) {
+                if (spongeTileEntity.entityActivation$getDefaultActivationState()) {
+                    ((ActivationCapability) tileEntity).entityActivation$setActivatedTick(currentTick);
                     continue;
                 }
 
                 // check if activation cache needs to be updated
-                if (spongeTileEntity.activation$requiresActivationCacheRefresh()) {
+                if (spongeTileEntity.entityActivation$requiresActivationCacheRefresh()) {
                     TileEntityActivation.initializeTileEntityActivationState(tileEntity);
-                    spongeTileEntity.activation$requiresActivationCacheRefresh(false);
+                    spongeTileEntity.entityActivation$requiresActivationCacheRefresh(false);
                 }
 
-                final int bbActivationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
+                final int bbActivationRange = ((ActivationCapability) tileEntity).entityActivation$getActivationRange();
                 final int blockDistance = Math.round(tilePos.distance(playerPos));
                 if (blockDistance <= bbActivationRange) {
-                    ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
+                    ((ActivationCapability) tileEntity).entityActivation$setActivatedTick(currentTick);
                 }
             }
         }
@@ -208,11 +208,11 @@ public class TileEntityActivation {
 
         final long currentTick = SpongeImpl.getServer().getTickCounter();
         final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
-        boolean isActive = activeChunk.bridge$isPersistedChunk() || spongeTileEntity.activation$getActivatedTick() >= currentTick || spongeTileEntity.activation$getDefaultActivationState();
+        boolean isActive = activeChunk.bridge$isPersistedChunk() || spongeTileEntity.entityActivation$getActivatedTick() >= currentTick || spongeTileEntity.entityActivation$getDefaultActivationState();
 
         // Should this tileentity tick?
         if (!isActive) {
-            if (spongeTileEntity.activation$getActivatedTick() == Integer.MIN_VALUE) {
+            if (spongeTileEntity.entityActivation$getActivatedTick() == Integer.MIN_VALUE) {
                 // Has not come across a player
                 return false;
             }

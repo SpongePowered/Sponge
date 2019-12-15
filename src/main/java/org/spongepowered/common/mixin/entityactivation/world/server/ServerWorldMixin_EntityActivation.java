@@ -37,5 +37,4 @@ public abstract class ServerWorldMixin_EntityActivation extends WorldMixin {
     protected void impl$entityActivationCheck(final CallbackInfo ci) {
         EntityActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
     }
-
 }

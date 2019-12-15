@@ -31,7 +31,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.ProtocolType;
 import net.minecraft.network.handshake.ServerHandshakeNetHandler;
 import net.minecraft.network.handshake.client.CHandshakePacket;
-import net.minecraft.network.login.server.SPacketDisconnect;
+import net.minecraft.network.login.server.SDisconnectLoginPacket;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,6 +41,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
+import org.spongepowered.common.mixin.accessor.network.NetworkManagerAccessor;
+import org.spongepowered.common.mixin.accessor.network.handshake.client.CHandshakePacketAccessor;
 
 import java.net.InetSocketAddress;
 
@@ -52,13 +54,14 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
     @Shadow @Final private NetworkManager networkManager;
 
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
-    private void bungee$patchHandshake(final CHandshakePacket packetIn, final CallbackInfo ci) {
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding() && packetIn.getRequestedState().equals(ProtocolType.LOGIN)) {
-            final String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
+    private void bungee$patchHandshake(CHandshakePacket packet, CallbackInfo ci) {
+        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding() && packet.getRequestedState().equals(ProtocolType.LOGIN)) {
+            final String ip = ((CHandshakePacketAccessor) packet).accessor$getIp();
+            final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {
-                packetIn.ip = split[0];
-                ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setRemoteAddress(new InetSocketAddress(split[1],
+                ((CHandshakePacketAccessor) packet).accessor$setIp(split[0]);
+                ((NetworkManagerAccessor) this.networkManager).accessor$setSocketAddress(new InetSocketAddress(split[1],
                         ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
                 ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
 
@@ -68,7 +71,8 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
             } else {
                 final StringTextComponent chatcomponenttext =
                         new StringTextComponent("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
-                this.networkManager.sendPacket(new SPacketDisconnect(chatcomponenttext));
+                // TODO 1.14 - If the client is in HANDSHAKE state, it has no Disconnect packet registered. This may not work anymore...
+                this.networkManager.sendPacket(new SDisconnectLoginPacket(chatcomponenttext));
                 this.networkManager.closeChannel(chatcomponenttext);
             }
         }

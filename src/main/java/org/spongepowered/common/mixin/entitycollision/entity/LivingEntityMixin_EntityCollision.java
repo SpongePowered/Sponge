@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.entitycollision.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,28 +35,27 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 import java.util.List;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_EntityCollision {
 
-    @Shadow protected abstract void collideWithEntity(Entity entityIn);
+    @Shadow protected abstract void shadow$collideWithEntity(Entity entity);
 
     private boolean runningCollideWithNearby = false;
 
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
-    private void collisions$canUpdateCollisions(final CallbackInfo ci) {
+    @Inject(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
+    private void collisions$canUpdateCollisions(CallbackInfo ci) {
         this.runningCollideWithNearby = true;
     }
 
-    @Inject(method = "onLivingUpdate",
+    @Inject(method = "livingTick",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V",
             shift = Shift.AFTER))
-    private void collisions$resetCanUpdateCollisions(final CallbackInfo ci) {
+    private void collisions$resetCanUpdateCollisions(CallbackInfo ci) {
         this.runningCollideWithNearby = false;
     }
 
@@ -66,24 +66,23 @@ public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_Enti
 
     // This injection allows maxEntityCramming to be applied first before checking for max collisions
     @Redirect(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", remap = false))
-    private int collisions$collideWithNearbyUseOurCache(final List<Entity> list) {
+    private int collisions$collideWithNearbyUseOurCache(List<Entity> list) {
         for (final Entity entity: list) {
             // ignore players and entities with parts (ex. EnderDragon)
-            if (this.world.isRemote || entity == null || entity instanceof PlayerEntity || entity.getParts() != null) {
+            if (this.shadow$getEntityWorld().isRemote() || entity == null || entity instanceof PlayerEntity || entity instanceof EnderDragonEntity) {
                 continue;
             }
 
-            final CollisionCapabilityBridge spongeEntity = (CollisionCapabilityBridge) this;
-            if (spongeEntity.collision$requiresCollisionsCacheRefresh()) {
-                spongeEntity.collision$initializeCollisionState(this.world);
-                spongeEntity.collision$requiresCollisionsCacheRefresh(false);
+            if (this.collision$requiresCollisionsCacheRefresh()) {
+                this.collision$initializeCollisionState(this.shadow$getEntityWorld());
+                this.collision$requiresCollisionsCacheRefresh(false);
             }
 
-            if (spongeEntity.collision$getMaxCollisions() >= 0 && list.size() >= spongeEntity.collision$getMaxCollisions()) {
+            if (this.collision$getMaxCollisions() >= 0 && list.size() >= this.collision$getMaxCollisions()) {
                 // Don't process any more collisions
                 break;
             }
-            this.collideWithEntity(entity);
+            this.shadow$collideWithEntity(entity);
         }
         // We always return '0' to prevent the original loop from running.
         return 0;

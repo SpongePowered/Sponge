@@ -25,8 +25,11 @@
 package org.spongepowered.common.bridge.entitycollision;
 
 import net.minecraft.world.World;
+import org.spongepowered.api.CatalogKey;
 
 public interface CollisionCapabilityBridge {
+
+    CatalogKey collision$getKey();
 
     int collision$getMaxCollisions();
 
@@ -37,14 +40,6 @@ public interface CollisionCapabilityBridge {
     void collision$requiresCollisionsCacheRefresh(boolean flag);
 
     boolean collision$requiresCollisionsCacheRefresh();
-
-    String collision$getModDataName();
-
-    void collision$setModDataName(String name);
-
-    String collision$getModDataId();
-
-    void collision$setModDataId(String id);
 
     boolean collision$isRunningCollideWithNearby();
 }

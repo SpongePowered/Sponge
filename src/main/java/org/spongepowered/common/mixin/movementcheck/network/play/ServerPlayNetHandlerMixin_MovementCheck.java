@@ -42,7 +42,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
 
     @Redirect(method = "processPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 0))
-    private boolean movementCheck$onPlayerMovedTooQuicklyCheck(final ServerPlayerEntity player) {
+    private boolean movementCheck$onPlayerMovedTooQuicklyCheck(ServerPlayerEntity player) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().playerMovedTooQuickly()) {
             return player.isInvulnerableDimensionChange();
         }
@@ -51,7 +51,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
 
     @Redirect(method = "processPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 1))
-    private boolean movementCheck$onMovedWronglyCheck(final ServerPlayerEntity player) {
+    private boolean movementCheck$onMovedWronglyCheck(ServerPlayerEntity player) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
             return player.isInvulnerableDimensionChange();
         }
@@ -61,7 +61,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
     @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 100, ordinal = 0), slice = @Slice(
             from = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;motionZ:D", ordinal = 1),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isSinglePlayer()Z", ordinal = 0)))
-    private double movementCheck$onVehicleMovedTooQuicklyCheck(final double val) {
+    private double movementCheck$onVehicleMovedTooQuicklyCheck(double val) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().playerVehicleMovedTooQuickly()) {
             return val;
         }
@@ -81,7 +81,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
                 ordinal = 0,
                 remap = false)
     ))
-    private double movementCheck$onMovedWronglySecond(final double val) {
+    private double movementCheck$onMovedWronglySecond(double val) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
             return val;
         }

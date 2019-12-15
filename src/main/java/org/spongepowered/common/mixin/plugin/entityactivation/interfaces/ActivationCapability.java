@@ -27,25 +27,25 @@ package org.spongepowered.common.mixin.plugin.entityactivation.interfaces;
 public interface ActivationCapability {
 
     // entity activation
-    void activation$inactiveTick();
+    void entityActivation$inactiveTick();
 
-    byte activation$getActivationType();
+    byte entityActivation$getActivationType();
 
-    long activation$getActivatedTick();
+    long entityActivation$getActivatedTick();
 
-    boolean activation$getDefaultActivationState();
+    boolean entityActivation$getDefaultActivationState();
 
-    void activation$setActivatedTick(long tick);
+    void entityActivation$setActivatedTick(long tick);
 
-    int activation$getActivationRange();
+    int entityActivation$getActivationRange();
 
-    void activation$setActivationRange(int range);
+    void entityActivation$setActivationRange(int range);
 
-    void activation$requiresActivationCacheRefresh(boolean flag);
+    void entityActivation$requiresActivationCacheRefresh(boolean flag);
 
-    boolean activation$requiresActivationCacheRefresh();
+    boolean entityActivation$requiresActivationCacheRefresh();
 
-    void activation$setDefaultActivationState(boolean defaultState);
+    void entityActivation$setDefaultActivationState(boolean defaultState);
 
     int activation$getSpongeTicksExisted();
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.entitycollision.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
@@ -40,48 +41,34 @@ import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge
 @Mixin(Block.class)
 public abstract class BlockMixin_EntityCollision implements CollisionCapabilityBridge {
 
-    private int collision$maxCollisions = 8;
-    private String collision$modId;
-    @SuppressWarnings("unused")
-    private String collision$modBlockName;
-    private boolean collision$refreshCache = true;
+    private int entityCollision$maxCollisions = 8;
+    private boolean entityCollision$refreshCache = true;
+
+    @Override
+    public CatalogKey collision$getKey() {
+        return ((BlockType) this).getKey();
+    }
 
     @Override
     public int collision$getMaxCollisions() {
-        return this.collision$maxCollisions;
+        return this.entityCollision$maxCollisions;
     }
 
     @Override
     public void collision$setMaxCollisions(int max) {
-        this.collision$maxCollisions = max;
-    }
-
-    @Override
-    public void collision$setModDataName(String name) {
-        this.collision$modBlockName = name;
-    }
-
-    @Override
-    public String collision$getModDataId() {
-        return this.collision$modId;
-    }
-
-    @Override
-    public void collision$setModDataId(String id) {
-        this.collision$modId = id;
+        this.entityCollision$maxCollisions = max;
     }
 
     @Override
     public void collision$requiresCollisionsCacheRefresh(boolean flag) {
-        this.collision$refreshCache = flag;
+        this.entityCollision$refreshCache = flag;
     }
 
     @Override
     public boolean collision$requiresCollisionsCacheRefresh() {
-        return this.collision$refreshCache;
+        return this.entityCollision$refreshCache;
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
     public void collision$initializeCollisionState(World world) {
         final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
@@ -92,7 +79,7 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
         this.collision$setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
         
         boolean requiresSave = false;
-        String[] ids = ((BlockType) this).getId().split(":");
+        String[] ids = ((BlockType) this).getKey().toString().split(":");
         String modId = ids[0];
         String name = ids[1];
 

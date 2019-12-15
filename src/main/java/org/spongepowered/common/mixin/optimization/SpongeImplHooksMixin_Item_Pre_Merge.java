@@ -84,8 +84,6 @@ public abstract class SpongeImplHooksMixin_Item_Pre_Merge {
                 continue;
             } else if (existing.isEmpty()) {
                 continue;
-            } else if (existing.getItem().getHasSubtypes() && existing.getMetadata() != itemStack.getMetadata()) {
-                continue;
             }
             // now to actually merge the itemstacks
             final int existingStackSize = existing.getCount();

@@ -49,31 +49,31 @@ public abstract class TileEntityMixin_Activation implements ActivationCapability
     }
 
     @Override
-    public void activation$inactiveTick() {
+    public void entityActivation$inactiveTick() {
     }
 
     @Override
-    public byte activation$getActivationType() {
+    public byte entityActivation$getActivationType() {
         return 0;
     }
 
     @Override
-    public long activation$getActivatedTick() {
+    public long entityActivation$getActivatedTick() {
         return this.tileActivationImpl$activatedTick;
     }
 
     @Override
-    public boolean activation$getDefaultActivationState() {
+    public boolean entityActivation$getDefaultActivationState() {
         return this.tileActivationImpl$defaultActivationState;
     }
 
     @Override
-    public void activation$setDefaultActivationState(boolean defaultState) {
+    public void entityActivation$setDefaultActivationState(boolean defaultState) {
         this.tileActivationImpl$defaultActivationState = defaultState;
     }
 
     @Override
-    public void activation$setActivatedTick(long tick) {
+    public void entityActivation$setActivatedTick(long tick) {
         this.tileActivationImpl$activatedTick = tick;
     }
 
@@ -88,22 +88,22 @@ public abstract class TileEntityMixin_Activation implements ActivationCapability
     }
 
     @Override
-    public int activation$getActivationRange() {
+    public int entityActivation$getActivationRange() {
         return this.tileActivationImpl$activationRange;
     }
 
     @Override
-    public void activation$setActivationRange(int range) {
+    public void entityActivation$setActivationRange(int range) {
         this.tileActivationImpl$activationRange = range;
     }
 
     @Override
-    public void activation$requiresActivationCacheRefresh(boolean flag) {
+    public void entityActivation$requiresActivationCacheRefresh(boolean flag) {
         this.tileActivationImpl$refreshCache = flag;
     }
 
     @Override
-    public boolean activation$requiresActivationCacheRefresh() {
+    public boolean entityActivation$requiresActivationCacheRefresh() {
         return this.tileActivationImpl$refreshCache;
     }
 }

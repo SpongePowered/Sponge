@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.entitycollision.entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -49,70 +50,50 @@ import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
 public abstract class EntityMixin_EntityCollision implements CollisionCapabilityBridge {
 
-    @Shadow public World world;
-    private int collision$maxCollisions = 8;
-    private boolean collision$refreshCache = false;
-    private String collision$entityName = "unknown";
-    private String collision$entityModId = "unknown";
+    @Shadow public abstract World shadow$getEntityWorld();
 
-    @SuppressWarnings("ConstantConditions")
+    private CatalogKey entityCollision$key;
+    private int entityCollision$maxCollisions = 8;
+    private boolean entityCollision$refreshCache = false;
+
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void collisions$InjectActivationInformation(final World world, final CallbackInfo ci) {
+    private void collisions$InjectActivationInformation(net.minecraft.entity.EntityType<?> type, World world, CallbackInfo ci) {
         if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
             final EntityType entityType = ((Entity) this).getType();
             if (entityType == EntityTypes.UNKNOWN || !(entityType instanceof SpongeEntityType)) {
                 return;
             }
 
-
             if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
                 final ItemEntity item = (ItemEntity) (Object) this;
                 final ItemStack itemstack = item.getItem();
                 if (!itemstack.isEmpty()) {
-                    this.collision$entityName = itemstack.getTranslationKey().replace("item.", "");
+                    this.entityCollision$key = ((org.spongepowered.api.item.inventory.ItemStack) (Object) itemstack).getType().getKey();
                 }
             } else {
-                this.collision$entityName = ((Entity) this).getType().getName();
+                this.entityCollision$key = ((Entity) this).getType().getKey();
             }
-
-            this.collision$entityModId = ((SpongeEntityType) ((Entity) this).getType()).getModId();
-            if (!this.world.isRemote) {
-                this.collision$initializeCollisionState(this.world);
+            if (!this.shadow$getEntityWorld().isRemote()) {
+                this.collision$initializeCollisionState(this.shadow$getEntityWorld());
             }
         }
     }
 
     @Override
+    public CatalogKey collision$getKey() {
+        return this.entityCollision$key;
+    }
+
+    @Override
     public int collision$getMaxCollisions() {
-        return this.collision$maxCollisions;
+        return this.entityCollision$maxCollisions;
     }
 
     @Override
     public void collision$setMaxCollisions(final int max) {
-        this.collision$maxCollisions = max;
+        this.entityCollision$maxCollisions = max;
     }
 
-    @Override
-    public void collision$setModDataName(final String name) {
-        this.collision$entityName = name;
-    }
-
-    @Override
-    public String collision$getModDataName() {
-        return this.collision$entityName;
-    }
-
-    @Override
-    public String collision$getModDataId() {
-        return this.collision$entityModId;
-    }
-
-    @Override
-    public void collision$setModDataId(final String id) {
-        this.collision$entityModId = id;
-    }
-
-    @SuppressWarnings({"ConstantConditions", "Duplicates"})
     @Override
     public void collision$initializeCollisionState(final World world) {
         final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
@@ -123,12 +104,12 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
         this.collision$setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
 
         boolean requiresSave = false;
-        final CollisionModCategory worldCollMod = worldCollCat.getModList().get(this.collision$getModDataId());
-        CollisionModCategory globalCollMod = globalCollCat.getModList().get(this.collision$getModDataId());
+        final CollisionModCategory worldCollMod = worldCollCat.getModList().get(this.entityCollision$key.getNamespace());
+        CollisionModCategory globalCollMod = globalCollCat.getModList().get(this.entityCollision$key.getNamespace());
         if (worldCollMod == null && worldCollCat.autoPopulateData()) {
-            globalCollMod = new CollisionModCategory(this.collision$getModDataId());
-            globalCollCat.getModList().put(this.collision$getModDataId(), globalCollMod);
-            globalCollMod.getEntityList().put(this.collision$getModDataName(), this.collision$getMaxCollisions());
+            globalCollMod = new CollisionModCategory(this.entityCollision$key.getNamespace());
+            globalCollCat.getModList().put(this.entityCollision$key.getNamespace(), globalCollMod);
+            globalCollMod.getEntityList().put(this.entityCollision$key.getValue(), this.collision$getMaxCollisions());
             globalConfigAdapter.save();
             return;
         } else if (worldCollMod != null) {
@@ -145,16 +126,16 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
             Integer entityMaxCollision = null;
             if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
                 // check if all items are overridden
-                entityMaxCollision = worldCollMod.getEntityList().get(this.collision$getModDataName());
+                entityMaxCollision = worldCollMod.getEntityList().get(this.entityCollision$key.getValue());
             }
 
             if (entityMaxCollision == null) {
-                entityMaxCollision = worldCollMod.getEntityList().get(this.collision$getModDataName());
+                entityMaxCollision = worldCollMod.getEntityList().get(this.entityCollision$key.getValue());
             }
 
             // entity overrides
             if (entityMaxCollision == null && worldCollCat.autoPopulateData()) {
-                globalCollMod.getEntityList().put(this.collision$getModDataName(), this.collision$getMaxCollisions());
+                globalCollMod.getEntityList().put(this.entityCollision$key.getValue(), this.collision$getMaxCollisions());
                 requiresSave = true;
             } else if (entityMaxCollision != null) {
                 this.collision$setMaxCollisions(entityMaxCollision);
@@ -173,12 +154,12 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
 
     @Override
     public void collision$requiresCollisionsCacheRefresh(final boolean flag) {
-        this.collision$refreshCache = flag;
+        this.entityCollision$refreshCache = flag;
     }
 
     @Override
     public boolean collision$requiresCollisionsCacheRefresh() {
-        return this.collision$refreshCache;
+        return this.entityCollision$refreshCache;
     }
 
     @Override

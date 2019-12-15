@@ -477,7 +477,7 @@ public final class SpongeHooks {
             ((ServerWorldBridge) world).bridge$updateConfigCache();
             for (final Entity entity : ((ServerWorldAccessor) world).accessor$getEntitiesById().values()) {
                 if (entity instanceof ActivationCapability) {
-                    ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
+                    ((ActivationCapability) entity).entityActivation$requiresActivationCacheRefresh(true);
                 }
                 if (entity instanceof CollisionCapabilityBridge) {
                     ((CollisionCapabilityBridge) entity).collision$requiresCollisionsCacheRefresh(true);
@@ -488,7 +488,7 @@ public final class SpongeHooks {
             }
             for (final TileEntity tileEntity : world.loadedTileEntityList) {
                 if (tileEntity instanceof ActivationCapability) {
-                    ((ActivationCapability) tileEntity).activation$requiresActivationCacheRefresh(true);
+                    ((ActivationCapability) tileEntity).entityActivation$requiresActivationCacheRefresh(true);
                 }
                 if (tileEntity instanceof TrackableBridge) {
                     ((TrackableBridge) tileEntity).bridge$refreshTrackerStates();

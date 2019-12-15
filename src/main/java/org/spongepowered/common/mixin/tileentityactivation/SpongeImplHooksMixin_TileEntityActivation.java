@@ -48,7 +48,7 @@ public abstract class SpongeImplHooksMixin_TileEntityActivation {
 
         if (!canUpdate) {
             ((ActivationCapability) tileEntity).activation$incrementSpongeTicksExisted();
-            ((ActivationCapability) tileEntity).activation$inactiveTick();
+            ((ActivationCapability) tileEntity).entityActivation$inactiveTick();
             return false;
         }
         return true;

@@ -27,15 +27,12 @@ package org.spongepowered.common.mixin.bungee.network.handshake.client;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.handshake.client.CHandshakePacket;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 
 @Mixin(CHandshakePacket.class)
 public abstract class CHandshakeMixin_Bungee {
-
-    @Shadow public String ip;
 
     @Redirect(method = "readPacketData",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readString(I)Ljava/lang/String;"))

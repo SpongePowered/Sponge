@@ -372,7 +372,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             ((ServerChunkProviderBridge) this.getChunkProvider()).bridge$setDenyChunkRequests(worldCategory.getDenyChunkRequests());
             for (final net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof ActivationCapability) {
-                    ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
+                    ((ActivationCapability) entity).entityActivation$requiresActivationCacheRefresh(true);
                 }
                 if (entity instanceof CollisionCapabilityBridge) {
                     ((CollisionCapabilityBridge) entity).collision$requiresCollisionsCacheRefresh(true);

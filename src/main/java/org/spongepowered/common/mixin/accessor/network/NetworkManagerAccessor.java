@@ -22,29 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.mixin.accessor.network;
 
-import net.minecraft.entity.AreaEffectCloudEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
+import net.minecraft.network.NetworkManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+import java.net.SocketAddress;
 
-public class AreaEffectCloudEntityWaitTimeProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, Integer> {
+@Mixin(NetworkManager.class)
+public interface NetworkManagerAccessor {
 
-    public AreaEffectCloudEntityWaitTimeProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_WAIT_TIME);
-    }
-
-    @Override
-    protected Optional<Integer> getFrom(AreaEffectCloudEntity dataHolder) {
-        return Optional.of(((AreaEffectCloudEntityAccessor) dataHolder).accessor$getWaitTime());
-    }
-
-    @Override
-    protected boolean set(AreaEffectCloudEntity dataHolder, Integer value) {
-        dataHolder.setWaitTime(value);
-        return true;
-    }
+    @Accessor("socketAddress") void accessor$setSocketAddress(SocketAddress socketAddress);
 }
