@@ -21,6 +21,6 @@ public class AreaEffectCloudEntityColorProvider extends GenericMutableDataProvid
     @Override
     protected boolean set(AreaEffectCloudEntity dataHolder, Color value) {
         dataHolder.setColor(value.getRgb());
-        return false;
+        return true;
     }
 }

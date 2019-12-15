@@ -25,17 +25,26 @@ import net.minecraft.block.FenceGateBlock;
 import net.minecraft.block.HopperBlock;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.HugeMushroomBlock;
+import net.minecraft.block.LadderBlock;
+import net.minecraft.block.LeverBlock;
+import net.minecraft.block.MovingPistonBlock;
 import net.minecraft.block.NetherPortalBlock;
 import net.minecraft.block.NetherWartBlock;
 import net.minecraft.block.PaneBlock;
+import net.minecraft.block.PistonBlock;
+import net.minecraft.block.PistonHeadBlock;
+import net.minecraft.block.PoweredRailBlock;
 import net.minecraft.block.PressurePlateBlock;
 import net.minecraft.block.RedstoneDiodeBlock;
+import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.block.RedstoneWireBlock;
 import net.minecraft.block.RepeaterBlock;
 import net.minecraft.block.RotatedPillarBlock;
 import net.minecraft.block.SaplingBlock;
+import net.minecraft.block.SkullBlock;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.block.SnowyDirtBlock;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.block.StemBlock;
 import net.minecraft.block.SugarCaneBlock;
 import net.minecraft.block.TNTBlock;
@@ -46,6 +55,7 @@ import net.minecraft.block.VineBlock;
 import net.minecraft.block.WallBannerBlock;
 import net.minecraft.block.WallBlock;
 import net.minecraft.block.WallSignBlock;
+import net.minecraft.block.WallTorchBlock;
 import net.minecraft.block.WeightedPressurePlateBlock;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
@@ -127,6 +137,10 @@ public class BlockDataProviders {
 
         // AbstractSignBlock
         register(new AbstractSignBlockAttachedProvider());
+        // TODO: Waterlogged
+
+        // AbstractSkullBlock
+        register(new AbstractSkullBlockAttachedProvider());
 
         // AbstractButtonBlock
         registerBoolean(AbstractButtonBlock.class, Keys.POWERED, AbstractButtonBlock.POWERED);
@@ -134,6 +148,9 @@ public class BlockDataProviders {
         // AbstractFurnaceBlock
         registerDirection(AbstractFurnaceBlock.class, AbstractFurnaceBlock.FACING);
         registerBoolean(AbstractFurnaceBlock.class, Keys.LIT, AbstractFurnaceBlock.LIT);
+
+        // AbstractRailBlock
+        register(new AbstractRailBlockRailDirectionProvider());
 
         // AnvilBlock
         registerDirection(AnvilBlock.class, AbstractFurnaceBlock.FACING);
@@ -190,7 +207,6 @@ public class BlockDataProviders {
 
         // DetectorRailBlock
         registerBoolean(DetectorRailBlock.class, Keys.POWERED, DetectorRailBlock.POWERED);
-        // TODO: Shape
 
         // DoorBlock
         registerDirection(DoorBlock.class, DoorBlock.FACING);
@@ -239,11 +255,34 @@ public class BlockDataProviders {
         registerDirection(HopperBlock.class, HopperBlock.FACING);
         // registerBoolean(HopperBlock.class, Keys.ENABLED, HopperBlock.ENABLED); // TODO
 
+        // LadderBlock
+        registerDirection(LadderBlock.class, LadderBlock.FACING);
+        // TODO: Waterlogged
+
+        // LeverBlock
+        registerBoolean(LeverBlock.class, Keys.POWERED, LeverBlock.POWERED);
+
+        // MovingPistonBlock
+        registerDirection(MovingPistonBlock.class, MovingPistonBlock.FACING);
+        // TODO: What to do with the MovingPistonBlock type... Flatten everything else but
+        //   still use an enum for stick and normal moving piston blocks...
+
+        // PistonBlock
+        registerBoolean(PistonBlock.class, Keys.EXTENDED, PistonBlock.EXTENDED);
+
+        // PistonHeadBlock
+        // registerBoolean(PistonHeadBlock.class, Keys.SHORT, PistonHeadBlock.SHORT); // TODO
+        // TODO: What to do with the MovingPistonBlock type... Flatten everything else but
+        //   still use an enum for stick and normal moving piston blocks...
+
         // NetherPortalBlock
         register(new AxisBlockAxisProvider(NetherPortalBlock.class, NetherPortalBlock.AXIS));
 
         // NetherWartBlock
         registerBoundedInt(NetherWartBlock.class, Keys.GROWTH_STAGE, NetherWartBlock.AGE);
+
+        // PoweredRailBlock
+        registerBoolean(PoweredRailBlock.class, Keys.POWERED, PoweredRailBlock.POWERED);
 
         // RedstoneWireBlock
         registerBoundedInt(RedstoneWireBlock.class, Keys.POWER, RedstoneWireBlock.POWER);
@@ -267,6 +306,9 @@ public class BlockDataProviders {
         // RedstoneDiodeBlock
         registerBoolean(RedstoneDiodeBlock.class, Keys.POWERED, RedstoneDiodeBlock.POWERED);
 
+        // RedstoneTorchBlock
+        registerBoolean(RedstoneTorchBlock.class, Keys.LIT, RedstoneTorchBlock.LIT);
+
         // RepeaterBlock
         registerBoundedInt(RepeaterBlock.class, Keys.DELAY, RepeaterBlock.DELAY);
 
@@ -288,11 +330,20 @@ public class BlockDataProviders {
         // SpongeBlock
         register(new SpongeBlockIsWetProvider());
 
+        // StairsBlock
+        registerDirection(StairsBlock.class, StairsBlock.FACING);
+        register(new HalfBlockPortionProvider(StairsBlock.class, StairsBlock.HALF));
+        register(new StairsBlockShapeProvider());
+        // TODO: Waterlogged
+
         // StandingSignBlock
         register(new StandingSignBlockDirectionProvider());
 
         // StemBlock
         registerBoundedInt(StemBlock.class, Keys.GROWTH_STAGE, StemBlock.AGE);
+
+        // SkullBlock
+        register(new SkullBlockDirectionProvider());
 
         // PaneBlock
         registerHorizontalConnectedSides(PaneBlock.class,
@@ -301,13 +352,17 @@ public class BlockDataProviders {
         // PressurePlateBlock
         registerBoolean(PressurePlateBlock.class, Keys.POWERED, PressurePlateBlock.POWERED);
 
+        // TorchBlock
+        register(new TorchBlockAttachedProvider());
+
         // TNTBlock
         registerBoolean(TNTBlock.class, Keys.UNSTABLE, TNTBlock.UNSTABLE);
 
         // TrapDoorBlock
         registerBoolean(TrapDoorBlock.class, Keys.OPEN, TrapDoorBlock.OPEN);
         registerBoolean(TrapDoorBlock.class, Keys.POWERED, TrapDoorBlock.POWERED);
-        // TODO: Half, Waterlogged
+        register(new HalfBlockPortionProvider(TrapDoorBlock.class, TrapDoorBlock.HALF));
+        // TODO: Waterlogged
 
         // TripWireBlock
         registerBoolean(TripWireBlock.class, Keys.ATTACHED, TripWireBlock.ATTACHED);
@@ -331,6 +386,9 @@ public class BlockDataProviders {
         // WallSignBlock
         registerDirection(WallSignBlock.class, WallSignBlock.FACING);
         // TODO: Waterlogged
+
+        // WallTorchBlock
+        registerDirection(WallTorchBlock.class, WallTorchBlock.HORIZONTAL_FACING);
 
         // WallBlock
         registerHorizontalAndUpConnectedSides(WallBlock.class,
