@@ -26,25 +26,26 @@ package org.spongepowered.test;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.slot.SlotMatchers;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
 import org.spongepowered.api.item.inventory.type.InventoryRow;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 
 /**
@@ -54,23 +55,23 @@ import org.spongepowered.api.plugin.PluginContainer;
 public class InventorySetOpsTest implements LoadableModule {
 
     public static final String DESCRIPTION = "A plugin to test inventory set operations";
-    @Inject private Logger logger;
     @Inject private PluginContainer container;
 
     private final InventorySetOpsListener listener = new InventorySetOpsListener();
 
     @Listener
     public void onStart(GameStartedServerEvent event) {
-        testIntersect();
-        testUnion();
+        this.testIntersect();
+        this.testUnion();
     }
 
     @SuppressWarnings("deprecation")
     private void testIntersect() {
-        Inventory chest = Inventory.builder().build(this);
-        Inventory firstSlots = chest.query(SlotIndex.of(0));
-        Inventory firstRow = chest.query(InventoryRow.class).first();
-        Inventory firstCol = chest.query(InventoryColumn.class).first();
+        ViewableInventory chest = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3).completeStructure().build();
+
+        Inventory firstSlots = chest.query(SlotMatchers.index(0));
+        Inventory firstRow = chest.query(InventoryRow.class).get().children().get(0);
+        Inventory firstCol = chest.query(InventoryColumn.class).get().children().get(0);
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
         Preconditions.checkState(intersection.capacity() == 1, "This should be the first slot only!");
     }
@@ -78,10 +79,11 @@ public class InventorySetOpsTest implements LoadableModule {
     @SuppressWarnings("deprecation")
     private void testUnion() {
 
-        Inventory chest = Inventory.builder().build(this);
-        Inventory firstSlots = chest.query(SlotIndex.of(0));
-        Inventory firstRow = chest.query(InventoryRow.class).first();
-        GridInventory grid = chest.query(GridInventory.class);
+        ViewableInventory chest = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3).completeStructure().build();
+
+        Inventory firstSlots = chest.query(SlotMatchers.index(0));
+        Inventory firstRow = chest.query(InventoryRow.class).get().children().get(0);
+        GridInventory grid = chest.query(GridInventory.class).get();
         InventoryColumn firstCol = grid.getColumn(0).get();
         InventoryColumn secondCol = grid.getColumn(1).get();
         Inventory union = firstSlots.union(firstCol).union(firstRow);
@@ -92,11 +94,8 @@ public class InventorySetOpsTest implements LoadableModule {
         Preconditions.checkState(union3.capacity() == 6, "This should include all six slot of the first 2 columns!");
     }
 
-
-
-
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -106,7 +105,7 @@ public class InventorySetOpsTest implements LoadableModule {
         @Listener
         public void onMidas(ChangeInventoryEvent.Held event, @Root Player player) {
             // Checks if Slots are contained in the hotbar then may transform iron to gold
-            Inventory hotbar = event.getTargetInventory().query(Hotbar.class);
+            Inventory hotbar = event.getInventory().query(Hotbar.class).get();
             boolean nugget = false;
             for (SlotTransaction transaction : event.getTransactions()) {
                 if (hotbar.containsInventory(transaction.getSlot())) {

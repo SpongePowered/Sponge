@@ -26,18 +26,15 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
+import org.spongepowered.api.item.inventory.InventoryKeys;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(id = "inventoryplugintest", name = "Inventory Test", description = "A plugin to test the owner of an inventory.", version = "0.0.0")
 public class InventoryPluginTest implements LoadableModule {
@@ -45,18 +42,17 @@ public class InventoryPluginTest implements LoadableModule {
     @Inject private PluginContainer container;
     private final InventoryPluginListener listener = new InventoryPluginListener();
 
-
-
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class InventoryPluginListener {
 
         @Listener
-        public void onInventoryClose(InteractInventoryEvent.Close event, @First Player player) {
-            player.sendMessage(Text.of("This inventory was brought to you by ", event.getTargetInventory().getPlugin().getName(), "."));
+        public void onInventoryClose(InteractContainerEvent.Close event, @First Player player) {
+            player.sendMessage(Text.of("This inventory was brought to you by ",
+                    event.getContainer().get(InventoryKeys.PLUGIN).map(PluginContainer::getName).orElse("unknown")));
         }
     }
 }

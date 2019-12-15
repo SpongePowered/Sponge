@@ -25,14 +25,14 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 public interface LoadableModule {
 
-    default void disable(CommandSource src) {
+    default void disable(MessageReceiver src) {
         Sponge.getEventManager().unregisterPluginListeners(this);
     }
 
-    void enable(CommandSource src);
+    void enable(MessageReceiver src);
 
 }

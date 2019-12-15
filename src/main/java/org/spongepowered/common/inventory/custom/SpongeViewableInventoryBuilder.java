@@ -29,7 +29,7 @@ import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.api.item.inventory.InventoryKeys;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -41,9 +41,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.math.vector.Vector2i;
-import BuildingStep;
-import DummyStep;
-import EndStep;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -221,7 +219,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
             CustomSlotProvider slotProvider = new CustomSlotProvider();
             for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
                 Slot slot = entry.getValue();
-                int idx = slot.getProperty(InventoryProperties.SLOT_INDEX).get();
+                int idx = slot.get(InventoryKeys.SLOT_INDEX).get();
 
                 int offset = 0;
                 for (int i = 0; i < this.finalInventories.indexOf(slot.parent()); i++) {

@@ -26,16 +26,14 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 /**
  * Bedrock in hoppers prevents them from working
@@ -46,10 +44,8 @@ public class TransferEventTest implements LoadableModule {
     private final TransferListener listener = new TransferListener();
     @Inject private PluginContainer container;
 
-
-
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -57,8 +53,8 @@ public class TransferEventTest implements LoadableModule {
 
         @SuppressWarnings("deprecation")
         @Listener
-        public void onPreTransferEvent(ChangeInventoryEvent.Transfer.Pre event) {
-            if (event.getSourceInventory().queryAny(ItemStack.of(ItemTypes.BEDROCK, 1)).capacity() != 0) {
+        public void onPreTransferEvent(TransferInventoryEvent.Pre event) {
+            if (event.getSourceInventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.of(ItemStack.of(ItemTypes.BEDROCK, 1))).capacity() != 0) {
                 event.setCancelled(true);
             }
         }

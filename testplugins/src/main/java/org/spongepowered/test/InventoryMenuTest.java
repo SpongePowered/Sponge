@@ -22,28 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.inventory;
+package org.spongepowered.test;
 
-import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.custom.ContainerTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.InventoryCallbackHandler;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.math.vector.Vector2i;
 
 import java.util.Arrays;
 
 @Plugin(id = "inventorymenutest", name = "Inventory Menu Test", description = "A plugin to test inventory menus", version = "0.0.0")
-public class InventoryMenuTest {
+public class InventoryMenuTest implements LoadableModule {
 
-    // TODO actually make it do smth.
+    @Override
+    public void enable(MessageReceiver src) {
+        // TODO actually make it do smth.
+    }
+
     public static void foobar2() {
 
         Player player = null;
@@ -54,13 +59,13 @@ public class InventoryMenuTest {
         ItemStackSnapshot disabled = ItemStack.of(ItemTypes.LIGHT_GRAY_STAINED_GLASS_PANE, 1).createSnapshot();
         ItemStackSnapshot emerald = ItemStack.of(ItemTypes.EMERALD, 1).createSnapshot();
 
-        ViewableInventory display = ViewableInventory.builder().type(ContainerTypes.DISPENSER)
+        ViewableInventory display = ViewableInventory.builder().type(ContainerTypes.GENERIC_3x3)
                 .fillDummy().item(disabled)
                 .slots(Arrays.asList(inv.query(GridInventory.class).get().getSlot(1,1).get()), new Vector2i(1, 1))
                 .completeStructure().build();
         display.query(GridInventory.class).get().set(1,1, ItemStack.of(ItemTypes.DIAMOND, 1));
 
-        ViewableInventory display2 = ViewableInventory.builder().type(ContainerTypes.DISPENSER)
+        ViewableInventory display2 = ViewableInventory.builder().type(ContainerTypes.GENERIC_3x3)
                 .fillDummy()
                 .dummySlots(1, new Vector2i(1,1)).item(emerald)
                 .completeStructure().build();
@@ -68,7 +73,7 @@ public class InventoryMenuTest {
 
 
         ViewableInventory basicChest = ViewableInventory.builder()
-                .type(ContainerTypes.CHEST_3X9)
+                .type(ContainerTypes.GENERIC_9x3)
                 .completeStructure()
                 .build();
 

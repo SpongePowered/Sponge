@@ -25,20 +25,14 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.potion.PotionType;
-import org.spongepowered.api.item.potion.PotionTypes;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,25 +42,16 @@ import java.util.Random;
  * Test Potion Types
  */
 @Plugin(id = "potion_type_test", name = "PotionType Test", description = "A plugin to test potion types", version = "0.0.0")
-public class PotionTypeTest {
+public class PotionTypeTest implements LoadableModule {
 
-    @Listener
-    public void onGamePreInitialization(GamePreInitializationEvent event) {
-        Keys
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                .description(Text.of("Fills inventory with random potions"))
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of(TextColors.RED, "Player only."));
-                        return CommandResult.success();
-                    }
-                    Player player = (Player) src;
-                    for (int i = 0; i < 5; i++) {
-                        player.getInventory().offer(getRandomPotion());
-                    }
-                    return CommandResult.success();
-                })
-                .build(), "testpotiontypes");
+    @Override
+    public void enable(MessageReceiver src) {
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            for (int i = 0; i < 5; i++) {
+                player.getInventory().offer(this.getRandomPotion());
+                player.sendMessage(Text.of("You received random potions!"));
+            }
+        }
     }
 
     private ItemStack getRandomPotion() {

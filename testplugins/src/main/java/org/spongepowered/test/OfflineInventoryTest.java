@@ -24,84 +24,74 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.user.UserStorageService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
-
-import javax.inject.Inject;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test for User(Offline-Player) Inventory
  */
 @Plugin(id = "offlineinventorytest", name = "Offline Inventory Test", description = "A plugin to test offline inventories", version = "0.0.0")
-public class OfflineInventoryTest {
+public class OfflineInventoryTest implements LoadableModule {
 
     @Inject private Logger logger;
+    @Inject private PluginContainer container;
 
-    private Set<UUID> receiveDiamonds = new HashSet<>();
+    private TestListener listener = new TestListener();
 
-    @Listener
-    public void onGamePreInitialization(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                .description(Text.of("Fills your hotbar with diamonds when you are offline"))
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of(TextColors.RED, "Player only."));
-                        return CommandResult.success();
-                    }
-                    Player player = (Player) src;
-                    receiveDiamonds.add(player.getUniqueId());
-                    src.sendMessage(Text.of(TextColors.GREEN, "You will receive diamonds."));
-                    return CommandResult.success();
-                })
-                .build(), "getmesomediamonds");
+    @Override
+    public void enable(MessageReceiver src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    @Listener
-    public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player) {
-        UUID uuid = player.getUniqueId();
-        if (receiveDiamonds.remove(uuid)) {
-            Sponge.getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
-        }
-    }
+    public class TestListener {
 
-    @SuppressWarnings("deprecation")
-    private void run(UUID uuid) {
-        User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).get(uuid).get();
-        this.logger.info(user.getName() + " has an Inventory with:");
-        for (Inventory slot : user.getInventory()) {
-            slot.peek().ifPresent(stack -> this.logger.info(stack.getType().getId() + "x" + stack.getQuantity()));
+        @Listener
+        public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player) {
+            UUID uuid = player.getUniqueId();
+            Sponge.getServer().getScheduler()
+                    .createExecutor(OfflineInventoryTest.this.container)
+                    .schedule(() -> this.run(uuid), 1, TimeUnit.SECONDS);
         }
-        user.getHelmet().ifPresent(s -> this.logger.info("Helmet: " + s.getType().getId()));
-        user.getChestplate().ifPresent(s -> this.logger.info("Chestplate: " + s.getType().getId()));
-        user.getLeggings().ifPresent(s -> this.logger.info("Leggings: " + s.getType().getId()));
-        user.getBoots().ifPresent(s -> this.logger.info("Boots: " + s.getType().getId()));
 
-        this.logger.info("and a hotbar full of diamonds!");
-        for (Inventory inv : user.getInventory().query(Hotbar.class).slots()) {
-            inv.offer(ItemStack.of(ItemTypes.DIAMOND, 1));
+        private void run(UUID uuid) {
+            Logger logger = OfflineInventoryTest.this.logger;
+
+            // Read offline inventory
+            User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).get(uuid).get();
+            logger.info(user.getName() + " has an Inventory with:");
+            for (Slot slot : user.getInventory().slots()) {
+                ItemStack stack = slot.peek();
+                logger.info(stack.getType().getKey() + "x" + stack.getQuantity());
+            }
+            logger.info("Helmet: " + user.getHelmet().getType().getKey());
+            logger.info("Chestplate: " + user.getChestplate().getType().getKey());
+            logger.info("Leggings: " + user.getLeggings().getType().getKey());
+            logger.info("Boots: " + user.getBoots().getType().getKey());
+
+            // Modify offline inventory
+            logger.info("and a hotbar full of diamonds!");
+            for (Slot inv : user.getInventory().query(Hotbar.class).get().slots()) {
+                inv.offer(ItemStack.of(ItemTypes.DIAMOND, 1));
+            }
         }
+
     }
 
 }

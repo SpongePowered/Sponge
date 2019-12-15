@@ -24,23 +24,22 @@
  */
 package org.spongepowered.test;
 
-import static org.spongepowered.api.item.ItemTypes.BED;
 import static org.spongepowered.api.item.ItemTypes.BEDROCK;
 import static org.spongepowered.api.item.ItemTypes.COAL;
-import static org.spongepowered.api.item.ItemTypes.IRON_BLOCK;
-import static org.spongepowered.api.item.ItemTypes.IRON_INGOT;
 import static org.spongepowered.api.item.ItemTypes.STONE;
-import static org.spongepowered.api.item.ItemTypes.WOOL;
+import static org.spongepowered.api.item.ItemTypes.WHITE_BED;
+import static org.spongepowered.api.item.ItemTypes.WHITE_WOOL;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.GameRegistryEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -53,16 +52,15 @@ import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingResult;
-import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.world.World;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import javax.inject.Inject;
 
 /**
  * Adds BedRock. Literally.
@@ -72,37 +70,26 @@ import javax.inject.Inject;
  *      disabling this plugin for now.
  */
 // @Plugin(id = "recipe_test", name = "Recipe Test", description = "A plugin to test recipes", version = "0.0.0")
-public class RecipeTest {
+public class RecipeTest implements LoadableModule {
 
+    @Inject private PluginContainer container;
     private final Logger logger;
+    private final RecipeTest.CraftListener listener = new RecipeTest.CraftListener ();
 
     @Inject
     public RecipeTest(Logger logger) {
         this.logger = logger;
     }
 
-    @SuppressWarnings(value = "deprecation")
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        final Ingredient s = Ingredient.of(IRON_INGOT);
-        final Ingredient b = Ingredient.of(IRON_BLOCK);
-        final ItemStack item = ItemStack.of(BEDROCK, 1);
-        final ShapedCraftingRecipe recipe = CraftingRecipe.shapedBuilder().rows()
-                .row(s, s, s)
-                .row(s, b, s)
-                .row(s, s, s)
-                .result(item)
-                .id("iron_to_bedrock")
-                .build();
-
-        Sponge.getGame().getRegistry().getCraftingRecipeRegistry().register(recipe);
-        this.logger.info("Registering custom crafting recipes using the deprecated method!");
+    @Override
+    public void enable(MessageReceiver src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     @Listener
     public void onRegisterCraftingRecipes(GameRegistryEvent.Register<CraftingRecipe> event) {
         final Ingredient s = Ingredient.of(STONE);
-        final Ingredient b = Ingredient.of(BED, WOOL);
+        final Ingredient b = Ingredient.of(WHITE_BED, WHITE_WOOL);
         final ItemStack item = ItemStack.of(BEDROCK, 1);
         final DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(Enchantment.of(EnchantmentTypes.UNBREAKING, 1)));
         if (trans.getType() != DataTransactionResult.Type.SUCCESS) {
@@ -113,7 +100,7 @@ public class RecipeTest {
                 .row(s, b, s)
                 .row(s, s, s)
                 .result(item)
-                .id("bedrock")
+                .key(CatalogKey.of("recipe_test", "bedrock"))
                 .build();
         event.register(recipe);
 
@@ -131,43 +118,47 @@ public class RecipeTest {
         event.register(SmeltingRecipe.builder()
                 .ingredient(in)
                 .result(out)
-                .id("hot_coal")
+                .key(CatalogKey.of("recipe_test", "hot_coal"))
                 .experience(5)
                 .build());
         this.logger.info("Registering custom smelting recipes!");
 
         final SmeltIronRecipe smeltIronRecipe = new SmeltIronRecipe();
         event.register(smeltIronRecipe);
-        this.logger.info("SmeltIronRecipe ID: " + smeltIronRecipe.getId());
+        this.logger.info("SmeltIronRecipe ID: " + smeltIronRecipe.getKey());
 
         final SmeltGoldRecipe smeltGoldRecipe = new SmeltGoldRecipe();
         event.register(smeltGoldRecipe);
-        this.logger.info("SmeltGoldRecipe ID: " + smeltGoldRecipe.getId());
+        this.logger.info("SmeltGoldRecipe ID: " + smeltGoldRecipe.getKey());
 
         this.logger.info("## Smelting recipes:");
-        event.getRegistryModule().getAll().forEach(recipe -> this.logger.info(" - " + recipe.getId()));
+        event.getRegistryModule().getAll().forEach(recipe -> this.logger.info(" - " + recipe.getKey()));
     }
 
-    @Listener
-    public void onCraftPreview(CraftItemEvent.Preview event) {
-        if (event.getRecipe().isPresent()) {
-            if (event.getRecipe().get().getExemplaryResult().getType() == BEDROCK) {
-                ItemStackSnapshot item = event.getPreview().getFinal();
-                List<Text> lore = Arrays.asList(Text.of("Uncraftable"));
-                item = item.with(Keys.ITEM_LORE, lore).get();
-                event.getPreview().setCustom(item);
-            }
-        }
-    }
+    public static class CraftListener {
 
-    @Listener
-    public void onCraft(CraftItemEvent.Craft event, @First Player player) {
-        if (event.getRecipe().isPresent()) {
-            if (event.getRecipe().get().getExemplaryResult().getType() == BEDROCK) {
-                player.sendMessage(Text.of("You tried to craft Bedrock!"));
-                event.setCancelled(true);
+        @Listener
+        public void onCraftPreview(CraftItemEvent.Preview event) {
+            if (event.getRecipe().isPresent()) {
+                if (event.getRecipe().get().getExemplaryResult().getType() == BEDROCK) {
+                    ItemStackSnapshot item = event.getPreview().getFinal();
+                    List<Text> lore = Arrays.asList(Text.of("Uncraftable"));
+                    item = item.with(Keys.ITEM_LORE, lore).get();
+                    event.getPreview().setCustom(item);
+                }
             }
         }
+
+        @Listener
+        public void onCraft(CraftItemEvent.Craft event, @First Player player) {
+            if (event.getRecipe().isPresent()) {
+                if (event.getRecipe().get().getExemplaryResult().getType() == BEDROCK) {
+                    player.sendMessage(Text.of("You tried to craft Bedrock!"));
+                    event.setCancelled(true);
+                }
+            }
+        }
+
     }
 
     public static class ArrowRecipe implements ShapedCraftingRecipe {
@@ -218,8 +209,8 @@ public class RecipeTest {
         }
 
         @Override
-        public String getId() {
-            return "recipe_test:arrow";
+        public CatalogKey getKey() {
+            return CatalogKey.of("recipe_test", "arrow");
         }
 
         @Override
@@ -234,6 +225,11 @@ public class RecipeTest {
     }
 
     public static class SmeltIronRecipe implements SmeltingRecipe {
+
+        @Override
+        public CatalogKey getKey() {
+            return CatalogKey.of("recipe_test", "smelt_iron_block_to_ingots");
+        }
 
         @Override
         public ItemStackSnapshot getExemplaryIngredient() {
@@ -262,8 +258,8 @@ public class RecipeTest {
     public static class SmeltGoldRecipe implements SmeltingRecipe {
 
         @Override
-        public String getId() {
-            return "recipe_test:smelt_gold_block_to_ingots";
+        public CatalogKey getKey() {
+            return CatalogKey.of("recipe_test", "smelt_gold_block_to_ingots");
         }
 
         @Override
