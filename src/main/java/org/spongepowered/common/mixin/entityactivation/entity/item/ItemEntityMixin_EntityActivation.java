@@ -43,7 +43,8 @@ public abstract class ItemEntityMixin_EntityActivation extends EntityMixin_Entit
             --this.pickupDelay;
         }
 
-        if (!this.world.isRemote && this.age >= ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
+        if (!this.shadow$getEntityWorld().isRemote() && this.age >= ((WorldInfoBridge) this.shadow$getEntityWorld().getWorldInfo())
+                .bridge$getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
             this.shadow$remove();
         }
     }

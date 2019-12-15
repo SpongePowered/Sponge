@@ -39,7 +39,6 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.Activat
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
 public abstract class EntityMixin_EntityActivation implements ActivationCapability {
 
-    @Shadow public World world;
     @Shadow public boolean onGround;
     @Shadow public abstract World shadow$getEntityWorld();
     @Shadow public abstract void shadow$remove();
