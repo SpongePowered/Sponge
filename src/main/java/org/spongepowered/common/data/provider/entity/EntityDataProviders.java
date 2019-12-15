@@ -24,18 +24,27 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.entity.AgeableEntity;
+import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 import net.minecraft.entity.monster.BlazeEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
+import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
+import org.spongepowered.common.data.provider.entity.areaeffectcloud.AreaEffectCloudEntityParticleEffectProvider;
+import org.spongepowered.common.data.provider.entity.areaeffectcloud.AreaEffectCloudEntityPotionEffectsProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityBodyRotationsProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityPlacingDisabledProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityRotationProvider;
@@ -43,19 +52,38 @@ import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntity
 import org.spongepowered.common.data.provider.entity.base.EntityDisplayNameProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvisibleProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvulnerabilityTicksProvider;
+import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityIsSaddledProvider;
+import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseColorProvider;
+import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseStyleProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityActiveItemProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityBodyRotationsProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityChestRotationProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityHeadRotationProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityHealthProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityLastAttackerProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityMaxAirProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityMaxHealthProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityPotionEffectsProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityRemainingAirProvider;
+import org.spongepowered.common.data.provider.entity.living.LivingEntityStuckArrowsProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityDominantHandProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityExhaustionProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityFlyingSpeedProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityFoodLevelProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntitySaturationProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityWalkingSpeedProvider;
+import org.spongepowered.common.data.provider.entity.user.UserFirstDatePlayedProvider;
+import org.spongepowered.common.data.provider.entity.user.UserLastDatePlayedProvider;
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishIgnoresCollisionProvider;
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishPreventsTargetingProvider;
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishProvider;
+import org.spongepowered.common.data.provider.entity.wolf.WolfEntityIsWetProvider;
+import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.BlazeEntityAccessor;
 import org.spongepowered.common.mixin.accessor.tileentity.CommandBlockLogicAccessor;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 public class EntityDataProviders extends DataProviderRegistryBuilder {
@@ -87,12 +115,20 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 PigEntity::getSaddled,
                 PigEntity::setSaddled);
 
+        registerAreaEffectCloudEntityData();
         registerFallingBlockEntityData();
         registerArmorStandEntityData();
         registerMinecartCommandBlockEntityData();
         registerSheepEntityData();
         registerVanishableEntityData();
         registerPlayerEntityData();
+        registerWolfEntityData();
+        registerUserData();
+        registerHorseEntityData();
+        registerAbstractHorseEntityData();
+        registerAgeableEntityData();
+        registerItemEntityData();
+        registerLivingEntityData();
         registerEntityData();
     }
 
@@ -188,6 +224,62 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(new MinecartCommandBlockEntityLastCommandOutputProvider());
     }
 
+    private void registerAbstractHorseEntityData() {
+        register(new AbstractHorseEntityIsSaddledProvider());
+    }
+
+    private void registerHorseEntityData() {
+        register(new HorseEntityHorseColorProvider());
+        register(new HorseEntityHorseStyleProvider());
+    }
+
+    private void registerAreaEffectCloudEntityData() {
+        register(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_AGE,
+                (accessor) -> accessor.ticksExisted,
+                (accessor, value) -> accessor.ticksExisted = value);
+
+        register(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY,
+                (accessor) -> accessor.ticksExisted,
+                (accessor, value) -> accessor.ticksExisted = value);
+
+        register(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_COLOR,
+                (accessor) -> Color.ofRgb(accessor.getColor()),
+                (accessor, value) -> accessor.setColor(value.getRgb()));
+
+        register(AreaEffectCloudEntityAccessor.class, Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE,
+                AreaEffectCloudEntityAccessor::accessor$getDurationOnUse,
+                AreaEffectCloudEntityAccessor::accessor$setDurationOnUse);
+
+        register(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_DURATION,
+                AreaEffectCloudEntity::getDuration,
+                AreaEffectCloudEntity::setDuration);
+
+        register(AreaEffectCloudEntityAccessor.class, AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE,
+                (accessor) -> (double) accessor.accessor$getRadiusOnUse(),
+                (accessor, value) -> accessor.setRadiusOnUse(value.floatValue()));
+
+        register(AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_RADIUS,
+                (accessor) -> (double) accessor.getRadius(),
+                (accessor, value) -> accessor.setRadius(value.floatValue()));
+
+        register(AreaEffectCloudEntityAccessor.class, AreaEffectCloudEntity.class, Keys.AREA_EFFECT_CLOUD_WAIT_TIME,
+                AreaEffectCloudEntityAccessor::accessor$getWaitTime,
+                AreaEffectCloudEntity::setWaitTime);
+
+        register(new AreaEffectCloudEntityParticleEffectProvider());
+        register(new AreaEffectCloudEntityPotionEffectsProvider());
+    }
+
+    private void registerAgeableEntityData() {
+        register(AgeableEntity.class, Keys.AGEABLE_AGE,
+                AgeableEntity::getGrowingAge,
+                AgeableEntity::setGrowingAge);
+
+        register(AgeableEntity.class, Keys.IS_ADULT,
+                (accessor) -> !accessor.isChild(),
+                (accessor, value) -> accessor.setGrowingAge(value ? Constants.Entity.Ageable.ADULT : Constants.Entity.Ageable.CHILD));
+    }
+
     private void registerEntityData() {
         register(Entity.class, Keys.VELOCITY,
                 (accessor) -> VecHelper.toVector3d(accessor.getMotion()),
@@ -203,9 +295,40 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(new EntityInvulnerabilityTicksProvider());
     }
 
+    private void registerLivingEntityData() {
+        register(LivingEntity.class, Keys.ABSORPTION,
+                (accessor) -> (double) accessor.getAbsorptionAmount(),
+                (accessor, value) -> accessor.setAbsorptionAmount(value.floatValue()));
+
+        register(new LivingEntityActiveItemProvider());
+        register(new LivingEntityBodyRotationsProvider());
+        register(new LivingEntityChestRotationProvider());
+        register(new LivingEntityHeadRotationProvider());
+        register(new LivingEntityHealthProvider());
+        register(new LivingEntityLastAttackerProvider());
+        register(new LivingEntityMaxAirProvider());
+        register(new LivingEntityMaxHealthProvider());
+        register(new LivingEntityPotionEffectsProvider());
+        register(new LivingEntityRemainingAirProvider());
+        register(new LivingEntityStuckArrowsProvider());
+    }
+
     private void registerSheepEntityData() {
-        register(SheepEntity.class, Keys.DYE_COLOR, SheepEntity::getFleeceColor, SheepEntity::setFleeceColor, identity());
-        register(SheepEntity.class, Keys.IS_SHEARED, SheepEntity::getSheared, SheepEntity::setSheared);
+        register(SheepEntity.class, Keys.DYE_COLOR,
+                SheepEntity::getFleeceColor,
+                SheepEntity::setFleeceColor, identity());
+
+        register(SheepEntity.class, Keys.IS_SHEARED,
+                SheepEntity::getSheared,
+                SheepEntity::setSheared);
+    }
+
+    private void registerWolfEntityData() {
+        register(WolfEntity.class, Keys.DYE_COLOR,
+                WolfEntity::getCollarColor,
+                WolfEntity::setCollarColor, identity());
+
+        register(new WolfEntityIsWetProvider());
     }
 
     private void registerVanishableEntityData() {
@@ -221,5 +344,20 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(new PlayerEntityFoodLevelProvider());
         register(new PlayerEntitySaturationProvider());
         register(new PlayerEntityWalkingSpeedProvider());
+    }
+
+    private void registerItemEntityData() {
+        register(ItemEntityBridge.class, Keys.DESPAWN_DELAY,
+                ItemEntityBridge::bridge$getDespawnDelay,
+                ItemEntityBridge::bridge$setDespawnDelay);
+
+        register(ItemEntityBridge.class, ItemEntity.class, Keys.PICKUP_DELAY,
+                ItemEntityBridge::bridge$getPickupDelay,
+                ItemEntity::setPickupDelay);
+    }
+
+    private void registerUserData() {
+        register(new UserFirstDatePlayedProvider());
+        register(new UserLastDatePlayedProvider());
     }
 }
