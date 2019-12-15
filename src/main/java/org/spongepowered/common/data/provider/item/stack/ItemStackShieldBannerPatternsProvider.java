@@ -80,7 +80,7 @@ public class ItemStackShieldBannerPatternsProvider extends GenericMutableDataPro
     protected boolean set(ItemStack dataHolder, List<PatternLayer> value) {
         final ListNBT layersTag = value.stream()
                 .map(ItemStackShieldBannerPatternsProvider::layerToNbt)
-                .collect(NbtCollectors.toList());
+                .collect(NbtCollectors.toTagList());
 
         final CompoundNBT blockEntity = dataHolder.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
         blockEntity.put(Constants.TileEntity.Banner.BANNER_PATTERNS, layersTag);
