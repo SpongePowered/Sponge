@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.BoundedValue;
-import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
@@ -175,10 +174,6 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
 
             return new BoundedKey(key, this.valueToken, elementToken, comparator,
                     includesTester, minValueSupplier, maxValueSupplier);
-        }
-
-        if (OptionalValue.class.isAssignableFrom(this.valueToken.getRawType())) {
-            return new OptionalKey(key, this.valueToken, elementToken, comparator, includesTester);
         }
 
         return new SpongeKey<>(key, this.valueToken, elementToken, comparator, includesTester);

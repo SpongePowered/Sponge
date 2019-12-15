@@ -35,26 +35,27 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class MinecartCommandBlockEntityLastCommandOutputProvider extends GenericMutableDataProvider<MinecartCommandBlockEntity, Optional<Text>> {
+public class MinecartCommandBlockEntityLastCommandOutputProvider extends GenericMutableDataProvider<MinecartCommandBlockEntity, Text> {
 
     public MinecartCommandBlockEntityLastCommandOutputProvider() {
         super(Keys.LAST_COMMAND_OUTPUT);
     }
 
     @Override
-    protected Optional<Optional<Text>> getFrom(MinecartCommandBlockEntity dataHolder) {
+    protected Optional<Text> getFrom(MinecartCommandBlockEntity dataHolder) {
         @Nullable final ITextComponent component = ((CommandBlockLogicAccessor) dataHolder.getCommandBlockLogic()).accessor$getNullableLastOutput();
-        return Optional.of(Optional.ofNullable(component == null ? null : SpongeTexts.toText(component)));
+        return component == null ? Optional.empty() : Optional.of(SpongeTexts.toText(component));
     }
 
     @Override
-    protected boolean set(MinecartCommandBlockEntity dataHolder, Optional<Text> value) {
-        dataHolder.getCommandBlockLogic().setLastOutput(value.map(SpongeTexts::toComponent).orElse(null));
+    protected boolean set(MinecartCommandBlockEntity dataHolder, Text value) {
+        dataHolder.getCommandBlockLogic().setLastOutput(SpongeTexts.toComponent(value));
         return true;
     }
 
     @Override
     protected boolean removeFrom(MinecartCommandBlockEntity dataHolder) {
-        return this.set(dataHolder, Optional.empty());
+        dataHolder.getCommandBlockLogic().setLastOutput(null);
+        return true;
     }
 }
