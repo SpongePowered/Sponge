@@ -24,35 +24,38 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
+import net.minecraft.entity.EntityPredicate;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.accessor.entity.EntityPredicateAccessor;
 
-@SuppressWarnings("rawtypes")
+import java.util.function.Predicate;
+
+@SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(NearestAttackableTargetGoal.class)
 public abstract class NearestAttackableTargetGoalMixin_API extends TargetGoalMixin_API<FindNearestAttackableTargetGoal>
         implements FindNearestAttackableTargetGoal {
 
-    @Shadow @Final @Mutable protected Class targetClass;
-    @Shadow @Final @Mutable private int targetChance;
-    @Shadow @Final @Mutable protected Predicate targetEntitySelector;
+    private static Predicate<? extends LivingEntity> ALWAYS_TRUE = e -> true;
 
-    @SuppressWarnings("unchecked")
+    @Shadow @Final @Mutable protected Class<? extends LivingEntity> targetClass;
+    @Shadow protected EntityPredicate targetEntitySelector;
+    @Shadow @Final @Mutable protected int targetChance;
+
     @Override
     public Class<? extends Living> getTargetClass() {
-        return this.targetClass;
+        return (Class<? extends Living>) this.targetClass;
     }
 
     @Override
-    public FindNearestAttackableTargetGoal setTargetClass(final Class<? extends Living> targetClass) {
-        this.targetClass = targetClass;
+    public FindNearestAttackableTargetGoal setTargetClass(Class<? extends Living> targetClass) {
+        this.targetClass = (Class<? extends LivingEntity>) targetClass;
         return this;
     }
 
@@ -62,21 +65,20 @@ public abstract class NearestAttackableTargetGoalMixin_API extends TargetGoalMix
     }
 
     @Override
-    public FindNearestAttackableTargetGoal setChance(final int chance) {
+    public FindNearestAttackableTargetGoal setChance(int chance) {
         this.targetChance = chance;
         return this;
     }
 
     @Override
-    public FindNearestAttackableTargetGoal filter(final java.util.function.Predicate<Living> predicate) {
-        this.targetEntitySelector = predicate == null ? null : Functional.java8ToGuava(predicate);
+    public FindNearestAttackableTargetGoal filter(Predicate<Living> predicate) {
+        this.targetEntitySelector.setCustomPredicate(((Predicate<LivingEntity>) (Object) predicate));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public java.util.function.Predicate<Living> getFilter() {
-        return this.targetEntitySelector == null ? Predicates.alwaysTrue() : this.targetEntitySelector;
+    public Predicate<Living> getFilter() {
+        final Predicate<LivingEntity> predicate = ((EntityPredicateAccessor) this.targetEntitySelector).accessor$getCustomPredicate();
+        return (Predicate<Living>) (predicate == null ? ALWAYS_TRUE : predicate);
     }
-
 }

@@ -589,7 +589,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public DataHolder copy() {
+    public org.spongepowered.api.entity.Entity copy() {
         if ((Object) this instanceof Player) {
             throw new IllegalArgumentException("Cannot copy player entities!");
         }

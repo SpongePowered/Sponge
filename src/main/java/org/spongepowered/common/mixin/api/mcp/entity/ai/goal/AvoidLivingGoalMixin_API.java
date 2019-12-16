@@ -24,35 +24,39 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidEntityGoal;
+import net.minecraft.entity.EntityPredicate;
+import net.minecraft.entity.LivingEntity;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidLivingGoal;
 import org.spongepowered.api.entity.living.Creature;
-import org.spongepowered.api.util.Functional;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.accessor.entity.EntityPredicateAccessor;
 
 import java.util.function.Predicate;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(net.minecraft.entity.ai.goal.AvoidEntityGoal.class)
-public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> implements AvoidEntityGoal {
+public abstract class AvoidLivingGoalMixin_API extends GoalMixin_API<Creature> implements AvoidLivingGoal {
+
+    private static final Predicate<LivingEntity> ALWAYS_TRUE = e -> true;
 
     @Shadow @Final @Mutable private double farSpeed;
     @Shadow @Final @Mutable private double nearSpeed;
-    @Shadow @Final @Mutable private float avoidDistance;
-    @Shadow @Final @Mutable private com.google.common.base.Predicate avoidTargetSelector;
+    @Shadow @Final @Mutable protected float avoidDistance;
+    @Shadow @Final private EntityPredicate builtTargetSelector;
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Predicate<Entity> getTargetSelector() {
-        return this.avoidTargetSelector;
+    public Predicate<Living> getTargetSelector() {
+        final Predicate<LivingEntity> predicate = ((EntityPredicateAccessor) this.builtTargetSelector).accessor$getCustomPredicate();
+        return (Predicate<Living>) (Object) (predicate == null ? ALWAYS_TRUE : predicate);
     }
 
     @Override
-    public AvoidEntityGoal setTargetSelector(Predicate<Entity> predicate) {
-        this.avoidTargetSelector = Functional.java8ToGuava(predicate);
+    public AvoidLivingGoal setTargetSelector(Predicate<Living> predicate) {
+        this.builtTargetSelector.setCustomPredicate((Predicate<LivingEntity>) (Object) predicate);
         return this;
     }
 
@@ -62,7 +66,7 @@ public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> i
     }
 
     @Override
-    public AvoidEntityGoal setSearchDistance(float distance) {
+    public AvoidLivingGoal setSearchDistance(float distance) {
         this.avoidDistance = distance;
         return this;
     }
@@ -73,7 +77,7 @@ public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> i
     }
 
     @Override
-    public AvoidEntityGoal setCloseRangeSpeed(double speed) {
+    public AvoidLivingGoal setCloseRangeSpeed(double speed) {
        this.nearSpeed = speed;
         return this;
     }
@@ -84,7 +88,7 @@ public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> i
     }
 
     @Override
-    public AvoidEntityGoal setFarRangeSpeed(double speed) {
+    public AvoidLivingGoal setFarRangeSpeed(double speed) {
         this.farSpeed = speed;
         return this;
     }

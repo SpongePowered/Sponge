@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
-import org.spongepowered.api.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.ai.goal.builtin.WatchClosestGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -35,29 +36,28 @@ import org.spongepowered.common.SpongeImpl;
 
 import javax.annotation.Nullable;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.LookAtGoal;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-@Mixin(LookAtGoal.class)
-public abstract class LookAtGoalMixin_API extends Goal implements WatchClosestGoal {
+@Mixin(net.minecraft.entity.ai.goal.LookAtGoal.class)
+public abstract class LookAtGoalMixin_API extends Goal implements LookAtGoal {
 
-    @Shadow protected Class watchedClass;
-    @Shadow protected float maxDistance;
+    @Shadow @Final @Mutable protected Class<? extends LivingEntity> watchedClass;
+    @Shadow @Final @Mutable protected float maxDistance;
     @Shadow @Final @Mutable private float chance;
 
     @Nullable private EntityType api$watchedType;
 
     @Override
-    public Class<? extends Entity> getWatchedClass() {
+    public Class<? extends Living> getWatchedClass() {
         if (this.api$watchedType == null) {
             this.api$watchedType = SpongeImpl.getRegistry().getTranslated(this.watchedClass, EntityType.class);
         }
-        return this.watchedClass;
+        return (Class<? extends Living>) this.watchedClass;
     }
 
     @Override
-    public WatchClosestGoal setWatchedClass(final Class<? extends Entity> watchedClass) {
-        this.watchedClass = watchedClass;
+    public LookAtGoal setWatchedClass(Class<? extends Living> watchedClass) {
+        this.watchedClass = (Class<? extends LivingEntity>) watchedClass;
         return this;
     }
 
@@ -67,7 +67,7 @@ public abstract class LookAtGoalMixin_API extends Goal implements WatchClosestGo
     }
 
     @Override
-    public WatchClosestGoal setMaxDistance(final float maxDistance) {
+    public LookAtGoal setMaxDistance(float maxDistance) {
         this.maxDistance = maxDistance;
         return this;
     }
@@ -78,9 +78,8 @@ public abstract class LookAtGoalMixin_API extends Goal implements WatchClosestGo
     }
 
     @Override
-    public WatchClosestGoal setChance(final float chance) {
+    public LookAtGoal setChance(float chance) {
         this.chance = chance;
         return this;
     }
-
 }

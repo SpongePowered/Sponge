@@ -31,11 +31,11 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.ai.goal.GoalTypes;
-import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidEntityGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.WanderGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.WatchClosestGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidLivingGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RandomWalkingGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.Agent;
@@ -96,11 +96,11 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<GoalType
 
     @Override
     public void registerDefaults() {
-        this.createAITaskType("minecraft:wander", "Wander", WanderGoal.class);
-        this.createAITaskType("minecraft:avoid_entity", "Avoid Entity", AvoidEntityGoal.class);
+        this.createAITaskType("minecraft:wander", "Wander", RandomWalkingGoal.class);
+        this.createAITaskType("minecraft:avoid_entity", "Avoid Entity", AvoidLivingGoal.class);
         this.createAITaskType("minecraft:run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyGoal.class);
-        this.createAITaskType("minecraft:swimming", "Swimming", SwimmingGoal.class);
-        this.createAITaskType("minecraft:watch_closest", "Watch Closest", WatchClosestGoal.class);
+        this.createAITaskType("minecraft:swimming", "Swimming", SwimGoal.class);
+        this.createAITaskType("minecraft:watch_closest", "Watch Closest", LookAtGoal.class);
         this.createAITaskType("minecraft:find_nearest_attackable_target", "Find Nearest Attackable Target", FindNearestAttackableTargetGoal.class);
         this.createAITaskType("minecraft:attack_living", "Attack Living", AttackLivingGoal.class);
     }

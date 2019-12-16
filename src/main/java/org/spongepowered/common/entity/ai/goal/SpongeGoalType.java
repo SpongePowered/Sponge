@@ -22,51 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.entity.ai.goal;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.ai.goal.RandomWalkingGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.WanderGoal;
-import org.spongepowered.api.entity.living.Creature;
+import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.entity.ai.goal.Goal;
+import org.spongepowered.api.entity.ai.goal.GoalType;
+import org.spongepowered.api.entity.living.Agent;
 
-public final class SpongeWanderAIBuilder implements WanderGoal.Builder {
+public final class SpongeGoalType implements GoalType {
 
-    private double speed;
-    private int executionChance;
+    private final CatalogKey key;
+    private final Class<? extends Goal<? extends Agent>> goalClass;
 
-    public SpongeWanderAIBuilder() {
-        this.reset();
+    public SpongeGoalType(CatalogKey key, Class<? extends Goal<? extends Agent>> goalClass) {
+        this.key = key;
+        this.goalClass = goalClass;
     }
 
     @Override
-    public WanderGoal.Builder speed(double speed) {
-        this.speed = speed;
-        return this;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
-    public WanderGoal.Builder executionChance(int executionChance) {
-        this.executionChance = executionChance;
-        return this;
+    public Class<? extends Goal<?>> getGoalClass() {
+        return this.goalClass;
     }
 
     @Override
-    public WanderGoal.Builder from(WanderGoal value) {
-        return this.speed(value.getSpeed())
-            .executionChance(value.getExecutionChance());
-    }
-
-    @Override
-    public WanderGoal.Builder reset() {
-        this.speed = 1;
-        this.executionChance = 120;
-        return this;
-    }
-
-    @Override
-    public WanderGoal build(Creature owner) {
-        Preconditions.checkNotNull(owner);
-        return (WanderGoal) new RandomWalkingGoal((CreatureEntity) owner, this.speed, this.executionChance);
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .addValue(this.key)
+            .add("goalClass", this.goalClass)
+            .toString();
     }
 }

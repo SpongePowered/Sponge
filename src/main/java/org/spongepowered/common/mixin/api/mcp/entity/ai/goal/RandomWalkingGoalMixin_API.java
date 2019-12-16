@@ -24,19 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.ai.goal.RandomWalkingGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.WanderGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RandomWalkingGoal;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(RandomWalkingGoal.class)
-public abstract class RandomWalkingGoalMixin_API extends GoalMixin_API<Creature> implements WanderGoal {
+@Mixin(net.minecraft.entity.ai.goal.RandomWalkingGoal.class)
+public abstract class RandomWalkingGoalMixin_API extends GoalMixin_API<Creature> implements RandomWalkingGoal {
 
-    @Shadow @Final protected CreatureEntity entity;
     @Shadow @Final @Mutable protected double speed;
     @Shadow protected int executionChance;
 
@@ -46,7 +43,7 @@ public abstract class RandomWalkingGoalMixin_API extends GoalMixin_API<Creature>
     }
 
     @Override
-    public WanderGoal setSpeed(double speed) {
+    public RandomWalkingGoal setSpeed(double speed) {
         this.speed = speed;
         return this;
     }
@@ -57,7 +54,7 @@ public abstract class RandomWalkingGoalMixin_API extends GoalMixin_API<Creature>
     }
 
     @Override
-    public WanderGoal setExecutionChance(int executionChance) {
+    public RandomWalkingGoal setExecutionChance(int executionChance) {
         this.executionChance = executionChance;
         return this;
     }

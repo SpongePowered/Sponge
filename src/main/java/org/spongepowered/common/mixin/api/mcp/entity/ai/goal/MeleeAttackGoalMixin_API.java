@@ -26,14 +26,16 @@ package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(MeleeAttackGoal.class)
 public abstract class MeleeAttackGoalMixin_API implements AttackLivingGoal {
 
-    @Shadow double speedTowardsTarget;
-    @Shadow boolean longMemory;
+    @Shadow @Final @Mutable private double speedTowardsTarget;
+    @Shadow @Final @Mutable private boolean longMemory;
 
     @Override
     public double getSpeed() {
@@ -56,5 +58,4 @@ public abstract class MeleeAttackGoalMixin_API implements AttackLivingGoal {
         this.longMemory = longMemory;
         return this;
     }
-
 }

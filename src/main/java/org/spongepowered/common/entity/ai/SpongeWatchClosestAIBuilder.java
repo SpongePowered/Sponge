@@ -26,14 +26,14 @@ package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.goal.builtin.WatchClosestGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.entity.living.Living;
 
-public final class SpongeWatchClosestAIBuilder implements WatchClosestGoal.Builder {
+@SuppressWarnings({"unchecked", "rawtypes"})
+public final class SpongeWatchClosestAIBuilder implements LookAtGoal.Builder {
 
-    private Class<? extends Entity> watchedClass;
+    private Class<? extends Living> watchedClass;
     private float maxDistance;
     private float chance;
 
@@ -42,32 +42,32 @@ public final class SpongeWatchClosestAIBuilder implements WatchClosestGoal.Build
     }
 
     @Override
-    public WatchClosestGoal.Builder watch(Class<? extends Entity> watchedClass) {
+    public LookAtGoal.Builder watch(Class<? extends Living> watchedClass) {
         this.watchedClass = watchedClass;
         return this;
     }
 
     @Override
-    public WatchClosestGoal.Builder maxDistance(float maxDistance) {
+    public LookAtGoal.Builder maxDistance(float maxDistance) {
         this.maxDistance = maxDistance;
         return this;
     }
 
     @Override
-    public WatchClosestGoal.Builder chance(float chance) {
+    public LookAtGoal.Builder chance(float chance) {
         this.chance = chance;
         return this;
     }
 
     @Override
-    public WatchClosestGoal.Builder from(WatchClosestGoal value) {
+    public LookAtGoal.Builder from(LookAtGoal value) {
         return this.watch(value.getWatchedClass())
             .maxDistance(value.getMaxDistance())
             .chance(value.getChance());
     }
 
     @Override
-    public WatchClosestGoal.Builder reset() {
+    public LookAtGoal.Builder reset() {
         this.watchedClass = null;
         this.maxDistance = 8;
         this.chance = 0.02f;
@@ -75,9 +75,8 @@ public final class SpongeWatchClosestAIBuilder implements WatchClosestGoal.Build
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public WatchClosestGoal build(Agent owner) {
+    public LookAtGoal build(Agent owner) {
         Preconditions.checkNotNull(this.watchedClass);
-        return (WatchClosestGoal) new LookAtGoal((MobEntity) owner, (Class) this.watchedClass, this.maxDistance, this.chance);
+        return (LookAtGoal) new net.minecraft.entity.ai.goal.LookAtGoal((MobEntity) owner, (Class) this.watchedClass, this.maxDistance, this.chance);
     }
 }

@@ -22,27 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai.target;
+package org.spongepowered.common.entity.ai.goal.builtin;
 
-import org.spongepowered.api.entity.ai.goal.builtin.creature.target.TargetGoal;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public abstract class SpongeTargetAIBuilder<A extends TargetGoal<A>, B extends TargetGoal.Builder<A, B>> implements TargetGoal.Builder<A, B> {
+import net.minecraft.entity.MobEntity;
+import org.spongepowered.api.entity.ai.goal.builtin.LookRandomlyGoal;
+import org.spongepowered.api.entity.living.Agent;
 
-    protected boolean checkSight, onlyNearby;
-    protected int searchDelay, interruptTargetUnseenTicks;
+public final class SpongeLookRandomlyGoalBuilder implements LookRandomlyGoal.Builder {
 
-    @SuppressWarnings("unchecked")
     @Override
-    public B checkSight() {
-        this.checkSight = true;
-        return (B) this;
+    public LookRandomlyGoal.Builder from(LookRandomlyGoal value) {
+        return this;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public B onlyNearby() {
-        this.onlyNearby = true;
-        return (B) this;
+    public LookRandomlyGoal.Builder reset() {
+        return this;
     }
 
+    @Override
+    public LookRandomlyGoal build(Agent owner) {
+        checkNotNull(owner);
+
+        return (LookRandomlyGoal) new net.minecraft.entity.ai.goal.LookRandomlyGoal((MobEntity) owner);
+    }
 }

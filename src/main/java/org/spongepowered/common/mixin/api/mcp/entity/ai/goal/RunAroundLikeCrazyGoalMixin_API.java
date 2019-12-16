@@ -46,5 +46,4 @@ public abstract class RunAroundLikeCrazyGoalMixin_API extends GoalMixin implemen
         this.speed = speed;
         return this;
     }
-
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.CreatureEntity;
@@ -30,12 +30,12 @@ import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
 import org.spongepowered.api.entity.living.Creature;
 
-public final class SpongeAttackLivingAIBuilder implements AttackLivingGoal.Builder {
+public final class SpongeAttackLivingGoalBuilder implements AttackLivingGoal.Builder {
 
     private double speed;
     private boolean longMemory;
 
-    public SpongeAttackLivingAIBuilder() {
+    public SpongeAttackLivingGoalBuilder() {
         this.reset();
     }
 

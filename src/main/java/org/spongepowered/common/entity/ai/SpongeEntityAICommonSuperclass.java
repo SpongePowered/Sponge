@@ -39,6 +39,11 @@ public abstract class SpongeEntityAICommonSuperclass extends Goal {
     }
 
     @Override
+    public boolean isPreemptible() {
+        return this.canBeInterrupted();
+    }
+
+    @Override
     public void startExecuting() {
         this.start();
     }
@@ -53,11 +58,6 @@ public abstract class SpongeEntityAICommonSuperclass extends Goal {
         this.update();
     }
 
-    @Override
-    public boolean isInterruptible() {
-        return this.canBeInterrupted();
-    }
-
     public abstract boolean canBeInterrupted();
 
     public abstract void start();
@@ -69,6 +69,4 @@ public abstract class SpongeEntityAICommonSuperclass extends Goal {
     public abstract boolean continueUpdating();
 
     public abstract void reset();
-
 }
-

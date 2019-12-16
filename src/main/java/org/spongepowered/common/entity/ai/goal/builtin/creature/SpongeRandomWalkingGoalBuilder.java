@@ -22,41 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.passive.horse.HorseEntity;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
-import org.spongepowered.api.entity.living.animal.RideableHorse;
+import net.minecraft.entity.CreatureEntity;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RandomWalkingGoal;
+import org.spongepowered.api.entity.living.Creature;
 
-public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCrazyGoal.Builder {
+public final class SpongeRandomWalkingGoalBuilder implements RandomWalkingGoal.Builder {
 
-    double speed;
+    private double speed;
+    private int executionChance;
 
-    public SpongeRunAroundLikeCrazyAIBuilder() {
+    public SpongeRandomWalkingGoalBuilder() {
         this.reset();
     }
 
     @Override
-    public RunAroundLikeCrazyGoal.Builder speed(double speed) {
+    public RandomWalkingGoal.Builder speed(double speed) {
         this.speed = speed;
         return this;
     }
 
     @Override
-    public RunAroundLikeCrazyGoal.Builder from(RunAroundLikeCrazyGoal value) {
-        return this.speed(value.getSpeed());
-    }
-
-    @Override
-    public RunAroundLikeCrazyGoal.Builder reset() {
-        this.speed = 1;
+    public RandomWalkingGoal.Builder executionChance(int executionChance) {
+        this.executionChance = executionChance;
         return this;
     }
 
     @Override
-    public RunAroundLikeCrazyGoal build(RideableHorse owner) {
+    public RandomWalkingGoal.Builder from(RandomWalkingGoal value) {
+        return this.speed(value.getSpeed())
+            .executionChance(value.getExecutionChance());
+    }
+
+    @Override
+    public RandomWalkingGoal.Builder reset() {
+        this.speed = 1;
+        this.executionChance = 120;
+        return this;
+    }
+
+    @Override
+    public RandomWalkingGoal build(Creature owner) {
         Preconditions.checkNotNull(owner);
-        return (RunAroundLikeCrazyGoal) new net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal((HorseEntity) owner, this.speed);
+        return (RandomWalkingGoal) new net.minecraft.entity.ai.goal.RandomWalkingGoal((CreatureEntity) owner, this.speed, this.executionChance);
     }
 }

@@ -28,28 +28,26 @@ import org.spongepowered.api.entity.ai.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
+@SuppressWarnings("unchecked")
 @Mixin(net.minecraft.entity.ai.goal.Goal.class)
-@Implements(value = @Interface(iface = Goal.class, prefix = "task$"))
 public abstract class GoalMixin_API<O extends Agent> implements Goal<O> {
 
-    @Shadow private int mutexBits;
+    @Shadow public abstract EnumSet<net.minecraft.entity.ai.goal.Goal.Flag> shadow$getMutexFlags();
 
     @Override
     public GoalType getType() {
         return ((GoalBridge) this).bridge$getType();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Optional<GoalExecutor<O>> getGoal() {
+    public Optional<GoalExecutor<O>> getExecutor() {
         return (Optional<GoalExecutor<O>>) (Optional<?>) ((GoalBridge) this).bridge$getGoalExecutor();
     }
 
@@ -60,8 +58,6 @@ public abstract class GoalMixin_API<O extends Agent> implements Goal<O> {
 
     @Override
     public boolean canBeInterrupted() {
-        return ((net.minecraft.entity.ai.goal.Goal) (Object) this).isInterruptible();
+        return ((net.minecraft.entity.ai.goal.Goal) (Object) this).isPreemptible();
     }
-
-
 }

@@ -217,7 +217,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         }
     }
 
-    @Nullable
     @Override
     public ResourcePack bridge$getResourcePack() {
         return this.impl$resourcePack;

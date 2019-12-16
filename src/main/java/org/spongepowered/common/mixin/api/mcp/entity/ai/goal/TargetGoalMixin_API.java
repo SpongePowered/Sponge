@@ -31,21 +31,18 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.ai.goal.GoalMixin;
 
+@SuppressWarnings("unchecked")
 @Mixin(net.minecraft.entity.ai.goal.TargetGoal.class)
 public abstract class TargetGoalMixin_API<A extends TargetGoal<A>> extends GoalMixin implements TargetGoal<A> {
 
-    @Shadow protected boolean shouldCheckSight;
+    @Shadow @Final @Mutable protected boolean shouldCheckSight;
     @Shadow @Final @Mutable private boolean nearbyOnly;
-    @Shadow private int targetSearchStatus;
-    @Shadow private int targetSearchDelay;
-    @Shadow private int targetUnseenTicks;
 
     @Override
     public boolean shouldCheckSight() {
         return this.shouldCheckSight;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public A setCheckSight(boolean checkSight) {
         this.shouldCheckSight = checkSight;
@@ -53,15 +50,13 @@ public abstract class TargetGoalMixin_API<A extends TargetGoal<A>> extends GoalM
     }
 
     @Override
-    public boolean onlyNearby() {
+    public boolean shouldCheckOnlyNearby() {
         return this.nearbyOnly;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public A setOnlyNearby(boolean nearby) {
+    public A setCheckOnlyNearby(boolean nearby) {
         this.nearbyOnly = nearby;
         return (A) this;
     }
-
 }

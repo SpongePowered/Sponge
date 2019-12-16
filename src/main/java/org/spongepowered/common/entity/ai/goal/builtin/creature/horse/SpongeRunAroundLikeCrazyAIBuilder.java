@@ -22,31 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.entity.ai.goal.builtin.creature.horse;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.LookIdleGoal;
-import org.spongepowered.api.entity.living.Agent;
+import com.google.common.base.Preconditions;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
+import org.spongepowered.api.entity.living.animal.horse.HorseEntity;
 
-public final class SpongeLookIdleAIBuilder implements LookIdleGoal.Builder {
+public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCrazyGoal.Builder {
+
+    private double speed;
+
+    public SpongeRunAroundLikeCrazyAIBuilder() {
+        this.reset();
+    }
 
     @Override
-    public LookIdleGoal.Builder from(LookIdleGoal value) {
+    public RunAroundLikeCrazyGoal.Builder speed(double speed) {
+        this.speed = speed;
         return this;
     }
 
     @Override
-    public LookIdleGoal.Builder reset() {
+    public RunAroundLikeCrazyGoal.Builder from(RunAroundLikeCrazyGoal value) {
+        checkNotNull(value);
+
+        return this.speed(value.getSpeed());
+    }
+
+    @Override
+    public RunAroundLikeCrazyGoal.Builder reset() {
+        this.speed = 1;
         return this;
     }
 
     @Override
-    public LookIdleGoal build(Agent owner) {
-        checkNotNull(owner);
-
-        return (LookIdleGoal) new LookRandomlyGoal((MobEntity) owner);
+    public RunAroundLikeCrazyGoal build(HorseEntity owner) {
+        Preconditions.checkNotNull(owner);
+        return (RunAroundLikeCrazyGoal) new net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal((net.minecraft.entity.passive.horse.HorseEntity) owner, this.speed);
     }
 }

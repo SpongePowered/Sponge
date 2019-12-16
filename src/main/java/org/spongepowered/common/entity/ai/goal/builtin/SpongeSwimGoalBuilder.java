@@ -22,44 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.entity.ai.goal.builtin;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.entity.ai.goal.Goal;
-import org.spongepowered.api.entity.ai.goal.GoalType;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.minecraft.entity.MobEntity;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
 import org.spongepowered.api.entity.living.Agent;
 
-public final class SpongeGoalType implements GoalType {
-    private final String id, name;
-    private final Class<? extends Goal<? extends Agent>> aiClass;
+public final class SpongeSwimGoalBuilder implements SwimGoal.Builder {
 
-    public SpongeAITaskType(String id, String name, Class<? extends Goal<? extends Agent>> aiClass) {
-        this.id = id;
-        this.name = name;
-        this.aiClass = aiClass;
+    private float chance;
+
+    public SpongeSwimGoalBuilder() {
+        this.reset();
     }
 
     @Override
-    public Class<? extends Goal<? extends Agent>> getAIClass() {
-        return this.aiClass;
+    public SwimGoal.Builder swimChance(float chance) {
+        this.chance = chance;
+        return this;
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public SwimGoal.Builder from(SwimGoal value) {
+        checkNotNull(value);
+        return this.swimChance(value.getSwimChance());
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public SwimGoal.Builder reset() {
+        this.chance = 0.8f;
+        return this;
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .addValue(this.id)
-                .addValue(this.name)
-                .add("aiClass", this.aiClass)
-                .toString();
+    public SwimGoal build(Agent owner) {
+        checkNotNull(owner);
+        final SwimGoal task = (SwimGoal) new net.minecraft.entity.ai.goal.SwimGoal((MobEntity) owner);
+        task.setSwimChance(this.chance);
+        return task;
     }
 }

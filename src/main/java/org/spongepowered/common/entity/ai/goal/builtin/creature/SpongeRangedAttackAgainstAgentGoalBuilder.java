@@ -22,46 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.ai.goal.RangedAttackGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.RangeAgentGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RangedAttackAgainstAgentGoal;
 import org.spongepowered.api.entity.living.Ranger;
 
-public final class SpongeRangeAgentAIBuilder implements RangeAgentGoal.Builder {
+public final class SpongeRangedAttackAgainstAgentGoalBuilder implements RangedAttackAgainstAgentGoal.Builder {
 
     private double maxSpeed;
     private int delayBetweenAttacks;
     private float attackRadius;
 
-    public SpongeRangeAgentAIBuilder() {
+    public SpongeRangedAttackAgainstAgentGoalBuilder() {
         this.reset();
     }
 
     @Override
-    public RangeAgentGoal.Builder moveSpeed(double speed) {
+    public RangedAttackAgainstAgentGoal.Builder moveSpeed(double speed) {
         this.maxSpeed = speed;
         return this;
     }
 
     @Override
-    public RangeAgentGoal.Builder delayBetweenAttacks(int delay) {
+    public RangedAttackAgainstAgentGoal.Builder delayBetweenAttacks(int delay) {
         this.delayBetweenAttacks = delay;
         return this;
     }
 
     @Override
-    public RangeAgentGoal.Builder attackRadius(float radius) {
+    public RangedAttackAgainstAgentGoal.Builder attackRadius(float radius) {
         this.attackRadius = radius;
         return this;
     }
 
     @Override
-    public RangeAgentGoal.Builder from(RangeAgentGoal value) {
+    public RangedAttackAgainstAgentGoal.Builder from(RangedAttackAgainstAgentGoal value) {
         checkNotNull(value);
         this.maxSpeed = value.getMoveSpeed();
         this.delayBetweenAttacks = value.getDelayBetweenAttacks();
@@ -70,7 +70,7 @@ public final class SpongeRangeAgentAIBuilder implements RangeAgentGoal.Builder {
     }
 
     @Override
-    public RangeAgentGoal.Builder reset() {
+    public RangedAttackAgainstAgentGoal.Builder reset() {
         // I'ma use Snowmen defaults. I like Snowmen.
         this.maxSpeed = 1.25D;
         this.delayBetweenAttacks = 20;
@@ -79,9 +79,9 @@ public final class SpongeRangeAgentAIBuilder implements RangeAgentGoal.Builder {
     }
 
     @Override
-    public RangeAgentGoal build(Ranger owner) {
+    public RangedAttackAgainstAgentGoal build(Ranger owner) {
         checkNotNull(owner);
         checkArgument(owner instanceof IRangedAttackMob, "Ranger must be an IRangedAttackMob!");
-        return (RangeAgentGoal) new RangedAttackGoal((IRangedAttackMob) owner, this.maxSpeed, this.delayBetweenAttacks, this.attackRadius);
+        return (RangedAttackAgainstAgentGoal) new RangedAttackGoal((IRangedAttackMob) owner, this.maxSpeed, this.delayBetweenAttacks, this.attackRadius);
     }
 }

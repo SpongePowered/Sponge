@@ -84,13 +84,13 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalType;
-import org.spongepowered.api.entity.ai.goal.builtin.LookIdleGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.WatchClosestGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.LookRandomlyGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidEntityGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.RangeAgentGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.creature.WanderGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidLivingGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RangedAttackAgainstAgentGoal;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.RandomWalkingGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
@@ -197,15 +197,15 @@ import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.entity.ai.SpongeAttackLivingAIBuilder;
-import org.spongepowered.common.entity.ai.SpongeAvoidEntityAIBuilder;
-import org.spongepowered.common.entity.ai.SpongeLookIdleAIBuilder;
-import org.spongepowered.common.entity.ai.SpongeRangeAgentAIBuilder;
-import org.spongepowered.common.entity.ai.SpongeRunAroundLikeCrazyAIBuilder;
-import org.spongepowered.common.entity.ai.SpongeSwimmingAIBuilder;
-import org.spongepowered.common.entity.ai.SpongeWanderAIBuilder;
+import org.spongepowered.common.entity.ai.goal.builtin.creature.SpongeAttackLivingGoalBuilder;
+import org.spongepowered.common.entity.ai.goal.builtin.creature.SpongeAvoidEntityGoalBuilder;
+import org.spongepowered.common.entity.ai.goal.builtin.SpongeLookRandomlyGoalBuilder;
+import org.spongepowered.common.entity.ai.goal.builtin.creature.SpongeRangedAttackAgainstAgentGoalBuilder;
+import org.spongepowered.common.entity.ai.goal.builtin.creature.horse.SpongeRunAroundLikeCrazyAIBuilder;
+import org.spongepowered.common.entity.ai.goal.builtin.SpongeSwimGoalBuilder;
+import org.spongepowered.common.entity.ai.goal.builtin.creature.SpongeRandomWalkingGoalBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
-import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
+import org.spongepowered.common.entity.ai.goal.builtin.creature.target.SpongeFindNearestAttackableTargetGoalBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
 import org.spongepowered.common.event.damage.SpongeBlockDamageSourceBuilder;
@@ -450,15 +450,15 @@ public final class CommonModuleRegistry {
                 .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
                 .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
                 .registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
-                .registerBuilderSupplier(WanderGoal.Builder.class, SpongeWanderAIBuilder::new)
-                .registerBuilderSupplier(AvoidEntityGoal.Builder.class, SpongeAvoidEntityAIBuilder::new)
+                .registerBuilderSupplier(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)
+                .registerBuilderSupplier(AvoidLivingGoal.Builder.class, SpongeAvoidEntityGoalBuilder::new)
                 .registerBuilderSupplier(RunAroundLikeCrazyGoal.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
-                .registerBuilderSupplier(SwimmingGoal.Builder.class, SpongeSwimmingAIBuilder::new)
-                .registerBuilderSupplier(WatchClosestGoal.Builder.class, SpongeWatchClosestAIBuilder::new)
-                .registerBuilderSupplier(FindNearestAttackableTargetGoal.Builder.class, SpongeFindNearestAttackableTargetAIBuilder::new)
-                .registerBuilderSupplier(AttackLivingGoal.Builder.class, SpongeAttackLivingAIBuilder::new)
-                .registerBuilderSupplier(RangeAgentGoal.Builder.class, SpongeRangeAgentAIBuilder::new)
-                .registerBuilderSupplier(LookIdleGoal.Builder.class, SpongeLookIdleAIBuilder::new)
+                .registerBuilderSupplier(SwimGoal.Builder.class, SpongeSwimGoalBuilder::new)
+                .registerBuilderSupplier(LookAtGoal.Builder.class, SpongeWatchClosestAIBuilder::new)
+                .registerBuilderSupplier(FindNearestAttackableTargetGoal.Builder.class, SpongeFindNearestAttackableTargetGoalBuilder::new)
+                .registerBuilderSupplier(AttackLivingGoal.Builder.class, SpongeAttackLivingGoalBuilder::new)
+                .registerBuilderSupplier(RangedAttackAgainstAgentGoal.Builder.class, SpongeRangedAttackAgainstAgentGoalBuilder::new)
+                .registerBuilderSupplier(LookRandomlyGoal.Builder.class, SpongeLookRandomlyGoalBuilder::new)
                 .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
                 .registerBuilderSupplier(Task.Builder.class, () -> Sponge.getScheduler().createTaskBuilder())
                 .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)

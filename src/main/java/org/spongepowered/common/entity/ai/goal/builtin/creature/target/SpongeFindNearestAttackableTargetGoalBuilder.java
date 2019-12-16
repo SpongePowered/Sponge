@@ -22,30 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai.target;
+package org.spongepowered.common.entity.ai.goal.builtin.creature.target;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.util.Functional;
 
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 
-public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTargetAIBuilder<FindNearestAttackableTargetGoal, FindNearestAttackableTargetGoal.Builder>
+@SuppressWarnings({"unchecked", "rawtypes"})
+public final class SpongeFindNearestAttackableTargetGoalBuilder extends SpongeTargetGoalBuilder<FindNearestAttackableTargetGoal, FindNearestAttackableTargetGoal.Builder>
         implements FindNearestAttackableTargetGoal.Builder {
+
+    private static final Predicate<LivingEntity> ALWAYS_TRUE = e -> true;
 
     private Class<? extends Living> targetClass;
     private int chance;
-    @Nullable private Predicate<? extends Living> predicate;
+    @Nullable private Predicate<? extends LivingEntity> predicate;
 
-    public SpongeFindNearestAttackableTargetAIBuilder() {
+    public SpongeFindNearestAttackableTargetGoalBuilder() {
         this.reset();
     }
 
@@ -63,34 +66,36 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
 
     @Override
     public FindNearestAttackableTargetGoal.Builder filter(Predicate<? extends Living> predicate) {
-        this.predicate = predicate;
+        this.predicate = (Predicate<? extends LivingEntity>) predicate;
         return this;
     }
 
     @Override
     public FindNearestAttackableTargetGoal.Builder from(FindNearestAttackableTargetGoal value) {
-        return this.target(value.getTargetClass())
-            .chance(value.getChance())
-            .filter(value.getFilter());
+        checkNotNull(value);
+        this.targetClass = value.getTargetClass();
+        this.checkSight = value.shouldCheckSight();
+        this.checkOnlyNearby = value.shouldCheckOnlyNearby();
+        this.chance = value.getChance();
+        this.predicate = (Predicate<? extends LivingEntity>) value.getFilter();
+        return this;
     }
 
     @Override
     public FindNearestAttackableTargetGoal.Builder reset() {
         this.checkSight = false;
-        this.onlyNearby = false;
-        this.searchDelay = 0;
-        this.interruptTargetUnseenTicks = 0;
+        this.checkOnlyNearby = false;
         this.targetClass = null;
         this.predicate = null;
         return this;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public FindNearestAttackableTargetGoal build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetClass);
-        return (FindNearestAttackableTargetGoal) new NearestAttackableTargetGoal<>((CreatureEntity) owner, (Class<? extends LivingEntity>) this.targetClass, this.chance, this.checkSight,
-            this.onlyNearby, this.predicate == null ? Predicates.alwaysTrue() : Functional.java8ToGuava((Predicate) this.predicate));
+
+        return (FindNearestAttackableTargetGoal) new NearestAttackableTargetGoal((CreatureEntity) owner, this.targetClass, this.chance,
+            this.checkSight, this.checkOnlyNearby, this.predicate == null ? ALWAYS_TRUE : this.predicate);
     }
 }

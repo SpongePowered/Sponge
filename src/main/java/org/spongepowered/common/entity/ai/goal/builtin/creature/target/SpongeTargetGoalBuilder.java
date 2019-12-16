@@ -22,44 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.entity.ai.goal.builtin.creature.target;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
-import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.entity.ai.goal.builtin.creature.target.TargetGoal;
 
-public final class SpongeSwimmingAIBuilder implements SwimmingGoal.Builder {
+@SuppressWarnings("unchecked")
+public abstract class SpongeTargetGoalBuilder<A extends TargetGoal<A>, B extends TargetGoal.Builder<A, B>> implements TargetGoal.Builder<A, B> {
 
-    float chance = 0.8f;
+    boolean checkSight, checkOnlyNearby;
 
-    public SpongeSwimmingAIBuilder() {
-        this.reset();
+    @Override
+    public B checkSight(boolean state) {
+        this.checkSight = state;
+        return (B) this;
     }
 
     @Override
-    public SwimmingGoal.Builder swimChance(float chance) {
-        this.chance = chance;
-        return this;
-    }
-
-    @Override
-    public SwimmingGoal.Builder from(SwimmingGoal value) {
-        return this.swimChance(value.getSwimChance());
-    }
-
-    @Override
-    public SwimmingGoal.Builder reset() {
-        this.chance = 0.8f;
-        return this;
-    }
-
-    @Override
-    public SwimmingGoal build(Agent owner) {
-        Preconditions.checkNotNull(owner);
-        final SwimmingGoal task = (SwimmingGoal) new SwimGoal((MobEntity) owner);
-        task.setSwimChance(this.chance);
-        return task;
+    public B checkOnlyNearby(boolean state) {
+        this.checkOnlyNearby = state;
+        return (B) this;
     }
 }

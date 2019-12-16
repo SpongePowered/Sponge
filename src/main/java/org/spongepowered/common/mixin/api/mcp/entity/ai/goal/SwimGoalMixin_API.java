@@ -24,30 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import org.spongepowered.api.entity.ai.goal.builtin.SwimmingGoal;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin(SwimGoal.class)
-public abstract class SwimGoalMixin_API implements SwimmingGoal {
+@Mixin(net.minecraft.entity.ai.goal.SwimGoal.class)
+public abstract class SwimGoalMixin_API implements SwimGoal {
 
-    @Shadow @Final private MobEntity entity;
+    private float api$swimChance = 0.8f;
 
-    float api$swimChance = 0.8f;
-
-    /**
-     * @author Zidane
-     * @reason By default, Vanilla's swim chance is always 0.8f. I expose this.
-     */
-    @Overwrite
-    public void updateTask() {
-        if (this.entity.getRNG().nextFloat() < this.api$swimChance) {
-            this.entity.getJumpController().setJumping();
-        }
+    @ModifyConstant(method = "tick", constant = @Constant(floatValue = 0.8F))
+    private float api$useAPISwimChance(float swimChance) {
+        return this.api$swimChance;
     }
 
     @Override
@@ -56,7 +45,7 @@ public abstract class SwimGoalMixin_API implements SwimmingGoal {
     }
 
     @Override
-    public void setSwimChance(final float chance) {
+    public void setSwimChance(float chance) {
         this.api$swimChance = chance;
     }
 }
