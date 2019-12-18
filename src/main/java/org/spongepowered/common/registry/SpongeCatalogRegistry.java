@@ -29,29 +29,58 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.BiMap;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.block.Blocks;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.item.Items;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.potion.Effects;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.world.biome.Biomes;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.type.ArmorType;
+import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
+import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.registry.supplier.VanillaBiomeSupplier;
+import org.spongepowered.common.registry.supplier.VanillaDimensionTypeSupplier;
+import org.spongepowered.common.registry.supplier.VanillaEffectSupplier;
+import org.spongepowered.common.registry.supplier.VanillaEnchantmentSupplier;
+import org.spongepowered.common.registry.supplier.VanillaEntityTypeSupplier;
+import org.spongepowered.common.registry.supplier.VanillaFluidSupplier;
+import org.spongepowered.common.registry.supplier.VanillaItemSupplier;
+import org.spongepowered.common.registry.supplier.VanillaParticleTypeSupplier;
+import org.spongepowered.common.registry.supplier.VanillaSoundEventSupplier;
+import org.spongepowered.common.registry.supplier.VanillaTileEntitySupplier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Singleton
@@ -63,9 +92,9 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     private final Map<Class<CatalogType>, Registry<CatalogType>> registriesByType;
 
     public SpongeCatalogRegistry() {
-        this.suppliers = new Object2ObjectArrayMap<>();
-        this.registries = new Object2ObjectArrayMap<>();
-        this.registriesByType = new Object2ObjectArrayMap<>();
+        this.suppliers = new IdentityHashMap<>();
+        this.registries = new Object2ObjectOpenHashMap<>();
+        this.registriesByType = new IdentityHashMap<>();
     }
 
     @Override
@@ -162,12 +191,13 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         }
 
         final SimpleRegistry<T> registry = new SimpleRegistry<>();
-        if (defaultsSupplier != null) {
-            defaultsSupplier.get().forEach(catalogType -> registry.register((ResourceLocation) (Object) catalogType.getKey(), catalogType));
-        }
 
         this.registries.put(key, (Registry<CatalogType>) registry);
         this.registriesByType.put((Class<CatalogType>) catalogClass, (Registry<CatalogType>) registry);
+
+        if (defaultsSupplier != null) {
+            defaultsSupplier.get().forEach(catalogType -> registry.register((ResourceLocation) (Object) catalogType.getKey(), catalogType));
+        }
         return this;
     }
 
@@ -193,10 +223,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    public void registerDefaultSuppliers() {
-
-    }
-
     public void registerDefaultRegistries() {
         // TODO 1.14.4 - Need to supply defaults for each of these
         this
@@ -205,5 +231,22 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .registerRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"))
             .registerRegistry(ArmorType.class, CatalogKey.minecraft("armor_type"))
         ;
+    }
+
+    private void registerDefaultSuppliers() {
+
+        // TODO 1.14 - Stats are stupid, need to handle them manually
+        // TODO 1.14 - This is not right but I don't want this forgotten so here for now
+        VanillaBiomeSupplier.registerSuppliers(this);
+        VanillaBiomeSupplier.registerSuppliers(this);
+        VanillaDimensionTypeSupplier.registerSuppliers(this);
+        VanillaEffectSupplier.registerSuppliers(this);
+        VanillaEnchantmentSupplier.registerSuppliers(this);
+        VanillaEntityTypeSupplier.registerSuppliers(this);
+        VanillaFluidSupplier.registerSuppliers(this);
+        VanillaItemSupplier.registerSuppliers(this);
+        VanillaParticleTypeSupplier.registerSuppliers(this);
+        VanillaSoundEventSupplier.registerSuppliers(this);
+        VanillaTileEntitySupplier.registerSuppliers(this);
     }
 }
