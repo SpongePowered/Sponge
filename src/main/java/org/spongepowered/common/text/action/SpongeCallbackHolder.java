@@ -27,11 +27,10 @@ package org.spongepowered.common.text.action;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.RemovalCause;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -50,6 +49,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SpongeCallbackHolder {
@@ -58,20 +58,17 @@ public class SpongeCallbackHolder {
     private static final SpongeCallbackHolder INSTANCE = new SpongeCallbackHolder();
 
     static final ConcurrentMap<UUID, Consumer<CommandSource>> reverseMap = new ConcurrentHashMap<>();
-    private static final LoadingCache<Consumer<CommandSource>, UUID> callbackCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES)
-            .removalListener(new RemovalListener<Consumer<CommandSource>, UUID>() {
-                @Override
-                public void onRemoval(RemovalNotification<Consumer<CommandSource>, UUID> notification) {
-                    reverseMap.remove(notification.getValue(), notification.getKey());
+    private static final LoadingCache<Consumer<CommandSource>, UUID> callbackCache = Caffeine.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .removalListener(((key, value, cause) -> {
+                if (value != null) {
+                    reverseMap.remove(value);
                 }
-            })
-            .build(new CacheLoader<Consumer<CommandSource>, UUID>() {
-                @Override
-                public UUID load(Consumer<CommandSource> key) throws Exception {
-                    UUID ret = UUID.randomUUID();
-                    reverseMap.putIfAbsent(ret, key);
-                    return ret;
-                }
+            }))
+            .build((key) -> {
+                UUID ret = UUID.randomUUID();
+                reverseMap.putIfAbsent(ret, key);
+                return ret;
             });
 
 
@@ -81,7 +78,7 @@ public class SpongeCallbackHolder {
 
 
     public UUID getOrCreateIdForCallback(Consumer<CommandSource> callback) {
-        return callbackCache.getUnchecked(checkNotNull(callback, "callback"));
+        return callbackCache.get(checkNotNull(callback, "callback"));
     }
 
     public Optional<Consumer<CommandSource>> getCallbackForUUID(UUID id) {

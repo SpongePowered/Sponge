@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.service.permission;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.command.CommandSource;
@@ -72,22 +71,19 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
     }
 
     private LoadingCache<RemoteSource, Set<Context>> buildAddressCache(final String contextKey, final Function<RemoteSource, InetAddress> function) {
-        return CacheBuilder.newBuilder()
+        return Caffeine.newBuilder()
             .weakKeys()
-            .build(new CacheLoader<RemoteSource, Set<Context>>() {
-                @Override
-                public Set<Context> load(RemoteSource key) {
-                    ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
-                    final InetAddress addr = function.apply(key);
-                    if (addr == null) {
-                        return builder.build();
-                    }
-                    builder.add(new Context(contextKey, addr.getHostAddress()));
-                    for (String set : Maps.filterValues(SpongeImpl.getGlobalConfigAdapter().getConfig().getIpSets(), input -> input.apply(addr)).keySet()) {
-                        builder.add(new Context(contextKey, set));
-                    }
+            .<RemoteSource, Set<Context>>build((key) -> {
+                ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
+                final InetAddress addr = function.apply(key);
+                if (addr == null) {
                     return builder.build();
                 }
+                builder.add(new Context(contextKey, addr.getHostAddress()));
+                for (String set : Maps.filterValues(SpongeImpl.getGlobalConfigAdapter().getConfig().getIpSets(), input -> input.apply(addr)).keySet()) {
+                    builder.add(new Context(contextKey, set));
+                }
+                return builder.build();
             });
     }
 
