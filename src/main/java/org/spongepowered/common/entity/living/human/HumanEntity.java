@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.entity.living.human;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
@@ -88,15 +87,11 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
 
     // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
     // you can access this data once per minute, lets cache for 2 minutes
-    private static final LoadingCache<UUID, PropertyMap> PROPERTIES_CACHE = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.MINUTES)
-            .build(new CacheLoader<UUID, PropertyMap>() {
-
-                @Override
-                public PropertyMap load(final UUID uuid) throws Exception {
-                    return SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
-                            .getProperties();
-                }
-            });
+    private static final LoadingCache<UUID, PropertyMap> PROPERTIES_CACHE = Caffeine.newBuilder()
+            .expireAfterWrite(2, TimeUnit.MINUTES)
+            .build((uuid) -> SpongeImpl.getServer().getMinecraftSessionService()
+                    .fillProfileProperties(new GameProfile(uuid, ""), true)
+                    .getProperties());
 
     // A queue of packets waiting to send to players tracking this human
     private final Map<UUID, List<IPacket<?>[]>> playerPacketMap = Maps.newHashMap();
@@ -330,7 +325,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     private boolean updateFakeProfileWithSkin(final UUID skin) {
-        final PropertyMap properties = PROPERTIES_CACHE.getUnchecked(skin);
+        final PropertyMap properties = PROPERTIES_CACHE.get(skin);
         if (properties.isEmpty()) {
             return false;
         }

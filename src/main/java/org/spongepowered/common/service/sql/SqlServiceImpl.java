@@ -26,11 +26,11 @@ package org.spongepowered.common.service.sql;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
 import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -117,28 +117,26 @@ public class SqlServiceImpl implements SqlService, Closeable {
     public void buildConnectionCache() {
         this.connectionCache = null;
         this.connectionCache =
-            CacheBuilder.newBuilder().removalListener((RemovalListener<ConnectionInfo, HikariDataSource>) notification -> {
-                HikariDataSource source = notification.getValue();
-                if (source != null) {
-                    source.close();
+            Caffeine.newBuilder()
+                    .removalListener(((key, value, cause) -> {
+                        HikariDataSource source = value;
+                        if (source != null) {
+                            source.close();
+                        }
+                    })).build((key) -> {
+                HikariConfig config = new HikariConfig();
+                config.setUsername(key.getUser());
+                config.setPassword(key.getPassword());
+                config.setDriverClassName(key.getDriverClassName());
+                // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing for info on pool sizing
+                config.setMaximumPoolSize((Runtime.getRuntime().availableProcessors() * 2) + 1);
+                config.setLeakDetectionThreshold(60 * 1000);
+                Properties driverSpecificProperties = PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
+                if (driverSpecificProperties != null) {
+                    config.setDataSourceProperties(driverSpecificProperties);
                 }
-            }).build(new CacheLoader<ConnectionInfo, HikariDataSource>() {
-                @Override
-                public HikariDataSource load(@Nonnull ConnectionInfo key) throws Exception {
-                    HikariConfig config = new HikariConfig();
-                    config.setUsername(key.getUser());
-                    config.setPassword(key.getPassword());
-                    config.setDriverClassName(key.getDriverClassName());
-                    // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing for info on pool sizing
-                    config.setMaximumPoolSize((Runtime.getRuntime().availableProcessors() * 2) + 1);
-                    config.setLeakDetectionThreshold(60 * 1000);
-                    Properties driverSpecificProperties = PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
-                    if (driverSpecificProperties != null) {
-                        config.setDataSourceProperties(driverSpecificProperties);
-                    }
-                    config.setJdbcUrl(key.getAuthlessUrl());
-                    return new HikariDataSource(config);
-                }
+                config.setJdbcUrl(key.getAuthlessUrl());
+                return new HikariDataSource(config);
             });
     }
     @Override

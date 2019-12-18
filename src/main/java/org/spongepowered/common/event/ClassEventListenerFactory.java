@@ -48,9 +48,8 @@ import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_6;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -69,16 +68,8 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
 
     private final AtomicInteger id = new AtomicInteger();
     private final DefineableClassLoader classLoader;
-    private final LoadingCache<Method, Class<? extends AnnotatedEventListener>> cache = CacheBuilder.newBuilder()
-            .concurrencyLevel(1)
-            .weakValues()
-            .build(new CacheLoader<Method, Class<? extends AnnotatedEventListener>>() {
-
-                @Override
-                public Class<? extends AnnotatedEventListener> load(Method method) throws Exception {
-                    return ClassEventListenerFactory.this.createClass(method);
-                }
-            });
+    private final LoadingCache<Method, Class<? extends AnnotatedEventListener>> cache = Caffeine.newBuilder()
+        .weakValues().build(this::createClass);
     private FilterFactory filterFactory;
 
     private final String targetPackage;
