@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Singleton
@@ -135,7 +136,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         checkNotNull(catalogClass);
         checkNotNull(supplier);
 
-        final Map<String, Supplier<CatalogType>> catalogSuppliers = this.suppliers.getOrDefault(catalogClass, new Object2ObjectArrayMap<>());
+        final Map<String, Supplier<CatalogType>> catalogSuppliers = this.suppliers.computeIfAbsent((Class<CatalogType>) (Object) catalogClass, k -> new Object2ObjectArrayMap<>());
         if (catalogSuppliers.containsKey(suggestedId)) {
             throw new DuplicateRegistrationException(String.format("Catalog '%s' with id '%s' has a supplier already registered!", catalogClass,
                 suggestedId));
