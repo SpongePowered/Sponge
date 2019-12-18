@@ -253,6 +253,7 @@ public final class Constants {
 
                 public static final String HEALTH_SCALE = "HealthScale";
             }
+
         }
 
         public static final class User {
@@ -909,6 +910,12 @@ public final class Constants {
         public static final class Rabbit {
 
             public static final Supplier<RabbitType> DEFAULT_TYPE = RabbitTypes.WHITE;
+        }
+
+        public static final class Ravager {
+
+            public static final int STUNNED_TIME = 40;
+            public static final int ROAR_TIME = 10;
         }
 
         public static final class Silverfish {

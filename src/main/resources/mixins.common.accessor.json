@@ -21,6 +21,7 @@
         "entity.monster.EndermanEntityAccessor",
         "entity.monster.EndermiteEntityAccessor",
         "entity.monster.SlimeEntityAccessor",
+        "entity.monster.SpellcastingIllagerEntity_UseSpellGoalAccessor",
         "entity.monster.VindicatorEntityAccessor",
         "entity.monster.ZombiePigmanEntityAccessor",
         "entity.passive.AbstractChestedHorseEntityAccessor",

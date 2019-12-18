@@ -24,11 +24,31 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.WitchEntity;
-import org.spongepowered.api.entity.living.monster.raider.Witch;
+import net.minecraft.entity.monster.SpellcastingIllagerEntity;
+import org.spongepowered.api.entity.living.monster.raider.illager.spellcaster.Spellcaster;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(WitchEntity.class)
-public abstract class WitchEntityMixin_API extends AbstractRaiderEntityMixin_API implements Witch {
+@Mixin(SpellcastingIllagerEntity.class)
+public abstract class SpellcastingIllagerEntityMixin_API extends AbstractIllagerEntityMixin_API implements Spellcaster {
 
+    @Shadow protected int spellTicks;
+    @Shadow private SpellcastingIllagerEntity.SpellType activeSpell;
+    @Shadow public abstract boolean shadow$isSpellcasting();
+    @Shadow public abstract void shadow$setSpellType(SpellcastingIllagerEntity.SpellType p_193081_1_);
+    @Shadow protected abstract SpellcastingIllagerEntity.SpellType shadow$getSpellType();
+
+    @Override
+    public boolean isCastingSpell() {
+        return this.shadow$isSpellcasting();
+    }
+
+    public void setCastingSpell(boolean castSpell) {
+        if (!castSpell) {
+            this.spellTicks = 0;
+            return;
+        }
+
+        // i509 -> TODO: Figure out how to get the casting time from UseSpellGoal. Yes Mojang made spells a goal and their oh so exposed enum SpellType does not refer to the goals.
+    }
 }

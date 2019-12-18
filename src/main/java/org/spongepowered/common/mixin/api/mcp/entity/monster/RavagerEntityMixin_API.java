@@ -24,11 +24,52 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.WitchEntity;
-import org.spongepowered.api.entity.living.monster.raider.Witch;
+import net.minecraft.entity.monster.RavagerEntity;
+import org.spongepowered.api.entity.living.monster.raider.Ravager;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.Constants;
 
-@Mixin(WitchEntity.class)
-public abstract class WitchEntityMixin_API extends AbstractRaiderEntityMixin_API implements Witch {
+@Mixin(RavagerEntity.class)
+public abstract class RavagerEntityMixin_API extends AbstractRaiderEntityMixin_API implements Ravager {
+
+    @Shadow private int stunTick;
+    @Shadow private int roarTick;
+    @Shadow protected abstract boolean shadow$isMovementBlocked();
+
+    @Override
+    public boolean isImmobilized() {
+        return this.shadow$isMovementBlocked();
+    }
+
+    @Override
+    public boolean isRoaring() {
+        return this.roarTick > 0;
+    }
+
+    @Override
+    public void setRoaring(boolean roaring) {
+        if (roaring) {
+            this.roarTick = Constants.Entity.Ravager.ROAR_TIME;
+            return;
+        }
+
+        this.roarTick = 0;
+    }
+
+    @Override
+    public boolean isStunned() {
+        return this.stunTick > 0;
+    }
+
+    @Override
+    public void setStunned(boolean stunned) {
+        if (stunned) {
+            this.stunTick = Constants.Entity.Ravager.STUNNED_TIME;
+            return;
+        }
+
+        this.stunTick = 0;
+    }
 
 }

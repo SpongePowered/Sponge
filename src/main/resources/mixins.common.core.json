@@ -227,6 +227,7 @@
         "world.chunk.BlockStateContainerMixin",
         "world.chunk.ChunkMixin",
         "world.end.DragonFightManagerMixin",
+        "world.raid.RaidMixin",
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin"
     ],
