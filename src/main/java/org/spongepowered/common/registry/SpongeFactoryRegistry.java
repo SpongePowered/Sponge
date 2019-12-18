@@ -50,7 +50,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
 
         final Object duck = this.factories.get(clazz);
         if (duck == null) {
-            throw new UnknownTypeException("Type '%s' has no factory registered!");
+            throw new UnknownTypeException(String.format("Type '%s' has no factory registered!", clazz));
         }
 
         return (T) duck;
