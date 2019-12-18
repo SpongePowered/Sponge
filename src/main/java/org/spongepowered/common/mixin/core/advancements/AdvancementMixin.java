@@ -42,7 +42,6 @@ import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
-import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;

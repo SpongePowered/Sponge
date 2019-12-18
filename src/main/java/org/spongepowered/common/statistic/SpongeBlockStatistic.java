@@ -33,7 +33,6 @@ import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.BlockStatistic;
 import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;

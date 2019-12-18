@@ -22,29 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.accessor.util.registry;
 
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.common.SpongeCatalogType;
+import com.google.common.collect.BiMap;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.SimpleRegistry;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
+@Mixin(SimpleRegistry.class)
+public interface SimpleRegistryAccessor {
 
-    private final byte id;
+    @Accessor(value = "values") Object[] accessor$getValues();
 
-    public SpongeNotePitch(byte id, String name) {
-        super(CatalogKey.minecraft(name.toLowerCase()));
-        this.id = id;
-    }
-
-    public byte getByteId() {
-        return this.id;
-    }
-
-    @Override
-    public NotePitch cycleNext() {
-        byte value = (byte) (((SpongeNotePitch) this).getByteId() + 1);
-        return NotePitchRegistryModule.getPitch(value); // Ensure wrapping at edge
-    }
-
+    @Accessor(value = "registryObjects") BiMap<ResourceLocation, Object> accessor$getRegistryObjects();
 }

@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.entity.ai;
 
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.GoalSelector;
-import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 
 import java.util.Set;
 

@@ -31,7 +31,6 @@ import org.spongepowered.api.advancement.criteria.trigger.Triggers;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.mixin.accessor.advancements.CriteriaTriggersAccessor;
-import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 @SuppressWarnings("rawtypes")
 @RegisterCatalog(Triggers.class)

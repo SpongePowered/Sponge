@@ -22,23 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch.mixin;
+package org.spongepowered.common.mixin.core.util.registry;
 
-import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.item.ItemType;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.SimpleRegistry;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImpl;
 
-@Mixin(value = Item.class, remap = false)
-public abstract class ItemMixin_Test {
+import java.util.function.Supplier;
 
-    // Register items
-    @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
-    private static void registerMinecraftItem(final int id, final ResourceLocation name, final Item item, final CallbackInfo ci) {
-        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) item);
+@Mixin(Registry.class)
+public abstract class RegistryMixin {
+
+    @Inject(method = "register(Ljava/lang/String;Lnet/minecraft/util/registry/MutableRegistry;Ljava/util/function/Supplier;)"
+        + "Lnet/minecraft/util/registry/MutableRegistry;", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private static void impl$registerRegistry(String registryName, Registry<Object> registry, Supplier<Object> supplier,
+        CallbackInfoReturnable<Object> cir, ResourceLocation location) {
+        final Object potentialCatalog = supplier.get();
+        if (potentialCatalog instanceof CatalogType && registry instanceof SimpleRegistry) {
+            // We don't care about non-catalog types and custom implementations of Registry
+            SpongeImpl.getRegistry().getCatalogRegistry().registerRegistry((Class<CatalogType>) potentialCatalog.getClass(),
+                (CatalogKey) (Object) location, (Registry<CatalogType>) (Object) registry);
+        }
     }
-
 }

@@ -31,7 +31,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.GameRegistry;
+import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
@@ -59,7 +59,6 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.registry.SpongeGameRegistry;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 

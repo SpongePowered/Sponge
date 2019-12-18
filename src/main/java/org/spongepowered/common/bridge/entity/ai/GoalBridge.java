@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.entity.ai;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 
 import java.util.Optional;

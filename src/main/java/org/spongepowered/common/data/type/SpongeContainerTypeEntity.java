@@ -27,7 +27,6 @@ package org.spongepowered.common.data.type;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.registry.RegistryHelper;
 
 /**
  * Cannot be opened normally. Use the inventory of an actual entity to open Container.

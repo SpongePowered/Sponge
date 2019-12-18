@@ -32,7 +32,6 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipeRegistry;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.ArrayList;
 import java.util.Collection;

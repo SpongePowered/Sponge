@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.ai.goal;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

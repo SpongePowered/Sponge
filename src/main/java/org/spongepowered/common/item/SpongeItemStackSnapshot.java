@@ -33,8 +33,6 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.GameDictionary;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -52,9 +50,6 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;

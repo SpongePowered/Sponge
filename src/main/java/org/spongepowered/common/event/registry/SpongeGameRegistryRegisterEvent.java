@@ -27,9 +27,7 @@ package org.spongepowered.common.event.registry;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 
 public class SpongeGameRegistryRegisterEvent<T extends CatalogType> implements GameRegistryEvent.Register<T> {
 

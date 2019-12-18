@@ -26,12 +26,12 @@ package org.spongepowered.common.mixin.core.entity.ai.goal;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.ai.GoalExecutor;
-import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.ai.AITaskEvent;
+import org.spongepowered.api.event.entity.ai.goal.GoalEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -84,7 +84,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
             // Event is fired in bridge$fireConstructors
             return set.add(((GoalSelector) (Object) this).new EntityAITaskEntry(priority, base));
         }
-        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(), priority, priority,
+        final GoalEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(), priority, priority,
                 (GoalExecutor<?>) this, (Agent) this.owner, (Goal<?>) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
@@ -132,7 +132,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
 
             // Sponge start
             if (otherAiBase.equals(aiBase)) {
-                AITaskEvent.Remove event = null;
+                GoalEvent.Remove event = null;
                 if (ShouldFire.A_I_TASK_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
                     event = SpongeEventFactory.createAITaskEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
                             (GoalExecutor) this, (Agent) this.owner, (Goal) otherAiBase, entityaitaskentry.priority);

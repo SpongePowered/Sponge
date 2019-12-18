@@ -33,8 +33,8 @@ import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.GoalExecutor;
-import org.spongepowered.api.entity.ai.GoalExecutorTypes;
+import org.spongepowered.api.entity.ai.goal.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
@@ -42,7 +42,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
-import org.spongepowered.api.event.entity.ai.AITaskEvent;
+import org.spongepowered.api.event.entity.ai.goal.GoalEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -113,7 +113,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         final Iterator<GoalSelector.EntityAITaskEntry> taskItr = tasks.bridge$getTasksUnsafe().iterator();
         while (taskItr.hasNext()) {
             final GoalSelector.EntityAITaskEntry task = taskItr.next();
-            final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
+            final GoalEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
                     task.priority, task.priority, (GoalExecutor<? extends Agent>) tasks, (Agent) this, (Goal<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {

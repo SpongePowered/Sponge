@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.RegistryException;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 

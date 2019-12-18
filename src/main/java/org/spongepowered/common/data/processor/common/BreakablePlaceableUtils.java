@@ -30,7 +30,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

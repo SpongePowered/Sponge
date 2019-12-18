@@ -29,7 +29,7 @@ import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.ai.GoalExecutorTypes;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalTypes;
 import org.spongepowered.api.entity.ai.goal.AbstractGoal;

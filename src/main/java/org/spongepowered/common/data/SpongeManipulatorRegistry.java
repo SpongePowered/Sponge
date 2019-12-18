@@ -58,7 +58,6 @@ import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
-import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.util.Constants;
 

@@ -22,29 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.mcp.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
+@Mixin(ResourceLocation.class)
+@Implements(value = @Interface(iface = CatalogKey.class, prefix = "catalogKey$"))
+public abstract class ResourceLocationMixin_API implements CatalogKey {
 
-    private final byte id;
+    @Shadow public abstract String shadow$getNamespace();
+    @Shadow public abstract String shadow$getPath();
+    @Shadow public abstract int shadow$compareTo(ResourceLocation p_compareTo_1_);
 
-    public SpongeNotePitch(byte id, String name) {
-        super(CatalogKey.minecraft(name.toLowerCase()));
-        this.id = id;
-    }
-
-    public byte getByteId() {
-        return this.id;
+    @Intrinsic
+    public String catalogKey$getNamespace() {
+        return this.shadow$getNamespace();
     }
 
     @Override
-    public NotePitch cycleNext() {
-        byte value = (byte) (((SpongeNotePitch) this).getByteId() + 1);
-        return NotePitchRegistryModule.getPitch(value); // Ensure wrapping at edge
+    public String getValue() {
+        return this.shadow$getPath();
     }
 
+    @Override
+    public int compareTo(CatalogKey o) {
+        checkNotNull(o);
+        return this.shadow$compareTo((ResourceLocation) (Object) o);
+    }
 }

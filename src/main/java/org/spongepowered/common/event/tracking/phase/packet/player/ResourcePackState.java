@@ -29,7 +29,7 @@ import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
+import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;

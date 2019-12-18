@@ -40,7 +40,6 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

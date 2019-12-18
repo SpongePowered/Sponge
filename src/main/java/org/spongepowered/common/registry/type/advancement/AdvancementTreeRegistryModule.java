@@ -34,12 +34,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
 import org.spongepowered.common.mixin.accessor.advancements.AdvancementManagerAccessor;
-import org.spongepowered.common.registry.CustomRegistrationPhase;
-import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
 import java.util.Optional;
 
-@CustomRegistrationPhase
 public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<AdvancementTree>
         implements AdditionalCatalogRegistryModule<AdvancementTree> {
 

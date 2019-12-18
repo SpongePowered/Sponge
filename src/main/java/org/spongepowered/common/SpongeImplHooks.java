@@ -97,7 +97,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 

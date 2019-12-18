@@ -68,7 +68,6 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.mixin.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
-import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;

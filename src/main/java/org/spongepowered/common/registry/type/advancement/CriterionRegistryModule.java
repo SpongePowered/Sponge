@@ -28,7 +28,6 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.common.advancement.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.SpongeEmptyCriterion;
-import org.spongepowered.common.registry.RegistryHelper;
 
 public final class CriterionRegistryModule implements RegistryModule {
 

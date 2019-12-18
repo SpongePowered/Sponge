@@ -45,7 +45,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.item.recipe.smelting.MatchSmeltingVanillaItemStack;
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipe;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.ArrayList;
 import java.util.HashMap;

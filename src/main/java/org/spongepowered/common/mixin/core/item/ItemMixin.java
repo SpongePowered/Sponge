@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.item.ItemBridge;
-import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 
 import java.util.List;
 

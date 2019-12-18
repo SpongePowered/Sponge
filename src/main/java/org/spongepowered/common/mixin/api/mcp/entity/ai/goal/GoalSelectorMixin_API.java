@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.entity.ai.GoalExecutor;
-import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;

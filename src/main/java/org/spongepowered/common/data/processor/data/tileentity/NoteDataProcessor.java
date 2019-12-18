@@ -41,7 +41,6 @@ import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDa
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 
 import java.util.Optional;
 

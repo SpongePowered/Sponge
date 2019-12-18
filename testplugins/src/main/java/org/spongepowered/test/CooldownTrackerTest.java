@@ -36,7 +36,7 @@ import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.entity.living.humanoid.player.CooldownEvent;
+import org.spongepowered.api.event.entity.living.player.CooldownEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -46,9 +46,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.text.DecimalFormat;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 @Plugin(id = "cooldowntracker", name = "Cooldown Tracker", description = "A plugin to test the cooldown tracker.", version = "0.0.0")
 public final class CooldownTrackerTest implements LoadableModule {

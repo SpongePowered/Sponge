@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
-import org.spongepowered.common.registry.TypeProvider;
 
 import java.util.HashMap;
 import java.util.Locale;

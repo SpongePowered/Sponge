@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.ai.goal;
 
-import org.spongepowered.api.entity.ai.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.AbstractGoal;
 import org.spongepowered.api.entity.living.Agent;

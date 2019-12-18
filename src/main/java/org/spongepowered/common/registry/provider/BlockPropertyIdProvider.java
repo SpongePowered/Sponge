@@ -31,7 +31,6 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.block.*;
 import net.minecraft.block.properties.IProperty;
 import org.apache.logging.log4j.LogManager;
-import org.spongepowered.common.registry.TypeProvider;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

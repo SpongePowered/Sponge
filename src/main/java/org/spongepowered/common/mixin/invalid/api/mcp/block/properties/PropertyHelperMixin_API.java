@@ -29,7 +29,6 @@ import net.minecraft.block.properties.IProperty;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
-import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
 import java.util.Optional;
 

@@ -52,7 +52,7 @@ public final class SpongeTaskBuilder implements Task.Builder {
     private boolean tickBasedDelay;
     private boolean tickBasedInterval;
 
-    SpongeTaskBuilder() {
+    public SpongeTaskBuilder() {
     }
 
     @Override

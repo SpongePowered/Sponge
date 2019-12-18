@@ -82,7 +82,7 @@ import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.ai.goal.builtin.LookRandomlyGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
@@ -129,7 +129,6 @@ import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.CollisionRule;
@@ -231,13 +230,6 @@ import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingReci
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
-import org.spongepowered.common.registry.type.BanTypeRegistryModule;
-import org.spongepowered.common.registry.type.BannerPatternShapeRegistryModule;
-import org.spongepowered.common.registry.type.BlockStateRegistryModule;
-import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
-import org.spongepowered.common.registry.type.DyeColorRegistryModule;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
-import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTypeRegistryModule;
@@ -431,101 +423,6 @@ public final class CommonModuleRegistry {
         }
     }
 
-    private void registerDefaultSuppliers(SpongeGameRegistry registry) {
-        registry.registerBuilderSupplier(ItemStack.Builder.class, SpongeItemStackBuilder::new)
-                .registerBuilderSupplier(TradeOffer.Builder.class, SpongeTradeOfferBuilder::new)
-                .registerBuilderSupplier(FireworkEffect.Builder.class, SpongeFireworkEffectBuilder::new)
-                .registerBuilderSupplier(PotionEffect.Builder.class, SpongePotionBuilder::new)
-                .registerBuilderSupplier(Objective.Builder.class, SpongeObjectiveBuilder::new)
-                .registerBuilderSupplier(Team.Builder.class, SpongeTeamBuilder::new)
-                .registerBuilderSupplier(Scoreboard.Builder.class, SpongeScoreboardBuilder::new)
-                .registerBuilderSupplier(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)
-                .registerBuilderSupplier(EntityDamageSource.Builder.class, SpongeEntityDamageSourceBuilder::new)
-                .registerBuilderSupplier(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
-                .registerBuilderSupplier(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
-                .registerBuilderSupplier(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
-                .registerBuilderSupplier(WorldArchetype.Builder.class, SpongeWorldArchetypeBuilder::new)
-                .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)
-                .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
-                .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
-                .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
-                .registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
-                .registerBuilderSupplier(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)
-                .registerBuilderSupplier(AvoidLivingGoal.Builder.class, SpongeAvoidEntityGoalBuilder::new)
-                .registerBuilderSupplier(RunAroundLikeCrazyGoal.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
-                .registerBuilderSupplier(SwimGoal.Builder.class, SpongeSwimGoalBuilder::new)
-                .registerBuilderSupplier(LookAtGoal.Builder.class, SpongeWatchClosestAIBuilder::new)
-                .registerBuilderSupplier(FindNearestAttackableTargetGoal.Builder.class, SpongeFindNearestAttackableTargetGoalBuilder::new)
-                .registerBuilderSupplier(AttackLivingGoal.Builder.class, SpongeAttackLivingGoalBuilder::new)
-                .registerBuilderSupplier(RangedAttackAgainstAgentGoal.Builder.class, SpongeRangedAttackAgainstAgentGoalBuilder::new)
-                .registerBuilderSupplier(LookRandomlyGoal.Builder.class, SpongeLookRandomlyGoalBuilder::new)
-                .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
-                .registerBuilderSupplier(Task.Builder.class, () -> Sponge.getScheduler().createTaskBuilder())
-                .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
-                .registerBuilderSupplier(BlockBlob.Builder.class, BlockBlobBuilder::new)
-                .registerBuilderSupplier(ChorusFlower.Builder.class, ChorusFlowerBuilder::new)
-                .registerBuilderSupplier(Cactus.Builder.class, CactusBuilder::new)
-                .registerBuilderSupplier(DeadBush.Builder.class, DeadBushBuilder::new)
-                .registerBuilderSupplier(DesertWell.Builder.class, DesertWellBuilder::new)
-                .registerBuilderSupplier(DoublePlant.Builder.class, DoublePlantBuilder::new)
-                .registerBuilderSupplier(Dungeon.Builder.class, DungeonBuilder::new)
-                .registerBuilderSupplier(EndIsland.Builder.class, EndIslandBuilder::new)
-                .registerBuilderSupplier(Flower.Builder.class, FlowerBuilder::new)
-                .registerBuilderSupplier(Forest.Builder.class, ForestBuilder::new)
-                .registerBuilderSupplier(Glowstone.Builder.class, GlowstoneBuilder::new)
-                .registerBuilderSupplier(IcePath.Builder.class, IcePathBuilder::new)
-                .registerBuilderSupplier(IceSpike.Builder.class, IceSpikeBuilder::new)
-                .registerBuilderSupplier(Lake.Builder.class, LakeBuilder::new)
-                .registerBuilderSupplier(Melon.Builder.class, MelonBuilder::new)
-                .registerBuilderSupplier(Mushroom.Builder.class, MushroomBuilder::new)
-                .registerBuilderSupplier(NetherFire.Builder.class, NetherFireBuilder::new)
-                .registerBuilderSupplier(Ore.Builder.class, OreBuilder::new)
-                .registerBuilderSupplier(Pumpkin.Builder.class, PumpkinBuilder::new)
-                .registerBuilderSupplier(RandomBlock.Builder.class, RandomBlockBuilder::new)
-                .registerBuilderSupplier(RandomObject.Builder.class, RandomObjectBuilder::new)
-                .registerBuilderSupplier(Reed.Builder.class, ReedBuilder::new)
-                .registerBuilderSupplier(SeaFloor.Builder.class, SeaFloorBuilder::new)
-                .registerBuilderSupplier(Shrub.Builder.class, ShrubBuilder::new)
-                .registerBuilderSupplier(Vine.Builder.class, VineBuilder::new)
-                .registerBuilderSupplier(WaterLily.Builder.class, WaterLilyBuilder::new)
-                .registerBuilderSupplier(Ban.Builder.class, SpongeBanBuilder::new)
-                .registerBuilderSupplier(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
-                .registerBuilderSupplier(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
-                .registerBuilderSupplier(TabListEntry.Builder.class, TabListEntryBuilder::new)
-                .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
-                .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
-                .registerBuilderSupplier(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
-                .registerBuilderSupplier(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
-                .registerBuilderSupplier(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
-                .registerBuilderSupplier(Schematic.Builder.class, SpongeSchematicBuilder::new)
-                .registerBuilderSupplier(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
-                .registerBuilderSupplier(BiomeGenerationSettings.Builder.class, SpongeBiomeGenerationSettingsBuilder::new)
-                .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
-                .registerBuilderSupplier(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
-                .registerBuilderSupplier(InventoryTransformation.Builder.class, SpongeTransformationBuilder::new)
-                .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
-                .registerBuilderSupplier(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
-                .registerBuilderSupplier(Fossil.Builder.class, FossilBuilder::new)
-                .registerBuilderSupplier(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
-                .registerBuilderSupplier(WorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
-                .registerBuilderSupplier(Ingredient.Builder.class, SpongeIngredientBuilder::new)
-                .registerBuilderSupplier(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
-                .registerBuilderSupplier(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
-                .registerBuilderSupplier(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
-                .registerBuilderSupplier(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
-                .registerBuilderSupplier(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
-                .registerBuilderSupplier(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)
-                .registerBuilderSupplier(Key.Builder.class, SpongeKeyBuilder::new)
-                .registerBuilderSupplier(Advancement.Builder.class, SpongeAdvancementBuilder::new)
-                .registerBuilderSupplier(AdvancementTree.Builder.class, SpongeAdvancementTreeBuilder::new)
-                .registerBuilderSupplier(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
-                .registerBuilderSupplier(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)
-                .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
-                .registerBuilderSupplier(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
-                .registerBuilderSupplier(Trigger.Builder.class, SpongeTriggerBuilder::new)
-        ;
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
@@ -670,5 +567,4 @@ public final class CommonModuleRegistry {
 
         static final CommonModuleRegistry INSTANCE = new CommonModuleRegistry();
     }
-
 }

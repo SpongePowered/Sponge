@@ -43,7 +43,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 
 @Mixin(NoteBlock.class)
 public abstract class NoteBlockMixin extends BlockMixin {

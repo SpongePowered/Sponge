@@ -39,13 +39,10 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
 import org.spongepowered.common.mixin.accessor.advancements.AdvancementManagerAccessor;
-import org.spongepowered.common.registry.CustomRegistrationPhase;
-import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
-@CustomRegistrationPhase
 @RegistrationDependency(CriterionRegistryModule.class)
 public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<Advancement>
         implements AdditionalCatalogRegistryModule<Advancement> {

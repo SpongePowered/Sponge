@@ -26,8 +26,8 @@ package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.entity.ai.GoalExecutor;
-import org.spongepowered.api.entity.ai.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 
 public final class SpongeGoalExecutorType implements GoalExecutorType {
 

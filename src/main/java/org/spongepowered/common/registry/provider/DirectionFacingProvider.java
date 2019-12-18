@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableBiMap;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.registry.TypeProvider;
 
 import java.util.Optional;
 
