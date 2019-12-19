@@ -44,7 +44,7 @@ public class CompoundLens extends SlotBasedLens {
     protected final List<Lens> inventories;
 
     private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotLensProvider slots, List<Lens> lenses) {
-        super(size, 1, adapterType, slots);
+        super(0, size, 1, adapterType, slots);
         this.inventories = lenses;
         this.init(slots);
     }

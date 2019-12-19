@@ -36,7 +36,7 @@ public class DefaultIndexedLens extends SlotBasedLens {
     }
 
     public DefaultIndexedLens(int size, int stride, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
-        super(size, stride, adapterType, slots);
+        super(0, size, stride, adapterType, slots);
     }
 
     public DefaultIndexedLens(int base, int size, SlotLensProvider slots) {
