@@ -24,32 +24,37 @@
  */
 package org.spongepowered.common.inventory.property;
 
-import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
 
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
-public interface InventoryPropertyHolder extends Inventory {
+public interface InventoryDataHolder extends Inventory {
 
-    @Override
-    default <V> Optional<V> getProperty(Inventory child, Property<V> property) {
-        return InventoryPropertyProvider.getProperty(this, child, property);
+//     InventoryPropertyProvider.getProperty(this, child, property);
+//     InventoryPropertyProvider.getRootProperty(this, property);
+//     SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
+// TODO
+
+    @Override default <E> Optional<E> get(Key<? extends Value<E>> key) {
+        return Optional.empty();
     }
 
-    @Override
-    default <V> Optional<V> getProperty(Property<V> property) {
-        if (this.parent() == this) {
-            return InventoryPropertyProvider.getRootProperty(this, property);
-        }
-        return this.parent().getProperty(this, property);
+    @Override default <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
+        return Optional.empty();
     }
 
-    @Override
-    default Map<Property<?>, ?> getProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
+    @Override default boolean supports(Key<?> key) {
+        return false;
     }
 
+    @Override default Set<Key<?>> getKeys() {
+        return null;
+    }
+
+    @Override default Set<Value.Immutable<?>> getValues() {
+        return null;
+    }
 }

@@ -24,28 +24,29 @@
  */
 package org.spongepowered.common.inventory.property;
 
-import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.item.inventory.InventoryKeys;
 
 public final class PropertyEntry {
 
     public static PropertyEntry slotIndex(int index) {
-        return of(InventoryProperties.SLOT_INDEX, index);
+        return of(InventoryKeys.SLOT_INDEX.get(), index);
     }
 
-    public static <V> PropertyEntry of(Property<V> property, V value) {
+    public static <V> PropertyEntry of(Key<? extends Value<V>> property, V value) {
         return new PropertyEntry(property, value);
     }
 
-    private final Property<?> property;
+    private final Key<?> property;
     private final Object value;
 
-    private PropertyEntry(Property<?> property, Object value) {
+    private PropertyEntry(Key<?> property, Object value) {
         this.property = property;
         this.value = value;
     }
 
-    public Property<?> getProperty() {
+    public Key<?> getProperty() {
         return this.property;
     }
 

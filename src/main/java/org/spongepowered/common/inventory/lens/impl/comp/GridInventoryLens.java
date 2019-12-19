@@ -27,16 +27,16 @@ package org.spongepowered.common.inventory.lens.impl.comp;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.impl.struct.LensHandle;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GridInventoryLens extends Inventory2DLens {
 
-    private List<LensHandle> rows = new ArrayList<>();
-    private List<LensHandle> cols = new ArrayList<>();
+    private List<Lens> rows = new ArrayList<>();
+    private List<Lens> cols = new ArrayList<>();
 
     public GridInventoryLens(int base, int width, int height, SlotLensProvider slots) {
         this(base, width, height, GridInventoryAdapter.class, slots);
@@ -61,20 +61,20 @@ public class GridInventoryLens extends Inventory2DLens {
 
     private void addRow(InventoryRowLens row) {
         super.addSpanningChild(row);
-        this.rows.add(new LensHandle(row));
+        this.rows.add(row);
     }
 
     private void addColumn(InventoryColumnLens column) {
         super.addChild(column);
-        this.cols.add(new LensHandle(column));
+        this.cols.add(column);
     }
 
     public InventoryRowLens getRow(int row) {
-        return (InventoryRowLens) this.rows.get(row).lens;
+        return (InventoryRowLens) this.rows.get(row);
     }
 
     public InventoryColumnLens getColumn(int column) {
-        return (InventoryColumnLens) this.cols.get(column).lens;
+        return (InventoryColumnLens) this.cols.get(column);
     }
 
     @SuppressWarnings("unchecked")

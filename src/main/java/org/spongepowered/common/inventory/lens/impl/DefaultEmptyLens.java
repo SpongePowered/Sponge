@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.lens.impl;
 
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -91,11 +92,11 @@ public class DefaultEmptyLens implements Lens {
     }
 
     @Override
-    public Map<Property<?>, Object> getProperties(int index) {
+    public Map<Key<?>, Object> getProperties(int index) {
         return Collections.emptyMap();
     }
 
-    @Override public Map<Property<?>, Object> getProperties(Lens lens) {
+    @Override public Map<Key<?>, Object> getProperties(Lens lens) {
         return Collections.emptyMap();
     }
 

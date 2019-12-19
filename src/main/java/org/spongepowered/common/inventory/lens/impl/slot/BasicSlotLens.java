@@ -27,6 +27,7 @@ package org.spongepowered.common.inventory.lens.impl.slot;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -108,7 +109,7 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public Map<Property<?>, Object> getProperties(int index) {
+    public Map<Key<?>, Object> getProperties(int index) {
         return Collections.emptyMap();
     }
 

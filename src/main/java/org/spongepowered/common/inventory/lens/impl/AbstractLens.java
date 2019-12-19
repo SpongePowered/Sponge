@@ -29,14 +29,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.struct.LensHandle;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.inventory.property.PropertyEntry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -203,12 +203,12 @@ public abstract class AbstractLens implements Lens {
     }
 
     @Override
-    public Map<Property<?>, Object> getProperties(final int index) {
+    public Map<Key, Object> getProperties(final int index) {
         return this.getProperties(this.getLens(index));
     }
 
     @Override
-    public Map<Property<?>, Object> getProperties(final Lens child) {
+    public Map<Key, Object> getProperties(final Lens child) {
         if (!this.has(child)) {
             throw new NoSuchElementException("Specified child lens is not a direct descendant this lens");
         }

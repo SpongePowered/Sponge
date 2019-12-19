@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory;
 
+import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.item.ItemType;
@@ -120,32 +121,7 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public <V> Optional<V> getProperty(Inventory child, Property<V> property) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <V> Optional<V> getProperty(Property<V> property) {
-        return Optional.empty();
-    }
-
-    @Override
-    public OptionalInt getIntProperty(Property<Integer> property) {
-        return OptionalInt.empty();
-    }
-
-    @Override
-    public OptionalDouble getDoubleProperty(Property<Double> property) {
-        return OptionalDouble.empty();
-    }
-
-    @Override
-    public Map<Property<?>, ?> getProperties() {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public Inventory query(PropertyMatcher<?> propertyMatcher) {
+    public Inventory query(KeyValueMatcher<?> matcher) {
         return this;
     }
 

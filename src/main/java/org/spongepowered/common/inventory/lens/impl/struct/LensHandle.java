@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.inventory.lens.impl.struct;
 
-import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.lens.Lens;
 
@@ -53,7 +54,7 @@ public final class LensHandle {
     /**
      * Properties for the lens when viewed through the parent lens
      */
-    private Map<Property<?>, Object> properties;
+    private Map<Key, Object> properties;
     /**
      * Create an "empty" lens handle
      */
@@ -85,14 +86,14 @@ public final class LensHandle {
      * @param lens
      * @param properties
      */
-    public LensHandle(Lens lens, Map<Property<?>, Object> properties) {
+    public LensHandle(Lens lens, Map<Key, Object> properties) {
         this.lens = lens;
         if (properties != null && properties.size() > 0) {
             this.properties = new HashMap<>(properties);
         }
     }
 
-    public Map<Property<?>, Object> getProperties() {
+    public Map<Key, Object> getProperties() {
         if (this.properties == null) {
             return Collections.emptyMap();
         }
@@ -101,7 +102,7 @@ public final class LensHandle {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public <V> V getProperty(Property<V> property) {
+    public <V> V getProperty(Key property) {
         if (this.properties != null) {
             return (V) this.properties.get(property);
         }
@@ -110,10 +111,10 @@ public final class LensHandle {
 
     @SuppressWarnings("unchecked")
     public void setProperty(PropertyEntry tuple) {
-        this.setProperty((Property) tuple.getProperty(), tuple.getValue());
+        this.setProperty((Key) tuple.getProperty(), tuple.getValue());
     }
 
-    public <V> void setProperty(Property<V> property, V value) {
+    public <V> void setProperty(Key<? extends Value<V>> property, V value) {
         if (this.properties == null) {
             this.properties = new HashMap<>();
         }
