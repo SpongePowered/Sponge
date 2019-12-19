@@ -26,41 +26,21 @@ package org.spongepowered.common.registry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.BiMap;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Items;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.Effects;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
-import net.minecraft.world.biome.Biomes;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.entity.BlockEntityType;
-import org.spongepowered.api.data.type.ArmorType;
-import org.spongepowered.api.effect.particle.ParticleType;
-import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
-import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.registry.supplier.VanillaBiomeSupplier;
 import org.spongepowered.common.registry.supplier.VanillaDimensionTypeSupplier;
@@ -69,19 +49,18 @@ import org.spongepowered.common.registry.supplier.VanillaEnchantmentSupplier;
 import org.spongepowered.common.registry.supplier.VanillaEntityTypeSupplier;
 import org.spongepowered.common.registry.supplier.VanillaFluidSupplier;
 import org.spongepowered.common.registry.supplier.VanillaItemSupplier;
+import org.spongepowered.common.registry.supplier.VanillaPaintingTypeSupplier;
 import org.spongepowered.common.registry.supplier.VanillaParticleTypeSupplier;
 import org.spongepowered.common.registry.supplier.VanillaSoundEventSupplier;
 import org.spongepowered.common.registry.supplier.VanillaTileEntitySupplier;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Singleton
 @SuppressWarnings("unchecked")
@@ -126,38 +105,35 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     @Override
-    public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
+    public <T extends CatalogType> Stream<T> getAllOf(Class<T> typeClass) {
         final Registry<CatalogType> registry = this.registries.get(typeClass);
-        final Collection<T> found;
+        final Stream<T> stream;
         if (registry == null) {
-            found = Collections.emptyList();
+            stream = Stream.empty();
         } else {
-            found = (Collection<T>) (Object) Arrays.asList(((SimpleRegistryAccessor) registry).accessor$getValues());
+            stream = (Stream<T>) (Object) Arrays.stream(((SimpleRegistryAccessor) registry).accessor$getValues());
         }
 
-        return Collections.unmodifiableCollection(found);
+        return stream;
     }
 
     @Override
-    public <T extends CatalogType> Collection<T> getAllFor(Class<T> typeClass, String namespace) {
+    public <T extends CatalogType> Stream<T> getAllFor(Class<T> typeClass, String namespace) {
         checkNotNull(namespace);
 
-        final Collection<T> found;
         final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
+        final Stream<T> stream;
         if (registry == null) {
-            found = Collections.emptyList();
+            stream = Stream.empty();
         } else {
-            found = new ArrayList<>();
-            final BiMap<CatalogKey, CatalogType> catalogTypes = (BiMap<CatalogKey, CatalogType>) (Object) ((SimpleRegistryAccessor) registry)
-                .accessor$getRegistryObjects();
-            for (final Map.Entry<CatalogKey, CatalogType> catalogEntry : catalogTypes.entrySet()) {
-                if (catalogEntry.getKey().getNamespace().equals(namespace)) {
-                    found.add((T) catalogEntry.getValue());
-                }
-            }
+            stream = (Stream<T>) (Object) ((SimpleRegistryAccessor) registry).accessor$getRegistryObjects()
+                .entrySet()
+                .stream()
+                .filter(kv -> kv.getKey().getNamespace().equals(namespace))
+                .map(Map.Entry::getValue);
         }
 
-        return Collections.unmodifiableCollection(found);
+        return stream;
     }
 
     public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerSupplier(Class<E> catalogClass, String suggestedId,
@@ -229,7 +205,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .registerRegistry(Advancement.class, CatalogKey.minecraft("advancement"))
             .registerRegistry(AdvancementTree.class, CatalogKey.minecraft("advancement_tree"))
             .registerRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"))
-            .registerRegistry(ArmorType.class, CatalogKey.minecraft("armor_type"))
         ;
     }
 
@@ -245,6 +220,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         VanillaEntityTypeSupplier.registerSuppliers(this);
         VanillaFluidSupplier.registerSuppliers(this);
         VanillaItemSupplier.registerSuppliers(this);
+        VanillaPaintingTypeSupplier.registerSuppliers(this);
         VanillaParticleTypeSupplier.registerSuppliers(this);
         VanillaSoundEventSupplier.registerSuppliers(this);
         VanillaTileEntitySupplier.registerSuppliers(this);
