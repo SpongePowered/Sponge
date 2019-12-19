@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.property.InventoryPropertyHolder;
+import org.spongepowered.common.inventory.property.InventoryDataHolder;
 import org.spongepowered.common.inventory.query.SpongeQueryTypes;
 
 import java.util.List;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 /**
  * Implements almost all of {@link Inventory} assuming that this is a {@link InventoryBridge} providing the {@link InventoryAdapter}.
  */
-public interface DefaultImplementedAdapterInventory extends InventoryPropertyHolder {
+public interface DefaultImplementedAdapterInventory extends InventoryDataHolder {
 
     // Helpers
     default Lens impl$getLens()

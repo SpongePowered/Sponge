@@ -82,7 +82,7 @@ public class InventoryPropertyProvider<V> implements PropertyProvider<V> {
         // TODO properties that do not come from lenses
         checkNotNull(property, "property");
         InventoryAdapter childAdapter = ((InventoryBridge) child).bridge$getAdapter();
-        V propertyValue = (V) lens.getProperties(childAdapter.inventoryAdapter$getRootLens()).get(property);
+        V propertyValue = (V) lens.getDataFor(childAdapter.inventoryAdapter$getRootLens()).get(property);
         return Optional.ofNullable(propertyValue);
     }
 

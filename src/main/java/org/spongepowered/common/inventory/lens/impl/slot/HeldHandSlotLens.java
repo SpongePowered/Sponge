@@ -26,10 +26,9 @@ package org.spongepowered.common.inventory.lens.impl.slot;
 
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -120,12 +119,12 @@ public class HeldHandSlotLens implements SlotLens {
     }
 
     @Override
-    public Map<Property<?>, Object> getProperties(int index) {
+    public Map<Key, Object> getDataAt(int index) {
         return Collections.emptyMap();
     }
 
     @Override
-    public Map<Property<?>, Object> getProperties(Lens lens) {
+    public Map<Key, Object> getDataFor(Lens lens) {
         return Collections.emptyMap();
     }
 

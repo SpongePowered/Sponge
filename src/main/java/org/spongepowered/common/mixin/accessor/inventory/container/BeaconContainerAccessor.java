@@ -22,34 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.property;
+package org.spongepowered.common.mixin.accessor.inventory.container;
 
-import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.item.inventory.InventoryProperties;
+import net.minecraft.inventory.container.BeaconContainer;
+import net.minecraft.util.IWorldPosCallable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public final class PropertyEntry {
+@Mixin(BeaconContainer.class)
+public interface BeaconContainerAccessor {
 
-    public static PropertyEntry slotIndex(int index) {
-        return of(InventoryProperties.SLOT_INDEX, index);
-    }
-
-    public static <V> PropertyEntry of(Property<V> property, V value) {
-        return new PropertyEntry(property, value);
-    }
-
-    private final Property<?> property;
-    private final Object value;
-
-    private PropertyEntry(Property<?> property, Object value) {
-        this.property = property;
-        this.value = value;
-    }
-
-    public Property<?> getProperty() {
-        return this.property;
-    }
-
-    public Object getValue() {
-        return this.value;
-    }
+    @Accessor("field_216971_e") IWorldPosCallable accessor$getBeaconPosition();
 }

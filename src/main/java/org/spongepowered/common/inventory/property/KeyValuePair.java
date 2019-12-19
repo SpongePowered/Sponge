@@ -22,29 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.lens.impl;
+package org.spongepowered.common.inventory.property;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.item.inventory.InventoryKeys;
 
-public class DefaultIndexedLens extends SlotBasedLens {
+public final class KeyValuePair {
 
-    public DefaultIndexedLens(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
-        super(base, size, stride, adapterType, slots);
+    public static KeyValuePair slotIndex(int index) {
+        return of(InventoryKeys.SLOT_INDEX.get(), index);
     }
 
-    public DefaultIndexedLens(int size, int stride, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
-        super(0, size, stride, adapterType, slots);
+    public static <V> KeyValuePair of(Key<? extends Value<V>> property, V value) {
+        return new KeyValuePair(property, value);
     }
 
-    public DefaultIndexedLens(int base, int size, SlotLensProvider slots) {
-        super(base, size, 1, BasicInventoryAdapter.class, slots);
+    private final Key<?> property;
+    private final Object value;
+
+    private KeyValuePair(Key<?> property, Object value) {
+        this.property = property;
+        this.value = value;
     }
 
-    @Override
-    public Inventory getAdapter(Fabric fabric, Inventory parent) {
-        return new BasicInventoryAdapter(fabric, this, parent);
+    public Key<?> getKey() {
+        return this.property;
+    }
+
+    public Object getValue() {
+        return this.value;
     }
 }

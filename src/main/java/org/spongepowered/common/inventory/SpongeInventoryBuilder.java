@@ -33,8 +33,6 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
-import BuildingStep;
-import EndStep;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

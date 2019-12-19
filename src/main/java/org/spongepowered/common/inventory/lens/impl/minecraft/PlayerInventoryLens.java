@@ -27,7 +27,7 @@ package org.spongepowered.common.inventory.lens.impl.minecraft;
 import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.api.item.inventory.InventoryKeys;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -40,7 +40,7 @@ import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryL
 import org.spongepowered.common.inventory.lens.impl.slot.HeldHandSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.inventory.property.PropertyEntry;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -79,42 +79,42 @@ public class PlayerInventoryLens extends AbstractLens {
     protected void init(SlotLensProvider slots) {
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlotLens(slot), PropertyEntry.slotIndex(ord));
+            this.addChild(slots.getSlotLens(slot), KeyValuePair.slotIndex(ord));
         }
 
         int base = this.base;
         Map<EquipmentType, SlotLens> equipmentLenses = new LinkedHashMap<>();
         if (this.isContainer) {
             this.armor = new ArmorInventoryLens(base, slots, true);
-            equipmentLenses.put(EquipmentTypes.HEADWEAR, slots.getSlotLens(base + 0));
-            equipmentLenses.put(EquipmentTypes.CHESTPLATE, slots.getSlotLens(base + 1));
-            equipmentLenses.put(EquipmentTypes.LEGGINGS, slots.getSlotLens(base + 2));
-            equipmentLenses.put(EquipmentTypes.BOOTS, slots.getSlotLens(base + 3));
+            equipmentLenses.put(EquipmentTypes.HEADWEAR.get(), slots.getSlotLens(base + 0));
+            equipmentLenses.put(EquipmentTypes.CHESTPLATE.get(), slots.getSlotLens(base + 1));
+            equipmentLenses.put(EquipmentTypes.LEGGINGS.get(), slots.getSlotLens(base + 2));
+            equipmentLenses.put(EquipmentTypes.BOOTS.get(), slots.getSlotLens(base + 3));
             base += ARMOR; // 4
             this.primary = new PrimaryPlayerInventoryLens(base, slots, true);
             base += this.primary.slotCount();
             this.offhand = slots.getSlotLens(base);
 
             base += OFFHAND;
-            equipmentLenses.put(EquipmentTypes.OFF_HAND, this.offhand);
+            equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
         } else {
             this.primary = new PrimaryPlayerInventoryLens(base, slots, false);
             base += this.primary.slotCount();
             this.armor = new ArmorInventoryLens(base, slots, false);
 
-            equipmentLenses.put(EquipmentTypes.BOOTS, slots.getSlotLens(base + 0));
-            equipmentLenses.put(EquipmentTypes.LEGGINGS, slots.getSlotLens(base + 1));
-            equipmentLenses.put(EquipmentTypes.CHESTPLATE, slots.getSlotLens(base + 2));
-            equipmentLenses.put(EquipmentTypes.HEADWEAR, slots.getSlotLens(base + 3));
+            equipmentLenses.put(EquipmentTypes.BOOTS.get(), slots.getSlotLens(base + 0));
+            equipmentLenses.put(EquipmentTypes.LEGGINGS.get(), slots.getSlotLens(base + 1));
+            equipmentLenses.put(EquipmentTypes.CHESTPLATE.get(), slots.getSlotLens(base + 2));
+            equipmentLenses.put(EquipmentTypes.HEADWEAR.get(), slots.getSlotLens(base + 3));
 
             base += ARMOR;
             this.offhand = slots.getSlotLens(base);
 
             base += OFFHAND;
-            equipmentLenses.put(EquipmentTypes.OFF_HAND, this.offhand);
+            equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
         }
 
-        equipmentLenses.put(EquipmentTypes.MAIN_HAND, new HeldHandSlotLens());
+        equipmentLenses.put(EquipmentTypes.MAIN_HAND.get(), new HeldHandSlotLens());
         this.equipment = new EquipmentInventoryLens(equipmentLenses);
 
         this.addSpanningChild(this.primary);
@@ -122,7 +122,7 @@ public class PlayerInventoryLens extends AbstractLens {
         this.addSpanningChild(this.offhand);
 
         for (Map.Entry<EquipmentType, SlotLens> entry : equipmentLenses.entrySet()) {
-            this.addChild(entry.getValue(), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, entry.getKey()));
+            this.addChild(entry.getValue(), KeyValuePair.of(InventoryKeys.EQUIPMENT_TYPE.get(), entry.getKey()));
         }
         this.addChild(this.equipment);
         this.addMissingSpanningSlots(base, slots);

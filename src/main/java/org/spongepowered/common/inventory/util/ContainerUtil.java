@@ -39,6 +39,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -64,11 +65,12 @@ import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryL
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.mixin.accessor.inventory.container.AbstractFurnaceContainerAccessor;
+import org.spongepowered.common.mixin.accessor.inventory.container.BeaconContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.BrewingStandContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.ContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.CraftingResultSlotAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.DispenserContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.AbstractFurnaceContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.HopperContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.HorseInventoryContainerAccessor;
 import org.spongepowered.common.mixin.accessor.inventory.container.MerchantContainerAccessor;
@@ -269,7 +271,7 @@ public final class ContainerUtil {
         } else if (container instanceof BrewingStandContainerAccessor) {
             return carrierOrNull(((BrewingStandContainerAccessor) container).accessor$getTileBrewingStand());
         } else if (container instanceof BeaconContainer) {
-            return carrierOrNull(((BeaconContainer) container).getTileEntity());
+            return (Carrier) ((BeaconContainerAccessor) container).accessor$getBeaconPosition().apply(World::getTileEntity).orElse(null);
         } else if (container instanceof HorseInventoryContainerAccessor) {
             return (Carrier) ((HorseInventoryContainerAccessor) container).accessor$getHorse();
         } else if (container instanceof MerchantContainerAccessor && ((MerchantContainerAccessor) container).accessor$getMerchant() instanceof Carrier) {

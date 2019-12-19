@@ -32,7 +32,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.FuelSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.InputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.OutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.property.PropertyEntry;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 
 public class FurnaceInventoryLens extends RealLens {
 
@@ -57,9 +57,9 @@ public class FurnaceInventoryLens extends RealLens {
         this.fuel = new FuelSlotLens(slots.getSlotLens(1), ItemStackFilter.filterIInventory(1));
         this.output = new OutputSlotLens(slots.getSlotLens(2), ItemStackFilter.filterIInventory(2));
 
-        this.addSpanningChild(this.input, PropertyEntry.slotIndex(0));
-        this.addSpanningChild(this.fuel, PropertyEntry.slotIndex(1));
-        this.addSpanningChild(this.output, PropertyEntry.slotIndex(2));
+        this.addSpanningChild(this.input, KeyValuePair.slotIndex(0));
+        this.addSpanningChild(this.fuel, KeyValuePair.slotIndex(1));
+        this.addSpanningChild(this.output, KeyValuePair.slotIndex(2));
     }
 
 }

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.inventory.lens;
 
-import java.util.Collection;
-import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.Key;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +49,7 @@ public interface LensCollection {
      * @return collection of properties for the specified slot when viewed
      *      through this lens
      */
-    Map<Property<?>, Object> getProperties(int index);
+    Map<Key, Object> getDataAt(int index);
     
     /**
      * Get all the properties for the specified lens (if contained in this
@@ -59,7 +59,7 @@ public interface LensCollection {
      * @return collection of properties for the specified slot when viewed
      *      through this lens
      */
-    Map<Property<?>, Object> getProperties(Lens lens);
+    Map<Key, Object> getDataFor(Lens lens);
 
     /**
      * A strongly-typed {@link java.util.Collection#contains}.

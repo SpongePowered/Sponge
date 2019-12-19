@@ -27,16 +27,13 @@ package org.spongepowered.common.inventory.lens.impl;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.property.PropertyEntry;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.impl.struct.LensHandle;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -56,9 +52,9 @@ public abstract class AbstractLens implements Lens {
     protected final int base;
     protected Lens parent;
 
-    protected List<LensHandle> spanningChildren = new ArrayList<>();
+    protected List<Lens> spanningChildren = new ArrayList<>();
     protected List<Lens> children = new ArrayList<>();
-    protected Map<Lens, LensHandle> handleMap = new HashMap<>();
+    protected Map<Lens, Map<Key, Object>> handleMap = new HashMap<>();
 
     protected int size;
 
@@ -82,36 +78,34 @@ public abstract class AbstractLens implements Lens {
         this.adapterType = adapterType;
     }
 
-    protected void addChild(final Lens lens, final PropertyEntry... properties) {
+    protected void addChild(final Lens lens, final KeyValuePair... keyValuePairs) {
         checkNotNull(lens, "Attempted to register a null lens");
-        LensHandle handle = this.handleMap.computeIfAbsent(lens, l -> new LensHandle(lens));
+
         if (!this.children.contains(lens)) {
             this.children.add(lens);
         }
-        for (PropertyEntry property : properties) {
-            handle.setProperty(property);
-        }
+        this.addKeyValuePairs(lens, keyValuePairs);
     }
 
-    protected void addSpanningChild(final Lens lens, final PropertyEntry... properties) {
-        this.addChild(lens, properties);
+    protected void addSpanningChild(final Lens lens, final KeyValuePair... keyValuePairs) {
+        this.addChild(lens, keyValuePairs);
 
-        for (LensHandle spanningChild : this.spanningChildren) {
-            if (spanningChild.lens == lens) { // Spanning Child already exists
-                for (PropertyEntry property : properties) {
-                    // Just add properties
-                    spanningChild.setProperty(property);
-                }
-                return;
+        if (!this.spanningChildren.contains(lens)) {
+            this.spanningChildren.add(lens);
+            this.maxOrdinal += lens.slotCount();
+        } else {
+            // TODO check if this is fine
+            if (lens instanceof AbstractLens) {
+                ((AbstractLens) lens).setParent(this);
             }
         }
+        this.addKeyValuePairs(lens, keyValuePairs);
+    }
 
-        final LensHandle child = new LensHandle(lens, properties);
-        this.spanningChildren.add(child);
-        child.ordinal = this.maxOrdinal;
-        this.maxOrdinal += lens.slotCount();
-        if (lens instanceof AbstractLens) {
-            ((AbstractLens) lens).setParent(this);
+    private void addKeyValuePairs(Lens lens, KeyValuePair[] keyValuePairs) {
+        Map<Key, Object> map = this.handleMap.computeIfAbsent(lens, l -> new HashMap<>());
+        for (KeyValuePair pair : keyValuePairs) {
+            map.put(pair.getKey(), pair.getValue());
         }
     }
 
@@ -129,55 +123,45 @@ public abstract class AbstractLens implements Lens {
         return this.adapterType;
     }
 
-    protected LensHandle getLensForOrdinal(final int ordinal) {
+    @Nullable
+    @Override
+    public SlotLens getSlotLens(int ordinal) {
         if (ordinal < 0 || ordinal > this.maxOrdinal) {
             return null;
         }
 
-        for (final LensHandle child : this.spanningChildren) {
-            if (child.ordinal <= ordinal && (ordinal - child.ordinal) < child.lens.slotCount()) {
-                return child;
+        int offset = 0;
+        for (final Lens child : this.spanningChildren) {
+            int count = child.slotCount();
+            if (ordinal < offset + count) {
+                return child.getSlotLens(ordinal - offset);
             }
+            offset += count;
         }
-
         return null;
     }
 
-    @Nullable
-    @Override
-    public SlotLens getSlotLens(int ordinal) {
-        LensHandle handle = this.getLensForOrdinal(ordinal);
-        if (handle == null) {
-            return null;
-        }
-        return handle.lens.getSlotLens(ordinal - handle.ordinal);
-    }
+    private List<SlotLens> slotCache;
 
     @Override
     public List<SlotLens> getSlots() {
-        this.cacheSlots(this);
-        return this.slotCache.stream().map(lh -> lh.lens).map(SlotLens.class::cast).collect(Collectors.toList());
-    }
-
-    protected List<LensHandle> slotCache;
-
-    private void cacheSlots(Lens lens) {
-        if (this.slotCache != null) {
-            return;
-        }
-        this.slotCache = new ArrayList<>();
-        if (lens instanceof SlotLens) {
-            this.slotCache.add(new LensHandle(lens, lens.getProperties(0)));
-            return;
-        }
-        for (Lens child : lens.getSpanningChildren()) {
-            if (child instanceof SlotLens) {
-                this.slotCache.add(new LensHandle(child, lens.getProperties(child)));
+        if (this.slotCache == null) {
+            this.slotCache = new ArrayList<>();
+            if (this instanceof SlotLens) {
+                this.slotCache.add((SlotLens) this);
             } else {
-                this.cacheSlots(child);
+                for (Lens child : this.getSpanningChildren()) {
+                    if (child instanceof SlotLens) {
+                        this.slotCache.add((SlotLens) child);
+                    } else {
+                        this.slotCache.addAll(child.getSlots());
+                    }
+                }
             }
         }
+        return this.slotCache;
     }
+
     @Override
     public List<Lens> getChildren() {
         return Collections.unmodifiableList(this.children);
@@ -185,11 +169,7 @@ public abstract class AbstractLens implements Lens {
 
     @Override
     public List<Lens> getSpanningChildren() {
-        final Builder<Lens> listBuilder = ImmutableList.<Lens>builder();
-        for (final LensHandle child : this.spanningChildren) {
-            listBuilder.add(child.lens);
-        }
-        return listBuilder.build();
+        return this.spanningChildren;
     }
 
     @Override
@@ -203,16 +183,16 @@ public abstract class AbstractLens implements Lens {
     }
 
     @Override
-    public Map<Property<?>, Object> getProperties(final int index) {
-        return this.getProperties(this.getLens(index));
+    public Map<Key, Object> getDataAt(final int index) {
+        return this.getDataFor(this.getLens(index));
     }
 
     @Override
-    public Map<Property<?>, Object> getProperties(final Lens child) {
+    public Map<Key, Object> getDataFor(final Lens child) {
         if (!this.has(child)) {
             throw new NoSuchElementException("Specified child lens is not a direct descendant this lens");
         }
-        return this.handleMap.get(child).getProperties();
+        return this.handleMap.get(child);
     }
 
     /**
@@ -257,10 +237,8 @@ public abstract class AbstractLens implements Lens {
         if (!this.children.isEmpty() && deep < LIMIT) {
             result += this.ident(deep) + "Children: ";
             for (Lens child : this.children) {
-                for (LensHandle spanningChild : this.spanningChildren) {
-                    if (spanningChild.lens == child) {
-                        result += "\n" + this.ident(deep) + "(Spanning)";
-                    }
+                if (this.spanningChildren.contains(child)) {
+                    result += "\n" + this.ident(deep) + "(Spanning)";
                 }
                 result += child.toString(deep + 1);
             }
