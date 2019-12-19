@@ -29,7 +29,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.common.inventory.property.PropertyEntry;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 import org.spongepowered.common.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.SlotBasedLens;
@@ -51,24 +51,24 @@ public class ArmorInventoryLens extends SlotBasedLens {
     private void initInventory(SlotLensProvider slots) {
         int index = this.base;
 
-        this.addSpanningChild(slots.getSlotLens(index), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.BOOTS));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.BOOTS));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.LEGGINGS));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.LEGGINGS));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.CHESTPLATE));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.CHESTPLATE));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.HEADWEAR));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.HEADWEAR));
     }
 
     private void initContainer(SlotLensProvider slots) {
         int index = this.base;
-        this.addSpanningChild(slots.getSlotLens(index), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.HEADWEAR));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.HEADWEAR));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.CHESTPLATE));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.CHESTPLATE));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.LEGGINGS));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.LEGGINGS));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.BOOTS));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.BOOTS));
     }
 
     @SuppressWarnings("rawtypes")

@@ -28,25 +28,25 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.InventoryKeys;
 
-public final class PropertyEntry {
+public final class KeyValuePair {
 
-    public static PropertyEntry slotIndex(int index) {
+    public static KeyValuePair slotIndex(int index) {
         return of(InventoryKeys.SLOT_INDEX.get(), index);
     }
 
-    public static <V> PropertyEntry of(Key<? extends Value<V>> property, V value) {
-        return new PropertyEntry(property, value);
+    public static <V> KeyValuePair of(Key<? extends Value<V>> property, V value) {
+        return new KeyValuePair(property, value);
     }
 
     private final Key<?> property;
     private final Object value;
 
-    private PropertyEntry(Key<?> property, Object value) {
+    private KeyValuePair(Key<?> property, Object value) {
         this.property = property;
         this.value = value;
     }
 
-    public Key<?> getProperty() {
+    public Key<?> getKey() {
         return this.property;
     }
 

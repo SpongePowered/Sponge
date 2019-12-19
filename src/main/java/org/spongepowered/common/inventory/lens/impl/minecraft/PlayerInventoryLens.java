@@ -40,7 +40,7 @@ import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryL
 import org.spongepowered.common.inventory.lens.impl.slot.HeldHandSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.inventory.property.PropertyEntry;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -79,7 +79,7 @@ public class PlayerInventoryLens extends AbstractLens {
     protected void init(SlotLensProvider slots) {
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlotLens(slot), PropertyEntry.slotIndex(ord));
+            this.addChild(slots.getSlotLens(slot), KeyValuePair.slotIndex(ord));
         }
 
         int base = this.base;
@@ -122,7 +122,7 @@ public class PlayerInventoryLens extends AbstractLens {
         this.addSpanningChild(this.offhand);
 
         for (Map.Entry<EquipmentType, SlotLens> entry : equipmentLenses.entrySet()) {
-            this.addChild(entry.getValue(), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, entry.getKey()));
+            this.addChild(entry.getValue(), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, entry.getKey()));
         }
         this.addChild(this.equipment);
         this.addMissingSpanningSlots(base, slots);

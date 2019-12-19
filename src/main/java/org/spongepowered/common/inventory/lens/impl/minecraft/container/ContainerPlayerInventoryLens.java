@@ -26,7 +26,7 @@ package org.spongepowered.common.inventory.lens.impl.minecraft.container;
 
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.common.inventory.property.PropertyEntry;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
@@ -57,11 +57,11 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
     protected void init(SlotLensProvider slots) {
         super.init(slots);
 
-        this.addChild(slots.getSlotLens(this.base + 0), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.HEADWEAR));
-        this.addChild(slots.getSlotLens(this.base + 1), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.CHESTPLATE));
-        this.addChild(slots.getSlotLens(this.base + 2), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.LEGGINGS));
-        this.addChild(slots.getSlotLens(this.base + 3), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.BOOTS));
-        this.addChild(slots.getSlotLens(this.base + 4 + 4 * 9), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.OFF_HAND));
+        this.addChild(slots.getSlotLens(this.base + 0), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.HEADWEAR));
+        this.addChild(slots.getSlotLens(this.base + 1), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.CHESTPLATE));
+        this.addChild(slots.getSlotLens(this.base + 2), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.LEGGINGS));
+        this.addChild(slots.getSlotLens(this.base + 3), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.BOOTS));
+        this.addChild(slots.getSlotLens(this.base + 4 + 4 * 9), KeyValuePair.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.OFF_HAND));
     }
 
 }

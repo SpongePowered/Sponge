@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.common.inventory.property.PropertyEntry;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 import org.spongepowered.common.inventory.adapter.impl.comp.Inventory2DAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.SlotBasedLens;
@@ -70,7 +70,7 @@ public class Inventory2DLens extends SlotBasedLens {
         for (int y = 0, slot = this.base; y < this.height; y++) {
             for (int x = 0; x < this.width; x++, slot += this.stride) {
                 SlotLens slotLens = slots.getSlotLens(slot);
-                this.addSpanningChild(slotLens, PropertyEntry.of(InventoryProperties.SLOT_POSITION, new Vector2i(this.xBase + x, this.yBase + y)));
+                this.addSpanningChild(slotLens, KeyValuePair.of(InventoryProperties.SLOT_POSITION, new Vector2i(this.xBase + x, this.yBase + y)));
             }
         }
     }
