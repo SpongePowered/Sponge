@@ -26,12 +26,13 @@ package org.spongepowered.common.inventory.lens.impl;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,21 +40,15 @@ import java.util.Map;
 
 public class DefaultEmptyLens implements Lens {
 
-    protected final InventoryAdapter adapter;
-
-    public DefaultEmptyLens(final InventoryAdapter adapter) {
-        this.adapter = adapter;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public Class<? extends Inventory> getAdapterType() {
-        return (Class<? extends Inventory>) this.adapter.getClass();
+        return EmptyInventory.class;
     }
 
     @Override
     public Inventory getAdapter(final Fabric fabric, final Inventory parent) {
-        return this.adapter;
+        return new EmptyInventoryImpl(parent);
     }
 
     @Override
@@ -92,11 +87,11 @@ public class DefaultEmptyLens implements Lens {
     }
 
     @Override
-    public Map<Key<?>, Object> getProperties(int index) {
+    public Map<Key, Object> getDataAt(int index) {
         return Collections.emptyMap();
     }
 
-    @Override public Map<Key<?>, Object> getProperties(Lens lens) {
+    @Override public Map<Key, Object> getDataFor(Lens lens) {
         return Collections.emptyMap();
     }
 

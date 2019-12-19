@@ -51,7 +51,6 @@ import net.minecraft.tileentity.ShulkerBoxTileEntity;
 import net.minecraft.tileentity.SmokerTileEntity;
 import net.minecraft.tileentity.TrappedChestTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
@@ -62,7 +61,6 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.LargeChestInventor
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.util.ContainerUtil;
@@ -166,7 +164,7 @@ public class LensRegistrar {
     private static Lens generateLens(Object inventory, int size, SlotLensProvider slotLensProvider) {
         LensFactory lensFactory = lensFactories.get(inventory.getClass());
         if (size == 0) {
-            return new DefaultEmptyLens(((InventoryBridge) inventory).bridge$getAdapter()); // TODO why do we need an adapter in an empty lens?
+            return new DefaultEmptyLens(); // TODO why do we need an adapter in an empty lens?
         }
         Lens lens = lensFactory.apply(inventory.getClass(), size, slotLensProvider);
         if (lens != null) {

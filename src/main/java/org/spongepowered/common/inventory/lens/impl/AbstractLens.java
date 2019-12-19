@@ -183,12 +183,12 @@ public abstract class AbstractLens implements Lens {
     }
 
     @Override
-    public Map<Key, Object> getProperties(final int index) {
-        return this.getProperties(this.getLens(index));
+    public Map<Key, Object> getDataAt(final int index) {
+        return this.getDataFor(this.getLens(index));
     }
 
     @Override
-    public Map<Key, Object> getProperties(final Lens child) {
+    public Map<Key, Object> getDataFor(final Lens child) {
         if (!this.has(child)) {
             throw new NoSuchElementException("Specified child lens is not a direct descendant this lens");
         }

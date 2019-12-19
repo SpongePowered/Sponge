@@ -55,7 +55,7 @@ public final class InventoryPropertyMatcherQuery extends SpongeDepthQuery {
         }
 
         // Check for lens properties
-        final Object value = parent.getProperties(lens).get(this.propertyMatcher.getProperty());
+        final Object value = parent.getDataFor(lens).get(this.propertyMatcher.getProperty());
         return this.propertyMatcher.matches(value);
     }
 
