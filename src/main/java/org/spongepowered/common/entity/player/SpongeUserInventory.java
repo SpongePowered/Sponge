@@ -174,10 +174,10 @@ public class SpongeUserInventory implements IInventory {
         this.armorInventory.clear();
         this.offHandInventory.clear();
 
-        for (int i = 0; i < nbtTagListIn.tagCount(); ++i) {
+        for (int i = 0; i < nbtTagListIn.size(); ++i) {
             CompoundNBT nbttagcompound = nbtTagListIn.getCompound(i);
             int j = nbttagcompound.getByte("Slot") & 255;
-            ItemStack itemstack = new ItemStack(nbttagcompound);
+            ItemStack itemstack = ItemStack.read(nbttagcompound);
 
             if (!itemstack.isEmpty()) {
                 if (j >= 0 && j < this.mainInventory.size()) {

@@ -54,9 +54,11 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
@@ -225,13 +227,14 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         super.onDeath(cause);
         this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);
-        this.motionY = 0.1D;
+        double motionX = 0.0D;
+        double motionY = 0.1D;
+        double motionZ = 0.0D;
         if (cause != null) {
-            this.motionX = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
-            this.motionZ = -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
-        } else {
-            this.motionX = this.motionZ = 0.0D;
+            motionX = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
+            motionZ = -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
         }
+        this.setMotion(motionX, motionY, motionZ);
     }
 
     @Override
@@ -302,8 +305,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
             if (i > 0) {
                 entityIn.addVelocity(-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
                         MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F);
-                this.motionX *= 0.6D;
-                this.motionZ *= 0.6D;
+                this.setMotion(this.getMotion().mul(0.6, 1.0, 0.6));
             }
 
             final int j = EnchantmentHelper.getFireAspectModifier(this);
@@ -340,10 +342,11 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         if (delay == 0) {
             removeTask.run();
         } else {
-            SpongeImpl.getGame().getScheduler().createTaskBuilder()
+            Sponge.getServer().getScheduler().submit(Task.builder()
                     .execute(removeTask)
                     .delayTicks(delay)
-                    .submit(SpongeImpl.getPlugin());
+                    .plugin(SpongeImpl.getPlugin())
+                    .build());
         }
     }
 
@@ -416,7 +419,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     /**
-     * Creates a {@link SPacketSpawnPlayer} packet.
+     * Creates a {@link SSpawnPlayerPacket} packet.
      *
      * Copied directly from the constructor of the packet, because that can't be
      * used as we're not an EntityPlayer.
@@ -439,7 +442,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     /**
-     * Creates a {@link SPacketPlayerListItem} packet with the given action.
+     * Creates a {@link SPlayerListItemPacket} packet with the given action.
      *
      * @param action The action to apply on the tab list
      * @return A new tab list packet
@@ -503,7 +506,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         // TODO Figure out how to API this out
         final ArrowEntity entitytippedarrow = new ArrowEntity(this.world, this);
         final double d0 = target.posX - this.posX;
-        final double d1 = target.getBoundingBox().minY + target.height / 3.0F - entitytippedarrow.posY;
+        final double d1 = target.getBoundingBox().minY + target.getHeight() / 3.0F - entitytippedarrow.posY;
         final double d2 = target.posZ - this.posZ;
         final double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
         entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getId() * 4);
