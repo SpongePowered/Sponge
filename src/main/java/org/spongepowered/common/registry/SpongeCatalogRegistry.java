@@ -42,6 +42,7 @@ import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.registry.supplier.VanillaBannerPatternSupplier;
 import org.spongepowered.common.registry.supplier.VanillaBiomeSupplier;
 import org.spongepowered.common.registry.supplier.VanillaDimensionTypeSupplier;
 import org.spongepowered.common.registry.supplier.VanillaEffectSupplier;
@@ -212,6 +213,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         // TODO 1.14 - Stats are stupid, need to handle them manually
         // TODO 1.14 - This is not right but I don't want this forgotten so here for now
+        VanillaBannerPatternSupplier.registerSuppliers(this);
         VanillaBiomeSupplier.registerSuppliers(this);
         VanillaBiomeSupplier.registerSuppliers(this);
         VanillaDimensionTypeSupplier.registerSuppliers(this);

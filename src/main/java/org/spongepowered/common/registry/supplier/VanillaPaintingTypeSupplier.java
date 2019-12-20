@@ -61,7 +61,6 @@ public final class VanillaPaintingTypeSupplier {
             .registerSupplier(ArtType.class, "burning_skull", () -> (ArtType) PaintingType.BURNING_SKULL)
             .registerSupplier(ArtType.class, "skeleton", () -> (ArtType) PaintingType.SKELETON)
             .registerSupplier(ArtType.class, "donkey_kong", () -> (ArtType) PaintingType.DONKEY_KONG)
-
         ;
     }
 }

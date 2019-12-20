@@ -22,21 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.tileentity;
+package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.BannerPattern;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.BannerPatternShape;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.CatalogKeyBridge;
 
 @Mixin(BannerPattern.class)
-public abstract class BannerPatternMixin_API implements BannerPatternShape {
+public abstract class BannerPatternMixin implements CatalogKeyBridge {
+
+    private CatalogKey impl$key;
+
+    @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;)V", at = @At("RETURN"))
+    private void impl$setCatalogKey(String enumName, int ordinal, String fileName, String hashName, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.impl$key = CatalogKey.of(container, fileName);
+    }
 
     @Override
-    public CatalogKey getKey() {
-        return ((CatalogKeyBridge) this).bridge$getKey();
+    public CatalogKey bridge$getKey() {
+        return this.impl$key;
+    }
+
+    @Override
+    public void bridge$setKey(CatalogKey key) {
+        throw new UnsupportedOperationException("Key is set in ctor injector, don't set it again!");
     }
 }

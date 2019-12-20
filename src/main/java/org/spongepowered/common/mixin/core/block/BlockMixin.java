@@ -41,6 +41,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -64,6 +65,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.CatalogKeyBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
@@ -88,7 +90,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(value = Block.class)
-public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {
+public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge, CatalogKeyBridge {
 
     private final boolean impl$isVanilla = this.getClass().getName().startsWith("net.minecraft.");
     private boolean impl$hasCollideLogic;
@@ -112,9 +114,21 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Shadow public abstract BlockStateContainer getBlockState();
     @Shadow protected abstract Block setTickRandomly(boolean shouldTick);
 
+    private CatalogKey impl$key;
+
     @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
     private static void onRegisterBlock(final int id, final ResourceLocation location, final Block block, final CallbackInfo ci) {
         BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
+    }
+
+    @Override
+    public CatalogKey bridge$getKey() {
+        return this.impl$key;
+    }
+
+    @Override
+    public void bridge$setKey(CatalogKey key) {
+        this.impl$key = key;
     }
 
     @Override

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.invalid.api.mcp.item;
 
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
-import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;

@@ -27,7 +27,6 @@ package org.spongepowered.common.data.property.store.item;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.property.item.ArmorTypeProperty;
-import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
 import java.util.Optional;

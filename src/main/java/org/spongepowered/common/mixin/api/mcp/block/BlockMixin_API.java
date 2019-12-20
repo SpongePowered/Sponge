@@ -39,6 +39,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.CatalogKeyBridge;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
@@ -52,15 +53,9 @@ public abstract class BlockMixin_API implements BlockType {
     @Shadow public abstract String shadow$getTranslationKey();
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
 
-    @Nullable private CatalogKey api$key;
-
     @Override
     public CatalogKey getKey() {
-        if (this.api$key == null) {
-            this.api$key = (CatalogKey) (Object) Registry.BLOCK.getKey((Block) (Object) this);
-        }
-
-        return this.api$key;
+        return ((CatalogKeyBridge) this).bridge$getKey();
     }
 
     @Override
