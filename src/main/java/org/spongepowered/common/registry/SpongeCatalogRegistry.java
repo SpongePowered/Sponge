@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
@@ -38,12 +39,15 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
+import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
+import org.spongepowered.common.entity.SpongeCatType;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.registry.supplier.VanillaBannerPatternSupplier;
 import org.spongepowered.common.registry.supplier.VanillaBiomeSupplier;
+import org.spongepowered.common.registry.supplier.VanillaCriteriaTriggers;
 import org.spongepowered.common.registry.supplier.VanillaDimensionTypeSupplier;
 import org.spongepowered.common.registry.supplier.VanillaEffectSupplier;
 import org.spongepowered.common.registry.supplier.VanillaEnchantmentSupplier;
@@ -61,6 +65,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Singleton
@@ -206,7 +211,17 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .registerRegistry(Advancement.class, CatalogKey.minecraft("advancement"))
             .registerRegistry(AdvancementTree.class, CatalogKey.minecraft("advancement_tree"))
             .registerRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"))
-        ;
+            .registerRegistry(CatType.class, CatalogKey.minecraft("cat_type"), () -> {
+                // Meowzers
+                return CatEntity.field_213425_bD.entrySet()
+                    .stream()
+                    .map(kv -> {
+                        final String value = kv.getValue().getPath();
+
+                        return new SpongeCatType(kv.getKey(), CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)));
+                    })
+                    .collect(Collectors.toSet());
+            });
     }
 
     private void registerDefaultSuppliers() {
@@ -216,6 +231,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         VanillaBannerPatternSupplier.registerSuppliers(this);
         VanillaBiomeSupplier.registerSuppliers(this);
         VanillaBiomeSupplier.registerSuppliers(this);
+        VanillaCriteriaTriggers.registerSuppliers(this);
         VanillaDimensionTypeSupplier.registerSuppliers(this);
         VanillaEffectSupplier.registerSuppliers(this);
         VanillaEnchantmentSupplier.registerSuppliers(this);

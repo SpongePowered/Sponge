@@ -75,5 +75,6 @@ public final class VanillaBannerPatternSupplier {
             .registerSupplier(BannerPatternShape.class, "skull", () -> (BannerPatternShape) (Object) BannerPattern.SKULL)
             .registerSupplier(BannerPatternShape.class, "flower", () -> (BannerPatternShape) (Object) BannerPattern.FLOWER)
             .registerSupplier(BannerPatternShape.class, "mojang", () -> (BannerPatternShape) (Object) BannerPattern.MOJANG)
+        ;
     }
 }

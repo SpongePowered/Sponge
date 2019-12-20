@@ -38,7 +38,7 @@ public abstract class IPBanEntryMixin_API extends BanEntryMixin_API<String> impl
 
     @Override
     public BanType getType() {
-        return BanTypes.IP;
+        return BanTypes.IP.get();
     }
 
     @Override

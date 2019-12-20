@@ -28,9 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.type.CoalType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.entity.SpongeEntityMeta;
+import org.spongepowered.common.entity.SpongeEntityMetadataType;
 
-public class SpongeCoalType extends SpongeEntityMeta implements CoalType {
+public class SpongeCoalType extends SpongeEntityMetadataType implements CoalType {
 
     private final Translation translation;
 

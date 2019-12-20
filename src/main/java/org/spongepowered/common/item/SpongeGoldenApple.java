@@ -25,9 +25,9 @@
 package org.spongepowered.common.item;
 
 import org.spongepowered.api.data.type.GoldenApple;
-import org.spongepowered.common.entity.SpongeEntityMeta;
+import org.spongepowered.common.entity.SpongeEntityMetadataType;
 
-public class SpongeGoldenApple extends SpongeEntityMeta implements GoldenApple {
+public class SpongeGoldenApple extends SpongeEntityMetadataType implements GoldenApple {
 
     public SpongeGoldenApple(int type, String name) {
         super(type, name);

@@ -38,7 +38,7 @@ import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataPr
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeOcelotType;
+import org.spongepowered.common.entity.SpongeCatType;
 import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 
 import java.util.Optional;
@@ -58,8 +58,8 @@ public class OcelotDataProcessor extends
 
     @Override
     protected boolean set(OcelotEntity entity, CatType value) {
-        if (value instanceof SpongeOcelotType) {
-            entity.setTameSkin(((SpongeOcelotType) value).type);
+        if (value instanceof SpongeCatType) {
+            entity.setTameSkin(((SpongeCatType) value).type);
             return true;
         }
         return false;

@@ -24,12 +24,31 @@
  */
 package org.spongepowered.common.entity;
 
-import org.spongepowered.api.data.type.CatType;
+import static org.spongepowered.api.data.persistence.DataQuery.of;
 
-public class SpongeOcelotType extends SpongeEntityMeta implements CatType {
+import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.common.SpongeCatalogType;
 
-    public SpongeOcelotType(int type, String name) {
-        super(type, name);
+public class SpongeEntityMetadataType extends SpongeCatalogType {
+
+    public final int type;
+
+    public SpongeEntityMetadataType(int type, CatalogKey key) {
+        super(key);
+        this.type = type;
+    }
+
+    public DataContainer toContainer() {
+        // TODO 1.14.4 - This needs to be version 2
+        return DataContainer.createNew().set(of("id"), this.getKey()).set(of("type"), this.type);
+    }
+
+    @Override
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("type", this.type);
     }
 
 }

@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @NonnullByDefault
-public class SpongeProfession extends SpongeEntityMeta implements Profession {
+public class SpongeProfession extends SpongeEntityMetadataType implements Profession {
 
     private final List<Career> careers = new ArrayList<>();
 

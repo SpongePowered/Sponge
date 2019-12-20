@@ -24,29 +24,12 @@
  */
 package org.spongepowered.common.entity;
 
-import static org.spongepowered.api.data.persistence.DataQuery.of;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.CatType;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.common.SpongeCatalogType;
+public final class SpongeCatType extends SpongeEntityMetadataType implements CatType {
 
-public class SpongeEntityMeta extends SpongeCatalogType {
-
-    public final int type;
-
-    public SpongeEntityMeta(int type, String name) {
-        super(name);
-        this.type = type;
+    public SpongeCatType(int type, CatalogKey key) {
+        super(type, key);
     }
-
-    public DataContainer toContainer() {
-        return DataContainer.createNew().set(of("id"), this.type).set(of("name"), getId());
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("type", this.type);
-    }
-
 }

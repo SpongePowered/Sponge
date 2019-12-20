@@ -26,7 +26,7 @@ package org.spongepowered.common.entity;
 
 import org.spongepowered.api.data.type.HorseStyle;
 
-public class SpongeHorseStyle extends SpongeEntityMeta implements HorseStyle {
+public class SpongeHorseStyle extends SpongeEntityMetadataType implements HorseStyle {
 
     private final String name;
 

@@ -36,7 +36,7 @@ public abstract class ProfileBanEntryMixin_API extends BanEntryMixin_API<com.moj
 
     @Override
     public BanType getType() {
-        return BanTypes.PROFILE;
+        return BanTypes.PROFILE.get();
     }
 
     @Override

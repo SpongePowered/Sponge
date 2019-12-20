@@ -47,7 +47,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.merchant.villager.VillagerEntityBridge;
 import org.spongepowered.common.entity.SpongeCareer;
-import org.spongepowered.common.entity.SpongeEntityMeta;
+import org.spongepowered.common.entity.SpongeEntityMetadataType;
 import org.spongepowered.common.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
@@ -99,7 +99,7 @@ public abstract class VillagerEntityMixin extends AgeableEntityMixin implements 
 
     @Override
     public void bridge$setCareer(final Career career) {
-        this.setProfession(((SpongeEntityMeta) career.getProfession()).type);
+        this.setProfession(((SpongeEntityMetadataType) career.getProfession()).type);
         this.buyingList = null;
         this.careerId = ((SpongeCareer) career).type + 1;
         this.careerLevel = 1;
