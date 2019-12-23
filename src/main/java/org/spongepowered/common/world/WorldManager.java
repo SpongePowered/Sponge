@@ -67,14 +67,13 @@ import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.integrated.IntegratedServerBridge;
 import org.spongepowered.common.bridge.world.DimensionTypeBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge_AsyncLighting;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.config.SpongeConfig;
@@ -542,24 +541,28 @@ public final class WorldManager {
             final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
             final int dimensionId = mixinWorldServer.bridge$getDimensionId();
 
+            SpongeImpl.getLogger().info("Unloading world [{}] ({}/{})", worldServer.getWorldInfo().getWorldName(),
+                    ((org.spongepowered.api.world.World) worldServer).getDimension().getType().getId(), dimensionId);
+
             try {
+                try {
+                    // Stop the lighting executor only when the world is going to unload - there's no point in running any more lighting tasks.
+                    if (globalConfigAdapter.getConfig().getModules().useOptimizations() && globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
+                        ((WorldServerBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 // Don't save if server is stopping to avoid duplicate saving.
                 if (!isShuttingDown) {
                     saveWorld(worldServer, true);
                 }
 
                 ((WorldInfoBridge) worldServer.getWorldInfo()).bridge$getConfigAdapter().save();
-            } catch (MinecraftException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                SpongeImpl.getLogger().info("Unloading world [{}] ({}/{})", worldServer.getWorldInfo().getWorldName(),
-                    ((org.spongepowered.api.world.World) worldServer).getDimension().getType().getId(), dimensionId);
-
-                // Stop the lighting executor only when the world is going to unload - there's no point in running any more lighting tasks.
-                if (globalConfigAdapter.getConfig().getModules().useOptimizations() && globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
-                    ((WorldServerBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
-                }
-
                 worldByDimensionId.remove(dimensionId);
                 weakWorldByWorld.remove(worldServer);
                 ((MinecraftServerBridge) server).bridge$removeWorldTickTimes(dimensionId);
@@ -570,9 +573,7 @@ public final class WorldManager {
     }
 
     public static void saveWorld(final WorldServer worldServer, final boolean flush) throws MinecraftException {
-        if (((WorldProperties) worldServer.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
-            return;
-        } else {
+        if (((WorldProperties) worldServer.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.NONE) {
             worldServer.saveAllChunks(true, null);
         }
         if (flush) {
@@ -817,7 +818,7 @@ public final class WorldManager {
 
             // Step 7 - Finally, we can create the world and tell it to load
             final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
-            ;
+
             SpongeImpl.getLogger().info("Loading world [{}] ({}/{})", ((org.spongepowered.api.world.World) worldServer).getName(),
                 apiDimensionType.getId(), dimensionId);
         }
@@ -1114,6 +1115,7 @@ public final class WorldManager {
         try {
             Files.move(oldWorldFolder, newWorldFolder);
         } catch (IOException e) {
+            SpongeImpl.getLogger().error("Failed to move world folder " + worldProperties.getWorldName(), e);
             return Optional.empty();
         }
 
