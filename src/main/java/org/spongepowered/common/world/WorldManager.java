@@ -542,26 +542,30 @@ public final class WorldManager {
             SpongeImpl.getLogger().info("Unloading world [{}] ({}/{})", worldServer.getWorldInfo().getWorldName(),
                     ((org.spongepowered.api.world.World) worldServer).getDimension().getType().getId(), dimensionId);
 
-            // Stop the lighting executor only when the world is going to unload - there's no point in running any more lighting tasks.
-            if (globalConfigAdapter.getConfig().getModules().useOptimizations() && globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
-                ((WorldServerBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
-            }
-
-            // Don't save if server is stopping to avoid duplicate saving.
-            if (!isShuttingDown) {
+            try {
                 try {
-                    saveWorld(worldServer, true);
-                } catch (MinecraftException e) {
+                    // Stop the lighting executor only when the world is going to unload - there's no point in running any more lighting tasks.
+                    if (globalConfigAdapter.getConfig().getModules().useOptimizations() && globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
+                        ((WorldServerBridge_AsyncLighting) worldServer).asyncLightingBridge$getLightingExecutor().shutdownNow();
+                    }
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                // Don't save if server is stopping to avoid duplicate saving.
+                if (!isShuttingDown) {
+                    saveWorld(worldServer, true);
+                }
+
+                ((WorldInfoBridge) worldServer.getWorldInfo()).bridge$getConfigAdapter().save();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                worldByDimensionId.remove(dimensionId);
+                weakWorldByWorld.remove(worldServer);
+                ((MinecraftServerBridge) server).bridge$removeWorldTickTimes(dimensionId);
+                reorderWorldsVanillaFirst();
             }
-
-            ((WorldInfoBridge) worldServer.getWorldInfo()).bridge$getConfigAdapter().save();
-
-            worldByDimensionId.remove(dimensionId);
-            weakWorldByWorld.remove(worldServer);
-            ((MinecraftServerBridge) server).bridge$removeWorldTickTimes(dimensionId);
-            reorderWorldsVanillaFirst();
         }
         return true;
     }
