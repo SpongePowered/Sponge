@@ -163,4 +163,9 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         // ender crystals. Default to PLACEMENT for those.
         return SpawnTypes.PLACEMENT;
     }
+
+    @Override
+    public boolean hasSpecificBlockProcess(final BasicPacketContext context) {
+        return true;
+    }
 }

@@ -103,8 +103,11 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             return;
         }
         // Update TE tracking cache
-        if (block instanceof ITileEntityProvider) {
-            final TileEntity tileEntity = this.tileEntities.get(pos);
+        // We must always check for a TE as a mod block may not implement ITileEntityProvider if a TE exists
+        // Note: We do not check SpongeImplHooks.hasBlockTileEntity(block, state) as neighbor notifications do not 
+        //       include blockstate.
+        final TileEntity tileEntity = this.tileEntities.get(pos);
+        if (tileEntity != null) {
             if (tileEntity instanceof OwnershipTrackedBridge) {
                 final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) tileEntity;
                 if (trackerType == PlayerTracker.Type.NOTIFIER) {
