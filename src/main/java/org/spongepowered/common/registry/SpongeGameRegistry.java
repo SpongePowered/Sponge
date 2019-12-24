@@ -146,7 +146,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     private RegistrationPhase phase = RegistrationPhase.PRE_REGISTRY; // Needed for module phase registrations
 
-    protected static final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> REGISTRY_MAP = new IdentityHashMap<>();
+    public static final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> REGISTRY_MAP = new IdentityHashMap<>();
     private static final Map<Class<?>, Supplier<?>> BUILDER_SUPPLIERS = new IdentityHashMap<>();
 
     private static List<Class<? extends RegistryModule>> ORDERED_MODULES = new ArrayList<>();

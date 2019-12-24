@@ -454,6 +454,7 @@
         "world.DimensionTypeMixin",
         "world.ExplosionAccessor",
         "world.ExplosionMixin",
+        "world.GameRulesAccessor",
         "world.GameRulesMixin",
         "world.NextTickListEntryMixin",
         "world.ServerWorldEventHandlerMixin",

@@ -22,11 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.mixin.core.world;
 
-public interface GameRulesBridge {
+import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    void bridge$setOrCreateGameRule(String gameRule, String value);
+import java.util.TreeMap;
 
-    boolean bridge$removeGameRule(String gameRule);
+@Mixin(GameRules.class)
+public interface GameRulesAccessor {
+
+    @Accessor("rules") TreeMap<String, GameRules.Value> accessor$getRules();
 }

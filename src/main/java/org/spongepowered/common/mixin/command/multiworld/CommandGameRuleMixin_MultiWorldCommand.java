@@ -34,6 +34,7 @@ import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.GameRulesBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 
 @Mixin(CommandGameRule.class)
@@ -51,6 +52,12 @@ public abstract class CommandGameRuleMixin_MultiWorldCommand {
     private GameRules multiWorldCommand$getWorldGameRule(final CommandGameRule self, final MinecraftServer server, final MinecraftServer server2,
         final ICommandSender sender, final String[] args) {
         return multiWorldcommand$getGameRules(sender);
+    }
+
+    @Redirect(method = "execute",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
+    private void multiWorldCommand$callBridgeMethodToAdjustGameRule(GameRules gameRules, String key, String ruleValue) {
+        ((GameRulesBridge) gameRules).bridge$setOrCreateGameRule(key, ruleValue);
     }
 
     @Redirect(method = "getTabCompletions",
