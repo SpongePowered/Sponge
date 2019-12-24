@@ -42,8 +42,8 @@ public class SpawnerCategory extends ConfigCategory {
     private int tickRateAmbient = 400;
     @Setting(value = "tick-rate-animal", comment = "The animal spawning tick rate. Default: 400")
     private int tickRateAnimal = 400;
-    @Setting(value = "tick-rate-aquatic", comment = "The aquatic spawning tick rate. Default: 400")
-    private int tickRateAquatic = 400;
+    @Setting(value = "tick-rate-aquatic", comment = "The aquatic spawning tick rate. Default: 1")
+    private int tickRateAquatic = 1;
     @Setting(value = "tick-rate-monster", comment = "The monster spawning tick rate. Default: 1")
     private int tickRateMonster = 1;
 
