@@ -69,6 +69,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -196,6 +197,10 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
     private void impl$SetActiveChunkOnTileEntityAdd(final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(this);
+        // Make sure to set owner/notifier for TE if any chunk data exists
+        // Failure to do this during chunk load will cause TE's to not have proper user tracking
+        ((OwnershipTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, this.bridge$getBlockNotifierUUID(pos).orElse(null));
+        ((OwnershipTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.OWNER, this.bridge$getBlockOwnerUUID(pos).orElse(null));
     }
 
     @Inject(method = "removeEntityAtIndex", at = @At("RETURN"))
