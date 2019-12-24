@@ -44,6 +44,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     private boolean shouldBreakBlocks = true;
     private boolean shouldSmoke;
     private boolean shouldDamageEntities = true;
+    private int resolution = 16;
+    private float randomness = 1.0F;
+    private double knockback = 1;
 
     public SpongeExplosionBuilder() {
         this.reset();
@@ -92,6 +95,25 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
+    public Explosion.Builder resolution(int resolution) {
+        //A value of 1 would cause a DivideByZeroException
+        this.resolution = Math.max(resolution, 2);
+        return this;
+    }
+
+    @Override
+    public Explosion.Builder randomness(float randomness) {
+        this.randomness = randomness;
+        return this;
+    }
+
+    @Override
+    public Explosion.Builder knockback(double knockback) {
+        this.knockback = knockback;
+        return this;
+    }
+
+    @Override
     public Explosion.Builder from(Explosion value) {
         this.location = value.getLocation();
         this.sourceExplosive = value.getSourceExplosive().orElse(null);
@@ -100,6 +122,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.shouldBreakBlocks = value.shouldBreakBlocks();
         this.shouldSmoke = value.shouldPlaySmoke();
         this.shouldDamageEntities = value.shouldDamageEntities();
+        this.resolution = value.getResolution();
+        this.randomness = value.getRandomness();
+        this.knockback = value.getKnockback();
         return this;
     }
 
@@ -112,6 +137,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.shouldBreakBlocks = true;
         this.shouldSmoke = false;
         this.shouldDamageEntities = true;
+        this.resolution = 16;
+        this.randomness = 1.0F;
+        this.knockback = 1;
         return this;
     }
 
@@ -127,6 +155,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
                 this.canCauseFire, this.shouldSmoke);
         ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
         ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
+        ((ExplosionBridge) explosion).bridge$setResolution(this.resolution);
+        ((ExplosionBridge) explosion).bridge$setRandomness(this.randomness);
+        ((ExplosionBridge) explosion).bridge$setKnockback(this.knockback);
         return (Explosion) explosion;
     }
 }

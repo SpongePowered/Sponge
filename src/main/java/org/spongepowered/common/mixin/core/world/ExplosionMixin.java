@@ -82,6 +82,9 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     private boolean impl$shouldBreakBlocks;
     private boolean impl$shouldDamageEntities;
 //    private Cause createdCause;
+    private int impl$resolution;
+    private float impl$randomness;
+    private double impl$knockback;
 
     @Shadow @Final private List<BlockPos> affectedBlockPositions;
     @Shadow @Final private Map<PlayerEntity, Vec3d> playerKnockbackMap;
@@ -103,6 +106,9 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
         this.impl$shouldBreakBlocks = this.damagesTerrain;
         this.impl$shouldDamageEntities = true;
+        this.impl$resolution = 16;
+        this.impl$randomness = 1.0F;
+        this.impl$knockback = 1.0;
     }
 
     /**
@@ -115,17 +121,15 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     public void doExplosionA() {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
         if (this.impl$shouldBreakBlocks) {
-            // Sponge End
             final Set<BlockPos> set = Sets.<BlockPos>newHashSet();
-            final int i = 16;
 
-            for (int j = 0; j < 16; ++j) {
-                for (int k = 0; k < 16; ++k) {
-                    for (int l = 0; l < 16; ++l) {
-                        if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
-                            double d0 = (double) ((float) j / 15.0F * 2.0F - 1.0F);
-                            double d1 = (double) ((float) k / 15.0F * 2.0F - 1.0F);
-                            double d2 = (double) ((float) l / 15.0F * 2.0F - 1.0F);
+            for (int j = 0; j < impl$resolution; ++j) {
+                for (int k = 0; k < impl$resolution; ++k) {
+                    for (int l = 0; l < impl$resolution; ++l) {
+                        if (j == 0 || j == impl$resolution - 1 || k == 0 || k == impl$resolution - 1 || l == 0 || l == impl$resolution - 1) {
+                            double d0 = (double) ((float) j / (float)(impl$resolution - 1) * 2.0F - 1.0F);
+                            double d1 = (double) ((float) k / (float)(impl$resolution - 1) * 2.0F - 1.0F);
+                            double d2 = (double) ((float) l / (float)(impl$resolution - 1) * 2.0F - 1.0F);
                             final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                             d0 = d0 / d3;
                             d1 = d1 / d3;
@@ -244,15 +248,17 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             d11 = ProtectionEnchantment.getBlastDamageReduction((LivingEntity) entity, d10);
                         }
 
-                        entity.motionX += d5 * d11;
-                        entity.motionY += d7 * d11;
-                        entity.motionZ += d9 * d11;
+                        //Sponge Start
+                        entity.motionX += d5 * d11 * impl$knockback;
+                        entity.motionY += d7 * d11 * impl$knockback;
+                        entity.motionZ += d9 * d11 * impl$knockback;
 
                         if (entity instanceof PlayerEntity) {
                             final PlayerEntity entityplayer = (PlayerEntity) entity;
 
-                            if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.abilities.isFlying)) {
-                                this.playerKnockbackMap.put(entityplayer, new Vec3d(d5 * d10, d7 * d10, d9 * d10));
+                            if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.capabilities.isFlying)) {
+                                this.playerKnockbackMap.put(entityplayer, new Vec3d(d5 * d10 * impl$knockback, d7 * d10 * impl$knockback, d9 * d10 * impl$knockback));
+                                //Sponge End
                             }
                         }
                     }
@@ -390,6 +396,36 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         this.impl$shouldDamageEntities = shouldDamageEntities;
     }
 
+    @Override
+    public void bridge$setResolution(int resolution) {
+        this.impl$resolution = resolution;
+    }
+
+    @Override
+    public int bridge$getResolution() {
+        return this.impl$resolution;
+    }
+
+    @Override
+    public void bridge$setRandomness(float randomness) {
+        this.impl$randomness = randomness;
+    }
+
+    @Override
+    public float bridge$getRandomness() {
+        return this.impl$randomness;
+    }
+
+    @Override
+    public void bridge$setKnockback(double knockback) {
+        this.impl$knockback = knockback;
+    }
+
+    @Override
+    public double bridge$getKnockback() {
+        return this.impl$knockback;
+    }
+
     @Nullable
     @Override
     public Entity bridge$getExploder() {
@@ -404,14 +440,17 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("causesFire", this.causesFire)
-            .add("damagesTerrain", this.damagesTerrain)
-            .add("world", this.world.getWorldInfo() == null ? "null" : this.world.getWorldInfo().getWorldName())
-            .add("x", this.x)
-            .add("y", this.y)
-            .add("z", this.z)
-            .add("exploder", this.exploder)
-            .add("size", this.size)
-            .toString();
+                .add("causesFire", this.causesFire)
+                .add("damagesTerrain", this.damagesTerrain)
+                .add("world", this.world.getWorldInfo() == null ? "null" : this.world.getWorldInfo().getWorldName())
+                .add("x", this.x)
+                .add("y", this.y)
+                .add("z", this.z)
+                .add("exploder", this.exploder)
+                .add("size", this.size)
+                .add("resolution", this.impl$resolution)
+                .add("randomness", this.impl$randomness)
+                .add("knockback", this.impl$knockback)
+                .toString();
     }
 }

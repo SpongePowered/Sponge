@@ -287,7 +287,10 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
                     // We have to set the size to 1 for the y limit due to the
                     // format having that restriction (up until 1.15's supposed
                     // changes.
-                    final MutableBiomeVolume biomes = new ByteArrayMutableBiomeBuffer(this.biomePalette, min, new Vector3i(size.getX(), 1, size.getZ()));
+                    // We also have to set the start y co-ordinate to zero for the
+                    // same reason
+                    final MutableBiomeVolume biomes = new ByteArrayMutableBiomeBuffer(
+                            this.biomePalette, min.mul(1, 0, 1), new Vector3i(size.getX(), 1, size.getZ()));
                     this.view.getBiomeWorker().iterate((v, x, y, z) -> biomes.setBiome(x, y, z, v.getBiome(x, y, z)));
                     this.biomeVolume = biomes;
                 }
@@ -297,7 +300,10 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             if (this.volume != null) {
                 this.entities = this.volume.getEntityArchetypes();
             } else if (this.view != null && this.backingVolume != null) {
-                this.entities = this.view.getIntersectingEntities(this.backingVolume.getBlockMin().toDouble(), this.backingVolume.getBlockMax().toDouble()).stream()
+                this.entities = this.view.getIntersectingEntities(
+                        this.backingVolume.getBlockMin().toDouble(),
+                        this.backingVolume.getBlockMax().add(1, 1,1).toDouble())
+                    .stream()
                     .map(ReadableEntityVolume.EntityHit::getEntity)
                     .filter(Objects::nonNull)
                     .filter(entity -> !(entity instanceof Player) || !SpongeImplHooks.isFakePlayer((net.minecraft.entity.Entity) entity))

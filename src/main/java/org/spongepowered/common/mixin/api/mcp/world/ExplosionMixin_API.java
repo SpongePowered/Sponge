@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -36,8 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
 import org.spongepowered.math.vector.Vector3d;
-import java.util.List;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.Random;
 
@@ -97,6 +94,21 @@ public abstract class ExplosionMixin_API implements Explosion {
     @Override
     public boolean shouldDamageEntities() {
         return ((ExplosionBridge) this).bridge$getShouldDamageEntities();
+    }
+
+    @Override
+    public int getResolution() {
+        return  ((ExplosionBridge) this).bridge$getResolution();
+    }
+
+    @Override
+    public float getRandomness() {
+        return  ((ExplosionBridge) this).bridge$getRandomness();
+    }
+
+    @Override
+    public double getKnockback() {
+        return  ((ExplosionBridge) this).bridge$getKnockback();
     }
 
 }
