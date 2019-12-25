@@ -26,7 +26,6 @@ package org.spongepowered.common.inventory.custom;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -80,6 +79,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
         return this.plugin;
     }
 
+    @Nullable
     public UUID getIdentity() {
         return this.identity;
     }

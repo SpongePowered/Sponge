@@ -22,34 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.inventory.root;
+package org.spongepowered.common.data.provider.inventory;
 
-import net.minecraft.util.INameable;
-import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryKeys;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.common.data.provider.inventory.GenericImmutableInventoryDataProvider;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.data.provider.GenericImmutableDataProvider;
+import org.spongepowered.common.inventory.lens.Lens;
 
+import java.util.Map;
 import java.util.Optional;
 
-public class TitleDataProvider extends GenericImmutableInventoryDataProvider<Text> {
+public class GenericSlotLensDataProvider<D> extends GenericImmutableDataProvider<Slot, D> {
 
-    public TitleDataProvider() {
-        super(InventoryKeys.TITLE.get());
+    public GenericSlotLensDataProvider(Key<? extends Value<D>> key) {
+        super(key);
     }
 
     @Override
-    protected Optional<Text> getFrom(Inventory dataHolder) {
-        if (dataHolder instanceof INameable) {
-            ITextComponent name = ((INameable) dataHolder).getName();
-            if (name == null) {
-                return Optional.empty();
-            }
-            return Optional.of(SpongeTexts.toText(name));
-        }
+    @SuppressWarnings("unchecked")
+    protected Optional<D> getFrom(Slot dataHolder) {
+        Inventory child = dataHolder;
+        Inventory parent = dataHolder.parent();
 
+        Lens parentLens = ((InventoryBridge) parent).bridge$getAdapter().inventoryAdapter$getRootLens();
+        Lens childLens = ((InventoryBridge) child).bridge$getAdapter().inventoryAdapter$getRootLens();
+        Map<Key, Object> dataMap = parentLens.getDataFor(childLens);
+        D data = (D) dataMap.get(this.getKey());
+        return Optional.ofNullable(data);
+    }
+
+    @Override
+    protected Optional<Slot> set(Slot dataHolder, D value) {
         return Optional.empty();
     }
 }
