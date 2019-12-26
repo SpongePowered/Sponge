@@ -44,7 +44,7 @@ public abstract class GameRulesMixin implements GameRulesBridge {
 
     @Shadow @Final private TreeMap<String, Object> rules;
     @Shadow public abstract void shadow$setOrCreateGameRule(String key, String ruleValue);
-
+    
     private boolean impl$adjustAllWorlds = false;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;addGameRule(Ljava/lang/String;"
@@ -60,24 +60,24 @@ public abstract class GameRulesMixin implements GameRulesBridge {
     }
 
     @Redirect(method = "setOrCreateGameRule", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules$Value;setValue(Ljava/lang/String;)V"))
-    private void impl$adjustWorldsForAddSetGameRule(GameRules.Value source, String value, String key) {
+    private void impl$adjustWorldsForAddSetGameRule(GameRules.Value source, String value, String key, String ruleValue) {
         if (!this.impl$adjustAllWorlds) {
             source.setValue(value);
             return;
         }
 
         WorldManager.getWorlds()
-            .stream()
-            .map(World::getGameRules)
-            .forEach(gameRules -> {
-                GameRules.Value otherValue = ((GameRulesAccessor) gameRules).accessor$getRules().get(key);
-                if (otherValue != null) {
-                    otherValue.setValue(value);
-                }
-            });
+                .stream()
+                .map(World::getGameRules)
+                .forEach(gameRules -> {
+                    GameRules.Value otherValue = ((GameRulesAccessor) gameRules).accessor$getRules().get(key);
+                    if (otherValue != null) {
+                        otherValue.setValue(value);
+                    }
+                });
     }
 
-    @Inject(method = "addGameRule", at = @At("HEAD"))
+    @Inject(method = "addGameRule", at = @At("HEAD"), cancellable = true)
     private void impl$adjustWorldsForAddGameRule(String key, String value, GameRules.ValueType type, CallbackInfo ci) {
         ci.cancel();
 
