@@ -516,6 +516,7 @@ public final class EntityUtil {
 
         SpongeImplHooks.handlePostChangeDimensionEvent(player, fromWorld, toWorld);
 
+        ((EntityPlayerMPBridge) player).bridge$refreshExp();
         return player;
     }
 
