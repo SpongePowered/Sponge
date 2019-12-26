@@ -48,7 +48,7 @@ import java.util.List;
 /**
  * Used to migrate Worlds from Bukkit -> Sponge and fix core world errors
  */
-public class WorldMigrator {
+public final class WorldMigrator {
 
     /**
      * Gets the old world container used when this server used to be running Bukkit.

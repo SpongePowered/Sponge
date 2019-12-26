@@ -118,6 +118,8 @@ import javax.annotation.Nullable;
 @SuppressWarnings("ConstantConditions")
 public final class WorldManager {
 
+    private static final boolean MIGRATE_WORLDS = Boolean.parseBoolean(System.getProperty("sponge.world.migrate_old", "true"));
+
     private static final DirectoryStream.Filter<Path> LEVEL_AND_SPONGE =
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
@@ -694,7 +696,11 @@ public final class WorldManager {
 
         WorldManager.registerVanillaDimensionPaths(currentSavesDir);
 
-        WorldMigrator.migrateWorldsTo(currentSavesDir);
+        if (MIGRATE_WORLDS) {
+            WorldMigrator.migrateWorldsTo(currentSavesDir);
+        } else {
+            SpongeImpl.getLogger().info("World migration is disabled. Old worlds will not be migrated...");
+        }
 
         registerExistingSpongeDimensions(currentSavesDir);
 
