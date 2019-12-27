@@ -22,25 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.util;
+package org.spongepowered.common.mixin.accessor.item;
 
 import net.minecraft.item.MerchantOffer;
-import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public class TradeOfferUtil {
+@Mixin(MerchantOffer.class)
+public interface MerchantOfferAccessor {
 
-    public static MerchantOffer toNative(TradeOffer tradeOffer) {
-        if (tradeOffer instanceof MerchantOffer) {
-            return (MerchantOffer) tradeOffer;
-        }
-        throw new NativeTradeOfferException("The supplied trade offer was not native to the current platform");
-    }
-
-    public static TradeOffer fromNative(MerchantOffer merchantRecipe) {
-        if (merchantRecipe instanceof TradeOffer || merchantRecipe == null) {
-            return (TradeOffer) merchantRecipe;
-        }
-        throw new NativeTradeOfferException("The supplied trade offer was not compatible with the target environment!");
-    }
+    @Accessor("doesRewardEXP") void accessor$setRewardsExp(boolean allowsExperience);
 
 }

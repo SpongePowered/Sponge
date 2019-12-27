@@ -51,31 +51,14 @@ import net.minecraft.entity.player.PlayerEntity;
 
 @Mixin(VillagerEntity.class)
 @Implements(@Interface(iface = Villager.class, prefix = "apiVillager$"))
-public abstract class VillagerEntityMixin_API extends AgeableEntityMixin_API implements Villager {
-
-    @Shadow public abstract void setProfession(int professionId);
-    @Shadow public abstract void setCustomer(PlayerEntity player);
-    @Shadow public abstract boolean shadow$isTrading();
-    @Shadow @Nullable public abstract PlayerEntity shadow$getCustomer();
-
+public abstract class VillagerEntityMixin_API extends AbstractVillagerEntityMixin_API implements Villager {
 
     @Intrinsic
     public boolean apiVillager$isTrading() {
-        return this.shadow$isTrading();
-    }
-
-    @Override
-    public Optional<Humanoid> getCustomer() {
-        return Optional.ofNullable((Humanoid) this.shadow$getCustomer());
-    }
-
-    @Override
-    public void setCustomer(@Nullable Humanoid humanoid) {
-        this.setCustomer((PlayerEntity) humanoid);
+        return this.shadow$hasCustomer();
     }
 
     // Data delegated methods
-
 
     @Override
     public CareerData getCareerData() {

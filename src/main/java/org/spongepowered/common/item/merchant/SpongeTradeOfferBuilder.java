@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.village.MerchantRecipe;
+import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -37,7 +37,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.invalid.accessor.village.MerchantRecipeAccessor;
+import org.spongepowered.common.mixin.accessor.item.MerchantOfferAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -46,9 +46,9 @@ import javax.annotation.Nullable;
 
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
-    private ItemStackSnapshot firstItem = ItemStackSnapshot.NONE;
+    private ItemStackSnapshot firstItem = ItemStackSnapshot.empty();
     @Nullable private ItemStackSnapshot secondItem;
-    private ItemStackSnapshot sellingItem = ItemStackSnapshot.NONE;
+    private ItemStackSnapshot sellingItem = ItemStackSnapshot.empty();
     private int useCount;
     private int maxUses;
     private boolean allowsExperience;
@@ -107,10 +107,10 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         final ItemStack first = this.firstItem.createStack();
         final ItemStack second = this.secondItem == null ? null : this.secondItem.createStack();
         final ItemStack selling = this.sellingItem.createStack();
-        final MerchantRecipe recipe = new MerchantRecipe(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
+        final MerchantOffer merchantOffer = new MerchantOffer(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
                         this.useCount, this.maxUses);
-        ((MerchantRecipeAccessor) recipe).accessor$setRewardsExp(this.allowsExperience);
-        return (TradeOffer) recipe;
+        ((MerchantOfferAccessor) merchantOffer).accessor$setRewardsExp(this.allowsExperience);
+        return (TradeOffer) merchantOffer;
     }
 
     @Override
@@ -128,9 +128,9 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public SpongeTradeOfferBuilder reset() {
-        this.firstItem = ItemStackSnapshot.NONE;
+        this.firstItem = ItemStackSnapshot.empty();
         this.secondItem = null;
-        this.sellingItem = ItemStackSnapshot.NONE;
+        this.sellingItem = ItemStackSnapshot.empty();
         this.useCount = Constants.Item.TradeOffer.DEFAULT_USE_COUNT;
         this.maxUses = Constants.Item.TradeOffer.DEFAULT_MAX_USES;
         this.allowsExperience = true;

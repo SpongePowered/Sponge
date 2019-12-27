@@ -198,6 +198,7 @@
         "util.text.TextFormattingMixin",
         "util.text.event.ClickEventMixin",
         "util.text.event.HoverEventMixin",
+        "village.MerchantOfferMixin",
         "world.RegionMixin",
         "world.dimension.DimensionTypeMixin",
         "world.ExplosionMixin",
