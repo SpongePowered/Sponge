@@ -53,7 +53,7 @@ public abstract class OcelotEntityMixin_API extends TameableEntityMixin_API impl
 
     @Override
     public Mutable<CatType> variant() {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, Constants.Entity.Ocelot.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
+        return new SpongeValue<>(Keys.OCELOT_TYPE, Constants.Entity.Cat.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
     }
 
     @Override

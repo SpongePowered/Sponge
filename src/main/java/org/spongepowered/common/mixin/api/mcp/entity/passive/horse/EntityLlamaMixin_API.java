@@ -59,7 +59,7 @@ public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implem
             this.setVariant(0); // Basically some validation
             variant = LlamaTypes.CREAMY;
         }
-        return new SpongeValue<>(Keys.LLAMA_VARIANT, Constants.Entity.Llama.DEFAULT_VARIANT, variant);
+        return new SpongeValue<>(Keys.LLAMA_VARIANT, Constants.Entity.Llama.DEFAULT_TYPE, variant);
     }
 
     @Override

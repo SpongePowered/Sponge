@@ -53,7 +53,7 @@ public class OcelotDataProcessor extends
 
     @Override
     protected Mutable<CatType> constructValue(CatType actualValue) {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, Constants.Catalog.DEFAULT_OCELOT, actualValue);
+        return new SpongeValue<>(Keys.OCELOT_TYPE, Constants.Catalog.DEFAULT_CAT_TYPE, actualValue);
     }
 
     @Override

@@ -51,7 +51,7 @@ public abstract class ParrotEntityMixin_API extends TameableEntityMixin_API impl
 
     @Override
     public Mutable<ParrotType> variant() {
-        return new SpongeValue<>(Keys.PARROT_VARIANT, Constants.Entity.Parrot.DEFAULT_VARIANT, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
+        return new SpongeValue<>(Keys.PARROT_VARIANT, Constants.Entity.Parrot.DEFAULT_TYPE, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
     }
 
     @Override
