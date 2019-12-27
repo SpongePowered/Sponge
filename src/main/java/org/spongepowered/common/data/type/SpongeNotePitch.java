@@ -46,12 +46,12 @@ public final class SpongeNotePitch extends SpongeCatalogType implements NotePitc
 
     @Override
     public NotePitch cycleNext() {
-        final int value = this.id + 1;
         final SimpleRegistry<NotePitch> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(NotePitch.class);
-        NotePitch notePitch = registry.getByValue(value);
-        if (notePitch == null) {
-            notePitch = NotePitches.A1.get();
+        final int value = this.id + 1;
+        NotePitch next = registry.getByValue(value);
+        if (next == null) {
+            next = NotePitches.A1.get();
         }
-        return notePitch;
+        return next;
     }
 }

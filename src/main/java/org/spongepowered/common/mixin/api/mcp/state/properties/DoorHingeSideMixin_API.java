@@ -25,34 +25,46 @@
 package org.spongepowered.common.mixin.api.mcp.state.properties;
 
 import net.minecraft.state.properties.DoorHingeSide;
+import net.minecraft.util.registry.SimpleRegistry;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 
 @Mixin(DoorHingeSide.class)
-@Implements(@Interface(iface = Hinge.class, prefix = "hinge$"))
 public abstract class DoorHingeSideMixin_API implements Hinge {
 
-    @Shadow public abstract String shadow$getName();
+    private CatalogKey api$key;
 
-    public String hinge$getId() {
-        return "minecraft:" + this.shadow$getName();
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(enumName.toLowerCase());
     }
 
-    @Intrinsic
-    public String hinge$getName() {
-        return this.shadow$getName();
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
     @Override
     public Hinge cycleNext() {
-        if (this.equals(Hinges.LEFT)) {
-            return Hinges.RIGHT;
+        final SimpleRegistry<Hinge> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(Hinge.class);
+        final int index = registry.getId(this);
+        Hinge next = registry.getByValue(index + 1);
+        if (next == null) {
+            next = Hinges.LEFT.get();
         }
-        return Hinges.LEFT;
+        return next;
     }
 }

@@ -26,11 +26,10 @@ package org.spongepowered.common.data.type;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.common.entity.SpongeEntityMetadataType;
 
 import java.util.ArrayList;
 
-public class SpongeProfession extends SpongeEntityMetadataType implements Profession {
+public final class SpongeProfession extends SpongeEntityMetadataType implements Profession {
 
     private final List<Career> careers = new ArrayList<>();
 

@@ -26,9 +26,8 @@ package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.HorseType;
-import org.spongepowered.common.entity.SpongeEntityMetadataType;
 
-public final class SpongeHorseType extends SpongeEntityMetadataType implements HorseType {
+public final class SpongeHorseType extends SpongeEntityMetadataType<Integer> implements HorseType {
 
     public SpongeHorseType(CatalogKey key, int color) {
         super(key, color);

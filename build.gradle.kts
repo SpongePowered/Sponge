@@ -17,6 +17,10 @@ minecraft {
             }
         }
     }
+    project.sourceSets["main"].resources
+            .filter { it.name.endsWith("_at.cfg") }
+            .files
+            .forEach { accessTransformer(it) }
 }
 
 

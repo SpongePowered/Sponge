@@ -22,35 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.projectile;
+package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.data.type.LlamaType;
 
-import java.util.Locale;
+public final class SpongeLlamaType extends SpongeEntityMetadataType<Integer> implements LlamaType {
 
-import javax.annotation.Nullable;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
-
-@Mixin(AbstractArrowEntity.PickupStatus.class)
-public abstract class AbstractArrowEntity_PickupStatusMixin_API implements PickupRule {
-
-    private CatalogKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(enumName.toLowerCase());
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.api$key;
+    public SpongeLlamaType(CatalogKey key, int metadata) {
+        super(key, metadata);
     }
 }

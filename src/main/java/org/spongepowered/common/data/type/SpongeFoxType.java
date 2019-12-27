@@ -22,28 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.block.StairsBlock;
-import org.spongepowered.api.data.type.StairShape;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.FoxType;
 
-@Mixin(StairsBlock.EnumShape.class)
-@Implements(@Interface(iface = StairShape.class, prefix = "stair$"))
-public abstract class BlockStairs_EnumShapeMixin_API {
+public final class SpongeFoxType extends SpongeEntityMetadataType<Integer> implements FoxType {
 
-    @Shadow public abstract String shadow$getName();
-
-    public String stair$getId() {
-        return "minecraft:" + this.shadow$getName();
-    }
-
-    @Intrinsic
-    public String stair$getName() {
-        return this.shadow$getName();
+    public SpongeFoxType(CatalogKey key, int metadata) {
+        super(key, metadata);
     }
 }

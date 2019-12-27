@@ -22,39 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.item;
+package org.spongepowered.common.mixin.api.mcp.state.properties;
 
-import net.minecraft.item.Item;
-import org.spongepowered.api.data.type.ToolType;
+import net.minecraft.state.properties.ChestType;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.ChestAttachmentType;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
-import java.util.Locale;
+@Mixin(ChestType.class)
+public abstract class ChestTypeMixin_API implements ChestAttachmentType {
 
-import javax.annotation.Nullable;
+    private CatalogKey api$key;
 
-@Mixin(Item.ToolMaterial.class)
-public abstract class Item_ToolMaterialMixin_API implements ToolType {
-
-    @Nullable private String spongeImpl$name;
-    @Nullable private String spongeImpl$capitalizedName;
-
-    @Override
-    public String getId() {
-        if (this.spongeImpl$name == null) {
-            String toString = this.toString();
-            if (toString.equalsIgnoreCase("emerald")) {
-                toString = "diamond";
-            }
-            this.spongeImpl$name = toString.toLowerCase(Locale.ENGLISH);
-        }
-        return this.spongeImpl$name;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, String name, int opposite, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(name);
     }
 
     @Override
-    public String getName() {
-        if (this.spongeImpl$capitalizedName == null) {
-            this.spongeImpl$capitalizedName = this.getId().toUpperCase(Locale.ENGLISH);
-        }
-        return this.spongeImpl$capitalizedName;
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 }

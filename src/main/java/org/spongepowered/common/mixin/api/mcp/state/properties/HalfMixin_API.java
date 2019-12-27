@@ -22,28 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block;
+package org.spongepowered.common.mixin.api.mcp.state.properties;
 
-import net.minecraft.block.SlabBlock;
+import net.minecraft.state.properties.Half;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.PortionType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
-@Mixin(SlabBlock.EnumBlockHalf.class)
-@Implements(@Interface(iface = PortionType.class, prefix = "portion$"))
-public abstract class BlockSlab_EnumBlockHalfMixin_API {
+@Mixin(Half.class)
+public abstract class HalfMixin_API implements PortionType {
 
-    @Shadow public abstract String shadow$getName();
+    private CatalogKey api$key;
 
-    public String portion$getId() {
-        return "minecraft:" + this.shadow$getName();
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, String name, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(name);
     }
 
-    @Intrinsic
-    public String portion$getName() {
-        return this.shadow$getName();
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 }

@@ -22,36 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity;
+package org.spongepowered.common.item.inventory;
 
-import static org.spongepowered.api.data.persistence.DataQuery.of;
-
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeEntityMetadataType extends SpongeCatalogType {
+/**
+ * Cannot be opened normally. Use the inventory of an actual entity to open Container.
+ */
+public final class SpongeDummyContainerType extends SpongeCatalogType implements ContainerType {
 
-    private final int metadata;
-
-    public SpongeEntityMetadataType(CatalogKey key, int metadata) {
+    public SpongeDummyContainerType(CatalogKey key) {
         super(key);
-        this.metadata = metadata;
-    }
-
-    public int getMetadata() {
-        return this.metadata;
-    }
-
-    public DataContainer toContainer() {
-        // TODO 1.14.4 - This needs to be version 2
-        return DataContainer.createNew().set(of("id"), this.getKey()).set(of("metadata"), this.metadata);
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("metadata", this.metadata);
     }
 }

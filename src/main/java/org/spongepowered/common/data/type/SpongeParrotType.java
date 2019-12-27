@@ -26,9 +26,8 @@ package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ParrotType;
-import org.spongepowered.common.entity.SpongeEntityMetadataType;
 
-public final class SpongeParrotType extends SpongeEntityMetadataType implements ParrotType {
+public final class SpongeParrotType extends SpongeEntityMetadataType<Integer> implements ParrotType {
 
     public SpongeParrotType(CatalogKey key, int metadata) {
         super(key, metadata);

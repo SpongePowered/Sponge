@@ -22,41 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block;
+package org.spongepowered.common.mixin.api.mcp.state.properties;
 
-import net.minecraft.block.AbstractRailBlock;
+import net.minecraft.state.properties.RailShape;
+import net.minecraft.util.registry.SimpleRegistry;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.RailDirection;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 
-@Mixin(AbstractRailBlock.EnumRailDirection.class)
-@Implements(@Interface(iface = RailDirection.class, prefix = "rail$"))
-public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDirection {
+@Mixin(RailShape.class)
+public abstract class RailShapeMixin_API implements RailDirection {
 
-    @Shadow public abstract String shadow$getName();
-    @Shadow public abstract int getMetadata();
+    @Shadow @Final private int meta;
+    private CatalogKey api$key;
 
-    public String rail$getId() {
-        return "minecraft:" + this.shadow$getName();
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, int meta, String name, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(name);
     }
 
-    @Intrinsic
-    public String rail$getName() {
-        return this.shadow$getName();
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public RailDirection cycleNext() {
-        int meta = this.getMetadata();
-        if (meta == 9) {
-            meta = 0;
-        } else {
-            meta++;
+        final SimpleRegistry<RailDirection> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(RailDirection.class);
+        final int meta = this.meta;
+        RailDirection next = registry.getByValue(meta + 1);
+        if (next == null) {
+            next = registry.getByValue(0);
         }
-        return (RailDirection) (Object) AbstractRailBlock.EnumRailDirection.byMetadata(meta);
+        return next;
     }
 }

@@ -40,7 +40,6 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeCoalData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.item.SpongeCoalType;
 
 import java.util.List;
 import java.util.Optional;

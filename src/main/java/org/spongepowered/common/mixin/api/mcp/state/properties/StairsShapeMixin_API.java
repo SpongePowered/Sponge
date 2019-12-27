@@ -22,30 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block;
+package org.spongepowered.common.mixin.api.mcp.state.properties;
 
-import net.minecraft.block.RedstoneWireBlock;
-import org.spongepowered.api.data.type.WireAttachmentType;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import net.minecraft.state.properties.StairsShape;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.StairShape;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
-@Mixin(RedstoneWireBlock.EnumAttachPosition.class)
-@Implements(@Interface(iface = WireAttachmentType.class, prefix = "type$"))
-public abstract class BlockRedstoneWire_EnumAttachPositionMixin_API implements WireAttachmentType {
+@Mixin(StairsShape.class)
+public abstract class StairsShapeMixin_API implements StairShape {
 
-    @Shadow @Final private String name;
+    private CatalogKey api$key;
 
-    @Override
-    public String getId() {
-        return "minecraft:" + this.name;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, String name, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(name);
     }
 
-    @Intrinsic
-    public String type$getName() {
-        return this.name;
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 }

@@ -22,31 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item;
+package org.spongepowered.common.mixin.api.mcp.state.properties;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import net.minecraft.state.properties.ComparatorMode;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.ComparatorType;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
-import org.spongepowered.api.data.type.CoalType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.entity.SpongeEntityMetadataType;
+@Mixin(ComparatorMode.class)
+public abstract class ComparatorModeMixin_API implements ComparatorType {
 
-public class SpongeCoalType extends SpongeEntityMetadataType implements CoalType {
+    private CatalogKey api$key;
 
-    private final Translation translation;
-
-    public SpongeCoalType(int type, String name, Translation translation) {
-        super(type, name);
-        this.translation = checkNotNull(translation, "translation");
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, String name, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(name);
     }
 
     @Override
-    public String getName() {
-        return this.getTranslation().get();
+    public CatalogKey getKey() {
+        return this.api$key;
     }
-
-    @Override
-    public Translation getTranslation() {
-        return this.translation;
-    }
-
 }

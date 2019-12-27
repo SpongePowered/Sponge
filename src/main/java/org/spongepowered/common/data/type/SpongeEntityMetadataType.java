@@ -22,35 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.projectile;
+package org.spongepowered.common.data.type;
 
+import static org.spongepowered.api.data.persistence.DataQuery.of;
+
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Locale;
+public abstract class SpongeEntityMetadataType<T> extends SpongeCatalogType {
 
-import javax.annotation.Nullable;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
+    private final T metadata;
 
-@Mixin(AbstractArrowEntity.PickupStatus.class)
-public abstract class AbstractArrowEntity_PickupStatusMixin_API implements PickupRule {
+    public SpongeEntityMetadataType(CatalogKey key, T metadata) {
+        super(key);
+        this.metadata = metadata;
+    }
 
-    private CatalogKey api$key;
+    public T getMetadata() {
+        return this.metadata;
+    }
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+    public DataContainer toContainer() {
+        // TODO 1.14.4 - This needs to be version 2
+        return DataContainer.createNew().set(of("id"), this.getKey()).set(of("metadata"), this.metadata);
     }
 
     @Override
-    public CatalogKey getKey() {
-        return this.api$key;
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("metadata", this.metadata);
     }
 }

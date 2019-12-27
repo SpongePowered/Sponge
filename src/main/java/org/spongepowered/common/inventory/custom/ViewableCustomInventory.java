@@ -33,7 +33,7 @@ import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.data.type.SpongeContainerType;
+import org.spongepowered.common.item.inventory.SpongeContainerType;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 

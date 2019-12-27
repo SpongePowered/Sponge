@@ -22,35 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.projectile;
+package org.spongepowered.common.data.type;
 
+import static org.spongepowered.api.data.persistence.DataQuery.of;
+
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.type.PandaGene;
 
-import java.util.Locale;
+public final class SpongePandaGene extends SpongeEntityMetadataType<Integer> implements PandaGene {
 
-import javax.annotation.Nullable;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
+    private final boolean isRecessive;
 
-@Mixin(AbstractArrowEntity.PickupStatus.class)
-public abstract class AbstractArrowEntity_PickupStatusMixin_API implements PickupRule {
-
-    private CatalogKey api$key;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+    public SpongePandaGene(CatalogKey key, Integer metadata, boolean isRecessive) {
+        super(key, metadata);
+        this.isRecessive = isRecessive;
     }
 
     @Override
-    public CatalogKey getKey() {
-        return this.api$key;
+    public boolean isRecessive() {
+        return this.isRecessive;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer().set(of("isRecessive"), this.isRecessive);
+    }
+
+    @Override
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+            .add("isRecessive", this.isRecessive);
     }
 }

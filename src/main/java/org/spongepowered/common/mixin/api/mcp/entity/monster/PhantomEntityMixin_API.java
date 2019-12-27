@@ -22,46 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity;
+package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-@NonnullByDefault
-public class SpongeCareer extends SpongeEntityMetadataType implements Career {
+import net.minecraft.entity.monster.PhantomEntity;
+import org.spongepowered.api.data.type.PhantomPhase;
+import org.spongepowered.api.entity.living.monster.Phantom;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-    private final Translation translation;
-    private final Profession profession;
+@Mixin(PhantomEntity.class)
+public abstract class PhantomEntityMixin_API implements Phantom {
 
-    public SpongeCareer(int id, String name, Profession profession, Translation translation) {
-        super(id, name);
-        this.translation = translation;
-        this.profession = profession;
+    @Shadow private PhantomEntity.AttackPhase attackPhase;
+
+    @Override
+    public PhantomPhase getPhase() {
+        return (PhantomPhase) (Object) this.attackPhase;
     }
 
     @Override
-    public String getName() {
-        return this.getTranslation().get();
+    public void setPhase(PhantomPhase phase) {
+        checkNotNull(phase);
+        this.attackPhase = (PhantomEntity.AttackPhase) (Object) phase;
     }
-
-    @Override
-    public Translation getTranslation() {
-        return this.translation;
-    }
-
-    @Override
-    public Profession getProfession() {
-        return this.profession;
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("translation", this.translation)
-                .add("profession", this.profession);
-    }
-
 }

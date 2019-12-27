@@ -26,9 +26,8 @@ package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.common.entity.SpongeEntityMetadataType;
 
-public final class SpongeRabbitType extends SpongeEntityMetadataType implements RabbitType {
+public final class SpongeRabbitType extends SpongeEntityMetadataType<Integer> implements RabbitType {
 
     public SpongeRabbitType(CatalogKey key, int metadata) {
         super(key, metadata);

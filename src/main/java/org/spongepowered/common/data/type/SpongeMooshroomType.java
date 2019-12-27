@@ -22,28 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.block.ComparatorBlock;
-import org.spongepowered.api.data.type.ComparatorType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.MooshroomType;
 
-@Mixin(ComparatorBlock.Mode.class)
-@Implements(@Interface(iface = ComparatorType.class, prefix = "comparator$"))
-public abstract class BlockRedstoneComparator_ModeMixin_API implements ComparatorType {
+public final class SpongeMooshroomType extends SpongeEntityMetadataType<String> implements MooshroomType {
 
-    @Shadow public abstract String shadow$getName();
-
-    public String comparator$getId() {
-        return "minecraft:" + this.shadow$getName();
-    }
-
-    @Intrinsic
-    public String comparator$getName() {
-        return this.shadow$getName();
+    public SpongeMooshroomType(CatalogKey key, String metadata) {
+        super(key, metadata);
     }
 }

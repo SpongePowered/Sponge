@@ -24,28 +24,30 @@
  */
 package org.spongepowered.common.mixin.api.mcp.util;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Locale;
 import net.minecraft.util.Hand;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
 @Mixin(Hand.class)
 public abstract class HandMixin_API implements HandType {
 
-    @Override
-    public String getId() {
-        return "minecraft:" + ((Hand) (Object) this).name().toLowerCase(Locale.ENGLISH);
+    private CatalogKey api$key;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(enumName.toLowerCase());
     }
 
     @Override
-    public String getName() {
-        return ((Hand) (Object) this).name();
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return null; // Uhh.... what?
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 }

@@ -24,51 +24,53 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
+import net.minecraft.block.material.MaterialColor;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.math.GenericMath;
 
 @Mixin(net.minecraft.item.DyeColor.class)
-@Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
 public abstract class DyeColorMixin_API implements DyeColor {
 
-    @Shadow public abstract String shadow$getTranslationKey();
-    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract float[] shadow$getColorComponentValues();
 
-    @Shadow public abstract float[] getColorComponentValues();
-
+    private CatalogKey api$key;
     private Translation api$translation;
 
-    @Intrinsic
-    public String dye$getName() {
-        return this.shadow$getTranslationKey();
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKeyAndTranslation(String enumName, int ordinal, int idIn, String translationKeyIn, int colorValueIn, MaterialColor mapColorIn,
+        int fireworkColorIn, int textColorIn, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(translationKeyIn);
+        this.api$translation = new SpongeTranslation("item.dyePowder." + translationKeyIn + ".name");
     }
 
-    public String dye$getId() {
-        return this.shadow$getName();
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
-    public Color dye$getColor() {
-        float[] color = this.getColorComponentValues();
-        int r = GenericMath.floor(color[0] * 255);
-        int g = GenericMath.floor(color[1] * 255);
-        int b = GenericMath.floor(color[2] * 255);
-        return Color.ofRgb(r, g, b);
-    }
-
-    public Translation dye$getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
-        if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation("item.dyePowder." + this.shadow$getTranslationKey() + ".name");
-        }
+    @Override
+    public Translation getTranslation() {
         return this.api$translation;
     }
 
+    @Override
+    public Color getColor() {
+        float[] components = this.shadow$getColorComponentValues();
+        int r = GenericMath.floor(components[0] * 255);
+        int g = GenericMath.floor(components[1] * 255);
+        int b = GenericMath.floor(components[2] * 255);
+        return Color.ofRgb(r, g, b);
+    }
 }

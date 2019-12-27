@@ -26,9 +26,9 @@ package org.spongepowered.common.ban;
 
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
-import org.spongepowered.common.entity.SpongeEntityMetadataType;
+import org.spongepowered.common.data.type.SpongeEntityMetadataType;
 
-public final class SpongeBanType extends SpongeEntityMetadataType implements BanType {
+public final class SpongeBanType extends SpongeEntityMetadataType<Integer> implements BanType {
 
     private Class<? extends Ban> banClass;
 

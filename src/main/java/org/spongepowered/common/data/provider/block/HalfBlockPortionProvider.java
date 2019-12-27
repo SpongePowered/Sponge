@@ -29,8 +29,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.properties.Half;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.PortionType;
-import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
