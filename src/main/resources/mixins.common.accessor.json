@@ -51,6 +51,7 @@
         "item.crafting.IngredientAccessor",
         "item.crafting.ShapedRecipeAccessor",
         "item.crafting.ShapelessRecipeAccessor",
+        "item.MerchantOfferAccessor",
         "item.MusicDiscItemAccessor",
         "item.ToolItemAccessor",
         "nbt.LongArrayNBTAccessor",

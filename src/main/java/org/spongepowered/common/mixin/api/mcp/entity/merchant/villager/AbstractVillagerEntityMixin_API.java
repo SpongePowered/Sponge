@@ -22,25 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.util;
+package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 
-import net.minecraft.item.MerchantOffer;
-import org.spongepowered.api.item.merchant.TradeOffer;
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.trader.Trader;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.mcp.entity.AgeableEntityMixin_API;
 
-public class TradeOfferUtil {
+import java.util.Optional;
 
-    public static MerchantOffer toNative(TradeOffer tradeOffer) {
-        if (tradeOffer instanceof MerchantOffer) {
-            return (MerchantOffer) tradeOffer;
-        }
-        throw new NativeTradeOfferException("The supplied trade offer was not native to the current platform");
+@Mixin(AbstractVillagerEntity.class)
+public abstract class AbstractVillagerEntityMixin_API extends AgeableEntityMixin_API implements Trader {
+
+    @Shadow public abstract boolean shadow$hasCustomer();
+    @Shadow public abstract void shadow$setCustomer(PlayerEntity player);
+    @Shadow public abstract PlayerEntity shadow$getCustomer();
+
+    public Optional<Humanoid> getCustomer() {
+        return Optional.ofNullable((Humanoid) this.shadow$getCustomer());
     }
 
-    public static TradeOffer fromNative(MerchantOffer merchantRecipe) {
-        if (merchantRecipe instanceof TradeOffer || merchantRecipe == null) {
-            return (TradeOffer) merchantRecipe;
-        }
-        throw new NativeTradeOfferException("The supplied trade offer was not compatible with the target environment!");
+    public void setCustomer(@Nullable Humanoid humanoid) {
+        this.shadow$setCustomer((PlayerEntity) humanoid);
     }
 
 }

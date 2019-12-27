@@ -22,49 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.entity.passive;
+package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.village.MerchantRecipe;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.merchant.villager.VillagerTrades;
+import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.List;
+import javax.annotation.Nullable;
 import java.util.Random;
 
-// Note that these mixins will not have to exist once mixing into interfaces is
-// added as the only thing needing to be done is a simple default implementation
-// with an empty MerchantRecipeList and diff the list with an empty one and
-// provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(VillagerEntity.EmeraldForItems.class)
-public class EntityVillager_EmeraldForItemsMixin_API implements TradeOfferGenerator {
+@Mixin(VillagerTrades.ITrade.class)
+public abstract class VillagerTrades_ITradeMixin_API implements TradeOfferGenerator {
 
-    @Shadow public Item buyingItem;
-    @Shadow public VillagerEntity.PriceInfo price;
+    @Shadow @Nullable public abstract MerchantOffer shadow$getOffer(Entity entity, Random random);
 
     @Override
-    public TradeOffer apply(Random random) {
-        checkNotNull(random, "Random cannot be null!");
-        int buyingCount = 1;
-
-        if (this.price != null) {
-            buyingCount = this.price.getPrice(random);
-        }
-
-        final ItemStack buyingItem = new ItemStack(this.buyingItem, buyingCount, 0);
-        return (TradeOffer) new MerchantRecipe(buyingItem, Items.EMERALD);
+    public TradeOffer apply(Random random, Merchant merchant) {
+        return (TradeOffer) this.shadow$getOffer((Entity) merchant, random);
     }
 
-    @Override
-    public void accept(Merchant owner, List<TradeOffer> tradeOffers, Random random) {
-        tradeOffers.add(this.apply(random));
-    }
 }

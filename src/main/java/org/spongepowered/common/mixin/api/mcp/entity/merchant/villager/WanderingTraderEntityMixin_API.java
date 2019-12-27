@@ -22,25 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.util;
+package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 
-import net.minecraft.item.MerchantOffer;
-import org.spongepowered.api.item.merchant.TradeOffer;
+import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
+import org.spongepowered.api.entity.living.trader.WanderingTrader;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class TradeOfferUtil {
-
-    public static MerchantOffer toNative(TradeOffer tradeOffer) {
-        if (tradeOffer instanceof MerchantOffer) {
-            return (MerchantOffer) tradeOffer;
-        }
-        throw new NativeTradeOfferException("The supplied trade offer was not native to the current platform");
-    }
-
-    public static TradeOffer fromNative(MerchantOffer merchantRecipe) {
-        if (merchantRecipe instanceof TradeOffer || merchantRecipe == null) {
-            return (TradeOffer) merchantRecipe;
-        }
-        throw new NativeTradeOfferException("The supplied trade offer was not compatible with the target environment!");
-    }
+@Mixin(WanderingTraderEntity.class)
+public abstract class WanderingTraderEntityMixin_API extends AbstractVillagerEntityMixin_API implements WanderingTrader {
 
 }

@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.village;
+package org.spongepowered.common.mixin.core.village;
 
-import net.minecraft.village.MerchantRecipe;
+import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,18 +32,18 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 
-@Mixin(MerchantRecipe.class)
-public abstract class MerchantRecipeMixin {
+@Mixin(MerchantOffer.class)
+public abstract class MerchantOfferMixin {
 
-    @Shadow public abstract net.minecraft.item.ItemStack getItemToBuy();
-    @Shadow @Nullable public abstract net.minecraft.item.ItemStack getSecondItemToBuy();
-    @Shadow public abstract net.minecraft.item.ItemStack getItemToSell();
-    @Shadow public abstract int getToolUses();
-    @Shadow public abstract int getMaxTradeUses();
-    @Shadow public abstract boolean getRewardsExp();
+    @Shadow public abstract net.minecraft.item.ItemStack shadow$getBuyingStackFirst();
+    @Shadow @Nullable public abstract net.minecraft.item.ItemStack shadow$getBuyingStackSecond();
+    @Shadow public abstract net.minecraft.item.ItemStack shadow$getSellingStack();
+    @Shadow public abstract int shadow$getUses();
+    @Shadow public abstract int shadow$func_222214_i();
+    @Shadow public abstract int shadow$getGivenExp();
 
-    // This is a little questionable, since we're mixing into a Mixnecraft class.
-    // However, Vanill adoesn't override equals(), so no one except plugins
+    // This is a little questionable, since we're mixing into a Minecraft class.
+    // However, Vanilla doesn't override equals(), so no one except plugins
     // should be calling it,
     @Override
     public boolean equals(Object o) {
@@ -53,12 +53,12 @@ public abstract class MerchantRecipeMixin {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        MerchantRecipe other = (MerchantRecipe) o;
-        return ItemStackComparators.ALL.compare((ItemStack) this.getItemToBuy(), (ItemStack) other.getItemToBuy()) == 0
-                && ItemStackComparators.ALL.compare((ItemStack) this.getSecondItemToBuy(), (ItemStack) other.getSecondItemToBuy()) == 0
-                && ItemStackComparators.ALL.compare((ItemStack) this.getItemToSell(), (ItemStack) other.getItemToSell()) == 0
-                && this.getToolUses() == other.getToolUses()
-                && this.getMaxTradeUses() == other.getMaxTradeUses()
-                && this.getRewardsExp() == other.getRewardsExp();
+        MerchantOffer other = (MerchantOffer) o;
+        return ItemStackComparators.ALL.compare((ItemStack) (Object) this.shadow$getBuyingStackFirst(), (ItemStack) (Object) other.getBuyingStackFirst()) == 0
+            && ItemStackComparators.ALL.compare((ItemStack) (Object) this.shadow$getBuyingStackSecond(), (ItemStack) (Object) other.getBuyingStackSecond()) == 0
+            && ItemStackComparators.ALL.compare((ItemStack) (Object) this.shadow$getSellingStack(), (ItemStack) (Object) other.getSellingStack()) == 0
+            && this.shadow$getUses() == other.getUses()
+            && this.shadow$func_222214_i() == other.func_222214_i()
+            && this.shadow$getGivenExp() == other.getGivenExp();
     }
 }

@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.invalid.api.mcp.entity.passive;
 
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
+import net.minecraft.item.MerchantOffer;
+import net.minecraft.item.MerchantOffers;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
@@ -36,18 +36,18 @@ import org.spongepowered.common.item.util.TradeOfferUtil;
 import java.util.List;
 import java.util.Random;
 
-@Mixin(VillagerEntity.ITradeList.class)
+@Mixin(MerchantOffers.class)
 public interface EntityVillager_ITradeListMixin_API extends TradeOfferListMutator, VillagerEntity.ITradeList {
 
     @Override
     default void accept(final Merchant owner, final List<TradeOffer> tradeOffers, final Random random) {
-        final MerchantRecipeList tempList = new MerchantRecipeList();
+        final MerchantOffers tempList = new MerchantOffers();
         for (final TradeOffer offer : tradeOffers) {
             tempList.add(TradeOfferUtil.toNative(offer));
         }
         addMerchantRecipe((IMerchant) owner, tempList, random);
         tradeOffers.clear();
-        for (final MerchantRecipe recipe : tempList) {
+        for (final MerchantOffer recipe : tempList) {
             tradeOffers.add(TradeOfferUtil.fromNative(recipe));
         }
     }
