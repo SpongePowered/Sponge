@@ -218,13 +218,13 @@ public final class SpongeTabList implements TabList {
                 this.removeEntry(data.getProfile().getId());
             } else {
                 this.getEntry(data.getProfile().getId()).ifPresent(entry -> {
-                    if (action == SPacketPlayerListItem.Action.UPDATE_DISPLAY_NAME) {
+                    if (action == SPlayerListItemPacket.Action.UPDATE_DISPLAY_NAME) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setDisplayName(data.getDisplayName() == null ? null : SpongeTexts.toText(data.getDisplayName()));
-                    } else if (action == SPacketPlayerListItem.Action.UPDATE_LATENCY) {
+                    } else if (action == SPlayerListItemPacket.Action.UPDATE_LATENCY) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setLatency(data.getPing());
-                    } else if (action == SPacketPlayerListItem.Action.UPDATE_GAME_MODE) {
+                    } else if (action == SPlayerListItemPacket.Action.UPDATE_GAME_MODE) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setGameMode((GameMode) (Object) data.getGameMode());
                     } else {
