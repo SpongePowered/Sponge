@@ -40,11 +40,10 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.TileEntityActivationCategory;
-import org.spongepowered.common.config.category.TileEntityActivationModCategory;
+import org.spongepowered.common.config.category.BlockEntityActivationCategory;
+import org.spongepowered.common.config.category.BlockEntityActivationModCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.mixin.invalid.accessor.server.management.PlayerChunkMapAccessor;
 import org.spongepowered.common.mixin.invalid.accessor.server.management.PlayerChunkMapEntryAccessor;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
@@ -64,7 +63,8 @@ public class TileEntityActivation {
             return;
         }
 
-        final TileEntityActivationCategory tileEntityActCat = ((WorldInfoBridge) tileEntity.getWorld().getWorldInfo()).bridge$getConfigAdapter().getConfig().getTileEntityActivationRange();
+        final BlockEntityActivationCategory
+            tileEntityActCat = ((WorldInfoBridge) tileEntity.getWorld().getWorldInfo()).bridge$getConfigAdapter().getConfig().getTileEntityActivationRange();
         final BlockEntityType type = ((org.spongepowered.api.block.entity.BlockEntity) tileEntity).getType();
 
         final ActivationCapabilityBridge spongeTileEntity = (ActivationCapabilityBridge) tileEntity;
@@ -72,7 +72,7 @@ public class TileEntityActivation {
         if (spongeType == null || spongeType.getModId() == null) {
             return;
         }
-        final TileEntityActivationModCategory tileEntityActModCat = tileEntityActCat.getModList().get(spongeType.getModId().toLowerCase());
+        final BlockEntityActivationModCategory tileEntityActModCat = tileEntityActCat.getModList().get(spongeType.getModId().toLowerCase());
         final int defaultActivationRange = tileEntityActCat.getDefaultBlockRange();
         final int defaultTickRate = tileEntityActCat.getDefaultTickRate();
         if (tileEntityActModCat == null) {
@@ -235,12 +235,12 @@ public class TileEntityActivation {
 
         boolean requiresSave = false;
         final String tileModId = type.getModId().toLowerCase();
-        final TileEntityActivationCategory activationCategory = globalConfigAdapter.getConfig().getTileEntityActivationRange();
-        TileEntityActivationModCategory tileEntityMod = activationCategory.getModList().get(tileModId);
+        final BlockEntityActivationCategory activationCategory = globalConfigAdapter.getConfig().getTileEntityActivationRange();
+        BlockEntityActivationModCategory tileEntityMod = activationCategory.getModList().get(tileModId);
         final int defaultRange = activationCategory.getDefaultBlockRange();
         final int defaultTickRate = activationCategory.getDefaultTickRate();
         if (tileEntityMod == null) {
-            tileEntityMod = new TileEntityActivationModCategory(tileModId);
+            tileEntityMod = new BlockEntityActivationModCategory(tileModId);
             activationCategory.getModList().put(tileModId, tileEntityMod);
             requiresSave = true;
         }

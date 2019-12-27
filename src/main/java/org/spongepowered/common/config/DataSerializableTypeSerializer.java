@@ -38,7 +38,7 @@ import org.spongepowered.api.data.persistence.DataTranslators;
  * An implementation of {@link TypeSerializer} so that DataSerializables can be
  * provided in {@link ObjectMapper}-using classes.
  */
-public class DataSerializableTypeSerializer implements TypeSerializer<DataSerializable> {
+public final class DataSerializableTypeSerializer implements TypeSerializer<DataSerializable> {
 
     @Override
     public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {

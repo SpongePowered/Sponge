@@ -29,47 +29,26 @@ import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.DefaultObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.plugin.PluginContainerExtension;
 
-import java.util.Optional;
-
 /**
  * Implementation of service to manage configurations.
  */
 @Singleton
-public class SpongeConfigManager implements ConfigManager {
+public final class SpongeConfigManager implements ConfigManager {
 
     @Override
-    public ConfigRoot getSharedConfig(Object instance) {
-        return getSharedRoot(this.containerFromInstance(instance));
+    public ConfigRoot getSharedConfig(PluginContainer container) {
+        return new SpongeConfigRoot(getMapperFactory(container), container.getId().toLowerCase(), SpongeImpl.getPluginConfigDir());
     }
 
     @Override
-    public ConfigRoot getPluginConfig(Object instance) {
-        return getPrivateRoot(this.containerFromInstance(instance));
-    }
-
-    private PluginContainer containerFromInstance(Object instance) {
-        Optional<PluginContainer> container = Sponge.getPluginManager().fromInstance(instance);
-        if (container.isPresent()) {
-            return container.get();
-        }
-        throw new IllegalArgumentException("No container available for instance " + instance + ", is this actually a plugin?");
-    }
-
-    public static ConfigRoot getSharedRoot(PluginContainer container) {
-        final String name = container.getId().toLowerCase();
-        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeImpl.getPluginConfigDir());
-    }
-
-    public static ConfigRoot getPrivateRoot(PluginContainer container) {
-        final String name = container.getId().toLowerCase();
-        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeImpl.getPluginConfigDir().resolve(name));
+    public ConfigRoot getPluginConfig(PluginContainer container) {
+        return new SpongeConfigRoot(getMapperFactory(container), container.getId().toLowerCase(), SpongeImpl.getPluginConfigDir().resolve(container.getId().toLowerCase()));
     }
 
     private static ObjectMapperFactory getMapperFactory(PluginContainer container) {
@@ -81,5 +60,4 @@ public class SpongeConfigManager implements ConfigManager {
         }
         return DefaultObjectMapperFactory.getInstance();
     }
-
 }

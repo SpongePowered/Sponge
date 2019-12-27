@@ -24,42 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive.horse;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
-import org.spongepowered.api.data.type.HorseColor;
-import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.entity.living.animal.horse.Horse;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
-import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
-import org.spongepowered.common.util.Constants;
-import Mutable;
-import java.util.Collection;
 import net.minecraft.entity.passive.horse.HorseEntity;
 
 @Mixin(HorseEntity.class)
 public abstract class HorseEntityMixin_API extends AbstractHorseMixin_API implements Horse {
-
-    @Override
-    public Mutable<HorseStyle> style() {
-        return new SpongeValue<>(Keys.HORSE_STYLE, Constants.Entity.Horse.DEFAULT_STYLE, HorseStyleRegistryModule.getHorseStyle((HorseEntity) (Object) this));
-    }
-
-    @Override
-    public Mutable<HorseColor> color() {
-        return new SpongeValue<>(Keys.HORSE_COLOR, Constants.Entity.Horse.DEFAULT_COLOR, HorseColorRegistryModule.getHorseColor((HorseEntity) (Object) this));
-    }
-
-    @Override
-    public HorseData getHorseData() {
-        return new SpongeHorseData(HorseColorRegistryModule.getHorseColor((HorseEntity) (Object) this), HorseStyleRegistryModule.getHorseStyle((HorseEntity) (Object) this));
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getHorseData());
-    }
 }

@@ -43,21 +43,22 @@ import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
-import org.spongepowered.common.entity.SpongeCatType;
+import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
-import org.spongepowered.common.registry.supplier.VanillaBannerPatternSupplier;
-import org.spongepowered.common.registry.supplier.VanillaBiomeSupplier;
-import org.spongepowered.common.registry.supplier.VanillaCriteriaTriggers;
-import org.spongepowered.common.registry.supplier.VanillaDimensionTypeSupplier;
-import org.spongepowered.common.registry.supplier.VanillaEffectSupplier;
-import org.spongepowered.common.registry.supplier.VanillaEnchantmentSupplier;
-import org.spongepowered.common.registry.supplier.VanillaEntityTypeSupplier;
-import org.spongepowered.common.registry.supplier.VanillaFluidSupplier;
-import org.spongepowered.common.registry.supplier.VanillaItemSupplier;
-import org.spongepowered.common.registry.supplier.VanillaPaintingTypeSupplier;
-import org.spongepowered.common.registry.supplier.VanillaParticleTypeSupplier;
-import org.spongepowered.common.registry.supplier.VanillaSoundEventSupplier;
-import org.spongepowered.common.registry.supplier.VanillaTileEntitySupplier;
+import org.spongepowered.common.registry.supplier.BannerPatternSupplier;
+import org.spongepowered.common.registry.supplier.BiomeSupplier;
+import org.spongepowered.common.registry.supplier.CriteriaTriggersSupplier;
+import org.spongepowered.common.registry.supplier.DimensionTypeSupplier;
+import org.spongepowered.common.registry.supplier.EffectSupplier;
+import org.spongepowered.common.registry.supplier.EnchantmentSupplier;
+import org.spongepowered.common.registry.supplier.EntityTypeSupplier;
+import org.spongepowered.common.registry.supplier.FluidSupplier;
+import org.spongepowered.common.registry.supplier.ItemSupplier;
+import org.spongepowered.common.registry.supplier.NoteBlockInstrumentSupplier;
+import org.spongepowered.common.registry.supplier.PaintingTypeSupplier;
+import org.spongepowered.common.registry.supplier.ParticleTypeSupplier;
+import org.spongepowered.common.registry.supplier.SoundEventSupplier;
+import org.spongepowered.common.registry.supplier.TileEntityTypeSupplier;
 
 import java.util.Arrays;
 import java.util.IdentityHashMap;
@@ -192,6 +193,12 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
+    public <T extends CatalogType> SimpleRegistry<T> getRegistry(Class<T> catalogClass) {
+        checkNotNull(catalogClass);
+
+        return (SimpleRegistry<T>) (Object) this.registriesByType.get(catalogClass);
+    }
+
     public SpongeCatalogRegistry registerCatalog(CatalogType catalogType) {
         checkNotNull(catalogType);
 
@@ -218,29 +225,31 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
                     .map(kv -> {
                         final String value = kv.getValue().getPath();
 
-                        return new SpongeCatType(kv.getKey(), CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)));
+                        return new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)), kv.getKey());
                     })
                     .collect(Collectors.toSet());
-            });
+            })
+        ;
     }
 
     private void registerDefaultSuppliers() {
 
         // TODO 1.14 - Stats are stupid, need to handle them manually
         // TODO 1.14 - This is not right but I don't want this forgotten so here for now
-        VanillaBannerPatternSupplier.registerSuppliers(this);
-        VanillaBiomeSupplier.registerSuppliers(this);
-        VanillaBiomeSupplier.registerSuppliers(this);
-        VanillaCriteriaTriggers.registerSuppliers(this);
-        VanillaDimensionTypeSupplier.registerSuppliers(this);
-        VanillaEffectSupplier.registerSuppliers(this);
-        VanillaEnchantmentSupplier.registerSuppliers(this);
-        VanillaEntityTypeSupplier.registerSuppliers(this);
-        VanillaFluidSupplier.registerSuppliers(this);
-        VanillaItemSupplier.registerSuppliers(this);
-        VanillaPaintingTypeSupplier.registerSuppliers(this);
-        VanillaParticleTypeSupplier.registerSuppliers(this);
-        VanillaSoundEventSupplier.registerSuppliers(this);
-        VanillaTileEntitySupplier.registerSuppliers(this);
+        BannerPatternSupplier.registerSuppliers(this);
+        BiomeSupplier.registerSuppliers(this);
+        BiomeSupplier.registerSuppliers(this);
+        CriteriaTriggersSupplier.registerSuppliers(this);
+        DimensionTypeSupplier.registerSuppliers(this);
+        EffectSupplier.registerSuppliers(this);
+        EnchantmentSupplier.registerSuppliers(this);
+        EntityTypeSupplier.registerSuppliers(this);
+        FluidSupplier.registerSuppliers(this);
+        ItemSupplier.registerSuppliers(this);
+        NoteBlockInstrumentSupplier.registerSuppliers(this);
+        PaintingTypeSupplier.registerSuppliers(this);
+        ParticleTypeSupplier.registerSuppliers(this);
+        SoundEventSupplier.registerSuppliers(this);
+        TileEntityTypeSupplier.registerSuppliers(this);
     }
 }

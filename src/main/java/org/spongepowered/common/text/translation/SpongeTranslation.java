@@ -27,13 +27,12 @@ package org.spongepowered.common.text.translation;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.util.text.translation.LanguageMap;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 import java.util.Locale;
 
-@NonnullByDefault
-public class SpongeTranslation implements Translation {
+public final class SpongeTranslation implements Translation {
 
     private final String id;
 
@@ -46,23 +45,9 @@ public class SpongeTranslation implements Translation {
         return this.id;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public String get(Locale locale) {
-        return net.minecraft.util.text.translation.I18n.translateToLocal(this.id);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public String get(Locale locale, Object... args) {
-        return net.minecraft.util.text.translation.I18n.translateToLocalFormatted(this.id, args);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .toString();
+        return LanguageMap.getInstance().translateKey(this.id);
     }
 
     @Override
@@ -75,17 +60,17 @@ public class SpongeTranslation implements Translation {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (this.getClass() != obj.getClass() || !(obj instanceof SpongeTranslation)) {
             return false;
         }
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-        SpongeTranslation other = (SpongeTranslation) obj;
-        if (!this.id.equals(other.id)) {
-            return false;
-        }
-        return true;
+        final SpongeTranslation other = (SpongeTranslation) obj;
+        return this.id.equals(other.id);
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("id", this.id)
+            .toString();
+    }
 }

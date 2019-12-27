@@ -37,7 +37,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeRabbitType;
+import org.spongepowered.common.data.type.SpongeRabbitType;
 import org.spongepowered.common.registry.type.entity.RabbitTypeRegistryModule;
 
 import java.util.Optional;

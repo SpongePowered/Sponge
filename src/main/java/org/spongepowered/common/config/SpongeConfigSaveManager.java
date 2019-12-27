@@ -25,15 +25,10 @@
 package org.spongepowered.common.config;
 
 import org.spongepowered.api.GameState;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
 
 /**
  * To avoid file saving issues with Windows and to allow some async file saving,
@@ -72,7 +67,7 @@ public class SpongeConfigSaveManager {
      * @param config The config to save now
      * @return {@code true} if successful or unneeded, false otherwise.
      */
-    public boolean flush(SpongeConfig<?> config) {
+    boolean flush(SpongeConfig<?> config) {
         synchronized (this) {
             if (this.stagedConfigs.remove(config)) {
                 return config.saveNow();
@@ -82,7 +77,7 @@ public class SpongeConfigSaveManager {
         return true;
     }
 
-    public void flush() {
+    private void flush() {
         if (!this.stagedConfigs.isEmpty()) {
             synchronized (this) {
                 for (SpongeConfig<?> spongeConfig : this.stagedConfigs) {

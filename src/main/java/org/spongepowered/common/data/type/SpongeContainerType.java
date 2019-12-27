@@ -31,7 +31,6 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.inventory.lens.LensCreator;
-import org.spongepowered.common.registry.type.item.ContainerTypeRegistryModule;
 
 public class SpongeContainerType extends SpongeCatalogType implements ContainerType {
 
@@ -41,7 +40,7 @@ public class SpongeContainerType extends SpongeCatalogType implements ContainerT
     private final int height;
     private LensCreator lensCreator;
 
-    public SpongeContainerType(final CatalogKey key, int size, int width, int height, LensCreator lensCreator, ContainerTypeRegistryModule.ContainerProvider containerProvider) {
+    public SpongeContainerType(CatalogKey key, int size, int width, int height, LensCreator lensCreator, ContainerTypeRegistryModule.ContainerProvider containerProvider) {
         super(key);
         this.containerProvider = containerProvider;
         this.lensCreator = lensCreator;

@@ -38,7 +38,7 @@ import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataPr
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeCatType;
+import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 
 import java.util.Optional;

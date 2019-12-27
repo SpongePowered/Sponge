@@ -26,30 +26,30 @@ package org.spongepowered.common.data.provider.entity.horse;
 
 import net.minecraft.entity.passive.horse.HorseEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseType;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.entity.SpongeHorseColor;
-import org.spongepowered.common.entity.SpongeHorseStyle;
+import org.spongepowered.common.data.type.SpongeHorseType;
+import org.spongepowered.common.data.type.SpongeHorseStyle;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
 import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
 import java.util.Optional;
 
-public class HorseEntityHorseColorProvider extends GenericMutableDataProvider<HorseEntity, HorseColor> {
+public class HorseEntityHorseColorProvider extends GenericMutableDataProvider<HorseEntity, HorseType> {
 
     public HorseEntityHorseColorProvider() {
-        super(Keys.HORSE_COLOR);
+        super(Keys.HORSE_TYPE);
     }
 
     @Override
-    protected Optional<HorseColor> getFrom(HorseEntity dataHolder) {
+    protected Optional<HorseType> getFrom(HorseEntity dataHolder) {
         return Optional.of(HorseColorRegistryModule.getHorseColor(dataHolder));
     }
 
     @Override
-    protected boolean set(HorseEntity dataHolder, HorseColor value) {
+    protected boolean set(HorseEntity dataHolder, HorseType value) {
         final SpongeHorseStyle style = (SpongeHorseStyle) HorseStyleRegistryModule.getHorseStyle(dataHolder);
-        dataHolder.setHorseVariant(((SpongeHorseColor) value).getBitMask() | style.getBitMask());
+        dataHolder.setHorseVariant(((SpongeHorseType) value).getBitMask() | style.getBitMask());
         return true;
     }
 }

@@ -34,8 +34,8 @@ import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.entity.SpongeHorseColor;
-import org.spongepowered.common.entity.SpongeHorseStyle;
+import org.spongepowered.common.data.type.SpongeHorseType;
+import org.spongepowered.common.data.type.SpongeHorseStyle;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
 import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
@@ -61,7 +61,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<HorseEntity,
 
     @Override
     protected boolean set(HorseEntity entity, Map<Key<?>, Object> keyValues) {
-        SpongeHorseColor horseColor = (SpongeHorseColor) keyValues.get(Keys.HORSE_COLOR);
+        SpongeHorseType horseColor = (SpongeHorseType) keyValues.get(Keys.HORSE_TYPE);
         SpongeHorseStyle horseStyle = (SpongeHorseStyle) keyValues.get(Keys.HORSE_STYLE);
 
         int variant = horseColor.getBitMask() | horseStyle.getBitMask();
@@ -74,7 +74,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<HorseEntity,
     @Override
     protected Map<Key<?>, ?> getValues(HorseEntity entity) {
         return ImmutableMap.<Key<?>, Object>of(
-                Keys.HORSE_COLOR, HorseColorRegistryModule.getHorseColor(entity),
+                Keys.HORSE_TYPE, HorseColorRegistryModule.getHorseColor(entity),
                 Keys.HORSE_STYLE, HorseStyleRegistryModule.getHorseStyle(entity)
         );
     }
@@ -82,7 +82,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<HorseEntity,
     @Override
     public Optional<HorseData> fill(DataContainer container, HorseData horseData) {
 
-        horseData.set(Keys.HORSE_COLOR, HorseColorRegistryModule.getHorseColor(container));
+        horseData.set(Keys.HORSE_TYPE, HorseColorRegistryModule.getHorseColor(container));
         horseData.set(Keys.HORSE_STYLE, HorseStyleRegistryModule.getHorseStyle(container));
 
         return Optional.of(horseData);

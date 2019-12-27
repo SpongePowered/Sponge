@@ -41,6 +41,7 @@ public abstract class ResourceLocationMixin_API implements CatalogKey {
     @Shadow public abstract String shadow$getNamespace();
     @Shadow public abstract String shadow$getPath();
     @Shadow public abstract int shadow$compareTo(ResourceLocation p_compareTo_1_);
+    @Shadow public abstract String shadow$toString();
 
     @Intrinsic
     public String catalogKey$getNamespace() {
@@ -50,6 +51,11 @@ public abstract class ResourceLocationMixin_API implements CatalogKey {
     @Override
     public String getValue() {
         return this.shadow$getPath();
+    }
+
+    @Override
+    public String getFormatted() {
+        return this.shadow$toString();
     }
 
     @Override

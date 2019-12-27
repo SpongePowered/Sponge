@@ -63,8 +63,6 @@ import org.spongepowered.common.config.category.LoggingCategory;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.mixin.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;

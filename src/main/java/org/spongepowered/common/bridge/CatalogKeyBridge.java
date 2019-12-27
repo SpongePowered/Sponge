@@ -30,5 +30,7 @@ public interface CatalogKeyBridge {
 
     CatalogKey bridge$getKey();
 
-    void bridge$setKey(CatalogKey key);
+    default void bridge$setKey(CatalogKey key) {
+        throw new UnsupportedOperationException("Catalog key is not allowed to be set outside Mixin!");
+    }
 }

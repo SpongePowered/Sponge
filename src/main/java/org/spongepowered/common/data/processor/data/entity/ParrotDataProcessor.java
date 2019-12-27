@@ -37,7 +37,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeParrotData
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeParrotVariant;
+import org.spongepowered.common.data.type.SpongeParrotType;
 import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
 
 import java.util.Optional;
@@ -52,7 +52,7 @@ public class ParrotDataProcessor extends
 
     @Override
     protected boolean set(ParrotEntity dataHolder, ParrotType value) {
-        dataHolder.setVariant(((SpongeParrotVariant)value).type);
+        dataHolder.setVariant(((SpongeParrotType)value).type);
         return true;
     }
 

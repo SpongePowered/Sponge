@@ -25,10 +25,9 @@
 package org.spongepowered.common.config.type;
 
 import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.common.config.category.BlockTrackerCategory;
 import org.spongepowered.common.config.category.EntityTrackerCategory;
-import org.spongepowered.common.config.category.TileEntityTrackerCategory;
+import org.spongepowered.common.config.category.BlockEntityTrackerCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
@@ -37,7 +36,7 @@ public class TrackerConfig extends ConfigBase {
     /**
      * Used to determine whether block changes will be "captured" until
      * a {@link IPhaseState#unwind(PhaseContext)} is called. Specifically
-     * used for certain entities and tile entities where we can expect
+     * used for certain entities and block entities where we can expect
      * multiple block changes to take place without negatively affecting
      * expected mechanics, functionality, or performance.
      *
@@ -59,8 +58,8 @@ public class TrackerConfig extends ConfigBase {
     @Setting("entity")
     private EntityTrackerCategory entityTracker = new EntityTrackerCategory();
 
-    @Setting("tileentity")
-    private TileEntityTrackerCategory tileEntityTracker = new TileEntityTrackerCategory();
+    @Setting("blockentity")
+    private BlockEntityTrackerCategory blockEntityTracker = new BlockEntityTrackerCategory();
 
     public BlockTrackerCategory getBlockTracker() {
         return this.blockTracker;
@@ -70,7 +69,7 @@ public class TrackerConfig extends ConfigBase {
         return this.entityTracker;
     }
 
-    public TileEntityTrackerCategory getTileEntityTracker() {
-        return this.tileEntityTracker;
+    public BlockEntityTrackerCategory getBlockEntityTracker() {
+        return this.blockEntityTracker;
     }
 }

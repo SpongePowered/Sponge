@@ -35,7 +35,7 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.data.type.SpongeContainerType;
-import org.spongepowered.common.data.type.SpongeContainerTypeEntity;
+import org.spongepowered.common.data.type.SpongeDummyContainerType;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -73,7 +73,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public BuildingStep type(ContainerType type) {
-        Validate.isTrue(!(this.type instanceof SpongeContainerTypeEntity), "Inventory needs to be constructed by entity");
+        Validate.isTrue(!(this.type instanceof SpongeDummyContainerType), "Inventory needs to be constructed by entity");
         this.type = type;
         this.slotDefinitions = new HashMap<>();
         if (type instanceof SpongeContainerType) {

@@ -26,15 +26,13 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityType;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.bridge.CatalogKeyBridge;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduledTask;
 
@@ -103,12 +101,11 @@ public final class SpongeTimings {
      * Get a named timer for the specified entity type to track type specific
      * timings.
      *
-     * @param entity
-     * @return
+     * @param entity The entity type
+     * @return The timing
      */
-    public static Timing getEntityTiming(SpongeEntityType entity) {
-        String entityType = entity.getKey().toString();
-        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + entityType);
+    public static Timing getEntityTiming(EntityType entity) {
+        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + ((CatalogKeyBridge) entity).bridge$getKey().getFormatted());
     }
 
     /**

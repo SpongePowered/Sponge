@@ -32,14 +32,15 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
@@ -91,6 +92,7 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
@@ -100,7 +102,6 @@ import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
@@ -121,7 +122,6 @@ import javax.annotation.Nullable;
 public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge {
 
     // @formatter:off
-    protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
     private boolean isConstructing = true;
     @Nullable private Text displayName;
     @Nullable private BlockPos lastCollidedBlockPos;
@@ -201,26 +201,23 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     // @formatter:on
 
-    @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
-    private void impl$UpdateDimension(final Entity self, final int dimensionId, final net.minecraft.world.World worldIn) {
-        if (worldIn instanceof ServerWorldBridge) {
-            self.dimension = ((ServerWorldBridge) worldIn).bridge$getDimensionId();
-        } else {
-            self.dimension = dimensionId;
-        }
-    }
-
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onSpongeConstruction(final net.minecraft.world.World worldIn, final CallbackInfo ci) {
-        if (this.entityType.isKnown()) {
-            this.bridge$refreshTrackerStates();
-            if (this.entityType.getEnumCreatureType() == null) {
-                for (final EntityClassification type : EntityClassification.values()) {
-                    if (SpongeImplHooks.isCreatureOfType((Entity) (Object) this, type)) {
-                        this.entityType.setEnumCreatureType(type);
-                        break;
-                    }
+    private void impl$refreshTrackerStates(EntityType<?> entityType, net.minecraft.world.World world, CallbackInfo ci) {
+        this.bridge$refreshTrackerStates();
+
+        final EntityTypeBridge entityTypeBridge = (EntityTypeBridge) entityType;
+        if (!entityTypeBridge.bridge$checkedDamageEntity()) {
+            try {
+                final String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "damageEntity" : "func_70665_d";
+                final Class<?>[] argTypes = {DamageSource.class, float.class};
+                final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+                if (!(clazz.equals(LivingEntity.class) || clazz.equals(PlayerEntity.class) || clazz.equals(ServerPlayerEntity.class))) {
+                    entityTypeBridge.bridge$setOverridesDamageEntity(true);
                 }
+            } catch (Throwable ex) {
+                // ignore
+            } finally {
+                entityTypeBridge.bridge$setCheckedDamageEntity(true);
             }
         }
     }

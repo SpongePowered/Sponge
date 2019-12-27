@@ -25,11 +25,12 @@
 package org.spongepowered.common.data.type;
 
 import net.minecraft.inventory.EquipmentSlotType;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.equipment.HeldEquipmentType;
 
-public class SpongeHeldEquipmentType extends SpongeEquipmentType implements HeldEquipmentType {
+public final class SpongeHeldEquipmentType extends SpongeEquipmentType implements HeldEquipmentType {
 
-    public SpongeHeldEquipmentType(String id, EquipmentSlotType... slots) {
-        super(id, slots);
+    public SpongeHeldEquipmentType(CatalogKey key, EquipmentSlotType... slots) {
+        super(key, slots);
     }
 }

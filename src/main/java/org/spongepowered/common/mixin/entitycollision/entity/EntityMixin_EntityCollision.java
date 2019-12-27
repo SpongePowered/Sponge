@@ -44,7 +44,6 @@ import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)

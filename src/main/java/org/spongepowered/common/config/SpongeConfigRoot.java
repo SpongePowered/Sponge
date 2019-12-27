@@ -44,7 +44,7 @@ public class SpongeConfigRoot implements ConfigRoot {
     private final String pluginName;
     private final Path baseDir;
 
-    public SpongeConfigRoot(ObjectMapperFactory mapperFactory, String pluginName, Path baseDir) {
+    SpongeConfigRoot(ObjectMapperFactory mapperFactory, String pluginName, Path baseDir) {
         this.mapperFactory = mapperFactory;
         this.pluginName = pluginName;
         this.baseDir = baseDir;

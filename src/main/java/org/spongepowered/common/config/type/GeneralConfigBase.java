@@ -33,7 +33,7 @@ import org.spongepowered.common.config.category.EntityCollisionCategory;
 import org.spongepowered.common.config.category.GeneralCategory;
 import org.spongepowered.common.config.category.LoggingCategory;
 import org.spongepowered.common.config.category.SpawnerCategory;
-import org.spongepowered.common.config.category.TileEntityActivationCategory;
+import org.spongepowered.common.config.category.BlockEntityActivationCategory;
 import org.spongepowered.common.config.category.TimingsCategory;
 import org.spongepowered.common.config.category.WorldCategory;
 
@@ -62,7 +62,7 @@ public class GeneralConfigBase extends ConfigBase {
                                         + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
     private SpawnerCategory spawner = new SpawnerCategory();
     @Setting(value = "tileentity-activation")
-    private TileEntityActivationCategory tileEntityActivationCategory = new TileEntityActivationCategory();
+    private BlockEntityActivationCategory blockEntityActivationCategory = new BlockEntityActivationCategory();
     @Setting
     private TimingsCategory timings = new TimingsCategory();
     @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
@@ -104,8 +104,8 @@ public class GeneralConfigBase extends ConfigBase {
         return this.world;
     }
 
-    public TileEntityActivationCategory getTileEntityActivationRange() {
-        return this.tileEntityActivationCategory;
+    public BlockEntityActivationCategory getTileEntityActivationRange() {
+        return this.blockEntityActivationCategory;
     }
 
     public TimingsCategory getTimings() {

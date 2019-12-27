@@ -24,27 +24,34 @@
  */
 package org.spongepowered.common.data.type;
 
+import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.SpongeImpl;
 
-public class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
+public final class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
 
-    private final byte id;
+    private final int id;
 
-    public SpongeNotePitch(byte id, String name) {
-        super(CatalogKey.minecraft(name.toLowerCase()));
+    public SpongeNotePitch(CatalogKey key, int id) {
+        super(key);
         this.id = id;
     }
 
-    public byte getByteId() {
+    public int getId() {
         return this.id;
     }
 
     @Override
     public NotePitch cycleNext() {
-        byte value = (byte) (((SpongeNotePitch) this).getByteId() + 1);
-        return NotePitchRegistryModule.getPitch(value); // Ensure wrapping at edge
+        final int value = this.id + 1;
+        final SimpleRegistry<NotePitch> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(NotePitch.class);
+        NotePitch notePitch = registry.getByValue(value);
+        if (notePitch == null) {
+            notePitch = NotePitches.A1.get();
+        }
+        return notePitch;
     }
-
 }

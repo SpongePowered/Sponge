@@ -57,6 +57,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("unchecked")
 public class SpongeConfig<T extends ConfigBase> {
 
     public enum Type {
@@ -124,7 +125,6 @@ public class SpongeConfig<T extends ConfigBase> {
         return new SpongeConfig<>(type);
     }
 
-    @SuppressWarnings("unchecked")
     private SpongeConfig(Type type) {
         this.type = type;
         this.parent = null;
@@ -138,7 +138,6 @@ public class SpongeConfig<T extends ConfigBase> {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public SpongeConfig(Type type, Path path, String modId, SpongeConfig<?> parent, boolean forceSaveOnLoad) {
         this.type = type;
         this.parent = parent;
@@ -184,7 +183,7 @@ public class SpongeConfig<T extends ConfigBase> {
         SpongeImpl.getConfigSaveManager().save(this);
     }
 
-    public boolean saveNow() {
+    boolean saveNow() {
         if (this.isDummy) {
             return false;
         }
@@ -318,7 +317,6 @@ public class SpongeConfig<T extends ConfigBase> {
                     Double parentVal = parentValue.getValue(Types::asDouble);
                     if (parentVal == null && nodeVal.doubleValue() == 0 || (parentVal != null && nodeVal.doubleValue() == parentVal.doubleValue())) {
                         node.setValue(null);
-                        continue;
                     }
                 }
             }
@@ -350,7 +348,7 @@ public class SpongeConfig<T extends ConfigBase> {
     }
 
     @Nullable
-    public CommentedConfigurationNode getSetting(String key) {
+    private CommentedConfigurationNode getSetting(String key) {
         if (key.equalsIgnoreCase("config-enabled")) {
             return this.getRootNode().getNode(key);
         } else if (!key.contains(".") || key.indexOf('.') == key.length() - 1) {
@@ -365,5 +363,4 @@ public class SpongeConfig<T extends ConfigBase> {
     public Type getType() {
         return this.type;
     }
-
 }

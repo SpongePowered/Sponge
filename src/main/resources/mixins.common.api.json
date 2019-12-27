@@ -173,7 +173,7 @@
         "mcp.server.management.BanEntryMixin_API",
         "mcp.server.management.UserListEntryMixin_API",
         "mcp.server.management.IPBanEntryMixin_API",
-        "mcp.state.properties.DoorHingeSide_API",
+        "mcp.state.properties.DoorHingeSideMixin_API",
         "mcp.stats.StatMixin_API",
         "mcp.tileentity.BannerPatternMixin_API",
         "mcp.tileentity.BannerTileEntityMixin_API",

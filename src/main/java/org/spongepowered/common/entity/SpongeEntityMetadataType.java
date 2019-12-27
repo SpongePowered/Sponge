@@ -33,22 +33,25 @@ import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeEntityMetadataType extends SpongeCatalogType {
 
-    public final int type;
+    private final int metadata;
 
-    public SpongeEntityMetadataType(int type, CatalogKey key) {
+    public SpongeEntityMetadataType(CatalogKey key, int metadata) {
         super(key);
-        this.type = type;
+        this.metadata = metadata;
+    }
+
+    public int getMetadata() {
+        return this.metadata;
     }
 
     public DataContainer toContainer() {
         // TODO 1.14.4 - This needs to be version 2
-        return DataContainer.createNew().set(of("id"), this.getKey()).set(of("type"), this.type);
+        return DataContainer.createNew().set(of("id"), this.getKey()).set(of("metadata"), this.metadata);
     }
 
     @Override
     protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
-                .add("type", this.type);
+                .add("metadata", this.metadata);
     }
-
 }

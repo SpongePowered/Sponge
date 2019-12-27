@@ -25,17 +25,24 @@
 package org.spongepowered.common.bridge;
 
 import org.spongepowered.common.config.type.TrackerConfig;
-import org.spongepowered.common.entity.SpongeEntityType;
 
 public interface TrackableBridge {
 
-    boolean bridge$allowsBlockBulkCapture();
+    boolean bridge$allowsBlockBulkCaptures();
 
-    boolean bridge$allowsEntityBulkCapture();
+    void bridge$setAllowsBlockBulkCaptures(boolean allowsBlockBulkCaptures);
 
     boolean bridge$allowsBlockEventCreation();
 
+    void bridge$setAllowsBlockEventCreation(boolean allowsBlockEventCreation);
+
+    boolean bridge$allowsEntityBulkCaptures();
+
+    void bridge$setAllowsEntityBulkCaptures(boolean allowsEntityBulkCaptures);
+
     boolean bridge$allowsEntityEventCreation();
+
+    void bridge$setAllowsEntityEventCreation(boolean allowsEntityEventCreation);
 
     /**
      * Tells this trackable to refresh it's tracker states.

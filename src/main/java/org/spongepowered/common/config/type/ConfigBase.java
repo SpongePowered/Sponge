@@ -29,8 +29,7 @@ package org.spongepowered.common.config.type;
  */
 public abstract class ConfigBase {
 
-    public ConfigBase() {
+    ConfigBase() {
 
     }
-
 }

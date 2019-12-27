@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.type;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeDismountType extends SpongeCatalogType implements DismountType {
+public final class SpongeDismountType extends SpongeCatalogType implements DismountType {
 
-    public SpongeDismountType(String id) {
-        super(id);
+    public SpongeDismountType(CatalogKey key) {
+        super(key);
     }
 }
