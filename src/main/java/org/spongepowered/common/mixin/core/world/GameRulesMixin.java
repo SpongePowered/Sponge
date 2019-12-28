@@ -92,6 +92,12 @@ public abstract class GameRulesMixin implements GameRulesBridge {
             .forEach(gameRules -> ((GameRulesAccessor) gameRules).accessor$getRules().put(key, new GameRules.Value(value, type)));
     }
 
+    @Redirect(method = "readFromNBT",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
+    private void impl$setGameRuleFromNBT(GameRules gameRules, String key, String value) {
+        this.bridge$setOrCreateGameRule(key, value);
+    }
+
     @Override
     public void bridge$setOrCreateGameRule(String gameRule, String value) {
         this.impl$adjustAllWorlds = false;
