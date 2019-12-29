@@ -766,8 +766,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                     if (isMainthread) {
                         Sponge.getCauseStackManager().pushCause(damageSource);
                     }
-                    final Cause currentCause = isMainthread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), damageSource);
-                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, originalFunctions,
+                    final Cause attackCause = isMainthread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), damageSource);
+                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(attackCause, originalFunctions,
                         (org.spongepowered.api.entity.Entity) targetEntity, knockbackModifier, originalBaseDamage);
                     SpongeImpl.postEvent(event);
                     if (isMainthread) {
@@ -840,8 +840,9 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
                                             incoming -> EnchantmentHelper.getSweepingDamageRatio((EntityPlayer) (Object) this) * attackDamage);
                                         final List<DamageFunction> sweapingFunctions = new ArrayList<>();
                                         sweapingFunctions.add(sweapingFunction);
+                                        final Cause sweepingCause = isMainthread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), sweepingAttackSource);
                                         final AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
-                                            currentCause,
+                                            sweepingCause,
                                             sweapingFunctions, (org.spongepowered.api.entity.Entity) entitylivingbase, 1, 1.0D);
                                         SpongeImpl.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
