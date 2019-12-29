@@ -37,9 +37,9 @@ import javax.annotation.Nullable;
 @Mixin(ShulkerBulletEntity.class)
 public interface ShulkerBulletEntityAccessor {
 
-    @Accessor("target") @Nullable Entity accessor$getTarget();
+    @Accessor("target") Entity accessor$getTarget();
 
-    @Accessor("target") void accessor$setTarget(@Nullable Entity target);
+    @Accessor("target") void accessor$setTarget(Entity target);
 
     @Accessor("targetUniqueId") void accessor$setTargetUniqueId(@Nullable UUID target);
 

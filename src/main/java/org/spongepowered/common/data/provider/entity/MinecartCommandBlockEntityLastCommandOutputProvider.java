@@ -43,7 +43,7 @@ public class MinecartCommandBlockEntityLastCommandOutputProvider extends Generic
 
     @Override
     protected Optional<Text> getFrom(MinecartCommandBlockEntity dataHolder) {
-        @Nullable final ITextComponent component = ((CommandBlockLogicAccessor) dataHolder.getCommandBlockLogic()).accessor$getNullableLastOutput();
+        @Nullable final ITextComponent component = ((CommandBlockLogicAccessor) dataHolder.getCommandBlockLogic()).accessor$getLastOutput();
         return component == null ? Optional.empty() : Optional.of(SpongeTexts.toText(component));
     }
 
