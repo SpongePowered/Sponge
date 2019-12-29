@@ -56,6 +56,12 @@ import java.util.Set;
 public abstract class SubjectMixin_API implements Subject {
 
     @Override
+    public SubjectReference asSubjectReference() {
+        return ((SubjectBridge) this).bridge$resolveReferenceOptional()
+                .orElseThrow(() -> new IllegalStateException("No subject reference present for user " + this));
+    }
+
+    @Override
     public boolean isSubjectDataPersisted() {
         return ((SubjectBridge) this).bridge$resolveOptional()
             .map(Subject::isSubjectDataPersisted)
