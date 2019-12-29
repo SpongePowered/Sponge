@@ -22,33 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.management;
+package org.spongepowered.common.mixin.core.crash;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.server.management.PlayerProfileCache;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import net.minecraft.crash.CrashReport;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheEntryBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Date;
+@Mixin(CrashReport.class)
+public interface CrashReportAccessor {
 
-@Mixin(targets = "net/minecraft/server/management/PlayerProfileCache$ProfileEntry")
-public abstract class PlayerProfileCache_ProfileEntryMixin implements PlayerProfileCacheEntryBridge {
-
-    @Shadow public abstract GameProfile getGameProfile();
-    @Shadow public abstract Date getExpirationDate();
-
-    @Override
-    public GameProfile accessor$getProfile() {
-        return this.getGameProfile();
-    }
-
-    @Override
-    public Date accessor$getExpirationDate() {
-        return this.getExpirationDate();
-    }
+    @Accessor("cause") Throwable accessor$getCause();
 
 }

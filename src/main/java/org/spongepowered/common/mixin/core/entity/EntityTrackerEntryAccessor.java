@@ -26,8 +26,10 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Set;
 
@@ -35,5 +37,7 @@ import java.util.Set;
 public interface EntityTrackerEntryAccessor {
 
     @Accessor("trackingPlayers") Set<EntityPlayerMP> accessor$getTrackingPlayers();
+
+    @Invoker("createSpawnPacket") Packet<?> accessor$createSpawnPacket();
 
 }

@@ -136,6 +136,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.network.play.client.CPacketClientSettingsAccessor;
+import org.spongepowered.common.mixin.core.network.play.server.SPacketBlockChangeAccessor;
 import org.spongepowered.common.registry.type.entity.SkinPartRegistryModule;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
@@ -406,7 +408,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
                 final Locale locale = LocaleCache.getLocale(packet.getLang());
                 final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
                 final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(cause, visibility, skinParts,
-                    locale, (Player) this, packet.isColorsEnabled(), packet.view);
+                    locale, (Player) this, packet.isColorsEnabled(), ((CPacketClientSettingsAccessor) packet).accessor$getView());
                 SpongeImpl.postEvent(event);
             } finally {
                 csm.popCause();
@@ -421,7 +423,7 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
             .map(part -> (SpongeSkinPart) part)
             .filter(part -> part.test(packet.getModelPartFlags()))
             .collect(ImmutableSet.toImmutableSet()); // Returned set is immutable
-        this.impl$viewDistance = packet.view;
+        this.impl$viewDistance = ((CPacketClientSettingsAccessor) packet).accessor$getView();
     }
 
     /**
@@ -654,8 +656,8 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     public void bridge$sendBlockChange(final BlockPos pos, final IBlockState state) {
         final SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = pos;
-        packet.blockState = state;
+        ((SPacketBlockChangeAccessor) packet).accessor$setBlockPosition(pos);
+        ((SPacketBlockChangeAccessor) packet).accessor$setBlockState(state);
         this.connection.sendPacket(packet);
     }
 

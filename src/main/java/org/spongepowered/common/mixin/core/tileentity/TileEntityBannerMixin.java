@@ -77,7 +77,7 @@ public abstract class TileEntityBannerMixin extends TileEntityMixin implements T
     }
 
     private void impl$markDirtyAndUpdate() {
-        this.bridge$markDirty();
+        this.shadow$markDirty();
         if (this.world != null && !this.world.isRemote) {
             ((WorldServer) this.world).getPlayerChunkMap().markBlockForUpdate(this.getPos());
         }

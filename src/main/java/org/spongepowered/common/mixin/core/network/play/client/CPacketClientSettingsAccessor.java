@@ -22,11 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.end;
+package org.spongepowered.common.mixin.core.network.play.client;
 
-import net.minecraft.world.BossInfo;
+import net.minecraft.network.play.client.CPacketClientSettings;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface DragonFightManagerBridge {
+@Mixin(CPacketClientSettings.class)
+public interface CPacketClientSettingsAccessor {
 
-    BossInfo bridge$getBossInfo();
+    @Accessor("view") int accessor$getView();
 }

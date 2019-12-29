@@ -22,20 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.mixin.core.world.gen;
 
-import org.spongepowered.asm.mixin.Final;
+import com.google.gson.Gson;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.CooldownTracker_CooldownBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(targets = "net/minecraft/util/CooldownTracker$Cooldown")
-public class CooldownTracker_CooldownMixin implements CooldownTracker_CooldownBridge {
+@Mixin(ChunkGeneratorSettings.Factory.class)
+public interface ChunkGeneratorSettings_FactoryAccessor {
 
-    @Shadow @Final int expireTicks;
-
-    @Override
-    public int bridge$getExpireTicks() {
-        return this.expireTicks;
+    @Accessor("JSON_ADAPTER")
+    public static Gson accessor$getJSON_ADAPTER() {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
+
 }

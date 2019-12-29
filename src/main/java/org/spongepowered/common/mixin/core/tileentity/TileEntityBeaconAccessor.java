@@ -22,12 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.util.text;
+package org.spongepowered.common.mixin.core.tileentity;
 
-public interface TextFormattingBridge {
+import net.minecraft.potion.Potion;
+import net.minecraft.tileentity.TileEntityBeacon;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    String bridge$getName();
+@Mixin(TileEntityBeacon.class)
+public interface TileEntityBeaconAccessor {
 
-    /** The formatting code that produces this format. */
-    char bridge$getFormattingCode();
+    @Accessor("primaryEffect")
+    void accessor$setPrimaryEffect(Potion primary);
+
+    @Accessor("secondaryEffect")
+    void accessor$setSecondaryEffect(Potion secondary);
+
 }

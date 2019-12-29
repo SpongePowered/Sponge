@@ -31,7 +31,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.WeightedSpawnerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.apache.logging.log4j.Level;
@@ -43,35 +42,21 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.tileentity.MobSpawnerBaseLogicBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
 
 @Mixin(MobSpawnerBaseLogic.class)
-public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBridge {
-
-    @Shadow private int spawnDelay;
-    @Shadow private int minSpawnDelay;
-    @Shadow private int maxSpawnDelay;
-    @Shadow private int spawnCount;
-    @Shadow private int maxNearbyEntities;
-    @Shadow private int activatingRangeFromPlayer;
-    @Shadow private int spawnRange;
+public abstract class MobSpawnerBaseLogicMixin {
 
     /**
      * @author gabizou - January 30th, 2016
@@ -162,48 +147,4 @@ public abstract class MobSpawnerBaseLogicMixin implements MobSpawnerBaseLogicBri
         return entity;
     }
 
-    @Override
-    public int bridge$getSpawnDelay() {
-        return this.spawnDelay;
-    }
-
-    @Override
-    public void bridge$setSpawnDelay(final int spawnDelay) {
-        this.spawnDelay = spawnDelay;
-    }
-
-    @Override
-    public int bridge$getMinSpawnDelay() {
-        return this.minSpawnDelay;
-    }
-
-    @Override
-    public int bridge$getMaxSpawnDelay() {
-        return this.maxSpawnDelay;
-    }
-
-    @Override
-    public int bridge$getSpawnCount() {
-        return this.spawnCount;
-    }
-
-    @Override
-    public int bridge$getMaxNearbyEntities() {
-        return this.maxNearbyEntities;
-    }
-
-    @Override
-    public void bridge$setMaxNearbyEntities(final int maxNearbyEntities) {
-        this.maxNearbyEntities = maxNearbyEntities;
-    }
-
-    @Override
-    public int bridge$getActivatingRangeFromPlayer() {
-        return this.activatingRangeFromPlayer;
-    }
-
-    @Override
-    public int bridge$getSpawnRange() {
-        return this.spawnRange;
-    }
 }

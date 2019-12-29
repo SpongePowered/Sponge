@@ -36,7 +36,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 @Mixin(PlayerChunkMapEntry.class)
-public interface PlayerchunkMapEntryAccessor {
+public interface PlayerChunkMapEntryAccessor {
 
     @Accessor("players") List<EntityPlayerMP> accessor$getPlayers();
 

@@ -30,9 +30,5 @@ public interface WorldProviderBridge {
 
     WorldBorder bridge$createServerWorldBorder();
 
-    // TODO Mixin 0.8
-    @Deprecated
-    void accessor$setGeneratorSettings(String generatorSettings);
-
     float bridge$getMovementFactor();
 }

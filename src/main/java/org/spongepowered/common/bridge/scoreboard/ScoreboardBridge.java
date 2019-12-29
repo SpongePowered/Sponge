@@ -36,27 +36,4 @@ public interface ScoreboardBridge {
 
     boolean bridge$isClient();
 
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<IScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<String, ScoreObjective> accessor$getScoreObjectives();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<String, Map<ScoreObjective, Score>> accessor$getEntitiesScoreObjectives();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<String, ScorePlayerTeam> accessor$getTeams();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    Map<String, ScorePlayerTeam> accessor$getTeamMemberships();
-
-    // TODO Mixin 0.8
-    @Deprecated
-    ScoreObjective[] accessor$getObjectiveDisplaySlots();
 }

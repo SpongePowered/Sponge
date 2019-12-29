@@ -22,9 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.util;
+package org.spongepowered.common.mixin.core.tileentity;
 
-public interface CooldownTracker_CooldownBridge {
+import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.tileentity.TileEntityStructure;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.data.type.StructureMode;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    int bridge$getExpireTicks();
+@Mixin(TileEntityStructure.class)
+public interface TileEntityStructureAccessor {
+
+    @Accessor("author") String accessor$getAuthor();
+
+    @Accessor("author") void accessor$setAuthor(String author);
+
+    @Accessor("ignoreEntities") boolean accessor$getIgnoreEntities();
+
+    @Accessor("integrity") float accessor$getIntegrity();
+
+    @Accessor("mode") TileEntityStructure.Mode accessor$getMode();
+
+    @Accessor("mode") void accessor$setMode(TileEntityStructure.Mode mode);
+
+    @Accessor("position") BlockPos accessor$getPosition();
+
+    @Accessor("position") void accessor$setPosition(BlockPos position);
+
+    @Accessor("showAir") boolean accessor$getShowAir();
+
+    @Accessor("showBoundingBox") boolean accessor$getShowBoundingBox();
+
+    @Accessor("size") BlockPos accessor$getSize();
+
+    @Accessor("size") void accessor$setSize(BlockPos size);
+    
 }

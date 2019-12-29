@@ -407,11 +407,10 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private void impl$updateVanishState(final CallbackInfo callbackInfo) {
         if (this.vanish$pendingVisibilityUpdate && !this.world.isRemote) {
             final EntityTracker entityTracker = ((WorldServer) this.world).getEntityTracker();
-            // TODO - remove once Mixin 0.8 fixes accessors
-            final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
+            final EntityTrackerEntry lookup = ((EntityTrackerAccessor) entityTracker).accessor$getTrackedEntityTable().lookup(this.getEntityId());
             if (lookup != null && this.vanish$visibilityTicks % 4 == 0) {
                 if (this.vanish$isVanished) {
-                    for (final EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) { // TODO - remove once Mixin 0.8 fixes accessors
+                    for (final EntityPlayerMP entityPlayerMP : ((EntityTrackerEntryAccessor) lookup).accessor$getTrackingPlayers()) {
                         entityPlayerMP.connection.sendPacket(new SPacketDestroyEntities(this.getEntityId()));
                         if ((Entity) (Object) this instanceof EntityPlayerMP) {
                             entityPlayerMP.connection.sendPacket(
@@ -429,8 +428,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                             final Packet<?> packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
                             entityPlayerMP.connection.sendPacket(packet);
                         }
-                        // TODO - replace with accessor once Mixin 0.8 fixes accessors within mixins
-                        final Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
+                        final Packet<?> newPacket = ((EntityTrackerEntryAccessor) lookup).accessor$createSpawnPacket();
                         entityPlayerMP.connection.sendPacket(newPacket);
                     }
                 }

@@ -33,9 +33,9 @@ import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
 import org.spongepowered.common.mixin.core.util.text.StyleAccessor;
 import org.spongepowered.common.mixin.core.util.text.TextComponentStringAccessor;
+import org.spongepowered.common.mixin.core.util.text.TextFormattingAccessor;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public final class LegacyTexts {
         final char[] lookup = new char[formatting.length];
 
         for (int i = 0; i < formatting.length; i++) {
-            lookup[i] = ((TextFormattingBridge) (Object) formatting[i]).bridge$getFormattingCode();
+            lookup[i] = ((TextFormattingAccessor) (Object) formatting[i]).accessor$getFormattingCode();
         }
 
         LOOKUP = new String(lookup);

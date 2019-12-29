@@ -22,24 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block;
+package org.spongepowered.common.mixin.core.world.chunk;
 
-import net.minecraft.block.BlockJukebox;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.bridge.block.BlockJukeboxBridge;
 
-@Mixin(BlockJukebox.class)
-public abstract class BlockJukeboxMixin implements BlockJukeboxBridge {
+@Mixin(Chunk.class)
+public interface ChunkAccessor {
 
-    @Shadow protected abstract void dropRecord(World worldIn, BlockPos pos, IBlockState state);
+    @Invoker("populate") void accessor$populate(IChunkGenerator generator);
 
-    @Override
-    public void accessor$dropRecordItem(final World worldIn, final BlockPos pos, final IBlockState state) {
-        dropRecord(worldIn, pos, state);
-    }
 }

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.tileentity.TileEntityStructure;
@@ -39,12 +37,14 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.StructureData;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeStructureData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
-import org.spongepowered.common.bridge.tileentity.TileEntityStructureBridge;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityStructureAccessor;
+import org.spongepowered.common.util.VecHelper;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class StructureDataProcessor extends AbstractTileEntityDataProcessor<TileEntityStructure, StructureData, ImmutableStructureData> {
 
@@ -53,33 +53,33 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
     }
 
     @Override
-    protected boolean doesDataExist(TileEntityStructure container) {
+    protected boolean doesDataExist(final TileEntityStructure container) {
         return true;
     }
 
     @Override
-    protected boolean set(TileEntityStructure container, Map<Key<?>, Object> map) {
-        @Nullable String author = (String) map.get(Keys.STRUCTURE_AUTHOR);
+    protected boolean set(final TileEntityStructure container, final Map<Key<?>, Object> map) {
+        @Nullable final String author = (String) map.get(Keys.STRUCTURE_AUTHOR);
         if (author != null) {
-            ((TileEntityStructureBridge) container).bridge$setAuthor(author);
+            ((TileEntityStructureAccessor) container).accessor$setAuthor(author);
         }
 
         container.setIgnoresEntities((Boolean) map.get(Keys.STRUCTURE_IGNORE_ENTITIES));
         container.setIntegrity((Float) map.get(Keys.STRUCTURE_INTEGRITY));
 
-        @Nullable StructureMode mode = (StructureMode) map.get(Keys.STRUCTURE_MODE);
+        @Nullable final StructureMode mode = (StructureMode) map.get(Keys.STRUCTURE_MODE);
         if (mode != null) {
-            ((TileEntityStructureBridge) container).bridge$setMode(mode);
+            ((TileEntityStructureAccessor) container).accessor$setMode((TileEntityStructure.Mode) (Object) mode);
         }
 
-        @Nullable Vector3i position = (Vector3i) map.get(Keys.STRUCTURE_POSITION);
+        @Nullable final Vector3i position = (Vector3i) map.get(Keys.STRUCTURE_POSITION);
         if (position != null) {
-            ((TileEntityStructureBridge) container).bridge$setPosition(position);
+            ((TileEntityStructureAccessor) container).accessor$setPosition(VecHelper.toBlockPos(checkNotNull(position, "position")));
         }
 
         container.setPowered((Boolean) map.get(Keys.STRUCTURE_POWERED));
 
-        @Nullable Long seed = (Long) map.get(Keys.STRUCTURE_SEED);
+        @Nullable final Long seed = (Long) map.get(Keys.STRUCTURE_SEED);
         if (seed != null) {
             container.setSeed(seed);
         }
@@ -87,30 +87,30 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
         container.setShowAir((Boolean) map.get(Keys.STRUCTURE_SHOW_AIR));
         container.setShowBoundingBox((Boolean) map.get(Keys.STRUCTURE_SHOW_BOUNDING_BOX));
 
-        @Nullable Boolean showBoundingBox = (Boolean) map.get(Keys.STRUCTURE_SHOW_BOUNDING_BOX);
+        @Nullable final Boolean showBoundingBox = (Boolean) map.get(Keys.STRUCTURE_SHOW_BOUNDING_BOX);
         if (showBoundingBox != null) {
         }
 
-        @Nullable Vector3i size = (Vector3i) map.get(Keys.STRUCTURE_SIZE);
+        @Nullable final Vector3i size = (Vector3i) map.get(Keys.STRUCTURE_SIZE);
         if (size != null) {
-            ((TileEntityStructureBridge) container).bridge$setSize(size);
+            ((TileEntityStructureAccessor) container).accessor$setSize(VecHelper.toBlockPos(checkNotNull(size, "position")));
         }
 
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(TileEntityStructure container) {
-        ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
-        builder.put(Keys.STRUCTURE_AUTHOR, ((TileEntityStructureBridge) container).bridge$getAuthor());
-        builder.put(Keys.STRUCTURE_IGNORE_ENTITIES, ((TileEntityStructureBridge) container).bridge$shouldIgnoreEntities());
-        builder.put(Keys.STRUCTURE_INTEGRITY, ((TileEntityStructureBridge) container).bridge$getIntegrity());
-        builder.put(Keys.STRUCTURE_MODE, ((TileEntityStructureBridge) container).bridge$getMode());
-        builder.put(Keys.STRUCTURE_POSITION, ((TileEntityStructureBridge) container).bridge$getPosition());
+    protected Map<Key<?>, ?> getValues(final TileEntityStructure container) {
+        final ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
+        builder.put(Keys.STRUCTURE_AUTHOR, ((TileEntityStructureAccessor) container).accessor$getAuthor());
+        builder.put(Keys.STRUCTURE_IGNORE_ENTITIES, ((TileEntityStructureAccessor) container).accessor$getIgnoreEntities());
+        builder.put(Keys.STRUCTURE_INTEGRITY, ((TileEntityStructureAccessor) container).accessor$getIntegrity());
+        builder.put(Keys.STRUCTURE_MODE, ((TileEntityStructureAccessor) container).accessor$getMode());
+        builder.put(Keys.STRUCTURE_POSITION, ((TileEntityStructureAccessor) container).accessor$getPosition());
         builder.put(Keys.STRUCTURE_POWERED, container.isPowered());
-        builder.put(Keys.STRUCTURE_SHOW_AIR, ((TileEntityStructureBridge) container).bridge$shouldShowAir());
-        builder.put(Keys.STRUCTURE_SHOW_BOUNDING_BOX, ((TileEntityStructureBridge) container).bridge$shouldShowBoundingBox());
-        builder.put(Keys.STRUCTURE_SIZE, ((TileEntityStructureBridge) container).bridge$getSize());
+        builder.put(Keys.STRUCTURE_SHOW_AIR, ((TileEntityStructureAccessor) container).accessor$getShowAir());
+        builder.put(Keys.STRUCTURE_SHOW_BOUNDING_BOX, ((TileEntityStructureAccessor) container).accessor$getShowBoundingBox());
+        builder.put(Keys.STRUCTURE_SIZE, ((TileEntityStructureAccessor) container).accessor$getSize());
         return builder.build();
     }
 
@@ -120,50 +120,50 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
     }
 
     @Override
-    public Optional<StructureData> fill(DataContainer container, StructureData data) {
+    public Optional<StructureData> fill(final DataContainer container, StructureData data) {
         checkNotNull(data, "data");
 
-        Optional<String> author = container.getString(Keys.STRUCTURE_AUTHOR.getQuery());
+        final Optional<String> author = container.getString(Keys.STRUCTURE_AUTHOR.getQuery());
         if (author.isPresent()) {
             data = data.set(Keys.STRUCTURE_AUTHOR, author.get());
         }
 
-        Optional<Boolean> ignoreEntities = container.getBoolean(Keys.STRUCTURE_IGNORE_ENTITIES.getQuery());
+        final Optional<Boolean> ignoreEntities = container.getBoolean(Keys.STRUCTURE_IGNORE_ENTITIES.getQuery());
         if (ignoreEntities.isPresent()) {
             data = data.set(Keys.STRUCTURE_IGNORE_ENTITIES, ignoreEntities.get());
         }
 
-        Optional<Float> integrity = container.getFloat(Keys.STRUCTURE_INTEGRITY.getQuery());
+        final Optional<Float> integrity = container.getFloat(Keys.STRUCTURE_INTEGRITY.getQuery());
         if (integrity.isPresent()) {
             data = data.set(Keys.STRUCTURE_INTEGRITY, integrity.get());
         }
 
-        Optional<StructureMode> mode = container.getObject(Keys.STRUCTURE_MODE.getQuery(), StructureMode.class);
+        final Optional<StructureMode> mode = container.getObject(Keys.STRUCTURE_MODE.getQuery(), StructureMode.class);
         if (mode.isPresent()) {
             data = data.set(Keys.STRUCTURE_MODE, mode.get());
         }
 
-        Optional<Vector3i> position = container.getObject(Keys.STRUCTURE_POSITION.getQuery(), Vector3i.class);
+        final Optional<Vector3i> position = container.getObject(Keys.STRUCTURE_POSITION.getQuery(), Vector3i.class);
         if (position.isPresent()) {
             data = data.set(Keys.STRUCTURE_POSITION, position.get());
         }
 
-        Optional<Boolean> powered = container.getBoolean(Keys.STRUCTURE_POWERED.getQuery());
+        final Optional<Boolean> powered = container.getBoolean(Keys.STRUCTURE_POWERED.getQuery());
         if (powered.isPresent()) {
             data = data.set(Keys.STRUCTURE_POWERED, powered.get());
         }
 
-        Optional<Boolean> showAir = container.getBoolean(Keys.STRUCTURE_SHOW_AIR.getQuery());
+        final Optional<Boolean> showAir = container.getBoolean(Keys.STRUCTURE_SHOW_AIR.getQuery());
         if (showAir.isPresent()) {
             data = data.set(Keys.STRUCTURE_SHOW_AIR, showAir.get());
         }
 
-        Optional<Boolean> showBoundingBox = container.getBoolean(Keys.STRUCTURE_SHOW_BOUNDING_BOX.getQuery());
+        final Optional<Boolean> showBoundingBox = container.getBoolean(Keys.STRUCTURE_SHOW_BOUNDING_BOX.getQuery());
         if (showBoundingBox.isPresent()) {
             data = data.set(Keys.STRUCTURE_SHOW_BOUNDING_BOX, showBoundingBox.get());
         }
 
-        Optional<Vector3i> size = container.getObject(Keys.STRUCTURE_SIZE.getQuery(), Vector3i.class);
+        final Optional<Vector3i> size = container.getObject(Keys.STRUCTURE_SIZE.getQuery(), Vector3i.class);
         if (size.isPresent()) {
             data = data.set(Keys.STRUCTURE_SIZE, size.get());
         }
@@ -172,7 +172,7 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder container) {
+    public DataTransactionResult remove(final DataHolder container) {
         return DataTransactionResult.failNoData();
     }
 

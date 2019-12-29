@@ -36,4 +36,6 @@ public interface PlayerChunkMapAccessor {
 
     @Accessor("entries") List<PlayerChunkMapEntry> accessor$getEntries();
 
+    @Accessor("playerViewRadius") int accessor$getPlayerViewRadius();
+
 }
