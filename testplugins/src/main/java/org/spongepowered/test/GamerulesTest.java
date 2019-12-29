@@ -73,36 +73,6 @@ public class GamerulesTest {
                 "viewgamerules"
         );
 
-        Sponge.getCommandManager().register(
-                this,
-                CommandSpec.builder()
-                        .arguments(
-                                GenericArguments.world(Text.of("world")),
-                                GenericArguments.optional(GenericArguments.string(Text.of("gamerule"))))
-                        .executor((src, args) -> {
-                            WorldProperties worldProperties = args.requireOne("world");
-                            Optional<String> rule = args.getOne("gamerule");
-                            if (rule.isPresent()) {
-                                String value = worldProperties.getGameRule(rule.get()).orElse("<not set>");
-                                src.sendMessage(Text.of("World: ", worldProperties.getWorldName(), " - Gamerule: ", rule, " - Value: ", value));
-                            } else {
-                                Sponge.getServiceManager().provideUnchecked(PaginationService.class)
-                                        .builder()
-                                        .title(Text.of("Gamerules for world ", worldProperties.getWorldName()))
-                                        .contents(
-                                                worldProperties.getGameRules().entrySet().stream()
-                                                        .map(x -> Text.of(x.getKey(), " = ", x.getValue()))
-                                                        .collect(Collectors.toList())
-                                        )
-                                        .sendTo(src);
-                            }
-
-                            return CommandResult.success();
-                        })
-                        .build(),
-                "viewgamerules"
-        );
-
         Sponge.getCommandManager().register(this,
                 CommandSpec.builder()
                         .arguments(
