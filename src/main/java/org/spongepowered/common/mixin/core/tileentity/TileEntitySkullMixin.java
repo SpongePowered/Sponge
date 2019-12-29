@@ -76,12 +76,12 @@ public abstract class TileEntitySkullMixin extends TileEntityMixin implements Ti
         final org.spongepowered.api.profile.GameProfile profile = (org.spongepowered.api.profile.GameProfile) ((TileEntitySkullAccessor) this).accessor$getMojangProfile();
         if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
             if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
-                ((TileEntityBridge) this).bridge$markDirty();
+                this.shadow$markDirty();
             } else {
                 Sponge.getServer().getGameProfileManager().get(profile.getName().get()).handle((newProfile, thrown) -> {
                     if (newProfile != null) {
                         ((TileEntitySkullBridge) this).bridge$setPlayerProfile((GameProfile) newProfile, false);
-                        ((TileEntityBridge) this).bridge$markDirty();
+                        this.shadow$markDirty();
                     } else {
                         SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",
                                 thrown.getMessage());
@@ -90,7 +90,7 @@ public abstract class TileEntitySkullMixin extends TileEntityMixin implements Ti
                 });
             }
         } else {
-            ((TileEntityBridge) this).bridge$markDirty();
+            this.shadow$markDirty();
         }
     }
 

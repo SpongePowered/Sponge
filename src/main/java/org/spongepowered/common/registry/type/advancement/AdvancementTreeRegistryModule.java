@@ -32,7 +32,7 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
+import org.spongepowered.common.mixin.core.advancements.AdvancementListAccessor;
 import org.spongepowered.common.mixin.core.advancements.AdvancementManagerAccessor;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
@@ -56,9 +56,9 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
     public void registerAdditionalCatalog(final AdvancementTree advancementTree) {
         checkState(SpongeImplHooks.isMainThread());
         final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();
-        final AdvancementListBridge advancementList = (AdvancementListBridge) AdvancementManagerAccessor.accessor$getAdvancementList();
-        advancementList.bridge$getRootsSet().add(advancement);
-        final AdvancementList.Listener listener = advancementList.bridge$getListener();
+        final AdvancementListAccessor advancementList = (AdvancementListAccessor) AdvancementManagerAccessor.accessor$getAdvancementList();
+        advancementList.accessor$getRootsSet().add(advancement);
+        final AdvancementList.Listener listener = advancementList.accessor$getListener();
         if (listener != null) {
             listener.rootAdvancementAdded(advancement);
         }

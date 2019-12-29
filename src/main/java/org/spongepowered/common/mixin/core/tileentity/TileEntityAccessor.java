@@ -29,6 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(TileEntity.class)
 public interface TileEntityAccessor {
@@ -37,5 +38,7 @@ public interface TileEntityAccessor {
     static RegistryNamespaced<ResourceLocation, Class <? extends TileEntity >> accessor$getRegistry() {
         throw new IllegalStateException("Untransformed Accessor");
     }
+
+    @Invoker("markDirty") void accessor$markDirty();
 
 }

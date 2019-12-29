@@ -50,10 +50,10 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
     @Shadow @Final private ChunkPos pos;
     @Shadow private int changes;
     @Shadow private int changedSectionFilter;
+    @Shadow @Nullable private Chunk chunk;
+
     @Shadow public abstract void sendPacket(Packet<?> packetIn);
 
-    @Shadow @Final private List<EntityPlayerMP> players;
-    @Shadow @Nullable private Chunk chunk;
     private boolean impl$updateBiomes;
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
@@ -75,10 +75,6 @@ public abstract class PlayerChunkMapEntryMixin implements PlayerChunkMapEntryBri
         this.playerChunkMap.entryChanged((PlayerChunkMapEntry) (Object) this);
     }
 
-    @Override
-    public List<EntityPlayerMP> accessor$getPlayers() {
-        return this.players;
-    }
 
     @Override
     public void bridge$setChunk(Chunk newChunk) {

@@ -29,8 +29,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 
 public interface TileEntityBridge {
 
-    void bridge$markDirty();
-
     default SpawnType bridge$getTickedSpawnType() {
         return SpawnTypes.BLOCK_SPAWNING;
     }

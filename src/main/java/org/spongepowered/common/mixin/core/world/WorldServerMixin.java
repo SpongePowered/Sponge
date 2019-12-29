@@ -144,9 +144,8 @@ import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldTypeBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -168,6 +167,9 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.mixin.core.crash.CrashReportCategoryAccessor;
+import org.spongepowered.common.mixin.core.crash.CrashReportAccessor;
+import org.spongepowered.common.mixin.core.world.chunk.ChunkProviderServerAccessor;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -185,6 +187,7 @@ import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -196,8 +199,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 @Mixin(WorldServer.class)
 public abstract class WorldServerMixin extends WorldMixin implements WorldServerBridge {
@@ -337,7 +338,6 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         this.impl$spawnGenerationContext.close();
     }
 
-    // TODO - Migrate the terrain generation injections to try-catch wrappers with Mixin 0.8.x when trycatch is added.
     @Inject(method = "createSpawnPosition", at = @At(value = "HEAD"), cancellable = true)
     private void impl$cancelBonusChestIfTheEnd(final WorldSettings settings, final CallbackInfo ci) {
         final GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
@@ -348,7 +348,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         }
 
         if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END))
-            || (((ChunkProviderServerBridge) (((WorldServer) (Object) this)).getChunkProvider()).accessor$getChunkGenerator() instanceof ChunkGeneratorEnd)) {
+            || (((ChunkProviderServerAccessor) (((WorldServer) (Object) this)).getChunkProvider()).accessor$getChunkGenerator() instanceof ChunkGeneratorEnd)) {
             this.worldInfo.setSpawn(new BlockPos(100, 50, 0));
             ci.cancel();
         }
@@ -434,7 +434,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @SuppressWarnings("deprecation")
     @Override
     public void bridge$setProviderGenerator(final SpongeChunkGenerator newGenerator) {
-        ((ChunkProviderServerBridge) this.chunkProvider).accessor$setChunkGenerator(newGenerator);
+        ((ChunkProviderServerAccessor) this.chunkProvider).accessor$setChunkGenerator(newGenerator);
     }
 
     @Override
@@ -467,10 +467,10 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         final IChunkGenerator chunkGenerator = ((WorldTypeBridge) worldType).bridge$getChunkGenerator()
             .map(func -> func.apply(worldServer, settings))
             .orElseGet(() -> {
-                final IChunkGenerator current = ((ChunkProviderServerBridge) this.getChunkProvider()).accessor$getChunkGenerator();
+                final IChunkGenerator current = ((ChunkProviderServerAccessor) this.getChunkProvider()).accessor$getChunkGenerator();
                 if (current == null) {
                     final WorldProvider worldProvider = worldServer.provider;
-                    ((WorldProviderBridge) worldProvider).accessor$setGeneratorSettings(settings);
+                    ((WorldProviderAccessor) worldProvider).accessor$setGeneratorSettings(settings);
                     return worldProvider.createChunkGenerator();
                 }
                 return current;
@@ -866,8 +866,8 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             CrashReportCategory.addBlockInfo(category, pos, state);
         } catch (NoClassDefFoundError e) {
             SpongeImpl.getLogger().error("An error occurred while adding crash report info!", e);
-            SpongeImpl.getLogger().error("Original caught error:", category.crashReport.cause);
-            throw new ReportedException(category.crashReport);
+            SpongeImpl.getLogger().error("Original caught error:", ((CrashReportAccessor) ((CrashReportCategoryAccessor) category).accessor$getCrashReport()).accessor$getCause());
+            throw new ReportedException(((CrashReportCategoryAccessor) category).accessor$getCrashReport());
         }
     }
 

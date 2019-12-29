@@ -51,8 +51,4 @@ public interface ExplosionBridge {
 
     double bridge$getKnockback();
 
-    @Nullable
-    Entity bridge$getExploder();
-
-    World bridge$getWorld();
 }

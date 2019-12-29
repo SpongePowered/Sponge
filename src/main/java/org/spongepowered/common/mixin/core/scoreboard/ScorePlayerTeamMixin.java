@@ -131,19 +131,6 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
         this.impl$doTeamUpdate();
     }
 
-    // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
-    @Nullable
-    @Override
-    public Scoreboard accessor$getScoreboard() {
-        return this.scoreboard;
-    }
-
-    // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
-    @Override
-    public void accessor$setScoreboard(@Nullable Scoreboard scoreboard) {
-        this.scoreboard = scoreboard;
-    }
-
     @Override
     public Text bridge$getDisplayName() {
         return this.bridge$displayName;

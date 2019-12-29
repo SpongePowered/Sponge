@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
+import org.spongepowered.common.mixin.core.network.handshake.client.C00HandshakeAccessor;
 
 import java.net.InetSocketAddress;
 
@@ -54,10 +55,10 @@ public abstract class NetHandlerHandshakeTCPMixin_Bungee {
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
     private void bungee$patchHandshake(final C00Handshake packetIn, final CallbackInfo ci) {
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding() && packetIn.getRequestedState().equals(EnumConnectionState.LOGIN)) {
-            final String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
+            final String[] split = ((C00HandshakeAccessor) packetIn).accessor$getIp().split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {
-                packetIn.ip = split[0];
+                ((C00HandshakeAccessor) packetIn).accessor$setIp(split[0]);
                 ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setRemoteAddress(new InetSocketAddress(split[1],
                         ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
                 ((NetworkManagerBridge_Bungee) this.networkManager).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));

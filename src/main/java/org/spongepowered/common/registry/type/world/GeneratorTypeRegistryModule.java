@@ -64,7 +64,7 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
             this.registerAdditionalCatalog((GeneratorType) worldType);
         }
         {
-            final WorldType the_end = new WorldType(getNextID(), "the_end");
+            final WorldType the_end = WorldTypeAccessor.accessor$createWorldType(getNextID(), "the_end");
             ((WorldTypeBridge) the_end).bridge$setChunkGenerator((world, options)
                 -> new ChunkGeneratorEnd(world, true, world.getSeed(), new BlockPos(100, 50, 0)));
             ((WorldTypeBridge) the_end).bridge$setBiomeProvider(world -> new BiomeProviderSingle(Biomes.SKY));
@@ -73,14 +73,14 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
             this.registerAdditionalCatalog((GeneratorType) the_end);
         }
         {
-            final WorldType nether = new WorldType(getNextID(), "nether");
+            final WorldType nether = WorldTypeAccessor.accessor$createWorldType(getNextID(), "nether");
             ((WorldTypeAccessor) nether).accessor$setHasInfoNotice(true);
             ((WorldTypeBridge) nether).bridge$setBiomeProvider(world -> new BiomeProviderSingle(Biomes.HELL));
             ((WorldTypeBridge) nether).bridge$setChunkGenerator((world, s) -> new ChunkGeneratorHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed()));
             this.registerAdditionalCatalog((GeneratorType) nether);
         }
         {
-            final WorldType overworld = new WorldType(getNextID(), "overworld");
+            final WorldType overworld = WorldTypeAccessor.accessor$createWorldType(getNextID(), "overworld");
             ((WorldTypeAccessor) overworld).accessor$setCanBeCreated(false);
             ((WorldTypeBridge) overworld).bridge$setBiomeProvider(world -> new BiomeProvider(world.getWorldInfo()));
             ((WorldTypeBridge) overworld).bridge$setChunkGenerator(((world, s) -> new ChunkGeneratorOverworld(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), s)));

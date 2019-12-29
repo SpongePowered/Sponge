@@ -39,8 +39,8 @@ import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhase
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.end.DragonFightManagerBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingMixin_API;
+import org.spongepowered.common.mixin.core.world.end.DragonFightManagerAccessor;
 
 import java.util.Optional;
 import java.util.Set;
@@ -72,7 +72,7 @@ public abstract class EntityDragonMixin_API extends EntityLivingMixin_API implem
 
     @Override
     public ServerBossBar getBossBar() {
-        return (ServerBossBar) ((DragonFightManagerBridge) this.fightManager).bridge$getBossInfo();
+        return (ServerBossBar) ((DragonFightManagerAccessor) this.fightManager).accessor$getBossInfo();
     }
 
     @Override

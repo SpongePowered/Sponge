@@ -22,16 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.world.border.IBorderListener;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementList;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.List;
+import javax.annotation.Nullable;
+import java.util.Map;
+import java.util.Set;
 
-public interface WorldBorderBridge {
+@Mixin(AdvancementList.class)
+public interface AdvancementListAccessor {
 
-    // TODO Mixin 0.8
-    @Deprecated
-    List<IBorderListener> accessor$getListeners();
+    @Accessor("advancements") Map<ResourceLocation, Advancement> accessor$getAdvancements();
+
+    @Accessor("roots") Set<Advancement> accessor$getRootsSet();
+
+    @Accessor("nonRoots") Set<Advancement> accessor$getNonRootsSet();
+
+    @Nullable
+    @Accessor("listener") AdvancementList.Listener accessor$getListener();
 
 }

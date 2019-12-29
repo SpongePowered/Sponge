@@ -22,22 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.mixin.core.util.text;
 
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3i;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.EnumFacingBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EnumFacing.class)
-public class EnumFacingMixin implements EnumFacingBridge {
+@Mixin(TextFormatting.class)
+public interface TextFormattingAccessor {
 
-    @Shadow @Final private Vec3i directionVec;
+    @Accessor("name") String accessor$getName();
 
-    @Override
-    public Vec3i bridge$getDirectionVec() {
-        return this.directionVec;
-    }
+    @Accessor("formattingCode") char accessor$getFormattingCode();
+
 }

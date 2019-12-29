@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.mixin.core.network.handshake.client.C00HandshakeAccessor;
 import org.spongepowered.common.util.NetworkUtil;
 
 @Mixin(NetHandlerHandshakeTCP.class)
@@ -45,7 +46,7 @@ public abstract class NetHandlerHandshakeTCPMixin {
     private void impl$updateVersionAndHost(final C00Handshake packetIn, final CallbackInfo ci) {
         final NetworkManagerBridge info = (NetworkManagerBridge) this.networkManager;
         info.bridge$setVersion(packetIn.getProtocolVersion());
-        info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(packetIn.ip), packetIn.port);
+        info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(((C00HandshakeAccessor) packetIn).accessor$getIp()), ((C00HandshakeAccessor) packetIn).accessor$getPort());
     }
 
 }

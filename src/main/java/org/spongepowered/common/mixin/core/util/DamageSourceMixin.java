@@ -48,6 +48,7 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.mixin.core.world.ExplosionAccessor;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 
 import javax.annotation.Nullable;
@@ -91,8 +92,8 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
     private static void onSetExplosionSource(@Nullable final Explosion explosionIn, final CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
         if (explosionIn != null) {
-            final Entity entity = ((ExplosionBridge) explosionIn).bridge$getExploder();
-            if (entity != null && !((WorldBridge) ((ExplosionBridge) explosionIn).bridge$getWorld()).bridge$isFake()) {
+            final Entity entity = ((ExplosionAccessor) explosionIn).accessor$getExploder();
+            if (entity != null && !((WorldBridge) ((ExplosionAccessor) explosionIn).accessor$getWorld()).bridge$isFake()) {
                 if (explosionIn.getExplosivePlacedBy() == null && entity instanceof OwnershipTrackedBridge) {
                     // check creator
                     final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) entity;

@@ -22,32 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.util.text;
+package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.network.play.server.SPacketBlockChange;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface StyleBridge {
+@Mixin(SPacketBlockChange.class)
+public interface SPacketBlockChangeAccessor {
 
-    Style bridge$getParentStyle();
+    @Accessor("blockState") IBlockState accessor$getBlockState();
 
-    TextFormatting bridge$getColor();
+    @Accessor("blockState") void accessor$setBlockState(IBlockState state);
 
-    Boolean bridge$getBold();
+    @Accessor("blockPosition") BlockPos accessor$getBlockPosition();
 
-    Boolean bridge$getItalic();
+    @Accessor("blockPosition") void accessor$setBlockPosition(BlockPos blockPosition);
 
-    Boolean bridge$getUnderlined();
 
-    Boolean bridge$getStrikethrough();
-
-    Boolean bridge$getObfuscated();
-
-    ClickEvent bridge$getClickEvent();
-
-    HoverEvent bridge$getHoverEvent();
-
-    String bridge$getInsertion();
 }
