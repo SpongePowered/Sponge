@@ -166,6 +166,6 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public boolean hasSpecificBlockProcess(final BasicPacketContext context) {
-        return true;
+        return false;
     }
 }
