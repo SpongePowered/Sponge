@@ -27,14 +27,14 @@ package org.spongepowered.common.mixin.realtime.tileentity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.math.MathHelper;
-import org.spongepowered.asm.lib.Opcodes;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 
 @Mixin(value = TileEntityFurnace.class, priority = 1001)
 public abstract class TileEntityFurnaceMixin_RealTime extends TileEntity {

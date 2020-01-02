@@ -428,16 +428,6 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         return this.impl$knockback;
     }
 
-    @Nullable
-    @Override
-    public Entity bridge$getExploder() {
-        return this.exploder;
-    }
-
-    @Override
-    public net.minecraft.world.World bridge$getWorld() {
-        return this.world;
-    }
 
     @Override
     public String toString() {

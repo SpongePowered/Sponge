@@ -22,25 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
+package org.spongepowered.common.mixin.core.server.management;
 
-public interface MobSpawnerBaseLogicBridge {
+import com.mojang.authlib.GameProfile;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-    int bridge$getSpawnDelay();
+import java.util.Date;
 
-    void bridge$setSpawnDelay(int spawnDelay);
+@Mixin(targets = "net.minecraft.server.management.PlayerProfileCache$ProfileEntry")
+public interface PlayerProfileCache_ProfileEntryAccessor {
 
-    int bridge$getMinSpawnDelay();
+    @Invoker("getProfile") GameProfile accessor$getProfile();
 
-    int bridge$getMaxSpawnDelay();
-
-    int bridge$getSpawnCount();
-
-    int bridge$getMaxNearbyEntities();
-
-    void bridge$setMaxNearbyEntities(int maxNearbyEntities);
-
-    int bridge$getActivatingRangeFromPlayer();
-
-    int bridge$getSpawnRange();
+    @Invoker("getExpirationDate") Date accessor$getExpirationDate();
 }

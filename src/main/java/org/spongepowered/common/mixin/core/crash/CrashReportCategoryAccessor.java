@@ -22,27 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util.text;
+package org.spongepowered.common.mixin.core.crash;
 
-import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(TextFormatting.class)
-public class TextFormattingMixin implements TextFormattingBridge {
+@Mixin(CrashReportCategory.class)
+public interface CrashReportCategoryAccessor {
 
-    @Shadow @Final private String name;
-    @Shadow @Final private char formattingCode;
+    @Accessor("crashReport") CrashReport accessor$getCrashReport();
 
-    @Override
-    public String bridge$getName() {
-        return this.name;
-    }
-
-    @Override
-    public char bridge$getFormattingCode() {
-        return this.formattingCode;
-    }
 }

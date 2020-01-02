@@ -868,11 +868,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Override
-    public void accessor$populate(final IChunkGenerator generator) {
-        this.populate(generator);
-    }
-
-    @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("World", this.world)

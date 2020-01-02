@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.management;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -41,10 +39,11 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheEntryBridge;
+import org.spongepowered.common.mixin.core.server.management.PlayerProfileCache_ProfileEntryAccessor;
 import org.spongepowered.common.profile.callback.MapProfileLookupCallback;
 import org.spongepowered.common.profile.callback.SingleProfileLookupCallback;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
@@ -55,13 +54,13 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
-    @Shadow @Final private Map<String, PlayerProfileCacheEntryBridge> usernameToProfileEntryMap;
-    @Shadow @Final private Map<UUID, PlayerProfileCacheEntryBridge> uuidToProfileEntryMap;
+    @Shadow @Final private Map<String, PlayerProfileCache_ProfileEntryAccessor> usernameToProfileEntryMap;
+    @Shadow @Final private Map<UUID, PlayerProfileCache_ProfileEntryAccessor> uuidToProfileEntryMap;
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();
     @Shadow private void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry) { }
@@ -315,7 +314,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
     @Nullable
     private com.mojang.authlib.GameProfile getByNameNoLookup(String username) {
-        @Nullable PlayerProfileCacheEntryBridge entry = this.usernameToProfileEntryMap.get(username.toLowerCase(Locale.ROOT));
+        @Nullable PlayerProfileCache_ProfileEntryAccessor entry = this.usernameToProfileEntryMap.get(username.toLowerCase(Locale.ROOT));
 
         if (entry != null && System.currentTimeMillis() >= entry.accessor$getExpirationDate().getTime()) {
             com.mojang.authlib.GameProfile profile = entry.accessor$getProfile();

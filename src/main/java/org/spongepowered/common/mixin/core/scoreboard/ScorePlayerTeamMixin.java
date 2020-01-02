@@ -30,12 +30,12 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.text.TextFormatting;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -129,19 +129,6 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
         this.bridge$Color = TextColorRegistryModule.enumChatColor.get(format);
         // This isn't called by Vanilla, so we inject the call ourselves.
         this.impl$doTeamUpdate();
-    }
-
-    // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
-    @Nullable
-    @Override
-    public Scoreboard accessor$getScoreboard() {
-        return this.scoreboard;
-    }
-
-    // TODO Mixin (0.8) - Remove when we can use accessor mixins in other mixins
-    @Override
-    public void accessor$setScoreboard(@Nullable Scoreboard scoreboard) {
-        this.scoreboard = scoreboard;
     }
 
     @Override

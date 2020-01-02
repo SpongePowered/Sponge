@@ -33,8 +33,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.server.MinecraftServer;
@@ -57,7 +55,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -81,12 +78,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.mixin.core.world.chunk.ChunkAccessor;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
@@ -105,6 +101,10 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.mixin.core.server.management.PlayerChunkMapAccessor;
+import org.spongepowered.common.mixin.core.server.management.PlayerChunkMapEntryAccessor;
+import org.spongepowered.common.mixin.core.util.SoundEventsAccessor;
+import org.spongepowered.common.mixin.core.world.chunk.ChunkProviderServerAccessor;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
@@ -252,8 +252,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
             final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
             ((ChunkProviderServerBridge) chunkProviderServer).bridge$unloadChunkAndSave(chunk);
-            // TODO - Move to accessor with Mixin 0.8
-            final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerBridge) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
+            final net.minecraft.world.chunk.Chunk newChunk = ((ChunkProviderServerAccessor) chunkProviderServer).accessor$getChunkGenerator().generateChunk(cx, cz);
             final PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
             if (playerChunk != null) {
                 ((PlayerChunkMapEntryBridge) playerChunk).bridge$setChunk(newChunk);
@@ -261,9 +260,9 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
             if (newChunk != null) {
                 final WorldServer world = (WorldServer) newChunk.getWorld();
-                ((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
+                ((ChunkProviderServerAccessor) world.getChunkProvider()).accessor$getLoadedChunks().put(ChunkPos.asLong(cx, cz), newChunk);
                 newChunk.onLoad();
-                ((ChunkBridge) newChunk).accessor$populate(((ChunkProviderServerBridge) world.getChunkProvider()).accessor$getChunkGenerator());
+                ((ChunkAccessor) newChunk).accessor$populate(((ChunkProviderServerAccessor) world.getChunkProvider()).accessor$getChunkGenerator());
                 for (final net.minecraft.entity.Entity entity: entityList) {
                     newChunk.addEntity(entity);
                 }
@@ -274,7 +273,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
                 final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
                 if (playerChunkMapEntry != null) {
-                    final List<EntityPlayerMP> chunkPlayers = ((PlayerChunkMapEntryBridge) playerChunkMapEntry).accessor$getPlayers();
+                    final List<EntityPlayerMP> chunkPlayers = ((PlayerChunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers();
                     // We deliberately send two packets, to avoid sending a 'fullChunk' packet
                     // (a changedSectionFilter of 65535). fullChunk packets cause the client to
                     // completely overwrite its current chunk with a new chunk instance. This causes
@@ -459,7 +458,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+            event = SoundEventsAccessor.accessor$getRegisteredSoundEvent(sound.getId());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
             this.eventListeners.stream()
@@ -613,8 +612,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @SuppressWarnings("deprecation")
     @Override
     public int getViewDistance() {
-        // TODO - Mixin 0.8 accessors
-        return ((PlayerChunkMapBridge) this.playerChunkMap).accessor$getViewDistance();
+        return ((PlayerChunkMapAccessor) this.playerChunkMap).accessor$getPlayerViewRadius();
     }
 
     @SuppressWarnings("deprecation")
@@ -623,7 +621,7 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         this.playerChunkMap.setPlayerViewRadius(viewDistance);
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter();
         // don't use the parameter, use the field that has been clamped
-        configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapBridge) this.playerChunkMap).accessor$getViewDistance());
+        configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapAccessor) this.playerChunkMap).accessor$getPlayerViewRadius());
         configAdapter.save();
     }
 

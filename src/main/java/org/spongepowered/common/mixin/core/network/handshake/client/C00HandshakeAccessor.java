@@ -22,13 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
+package org.spongepowered.common.mixin.core.network.handshake.client;
 
-import net.minecraft.potion.Potion;
+import net.minecraft.network.handshake.client.C00Handshake;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface TileEntityBeaconBridge {
+@Mixin(C00Handshake.class)
+public interface C00HandshakeAccessor {
 
-    void bridge$forceSetPrimaryEffect(Potion potion);
+    @Accessor("ip")  String accessor$getIp();
 
-    void bridge$forceSetSecondaryEffect(Potion potion);
+    @Accessor("ip") void accessor$setIp(String ip);
+
+    @Accessor("port") int accessor$getPort();
 }

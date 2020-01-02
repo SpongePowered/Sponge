@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
@@ -57,6 +55,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
@@ -72,7 +71,6 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -95,8 +93,8 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.util.DataUtil;
@@ -111,12 +109,13 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge {
@@ -408,11 +407,10 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private void impl$updateVanishState(final CallbackInfo callbackInfo) {
         if (this.vanish$pendingVisibilityUpdate && !this.world.isRemote) {
             final EntityTracker entityTracker = ((WorldServer) this.world).getEntityTracker();
-            // TODO - remove once Mixin 0.8 fixes accessors
-            final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
+            final EntityTrackerEntry lookup = ((EntityTrackerAccessor) entityTracker).accessor$getTrackedEntityTable().lookup(this.getEntityId());
             if (lookup != null && this.vanish$visibilityTicks % 4 == 0) {
                 if (this.vanish$isVanished) {
-                    for (final EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) { // TODO - remove once Mixin 0.8 fixes accessors
+                    for (final EntityPlayerMP entityPlayerMP : ((EntityTrackerEntryAccessor) lookup).accessor$getTrackingPlayers()) {
                         entityPlayerMP.connection.sendPacket(new SPacketDestroyEntities(this.getEntityId()));
                         if ((Entity) (Object) this instanceof EntityPlayerMP) {
                             entityPlayerMP.connection.sendPacket(
@@ -430,8 +428,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                             final Packet<?> packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
                             entityPlayerMP.connection.sendPacket(packet);
                         }
-                        // TODO - replace with accessor once Mixin 0.8 fixes accessors within mixins
-                        final Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
+                        final Packet<?> newPacket = ((EntityTrackerEntryAccessor) lookup).accessor$createSpawnPacket();
                         entityPlayerMP.connection.sendPacket(newPacket);
                     }
                 }

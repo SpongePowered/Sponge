@@ -31,7 +31,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
@@ -42,14 +41,13 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 public interface ChunkBridge {
 
@@ -128,7 +126,4 @@ public interface ChunkBridge {
 
     Chunk[] bridge$getNeighborArray();
 
-    // TODO Mixin 0.8
-    @Deprecated
-    void accessor$populate(IChunkGenerator generator);
 }

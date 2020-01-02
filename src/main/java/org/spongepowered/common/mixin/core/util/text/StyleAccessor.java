@@ -34,14 +34,32 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Style.class)
 public interface StyleAccessor {
 
+    @Accessor("parentStyle") Style accessor$getParentStyle();
+
     @Accessor("color") TextFormatting accessor$getColor();
 
+    @Accessor("bold") Boolean accessor$getBold();
+
+    @Accessor("italic") Boolean accessor$getItalic();
+
+    @Accessor("underlined") Boolean accessor$getUnderlined();
+
+    @Accessor("strikethrough") Boolean accessor$getStrikethrough();
+
+    @Accessor("obfuscated") Boolean accessor$getObfuscated();
+
+    @Accessor("clickEvent") ClickEvent accessor$getClickEvent();
+
+    @Accessor("hoverEvent") HoverEvent accessor$getHoverEvent();
+
+    @Accessor("insertion") String accessor$getInsertion();
+
     @Accessor("color") void accessor$setColor(TextFormatting color);
-
+  
     @Accessor("bold") void accessor$setBold(Boolean bold);
-
+  
     @Accessor("italic") void accessor$setItalic(Boolean italic);
-
+  
     @Accessor("underlined") void accessor$setUnderlined(Boolean underlined);
 
     @Accessor("strikethrough") void accessor$setStrikethrough(Boolean strikethrough);

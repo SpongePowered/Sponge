@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.mixin.core.util;
 
-import net.minecraft.advancements.Advancement;
+import net.minecraft.util.CooldownTracker;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface ICriterionTrigger_ListenerBridge {
+@Mixin(targets = "net.minecraft.util.CooldownTracker$Cooldown")
+public interface CooldownTracker_CooldownAccessor {
 
-    Advancement bridge$getAdvancement();
-
-    String bridge$getCriterionName();
+    @Accessor("expireTicks") int accessor$getExpireTicks();
 }

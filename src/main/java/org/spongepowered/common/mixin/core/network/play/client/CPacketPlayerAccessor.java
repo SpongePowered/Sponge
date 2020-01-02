@@ -22,24 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.border;
+package org.spongepowered.common.mixin.core.network.play.client;
 
-import net.minecraft.world.border.IBorderListener;
-import net.minecraft.world.border.WorldBorder;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.network.play.client.CPacketPlayer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.WorldBorderBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.List;
+@Mixin(CPacketPlayer.class)
+public interface CPacketPlayerAccessor {
 
-@Mixin(WorldBorder.class)
-public class WorldBorderMixin implements WorldBorderBridge {
+    @Accessor("x") double accessor$getX();
 
-    @Shadow @Final private List<IBorderListener> listeners;
+    @Accessor("y") double accessor$getY();
 
-    @Override
-    public List<IBorderListener> accessor$getListeners() {
-        return this.listeners;
-    }
+    @Accessor("z") double accessor$getZ();
+
+    @Accessor("yaw") float accessor$getYaw();
+
+    @Accessor("pitch") float accessor$getPitch();
+
+    @Accessor("onGround") boolean accessor$getOnGround();
+
+    @Accessor("moving") boolean accessor$getMoving();
+
+    @Accessor("rotating") boolean accessor$getRotating();
 }

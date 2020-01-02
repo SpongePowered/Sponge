@@ -37,4 +37,6 @@ public interface WorldProviderAccessor {
 
     @Accessor("biomeProvider") void accessor$setBiomeProvider(BiomeProvider biomeProvider);
 
+    @Accessor("generatorSettings") void accessor$setGeneratorSettings(String generatorSettings);
+
 }

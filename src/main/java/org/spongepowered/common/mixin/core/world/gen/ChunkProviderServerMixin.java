@@ -84,7 +84,6 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
 
     @Shadow @Final private WorldServer world;
     @Shadow @Final private IChunkLoader chunkLoader;
-    @Shadow @Final @Mutable private IChunkGenerator chunkGenerator;
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Shadow @Final @Mutable private Long2ObjectMap<Chunk> loadedChunks = new CachedLong2ObjectMap();
 
@@ -107,21 +106,6 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
         this.impl$denyChunkRequests = worldCategory.getDenyChunkRequests();
         this.impl$chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
         this.impl$maxChunkUnloads = worldCategory.getMaxChunkUnloads();
-    }
-
-    @Override
-    public void accessor$setChunkGenerator(final IChunkGenerator spongeGen) {
-        this.chunkGenerator = spongeGen;
-    }
-
-    @Override
-    public Long2ObjectMap<Chunk> accessor$getLoadedChunks() {
-        return this.loadedChunks;
-    }
-
-    @Override
-    public IChunkGenerator accessor$getChunkGenerator() {
-        return this.chunkGenerator;
     }
 
     @Override
@@ -199,8 +183,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
         locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void impl$StopGenerationPhaseFromError(final int x, final int z, final CallbackInfoReturnable<Chunk> cir, final Chunk ungenerated,
-        final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory,
-        @Coerce final Object provider, final int someVar, final int someOther) {
+        final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory) {
 
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         report.makeCategoryDepth("Current PhaseState", 1)

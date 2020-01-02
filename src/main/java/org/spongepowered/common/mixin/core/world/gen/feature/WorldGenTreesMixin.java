@@ -36,8 +36,6 @@ import org.spongepowered.common.bridge.world.gen.WorldGenTreesBridge;
 @Mixin(WorldGenTrees.class)
 public abstract class WorldGenTreesMixin extends WorldGenAbstractTree implements WorldGenTreesBridge {
 
-    @Shadow @Final @Mutable private int minTreeHeight;
-
     private VariableAmount impl$minHeight = VariableAmount.fixed(4);
     private String impl$id = "minecraft:oak";
     private String impl$name = "Oak tree";

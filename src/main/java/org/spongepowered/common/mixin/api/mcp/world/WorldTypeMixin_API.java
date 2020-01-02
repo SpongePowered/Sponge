@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
+import org.spongepowered.common.mixin.core.world.gen.ChunkGeneratorSettings_FactoryAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
@@ -75,7 +76,7 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
         if (((WorldType) (Object) this) == WorldType.CUSTOMIZED) {
             // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT
             try {
-                return JsonDataFormat.serialize(ChunkGeneratorSettings.Factory.JSON_ADAPTER, new ChunkGeneratorSettings.Factory());
+                return JsonDataFormat.serialize(ChunkGeneratorSettings_FactoryAccessor.accessor$getJSON_ADAPTER(), new ChunkGeneratorSettings.Factory());
             } catch (JsonParseException | IOException e) {
                 throw new AssertionError("Failed to serialize default settings of CUSTOMIZED world type", e);
             }

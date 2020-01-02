@@ -68,6 +68,7 @@ import org.spongepowered.common.mixin.core.entity.passive.AbstractChestHorseAcce
 import org.spongepowered.common.mixin.core.entity.passive.EntityPigAccessor;
 import org.spongepowered.common.mixin.core.entity.passive.EntitySheepAccessor;
 import org.spongepowered.common.mixin.core.entity.passive.EntityWolfAccessor;
+import org.spongepowered.common.mixin.core.network.play.client.CPacketPlayerAccessor;
 
 import java.util.List;
 
@@ -187,7 +188,7 @@ public final class PacketPhaseUtil {
                     final CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
                     if (movingPacket instanceof CPacketPlayer.Rotation) {
                         ignoreMovementCapture = true;
-                    } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
+                    } else if (packetPlayer.posX == ((CPacketPlayerAccessor) movingPacket).accessor$getX() && packetPlayer.posY == ((CPacketPlayerAccessor) movingPacket).accessor$getY() && packetPlayer.posZ == ((CPacketPlayerAccessor) movingPacket).accessor$getZ()) {
                         ignoreMovementCapture = true;
                     } else {
                         ignoreMovementCapture = false;

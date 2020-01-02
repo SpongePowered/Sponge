@@ -51,7 +51,6 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
     @Shadow public abstract boolean doesWaterVaporize();
     @Shadow public abstract WorldBorder createWorldBorder();
     @Shadow public abstract boolean isNether();
-    @Shadow private String generatorSettings;
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -82,11 +81,6 @@ public abstract class WorldProviderMixin implements Dimension, WorldProviderBrid
     @Override
     public boolean hasSky() {
         return !isNether();
-    }
-
-    @Override
-    public void accessor$setGeneratorSettings(final String generatorSettings) {
-        this.generatorSettings = generatorSettings;
     }
 
     @Override

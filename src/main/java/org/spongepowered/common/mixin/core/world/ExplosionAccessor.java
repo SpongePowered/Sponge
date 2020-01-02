@@ -24,16 +24,21 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import javax.annotation.Nullable;
 
 @Mixin(Explosion.class)
 public interface ExplosionAccessor {
 
     /** whether or not this explosion spawns smoke particles */
     @Accessor("damagesTerrain") boolean accessor$getDamagesTerrain();
+
+    @Nullable @Accessor("exploder") Entity accessor$getExploder();
 
     @Accessor("world") World accessor$getWorld();
 

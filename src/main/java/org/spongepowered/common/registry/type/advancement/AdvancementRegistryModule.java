@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.AdvancementRewards;
@@ -37,12 +35,14 @@ import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
-import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
+import org.spongepowered.common.mixin.core.advancements.AdvancementListAccessor;
 import org.spongepowered.common.mixin.core.advancements.AdvancementManagerAccessor;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
 import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkState;
 
 @SuppressWarnings("unchecked")
 @CustomRegistrationPhase
@@ -66,8 +66,8 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         super("minecraft");
     }
 
-    private static AdvancementListBridge getAdvancementList() {
-        return (AdvancementListBridge) AdvancementManagerAccessor.accessor$getAdvancementList();
+    private static AdvancementListAccessor getAdvancementList() {
+        return (AdvancementListAccessor) AdvancementManagerAccessor.accessor$getAdvancementList();
     }
 
     @Override
@@ -88,12 +88,12 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         checkState(SpongeImplHooks.isMainThread());
         ((AdvancementBridge) advancement).bridge$setRegistered();
         final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
-        final AdvancementListBridge advList = getAdvancementList();
-        advList.bridge$getAdvancements().put(mcAdv.getId(), mcAdv);
+        final AdvancementListAccessor advList = getAdvancementList();
+        advList.accessor$getAdvancements().put(mcAdv.getId(), mcAdv);
         // If the parent != null, that means that its not a root advancement
         if (mcAdv.getParent() != null && mcAdv.getParent() != DUMMY_ROOT_ADVANCEMENT &&
-                advList.bridge$getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
-            final AdvancementList.Listener listener = advList.bridge$getListener();
+                advList.accessor$getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
+            final AdvancementList.Listener listener = advList.accessor$getListener();
             if (listener != null) {
                 listener.nonRootAdvancementAdded(mcAdv);
             }

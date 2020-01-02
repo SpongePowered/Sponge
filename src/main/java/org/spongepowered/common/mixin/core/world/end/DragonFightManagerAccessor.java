@@ -22,34 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.tileentity;
+package org.spongepowered.common.mixin.core.world.end;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.data.type.StructureMode;
+import net.minecraft.world.BossInfoServer;
+import net.minecraft.world.end.DragonFightManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface TileEntityStructureBridge {
+@Mixin(DragonFightManager.class)
+public interface DragonFightManagerAccessor {
 
-    String bridge$getAuthor();
+    @Accessor("bossInfo") BossInfoServer accessor$getBossInfo();
 
-    void bridge$setAuthor(String author);
-
-    boolean bridge$shouldIgnoreEntities();
-
-    float bridge$getIntegrity();
-
-    StructureMode bridge$getMode();
-
-    void bridge$setMode(StructureMode mode);
-
-    Vector3i bridge$getPosition();
-
-    void bridge$setPosition(Vector3i position);
-
-    boolean bridge$shouldShowAir();
-
-    boolean bridge$shouldShowBoundingBox();
-
-    Vector3i bridge$getSize();
-
-    void bridge$setSize(Vector3i size);
 }

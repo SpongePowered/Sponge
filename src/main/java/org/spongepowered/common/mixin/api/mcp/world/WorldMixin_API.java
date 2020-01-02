@@ -124,6 +124,7 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.mixin.core.network.play.server.SPacketBlockChangeAccessor;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -894,8 +895,8 @@ public abstract class WorldMixin_API implements World {
     public void sendBlockChange(int x, int y, int z, BlockState state) {
         checkNotNull(state, "state");
         SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = new BlockPos(x, y, z);
-        packet.blockState = (IBlockState) state;
+        ((SPacketBlockChangeAccessor) packet).accessor$setBlockPosition(new BlockPos(x, y, z));
+        ((SPacketBlockChangeAccessor) packet).accessor$setBlockState((IBlockState) state);
 
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {

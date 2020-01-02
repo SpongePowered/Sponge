@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.player;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.advancements.PlayerAdvancements;
@@ -35,7 +31,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketBlockChange;
@@ -105,12 +100,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
 import org.spongepowered.common.bridge.packet.SPacketResourcePackSendBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.bridge.world.WorldBorderBridge;
+import org.spongepowered.common.bridge.text.TitleBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -122,11 +120,10 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.bridge.advancements.AdvancementBridge;
-import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.network.NetHandlerPlayServerBridge;
-import org.spongepowered.common.bridge.text.TitleBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.network.play.server.SPacketBlockChangeAccessor;
+import org.spongepowered.common.mixin.core.util.SoundEventsAccessor;
+import org.spongepowered.common.mixin.core.world.border.WorldBorderAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.Constants;
@@ -134,6 +131,8 @@ import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -144,8 +143,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 @Mixin(EntityPlayerMP.class)
 @Implements(@Interface(iface = Player.class, prefix = "api$"))
@@ -395,7 +395,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+            event = SoundEventsAccessor.accessor$getRegisteredSoundEvent(sound.getId());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
             this.connection.sendPacket(new SPacketCustomSound(sound.getId(), (net.minecraft.util.SoundCategory) (Object) category,
@@ -529,8 +529,8 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
 
     public void sendBlockChange(final BlockPos pos, final IBlockState state) {
         final SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = pos;
-        packet.blockState = state;
+        ((SPacketBlockChangeAccessor) packet).accessor$setBlockPosition(pos);
+        ((SPacketBlockChangeAccessor) packet).accessor$setBlockState(state);
         this.connection.sendPacket(packet);
     }
 
@@ -603,7 +603,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         }
         if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.api$worldBorder), Optional.ofNullable(border), this))) {
             if (this.api$worldBorder != null) { //is the world border about to be unset?
-                ((WorldBorderBridge) this.api$worldBorder).accessor$getListeners().remove(((EntityPlayerMPBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
+                ((WorldBorderAccessor) this.api$worldBorder).accessor$getListeners().remove(((EntityPlayerMPBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
             }
             this.api$worldBorder = border;
             if (this.api$worldBorder != null) {

@@ -22,15 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.block;
+package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.ICriterionTrigger;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface BlockJukeboxBridge {
+@Mixin(ICriterionTrigger.Listener.class)
+public interface ICriterionTrigger_ListenerAccessor {
 
-    // TODO Mixin 0.8
-    @Deprecated
-    void accessor$dropRecordItem(World worldIn, BlockPos pos, IBlockState state);
+    @Accessor("advancement") Advancement accessor$getAdvancement();
+
+    @Accessor("criterionName") String accessor$getCriterionName();
+
 }

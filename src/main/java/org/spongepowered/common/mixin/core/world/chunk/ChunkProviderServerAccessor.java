@@ -22,13 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.util;
+package org.spongepowered.common.mixin.core.world.chunk;
 
-import net.minecraft.util.math.Vec3i;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface EnumFacingBridge {
+import javax.annotation.Nullable;
 
-    // TODO Mixin 0.8
-    @Deprecated
-    Vec3i bridge$getDirectionVec();
+@Mixin(ChunkProviderServer.class)
+public interface ChunkProviderServerAccessor {
+
+    @Nullable
+    @Accessor("chunkGenerator") IChunkGenerator accessor$getChunkGenerator();
+
+    @Accessor("chunkGenerator") void accessor$setChunkGenerator(IChunkGenerator spongeGen);
+
+    @Accessor("loadedChunks") Long2ObjectMap<Chunk> accessor$getLoadedChunks();
+
 }

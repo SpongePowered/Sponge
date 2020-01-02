@@ -46,25 +46,18 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.WorldInfo;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.Jukebox;
 import org.spongepowered.api.data.property.item.RecordProperty;
-import org.spongepowered.api.effect.sound.SoundCategory;
-import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.effect.sound.record.RecordType;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -83,9 +76,9 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -100,14 +93,13 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeEmptyChunk;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.World.class)
 public abstract class WorldMixin implements WorldBridge {

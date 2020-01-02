@@ -131,6 +131,7 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.network.play.client.CPacketPlayerAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -389,7 +390,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
             // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
             // We don't fire an event to avoid confusing plugins.
-            if (!packetIn.moving && !packetIn.rotating) {
+            if (!((CPacketPlayerAccessor) packetIn).accessor$getMoving() && !((CPacketPlayerAccessor) packetIn).accessor$getRotating()) {
                 return playerMP.queuedEndExit;
             }
 
@@ -404,15 +405,15 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                 fromLocation = this.impl$lastMoveLocation;
             }
 
-            Location<World> toLocation = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
-            Vector3d toRotation = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
+            Location<World> toLocation = new Location<>(player.getWorld(), ((CPacketPlayerAccessor) packetIn).accessor$getX(), ((CPacketPlayerAccessor) packetIn).accessor$getY(), ((CPacketPlayerAccessor) packetIn).accessor$getZ());
+            Vector3d toRotation = new Vector3d(((CPacketPlayerAccessor) packetIn).accessor$getPitch(), ((CPacketPlayerAccessor) packetIn).accessor$getYaw(), 0);
 
             // If we have zero movement, we have rotation only, we might as well note that now.
-            final boolean zeroMovement = !packetIn.moving || toLocation.getPosition().equals(fromLocation.getPosition());
+            final boolean zeroMovement = !((CPacketPlayerAccessor) packetIn).accessor$getMoving() || toLocation.getPosition().equals(fromLocation.getPosition());
 
             // Minecraft does the same with rotation when it's only a positional update
             // Branch executed for CPacketPlayer.Position
-            boolean firePositionEvent = packetIn.moving && !packetIn.rotating;
+            boolean firePositionEvent = ((CPacketPlayerAccessor) packetIn).accessor$getMoving() && !((CPacketPlayerAccessor) packetIn).accessor$getRotating();
             if (firePositionEvent) {
                 // Correct the new rotation to match the old rotation
                 toRotation = fromRotation;
@@ -422,7 +423,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
             // Branch executed for CPacketPlayer.Rotation
-            boolean fireRotationEvent = !packetIn.moving && packetIn.rotating;
+            boolean fireRotationEvent = !((CPacketPlayerAccessor) packetIn).accessor$getMoving() && ((CPacketPlayerAccessor) packetIn).accessor$getRotating();
 
             if (fireRotationEvent) {
                 // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
@@ -434,7 +435,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             }
 
             // Branch executed for CPacketPlayer.PositionRotation
-            if (packetIn.moving && packetIn.rotating) {
+            if (((CPacketPlayerAccessor) packetIn).accessor$getMoving() && ((CPacketPlayerAccessor) packetIn).accessor$getRotating()) {
                 firePositionEvent = !zeroMovement && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
                 fireRotationEvent = ShouldFire.ROTATE_ENTITY_EVENT;
             }
