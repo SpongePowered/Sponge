@@ -785,9 +785,14 @@ public class SpongeCommonEventFactory {
     public static InteractItemEvent.Primary callInteractItemEventPrimary(final EntityPlayer player, final ItemStack stack, final EnumHand hand,
         @Nullable final Vector3d hitVec, final Object hitTarget) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.OWNER, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            if (SpongeImplHooks.isFakePlayer(player)) {
+                frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
+            } else {
+                frame.pushCause(player);
+                frame.addContext(EventContextKeys.OWNER, (User) player);
+                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            }
+
             if (hitTarget instanceof Entity) {
                 frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
             } else if (hitTarget instanceof BlockSnapshot) {
@@ -814,9 +819,14 @@ public class SpongeCommonEventFactory {
     public static InteractItemEvent.Secondary callInteractItemEventSecondary(final CauseStackManager.StackFrame frame, final EntityPlayer player,
         final ItemStack stack, final EnumHand hand,
         @Nullable final Vector3d hitVec, final Object hitTarget) {
-        frame.pushCause(player);
-        frame.addContext(EventContextKeys.OWNER, (User) player);
-        frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+        if (SpongeImplHooks.isFakePlayer(player)) {
+            frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
+        } else {
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+        }
+
         if (hitTarget instanceof Entity) {
             frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
         } else if (hitTarget instanceof BlockSnapshot) {
@@ -848,9 +858,14 @@ public class SpongeCommonEventFactory {
             @Nullable final EnumFacing side, @Nullable final Vector3d hitVec) {
         final HandType handType = (HandType) (Object) hand;
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.OWNER, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            if (SpongeImplHooks.isFakePlayer(player)) {
+                frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
+            } else {
+                frame.pushCause(player);
+                frame.addContext(EventContextKeys.OWNER, (User) player);
+                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            }
+
             frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
             frame.addContext(EventContextKeys.USED_HAND, handType);
             final InteractBlockEvent.Primary event;
@@ -886,9 +901,14 @@ public class SpongeCommonEventFactory {
             final Tristate originalUseItemResult, final Tristate useItemResult, @Nullable final Vector3d hitVec, final BlockSnapshot targetBlock,
             final Direction targetSide, final EnumHand hand) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.OWNER, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            if (SpongeImplHooks.isFakePlayer(player)) {
+                frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
+            } else {
+                frame.pushCause(player);
+                frame.addContext(EventContextKeys.OWNER, (User) player);
+                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            }
+
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
             if (!heldItem.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
