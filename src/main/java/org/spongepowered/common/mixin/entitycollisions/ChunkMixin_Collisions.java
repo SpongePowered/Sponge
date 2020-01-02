@@ -31,6 +31,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Final;
@@ -39,6 +40,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -47,7 +49,7 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.Collisi
 import java.util.List;
 
 @Mixin(net.minecraft.world.chunk.Chunk.class)
-public class ChunkMixin_Collisions {
+public abstract class ChunkMixin_Collisions {
 
     @Shadow @Final private World world;
 
@@ -57,7 +59,8 @@ public class ChunkMixin_Collisions {
     private void collisionsImpl$checkForCollisionRules(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         final Predicate<? super Entity> predicate, final CallbackInfo ci) {
         // ignore players and entities with parts (ex. EnderDragon)
-        if (this.world.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
+        if (this.world.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null
+                || collisionsImpl$isLimitExempt(aabb)) {
             return;
         }
         // Run hook in EntityLivingBase to support maxEntityCramming
@@ -77,7 +80,8 @@ public class ChunkMixin_Collisions {
         final List<T> listToFill, final Predicate<? super T> p_177430_4_, final CallbackInfo ci) {
         // ignore player checks
         // ignore item check (ex. Hoppers)
-        if (this.world.isRemote || EntityPlayer.class.isAssignableFrom(entityClass) || EntityItem.class == entityClass) {
+        if (this.world.isRemote || EntityPlayer.class.isAssignableFrom(entityClass) || EntityItem.class == entityClass
+                || collisionsImpl$isLimitExempt(aabb)) {
             return;
         }
 
@@ -123,5 +127,19 @@ public class ChunkMixin_Collisions {
         }
 
         return true;
+    }
+
+    /**
+     * Removes the limit when the bounding box is large. Fixes bugs like
+     * https://github.com/SpongePowered/SpongeCommon/issues/2452.
+     *
+     * @author JBYoshi
+     */
+    private boolean collisionsImpl$isLimitExempt(AxisAlignedBB aabb) {
+        if (!(this.world instanceof WorldServer)) {
+            return true;
+        }
+        double entitySize = SpongeImplHooks.getWorldMaxEntityRadius((WorldServer) this.world) * 2;
+        return (aabb.maxX - aabb.minX) * (aabb.maxY - aabb.minY) * (aabb.maxZ - aabb.minZ) > entitySize * entitySize * entitySize;
     }
 }
