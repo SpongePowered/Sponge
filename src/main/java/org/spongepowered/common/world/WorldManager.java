@@ -53,7 +53,6 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
@@ -80,13 +79,16 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
@@ -432,7 +434,13 @@ public final class WorldManager {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        final ISaveHandler saveHandler;
+        try (PhaseContext<?> ignore = GeneralPhase.State.SAVE_HANDLER_CREATION.createPhaseContext()
+                .createFiles(!archetype.getSerializationBehavior().equals(SerializationBehaviors.NONE))
+                .buildAndSwitch()) {
+            saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true,
+                    ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        }
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
         if (worldInfo == null) {
@@ -464,7 +472,9 @@ public final class WorldManager {
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(), archetype,
                 (WorldProperties) worldInfo));
 
-        saveHandler.saveWorldInfoWithPlayer(worldInfo, SpongeImpl.getServer().getPlayerList().getHostPlayerData());
+        if (archetype.getSerializationBehavior() != SerializationBehaviors.NONE) {
+            saveHandler.saveWorldInfoWithPlayer(worldInfo, SpongeImpl.getServer().getPlayerList().getHostPlayerData());
+        }
 
         return (WorldProperties) worldInfo;
 
@@ -623,12 +633,18 @@ public final class WorldManager {
         }
 
         final Path worldFolder = currentSavesDir.resolve(worldName);
-        if (!Files.isDirectory(worldFolder)) {
+        if (!Files.isDirectory(worldFolder) && properties.getSerializationBehavior() != SerializationBehaviors.NONE) {
             SpongeImpl.getLogger().error("Unable to load world [{}]. We cannot find its folder under [{}].", worldFolder, currentSavesDir);
             return Optional.empty();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        final ISaveHandler saveHandler;
+        try (PhaseContext<?> ignore = GeneralPhase.State.SAVE_HANDLER_CREATION.createPhaseContext()
+                .createFiles(!properties.getSerializationBehavior().equals(SerializationBehaviors.NONE))
+                .buildAndSwitch()) {
+            saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true,
+                    ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        }
 
         // We weren't given a properties, see if one is cached
         if (properties == null) {
@@ -676,9 +692,7 @@ public final class WorldManager {
     public static void loadAllWorlds(final long defaultSeed, final WorldType defaultWorldType, final String generatorOptions) {
         final MinecraftServer server = SpongeImpl.getServer();
 
-        // We cannot call getCurrentSavesDirectory here as that would generate a savehandler and trigger a session lock.
-        // We'll go ahead and make the directories for the save name here so that the migrator won't fail
-        final Path currentSavesDir = ((MinecraftServerAccessor) server).accessor$getAnvilFile().toPath().resolve(server.getFolderName());
+        final Path currentSavesDir = getCurrentSavesDirectory().get();
         try {
             // Symlink needs special handling
             if (Files.isSymbolicLink(currentSavesDir)) {
@@ -891,6 +905,43 @@ public final class WorldManager {
         } finally {
             ((ChunkProviderServerBridge) worldServer.getChunkProvider()).bridge$setForceChunkRequests(false);
         }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static boolean mkdirsIfSaveable(File dir) {
+        if (PhaseTracker.getInstance().getSidedThread() == Thread.currentThread()) {
+            IPhaseState state = PhaseTracker.getInstance().getCurrentState();
+            if (!state.shouldCreateWorldDirectories(PhaseTracker.getInstance().getCurrentContext())) {
+                return false;
+            }
+        }
+        Path path = dir.toPath();
+        Optional<Path> savesDirOpt = getCurrentSavesDirectory();
+        if (!savesDirOpt.isPresent()) {
+            return dir.mkdirs();
+        }
+        Path savesDir = savesDirOpt.get();
+        if (path.startsWith(savesDir) && !path.equals(savesDir)) {
+            Path worldName = savesDir.relativize(path).getName(0);
+            WorldProperties props;
+            if (worldPropertiesByFolderName.containsKey(worldName.toString())) {
+                props = worldPropertiesByFolderName.get(worldName.toString());
+            } else if (worldPropertiesByWorldUuid.size() == 1) {
+                // Happens while creating the WorldServer object for the main
+                // world: getDefaultWorld() doesn't work until afterwards
+                props = worldPropertiesByWorldUuid.values().iterator().next();
+            } else {
+                Optional<WorldProperties> overworld = Sponge.getServer().getDefaultWorld();
+                if (!overworld.isPresent()) {
+                    return dir.mkdirs();
+                }
+                props = overworld.get();
+            }
+            if (props.getSerializationBehavior() == SerializationBehaviors.NONE) {
+                return false;
+            }
+        }
+        return dir.mkdirs();
     }
 
     /**
@@ -1299,8 +1350,8 @@ public final class WorldManager {
         if (optWorldServer.isPresent()) {
             return Optional.of(optWorldServer.get().getSaveHandler().getWorldDirectory().toPath());
         } else if (SpongeImpl.getGame().getState().ordinal() >= GameState.SERVER_ABOUT_TO_START.ordinal()) {
-            final SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(SpongeImpl.getServer().getFolderName(), false);
-            return Optional.of(saveHandler.getWorldDirectory().toPath());
+            final MinecraftServer server = SpongeImpl.getServer();
+            return Optional.of(((MinecraftServerAccessor) server).accessor$getAnvilFile().toPath().resolve(server.getFolderName()));
         }
 
         return Optional.empty();

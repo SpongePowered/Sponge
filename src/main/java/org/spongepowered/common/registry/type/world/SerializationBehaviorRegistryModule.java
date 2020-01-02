@@ -44,6 +44,7 @@ public class SerializationBehaviorRegistryModule implements SpongeAdditionalCata
     private final Map<String, SerializationBehavior> serializationBehaviorMap = ImmutableMap.<String, SerializationBehavior>builder()
             .put("automatic", new SpongeSerializationBehavior("automatic", "Automatic"))
             .put("manual", new SpongeSerializationBehavior("manual", "Manual"))
+            .put("metadata_only", new SpongeSerializationBehavior("metadata_only", "Metadata Only"))
             .put("none", new SpongeSerializationBehavior("none", "None"))
             .build();
 
