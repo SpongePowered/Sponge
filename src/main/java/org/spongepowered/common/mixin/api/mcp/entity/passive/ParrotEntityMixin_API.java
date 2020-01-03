@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
 import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Parrot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +36,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingDat
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
 import org.spongepowered.common.util.Constants;
-import Mutable;
 import java.util.Collection;
 import net.minecraft.entity.passive.ParrotEntity;
 
@@ -50,8 +50,8 @@ public abstract class ParrotEntityMixin_API extends TameableEntityMixin_API impl
     }
 
     @Override
-    public Mutable<ParrotType> variant() {
-        return new SpongeValue<>(Keys.PARROT_VARIANT, Constants.Entity.Parrot.DEFAULT_TYPE, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
+    public Value.Mutable<ParrotType> type() {
+        return new SpongeValue<>(Keys.PARROT_TYPE, Constants.Entity.Parrot.DEFAULT_TYPE, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
     }
 
     @Override

@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import FurnaceData;
-import Mutable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
@@ -68,7 +68,7 @@ public abstract class FurnaceTileEntityMixin_API extends LockableTileEntityMixin
     }
 
     @Override
-    public Mutable<Integer> passedBurnTime() {
+    public BoundedValue.Mutable<Integer> passedBurnTime() {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
             .minimum(0)
             .maximum(Constants.TileEntity.Furnace.MAX_BURN_TIME)
@@ -77,7 +77,7 @@ public abstract class FurnaceTileEntityMixin_API extends LockableTileEntityMixin
     }
 
     @Override
-    public Mutable<Integer> maxBurnTime() {
+    public BoundedValue.Mutable<Integer> maxBurnTime() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_BURN_TIME)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
@@ -86,7 +86,7 @@ public abstract class FurnaceTileEntityMixin_API extends LockableTileEntityMixin
     }
 
     @Override
-    public Mutable<Integer> passedCookTime() {
+    public BoundedValue.Mutable<Integer> passedCookTime() {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
             .minimum(0)
             .maximum(Integer.MAX_VALUE) //TODO
@@ -96,7 +96,7 @@ public abstract class FurnaceTileEntityMixin_API extends LockableTileEntityMixin
     }
 
     @Override
-    public Mutable<Integer> maxCookTime() {
+    public BoundedValue.Mutable<Integer> maxCookTime() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)

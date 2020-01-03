@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.entity.MobSpawner;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,6 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
 import org.spongepowered.common.util.Constants;
 import MobSpawnerData;
-import Mutable;
 import net.minecraft.tileentity.MobSpawnerTileEntity;
 import net.minecraft.world.spawner.AbstractSpawner;
 
@@ -90,72 +90,72 @@ public abstract class MobSpawnerTileEntityMixin_API extends TileEntityMixin_API 
     }
 
     @Override
-    public Mutable<Short> remainingDelay() {
+    public BoundedValue.Mutable<Integer> remainingDelay() {
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_REMAINING_DELAY)
-            .minimum((short) 0)
-            .maximum(Short.MAX_VALUE)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_REMAINING_DELAY)
-            .actualValue((short) ((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getSpawnDelay())
+            .actualValue(((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getSpawnDelay())
             .build();
     }
 
     @Override
-    public Mutable<Short> minimumSpawnDelay() {
+    public BoundedValue.Mutable<Integer> minimumSpawnDelay() {
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MINIMUM_DELAY)
-            .minimum((short) 0)
-            .maximum(Short.MAX_VALUE)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_MINIMUM_SPAWN_DELAY)
-            .actualValue((short) ((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getMinSpawnDelay())
+            .actualValue(((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getMinSpawnDelay())
             .build();
     }
 
     @Override
-    public Mutable<Short> maximumSpawnDelay() {
+    public BoundedValue.Mutable<Integer> maximumSpawnDelay() {
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MAXIMUM_DELAY)
-            .minimum((short) 0)
-            .maximum(Short.MAX_VALUE)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_MAXIMUM_SPAWN_DELAY)
-            .actualValue((short) ((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getMaxSpawnDelay())
+            .actualValue(((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getMaxSpawnDelay())
             .build();
     }
 
     @Override
-    public Mutable<Short> spawnCount() {
+    public BoundedValue.Mutable<Integer> spawnCount() {
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_SPAWN_COUNT)
-            .minimum((short) 0)
-            .maximum(Short.MAX_VALUE)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_SPAWN_COUNT)
-            .actualValue((short) ((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getSpawnCount())
+            .actualValue(((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getSpawnCount())
             .build();
     }
 
     @Override
-    public Mutable<Short> maximumNearbyEntities() {
+    public BoundedValue.Mutable<Integer> maximumNearbyEntities() {
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES)
-            .minimum((short) 0)
+            .minimum(0)
             .maximum(Short.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_MAXMIMUM_NEARBY_ENTITIES)
-            .actualValue((short) ((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getMaxNearbyEntities())
+            .actualValue(((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getMaxNearbyEntities())
             .build();
     }
 
     @Override
-    public Mutable<Short> requiredPlayerRange() {
+    public BoundedValue.Mutable<Integer> requiredPlayerRange() {
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_REQUIRED_PLAYER_RANGE)
-            .minimum((short) 0)
-            .maximum(Short.MAX_VALUE)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_REQUIRED_PLAYER_RANGE)
-            .actualValue((short) ((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getActivatingRangeFromPlayer())
+            .actualValue(((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getActivatingRangeFromPlayer())
             .build();
     }
 
     @Override
-    public Mutable<Short> spawnRange() {
+    public BoundedValue.Mutable<Integer> spawnRange() {
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_SPAWN_RANGE)
-            .minimum((short) 0)
-            .maximum(Short.MAX_VALUE)
+            .minimum(0)
+            .maximum(Integer.MAX_VALUE)
             .defaultValue(Constants.TileEntity.Spawner.DEFAULT_SPAWN_RANGE)
-            .actualValue((short) ((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getSpawnRange())
+            .actualValue(((AbstractSpawnerBridge) this.getSpawnerBaseLogic()).bridge$getSpawnRange())
             .build();
     }
 

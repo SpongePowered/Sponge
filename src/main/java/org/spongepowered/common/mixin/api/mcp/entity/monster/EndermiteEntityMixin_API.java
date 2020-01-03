@@ -26,13 +26,15 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.monster.Endermite;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
-import Mutable;
+
+import java.time.Duration;
 import java.util.Collection;
 import net.minecraft.entity.monster.EndermiteEntity;
 
@@ -47,8 +49,8 @@ public abstract class EndermiteEntityMixin_API extends MonsterEntityMixin_API im
     }
 
     @Override
-    public Mutable<Integer> expireTicks() {
-        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
+    public BoundedValue.Mutable<Duration> expirationDelay() {
+        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_DELAY)
                 .minimum(0)
                 .maximum(Constants.Entity.Silverfish.MAX_EXPIRATION_TICKS)
                 .defaultValue(0)

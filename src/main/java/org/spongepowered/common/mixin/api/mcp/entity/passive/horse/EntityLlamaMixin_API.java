@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive.horse;
 
-import Mutable;
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.LlamaTypes;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.llama.Llama;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +44,7 @@ public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implem
     @Shadow public abstract void setVariant(int p_190710_1_);
 
     @Override
-    public Mutable<LlamaType> llamaVariant() {
+    public Value.Mutable<LlamaType> type() {
         final int i = this.getVariant();
         final LlamaType variant;
         if (i == 0) {
@@ -59,7 +59,7 @@ public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implem
             this.setVariant(0); // Basically some validation
             variant = LlamaTypes.CREAMY;
         }
-        return new SpongeValue<>(Keys.LLAMA_VARIANT, Constants.Entity.Llama.DEFAULT_TYPE, variant);
+        return new SpongeValue<>(Keys.LLAMA_TYPE, Constants.Entity.Llama.DEFAULT_TYPE, variant);
     }
 
     @Override

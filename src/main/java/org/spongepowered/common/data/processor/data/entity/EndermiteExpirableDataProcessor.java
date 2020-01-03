@@ -45,7 +45,7 @@ public class EndermiteExpirableDataProcessor extends
         AbstractEntitySingleDataProcessor<EndermiteEntity, Integer, Mutable<Integer>, ExpirableData, ImmutableExpirableData> {
 
     public EndermiteExpirableDataProcessor() {
-        super(EndermiteEntity.class, Keys.EXPIRATION_TICKS);
+        super(EndermiteEntity.class, Keys.EXPIRATION_DELAY);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class EndermiteExpirableDataProcessor extends
 
     @Override
     protected Mutable<Integer> constructValue(final Integer actualValue) {
-        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
+        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_DELAY)
                 .minimum(0)
                 .maximum(2400)
                 .defaultValue(0)

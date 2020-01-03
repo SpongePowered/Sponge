@@ -26,13 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.monster.zombie.ZombiePigman;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import Mutable;
 import java.util.Collection;
 import net.minecraft.entity.monster.ZombiePigmanEntity;
 
@@ -49,8 +49,8 @@ public abstract class ZombiePigmanEntityMixin_API extends ZombieEntityMixin_API 
     }
 
     @Override
-    public Mutable<Integer> angerLevel() {
-        return SpongeValueFactory.boundedBuilder(Keys.ANGER)
+    public BoundedValue.Mutable<Integer> angerLevel() {
+        return SpongeValueFactory.boundedBuilder(Keys.ANGER_LEVEL)
                 .actualValue(this.angerLevel)
                 .defaultValue(0)
                 .minimum(Integer.MIN_VALUE)

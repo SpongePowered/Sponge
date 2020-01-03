@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.effect;
 
-import Mutable;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.weather.LightningBolt;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.entity.effect.LightningBoltEntity;
@@ -71,8 +72,8 @@ public abstract class LightningBoltEntityMixin_API extends EntityWeatherEffectMi
     }
 
     @Override
-    public Mutable<Integer> expireTicks() {
-        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
+    public BoundedValue.Mutable<Duration> expirationDelay() {
+        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_DELAY)
                 .minimum((int) Short.MIN_VALUE)
                 .maximum(2)
                 .defaultValue(2)
