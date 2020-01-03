@@ -26,13 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.monster.slime.Slime;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.api.mcp.entity.MobEntityMixin_API;
-import Mutable;
 import java.util.Collection;
 import net.minecraft.entity.monster.SlimeEntity;
 
@@ -42,7 +42,7 @@ public abstract class SlimeEntityMixin_API extends MobEntityMixin_API implements
     @Shadow public abstract int getSlimeSize();
 
     @Override
-    public Mutable<Integer> slimeSize() {
+    public BoundedValue.Mutable<Integer> slimeSize() {
         return SpongeValueFactory.boundedBuilder(Keys.SLIME_SIZE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)

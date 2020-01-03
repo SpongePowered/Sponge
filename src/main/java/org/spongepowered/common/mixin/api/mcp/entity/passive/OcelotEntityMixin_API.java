@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.data.type.CatType;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,6 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.Constants;
-import Mutable;
 import java.util.Collection;
 import net.minecraft.entity.passive.OcelotEntity;
 
@@ -52,7 +52,7 @@ public abstract class OcelotEntityMixin_API extends TameableEntityMixin_API impl
     }
 
     @Override
-    public Mutable<CatType> variant() {
+    public Value.Mutable<CatType> variant() {
         return new SpongeValue<>(Keys.OCELOT_TYPE, Constants.Entity.Cat.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
     }
 

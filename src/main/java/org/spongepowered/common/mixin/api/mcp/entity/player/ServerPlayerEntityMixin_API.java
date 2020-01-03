@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import Mutable;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -57,6 +56,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -414,12 +414,12 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public Mutable<Instant> firstPlayed() {
+    public Value.Mutable<Instant> firstPlayed() {
         return new SpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get());
     }
 
     @Override
-    public Mutable<Instant> lastPlayed() {
+    public Value.Mutable<Instant> lastPlayed() {
         return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
     }
 
@@ -438,7 +438,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public Mutable<GameMode> gameMode() {
+    public Value.Mutable<GameMode> gameMode() {
         return new SpongeValue<>(Keys.GAME_MODE, Constants.Catalog.DEFAULT_GAMEMODE,
                 (GameMode) (Object) this.interactionManager.getGameType());
     }

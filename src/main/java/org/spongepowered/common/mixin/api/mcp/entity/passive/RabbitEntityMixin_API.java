@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.RabbitData;
 import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Rabbit;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +35,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.RabbitTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
-import Mutable;
 import java.util.Collection;
 import net.minecraft.entity.passive.RabbitEntity;
 
@@ -49,7 +49,7 @@ public abstract class RabbitEntityMixin_API extends AnimalEntityMixin_API implem
     }
 
     @Override
-    public Mutable<RabbitType> variant() {
+    public Value.Mutable<RabbitType> type() {
         return new SpongeValue<>(Keys.RABBIT_TYPE, Constants.Entity.Rabbit.DEFAULT_TYPE, RabbitTypeRegistryModule.RABBIT_IDMAP.get(this.getRabbitType()));
     }
 

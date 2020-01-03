@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.trader.Villager;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -41,7 +42,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.AgeableEntityMixin_API;
 import org.spongepowered.common.util.Constants;
-import Mutable;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -66,7 +66,7 @@ public abstract class VillagerEntityMixin_API extends AbstractVillagerEntityMixi
     }
 
     @Override
-    public Mutable<Career> career() {
+    public Value.Mutable<Career> career() {
         return new SpongeValue<>(Keys.CAREER, Constants.Catalog.CAREER_DEFAULT, ((VillagerEntityBridge) this).bridge$getCareer());
     }
 

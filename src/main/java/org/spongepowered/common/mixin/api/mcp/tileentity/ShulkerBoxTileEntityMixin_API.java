@@ -26,13 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.entity.carrier.ShulkerBox;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 import DyeableData;
-import Mutable;
 import net.minecraft.tileentity.ShulkerBoxTileEntity;
 
 @Mixin(ShulkerBoxTileEntity.class)
@@ -49,7 +49,7 @@ public abstract class ShulkerBoxTileEntityMixin_API extends LockableLootTileEnti
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Mutable<DyeColor> color() {
+    public Value.Mutable<DyeColor> color() {
         return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHULKER_COLOR, (DyeColor) (Object) this.color);
     }
 

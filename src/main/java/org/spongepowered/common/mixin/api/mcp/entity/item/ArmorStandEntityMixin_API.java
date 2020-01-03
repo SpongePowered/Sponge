@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import Mutable;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.util.math.Rotations;
@@ -34,6 +33,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalD
 import org.spongepowered.api.data.manipulator.mutable.entity.DisabledSlotsData;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -66,22 +66,22 @@ public abstract class ArmorStandEntityMixin_API extends LivingEntityMixin_API im
     @Shadow public abstract Rotations getBodyRotation();
 
     @Override
-    public Mutable<Boolean> marker() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_MARKER, false, this.hasMarker());
+    public Value.Mutable<Boolean> marker() {
+        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_MARKER, false, this.hasMarker());
     }
 
     @Override
-    public Mutable<Boolean> small() {
+    public Value.Mutable<Boolean> small() {
         return new SpongeValue<>(Keys.ARMOR_STAND_IS_SMALL, false, this.shadow$isSmall());
     }
 
     @Override
-    public Mutable<Boolean> basePlate() {
+    public Value.Mutable<Boolean> basePlate() {
         return new SpongeValue<>(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, !this.hasNoBasePlate());
     }
 
     @Override
-    public Mutable<Boolean> arms() {
+    public Value.Mutable<Boolean> arms() {
         return new SpongeValue<>(Keys.ARMOR_STAND_HAS_ARMS, false, this.getShowArms());
     }
 

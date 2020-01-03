@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.entity.PlayerHead;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
-import Mutable;
 import SkullData;
 import net.minecraft.tileentity.SkullTileEntity;
 
@@ -43,7 +43,7 @@ public abstract class SkullTileEntityMixin_API extends TileEntityMixin_API imple
     }
 
     @Override
-    public Mutable<SkullType> skullType() {
+    public Value.Mutable<SkullType> skullType() {
         return new SpongeValue<>(Keys.SKULL_TYPE, Constants.TileEntity.Skull.DEFAULT_TYPE,
             SkullUtils.getSkullType(((SkullTileEntity) (Object) this).getSkullType()));
     }
