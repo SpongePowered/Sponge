@@ -43,7 +43,6 @@ public interface AdvancementListAccessor {
 
     @Accessor("nonRoots") Set<Advancement> accessor$getNonRootsSet();
 
-    @Nullable
     @Accessor("listener") AdvancementList.Listener accessor$getListener();
 
 }

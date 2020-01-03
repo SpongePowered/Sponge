@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.core.util;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3i;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(EnumFacing.class)
 public interface EnumFacingAccessor {
 
-    @Invoker("getDirectionVec") Vec3i accessor$getDirectionVec();
+    @Accessor("directionVec") Vec3i accessor$getDirectionVec();
 
 }

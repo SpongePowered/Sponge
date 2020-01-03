@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server.management;
 
 import com.mojang.authlib.GameProfile;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Date;
@@ -33,7 +34,7 @@ import java.util.Date;
 @Mixin(targets = "net.minecraft.server.management.PlayerProfileCache$ProfileEntry")
 public interface PlayerProfileCache_ProfileEntryAccessor {
 
-    @Invoker("getProfile") GameProfile accessor$getProfile();
+    @Invoker("getGameProfile") GameProfile accessor$getGameProfile();
 
     @Invoker("getExpirationDate") Date accessor$getExpirationDate();
 }

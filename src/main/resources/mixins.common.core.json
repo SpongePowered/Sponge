@@ -10,6 +10,7 @@
         "Bootstrap_10Mixin",
         "Bootstrap_11Mixin",
         "BootstrapMixin",
+        "advancements.AdvancementListAccessor",
         "advancements.AdvancementListMixin",
         "advancements.AdvancementManagerAccessor",
         "advancements.AdvancementManagerMixin",

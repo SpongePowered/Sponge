@@ -26,12 +26,14 @@ package org.spongepowered.common.mixin.core.advancements;
 
 import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.AdvancementManager;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(AdvancementManager.class)
 public interface AdvancementManagerAccessor {
 
+    @Final
     @Accessor("ADVANCEMENT_LIST")
     static AdvancementList accessor$getAdvancementList() {
         throw new IllegalStateException("Untransformed AdvancementManagerAccessor");

@@ -56,9 +56,9 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
     public void registerAdditionalCatalog(final AdvancementTree advancementTree) {
         checkState(SpongeImplHooks.isMainThread());
         final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();
-        final AdvancementListAccessor advancementList = (AdvancementListAccessor) AdvancementManagerAccessor.accessor$getAdvancementList();
-        advancementList.accessor$getRootsSet().add(advancement);
-        final AdvancementList.Listener listener = advancementList.accessor$getListener();
+        final AdvancementList advList = (AdvancementList) AdvancementRegistryModule.getAdvancementList();
+        ((AdvancementListAccessor) advList).accessor$getRootsSet().add(advancement);
+        final AdvancementList.Listener listener = ((AdvancementListAccessor) advList).accessor$getListener();
         if (listener != null) {
             listener.rootAdvancementAdded(advancement);
         }
