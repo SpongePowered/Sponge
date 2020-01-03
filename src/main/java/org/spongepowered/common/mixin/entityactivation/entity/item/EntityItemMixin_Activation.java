@@ -32,7 +32,7 @@ import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_Activation;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityItem.class)
+@Mixin(value = EntityItem.class, priority = 1002)
 public abstract class EntityItemMixin_Activation extends EntityMixin_Activation {
 
     @Shadow public abstract ItemStack getItem();
