@@ -63,12 +63,12 @@ public class ParrotDataProcessor extends
 
     @Override
     protected Immutable<ParrotType> constructImmutableValue(ParrotType value) {
-        return ImmutableSpongeValue.cachedOf(this.key, ParrotTypes.RED, value);
+        return ImmutableSpongeValue.cachedOf(this.key, ParrotTypes.RED_AND_BLUE, value);
     }
 
     @Override
     protected Mutable<ParrotType> constructValue(ParrotType actualValue) {
-        return new SpongeValue<>(this.key, ParrotTypes.RED, actualValue);
+        return new SpongeValue<>(this.key, ParrotTypes.RED_AND_BLUE, actualValue);
     }
 
     @Override

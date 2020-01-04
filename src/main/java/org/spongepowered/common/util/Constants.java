@@ -66,7 +66,6 @@ import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.StructureModes;
-import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.animal.Pig;
@@ -76,11 +75,9 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
-import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -877,7 +874,7 @@ public final class Constants {
 
         public static final class Parrot {
 
-            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED;
+            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_AND_BLUE;
         }
 
         public static final class Player {

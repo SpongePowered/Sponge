@@ -71,6 +71,7 @@ import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.PandaGene;
+import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PistonType;
@@ -94,6 +95,7 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.registry.builtin.stream.BodyPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.LlamaTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.ParrotTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.stream.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.CriteriaTriggersSupplier;
@@ -322,6 +324,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(InstrumentType.class, CatalogKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true)
             .generateRegistry(LlamaType.class, CatalogKey.minecraft("llama_type"), LlamaTypeStreamGenerator.stream(), true)
             .generateRegistry(PandaGene.class, CatalogKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true)
+            .generateRegistry(ParrotType.class, CatalogKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true)
             .generateRegistry(PhantomPhase.class, CatalogKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
             .generateRegistry(PickupRule.class, CatalogKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
             .generateRegistry(PistonType.class, CatalogKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true)
