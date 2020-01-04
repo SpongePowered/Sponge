@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block.properties;
+package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.block.properties.PropertyEnum;
-import org.spongepowered.api.state.EnumStateProperty;
+import net.minecraft.state.BooleanProperty;
+import org.spongepowered.api.state.BooleanStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(value = PropertyEnum.class)
-public abstract class PropertyEnumMixin_API<E extends Enum<E>> extends PropertyHelperMixin_API<E> implements EnumStateProperty<E> {
+@Mixin(value = BooleanProperty.class)
+public abstract class BooleanPropertyMixin_API extends PropertyMixin_API<Boolean> implements BooleanStateProperty {
 
 }

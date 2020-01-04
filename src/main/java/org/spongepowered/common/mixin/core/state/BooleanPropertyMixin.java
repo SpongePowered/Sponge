@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.block.properties;
+package org.spongepowered.common.mixin.core.state;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.state.BooleanProperty;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = PropertyBool.class)
-public abstract class PropertyBooleanMixin extends PropertyHelperMixin<Boolean> {
+@Mixin(value = BooleanProperty.class)
+public abstract class BooleanPropertyMixin extends PropertyMixin<Boolean> {
 
     @Shadow @Final private ImmutableSet<Boolean> allowedValues;
 

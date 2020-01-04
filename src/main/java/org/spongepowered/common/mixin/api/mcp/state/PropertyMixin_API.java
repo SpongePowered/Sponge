@@ -22,25 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.entity;
+package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.MultiPartEntityPart;
-import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragon;
-import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragonPart;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.state.IProperty;
+import net.minecraft.state.Property;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
+import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 
-@Mixin(MultiPartEntityPart.class)
-public abstract class MultiPartEntityPartMixin_API extends EntityMixin_API implements EnderDragonPart {
+import java.util.Optional;
 
-    @Shadow @Final public IEntityMultiPart parent;
+import javax.annotation.Nullable;
 
+/**
+ * This is retained solely for simplification not having to perform any
+ * lookups to the {@link BlockTypeRegistryModule#getIdFor(IProperty)}.
+ *
+ * @param <T> The type of comparable
+ */
+@Mixin(value = Property.class)
+public abstract class PropertyMixin_API<T extends Comparable<T>> implements StateProperty<T> {
+
+    @Nullable private String api$IdString = null;
+
+    @SuppressWarnings("rawtypes")
     @Override
-    public EnderDragon getParent() {
-        return (EnderDragon) this.parent;
+    public String getId() {
+        if (this.api$IdString == null) {
+            this.api$IdString =  BlockPropertyIdProvider.getIdFor((IProperty<T>) this);
+        }
+        return this.api$IdString;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<T> parseValue(String value) {
+        return Optional.ofNullable(((IProperty<T>) this).parseValue(value).orNull());
     }
 
 }

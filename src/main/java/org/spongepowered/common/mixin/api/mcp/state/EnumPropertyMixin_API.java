@@ -22,43 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.block.properties;
+package org.spongepowered.common.mixin.api.mcp.state;
 
-import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.properties.PropertyEnum;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.state.EnumProperty;
+import org.spongepowered.api.state.EnumStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Map;
+@Mixin(value = EnumProperty.class)
+public abstract class EnumPropertyMixin_API<E extends Enum<E>> extends PropertyMixin_API<E> implements EnumStateProperty<E> {
 
-import javax.annotation.Nullable;
-
-@Mixin(value = PropertyEnum.class)
-public abstract class PropertyEnumMixin<E extends Enum<E>> extends PropertyHelperMixin<E> {
-
-    @Shadow @Final private ImmutableSet<E> allowedValues;
-    @Shadow @Final private Map<String, E> nameToValue;
-
-    @Nullable private Integer impl$hashCode = null;
-
-    /**
-     * @author blood - February 28th, 2019
-     * @reason Block properties are immutable so there is no reason
-     * to recompute the hashCode repeatedly. To improve performance, we
-     * compute the hashCode once then cache the result.
-     *
-     * @return The cached hashCode
-     */
-    @Overwrite
-    public int hashCode() {
-        if (this.impl$hashCode == null) {
-            int i = super.hashCode();
-            i = 31 * i + this.allowedValues.hashCode();
-            i = 31 * i + this.nameToValue.hashCode();
-            this.impl$hashCode = i;
-        }
-        return this.impl$hashCode;
-    }
 }

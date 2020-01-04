@@ -22,9 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block.properties;
+package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.block.properties.IProperty;
+import net.minecraft.state.IProperty;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Implements;
@@ -48,33 +49,33 @@ import java.util.function.Predicate;
  * @param <T> The type of comparable.
  */
 @Mixin(value = IProperty.class)
-@Implements(@Interface(iface = StateProperty.class, prefix = "trait$"))
+@Implements(@Interface(iface = StateProperty.class, prefix = "state$"))
 public interface IPropertyMixin_API<T extends Comparable<T>> extends IProperty<T> {
 
-    default String trait$getId() {
+    default CatalogKey state$getKey() {
         return BlockTypeRegistryModule.getInstance().getIdFor(this);
     }
 
     @Intrinsic
-    default String trait$getName() {
+    default String state$getName() {
         return getName();
     }
 
-    default Collection<T> trait$getPossibleValues() {
+    default Collection<T> state$getPossibleValues() {
         return getAllowedValues();
     }
 
     @Intrinsic
-    default Class<T> trait$getValueClass() {
+    default Class<T> state$getValueClass() {
         return getValueClass();
     }
 
-    default Predicate<T> trait$getPredicate() {
+    default Predicate<T> state$getPredicate() {
         return Functional.predicateIn(getAllowedValues());
     }
 
     @Intrinsic
-    default Optional<T> trait$parseValue(final String value) {
-        return parseValue(value).toJavaUtil();
+    default Optional<T> state$parseValue(final String value) {
+        return parseValue(value);
     }
 }

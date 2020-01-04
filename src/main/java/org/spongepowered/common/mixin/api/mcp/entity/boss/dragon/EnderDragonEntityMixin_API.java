@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.entity.boss.dragon;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonPartEntity;
 import net.minecraft.entity.boss.dragon.phase.PhaseManager;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.world.end.DragonFightManager;
@@ -48,16 +48,16 @@ import java.util.Set;
 @Mixin(EnderDragonEntity.class)
 public abstract class EnderDragonEntityMixin_API extends MobEntityMixin_API implements EnderDragon {
 
-    @Shadow public MultiPartEntityPart[] dragonPartArray;
-    @Shadow public EnderCrystalEntity healingEnderCrystal;
-    @Final @Shadow private DragonFightManager fightManager;
+    @Shadow public EnderDragonPartEntity[] dragonParts;
+    @Shadow public EnderCrystalEntity closestEnderCrystal;
+    @Shadow @Final private DragonFightManager fightManager;
     @Shadow @Final private PhaseManager phaseManager;
 
     @Override
     public Set<EnderDragonPart> getParts() {
         Builder<EnderDragonPart> builder = ImmutableSet.builder();
 
-        for (MultiPartEntityPart part : this.dragonPartArray) {
+        for (EnderDragonPartEntity part : this.dragonParts) {
             builder.add((EnderDragonPart) part);
         }
 
@@ -66,7 +66,7 @@ public abstract class EnderDragonEntityMixin_API extends MobEntityMixin_API impl
 
     @Override
     public Optional<EnderCrystal> getHealingCrystal() {
-        return Optional.ofNullable((EnderCrystal) this.healingEnderCrystal);
+        return Optional.ofNullable((EnderCrystal) this.closestEnderCrystal);
     }
 
 
