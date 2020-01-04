@@ -30,10 +30,22 @@ import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.advancements.FrameType;
+import net.minecraft.entity.monster.PhantomEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.state.properties.ChestType;
+import net.minecraft.state.properties.ComparatorMode;
+import net.minecraft.state.properties.DoorHingeSide;
+import net.minecraft.state.properties.Half;
 import net.minecraft.state.properties.NoteBlockInstrument;
+import net.minecraft.state.properties.RailShape;
+import net.minecraft.state.properties.RedstoneSide;
+import net.minecraft.state.properties.SlabType;
+import net.minecraft.state.properties.StairsShape;
 import net.minecraft.tileentity.BannerPattern;
+import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
@@ -46,9 +58,22 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.ChestAttachmentType;
+import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.InstrumentType;
+import org.spongepowered.api.data.type.PhantomPhase;
+import org.spongepowered.api.data.type.PickupRule;
+import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.RaidStatus;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.data.type.SlabPortion;
+import org.spongepowered.api.data.type.StairShape;
+import org.spongepowered.api.data.type.StructureMode;
+import org.spongepowered.api.data.type.ToolType;
+import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
@@ -270,10 +295,25 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .registerRegistry(Advancement.class, CatalogKey.minecraft("advancement"))
             .registerRegistry(AdvancementTree.class, CatalogKey.minecraft("advancement_tree"))
             .generateRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
+            .generateRegistry(BannerPatternShape.class, CatalogKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true)
             .generateRegistry(ChestAttachmentType.class, CatalogKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true)
             .generateRegistry(CollisionRule.class, CatalogKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
+            .generateRegistry(ComparatorType.class, CatalogKey.minecraft("comparator_type"), Arrays.stream(ComparatorMode.values()), true)
             .generateRegistry(DyeColor.class, CatalogKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
+            .generateRegistry(HandPreference.class, CatalogKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true)
+            .generateRegistry(HandType.class, CatalogKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true)
+            .generateRegistry(Hinge.class, CatalogKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true)
+            .generateRegistry(InstrumentType.class, CatalogKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true)
+            .generateRegistry(PhantomPhase.class, CatalogKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
+            .generateRegistry(PickupRule.class, CatalogKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
+            .generateRegistry(PortionType.class, CatalogKey.minecraft("portion_type"), Arrays.stream(Half.values()), true)
             .generateRegistry(RaidStatus.class, CatalogKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true)
+            .generateRegistry(RailDirection.class, CatalogKey.minecraft("rail_direction"), Arrays.stream(RailShape.values()), true)
+            .generateRegistry(SlabPortion.class, CatalogKey.minecraft("slab_portion"), Arrays.stream(SlabType.values()), true)
+            .generateRegistry(StairShape.class, CatalogKey.minecraft("stair_shape"), Arrays.stream(StairsShape.values()), true)
+            .generateRegistry(StructureMode.class, CatalogKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true)
+            .generateRegistry(ToolType.class, CatalogKey.minecraft("tool_type"), Arrays.stream(ItemTier.values()), true)
+            .generateRegistry(WireAttachmentType.class, CatalogKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true)
             .generateRegistry(Visibility.class, CatalogKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true)
         ;
 
@@ -293,11 +333,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         // TODO 1.14 - We'll take on a case by case basis if any mods are extending/replacing Enum values and therefore breaks this. Otherwise it will
         // TODO 1.14 - get to the point of insanity if literally every enum in the game becomes hardcoded lines that we have to map out...
-
-        this
-            .generateSuppliers(BannerPatternShape.class, Arrays.stream(BannerPattern.values()))
-            .generateSuppliers(InstrumentType.class, Arrays.stream(NoteBlockInstrument.values()))
-        ;
 
         // Class based/Likely for mods to override
         BiomeSupplier.registerSuppliers(this);
