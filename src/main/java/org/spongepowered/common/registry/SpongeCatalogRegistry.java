@@ -66,6 +66,7 @@ import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.api.data.type.PickupRule;
+import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.data.type.RailDirection;
@@ -306,6 +307,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(InstrumentType.class, CatalogKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true)
             .generateRegistry(PhantomPhase.class, CatalogKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
             .generateRegistry(PickupRule.class, CatalogKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
+            .generateRegistry(PistonType.class, CatalogKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true)
             .generateRegistry(PortionType.class, CatalogKey.minecraft("portion_type"), Arrays.stream(Half.values()), true)
             .generateRegistry(RaidStatus.class, CatalogKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true)
             .generateRegistry(RailDirection.class, CatalogKey.minecraft("rail_direction"), Arrays.stream(RailShape.values()), true)
@@ -330,9 +332,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         // TODO 1.14 - This is not right but I don't want this forgotten so here for now
         // TODO 1.14 - Stats are stupid, need to handle them manually
-
-        // TODO 1.14 - We'll take on a case by case basis if any mods are extending/replacing Enum values and therefore breaks this. Otherwise it will
-        // TODO 1.14 - get to the point of insanity if literally every enum in the game becomes hardcoded lines that we have to map out...
 
         // Class based/Likely for mods to override
         BiomeSupplier.registerSuppliers(this);

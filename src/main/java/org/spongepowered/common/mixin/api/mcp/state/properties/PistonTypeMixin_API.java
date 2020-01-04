@@ -22,53 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block;
+package org.spongepowered.common.mixin.api.mcp.state.properties;
 
-import org.spongepowered.api.data.type.PistonType;
+import net.minecraft.state.properties.PistonType;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import javax.annotation.Nullable;
-import net.minecraft.block.PistonHeadBlock;
+@Mixin(PistonType.class)
+public abstract class PistonTypeMixin_API implements org.spongepowered.api.data.type.PistonType {
 
-@Mixin(PistonHeadBlock.EnumPistonType.class)
-@Implements(@Interface(iface = PistonType.class, prefix = "piston$"))
-public abstract class BlockPistonExtension_EnumPistonTypeMixin_API implements PistonType {
+    private CatalogKey api$key;
+    private Translation api$translation;
 
-    @Shadow public abstract String shadow$getName();
-
-    @Nullable private Translation api$translation;
-
-    @Override
-    public String getId() {
-        return "minecraft:" + this.shadow$getName();
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKeyAndTranslation(String enumName, int ordinal, String name, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(name);
+        this.api$translation = new SpongeTranslation("block.minecraft." + ((PistonType) (Object) this == PistonType.DEFAULT ? "piston" : "sticky_piston"));
     }
 
-    @Intrinsic
-    public String piston$getName() {
-        return this.shadow$getName();
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
     @Override
     public Translation getTranslation() {
-        if (this.api$translation == null) {
-            final String internalName = this.shadow$getName();
-            final String translationId;
-            if ("normal".equals(internalName)) {
-                translationId = "tile.pistonBase.name";
-            } else if ("sticky".equals(internalName)) {
-                translationId = "tile.pistonStickyBase.name";
-            } else {
-                translationId = "tile.pistonBase.name";
-            }
-            this.api$translation = new SpongeTranslation(translationId);
-        }
         return this.api$translation;
     }
-
 }

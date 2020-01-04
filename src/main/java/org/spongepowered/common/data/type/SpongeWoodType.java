@@ -22,33 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.entity.passive.CatEntity;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.CatType;
-import org.spongepowered.common.data.type.SpongeCatType;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.text.translation.Translation;
 
-import java.util.stream.Collectors;
+public final class SpongeWoodType implements WoodType {
 
-public final class CatTypeRegistry {
+    private final CatalogKey key;
+    private final Translation translation;
 
-    private CatTypeRegistry() {
+    @Override
+    public CatalogKey getKey() {
+        return null;
     }
 
-    public static void generateRegistry(SpongeCatalogRegistry registry) {
-        registry
-            .registerRegistry(CatType.class, CatalogKey.minecraft("cat_type"), () -> {
-                // Meowzers
-                return CatEntity.field_213425_bD.entrySet()
-                    .stream()
-                    .map(kv -> {
-                        final String value = kv.getValue().getPath();
-
-                        return new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)), kv.getKey());
-                    })
-                    .collect(Collectors.toSet());
-            }, true);
+    @Override
+    public Translation getTranslation() {
+        return null;
     }
 }
