@@ -88,6 +88,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.packet.SPacketWorldBorderBridge;
@@ -370,11 +371,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((org.spongepowered.api.world.World) toWorld).spawnEntity(spongeEntity);
         this.playerEntityList.add(newPlayer);
         newPlayer.connection.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_GAME_MODE, newPlayer));
-        // TODO This is not right. When re-creating a Player we need to treat all their data as gone. Forge fixes mods wanting to copy
-        // TODO data over with a Clone event. Maybe we do the same or tell people to copy over in RespawnPlayerEvent
-//        for (DataManipulator<?, ?> container : ((Player) playerIn).getContainers()) {
-//            ((Player) newPlayer).offer(container);
-//        }
+        for (DataManipulator<?, ?> container : ((CustomDataHolderBridge) playerIn).bridge$getCustomManipulators()) {
+            ((Player) newPlayer).offer(container);
+        }
         this.uuidToPlayerMap.put(newPlayer.getUniqueID(), newPlayer);
         newPlayer.addSelfToInternalCraftingInventory();
 
