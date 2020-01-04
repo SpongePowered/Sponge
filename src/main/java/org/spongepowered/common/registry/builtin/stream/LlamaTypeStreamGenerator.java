@@ -37,10 +37,10 @@ public final class LlamaTypeStreamGenerator {
 
     public static Stream<LlamaType> stream() {
         return Stream.of(
-            new SpongeLlamaType(CatalogKey.minecraft("brown"), 0),
-            new SpongeLlamaType(CatalogKey.minecraft("creamy"), 1),
-            new SpongeLlamaType(CatalogKey.minecraft("gray"), 2),
-            new SpongeLlamaType(CatalogKey.minecraft("white"), 3)
+            new SpongeLlamaType(CatalogKey.minecraft("creamy"), 0),
+            new SpongeLlamaType(CatalogKey.minecraft("white"), 1),
+            new SpongeLlamaType(CatalogKey.minecraft("brown"), 2),
+            new SpongeLlamaType(CatalogKey.minecraft("gray"), 3)
         );
     }
 }
