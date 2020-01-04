@@ -32,6 +32,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.entity.monster.PhantomEntity;
 import net.minecraft.entity.passive.FoxEntity;
+import net.minecraft.entity.passive.PandaEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.Team;
@@ -69,6 +70,7 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PistonType;
@@ -319,6 +321,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(Hinge.class, CatalogKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true)
             .generateRegistry(InstrumentType.class, CatalogKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true)
             .generateRegistry(LlamaType.class, CatalogKey.minecraft("llama_type"), LlamaTypeStreamGenerator.stream(), true)
+            .generateRegistry(PandaGene.class, CatalogKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true)
             .generateRegistry(PhantomPhase.class, CatalogKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
             .generateRegistry(PickupRule.class, CatalogKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
             .generateRegistry(PistonType.class, CatalogKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true)
