@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.mixin.accessor.block.tileentity.BeaconTileEntityAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.BeaconTileEntityAccessor;
 
 public class BeaconTileEntitySecondaryEffectProvider extends BeaconTileEntityEffectProvider {
 

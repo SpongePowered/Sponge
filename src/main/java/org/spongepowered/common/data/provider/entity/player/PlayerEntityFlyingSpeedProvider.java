@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity.player;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.player.PlayerCapabilitiesAccessor;
+import org.spongepowered.common.mixin.accessor.entity.player.PlayerAbilitiesAccessor;
 
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ public class PlayerEntityFlyingSpeedProvider extends GenericMutableDataProvider<
 
     @Override
     protected boolean set(PlayerEntity dataHolder, Double value) {
-        ((PlayerCapabilitiesAccessor) dataHolder.abilities).accessor$setFlySpeed(value.floatValue());
+        ((PlayerAbilitiesAccessor) dataHolder.abilities).accessor$setFlySpeed(value.floatValue());
         dataHolder.sendPlayerAbilities();
         return true;
     }

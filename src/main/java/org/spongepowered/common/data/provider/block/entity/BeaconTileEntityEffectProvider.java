@@ -27,11 +27,10 @@ package org.spongepowered.common.data.provider.block.entity;
 import net.minecraft.potion.Effect;
 import net.minecraft.tileentity.BeaconTileEntity;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.block.tileentity.BeaconTileEntityAccessor;
+import org.spongepowered.common.mixin.accessor.tileentity.BeaconTileEntityAccessor;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
