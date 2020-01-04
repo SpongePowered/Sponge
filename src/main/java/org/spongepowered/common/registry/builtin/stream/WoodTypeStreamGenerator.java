@@ -22,35 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.registry;
+package org.spongepowered.common.registry.builtin.stream;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.common.data.type.SpongeWoodType;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.stream.Stream;
 
-public final class WoodTypeRegistry {
+public final class WoodTypeStreamGenerator {
 
-    private WoodTypeRegistry() {
+    private WoodTypeStreamGenerator() {
     }
 
-    public static void generateRegistry(SpongeCatalogRegistry registry) {
+    public static Stream<WoodType> stream() {
 
         // TODO 1.14 - Tag system is fucking stupid Mojang, why can we not know if something is made of Acacia Wood???????
         // TODO 1.14 - May need to remove tags altogether
 
-        registry
-            .registerRegistry(WoodType.class, CatalogKey.minecraft("wood_type"), () -> new HashSet<>(Arrays.asList(
-                new SpongeWoodType(CatalogKey.minecraft("acacia"), new SpongeTranslation("block.minecraft.acacia_wood"), null),
-                new SpongeWoodType(CatalogKey.minecraft("birch"), new SpongeTranslation("block.minecraft.birch_wood"), null),
-                new SpongeWoodType(CatalogKey.minecraft("dark_oak"), new SpongeTranslation("block.minecraft.dark_oak_wood"), null),
-                new SpongeWoodType(CatalogKey.minecraft("jungle"), new SpongeTranslation("block.minecraft.jungle_wood"), null),
-                new SpongeWoodType(CatalogKey.minecraft("oak"), new SpongeTranslation("block.minecraft.oak_wood"), null),
-                new SpongeWoodType(CatalogKey.minecraft("spruce"), new SpongeTranslation("block.minecraft.spruce_wood"), null)))
-            , true);
+        return Stream.of(
+            new SpongeWoodType(CatalogKey.minecraft("acacia"), new SpongeTranslation("block.minecraft.acacia_wood"), null),
+            new SpongeWoodType(CatalogKey.minecraft("birch"), new SpongeTranslation("block.minecraft.birch_wood"), null),
+            new SpongeWoodType(CatalogKey.minecraft("dark_oak"), new SpongeTranslation("block.minecraft.dark_oak_wood"), null),
+            new SpongeWoodType(CatalogKey.minecraft("jungle"), new SpongeTranslation("block.minecraft.jungle_wood"), null),
+            new SpongeWoodType(CatalogKey.minecraft("oak"), new SpongeTranslation("block.minecraft.oak_wood"), null),
+            new SpongeWoodType(CatalogKey.minecraft("spruce"), new SpongeTranslation("block.minecraft.spruce_wood"), null)
+        );
     }
 }

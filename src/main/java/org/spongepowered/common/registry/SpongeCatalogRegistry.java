@@ -57,6 +57,8 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.data.type.BannerPatternShape;
+import org.spongepowered.api.data.type.BodyPart;
+import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.DyeColor;
@@ -64,6 +66,7 @@ import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.InstrumentType;
+import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PistonType;
@@ -75,15 +78,20 @@ import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.WireAttachmentType;
+import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.registry.builtin.stream.BodyPartStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.LlamaTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.BiomeSupplier;
-import org.spongepowered.common.registry.builtin.registry.CatTypeRegistry;
+import org.spongepowered.common.registry.builtin.stream.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.CriteriaTriggersSupplier;
 import org.spongepowered.common.registry.builtin.supplier.DimensionTypeSupplier;
 import org.spongepowered.common.registry.builtin.supplier.EffectSupplier;
@@ -94,10 +102,10 @@ import org.spongepowered.common.registry.builtin.supplier.ItemSupplier;
 import org.spongepowered.common.registry.builtin.supplier.PaintingTypeSupplier;
 import org.spongepowered.common.registry.builtin.supplier.ParticleTypeSupplier;
 import org.spongepowered.common.registry.builtin.supplier.SoundEventSupplier;
-import org.spongepowered.common.registry.builtin.supplier.TextColorRegistry;
-import org.spongepowered.common.registry.builtin.supplier.TextStyleRegistry;
+import org.spongepowered.common.registry.builtin.stream.TextColorStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.TextStyleTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.TileEntityTypeSupplier;
-import org.spongepowered.common.registry.builtin.registry.WoodTypeRegistry;
+import org.spongepowered.common.registry.builtin.stream.WoodTypeStreamGenerator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -205,8 +213,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this.registerRegistry(catalogClass, key, null, false);
     }
 
-    public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(Class<T> catalogClass, CatalogKey key,
-        @Nullable Supplier<Set<T>> defaultsSupplier, boolean generateSuppliers) {
+    public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(Class<T> catalogClass, CatalogKey key, @Nullable Supplier<Set<T>> defaultsSupplier, boolean generateSuppliers) {
         checkNotNull(catalogClass);
         checkNotNull(key);
 
@@ -298,6 +305,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .registerRegistry(AdvancementTree.class, CatalogKey.minecraft("advancement_tree"))
             .generateRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
             .generateRegistry(BannerPatternShape.class, CatalogKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true)
+            .generateRegistry(BodyPart.class, CatalogKey.minecraft("body_part"), BodyPartStreamGenerator.stream(), true)
+            .generateRegistry(CatType.class, CatalogKey.minecraft("cat_type"), CatTypeStreamGenerator.stream(), true)
             .generateRegistry(ChestAttachmentType.class, CatalogKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true)
             .generateRegistry(CollisionRule.class, CatalogKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
             .generateRegistry(ComparatorType.class, CatalogKey.minecraft("comparator_type"), Arrays.stream(ComparatorMode.values()), true)
@@ -306,6 +315,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(HandType.class, CatalogKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true)
             .generateRegistry(Hinge.class, CatalogKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true)
             .generateRegistry(InstrumentType.class, CatalogKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true)
+            .generateRegistry(LlamaType.class, CatalogKey.minecraft("llama_type"), LlamaTypeStreamGenerator.stream(), true)
             .generateRegistry(PhantomPhase.class, CatalogKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
             .generateRegistry(PickupRule.class, CatalogKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
             .generateRegistry(PistonType.class, CatalogKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true)
@@ -317,14 +327,14 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(StructureMode.class, CatalogKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true)
             .generateRegistry(ToolType.class, CatalogKey.minecraft("tool_type"), Arrays.stream(ItemTier.values()), true)
             .generateRegistry(WireAttachmentType.class, CatalogKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true)
+            .generateRegistry(WoodType.class, CatalogKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true)
             .generateRegistry(Visibility.class, CatalogKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true)
         ;
 
-        // Oddballs
-        CatTypeRegistry.generateRegistry(this);
-        TextColorRegistry.generateRegistry(this);
-        TextStyleRegistry.generateRegistry(this);
-        WoodTypeRegistry.generateRegistry(this);
+        this
+            .generateMappedRegistry(TextColor.class, CatalogKey.minecraft("text_color"), TextColorStreamGenerator.stream(), true)
+            .generateMappedRegistry(TextStyle.Type.class, CatalogKey.minecraft("text_style"), TextStyleTypeStreamGenerator.stream(), true)
+        ;
     }
 
     /**
@@ -356,8 +366,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    private <T extends CatalogType, E> SpongeCatalogRegistry generateSuppliers(Class<T> catalogClass, Stream<E> valueStream) {
-        valueStream.map(value -> (T) value).forEach(value -> this.registerSupplier(catalogClass, value.getKey().getValue(), () -> value));
+    private <T extends CatalogType, E> SpongeCatalogRegistry generateMappedRegistry(Class<T> catalogClass, CatalogKey key, Stream<Tuple<T, E>> valueStream, boolean generateSuppliers) {
+        this.registerMappedRegistry(catalogClass, key, () -> valueStream.collect(Collectors.toSet()), generateSuppliers);
         return this;
     }
 }

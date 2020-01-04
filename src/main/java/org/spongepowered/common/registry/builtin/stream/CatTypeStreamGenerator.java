@@ -22,33 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.registry;
+package org.spongepowered.common.registry.builtin.stream;
 
 import net.minecraft.entity.passive.CatEntity;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.common.data.type.SpongeCatType;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public final class CatTypeRegistry {
+public final class CatTypeStreamGenerator {
 
-    private CatTypeRegistry() {
+    private CatTypeStreamGenerator() {
     }
 
-    public static void generateRegistry(SpongeCatalogRegistry registry) {
-        registry
-            .registerRegistry(CatType.class, CatalogKey.minecraft("cat_type"), () -> {
-                // Meowzers
-                return CatEntity.field_213425_bD.entrySet()
-                    .stream()
-                    .map(kv -> {
-                        final String value = kv.getValue().getPath();
+    public static Stream<CatType> stream() {
+        // Meowzers
+        return CatEntity.field_213425_bD.entrySet()
+            .stream()
+            .map(kv -> {
+                final String value = kv.getValue().getPath();
 
-                        return new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)), kv.getKey());
-                    })
-                    .collect(Collectors.toSet());
-            }, true);
+                return new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)), kv.getKey());
+            });
     }
 }
