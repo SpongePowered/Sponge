@@ -27,6 +27,7 @@ package org.spongepowered.common.text.translation;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.translation.LanguageMap;
 import org.spongepowered.api.text.translation.Translation;
 
@@ -38,6 +39,10 @@ public final class SpongeTranslation implements Translation {
 
     public SpongeTranslation(String id) {
         this.id = checkNotNull(id, "id");
+    }
+
+    public SpongeTranslation(TranslationTextComponent component) {
+        this(component.getKey());
     }
 
     @Override

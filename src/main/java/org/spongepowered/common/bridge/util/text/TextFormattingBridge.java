@@ -26,7 +26,5 @@ package org.spongepowered.common.bridge.util.text;
 
 public interface TextFormattingBridge {
 
-    String bridge$getName();
-
     char bridge$getFormattingCode();
 }

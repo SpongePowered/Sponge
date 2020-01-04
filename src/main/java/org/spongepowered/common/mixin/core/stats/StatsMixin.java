@@ -32,8 +32,6 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.statistic.SpongeBlockStatistic;
-import org.spongepowered.common.statistic.SpongeEntityStatistic;
 
 @Mixin(Stats.class)
 public abstract class StatsMixin {

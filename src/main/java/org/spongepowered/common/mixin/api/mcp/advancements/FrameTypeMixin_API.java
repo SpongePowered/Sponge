@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.format.SpongeTextColor;
-import org.spongepowered.common.text.format.SpongeTextStyle;
+import org.spongepowered.common.text.format.SpongeTextStyleType;
 
 import javax.annotation.Nullable;
 
@@ -49,7 +49,7 @@ public abstract class FrameTypeMixin_API implements AdvancementType {
         this.api$key = CatalogKey.minecraft(name);
         this.api$textFormat = TextFormat.of(
                 SpongeTextColor.of(format),
-                SpongeTextStyle.of(format)
+                SpongeTextStyleType.of(format)
         );
     }
 

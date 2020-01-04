@@ -29,9 +29,6 @@ import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Locale;
-
-import javax.annotation.Nullable;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

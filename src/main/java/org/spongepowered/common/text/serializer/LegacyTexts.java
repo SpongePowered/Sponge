@@ -36,7 +36,6 @@ import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
 import org.spongepowered.common.mixin.accessor.util.text.StyleAccessor;
 import org.spongepowered.common.mixin.accessor.util.text.StringTextComponentAccessor;
-import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.ArrayList;
 import java.util.Collections;

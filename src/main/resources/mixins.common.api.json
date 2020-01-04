@@ -171,7 +171,7 @@
         "mcp.scoreboard.ScorePlayerTeamMixin_API",
         "mcp.scoreboard.ServerScoreboardMixin_API",
         "mcp.scoreboard.Team_CollisionRuleMixin_API",
-        "mcp.scoreboard.Team_EnumVisibleMixin_API",
+        "mcp.scoreboard.Team_VisibleMixin_API",
         "mcp.server.MinecraftServerMixin_API",
         "mcp.server.management.PlayerProfileCacheMixin_API",
         "mcp.server.management.ProfileBanEntryMixin_API",

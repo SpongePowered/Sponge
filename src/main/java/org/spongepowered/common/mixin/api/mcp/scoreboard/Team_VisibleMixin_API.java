@@ -22,45 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block;
+package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
-import net.minecraft.block.BlockPlanks;
-import org.spongepowered.api.data.type.WoodType;
+import net.minecraft.scoreboard.Team;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import javax.annotation.Nullable;
+@Mixin(Team.Visible.class)
+public abstract class Team_VisibleMixin_API implements Visibility {
 
-@Mixin(BlockPlanks.EnumType.class)
-@Implements(@Interface(iface = WoodType.class, prefix = "tree$"))
-public abstract class BlockPlanks_EnumTypeMixin_API implements WoodType {
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
 
-    @Shadow @Final private String name;
-    @Shadow @Final private String translationKey;
+    private CatalogKey api$key;
+    private SpongeTranslation api$translation;
 
-    @Nullable private Translation api$translation;
-
-    public String tree$getId() {
-        return "minecraft:" + this.name;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKeyAndTranslation(String enumName, int ordinal, String nameIn, int idIn, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(nameIn.toLowerCase());
+        this.api$translation = new SpongeTranslation(((TranslationTextComponent) this.shadow$getDisplayName()).getKey());
     }
 
-    @Intrinsic
-    public String tree$getName() {
-        return this.translationKey;
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
-    public Translation tree$getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
-        if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation("tile.wood." + this.translationKey + ".name");
-        }
+    @Override
+    public Translation getTranslation() {
         return this.api$translation;
     }
-
 }

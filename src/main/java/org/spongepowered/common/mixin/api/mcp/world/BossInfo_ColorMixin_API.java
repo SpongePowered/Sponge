@@ -24,34 +24,43 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.BossInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.boss.BossBarColor;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.asm.mixin.Mixin;
-
-import java.util.Locale;
-
-import javax.annotation.Nullable;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.text.format.SpongeTextColor;
 
 @Mixin(BossInfo.Color.class)
 public abstract class BossInfo_ColorMixin_API implements BossBarColor {
 
-    @Nullable private String api$name;
-    @Nullable private String api$id;
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract TextFormatting shadow$getFormatting();
 
-    @Override
-    public String getId() {
-        if (this.api$id == null) {
-            this.api$id = "minecraft:" + this.getName().toLowerCase(Locale.ENGLISH);
-        }
-        return this.api$id;
+    private CatalogKey api$key;
+    private SpongeTextColor api$color;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKeyAndColor(String enumName, int ordinal, String name, TextFormatting formatting, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(this.shadow$getName());
+        this.api$color = SpongeTextColor.of(this.shadow$getFormatting());
     }
 
     @Override
-    public String getName() {
-        if (this.api$name == null) {
-            this.api$name = ((BossInfo.Color) (Object) this).name();
-        }
-        return this.api$name;
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
+    @Override
+    public TextColor getColor() {
+        return this.api$color;
+    }
 }

@@ -28,7 +28,5 @@ import java.text.NumberFormat;
 
 public interface StatBridge {
 
-    String bridge$getUnderlyingId();
-
     NumberFormat bridge$getFormat();
 }

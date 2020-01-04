@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.supplier;
+package org.spongepowered.common.registry.builtin;
 
 import net.minecraft.world.biome.Biomes;
 import org.spongepowered.api.world.biome.BiomeType;

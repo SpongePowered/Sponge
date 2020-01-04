@@ -52,7 +52,7 @@ public abstract class DyeColorMixin_API implements DyeColor {
         int fireworkColorIn, int textColorIn, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
         this.api$key = container.createCatalogKey(translationKeyIn);
-        this.api$translation = new SpongeTranslation("item.dyePowder." + translationKeyIn + ".name");
+        this.api$translation = new SpongeTranslation("color.minecraft." + translationKeyIn);
     }
 
     @Override

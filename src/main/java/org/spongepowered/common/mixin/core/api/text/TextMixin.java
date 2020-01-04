@@ -42,7 +42,6 @@ import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.api.text.TextBridge;
 import org.spongepowered.common.text.action.SpongeClickAction;
 import org.spongepowered.common.text.action.SpongeHoverAction;
-import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Optional;
 
@@ -73,11 +72,11 @@ public abstract class TextMixin implements TextBridge {
             }
 
             if (!this.format.getStyle().isEmpty()) {
-                style.setBold(this.format.getStyle().isBold().orElse(null));
-                style.setItalic(this.format.getStyle().isItalic().orElse(null));
+                style.setBold(this.format.getStyle().hasBold().orElse(null));
+                style.setItalic(this.format.getStyle().hasItalic().orElse(null));
                 style.setUnderlined(this.format.getStyle().hasUnderline().orElse(null));
                 style.setStrikethrough(this.format.getStyle().hasStrikethrough().orElse(null));
-                style.setObfuscated(this.format.getStyle().isObfuscated().orElse(null));
+                style.setObfuscated(this.format.getStyle().hasObfuscated().orElse(null));
             }
 
             if (this.clickAction.isPresent()) {

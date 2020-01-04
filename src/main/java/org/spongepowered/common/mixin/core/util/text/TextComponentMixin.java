@@ -49,7 +49,6 @@ import org.spongepowered.common.bridge.util.text.event.ClickEventBridge;
 import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.text.ResolvedChatStyle;
 import org.spongepowered.common.text.TextComponentIterable;
-import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Iterator;
 import java.util.List;

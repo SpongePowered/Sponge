@@ -24,48 +24,40 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(net.minecraft.world.Difficulty.class)
 public abstract class DifficultyMixin_API implements Difficulty {
 
-    @Shadow @Final private int id;
-    @Shadow @Final private String translationKey;
-    
-    private String key;
+    @Shadow public abstract String shadow$getTranslationKey();
 
-    private Translation translation;
+    private CatalogKey api$key;
+    private SpongeTranslation api$translation;
 
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void onConstruction(CallbackInfo callbackInfo) {
-        this.key = this.translationKey.replace("options.difficulty.", "minecraft:");
-    }
-    
-    @Override
-    public String getId() {
-        return this.key;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKeyAndTranslation(String enumName, int ordinal, int id, String name, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(name);
+        this.api$translation = new SpongeTranslation(this.shadow$getTranslationKey());
     }
 
     @Override
-    public String getName() {
-        return this.key;
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
     @Override
     public Translation getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
-        if (this.translation == null) {
-            this.translation = new SpongeTranslation(this.translationKey);
-        }
-        return this.translation;
+        return this.api$translation;
     }
-
 }

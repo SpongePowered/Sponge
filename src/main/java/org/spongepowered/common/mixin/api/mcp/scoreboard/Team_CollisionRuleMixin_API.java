@@ -24,33 +24,43 @@
  */
 package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
-import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scoreboard.CollisionRule;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
-import javax.annotation.Nullable;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(Team.CollisionRule.class)
 public abstract class Team_CollisionRuleMixin_API implements CollisionRule {
 
-    @Shadow @Final public String name;
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
 
-    @Nullable private String spongeId;
+    private CatalogKey api$key;
+    private SpongeTranslation api$translation;
 
-    @Override
-    public String getId() {
-        if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name);
-        }
-        return this.spongeId;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKeyAndTranslation(String enumName, int ordinal, String nameIn, int idIn, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(nameIn);
+        this.api$translation = new SpongeTranslation((TranslationTextComponent) this.shadow$getDisplayName());
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
+    @Override
+    public Translation getTranslation() {
+        return this.api$translation;
+    }
 }

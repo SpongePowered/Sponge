@@ -24,52 +24,30 @@
  */
 package org.spongepowered.common.mixin.api.mcp.stats;
 
-import net.minecraft.scoreboard.ScoreCriteria;
+import net.minecraft.stats.IStatFormatter;
 import net.minecraft.stats.Stat;
-import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.stats.StatBridge;
-import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.text.NumberFormat;
 import java.util.Optional;
 
-@Mixin(value = Stat.class)
+@Mixin(Stat.class)
 public abstract class StatMixin_API implements Statistic {
 
-    @Shadow @Final public String statId;
-    @Shadow @Final private ITextComponent statName;
-    @Shadow @Final private ScoreCriteria objectiveCriteria;
+    @Shadow @Final private IStatFormatter formatter;
 
     @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.statId);
-    }
-
-    @Override
-    public String getId() {
-        return ((StatBridge) this).bridge$getUnderlyingId();
+    public Optional<Criterion> getCriterion() {
+        return Optional.empty();
     }
 
     @Override
     public NumberFormat getFormat() {
-        return ((StatBridge) this).bridge$getFormat();
+        return ((StatBridge) this.formatter).bridge$getFormat();
     }
-
-    @Override
-    public Optional<Criterion> getCriterion() {
-        return Optional.ofNullable((Criterion) this.objectiveCriteria);
-    }
-
-    @Override
-    public String getName() {
-        return SpongeTexts.toText(this.statName).toPlain();
-    }
-
 }

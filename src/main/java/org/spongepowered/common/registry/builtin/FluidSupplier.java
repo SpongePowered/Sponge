@@ -22,36 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.stats;
+package org.spongepowered.common.registry.builtin;
 
-import net.minecraft.item.Item;
-import net.minecraft.stats.StatCrafting;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.statistic.ItemStatistic;
-import org.spongepowered.api.statistic.StatisticCategory;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.mcp.stats.StatMixin_API;
+import net.minecraft.fluid.Fluids;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
-@Mixin(StatCrafting.class)
-public abstract class StatCraftingMixin_API extends StatMixin_API implements ItemStatistic {
+public final class FluidSupplier {
 
-    @Shadow @Final private Item item;
-
-    private StatisticCategory api$statType;
-
-    @Override
-    public ItemType getItemType() {
-        return (ItemType) this.item;
+    private FluidSupplier() {
     }
 
-    @Override
-    public StatisticCategory getType() {
-        if (this.api$statType == null) {
-            this.api$statType = Sponge.getRegistry().getType(StatisticCategory.class, this.getId().substring(0, this.getId().indexOf("."))).get();
-        }
-        return this.api$statType;
+    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+        registry
+            .registerSupplier(FluidType.class, "empty", () -> (FluidType) Fluids.EMPTY)
+            .registerSupplier(FluidType.class, "flowing_water", () -> (FluidType) Fluids.FLOWING_WATER)
+            .registerSupplier(FluidType.class, "water", () -> (FluidType) Fluids.WATER)
+            .registerSupplier(FluidType.class, "flowing_lava", () -> (FluidType) Fluids.FLOWING_LAVA)
+            .registerSupplier(FluidType.class, "lava", () -> (FluidType) Fluids.LAVA)
+        ;
     }
 }

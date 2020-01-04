@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.supplier;
+package org.spongepowered.common.registry.builtin;
 
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;

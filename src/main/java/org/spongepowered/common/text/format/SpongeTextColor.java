@@ -26,35 +26,50 @@ package org.spongepowered.common.text.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
+import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.util.text.TextFormatting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.registry.MappedRegistry;
 
-@NonnullByDefault
-public class SpongeTextColor implements TextColor {
+public final class SpongeTextColor implements TextColor {
 
-    private final TextFormatting handle;
-    private final Color color;
+    public static SpongeTextColor of(TextFormatting formatting) {
+        final SimpleRegistry<TextColor> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
+        TextColor color = ((MappedRegistry<TextColor, TextFormatting>) registry).getReverseMapping(formatting);
+        if (color == null) {
+            color = TextColors.NONE.get();
+        }
 
-    @Override
-    public String getId() {
-        return this.handle.name();
+        return (SpongeTextColor) color;
     }
 
-    public SpongeTextColor(TextFormatting handle, Color color) {
-        this.handle = checkNotNull(handle, "handle");
+    public static TextFormatting of(TextColor color) {
+        final SimpleRegistry<TextColor> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
+        TextFormatting formatting = ((MappedRegistry<TextColor, TextFormatting>) registry).getMapping(color);
+        if (formatting == null) {
+            formatting = TextFormatting.WHITE;
+        }
+
+        return formatting;
+    }
+
+    private final CatalogKey key;
+    private final Color color;
+
+    public SpongeTextColor(CatalogKey key, Color color) {
+        this.key = key;
         this.color = checkNotNull(color, "color");
     }
 
-    public TextFormatting getHandle() {
-        return this.handle;
-    }
-
     @Override
-    public String getName() {
-        return this.handle.getFriendlyName();
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -64,11 +79,9 @@ public class SpongeTextColor implements TextColor {
 
     @Override
     public String toString() {
-        return this.getName();
+        return MoreObjects.toStringHelper(SpongeTextColor.class)
+            .add("key", this.key)
+            .add("color", this.color)
+            .toString();
     }
-
-    public static SpongeTextColor of(TextFormatting color) {
-        return TextColorRegistryModule.enumChatColor.get(color);
-    }
-
 }

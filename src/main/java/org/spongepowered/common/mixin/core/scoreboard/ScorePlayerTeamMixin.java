@@ -81,7 +81,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
         this.bridge$displayName = SpongeTexts.fromLegacy(name);
         this.bridge$Prefix = SpongeTexts.fromLegacy(this.prefix);
         this.bridge$Suffix = SpongeTexts.fromLegacy(this.suffix);
-        this.bridge$Color = TextColorRegistryModule.enumChatColor.get(this.color);
+        this.bridge$Color = SpongeTextColor.of(this.color);
     }
 
     @Redirect(method = "*",
@@ -194,11 +194,11 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
     @Override
     public void bridge$setColor(TextColor color) {
-        if (color.equals(TextColors.NONE)) {
-            color = TextColors.RESET;
+        if (color.equals(TextColors.NONE.get())) {
+            color = TextColors.RESET.get();
         }
         this.bridge$Color = color;
-        this.color = ((SpongeTextColor) color).getHandle();
+        this.color = SpongeTextColor.of(color);
         this.impl$doTeamUpdate();
     }
 

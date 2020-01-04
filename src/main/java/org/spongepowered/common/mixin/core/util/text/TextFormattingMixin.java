@@ -33,13 +33,7 @@ import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
 @Mixin(TextFormatting.class)
 public abstract class TextFormattingMixin implements TextFormattingBridge {
 
-    @Shadow @Final private String name;
     @Shadow @Final private char formattingCode;
-
-    @Override
-    public String bridge$getName() {
-        return this.name;
-    }
 
     @Override
     public char bridge$getFormattingCode() {
