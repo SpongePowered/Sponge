@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.WitchEntity;
-import org.spongepowered.api.entity.living.monster.raider.Witch;
+import net.minecraft.entity.monster.IllusionerEntity;
+import org.spongepowered.api.entity.living.monster.raider.illager.spellcaster.Illusioner;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(WitchEntity.class)
-public abstract class WitchEntityMixin_API extends AbstractRaiderEntityMixin_API implements Witch {
+@Mixin(IllusionerEntity.class)
+public abstract class IllusionerEntityMixin_API extends SpellcastingIllagerEntityMixin_API implements Illusioner {
 
 }

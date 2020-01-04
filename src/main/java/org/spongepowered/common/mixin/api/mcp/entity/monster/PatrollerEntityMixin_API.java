@@ -24,11 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.WitchEntity;
-import org.spongepowered.api.entity.living.monster.raider.Witch;
+import net.minecraft.entity.monster.PatrollerEntity;
+import org.spongepowered.api.entity.living.monster.Patroller;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(WitchEntity.class)
-public abstract class WitchEntityMixin_API extends AbstractRaiderEntityMixin_API implements Witch {
+@Mixin(PatrollerEntity.class)
+public abstract class PatrollerEntityMixin_API extends MonsterEntityMixin_API implements Patroller {
+
+    @Shadow public abstract void shadow$resetPatrolTarget();
+
+    @Override
+    public void findPatrolTarget() {
+        this.shadow$resetPatrolTarget();
+    }
 
 }

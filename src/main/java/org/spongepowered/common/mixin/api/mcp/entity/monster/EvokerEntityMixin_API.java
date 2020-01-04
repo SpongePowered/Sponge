@@ -29,6 +29,6 @@ import org.spongepowered.api.entity.living.monster.raider.illager.spellcaster.Ev
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(EvokerEntity.class)
-public abstract class EvokerEntityMixin_API extends MonsterEntityMixin_API implements Evoker {
+public abstract class EvokerEntityMixin_API extends SpellcastingIllagerEntityMixin_API implements Evoker {
 
 }

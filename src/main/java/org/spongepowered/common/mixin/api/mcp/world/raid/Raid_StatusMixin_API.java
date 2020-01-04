@@ -22,13 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.monster;
+package org.spongepowered.common.mixin.api.mcp.world.raid;
 
-import net.minecraft.entity.monster.WitchEntity;
-import org.spongepowered.api.entity.living.monster.raider.Witch;
+import net.minecraft.world.raid.Raid;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
-@Mixin(WitchEntity.class)
-public abstract class WitchEntityMixin_API extends AbstractRaiderEntityMixin_API implements Witch {
+@Mixin(Raid.Status.class)
+public abstract class Raid_StatusMixin_API implements RaidStatus {
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void api$setKey(CallbackInfo ci) {
+        api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$func_221277_a());
+    }
+
+    @Shadow public abstract String shadow$func_221277_a();
+
+    private CatalogKey api$key;
+
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
+    }
 
 }

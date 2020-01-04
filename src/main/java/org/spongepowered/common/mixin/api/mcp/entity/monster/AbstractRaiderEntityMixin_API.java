@@ -24,11 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.monster.WitchEntity;
-import org.spongepowered.api.entity.living.monster.raider.Witch;
+import net.minecraft.entity.monster.AbstractRaiderEntity;
+import org.spongepowered.api.entity.living.monster.raider.Raider;
+import org.spongepowered.api.raid.Raid;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(WitchEntity.class)
-public abstract class WitchEntityMixin_API extends AbstractRaiderEntityMixin_API implements Witch {
+import java.util.Optional;
+
+@Mixin(AbstractRaiderEntity.class)
+public abstract class AbstractRaiderEntityMixin_API extends PatrollerEntityMixin_API implements Raider {
+
+    @Shadow public abstract net.minecraft.world.raid.Raid shadow$getRaid();
+
+    @Override
+    public Optional<Raid> getRaid() {
+        return Optional.ofNullable((Raid) this.shadow$getRaid());
+    }
 
 }

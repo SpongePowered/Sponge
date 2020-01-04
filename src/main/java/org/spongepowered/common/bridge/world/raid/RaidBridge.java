@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.monster;
+package org.spongepowered.common.bridge.world.raid;
 
-import net.minecraft.entity.monster.WitchEntity;
-import org.spongepowered.api.entity.living.monster.raider.Witch;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.raid.Wave;
 
-@Mixin(WitchEntity.class)
-public abstract class WitchEntityMixin_API extends AbstractRaiderEntityMixin_API implements Witch {
+import java.util.Map;
+
+public interface RaidBridge {
+
+    Map<Integer, Wave> bridge$getWaves();
 
 }
