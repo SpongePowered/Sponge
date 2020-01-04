@@ -97,6 +97,7 @@ import org.spongepowered.common.registry.builtin.SoundEventSupplier;
 import org.spongepowered.common.registry.builtin.TextColorRegistry;
 import org.spongepowered.common.registry.builtin.TextStyleRegistry;
 import org.spongepowered.common.registry.builtin.TileEntityTypeSupplier;
+import org.spongepowered.common.registry.builtin.WoodTypeRegistry;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -323,6 +324,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         CatTypeRegistry.generateRegistry(this);
         TextColorRegistry.generateRegistry(this);
         TextStyleRegistry.generateRegistry(this);
+        WoodTypeRegistry.generateRegistry(this);
     }
 
     /**

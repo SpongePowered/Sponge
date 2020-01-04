@@ -22,27 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common;
 
-import net.minecraft.block.Block;
 import net.minecraft.tags.Tag;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.type.WoodType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.TagHolderCatalogType;
 
-public final class SpongeWoodType extends SpongeCatalogType.Translatable implements WoodType, TagHolderCatalogType<Block> {
+/**
+ * Represents a {@link CatalogType} that holds a {@link Tag}.
+ *
+ * <p>
+ *     Primarily used in the data system so that plugins can change data of a holder to
+ *     a new catalog that is represented as a tag in Vanilla. {@link WoodType}
+ * </p>
+ */
+public interface TagHolderCatalogType<T> extends CatalogType {
 
-    private final Tag<Block> tag;
-
-    public SpongeWoodType(CatalogKey key, Translation translation, Tag<Block> tag) {
-        super(key, translation);
-        this.tag = tag;
-    }
-
-    @Override
-    public Tag<Block> getTag() {
-        return this.tag;
-    }
+    Tag<T> getTag();
 }
