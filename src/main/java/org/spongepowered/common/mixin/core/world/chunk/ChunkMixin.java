@@ -545,7 +545,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             // Sponge End
             TileEntity tileentity = this.getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
 
-            if (tileentity == null) {
+            if (tileentity == null || (transaction != null && transaction.queuedRemoval != null)) {
                 // Sponge Start - use SpongeImplHooks for forge compatibility
                 // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
                 tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
