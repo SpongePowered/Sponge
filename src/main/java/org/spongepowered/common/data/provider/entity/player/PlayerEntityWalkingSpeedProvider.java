@@ -29,7 +29,7 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.player.PlayerCapabilitiesAccessor;
+import org.spongepowered.common.mixin.accessor.entity.player.PlayerAbilitiesAccessor;
 
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public class PlayerEntityWalkingSpeedProvider extends GenericMutableDataProvider
 
     @Override
     protected boolean set(PlayerEntity dataHolder, Double value) {
-        ((PlayerCapabilitiesAccessor) dataHolder.abilities).accessor$setWalkSpeed(value.floatValue());
+        ((PlayerAbilitiesAccessor) dataHolder.abilities).accessor$setWalkSpeed(value.floatValue());
         final IAttributeInstance attribute = dataHolder.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
         attribute.setBaseValue(value);
         dataHolder.sendPlayerAbilities();

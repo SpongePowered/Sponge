@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.accessor.raid;
+package org.spongepowered.common.mixin.accessor.world.raid;
 
 import net.minecraft.world.raid.Raid;
 import org.spongepowered.asm.mixin.Mixin;
