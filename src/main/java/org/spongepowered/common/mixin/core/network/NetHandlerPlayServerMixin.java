@@ -108,6 +108,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -246,6 +247,17 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
      */
     @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CPacketUpdateSign;getLines()[Ljava/lang/String;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private void impl$callSignChangeEvent(final CPacketUpdateSign packetIn, final CallbackInfo ci, final WorldServer worldserver, final BlockPos blockpos, final IBlockState iblockstate, final TileEntity tileentity, final TileEntitySign tileentitysign) {
+        impl$callSignChangeEventInternal(packetIn, ci, worldserver, blockpos, tileentitysign);
+    }
+
+    // This is required for SpongeVanilla
+    @Surrogate
+    private void impl$callSignChangeEvent(final CPacketUpdateSign packetIn, final CallbackInfo ci, final WorldServer worldserver, final BlockPos blockpos, final IBlockState iblockstate, final TileEntitySign tileentitysign) {
+        impl$callSignChangeEventInternal(packetIn, ci, worldserver, blockpos, tileentitysign);
+    }
+
+    private void impl$callSignChangeEventInternal(final CPacketUpdateSign packetIn, final CallbackInfo ci, final WorldServer worldserver,
+            final BlockPos blockpos, final TileEntitySign tileentitysign) {
         ci.cancel();
         final Optional<SignData> existingSignData = ((Sign) tileentitysign).get(SignData.class);
         if (!existingSignData.isPresent()) {
