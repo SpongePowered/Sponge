@@ -31,6 +31,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.entity.monster.PhantomEntity;
+import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.Team;
@@ -62,6 +63,7 @@ import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.Hinge;
@@ -311,6 +313,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(CollisionRule.class, CatalogKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
             .generateRegistry(ComparatorType.class, CatalogKey.minecraft("comparator_type"), Arrays.stream(ComparatorMode.values()), true)
             .generateRegistry(DyeColor.class, CatalogKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
+            .generateRegistry(FoxType.class, CatalogKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
             .generateRegistry(HandPreference.class, CatalogKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true)
             .generateRegistry(HandType.class, CatalogKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true)
             .generateRegistry(Hinge.class, CatalogKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true)
