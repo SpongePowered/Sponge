@@ -22,13 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.block.properties;
+package org.spongepowered.common.mixin.core.state;
 
-import net.minecraft.block.properties.PropertyInteger;
-import org.spongepowered.api.state.IntegerStateProperty;
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.state.IntegerProperty;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(value = PropertyInteger.class)
-public abstract class PropertyIntegerMixin_API extends PropertyHelperMixin_API<Integer> implements IntegerStateProperty {
+import javax.annotation.Nullable;
 
+@Mixin(value = IntegerProperty.class)
+public abstract class IntegerPropertyMixin extends PropertyMixin<Integer> {
+
+    @Shadow @Final private ImmutableSet<Integer> allowedValues;
+
+    @Nullable private Integer impl$hashCode;
+
+
+    /**
+     * @author blood - February 28th, 2019
+     * @reason Block properties are immutable so there is no reason
+     * to recompute the hashCode repeatedly. To improve performance, we
+     * compute the hashCode once then cache the result.
+     *
+     * @return The cached hashCode
+     */
+    @Overwrite
+    public int hashCode() {
+        if (this.impl$hashCode == null) {
+            this.impl$hashCode = 31 * super.hashCode() + this.allowedValues.hashCode();
+        }
+        return this.impl$hashCode;
+    }
 }

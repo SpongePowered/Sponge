@@ -22,38 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.block.properties;
+package org.spongepowered.common.mixin.api.mcp.entity.boss.dragon;
 
-import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonPartEntity;
+import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragon;
+import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragonPart;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import javax.annotation.Nullable;
+@Mixin(EnderDragonPartEntity.class)
+public abstract class EnderDragonPartEntityMixin_API extends EntityMixin_API implements EnderDragonPart {
 
-@Mixin(value = PropertyInteger.class)
-public abstract class PropertyIntegerMixin extends PropertyHelperMixin<Integer> {
+    @Shadow @Final public EnderDragonEntity dragon;
 
-    @Shadow @Final private ImmutableSet<Integer> allowedValues;
-
-    @Nullable private Integer impl$hashCode;
-
-
-    /**
-     * @author blood - February 28th, 2019
-     * @reason Block properties are immutable so there is no reason
-     * to recompute the hashCode repeatedly. To improve performance, we
-     * compute the hashCode once then cache the result.
-     *
-     * @return The cached hashCode
-     */
-    @Overwrite
-    public int hashCode() {
-        if (this.impl$hashCode == null) {
-            this.impl$hashCode = 31 * super.hashCode() + this.allowedValues.hashCode();
-        }
-        return this.impl$hashCode;
+    @Override
+    public EnderDragon getParent() {
+        return (EnderDragon) this.dragon;
     }
+
 }

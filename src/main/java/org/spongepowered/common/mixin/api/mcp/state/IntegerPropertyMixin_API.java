@@ -22,39 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.tileentity;
+package org.spongepowered.common.mixin.api.mcp.state;
 
-import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import net.minecraft.state.IntegerProperty;
+import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Locale;
-
-import javax.annotation.Nullable;
-import net.minecraft.tileentity.StructureBlockTileEntity;
-
-@Mixin(StructureBlockTileEntity.Mode.class)
-@Implements(@Interface(iface = StructureMode.class, prefix = "structure$"))
-public abstract class TileEntityStructure_ModeMixin_API implements StructureMode {
-
-    @Shadow @Final private String modeName;
-    @Nullable private String friendlyName;
-
-    @Override
-    public String getId() {
-        return this.modeName;
-    }
-
-    @Intrinsic
-    public String structure$getName() {
-        if (this.friendlyName == null) {
-            this.friendlyName = this.modeName.toUpperCase(Locale.ENGLISH);
-        }
-        return this.friendlyName;
-    }
+@Mixin(value = IntegerProperty.class)
+public abstract class IntegerPropertyMixin_API extends PropertyMixin_API<Integer> implements IntegerStateProperty {
 
 }

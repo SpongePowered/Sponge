@@ -22,10 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.block.properties;
+package org.spongepowered.common.mixin.core.state;
 
-import net.minecraft.block.properties.AbstractProperty;
-import net.minecraft.block.properties.IProperty;
+import net.minecraft.state.Property;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -39,8 +38,8 @@ import javax.annotation.Nullable;
  *
  * @param <T> The type of comparable
  */
-@Mixin(value = AbstractProperty.class)
-public abstract class PropertyHelperMixin<T extends Comparable<T>> {
+@Mixin(value = Property.class)
+public abstract class PropertyMixin<T extends Comparable<T>> {
 
     @Shadow @Final private Class<T> valueClass;
     @Shadow @Final private String name;
