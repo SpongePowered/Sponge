@@ -22,14 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.passive.MooshroomEntity;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.MooshroomType;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
-public final class SpongeMooshroomType extends SpongeEntityMetadataType<String> implements MooshroomType {
+@Mixin(MooshroomEntity.Type.class)
+public abstract class MooshroomEntity_TypeMixin_API implements MooshroomType {
 
-    public SpongeMooshroomType(CatalogKey key, String metadata) {
-        super(key, metadata);
+    private CatalogKey api$key;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, String nameIn, BlockState renderStateIn, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(nameIn);
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 }
