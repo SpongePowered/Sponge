@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin;
+package org.spongepowered.common.registry.builtin.registry;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.WoodType;

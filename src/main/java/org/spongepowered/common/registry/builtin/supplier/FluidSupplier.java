@@ -22,33 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin;
+package org.spongepowered.common.registry.builtin.supplier;
 
-import net.minecraft.entity.passive.CatEntity;
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.CatType;
-import org.spongepowered.common.data.type.SpongeCatType;
+import net.minecraft.fluid.Fluids;
+import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
-import java.util.stream.Collectors;
+public final class FluidSupplier {
 
-public final class CatTypeRegistry {
-
-    private CatTypeRegistry() {
+    private FluidSupplier() {
     }
 
-    public static void generateRegistry(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(SpongeCatalogRegistry registry) {
         registry
-            .registerRegistry(CatType.class, CatalogKey.minecraft("cat_type"), () -> {
-                // Meowzers
-                return CatEntity.field_213425_bD.entrySet()
-                    .stream()
-                    .map(kv -> {
-                        final String value = kv.getValue().getPath();
-
-                        return new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)), kv.getKey());
-                    })
-                    .collect(Collectors.toSet());
-            }, true);
+            .registerSupplier(FluidType.class, "empty", () -> (FluidType) Fluids.EMPTY)
+            .registerSupplier(FluidType.class, "flowing_water", () -> (FluidType) Fluids.FLOWING_WATER)
+            .registerSupplier(FluidType.class, "water", () -> (FluidType) Fluids.WATER)
+            .registerSupplier(FluidType.class, "flowing_lava", () -> (FluidType) Fluids.FLOWING_LAVA)
+            .registerSupplier(FluidType.class, "lava", () -> (FluidType) Fluids.LAVA)
+        ;
     }
 }
