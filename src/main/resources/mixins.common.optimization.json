@@ -6,21 +6,21 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-        "SpongeImplHooksMixin_Item_Pre_Merge",
         "mcp.block.RedstoneWireMixinBlock_Optimization_Eigen",
         "mcp.block.RedstoneWireBlockMixin_Optimization_Panda",
         "mcp.enchantment.EnchantmentHelperMixin_Optimization_No_Source_Leak",
-        "mcp.entity.EntityMixin_Optimization_Collision",
-        "mcp.entity.passive.TameableEntity_Optimization_Owner",
         "mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
+        "mcp.entity.passive.TameableEntity_Optimization_Owner",
+        "mcp.entity.EntityMixin_Optimization_Collision",
         "mcp.item.FilledMapItem_Optimization_Map",
         "mcp.server.MinecraftServerMixin_Optimization_Map",
         "mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
         "mcp.tileentity.TileEntityMixin_Optimization_Hopper",
-        "mcp.world.WorldMixin_Optimization_Collision",
         "mcp.world.server.ServerWorldMixin_Optimization_Collision",
+        "mcp.world.storage.MapData_MapInfoMixin_Optimization_Map",
         "mcp.world.storage.MapDataMixin_Optimization_Map",
-        "mcp.world.storage.MapData_MapInfoMixin_Optimization_Map"
+        "mcp.world.WorldMixin_Optimization_Collision",
+        "SpongeImplHooksMixin_Item_Pre_Merge"
     ],
     "injectors": {
         "defaultRequire": 1
