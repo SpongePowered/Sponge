@@ -22,44 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.scoreboard;
+package org.spongepowered.common.registry.builtin.stream;
 
-import com.google.common.base.MoreObjects;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.common.event.cause.entity.dismount.SpongeDismountType;
 
-import java.util.Optional;
+import java.util.stream.Stream;
 
-public final class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot {
+public final class DismountTypeStreamGenerator {
 
-    @Nullable private TextColor color;
-    private int index;
-
-    public SpongeDisplaySlot(CatalogKey key, int index) {
-        super(key);
-        this.index = index;
+    private DismountTypeStreamGenerator() {
     }
 
-    @Override
-    public void setTeamColor(@Nullable TextColor color) {
-        this.color = color;
-    }
-
-    @Override
-    public Optional<TextColor> getTeamColor() {
-        return Optional.ofNullable(this.color);
-    }
-
-    public int getIndex() {
-        return this.index;
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-            .add("color", this.color);
+    public static Stream<DismountType> stream() {
+        return Stream.of(
+            new SpongeDismountType(CatalogKey.minecraft("player")),
+            new SpongeDismountType(CatalogKey.minecraft("derail")),
+            new SpongeDismountType(CatalogKey.minecraft("death"))
+        );
     }
 }

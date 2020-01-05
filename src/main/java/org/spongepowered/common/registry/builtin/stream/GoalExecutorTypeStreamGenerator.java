@@ -22,44 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.scoreboard;
+package org.spongepowered.common.registry.builtin.stream;
 
-import com.google.common.base.MoreObjects;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
+import org.spongepowered.common.entity.ai.SpongeGoalExecutorType;
 
-import java.util.Optional;
+import java.util.stream.Stream;
 
-public final class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot {
+public final class GoalExecutorTypeStreamGenerator {
 
-    @Nullable private TextColor color;
-    private int index;
-
-    public SpongeDisplaySlot(CatalogKey key, int index) {
-        super(key);
-        this.index = index;
+    private GoalExecutorTypeStreamGenerator() {
     }
 
-    @Override
-    public void setTeamColor(@Nullable TextColor color) {
-        this.color = color;
-    }
-
-    @Override
-    public Optional<TextColor> getTeamColor() {
-        return Optional.ofNullable(this.color);
-    }
-
-    public int getIndex() {
-        return this.index;
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-            .add("color", this.color);
+    public static Stream<GoalExecutorType> stream() {
+        return Stream.of(
+            new SpongeGoalExecutorType(CatalogKey.minecraft("normal")),
+            new SpongeGoalExecutorType(CatalogKey.minecraft("target"))
+        );
     }
 }

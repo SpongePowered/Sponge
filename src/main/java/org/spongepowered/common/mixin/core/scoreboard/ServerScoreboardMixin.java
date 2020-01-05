@@ -53,7 +53,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.text.SpongeTexts;

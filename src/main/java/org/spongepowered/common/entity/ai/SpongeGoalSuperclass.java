@@ -22,44 +22,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.scoreboard;
+package org.spongepowered.common.entity.ai;
 
-import com.google.common.base.MoreObjects;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.common.SpongeCatalogType;
+import net.minecraft.entity.ai.goal.Goal;
 
-import java.util.Optional;
+public abstract class SpongeGoalSuperclass extends Goal {
 
-public final class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot {
-
-    @Nullable private TextColor color;
-    private int index;
-
-    public SpongeDisplaySlot(CatalogKey key, int index) {
-        super(key);
-        this.index = index;
+    @Override
+    public boolean shouldExecute() {
+        return this.shouldUpdate();
     }
 
     @Override
-    public void setTeamColor(@Nullable TextColor color) {
-        this.color = color;
+    public boolean shouldContinueExecuting() {
+        return this.continueUpdating();
     }
 
     @Override
-    public Optional<TextColor> getTeamColor() {
-        return Optional.ofNullable(this.color);
-    }
-
-    public int getIndex() {
-        return this.index;
+    public boolean isPreemptible() {
+        return this.canBeInterrupted();
     }
 
     @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-            .add("color", this.color);
+    public void startExecuting() {
+        this.start();
     }
+
+    @Override
+    public void resetTask() {
+        this.reset();
+    }
+
+    @Override
+    public void tick() {
+        this.update();
+    }
+
+    public abstract boolean canBeInterrupted();
+
+    public abstract void start();
+
+    public abstract boolean shouldUpdate();
+
+    public abstract void update();
+
+    public abstract boolean continueUpdating();
+
+    public abstract void reset();
 }

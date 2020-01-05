@@ -25,13 +25,16 @@
 package org.spongepowered.common.mixin.core.entity.ai.goal;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.ai.GoalBridge;
+import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 
 import java.util.Optional;
@@ -42,14 +45,12 @@ import javax.annotation.Nullable;
 public abstract class GoalMixin implements GoalBridge {
 
     private GoalType impl$type;
-    private Optional<GoalExecutor<?>> impl$owner = Optional.empty();
+    private GoalExecutor<?> impl$owner;
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void assignAITaskType(final CallbackInfo ci) {
-        final Optional<GoalType> optAiTaskType = AITaskTypeModule.getInstance().getByAIClass(this.getClass());
-        if (optAiTaskType.isPresent()) {
-            this.impl$type = optAiTaskType.get();
-        }
+    private void assignAITaskType(final CallbackInfo ci) {
+        final MappedRegistry<GoalType, Class<? extends Goal>> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(GoalType.class);
+        this.impl$type = registry.getReverseMapping((Class<Goal>) (Object) this.getClass());
     }
 
     @Override
@@ -64,19 +65,19 @@ public abstract class GoalMixin implements GoalBridge {
 
     @Override
     public Optional<GoalExecutor<?>> bridge$getGoalExecutor() {
-        return this.impl$owner;
+        return Optional.ofNullable(this.impl$owner);
     }
 
     @Override
     public void bridge$setGoalExecutor(@Nullable final GoalExecutor<?> owner) {
-        this.impl$owner = Optional.ofNullable(owner);
+        this.impl$owner = owner;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .addValue(this.impl$type)
-                .addValue(this.impl$owner)
+                .add("type", this.impl$type)
+                .add("owner", this.impl$owner)
                 .toString();
     }
 }

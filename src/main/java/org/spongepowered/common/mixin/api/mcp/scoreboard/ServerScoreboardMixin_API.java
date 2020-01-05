@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings({"SuspiciousMethodCalls", "deprecation"})
+@SuppressWarnings("SuspiciousMethodCalls")
 @Mixin(ServerScoreboard.class)
 @Implements(@Interface(iface = org.spongepowered.api.scoreboard.Scoreboard.class, prefix = "scoreboard$"))
 public abstract class ServerScoreboardMixin_API extends Scoreboard {

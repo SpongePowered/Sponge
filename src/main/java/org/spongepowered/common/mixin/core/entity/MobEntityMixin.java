@@ -89,12 +89,12 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     private void initSpongeAI() {
         if (!((GoalSelectorBridge) this.tasks).bridge$initialized()) {
             ((GoalSelectorBridge) this.tasks).bridge$setOwner((MobEntity) (Object) this);
-            ((GoalSelectorBridge) this.tasks).bridge$setType(GoalExecutorTypes.NORMAL);
+            ((GoalSelectorBridge) this.tasks).bridge$setType(GoalExecutorTypes.NORMAL.get());
             ((GoalSelectorBridge) this.tasks).bridge$setInitialized(true);
         }
         if (!((GoalSelectorBridge) this.targetTasks).bridge$initialized()) {
             ((GoalSelectorBridge) this.targetTasks).bridge$setOwner((MobEntity) (Object) this);
-            ((GoalSelectorBridge) this.targetTasks).bridge$setType(GoalExecutorTypes.TARGET);
+            ((GoalSelectorBridge) this.targetTasks).bridge$setType(GoalExecutorTypes.TARGET.get());
             ((GoalSelectorBridge) this.targetTasks).bridge$setInitialized(true);
         }
     }

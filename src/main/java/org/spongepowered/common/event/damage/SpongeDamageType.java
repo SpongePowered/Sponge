@@ -24,54 +24,13 @@
  */
 package org.spongepowered.common.event.damage;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Locale;
+public final class SpongeDamageType extends SpongeCatalogType implements DamageType {
 
-public class SpongeDamageType implements DamageType {
-
-    private String id; // TODO: figure out how to handle mods
-    private String name;
-
-    public SpongeDamageType(final String id, final String name) {
-        this.name = name;
-        this.id = id.toLowerCase(Locale.ENGLISH);
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeDamageType other = (SpongeDamageType) obj;
-        return this.id.equals(other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .add("name", this.name)
-                .toString();
+    public SpongeDamageType(CatalogKey key) {
+        super(key);
     }
 }

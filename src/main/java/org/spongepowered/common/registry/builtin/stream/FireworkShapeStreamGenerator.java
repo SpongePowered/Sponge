@@ -22,51 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.registry.builtin.stream;
 
-import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.item.FireworkRocketItem;
+import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.util.Tuple;
 
-public abstract class SpongeEntityAICommonSuperclass extends Goal {
+import java.util.stream.Stream;
 
-    @Override
-    public boolean shouldExecute() {
-        return this.shouldUpdate();
+public final class FireworkShapeStreamGenerator {
+
+    private FireworkShapeStreamGenerator() {
     }
 
-    @Override
-    public boolean shouldContinueExecuting() {
-        return this.continueUpdating();
+    public static Stream<Tuple<FireworkShape, Integer>> stream() {
+        return Stream.of(
+            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.SMALL_BALL, 0),
+            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.LARGE_BALL, 1),
+            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.STAR, 2),
+            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.CREEPER, 3),
+            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.BURST, 4)
+        );
     }
-
-    @Override
-    public boolean isPreemptible() {
-        return this.canBeInterrupted();
-    }
-
-    @Override
-    public void startExecuting() {
-        this.start();
-    }
-
-    @Override
-    public void resetTask() {
-        this.reset();
-    }
-
-    @Override
-    public void tick() {
-        this.update();
-    }
-
-    public abstract boolean canBeInterrupted();
-
-    public abstract void start();
-
-    public abstract boolean shouldUpdate();
-
-    public abstract void update();
-
-    public abstract boolean continueUpdating();
-
-    public abstract void reset();
 }

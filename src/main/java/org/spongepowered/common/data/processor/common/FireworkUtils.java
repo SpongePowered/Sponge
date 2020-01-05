@@ -25,8 +25,6 @@
 package org.spongepowered.common.data.processor.common;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.item.FireworkRocketEntity;
@@ -38,10 +36,11 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
-import org.spongepowered.common.item.SpongeFireworkShape;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.mixin.accessor.entity.item.FireworkRocketEntityAccessor;
+import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -50,14 +49,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public class FireworkUtils {
-
-    public static final BiMap<Byte, SpongeFireworkShape> shapeMapping = ImmutableBiMap.<Byte, SpongeFireworkShape>builder()
-            .put((byte) 0, new SpongeFireworkShape("minecraft:ball", "Ball"))
-            .put((byte) 1, new SpongeFireworkShape("minecraft:large_ball", "Large Ball"))
-            .put((byte) 2, new SpongeFireworkShape("minecraft:star", "Star"))
-            .put((byte) 3, new SpongeFireworkShape("minecraft:creeper", "Creeper"))
-            .put((byte) 4, new SpongeFireworkShape("minecraft:burst", "Burst"))
-            .build();
 
     public static ItemStack getItem(final FireworkRocketEntity firework) {
         ItemStack item = firework.getDataManager().get(FireworkRocketEntityAccessor.accessor$getFireworkItem());
@@ -80,41 +71,33 @@ public class FireworkUtils {
             return null;
         }
 
-        return fromNbt(firework);
+        return fromCompound(firework);
     }
 
-    public static FireworkShape getShape(byte id) {
-        if(id > 4) id = 0;
-        return shapeMapping.get(id);
-    }
-
-    public static byte getShapeId(final FireworkShape shape) {
-        return shapeMapping.inverse().get(shape);
-    }
-
-    public static FireworkEffect fromNbt(final CompoundNBT effectNbt) {
+    public static FireworkEffect fromCompound(final CompoundNBT compound) {
         final FireworkEffect.Builder builder = new SpongeFireworkEffectBuilder();
-        if (effectNbt.contains(Constants.Item.Fireworks.FLICKER)) {
-            builder.flicker(effectNbt.getBoolean(Constants.Item.Fireworks.FLICKER));
+        if (compound.contains(Constants.Item.Fireworks.FLICKER)) {
+            builder.flicker(compound.getBoolean(Constants.Item.Fireworks.FLICKER));
         }
-        if (effectNbt.contains(Constants.Item.Fireworks.TRAIL)) {
-            builder.trail(effectNbt.getBoolean(Constants.Item.Fireworks.TRAIL));
+        if (compound.contains(Constants.Item.Fireworks.TRAIL)) {
+            builder.trail(compound.getBoolean(Constants.Item.Fireworks.TRAIL));
         }
-        if (effectNbt.contains(Constants.Item.Fireworks.SHAPE_TYPE)) {
-            final byte type = effectNbt.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
-            builder.shape(getShape(type));
+        if (compound.contains(Constants.Item.Fireworks.SHAPE_TYPE)) {
+            final byte type = compound.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
+            final MappedRegistry<FireworkShape, Byte> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(FireworkShape.class);
+            builder.shape(registry.getReverseMapping(type));
         }
-        if (effectNbt.contains(Constants.Item.Fireworks.COLORS)) {
+        if (compound.contains(Constants.Item.Fireworks.COLORS)) {
             final List<Color> colors = Lists.newArrayList();
-            final int[] colorsRaw = effectNbt.getIntArray(Constants.Item.Fireworks.COLORS);
+            final int[] colorsRaw = compound.getIntArray(Constants.Item.Fireworks.COLORS);
             for(final int color : colorsRaw) {
                 colors.add(Color.ofRgb(color));
             }
             builder.colors(colors);
         }
-        if (effectNbt.contains(Constants.Item.Fireworks.FADE_COLORS)) {
+        if (compound.contains(Constants.Item.Fireworks.FADE_COLORS)) {
             final List<Color> fades = Lists.newArrayList();
-            final int[] fadesRaw = effectNbt.getIntArray(Constants.Item.Fireworks.FADE_COLORS);
+            final int[] fadesRaw = compound.getIntArray(Constants.Item.Fireworks.FADE_COLORS);
             for(final int fade : fadesRaw) {
                 fades.add(Color.ofRgb(fade));
             }
@@ -124,11 +107,13 @@ public class FireworkUtils {
         return builder.build();
     }
 
-    public static CompoundNBT toNbt(final FireworkEffect effect) {
+    public static CompoundNBT toCompound(final FireworkEffect effect) {
+        final MappedRegistry<FireworkShape, Byte> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(FireworkShape.class);
+
         final CompoundNBT tag = new CompoundNBT();
         tag.putBoolean(Constants.Item.Fireworks.FLICKER, effect.flickers());
         tag.putBoolean(Constants.Item.Fireworks.TRAIL, effect.hasTrail());
-        tag.putByte(Constants.Item.Fireworks.SHAPE_TYPE, getShapeId(effect.getShape()));
+        tag.putByte(Constants.Item.Fireworks.SHAPE_TYPE, registry.getMapping(effect.getShape()));
         final int[] colorsArray = new int[effect.getColors().size()];
         final List<Color> colors = effect.getColors();
         for (int i = 0; i < colors.size(); i++) {
@@ -161,14 +146,14 @@ public class FireworkUtils {
                 return true;
             }
             if(!effects.isEmpty()) {
-                tag.put(Constants.Entity.Firework.EXPLOSION, toNbt(effects.get(0)));
+                tag.put(Constants.Entity.Firework.EXPLOSION, toCompound(effects.get(0)));
             } else {
                 tag.remove(Constants.Entity.Firework.EXPLOSION);
             }
             return true;
         } else if(item.getItem() == Items.FIREWORKS) {
             final ListNBT nbtEffects = new ListNBT();
-            effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::appendTag);
+            effects.stream().map(FireworkUtils::toCompound).forEach(nbtEffects::add);
 
             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
             fireworks.put(Constants.Item.Fireworks.EXPLOSIONS, nbtEffects);
@@ -194,9 +179,9 @@ public class FireworkUtils {
 
             final ListNBT effectsNbt = fireworks.getList(Constants.Item.Fireworks.EXPLOSIONS, Constants.NBT.TAG_COMPOUND);
             effects = Lists.newArrayList();
-            for(int i = 0; i < effectsNbt.tagCount(); i++) {
+            for(int i = 0; i < effectsNbt.size(); i++) {
                 final CompoundNBT effectNbt = effectsNbt.getCompound(i);
-                effects.add(fromNbt(effectNbt));
+                effects.add(fromCompound(effectNbt));
             }
         } else {
             final FireworkEffect effect = FireworkUtils.getChargeEffect(item);
@@ -224,7 +209,7 @@ public class FireworkUtils {
             }
             tag.remove(Constants.Entity.Firework.EXPLOSION);
             return true;
-        } else if(item.getItem() == Items.FIREWORKS) {
+        } else if(item.getItem() == Items.FIREWORK_STAR) {
             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
             fireworks.remove(Constants.Item.Fireworks.EXPLOSIONS);
             return true;

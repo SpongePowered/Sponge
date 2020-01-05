@@ -54,6 +54,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.BossInfo;
+import net.minecraft.world.GameType;
 import net.minecraft.world.raid.Raid;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
@@ -95,12 +96,18 @@ import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
+import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
@@ -112,7 +119,12 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.registry.builtin.stream.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.BodyPartStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.DismountTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.DisplaySlotStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.DragonPhaseTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.FireworkShapeStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.GoalExecutorTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.GoalTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.HorseColorStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.HorseStyleStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.LlamaTypeStreamGenerator;
@@ -276,7 +288,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    public <T extends CatalogType, U> SpongeCatalogRegistry registerMappedRegistry(Class<T> catalogClass, CatalogKey key,
+    private <T extends CatalogType, U> SpongeCatalogRegistry registerMappedRegistry(Class<T> catalogClass, CatalogKey key,
         @Nullable Supplier<Set<Tuple<T, U>>> defaultsSupplier, boolean generateSuppliers) {
 
         checkNotNull(catalogClass);
@@ -304,10 +316,10 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    public <T extends CatalogType> SimpleRegistry<T> getRegistry(Class<T> catalogClass) {
+    public <T extends CatalogType, R extends Registry<T>> R getRegistry(Class<T> catalogClass) {
         checkNotNull(catalogClass);
 
-        return (SimpleRegistry<T>) (Object) this.registriesByType.get(catalogClass);
+        return (R) (Object) this.registriesByType.get(catalogClass);
     }
 
     public SpongeCatalogRegistry registerCatalog(CatalogType catalogType) {
@@ -351,9 +363,13 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(ComparatorType.class, CatalogKey.minecraft("comparator_type"), Arrays.stream(ComparatorMode.values()), true)
             .generateRegistry(Currency.class, CatalogKey.sponge("currency"), null, false)
             .generateRegistry(Difficulty.class, CatalogKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true)
+            .generateRegistry(DismountType.class, CatalogKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true)
+            .generateRegistry(DisplaySlot.class, CatalogKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true)
             .generateRegistry(DragonPhaseType.class, CatalogKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true)
             .generateRegistry(DyeColor.class, CatalogKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
             .generateRegistry(FoxType.class, CatalogKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
+            .generateRegistry(GameMode.class, CatalogKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true)
+            .generateRegistry(GoalExecutorType.class, CatalogKey.minecraft("goal_executor_type"), GoalExecutorTypeStreamGenerator.stream(), true)
             .generateRegistry(HandPreference.class, CatalogKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true)
             .generateRegistry(HandType.class, CatalogKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true)
             .generateRegistry(Hinge.class, CatalogKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true)
@@ -378,6 +394,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         this
             .generateMappedRegistry(CatType.class, CatalogKey.minecraft("cat_type"), CatTypeStreamGenerator.stream(), true)
+            .generateMappedRegistry(FireworkShape.class, CatalogKey.minecraft("firework_shape"), FireworkShapeStreamGenerator.stream(), true)
+            .generateMappedRegistry(GoalType.class, CatalogKey.minecraft("goal_type"), GoalTypeStreamGenerator.stream(), true)
             .generateMappedRegistry(HorseColor.class, CatalogKey.minecraft("horse_color"), HorseColorStreamGenerator.stream(), true)
             .generateMappedRegistry(HorseStyle.class, CatalogKey.minecraft("horse_style"), HorseStyleStreamGenerator.stream(), true)
             .generateMappedRegistry(LlamaType.class, CatalogKey.minecraft("llama_type"), LlamaTypeStreamGenerator.stream(), true)

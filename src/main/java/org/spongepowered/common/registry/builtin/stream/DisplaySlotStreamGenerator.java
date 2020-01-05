@@ -22,27 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item;
+package org.spongepowered.common.registry.builtin.stream;
 
-import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 
-public class SpongeFireworkShape implements FireworkShape {
+import java.util.stream.Stream;
 
-    private final String id;
-    private final String name;
+public final class DisplaySlotStreamGenerator {
 
-    public SpongeFireworkShape(String id, String name) {
-        this.id = id;
-        this.name = name;
+    private DisplaySlotStreamGenerator() {
     }
 
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
+    public static Stream<DisplaySlot> stream() {
+        return Stream.of(
+            new SpongeDisplaySlot(CatalogKey.minecraft("below_name"), 0),
+            new SpongeDisplaySlot(CatalogKey.minecraft("list"), 1),
+            new SpongeDisplaySlot(CatalogKey.minecraft("sidebar"), 2)
+        );
     }
 }

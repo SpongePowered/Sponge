@@ -24,36 +24,13 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeGoalExecutorType implements GoalExecutorType {
+public final class SpongeGoalExecutorType extends SpongeCatalogType implements GoalExecutorType {
 
-    private final CatalogKey key;
-    private final Class<? extends GoalExecutor<?>> goalExecutorClass;
-
-    public SpongeGoalExecutorType(CatalogKey key, Class<? extends GoalExecutor<?>> goalExecutorClass) {
-        this.key = key;
-        this.goalExecutorClass = goalExecutorClass;
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public Class<? extends GoalExecutor<?>> getGoalExecutorClass() {
-        return this.goalExecutorClass;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .addValue(this.key)
-                .add("goalExecutorClass", this.goalExecutorClass)
-                .toString();
+    public SpongeGoalExecutorType(CatalogKey key) {
+        super(key);
     }
 }
