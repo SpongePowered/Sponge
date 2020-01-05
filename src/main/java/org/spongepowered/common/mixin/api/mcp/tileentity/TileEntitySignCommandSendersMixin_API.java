@@ -39,7 +39,8 @@ import org.spongepowered.common.command.WrapperCommandSource;
 @Mixin(targets = {"net/minecraft/tileentity/TileEntitySign$1", "net/minecraft/tileentity/TileEntitySign$2"})
 public abstract class TileEntitySignCommandSendersMixin_API implements SignSource {
 
-    @Shadow(aliases = {"this$0"}, remap = false)
+    // SpongeForge, SpongeVanilla TileEntitySign$1, SpongeVanilla TileEntitySign$2.
+    @Shadow(aliases = {"this$0", "field_174795_a", "field_174796_b"}, remap = false)
     @Final
     private TileEntitySign tileEntitySign;
 
