@@ -25,18 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.SpiderEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.spider.Spider;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Set;
 
 @Mixin(SpiderEntity.class)
 public abstract class SpiderEntityMixin_API extends MonsterEntityMixin_API implements Spider {
 
-    @Shadow public abstract boolean isBesideClimbableBlock();
-
     @Override
-    public boolean isClimbing() {
-        return this.isBesideClimbableBlock();
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.climbing());
+
+        return values;
     }
 
 }

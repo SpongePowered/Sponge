@@ -24,42 +24,29 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.Value.Mutable;
+import net.minecraft.entity.item.HangingEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
-
+import java.util.Set;
 import javax.annotation.Nullable;
-import net.minecraft.entity.item.HangingEntity;
 
 @Mixin(HangingEntity.class)
 public abstract class HangingEntityMixin_API extends EntityMixin_API implements Hanging {
 
-    @Shadow @Nullable public net.minecraft.util.Direction facingDirection;
-
     @Override
-    public DirectionalData getDirectionalData() {
-        return new SpongeDirectionalData(this.facingDirection == null ? Direction.NONE : Constants.DirectionFunctions.getFor(this.facingDirection));
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public Mutable<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, this.facingDirection == null ? Direction.NONE : Constants.DirectionFunctions.getFor(this.facingDirection));
-    }
+        values.add(this.direction().asImmutable());
 
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getDirectionalData());
+        return values;
     }
 
 }

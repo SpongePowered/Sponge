@@ -29,6 +29,6 @@ import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(SmallFireballEntity.class)
-public abstract class SmallFireballEntityMixin_API extends DamagingProjectileEntityMixin_API implements SmallFireball {
+public abstract class SmallFireballEntityMixin_API extends AbstractFireballEntityMixin_API implements SmallFireball {
 
 }

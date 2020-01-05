@@ -24,54 +24,39 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item.minecart;
 
-import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.SpawnerMinecart;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
-import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
-import org.spongepowered.common.data.processor.common.SpawnerUtils;
 
-import java.util.Collection;
+import java.util.Set;
+
 import net.minecraft.entity.item.minecart.SpawnerMinecartEntity;
 import net.minecraft.world.spawner.AbstractSpawner;
 
 @Mixin(SpawnerMinecartEntity.class)
 public abstract class SpawnerMinecartEntityMixin_API extends AbstractMinecartEntityMixin_API implements SpawnerMinecart {
 
-    @Shadow @Final private AbstractSpawner mobSpawnerLogic;
-
     @Override
-    public MobSpawnerData getSpawnerData() {
-        // TODO - Update once Mixin 0.8 for accessors
-//        final MobSpawnerBaseLogicAccessor accessor = (MobSpawnerBaseLogicAccessor) this.mobSpawnerLogic;
-//        return new SpongeMobSpawnerData(
-//                (short) accessor.accessor$getSpawnDelay(),
-//                (short) accessor.accessor$getMinSpawnDelay(),
-//                (short) accessor.accessor$getMaxSpawnDelay(),
-//                (short) accessor.accessor$getSpawnCount(),
-//                (short) accessor.accessor$getMaxNearbyEntities(),
-//                (short) accessor.accessor$getActivatingRangeFromPlayer(),
-//                (short) accessor.accessor$getSpawnRange(),
-//                SpawnerUtils.getNextEntity(accessor),
-//                SpawnerUtils.getEntities(this.mobSpawnerLogic));
-        final AbstractSpawnerBridge accessor = (AbstractSpawnerBridge) this.mobSpawnerLogic;
-        return new SpongeMobSpawnerData(
-            (short) accessor.bridge$getSpawnDelay(),
-            (short) accessor.bridge$getMinSpawnDelay(),
-            (short) accessor.bridge$getMaxSpawnDelay(),
-            (short) accessor.bridge$getSpawnCount(),
-            (short) accessor.bridge$getMaxNearbyEntities(),
-            (short) accessor.bridge$getActivatingRangeFromPlayer(),
-            (short) accessor.bridge$getSpawnRange(),
-            SpawnerUtils.getNextEntity(accessor),
-            SpawnerUtils.getEntities(this.mobSpawnerLogic));
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // BlockOccupiedMinecart
+        values.add(this.block().asImmutable());
+
+        // Spawner
+        values.add(this.remainingDelay().asImmutable());
+        values.add(this.minimumSpawnDelay().asImmutable());
+        values.add(this.maximumSpawnDelay().asImmutable());
+        values.add(this.spawnCount().asImmutable());
+        values.add(this.maximumNearbyEntities().asImmutable());
+        values.add(this.requiredPlayerRange().asImmutable());
+        values.add(this.spawnRange().asImmutable());
+        values.add(this.nextEntityToSpawn().asImmutable());
+        values.add(this.possibleEntitiesToSpawn().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getSpawnerData());
-    }
 }

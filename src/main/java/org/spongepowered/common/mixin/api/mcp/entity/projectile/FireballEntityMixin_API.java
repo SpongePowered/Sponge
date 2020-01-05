@@ -25,10 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import net.minecraft.entity.projectile.FireballEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.projectile.FireballEntityBridge;
+
+import java.util.Set;
 
 @Mixin(FireballEntity.class)
 public abstract class FireballEntityMixin_API extends AbstractFireballEntityMixin_API implements ExplosiveFireball {
@@ -40,4 +43,15 @@ public abstract class FireballEntityMixin_API extends AbstractFireballEntityMixi
         ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
         this.setDead();
     }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Explosive
+        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
+
 }

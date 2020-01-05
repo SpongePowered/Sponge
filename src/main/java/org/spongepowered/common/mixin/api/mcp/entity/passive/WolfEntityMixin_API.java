@@ -24,25 +24,27 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
+import net.minecraft.entity.passive.WolfEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
-import org.spongepowered.common.mixin.api.mcp.entity.AgeableEntityMixin_API;
 
-import java.util.Collection;
-import net.minecraft.entity.passive.WolfEntity;
+import java.util.Set;
 
 @Mixin(WolfEntity.class)
-public abstract class WolfEntityMixin_API extends AgeableEntityMixin_API implements Wolf {
-
-    @Shadow public abstract boolean shadow$isAngry();
+public abstract class WolfEntityMixin_API extends TameableEntityMixin_API implements Wolf {
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.get(SittingData.class).get());
-        manipulators.add(new SpongeAggressiveData(this.shadow$isAngry()));
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Sittable
+        values.add(this.sitting().asImmutable());
+
+        values.add(this.angry().asImmutable());
+        values.add(this.collarColor().asImmutable());
+        values.add(this.beggingForFood().asImmutable());
+
+        return values;
     }
 }

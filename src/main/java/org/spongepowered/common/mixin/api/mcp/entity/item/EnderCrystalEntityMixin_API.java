@@ -25,10 +25,17 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EnderCrystalEntity;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.explosive.EnderCrystal;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.item.EnderCrystalEntityBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
+
+import javax.annotation.Nullable;
+import java.util.Set;
 
 @Mixin(EnderCrystalEntity.class)
 public abstract class EnderCrystalEntityMixin_API extends EntityMixin_API implements EnderCrystal {
@@ -37,5 +44,19 @@ public abstract class EnderCrystalEntityMixin_API extends EntityMixin_API implem
     public void detonate() {
         this.setDead();
         ((EnderCrystalEntityBridge) this).bridge$ThrowEventWithDetonation(this.world, null, this.posX, this.posY, this.posZ, true, null);
+    }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Explosive
+        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+
+        values.add(this.showBottom().asImmutable());
+
+        this.beamTarget().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 }

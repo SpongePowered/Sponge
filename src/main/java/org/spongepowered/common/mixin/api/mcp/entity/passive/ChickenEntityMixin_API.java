@@ -25,10 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.ChickenEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Chicken;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Set;
+
 @Mixin(ChickenEntity.class)
 public abstract class ChickenEntityMixin_API extends AnimalEntityMixin_API implements Chicken {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.eggTime().asImmutable());
+
+        return values;
+    }
 
 }

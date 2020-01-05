@@ -24,48 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
+import net.minecraft.entity.projectile.ThrowableEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import javax.annotation.Nullable;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
+import java.util.Set;
 
 @Mixin(ThrowableEntity.class)
 public abstract class ThrowableEntityMixin_API extends EntityMixin_API implements Projectile {
 
-    @Shadow protected LivingEntity thrower;
-    @Shadow private String throwerName;
-    @Shadow public abstract LivingEntity getThrower();
-
-    @Nullable
-    public ProjectileSource projectileSource;
-
     @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        } else if (this.getThrower() != null && this.getThrower() instanceof ProjectileSource) {
-            return (ProjectileSource) this.getThrower();
-        }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        return ProjectileSource.UNKNOWN;
-    }
+        values.add(this.shooter().asImmutable());
 
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof LivingEntity) {
-            // This allows things like Vanilla kill attribution to take place
-            this.thrower = (LivingEntity) shooter;
-        } else {
-            this.thrower = null;
-        }
-
-        this.throwerName = null;
-        this.projectileSource = shooter;
+        return values;
     }
 
 }

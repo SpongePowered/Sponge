@@ -24,94 +24,32 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import com.google.common.collect.Maps;
 import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.util.math.Rotations;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
-import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
-import org.spongepowered.api.data.manipulator.mutable.entity.DisabledSlotsData;
-import org.spongepowered.api.data.type.BodyPart;
-import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArmorStandData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBodyPartRotationalData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDisabledSlotsData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.LivingEntityMixin_API;
-import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3d;
-import java.util.Collection;
-import java.util.Map;
+
+import java.util.Set;
 
 @Mixin(ArmorStandEntity.class)
 @Implements(@Interface(iface = ArmorStand.class, prefix = "armor$"))
 public abstract class ArmorStandEntityMixin_API extends LivingEntityMixin_API implements ArmorStand {
 
-    @Shadow private Rotations leftArmRotation;
-    @Shadow private Rotations rightArmRotation;
-    @Shadow private Rotations leftLegRotation;
-    @Shadow private Rotations rightLegRotation;
-
-    @Shadow public abstract boolean getShowArms(); // getShowArms
-    @Shadow public abstract boolean hasNoBasePlate(); // hasNoBasePlate
-    @Shadow public abstract boolean hasMarker();
-    @Shadow public abstract boolean shadow$isSmall();
-    @Shadow public abstract Rotations shadow$getHeadRotation();
-    @Shadow public abstract Rotations getBodyRotation();
-
     @Override
-    public Value.Mutable<Boolean> marker() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_MARKER, false, this.hasMarker());
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public Value.Mutable<Boolean> small() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_IS_SMALL, false, this.shadow$isSmall());
-    }
+        values.add(this.marker().asImmutable());
+        values.add(this.small().asImmutable());
+        values.add(this.basePlate().asImmutable());
+        values.add(this.arms().asImmutable());
+        values.add(this.placingDisabled().asImmutable());
+        values.add(this.takingDisabled().asImmutable());
 
-    @Override
-    public Value.Mutable<Boolean> basePlate() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, !this.hasNoBasePlate());
-    }
-
-    @Override
-    public Value.Mutable<Boolean> arms() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_ARMS, false, this.getShowArms());
-    }
-
-    @Override
-    public ArmorStandData getArmorStandData() {
-        return new SpongeArmorStandData(this.hasMarker(), this.shadow$isSmall(), this.getShowArms(), !this.hasNoBasePlate());
-    }
-
-    @Override
-    public DisabledSlotsData getDisabledSlotsData() {
-        return new SpongeDisabledSlotsData(this.takingDisabled().get(), this.placingDisabled().get());
-    }
-
-    @Override
-    public BodyPartRotationalData getBodyPartRotationalData() {
-        Map<BodyPart, Vector3d> rotations = Maps.newHashMapWithExpectedSize(6);
-        rotations.put(BodyParts.HEAD, VecHelper.toVector3d(this.shadow$getHeadRotation()));
-        rotations.put(BodyParts.CHEST, VecHelper.toVector3d(this.getBodyRotation()));
-        rotations.put(BodyParts.LEFT_ARM, VecHelper.toVector3d(this.leftArmRotation));
-        rotations.put(BodyParts.RIGHT_ARM, VecHelper.toVector3d(this.rightArmRotation));
-        rotations.put(BodyParts.LEFT_LEG, VecHelper.toVector3d(this.leftLegRotation));
-        rotations.put(BodyParts.RIGHT_LEG, VecHelper.toVector3d(this.rightLegRotation));
-        return new SpongeBodyPartRotationalData(rotations);
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getBodyPartRotationalData());
-        manipulators.add(this.getArmorStandData());
+        return values;
     }
 
 }

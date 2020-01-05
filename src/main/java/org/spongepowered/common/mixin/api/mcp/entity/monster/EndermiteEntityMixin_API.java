@@ -24,43 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
-import org.spongepowered.api.data.value.BoundedValue;
+import net.minecraft.entity.monster.EndermiteEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Endermite;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
-import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.util.Constants;
 
-import java.time.Duration;
-import java.util.Collection;
-import net.minecraft.entity.monster.EndermiteEntity;
+import java.util.Set;
 
 @Mixin(EndermiteEntity.class)
 public abstract class EndermiteEntityMixin_API extends MonsterEntityMixin_API implements Endermite {
 
-    @Shadow private int lifetime;
-
     @Override
-    public ExpirableData getExpirableData() {
-        return new SpongeExpirableData(this.lifetime, Constants.Entity.Silverfish.MAX_EXPIRATION_TICKS);
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.expirationDelay().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public BoundedValue.Mutable<Duration> expirationDelay() {
-        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_DELAY)
-                .minimum(0)
-                .maximum(Constants.Entity.Silverfish.MAX_EXPIRATION_TICKS)
-                .defaultValue(0)
-                .actualValue(this.lifetime)
-                .build();
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getExpirableData());
-    }
 }

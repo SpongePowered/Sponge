@@ -24,34 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.GuardianEntity;
-import net.minecraft.network.datasync.DataParameter;
-import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.guardian.Guardian;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Optional;
+import java.util.Set;
 
 @Mixin(GuardianEntity.class)
 public abstract class GuardianEntityMixin_API extends MonsterEntityMixin_API implements Guardian {
 
-    @Shadow @Final private static DataParameter<Integer> TARGET_ENTITY;
-    @Shadow private void setTargetedEntity(int entityId) { } // setTargetedEntity
-
     @Override
-    public Optional<Living> getBeamTarget() {
-        return Optional.ofNullable((Living) this.world.getEntityByID(this.dataManager.get(TARGET_ENTITY)));
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        this.beamTarget().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 
-    @Override
-    public void setBeamTarget(Living entity) {
-        if (entity == null) {
-            this.setTargetedEntity(0);
-        } else {
-            this.setTargetedEntity(((LivingEntity) entity).getEntityId());
-        }
-    }
 }

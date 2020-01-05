@@ -62,5 +62,4 @@ public abstract class PlayerEntityMixin_API extends LivingEntityMixin_API {
         return this.shadow$getName();
     }
 
-
 }

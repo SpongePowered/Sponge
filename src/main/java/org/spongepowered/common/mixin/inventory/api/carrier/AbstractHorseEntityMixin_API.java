@@ -26,17 +26,25 @@ package org.spongepowered.common.mixin.inventory.api.carrier;
 
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.inventory.Inventory;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.HorseEntity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.util.InventoryUtil;
+import org.spongepowered.common.mixin.api.mcp.entity.passive.AnimalEntityMixin_API;
+
+import javax.annotation.Nullable;
+import java.util.Set;
+import java.util.UUID;
 
 @Mixin(AbstractHorseEntity.class)
-public abstract class AbstractHorseEntityMixin_API implements Carrier {
+public abstract class AbstractHorseEntityMixin_API extends AnimalEntityMixin_API implements HorseEntity, Carrier {
 
     @Shadow protected Inventory horseChest;
+
+    @Shadow @Nullable public abstract UUID shadow$getOwnerUniqueId();
 
     @SuppressWarnings("unchecked")
     @Override

@@ -26,50 +26,33 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
-import org.spongepowered.api.data.value.Value.Mutable;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.Collection;
+import java.util.Set;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin_API extends EntityMixin_API implements Item {
 
-    @Shadow public abstract ItemStack getItem();
+    @Shadow public abstract ItemStack shadow$getItem();
 
     @Override
     public Translation getTranslation() {
-        return ((org.spongepowered.api.item.inventory.ItemStack) this.getItem()).getTranslation();
+        return ((org.spongepowered.api.item.inventory.ItemStack) (Object) this.shadow$getItem()).getTranslation();
     }
 
     @Override
-    public ItemType getItemType() {
-        return (ItemType) this.getItem().getItem();
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.item().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public RepresentedItemData getItemData() {
-        return new SpongeRepresentedItemData(ItemStackUtil.snapshotOf(this.getItem()));
-    }
-
-    @Override
-    public Mutable<ItemStackSnapshot> item() {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getItem()));
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getItemData());
-    }
 }

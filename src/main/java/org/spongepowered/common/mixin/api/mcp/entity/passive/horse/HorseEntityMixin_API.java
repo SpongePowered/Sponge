@@ -24,10 +24,26 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive.horse;
 
+import net.minecraft.entity.passive.horse.HorseEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.Horse;
 import org.spongepowered.asm.mixin.Mixin;
-import net.minecraft.entity.passive.horse.HorseEntity;
+
+import java.util.Set;
 
 @Mixin(HorseEntity.class)
-public abstract class HorseEntityMixin_API extends AbstractHorseMixin_API implements Horse {
+public abstract class HorseEntityMixin_API extends AbstractHorseEntityMixin_API implements Horse {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.color().asImmutable());
+        values.add(this.style().asImmutable());
+
+        this.tamer().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
+
 }

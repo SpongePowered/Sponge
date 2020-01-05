@@ -25,10 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive.horse;
 
 import net.minecraft.entity.passive.horse.DonkeyEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.Donkey;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Set;
+
 @Mixin(DonkeyEntity.class)
-public abstract class DonkeyEntityMixin_API extends AbstractHorseMixin_API implements Donkey {
+public abstract class DonkeyEntityMixin_API extends AbstractChestedHorseEntityMixin_API implements Donkey {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        this.tamer().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
 
 }

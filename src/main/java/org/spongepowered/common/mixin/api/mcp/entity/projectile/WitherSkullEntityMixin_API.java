@@ -25,9 +25,12 @@
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import net.minecraft.entity.projectile.WitherSkullEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.entity.projectile.WitherSkullEntityBridge;
+
+import java.util.Set;
 
 @Mixin(WitherSkullEntity.class)
 public abstract class WitherSkullEntityMixin_API extends DamagingProjectileEntityMixin_API implements WitherSkull {
@@ -37,4 +40,18 @@ public abstract class WitherSkullEntityMixin_API extends DamagingProjectileEntit
         ((WitherSkullEntityBridge) this).bridge$CreateAndProcessExplosionEvent(this.world, (WitherSkullEntity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
         this.setDead();
     }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // FireballEntity
+        values.add(this.acceleration().asImmutable());
+
+        // Explosive
+        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
+
 }

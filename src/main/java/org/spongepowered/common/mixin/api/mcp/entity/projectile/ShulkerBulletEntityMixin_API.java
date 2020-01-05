@@ -24,73 +24,30 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.Value.Mutable;
-import org.spongepowered.api.entity.projectile.ShulkerBullet;
-import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
-import org.spongepowered.common.util.Constants;
-
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ShulkerBulletEntity;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.projectile.ShulkerBullet;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
+
+import java.util.Set;
 
 @Mixin(ShulkerBulletEntity.class)
 public abstract class ShulkerBulletEntityMixin_API extends EntityMixin_API implements ShulkerBullet {
 
-    @Shadow @Nullable private net.minecraft.util.Direction direction;
-
-    @Shadow private LivingEntity owner;
-
-    @Nullable public ProjectileSource projectileSource;
-
     @Override
-    public DirectionalData getDirectionalData() {
-        return new SpongeDirectionalData( this.direction != null ? Constants.DirectionFunctions.getFor(this.direction) : Direction.NONE);
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Projectile
+        values.add(this.shooter().asImmutable());
+
+        // EntityTargettingProjectile
+        this.targetEntity().map(Value::asImmutable).ifPresent(values::add);
+
+        values.add(this.direction().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public Mutable<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, this.direction != null ? Constants.DirectionFunctions.getFor(this.direction) : Direction.NONE);
-    }
-
-    @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        }
-
-        if (this.owner instanceof ProjectileSource) {
-            return (ProjectileSource) this.owner;
-        }
-
-        return ProjectileSource.UNKNOWN;
-    }
-
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof LivingEntity) {
-            this.owner = (LivingEntity) shooter;
-        } else {
-            this.owner = null;
-        }
-
-        this.projectileSource = shooter;
-    }
-
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getTargetData());
-        manipulators.add(this.getDirectionalData());
-    }
 }

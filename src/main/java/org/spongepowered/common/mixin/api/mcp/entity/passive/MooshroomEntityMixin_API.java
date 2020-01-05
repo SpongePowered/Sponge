@@ -25,10 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.MooshroomEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.cow.Mooshroom;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Set;
+
 @Mixin(MooshroomEntity.class)
 public abstract class MooshroomEntityMixin_API extends AnimalEntityMixin_API implements Mooshroom {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.type().asImmutable());
+
+        return values;
+    }
 
 }

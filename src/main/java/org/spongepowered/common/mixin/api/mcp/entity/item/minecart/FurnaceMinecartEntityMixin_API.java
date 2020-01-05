@@ -25,23 +25,26 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item.minecart;
 
 import net.minecraft.entity.item.minecart.FurnaceMinecartEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.FurnaceMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Set;
+
 @Mixin(FurnaceMinecartEntity.class)
 public abstract class FurnaceMinecartEntityMixin_API extends AbstractMinecartEntityMixin_API implements FurnaceMinecart {
 
-    @Shadow private int fuel;
-
     @Override
-    public int getFuel() {
-        return this.fuel;
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public void setFuel(int fuel) {
-        this.fuel = fuel;
+        // BlockOccupiedMinecart
+        values.add(this.block().asImmutable());
+
+        values.add(this.fuelDuration().asImmutable());
+
+        return values;
     }
 
 }

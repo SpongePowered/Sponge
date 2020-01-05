@@ -30,6 +30,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.weather.LightningBolt;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,13 +41,14 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
 import net.minecraft.entity.effect.LightningBoltEntity;
+import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import org.spongepowered.common.mixin.invalid.api.mcp.entity.effect.EntityWeatherEffectMixin_API;
 
 @Mixin(LightningBoltEntity.class)
-public abstract class LightningBoltEntityMixin_API extends EntityWeatherEffectMixin_API implements LightningBolt {
-
-    @Shadow private int lightningState;
+public abstract class LightningBoltEntityMixin_API extends EntityMixin_API implements LightningBolt {
 
     private final List<Entity> api$struckEntities = Lists.newArrayList();
     private final List<Transaction<BlockSnapshot>> api$struckBlocks = Lists.newArrayList();
@@ -67,23 +69,13 @@ public abstract class LightningBoltEntityMixin_API extends EntityWeatherEffectMi
     }
 
     @Override
-    public ExpirableData getExpiringData() {
-        return new SpongeExpirableData(this.lightningState, 2);
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.harmful().asImmutable());
+        values.add(this.expirationDelay().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public BoundedValue.Mutable<Duration> expirationDelay() {
-        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_DELAY)
-                .minimum((int) Short.MIN_VALUE)
-                .maximum(2)
-                .defaultValue(2)
-                .actualValue(this.lightningState)
-                .build();
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getExpiringData());
-    }
 }

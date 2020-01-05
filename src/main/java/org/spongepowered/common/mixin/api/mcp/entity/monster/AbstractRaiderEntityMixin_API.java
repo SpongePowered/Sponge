@@ -25,21 +25,25 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.AbstractRaiderEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.Raider;
-import org.spongepowered.api.raid.Raid;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Optional;
+import java.util.Set;
 
 @Mixin(AbstractRaiderEntity.class)
 public abstract class AbstractRaiderEntityMixin_API extends PatrollerEntityMixin_API implements Raider {
 
-    @Shadow public abstract net.minecraft.world.raid.Raid shadow$getRaid();
-
     @Override
-    public Optional<Raid> getRaid() {
-        return Optional.ofNullable((Raid) this.shadow$getRaid());
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.canJoinRaid().asImmutable());
+        values.add(this.celebrating().asImmutable());
+
+        this.raidWave().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 
 }

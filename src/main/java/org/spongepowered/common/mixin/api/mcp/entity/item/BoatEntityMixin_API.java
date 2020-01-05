@@ -24,93 +24,37 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import org.spongepowered.api.data.DataManipulator.Mutable;
+import net.minecraft.entity.item.BoatEntity;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.WoodTypes;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.Boat;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
 import java.util.Collection;
-import net.minecraft.entity.item.BoatEntity;
+import java.util.Set;
 
 @Mixin(BoatEntity.class)
 @Implements(@Interface(iface = Boat.class, prefix = "apiBoat$"))
 public abstract class BoatEntityMixin_API extends EntityMixin_API implements Boat {
 
-    @Shadow public abstract BoatEntity.Type getBoatType();
-
-    private double maxSpeed = 0.35D;
-    private boolean moveOnLand = false;
-    private double occupiedDecelerationSpeed = 0D;
-    private double unoccupiedDecelerationSpeed = 0.8D;
-
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        final BoatEntity.Type boatType = this.getBoatType();
-        if (boatType == BoatEntity.Type.OAK) {
-            manipulators.add(new SpongeTreeData(WoodTypes.OAK));
-        } else if ( boatType == BoatEntity.Type.BIRCH) {
-            manipulators.add(new SpongeTreeData(WoodTypes.BIRCH));
-        } else if ( boatType == BoatEntity.Type.JUNGLE) {
-            manipulators.add(new SpongeTreeData(WoodTypes.JUNGLE));
-        } else if ( boatType == BoatEntity.Type.DARK_OAK) {
-            manipulators.add(new SpongeTreeData(WoodTypes.DARK_OAK));
-        } else if ( boatType == BoatEntity.Type.ACACIA) {
-            manipulators.add(new SpongeTreeData(WoodTypes.ACACIA));
-        } else if ( boatType == BoatEntity.Type.SPRUCE) {
-            manipulators.add(new SpongeTreeData(WoodTypes.SPRUCE));
-        }
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Intrinsic
-    public boolean apiBoat$isInWater() {
-        return !this.onGround;
-    }
+        values.add(this.inWater().asImmutable());
+        values.add(this.moveOnLand().asImmutable());
+        values.add(this.maxSpeed().asImmutable());
+        values.add(this.unoccupiedDeceleration().asImmutable());
+        values.add(this.occupiedDeceleration().asImmutable());
+        values.add(this.woodType().asImmutable());
 
-    @Override
-    public double getMaxSpeed() {
-        return this.maxSpeed;
-    }
-
-    @Override
-    public void setMaxSpeed(double maxSpeed) {
-        this.maxSpeed = maxSpeed;
-    }
-
-    @Override
-    public boolean canMoveOnLand() {
-        return this.moveOnLand;
-    }
-
-    @Override
-    public void setMoveOnLand(boolean moveOnLand) {
-        this.moveOnLand = moveOnLand;
-    }
-
-    @Override
-    public double getOccupiedDeceleration() {
-        return this.occupiedDecelerationSpeed;
-    }
-
-    @Override
-    public void setOccupiedDeceleration(double occupiedDeceleration) {
-        this.occupiedDecelerationSpeed = occupiedDeceleration;
-    }
-
-    @Override
-    public double getUnoccupiedDeceleration() {
-        return this.unoccupiedDecelerationSpeed;
-    }
-
-    @Override
-    public void setUnoccupiedDeceleration(double unoccupiedDeceleration) {
-        this.unoccupiedDecelerationSpeed = unoccupiedDeceleration;
+        return values;
     }
 
 }

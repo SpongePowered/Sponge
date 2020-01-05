@@ -872,13 +872,22 @@ public final class Constants {
 
         }
 
+        public static final class Panda {
+
+            public static final int UNHAPPY_TIME = 32;
+        }
+
         public static final class Parrot {
 
             public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_AND_BLUE;
         }
 
-        public static final class Player {
+        public static final class Phantom {
 
+            public static final double CAT_SCAN_RADIUS = 16.0D;
+        }
+
+        public static final class Player {
 
             public static final double DEFAULT_FLYING_SPEED = 0.05D;
             public static final double DEFAULT_EXHAUSTION = 0;

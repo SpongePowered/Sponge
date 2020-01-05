@@ -52,9 +52,6 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
-import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -102,9 +99,6 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
@@ -112,7 +106,6 @@ import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
@@ -133,7 +126,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Mixin(ServerPlayerEntity.class)
-@Implements(@Interface(iface = Player.class, prefix = "api$"))
+@Implements(@Interface(iface = Player.class, prefix = "player$"))
 public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API implements Player {
 
     @Shadow @Final public MinecraftServer server;
@@ -141,11 +134,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Shadow @Final private PlayerAdvancements advancements;
     @Shadow private String language;
     @Shadow public ServerPlayNetHandler connection;
-    @Shadow private PlayerEntity.EnumChatVisibility chatVisibility = PlayerEntity.EnumChatVisibility.FULL;
+    @Shadow private net.minecraft.entity.player.ChatVisibility chatVisibility = net.minecraft.entity.player.ChatVisibility.FULL;
     @Shadow private boolean chatColours;
-
-    @Shadow public abstract Entity getSpectatingEntity();
-    @Shadow public abstract void setSpectatingEntity(Entity entity);
 
     private boolean api$sleepingIgnored;
     private TabList api$tabList = new SpongeTabList((ServerPlayerEntity) (Object) this);
@@ -409,45 +399,12 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public JoinData getJoinData() {
-        return new SpongeJoinData(SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get(), Instant.now());
-    }
-
-    @Override
-    public Value.Mutable<Instant> firstPlayed() {
-        return new SpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get());
-    }
-
-    @Override
-    public Value.Mutable<Instant> lastPlayed() {
-        return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
-    }
-
-    @Override
     public boolean hasPlayedBefore() {
         final Instant instant = SpongePlayerDataHandler.getFirstJoined(this.getUniqueId()).get();
         final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
         final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
         final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
         return timeSinceFirstJoined.getSeconds() > 0;
-    }
-
-    @Override
-    public GameModeData getGameModeData() {
-        return new SpongeGameModeData((GameMode) (Object) this.interactionManager.getGameType());
-    }
-
-    @Override
-    public Value.Mutable<GameMode> gameMode() {
-        return new SpongeValue<>(Keys.GAME_MODE, Constants.Catalog.DEFAULT_GAMEMODE,
-                (GameMode) (Object) this.interactionManager.getGameType());
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getJoinData());
-        manipulators.add(this.getGameModeData());
     }
 
     public void sendBlockChange(final BlockPos pos, final net.minecraft.block.BlockState state) {
@@ -476,18 +433,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         }
         this.connection.player = this.server.getPlayerList().recreatePlayerEntity((ServerPlayerEntity) (Object) this, this.dimension, false);
         return true;
-    }
-
-    @Override
-    public Optional<org.spongepowered.api.entity.Entity> getSpectatorTarget() {
-        // For the API, return empty if we're spectating ourself.
-        @Nonnull final Entity entity = this.getSpectatingEntity();
-        return entity == (Object) this ? Optional.empty() : Optional.of((org.spongepowered.api.entity.Entity) entity);
-    }
-
-    @Override
-    public void setSpectatorTarget(@Nullable final org.spongepowered.api.entity.Entity entity) {
-        this.setSpectatingEntity((Entity) entity);
     }
 
     @Override
@@ -568,4 +513,26 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         final World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
         return this.setLocation(new Location<>(loaded, position));
     }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Humanoid
+        values.add(this.foodLevel().asImmutable());
+        values.add(this.exhaustion().asImmutable());
+        values.add(this.saturation().asImmutable());
+        values.add(this.gameMode().asImmutable());
+
+        // Player
+        values.add(this.firstPlayed().asImmutable());
+        values.add(this.lastPlayed().asImmutable());
+        values.add(this.sleepingIgnored().asImmutable());
+
+        // If getSpectatingEntity returns this player, then we are not spectating any other entity, so spectatorTarget would be an Optional.empty()
+        this.spectatorTarget().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
+
 }

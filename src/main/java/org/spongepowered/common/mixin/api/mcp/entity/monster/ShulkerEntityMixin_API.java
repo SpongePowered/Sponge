@@ -24,49 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.DyeableData;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.type.DyeColor;
+import net.minecraft.entity.monster.ShulkerEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.golem.Shulker;
 import org.spongepowered.api.entity.projectile.EntityTargetingProjectile;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
-import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.mixin.api.mcp.entity.passive.GolemEntityMixin_API;
-import org.spongepowered.common.util.Constants;
-import java.util.Collection;
+
 import java.util.Optional;
-import net.minecraft.entity.monster.ShulkerEntity;
+import java.util.Set;
 
 @Mixin(ShulkerEntity.class)
 public abstract class ShulkerEntityMixin_API extends GolemEntityMixin_API implements Shulker {
-
-
-    @Override
-    public DyeableData getDyeData() {
-        return new SpongeDyeableData(((ShulkerEntityBridge) this).bridge$getColor());
-    }
-
-    @Override
-    public Value.Mutable<DyeColor> color() {
-        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHULKER_COLOR, ((ShulkerEntityBridge) this).bridge$getColor());
-    }
-
-    @Override
-    public DirectionalData getDirectionalData() {
-        return new SpongeDirectionalData(((ShulkerEntityBridge) this).bridge$getDirection());
-    }
-
-    @Override
-    public Value.Mutable<Direction> direction() {
-        return new SpongeValue<>(Keys.DIRECTION, ((ShulkerEntityBridge) this).bridge$getDirection());
-    }
 
     @Override
     public <P extends EntityTargetingProjectile> Optional<P> launchWithTarget(final Class<P> projectileClass,
@@ -75,9 +45,13 @@ public abstract class ShulkerEntityMixin_API extends GolemEntityMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getDyeData());
-        manipulators.add(this.getDirectionalData());
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.color().asImmutable());
+        values.add(this.direction().asImmutable());
+
+        return values;
     }
+
 }

@@ -24,20 +24,25 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
+import net.minecraft.entity.monster.EndermanEntity;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Enderman;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Collection;
-import net.minecraft.entity.monster.EndermanEntity;
+import java.util.Set;
 
 @Mixin(EndermanEntity.class)
 public abstract class EndermanEntityMixin_API extends MonsterEntityMixin_API implements Enderman {
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.get(ScreamingData.class).get());
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.screaming().asImmutable());
+
+        return values;
     }
 
 }

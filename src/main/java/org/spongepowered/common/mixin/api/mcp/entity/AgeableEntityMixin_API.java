@@ -25,48 +25,23 @@
 package org.spongepowered.common.mixin.api.mcp.entity;
 
 import net.minecraft.entity.AgeableEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
-import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableData;
-import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
+
+import java.util.Set;
 
 @Mixin(AgeableEntity.class)
 public abstract class AgeableEntityMixin_API extends CreatureEntityMixin_API implements Ageable {
 
-    @Shadow public abstract void setScaleForAge(boolean child);
-    @Shadow public abstract boolean shadow$isChild();
-
-    @Shadow public abstract int getGrowingAge();
-
     @Override
-    public void setScaleForAge() {
-        this.setScaleForAge(this.shadow$isChild());
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.age().asImmutable());
+        values.add(this.adult().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public AgeableData getAgeData() {
-        return new SpongeAgeableData(this.getGrowingAge(), this.shadow$isChild());
-    }
-
-    @Override
-    public BoundedValue.Mutable<Integer> age() {
-        return SpongeValueFactory.boundedBuilder(Keys.AGEABLE_AGE)
-            .minimum(Constants.Entity.Ageable.CHILD)
-            .maximum(Integer.MAX_VALUE)
-            .defaultValue(Constants.Entity.Ageable.ADULT)
-            .actualValue(this.getGrowingAge())
-            .build()
-            ;
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.Value.Mutable<Boolean> adult() {
-        return new SpongeValue<>(Keys.IS_ADULT, true,  this.shadow$isChild());
-    }
 }

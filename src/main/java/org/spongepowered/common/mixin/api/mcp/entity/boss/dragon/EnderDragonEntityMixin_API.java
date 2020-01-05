@@ -29,28 +29,21 @@ import com.google.common.collect.ImmutableSet.Builder;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonPartEntity;
 import net.minecraft.entity.boss.dragon.phase.PhaseManager;
-import net.minecraft.entity.item.EnderCrystalEntity;
-import net.minecraft.world.end.DragonFightManager;
-import org.spongepowered.api.boss.ServerBossBar;
-import org.spongepowered.api.entity.explosive.EnderCrystal;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragon;
 import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragonPart;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.end.DragonFightManagerBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.MobEntityMixin_API;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Mixin(EnderDragonEntity.class)
 public abstract class EnderDragonEntityMixin_API extends MobEntityMixin_API implements EnderDragon {
 
     @Shadow public EnderDragonPartEntity[] dragonParts;
-    @Shadow public EnderCrystalEntity closestEnderCrystal;
-    @Shadow @Final private DragonFightManager fightManager;
     @Shadow @Final private PhaseManager phaseManager;
 
     @Override
@@ -65,18 +58,20 @@ public abstract class EnderDragonEntityMixin_API extends MobEntityMixin_API impl
     }
 
     @Override
-    public Optional<EnderCrystal> getHealingCrystal() {
-        return Optional.ofNullable((EnderCrystal) this.closestEnderCrystal);
-    }
-
-
-    @Override
-    public ServerBossBar getBossBar() {
-        return (ServerBossBar) ((DragonFightManagerBridge) this.fightManager).bridge$getBossInfo();
-    }
-
-    @Override
     public DragonPhaseManager getPhaseManager() {
         return (DragonPhaseManager) this.phaseManager;
     }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Boss
+        values.add(this.bossBar().asImmutable());
+
+        this.healingCrystal().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
+
 }

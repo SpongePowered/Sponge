@@ -24,51 +24,27 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
-import org.spongepowered.api.data.type.CatType;
+import net.minecraft.entity.passive.OcelotEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.Constants;
+
 import java.util.Collection;
-import net.minecraft.entity.passive.OcelotEntity;
+import java.util.Set;
 
 @Mixin(OcelotEntity.class)
-public abstract class OcelotEntityMixin_API extends TameableEntityMixin_API implements Ocelot {
-
-    @Shadow public abstract int getTameSkin();
+public abstract class OcelotEntityMixin_API extends AnimalEntityMixin_API implements Ocelot {
 
     @Override
-    public OcelotData getOcelotData() {
-        return new SpongeOcelotData(OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public Value.Mutable<CatType> variant() {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, Constants.Entity.Cat.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
-    }
+        values.add(this.trusting().asImmutable());
 
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
-        manipulators.add(this.getOcelotData());
-    }
-
-    @Override
-    public Translation getTranslation() {
-        if (this.shadow$isTamed()) {
-            return new SpongeTranslation("entity.Cat.name");
-        }
-        return super.getTranslation();
+        return values;
     }
 
 }

@@ -22,19 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.passive.horse;
+package org.spongepowered.common.mixin.api.mcp.entity.passive.fish;
 
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.inventory.Inventory;
-import org.spongepowered.api.entity.living.animal.horse.HorseEntity;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import net.minecraft.entity.passive.fish.SalmonEntity;
+import org.spongepowered.api.entity.living.aquatic.fish.school.Salmon;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.mixin.api.mcp.entity.passive.AnimalEntityMixin_API;
 
-@Mixin(AbstractHorseEntity.class)
-public abstract class AbstractHorseMixin_API extends AnimalEntityMixin_API implements HorseEntity {
+@Mixin(SalmonEntity.class)
+public abstract class SalmonEntityMixin_API extends AbstractGroupFishEntityMixin_API implements Salmon {
 
 }

@@ -24,56 +24,27 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
-import org.spongepowered.api.data.type.Career;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.trader.Villager;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.merchant.villager.VillagerEntityBridge;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.api.mcp.entity.AgeableEntityMixin_API;
-import org.spongepowered.common.util.Constants;
-import java.util.Collection;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import java.util.Set;
 
 @Mixin(VillagerEntity.class)
 @Implements(@Interface(iface = Villager.class, prefix = "apiVillager$"))
 public abstract class VillagerEntityMixin_API extends AbstractVillagerEntityMixin_API implements Villager {
 
-    @Intrinsic
-    public boolean apiVillager$isTrading() {
-        return this.shadow$hasCustomer();
-    }
-
-    // Data delegated methods
-
     @Override
-    public CareerData getCareerData() {
-        return new SpongeCareerData(((VillagerEntityBridge) this).bridge$getCareer());
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public Value.Mutable<Career> career() {
-        return new SpongeValue<>(Keys.CAREER, Constants.Catalog.CAREER_DEFAULT, ((VillagerEntityBridge) this).bridge$getCareer());
-    }
+        values.add(this.type().asImmutable());
+        values.add(this.profession().asImmutable());
+        values.add(this.professionLevel().asImmutable());
 
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getCareerData());
+        return values;
     }
 
 }

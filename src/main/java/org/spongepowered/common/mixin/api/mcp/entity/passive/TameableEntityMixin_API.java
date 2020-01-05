@@ -25,13 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.TameableEntity;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.living.animal.TameableAnimal;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Set;
 
 @Mixin(TameableEntity.class)
-public abstract class TameableEntityMixin_API extends AnimalEntityMixin_API {
+public abstract class TameableEntityMixin_API extends AnimalEntityMixin_API implements TameableAnimal {
 
-    @Shadow public abstract boolean shadow$isTamed();
-    @Shadow public abstract boolean shadow$isSitting();
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        this.tamer().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
 
 }

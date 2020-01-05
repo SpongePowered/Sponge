@@ -24,55 +24,32 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.entity.projectile.arrow.Arrow;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.Collection;
-
-import javax.annotation.Nullable;
+import java.util.Set;
 
 @Mixin(AbstractArrowEntity.class)
 public abstract class AbstractArrowEntityMixin_API extends EntityMixin_API implements ArrowEntity {
 
-    @Shadow public Entity shootingEntity;
-    @Shadow private double damage;
-
-    // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
-    // This field is used to store a ProjectileSource that isn't an entity.
-    @Nullable public ProjectileSource projectileSource;
-
     @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        } else if (this.shootingEntity instanceof ProjectileSource) {
-            return (ProjectileSource) this.shootingEntity;
-        }
-        return ProjectileSource.UNKNOWN;
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getKnockbackData());
-    }
+        // Projectile
+        values.add(this.shooter().asImmutable());
 
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof Entity) {
-            // This allows things like Vanilla kill attribution to take place
-            this.shootingEntity = (Entity) shooter;
-        } else {
-            this.shootingEntity = null;
-        }
-        this.projectileSource = shooter;
+        // DamagingProjectile
+        values.add(this.attackDamage().asImmutable());
+        values.add(this.customAttackDamage().asImmutable());
+
+        values.add(this.pickupRule().asImmutable());
+        values.add(this.knockbackStrength().asImmutable());
+
+        return values;
     }
 
 }

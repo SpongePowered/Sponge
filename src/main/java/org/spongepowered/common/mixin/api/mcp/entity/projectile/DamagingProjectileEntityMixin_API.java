@@ -24,64 +24,29 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import org.spongepowered.api.data.Keys;
+import net.minecraft.entity.projectile.DamagingProjectileEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.DamagingProjectile;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAccelerationData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
-import org.spongepowered.math.vector.Vector3d;
-import java.util.Collection;
 
-import javax.annotation.Nullable;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.DamagingProjectileEntity;
+import java.util.Set;
 
 @Mixin(DamagingProjectileEntity.class)
 public abstract class DamagingProjectileEntityMixin_API extends EntityMixin_API implements DamagingProjectile {
 
-    @Shadow @Nullable public LivingEntity shootingEntity;
-
-    @Shadow public double accelerationX;
-    @Shadow public double accelerationY;
-    @Shadow public double accelerationZ;
-    @Nullable private ProjectileSource projectileSource = null;
-
     @Override
-    public Value.Mutable<Vector3d> acceleration() {
-        return new SpongeValue<>(Keys.ACCELERATION, new Vector3d(this.accelerationX, this.accelerationY, this.accelerationZ));
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public ProjectileSource getShooter() {
-        if (this.shootingEntity instanceof ProjectileSource) {
-            return (ProjectileSource) this.shootingEntity;
-        }
+        // Projectile
+        values.add(this.shooter().asImmutable());
 
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        }
+        // Projectile Data values
+        values.add(this.attackDamage().asImmutable());
+        values.add(this.customAttackDamage().asImmutable());
 
-        return ProjectileSource.UNKNOWN;
-    }
-
-    @Override
-    public void setShooter(final ProjectileSource shooter) {
-        this.projectileSource = shooter;
-        if (shooter instanceof LivingEntity) {
-            this.shootingEntity = (LivingEntity) shooter;
-        } else {
-            this.shootingEntity = null;
-        }
-    }
-
-    @Override
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeAccelerationData(this.accelerationX, this.accelerationY, this.accelerationZ));
+        return values;
     }
 
 }
