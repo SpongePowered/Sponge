@@ -37,6 +37,8 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
@@ -44,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 @Plugin(id = "command-test", name = "Command Test", description = "Tests command related functions", version = "0.0.0")
 public class CommandTestPlugin {
@@ -53,11 +56,17 @@ public class CommandTestPlugin {
             .put("opt2", "opt2")
             .put("opt3", "opt3")
             .build();
+    private final PluginContainer pluginContainer;
+
+    @Inject
+    public CommandTestPlugin(PluginContainer pluginContainer) {
+        this.pluginContainer = pluginContainer;
+    }
 
     @Listener
     public void onInit(GameInitializationEvent event) {
 
-        Sponge.getCommandManager().register(this,
+        Sponge.getCommandManager().register(this.pluginContainer,
                 CommandSpec.builder()
                     .child(CommandSpec.builder().arguments(GenericArguments.literal(Text.of("t"), "test"))
                             .executor((src, args) -> {
@@ -76,7 +85,7 @@ public class CommandTestPlugin {
                     }).build(),
                 "commandtestwithfallback");
 
-        Sponge.getCommandManager().register(this,
+        Sponge.getCommandManager().register(this.pluginContainer,
                 CommandSpec.builder()
                         .child(CommandSpec.builder().arguments(GenericArguments.literal(Text.of("t"), "test"))
                                 .executor((src, args) -> {
@@ -92,7 +101,7 @@ public class CommandTestPlugin {
                 "commandtestwithoutfallback");
 
             // With thanks to felixoi, see https://gist.github.com/felixoi/65ba84c2d85d4ed5c28330f3af15bdfa
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        Sponge.getCommandManager().register(this.pluginContainer, CommandSpec.builder()
                     .executor((src, args) -> {
                         src.sendMessage(Text.of("Command Executed"));
 
@@ -109,7 +118,7 @@ public class CommandTestPlugin {
                     .childArgumentParseExceptionFallback(false)
                     .build(), "commandelementtest");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        Sponge.getCommandManager().register(this.pluginContainer, CommandSpec.builder()
                     .child(CommandSpec.builder()
                             .executor(((src, args) -> {
                                 src.sendMessage(Text.of("Command Child Executed"));
@@ -119,7 +128,7 @@ public class CommandTestPlugin {
                             .arguments(new TestCommandElement(Text.of("test")))
                             .build(), "test").build(), "commandwithnofallback");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        Sponge.getCommandManager().register(this.pluginContainer, CommandSpec.builder()
                         .arguments(GenericArguments.userOrSource(Text.of("user")))
                         .executor(((src, args) -> {
                             src.sendMessage(Text.of(args.getOne("user").get()));
@@ -127,7 +136,7 @@ public class CommandTestPlugin {
                         })).build(),
                 "user-test");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        Sponge.getCommandManager().register(this.pluginContainer, CommandSpec.builder()
                         .arguments(GenericArguments.playerOrSource(Text.of("user")))
                         .executor(((src, args) -> {
                             src.sendMessage(Text.of(args.getOne("user").get()));
@@ -135,7 +144,7 @@ public class CommandTestPlugin {
                         })).build(),
                 "player-test");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        Sponge.getCommandManager().register(this.pluginContainer, CommandSpec.builder()
                         .arguments(GenericArguments.userOrSource(Text.of("user")), GenericArguments.integer(Text.of("number")))
                         .executor(((src, args) -> {
                             src.sendMessage(Text.of(args.getOne("user").get(), args.getOne("number").get()));
@@ -174,9 +183,29 @@ public class CommandTestPlugin {
                 })
                 .build();
 
-        Sponge.getCommandManager().register(this, parent, "child-choices-test");
-        Sponge.getCommandManager().register(this, cmd, "child-choices-test-child1");
-        Sponge.getCommandManager().register(this, cmd2, "child-choices-test-child2");
+        CommandSpec echo = CommandSpec.builder()
+                .arguments(GenericArguments.remainingJoinedStrings(Text.of("message")))
+                .executor((src, args) -> {
+                    src.sendMessage(Text.of(args.<String>requireOne("message")));
+                    return CommandResult.success();
+                })
+                .build();
+
+        CommandSpec async = CommandSpec.builder()
+                .arguments(GenericArguments.remainingJoinedStrings(Text.of("message")))
+                .executor((src, args) -> {
+                    final CommandSource s = src;
+                    final String message = args.requireOne("message");
+                    Task.builder().async().execute(x -> Sponge.getCommandManager().process(s, "echo " + message)).submit(this.pluginContainer);
+                    return CommandResult.success();
+                })
+                .build();
+
+        Sponge.getCommandManager().register(this.pluginContainer, parent, "child-choices-test");
+        Sponge.getCommandManager().register(this.pluginContainer, cmd, "child-choices-test-child1");
+        Sponge.getCommandManager().register(this.pluginContainer, cmd2, "child-choices-test-child2");
+        Sponge.getCommandManager().register(this.pluginContainer, echo, "echo");
+        Sponge.getCommandManager().register(this.pluginContainer, async, "async-echo");
 
     }
 
