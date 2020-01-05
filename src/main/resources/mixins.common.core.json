@@ -98,6 +98,7 @@
         "entity.passive.ParrotEntityMixin",
         "entity.passive.RabbitEntity_RaidFarmGoalMixin",
         "entity.merchant.villager.VillagerEntityMixin",
+        "entity.merchant.villager.VillagerProfessionMixin",
         "entity.passive.WolfEntityMixin",
         "entity.player.ChatVisibilityMixin",
         "entity.player.PlayerEntityMixin",

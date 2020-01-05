@@ -26,6 +26,7 @@ package org.spongepowered.common.registry.builtin.stream;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.data.type.SpongeLlamaType;
 
 import java.util.stream.Stream;
@@ -35,12 +36,12 @@ public final class LlamaTypeStreamGenerator {
     private LlamaTypeStreamGenerator() {
     }
 
-    public static Stream<LlamaType> stream() {
+    public static Stream<Tuple<LlamaType, Integer>> stream() {
         return Stream.of(
-            new SpongeLlamaType(CatalogKey.minecraft("creamy"), 0),
-            new SpongeLlamaType(CatalogKey.minecraft("white"), 1),
-            new SpongeLlamaType(CatalogKey.minecraft("brown"), 2),
-            new SpongeLlamaType(CatalogKey.minecraft("gray"), 3)
+            Tuple.of(new SpongeLlamaType(CatalogKey.minecraft("creamy"), 0), 0),
+            Tuple.of(new SpongeLlamaType(CatalogKey.minecraft("white"), 1), 1),
+            Tuple.of(new SpongeLlamaType(CatalogKey.minecraft("brown"), 2), 2),
+            Tuple.of(new SpongeLlamaType(CatalogKey.minecraft("gray"), 3), 3)
         );
     }
 }

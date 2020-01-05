@@ -28,7 +28,7 @@ import net.minecraft.entity.passive.horse.HorseEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.data.type.SpongeHorseType;
+import org.spongepowered.common.data.type.SpongeHorseColor;
 import org.spongepowered.common.data.type.SpongeHorseStyle;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
 import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
@@ -48,7 +48,7 @@ public class HorseEntityHorseStyleProvider extends GenericMutableDataProvider<Ho
 
     @Override
     protected boolean set(HorseEntity dataHolder, HorseStyle value) {
-        final SpongeHorseType color = (SpongeHorseType) HorseColorRegistryModule.getHorseColor(dataHolder);
+        final SpongeHorseColor color = (SpongeHorseColor) HorseColorRegistryModule.getHorseColor(dataHolder);
         dataHolder.setHorseVariant((color.getBitMask() | ((SpongeHorseStyle) value).getBitMask()));
         return true;
     }

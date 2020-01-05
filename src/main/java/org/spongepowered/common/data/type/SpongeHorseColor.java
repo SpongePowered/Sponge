@@ -22,27 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.stream;
+package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.ParrotType;
-import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.data.type.SpongeParrotType;
+import org.spongepowered.api.data.type.HorseColor;
 
-import java.util.stream.Stream;
+public final class SpongeHorseColor extends SpongeEntityMetadataType<Integer> implements HorseColor {
 
-public final class ParrotTypeStreamGenerator {
-
-    private ParrotTypeStreamGenerator() {
-    }
-
-    public static Stream<Tuple<ParrotType, Integer>> stream() {
-        return Stream.of(
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("red_and_blue"), 0), 0),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("blue"), 1), 1),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("green"), 2), 2),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("yellow_and_blue"), 3), 3),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("gray"), 4), 4)
-        );
+    public SpongeHorseColor(CatalogKey key, int metadata) {
+        super(key, metadata);
     }
 }

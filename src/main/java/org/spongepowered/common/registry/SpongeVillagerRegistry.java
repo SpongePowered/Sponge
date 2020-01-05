@@ -34,7 +34,6 @@ import com.google.common.collect.Multimap;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
-import org.spongepowered.common.data.type.SpongeProfession;
 import org.spongepowered.common.registry.type.entity.CareerRegistryModule;
 
 import java.util.ArrayList;

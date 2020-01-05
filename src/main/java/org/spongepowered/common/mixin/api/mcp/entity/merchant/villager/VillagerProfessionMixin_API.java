@@ -22,27 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.stream;
+package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 
+import net.minecraft.entity.merchant.villager.VillagerProfession;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.ParrotType;
-import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.data.type.SpongeParrotType;
+import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.CatalogKeyBridge;
 
-import java.util.stream.Stream;
+@Mixin(VillagerProfession.class)
+public abstract class VillagerProfessionMixin_API implements Profession {
 
-public final class ParrotTypeStreamGenerator {
-
-    private ParrotTypeStreamGenerator() {
-    }
-
-    public static Stream<Tuple<ParrotType, Integer>> stream() {
-        return Stream.of(
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("red_and_blue"), 0), 0),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("blue"), 1), 1),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("green"), 2), 2),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("yellow_and_blue"), 3), 3),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("gray"), 4), 4)
-        );
+    @Override
+    public CatalogKey getKey() {
+        return ((CatalogKeyBridge) this).bridge$getKey();
     }
 }

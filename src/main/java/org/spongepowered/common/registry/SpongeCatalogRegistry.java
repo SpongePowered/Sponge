@@ -31,6 +31,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.entity.monster.PhantomEntity;
+import net.minecraft.entity.monster.SpellcastingIllagerEntity;
 import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.PandaEntity;
@@ -69,18 +70,23 @@ import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.MooshroomType;
+import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.SlabPortion;
+import org.spongepowered.api.data.type.SpellType;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.ToolType;
@@ -96,8 +102,12 @@ import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.registry.builtin.stream.BodyPartStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.HorseColorStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.HorseStyleStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.LlamaTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.ParrotTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.RabbitTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.stream.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.CriteriaTriggersSupplier;
@@ -114,6 +124,7 @@ import org.spongepowered.common.registry.builtin.stream.TextColorStreamGenerator
 import org.spongepowered.common.registry.builtin.stream.TextStyleTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.TileEntityTypeSupplier;
 import org.spongepowered.common.registry.builtin.stream.WoodTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.supplier.VillagerProfessionSupplier;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -314,7 +325,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
             .generateRegistry(BannerPatternShape.class, CatalogKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true)
             .generateRegistry(BodyPart.class, CatalogKey.minecraft("body_part"), BodyPartStreamGenerator.stream(), true)
-            .generateRegistry(CatType.class, CatalogKey.minecraft("cat_type"), CatTypeStreamGenerator.stream(), true)
             .generateRegistry(ChestAttachmentType.class, CatalogKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true)
             .generateRegistry(CollisionRule.class, CatalogKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
             .generateRegistry(ComparatorType.class, CatalogKey.minecraft("comparator_type"), Arrays.stream(ComparatorMode.values()), true)
@@ -324,10 +334,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(HandType.class, CatalogKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true)
             .generateRegistry(Hinge.class, CatalogKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true)
             .generateRegistry(InstrumentType.class, CatalogKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true)
-            .generateRegistry(LlamaType.class, CatalogKey.minecraft("llama_type"), LlamaTypeStreamGenerator.stream(), true)
             .generateRegistry(MooshroomType.class, CatalogKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true)
             .generateRegistry(PandaGene.class, CatalogKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true)
-            .generateRegistry(ParrotType.class, CatalogKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true)
             .generateRegistry(PhantomPhase.class, CatalogKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
             .generateRegistry(PickupRule.class, CatalogKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
             .generateRegistry(PistonType.class, CatalogKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true)
@@ -335,6 +343,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(RaidStatus.class, CatalogKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true)
             .generateRegistry(RailDirection.class, CatalogKey.minecraft("rail_direction"), Arrays.stream(RailShape.values()), true)
             .generateRegistry(SlabPortion.class, CatalogKey.minecraft("slab_portion"), Arrays.stream(SlabType.values()), true)
+            .generateRegistry(SpellType.class, CatalogKey.minecraft("spell_type"), Arrays.stream(SpellcastingIllagerEntity.SpellType.values()), true)
             .generateRegistry(StairShape.class, CatalogKey.minecraft("stair_shape"), Arrays.stream(StairsShape.values()), true)
             .generateRegistry(StructureMode.class, CatalogKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true)
             .generateRegistry(ToolType.class, CatalogKey.minecraft("tool_type"), Arrays.stream(ItemTier.values()), true)
@@ -344,6 +353,13 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         ;
 
         this
+            .generateMappedRegistry(CatType.class, CatalogKey.minecraft("cat_type"), CatTypeStreamGenerator.stream(), true)
+            .generateMappedRegistry(HorseColor.class, CatalogKey.minecraft("horse_color"), HorseColorStreamGenerator.stream(), true)
+            .generateMappedRegistry(HorseStyle.class, CatalogKey.minecraft("horse_style"), HorseStyleStreamGenerator.stream(), true)
+            .generateMappedRegistry(LlamaType.class, CatalogKey.minecraft("llama_type"), LlamaTypeStreamGenerator.stream(), true)
+            .generateMappedRegistry(NotePitch.class, CatalogKey.minecraft("note_pitch"), NotePitchStreamGenerator.stream(), true)
+            .generateMappedRegistry(ParrotType.class, CatalogKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true)
+            .generateMappedRegistry(RabbitType.class, CatalogKey.minecraft("rabbit_type"), RabbitTypeStreamGenerator.stream(), true)
             .generateMappedRegistry(TextColor.class, CatalogKey.minecraft("text_color"), TextColorStreamGenerator.stream(), true)
             .generateMappedRegistry(TextStyle.Type.class, CatalogKey.minecraft("text_style"), TextStyleTypeStreamGenerator.stream(), true)
         ;
@@ -371,6 +387,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         ParticleTypeSupplier.registerSuppliers(this);
         SoundEventSupplier.registerSuppliers(this);
         TileEntityTypeSupplier.registerSuppliers(this);
+        VillagerProfessionSupplier.registerSuppliers(this);
     }
 
     private <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(Class<T> catalogClass, CatalogKey key, Stream<E> valueStream, boolean generateSuppliers) {

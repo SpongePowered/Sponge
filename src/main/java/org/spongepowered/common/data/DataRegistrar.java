@@ -805,7 +805,7 @@ public final class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
         DataUtil.registerValueProcessor(Keys.MAX_AIR, new MaxAirValueProcessor());
         DataUtil.registerValueProcessor(Keys.REMAINING_AIR, new RemainingAirValueProcessor());
-        DataUtil.registerValueProcessor(Keys.HORSE_TYPE, new HorseColorValueProcessor());
+        DataUtil.registerValueProcessor(Keys.HORSE_COLOR, new HorseColorValueProcessor());
         DataUtil.registerValueProcessor(Keys.HORSE_STYLE, new HorseStyleValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXPERIENCE_LEVEL, new ExperienceLevelValueProcessor());
         DataUtil.registerValueProcessor(Keys.TOTAL_EXPERIENCE, new TotalExperienceValueProcessor());

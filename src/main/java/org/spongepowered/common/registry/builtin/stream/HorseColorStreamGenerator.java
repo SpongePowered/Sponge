@@ -25,24 +25,26 @@
 package org.spongepowered.common.registry.builtin.stream;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.data.type.SpongeParrotType;
+import org.spongepowered.common.data.type.SpongeHorseColor;
 
 import java.util.stream.Stream;
 
-public final class ParrotTypeStreamGenerator {
+public final class HorseColorStreamGenerator {
 
-    private ParrotTypeStreamGenerator() {
+    private HorseColorStreamGenerator() {
     }
 
-    public static Stream<Tuple<ParrotType, Integer>> stream() {
+    public static Stream<Tuple<HorseColor, Integer>> stream() {
         return Stream.of(
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("red_and_blue"), 0), 0),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("blue"), 1), 1),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("green"), 2), 2),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("yellow_and_blue"), 3), 3),
-            Tuple.of(new SpongeParrotType(CatalogKey.minecraft("gray"), 4), 4)
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("white"), 0), 0),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("creamy"), 1), 1),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("chestnut"), 2), 2),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("brown"), 3), 3),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("black"), 4), 4),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("gravy"), 5), 5),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("dark_brown"), 6), 6)
         );
     }
 }

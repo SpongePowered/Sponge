@@ -22,14 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
+import net.minecraft.entity.monster.SpellcastingIllagerEntity;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.HorseType;
+import org.spongepowered.api.data.type.SpellType;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
-public final class SpongeHorseType extends SpongeEntityMetadataType<Integer> implements HorseType {
+@Mixin(SpellcastingIllagerEntity.SpellType.class)
+public abstract class SpellcastingIllagerEntity_SpellTypeMixin_API implements SpellType {
 
-    public SpongeHorseType(CatalogKey key, int color) {
-        super(key, color);
+    private CatalogKey api$key;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, int idIn, double xParticleSpeed, double yParticleSpeed, double zParticleSpeed,
+        CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 }

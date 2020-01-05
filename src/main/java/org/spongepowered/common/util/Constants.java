@@ -54,8 +54,8 @@ import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.type.HorseType;
-import org.spongepowered.api.data.type.HorseTypes;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.ParrotType;
@@ -820,7 +820,7 @@ public final class Constants {
         public static final class Horse {
 
             public static final Supplier<HorseStyle> DEFAULT_STYLE = HorseStyles.NONE;
-            public static final Supplier<HorseType> DERAULT_TYPE = HorseTypes.WHITE;
+            public static final Supplier<HorseColor> DERAULT_TYPE = HorseColors.WHITE;
             private Horse() {
             }
         }

@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.builtin.stream;
 import net.minecraft.entity.passive.CatEntity;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.CatType;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.data.type.SpongeCatType;
 
 import java.util.stream.Stream;
@@ -36,14 +37,15 @@ public final class CatTypeStreamGenerator {
     private CatTypeStreamGenerator() {
     }
 
-    public static Stream<CatType> stream() {
+    public static Stream<Tuple<CatType, Integer>> stream() {
         // Meowzers
         return CatEntity.field_213425_bD.entrySet()
             .stream()
             .map(kv -> {
                 final String value = kv.getValue().getPath();
 
-                return new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)), kv.getKey());
+                return Tuple.of(new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)),
+                    kv.getKey()), kv.getKey());
             });
     }
 }
