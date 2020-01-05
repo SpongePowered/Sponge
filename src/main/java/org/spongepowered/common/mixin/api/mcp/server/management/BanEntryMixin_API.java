@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.management;
 
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.server.management.BanUserListEntryBridge;
-import org.spongepowered.common.mixin.core.server.management.UserListEntryMixin;
 
 import java.time.Instant;
 import java.util.Date;

@@ -53,6 +53,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.world.BossInfo;
 import net.minecraft.world.raid.Raid;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
@@ -60,6 +61,8 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
+import org.spongepowered.api.boss.BossBarColor;
+import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.CatType;
@@ -92,16 +95,24 @@ import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.api.service.economy.Currency;
+import org.spongepowered.api.text.chat.ChatType;
+import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.api.util.ban.BanType;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.registry.builtin.stream.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.BodyPartStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.DragonPhaseTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.HorseColorStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.HorseStyleStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.LlamaTypeStreamGenerator;
@@ -319,15 +330,28 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         // TODO 1.14 - We'll take on a case by case basis if any mods are extending/replacing Enum values and therefore breaks this. Otherwise it will
         // TODO 1.14 - get to the point of insanity if literally every enum in the game becomes hardcoded lines that we have to map out...
 
+        // TODO 1.14 - Text stuff needs to be registered as soon as possible in the engine, needed by BossBarOverlay (as an example)
+        this
+            .generateMappedRegistry(TextColor.class, CatalogKey.minecraft("text_color"), TextColorStreamGenerator.stream(), true)
+            .generateMappedRegistry(TextStyle.Type.class, CatalogKey.minecraft("text_style"), TextStyleTypeStreamGenerator.stream(), true);
+
         this
             .registerRegistry(Advancement.class, CatalogKey.minecraft("advancement"))
             .registerRegistry(AdvancementTree.class, CatalogKey.minecraft("advancement_tree"))
             .generateRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
+            .generateRegistry(BanType.class, CatalogKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true)
             .generateRegistry(BannerPatternShape.class, CatalogKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true)
+            .generateRegistry(BossBarOverlay.class, CatalogKey.minecraft("boss_bar_overlay"), Arrays.stream(BossInfo.Overlay.values()), true)
+            .generateRegistry(BossBarColor.class, CatalogKey.minecraft("boss_bar_color"), Arrays.stream(BossInfo.Color.values()), true)
             .generateRegistry(BodyPart.class, CatalogKey.minecraft("body_part"), BodyPartStreamGenerator.stream(), true)
+            .generateRegistry(ChatType.class, CatalogKey.minecraft("chat_type"), Arrays.stream(net.minecraft.util.text.ChatType.values()), true)
+            .generateRegistry(ChatVisibility.class, CatalogKey.minecraft("chat_visibility"), Arrays.stream(net.minecraft.entity.player.ChatVisibility.values()), true)
             .generateRegistry(ChestAttachmentType.class, CatalogKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true)
             .generateRegistry(CollisionRule.class, CatalogKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
             .generateRegistry(ComparatorType.class, CatalogKey.minecraft("comparator_type"), Arrays.stream(ComparatorMode.values()), true)
+            .generateRegistry(Currency.class, CatalogKey.sponge("currency"), null, false)
+            .generateRegistry(Difficulty.class, CatalogKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true)
+            .generateRegistry(DragonPhaseType.class, CatalogKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true)
             .generateRegistry(DyeColor.class, CatalogKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
             .generateRegistry(FoxType.class, CatalogKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
             .generateRegistry(HandPreference.class, CatalogKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true)
@@ -360,8 +384,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateMappedRegistry(NotePitch.class, CatalogKey.minecraft("note_pitch"), NotePitchStreamGenerator.stream(), true)
             .generateMappedRegistry(ParrotType.class, CatalogKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true)
             .generateMappedRegistry(RabbitType.class, CatalogKey.minecraft("rabbit_type"), RabbitTypeStreamGenerator.stream(), true)
-            .generateMappedRegistry(TextColor.class, CatalogKey.minecraft("text_color"), TextColorStreamGenerator.stream(), true)
-            .generateMappedRegistry(TextStyle.Type.class, CatalogKey.minecraft("text_style"), TextStyleTypeStreamGenerator.stream(), true)
         ;
     }
 

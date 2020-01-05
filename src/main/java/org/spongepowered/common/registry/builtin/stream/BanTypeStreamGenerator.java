@@ -22,25 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.ban;
+package org.spongepowered.common.registry.builtin.stream;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.ban.SpongeBanType;
 
-public final class SpongeBanType extends SpongeCatalogType implements BanType {
+import java.util.stream.Stream;
 
-    private Class<? extends Ban> banClass;
+public final class BanTypeStreamGenerator {
 
-    public SpongeBanType(CatalogKey key, Class<? extends Ban> banClass) {
-        super(key);
-        this.banClass = banClass;
+    private BanTypeStreamGenerator() {
     }
 
-    @Override
-    public Class<? extends Ban> getBanClass() {
-        return this.banClass;
+    public static Stream<BanType> stream() {
+        return Stream.of(
+            new SpongeBanType(CatalogKey.minecraft("ip"), Ban.Ip.class),
+            new SpongeBanType(CatalogKey.minecraft("profile"), Ban.Profile.class)
+        );
     }
-
 }

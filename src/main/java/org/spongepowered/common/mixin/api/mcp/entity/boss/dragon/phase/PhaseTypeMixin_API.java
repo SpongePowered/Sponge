@@ -24,31 +24,33 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.boss.dragon.phase;
 
-import com.google.common.base.CaseFormat;
+import net.minecraft.entity.boss.dragon.phase.IPhase;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Locale;
 import net.minecraft.entity.boss.dragon.phase.PhaseType;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
 @Mixin(PhaseType.class)
 public abstract class PhaseTypeMixin_API implements DragonPhaseType {
 
-    private String spongeId;
-    @Shadow @Final private String name;
+    private CatalogKey api$key;
 
-    @Override
-    public String getId() {
-        if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, this.name).toLowerCase(Locale.ENGLISH);
-        }
-        return this.spongeId;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(int idIn, Class<? extends IPhase> clazzIn, String nameIn, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+
+        // Honestly, fuck off Mojang with HoldingPattern instead of Holding_Pattern or holding_pattern
+        this.api$key = container.createCatalogKey(String.join("_", nameIn.split("(?<=.)(?=\\p{Lu})")).toLowerCase());
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 }

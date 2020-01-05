@@ -147,6 +147,7 @@
         "mcp.entity.passive.TameableEntityMixin_API",
         "mcp.entity.passive.WaterMobEntityMixin_API",
         "mcp.entity.passive.WolfEntityMixin_API",
+        "mcp.entity.player.ChatVisibilityMixin_API",
         "mcp.entity.player.PlayerEntityMixin_API",
         "mcp.entity.player.ServerPlayerEntityMixin_API",
         "mcp.entity.projectile.AbstractArrowEntity_PickupStatusMixin_API",

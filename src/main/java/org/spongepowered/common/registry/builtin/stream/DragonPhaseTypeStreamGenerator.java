@@ -22,25 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.ban;
+package org.spongepowered.common.registry.builtin.stream;
 
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.BanType;
-import org.spongepowered.common.SpongeCatalogType;
+import net.minecraft.entity.boss.dragon.phase.PhaseType;
+import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 
-public final class SpongeBanType extends SpongeCatalogType implements BanType {
+import java.util.stream.Stream;
 
-    private Class<? extends Ban> banClass;
+public final class DragonPhaseTypeStreamGenerator {
 
-    public SpongeBanType(CatalogKey key, Class<? extends Ban> banClass) {
-        super(key);
-        this.banClass = banClass;
+    private DragonPhaseTypeStreamGenerator() {
     }
 
-    @Override
-    public Class<? extends Ban> getBanClass() {
-        return this.banClass;
+    public static Stream<DragonPhaseType> stream() {
+        return Stream.of(
+            (DragonPhaseType) PhaseType.HOLDING_PATTERN,
+            (DragonPhaseType) PhaseType.STRAFE_PLAYER,
+            (DragonPhaseType) PhaseType.LANDING_APPROACH,
+            (DragonPhaseType) PhaseType.LANDING,
+            (DragonPhaseType) PhaseType.TAKEOFF,
+            (DragonPhaseType) PhaseType.SITTING_FLAMING,
+            (DragonPhaseType) PhaseType.SITTING_SCANNING,
+            (DragonPhaseType) PhaseType.SITTING_ATTACKING,
+            (DragonPhaseType) PhaseType.CHARGING_PLAYER,
+            (DragonPhaseType) PhaseType.DYING,
+            (DragonPhaseType) PhaseType.HOVER
+        );
     }
-
 }

@@ -25,8 +25,14 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.world.BossInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.boss.BossBarOverlay;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
 import java.util.Locale;
 
@@ -35,23 +41,16 @@ import javax.annotation.Nullable;
 @Mixin(BossInfo.Overlay.class)
 public abstract class BossInfo_OverlayMixin_API implements BossBarOverlay {
 
-    @Nullable private String api$name;
-    @Nullable private String api$id;
+    private CatalogKey api$key;
 
-    @Override
-    public String getId() {
-        if (this.api$id == null) {
-            this.api$id = this.getName().toLowerCase(Locale.ENGLISH);
-        }
-        return this.api$id;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, String p_i48621_3_, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(p_i48621_3_);
     }
 
     @Override
-    public String getName() {
-        if (this.api$name == null) {
-            this.api$name = ((BossInfo.Overlay) (Object) this).name();
-        }
-        return this.api$name;
+    public CatalogKey getKey() {
+        return this.api$key;
     }
-
 }

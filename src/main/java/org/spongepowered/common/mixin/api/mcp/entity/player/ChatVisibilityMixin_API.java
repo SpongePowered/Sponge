@@ -22,56 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.entity.player;
+package org.spongepowered.common.mixin.api.mcp.entity.player;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import net.minecraft.entity.player.ChatVisibility;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Locale;
-import net.minecraft.entity.player.PlayerEntity;
+@Mixin(ChatVisibility.class)
+public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.text.chat.ChatVisibility {
 
-@Mixin(PlayerEntity.EnumChatVisibility.class)
-public abstract class EntityPlayer_EnumChatVisibilityMixin_API implements ChatVisibility {
+    private CatalogKey api$key;
+    private SpongeTranslation api$translation;
 
-    @Shadow @Final private String resourceKey;
-
-    private String api$id;
-    private Translation api$translation;
-
-    @Override
-    public boolean isVisible(final ChatType type) {
-        checkNotNull(type, "type");
-        return ((ChatVisibilityBridge) this).bridge$getVisibleChatTypes().contains(type);
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKeyAndTranslation(String enumName, int ordinal, int p_i50176_3_, String p_i50176_4_, CallbackInfo ci) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+        this.api$translation = new SpongeTranslation(p_i50176_4_);
     }
 
     @Override
-    public String getId() {
-        if (this.api$id == null) {
-            this.api$id = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + ((PlayerEntity.EnumChatVisibility) (Object) this).name().toLowerCase(Locale.ENGLISH);
-        }
-        return this.api$id;
-    }
-
-    @Override
-    public String getName() {
-        return this.api$translation.get();
+    public CatalogKey getKey() {
+        return this.api$key;
     }
 
     @Override
     public Translation getTranslation() {
-        if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(this.resourceKey);
-        }
         return this.api$translation;
     }
 
+    @Override
+    public boolean isVisible(ChatType chatType) {
+        return ((ChatVisibilityBridge) this).bridge$getVisibleChatTypes().contains(chatType);
+    }
 }

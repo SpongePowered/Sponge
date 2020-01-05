@@ -386,7 +386,6 @@ public class SpongeImplHooks {
         CraftingManager.register(name, recipe);
     }
 
-    @Nullable
     public static PluginContainer getActiveModContainer() {
         return null;
     }
