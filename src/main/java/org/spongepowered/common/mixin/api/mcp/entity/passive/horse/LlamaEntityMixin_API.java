@@ -37,7 +37,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(LlamaEntity.class)
-public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implements Llama {
+public abstract class LlamaEntityMixin_API extends AbstractHorseMixin_API implements Llama {
 
     @Shadow public abstract int getStrength();
     @Shadow public abstract int getVariant();
