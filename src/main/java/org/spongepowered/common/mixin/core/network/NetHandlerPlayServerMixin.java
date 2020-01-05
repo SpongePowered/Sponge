@@ -108,6 +108,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -145,6 +146,8 @@ import javax.annotation.Nullable;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerBridge {
+
+    private static final String[] ZERO_LENGTH_ARRAY = new String[0];
 
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer server;
@@ -233,20 +236,13 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         }
     }
 
-    /**
-     * @author Zidane
-     *
-     * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileentitysign.signText, 0, 4);} (line 1156 in source) to call SignChangeEvent.
-     * @param packetIn Injected packet param
-     * @param ci Info to provide mixin on how to handle the callback
-     * @param worldserver Injected world param
-     * @param blockpos Injected blockpos param
-     * @param tileentity Injected tilentity param
-     * @param tileentitysign Injected tileentitysign param
-     */
-    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CPacketUpdateSign;getLines()[Ljava/lang/String;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$callSignChangeEvent(final CPacketUpdateSign packetIn, final CallbackInfo ci, final WorldServer worldserver, final BlockPos blockpos, final IBlockState iblockstate, final TileEntity tileentity, final TileEntitySign tileentitysign) {
-        ci.cancel();
+    @Redirect(method = "processUpdateSign",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CPacketUpdateSign;getLines()[Ljava/lang/String;"))
+    private String[] impl$callSignChangeEvent(CPacketUpdateSign packetIn) {
+        WorldServer worldserver = this.server.getWorld(this.player.dimension);
+        BlockPos blockpos = packetIn.getPosition();
+        // We already know we can do this.
+        TileEntitySign tileentitysign = (TileEntitySign) worldserver.getTileEntity(blockpos);
         final Optional<SignData> existingSignData = ((Sign) tileentitysign).get(SignData.class);
         if (!existingSignData.isPresent()) {
             // TODO Unsure if this is the best to do here...
@@ -263,7 +259,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         Sponge.getCauseStackManager().pushCause(this.player);
         final ChangeSignEvent event =
                 SpongeEventFactory.createChangeSignEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                    changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
+                        changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
         if (!SpongeImpl.postEvent(event)) {
             ((Sign) tileentitysign).offer(event.getText());
         } else {
@@ -272,8 +268,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
             ((Sign) tileentitysign).offer(existingSignData.get());
         }
         Sponge.getCauseStackManager().popCause();
-        tileentitysign.markDirty();
-        worldserver.getPlayerChunkMap().markBlockForUpdate(blockpos);
+        return ZERO_LENGTH_ARRAY; // will bypass the for loop after this method.
     }
 
     /**
