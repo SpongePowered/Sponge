@@ -7,9 +7,9 @@
     "compatibilityLevel": "JAVA_8",
     "mixins": [
         "block.BlockMixin_EntityCollision",
-        "world.chunk.ChunkMixin_EntityCollision",
         "entity.EntityMixin_EntityCollision",
-        "entity.LivingEntityMixin_EntityCollision"
+        "entity.LivingEntityMixin_EntityCollision",
+        "world.chunk.ChunkMixin_EntityCollision"
     ],
     "injectors": {
         "defaultRequire": 1
