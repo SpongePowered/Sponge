@@ -34,7 +34,5 @@ import java.util.Map;
 @Mixin(MusicDiscItem.class)
 public interface MusicDiscItemAccessor {
 
-    @Accessor("RECORDS") Map<SoundEvent, MusicDiscItem> accessor$getRecords();
-
     @Accessor("sound") SoundEvent accessor$getSound();
 }

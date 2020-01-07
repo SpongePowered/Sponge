@@ -26,18 +26,20 @@ package org.spongepowered.common.effect.record;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.item.Item;
+import net.minecraft.item.MusicDiscItem;
 import net.minecraft.network.play.server.SPlaySoundEventPacket;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.mixin.accessor.item.MusicDiscItemAccessor;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.math.vector.Vector3i;
 import javax.annotation.Nullable;
 
-public class SpongeRecordType extends SpongeCatalogType.Translatable implements MusicDisc {
+public final class SpongeRecordType extends SpongeCatalogType.Translatable implements MusicDisc {
 
     /**
      * This is the effect ID that is used by the Effect packet to play a record effect.
@@ -45,28 +47,28 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
      */
     private static final int EFFECT_ID = 1010;
 
-    private final ItemType recordItem;
-    private final SoundType soundType;
+    private final MusicDiscItem item;
+    private final int id;
 
-    public SpongeRecordType(String id, String translation, ItemType recordItem, SoundType soundType) {
-        super(id, new SpongeTranslation(translation));
-        this.recordItem = recordItem;
-        this.soundType = soundType;
+    public SpongeRecordType(CatalogKey key, MusicDiscItem item) {
+        super(key, new SpongeTranslation(item.getTranslationKey()));
+        this.item = item;
+        this.id = Registry.ITEM.getId(item);
     }
 
-    public int getInternalId() {
-        return Item.REGISTRY.getId((Item) this.recordItem);
+    public int getId() {
+        return this.id;
     }
 
     @Override
     public SoundType getSound() {
-        return this.soundType;
+        return (SoundType) ((MusicDiscItemAccessor) this.item).accessor$getSound();
     }
 
     public static SPlaySoundEventPacket createPacket(Vector3i position, @Nullable MusicDisc recordType) {
         checkNotNull(position, "position");
         final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
         return new SPlaySoundEventPacket(EFFECT_ID, pos, recordType == null ? 0 :
-                ((SpongeRecordType) recordType).getInternalId(), false);
+                ((SpongeRecordType) recordType).getId(), false);
     }
 }

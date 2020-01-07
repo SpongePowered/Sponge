@@ -96,6 +96,7 @@ import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
@@ -128,6 +129,7 @@ import org.spongepowered.common.registry.builtin.stream.GoalTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.HorseColorStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.HorseStyleStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.LlamaTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.ParrotTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.RabbitTypeStreamGenerator;
@@ -375,6 +377,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(Hinge.class, CatalogKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true)
             .generateRegistry(InstrumentType.class, CatalogKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true)
             .generateRegistry(MooshroomType.class, CatalogKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true)
+            .generateRegistry(MusicDisc.class, CatalogKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true)
             .generateRegistry(PandaGene.class, CatalogKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true)
             .generateRegistry(PhantomPhase.class, CatalogKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
             .generateRegistry(PickupRule.class, CatalogKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
