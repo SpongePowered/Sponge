@@ -36,7 +36,7 @@ import java.util.Optional;
 public class BoatEntityWoodTypeProvider extends GenericMutableDataProvider<BoatEntity, WoodType> {
 
     public BoatEntityWoodTypeProvider() {
-        super(Keys.WOOD_TYPE);
+        super(Keys.WOOD_TYPE.get());
     }
 
     @Override
@@ -55,17 +55,17 @@ public class BoatEntityWoodTypeProvider extends GenericMutableDataProvider<BoatE
     }
 
     private static BoatEntity.@Nullable Type getFor(WoodType type) {
-        if (type == WoodTypes.OAK) {
+        if (type == WoodTypes.OAK.get()) {
             return BoatEntity.Type.OAK;
-        } else if (type == WoodTypes.SPRUCE) {
+        } else if (type == WoodTypes.SPRUCE.get()) {
             return BoatEntity.Type.SPRUCE;
-        } else if (type == WoodTypes.JUNGLE) {
+        } else if (type == WoodTypes.JUNGLE.get()) {
             return BoatEntity.Type.JUNGLE;
-        } else if (type == WoodTypes.DARK_OAK) {
+        } else if (type == WoodTypes.DARK_OAK.get()) {
             return BoatEntity.Type.DARK_OAK;
-        } else if (type == WoodTypes.BIRCH) {
+        } else if (type == WoodTypes.BIRCH.get()) {
             return BoatEntity.Type.BIRCH;
-        } else if (type == WoodTypes.ACACIA) {
+        } else if (type == WoodTypes.ACACIA.get()) {
             return BoatEntity.Type.ACACIA;
         }
         // TODO: Modded types?
@@ -75,17 +75,17 @@ public class BoatEntityWoodTypeProvider extends GenericMutableDataProvider<BoatE
     private static @Nullable WoodType getFor(BoatEntity.Type type) {
         switch (type) {
             case OAK:
-                return WoodTypes.OAK;
+                return WoodTypes.OAK.get();
             case SPRUCE:
-                return WoodTypes.SPRUCE;
+                return WoodTypes.SPRUCE.get();
             case BIRCH:
-                return WoodTypes.BIRCH;
+                return WoodTypes.BIRCH.get();
             case JUNGLE:
-                return WoodTypes.JUNGLE;
+                return WoodTypes.JUNGLE.get();
             case ACACIA:
-                return WoodTypes.ACACIA;
+                return WoodTypes.ACACIA.get();
             case DARK_OAK:
-                return WoodTypes.DARK_OAK;
+                return WoodTypes.DARK_OAK.get();
         }
         // TODO: Modded types?
         return null;

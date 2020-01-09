@@ -56,7 +56,7 @@ public class ItemStackShieldBannerPatternsProvider extends GenericMutableDataPro
     }
 
     public ItemStackShieldBannerPatternsProvider() {
-        super(Keys.BANNER_PATTERNS);
+        super(Keys.BANNER_PATTERNS.get());
     }
 
     @Override

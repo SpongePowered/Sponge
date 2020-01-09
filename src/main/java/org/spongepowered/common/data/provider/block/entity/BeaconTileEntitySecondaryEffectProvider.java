@@ -30,7 +30,7 @@ import org.spongepowered.common.mixin.accessor.tileentity.BeaconTileEntityAccess
 public class BeaconTileEntitySecondaryEffectProvider extends BeaconTileEntityEffectProvider {
 
     public BeaconTileEntitySecondaryEffectProvider() {
-        super(Keys.BEACON_SECONDARY_EFFECT,
+        super(Keys.BEACON_SECONDARY_EFFECT.get(),
                 BeaconTileEntityAccessor::accessor$getSecondaryEffect,
                 BeaconTileEntityAccessor::accessor$setSecondaryEffect);
     }

@@ -30,6 +30,6 @@ import org.spongepowered.common.util.Constants;
 public class ItemStackHideAttributesProvider extends ItemStackHideFlagsValueProviderBase {
 
     public ItemStackHideAttributesProvider() {
-        super(Keys.HIDE_ATTRIBUTES, Constants.Item.HIDE_ATTRIBUTES_FLAG);
+        super(Keys.HIDE_ATTRIBUTES.get(), Constants.Item.HIDE_ATTRIBUTES_FLAG);
     }
 }

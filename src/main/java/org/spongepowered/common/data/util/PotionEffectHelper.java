@@ -22,32 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.util;
 
-import org.spongepowered.api.data.Keys;
+import net.minecraft.potion.EffectInstance;
 import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
-@SuppressWarnings("unchecked")
-public class AreaEffectCloudEntityPotionEffectsProvider extends GenericMutableDataProvider<AreaEffectCloudEntityAccessor, List<PotionEffect>> {
+public final class PotionEffectHelper {
 
-    public AreaEffectCloudEntityPotionEffectsProvider() {
-        super(Keys.POTION_EFFECTS);
+    public static EffectInstance copy(EffectInstance instance) {
+        return new EffectInstance(instance.getPotion(), instance.getDuration(), instance.getAmplifier(),
+                instance.isAmbient(), instance.doesShowParticles(), instance.isShowIcon());
     }
 
-    @Override
-    protected Optional<List<PotionEffect>> getFrom(AreaEffectCloudEntityAccessor dataHolder) {
-        return Optional.of(((List<PotionEffect>) (List<?>) dataHolder.accessor$getEffects()));
+    public static EffectInstance copyAsEffectInstance(PotionEffect instance) {
+        return copy((EffectInstance) instance);
     }
 
-    @Override
-    protected boolean set(AreaEffectCloudEntityAccessor dataHolder, List<PotionEffect> value) {
-        dataHolder.accessor$setEffects(new ArrayList(value));
-        return true;
+    public static List<EffectInstance> copyAsEffectInstances(Collection<PotionEffect> effects) {
+        return effects.stream().map(effect -> copy((EffectInstance) effect)).collect(Collectors.toList());
+    }
+
+    public static List<PotionEffect> copyAsPotionEffects(Collection<EffectInstance> effects) {
+        return effects.stream().map(effect -> (PotionEffect) copy(effect)).collect(Collectors.toList());
+    }
+
+    private PotionEffectHelper() {
     }
 }

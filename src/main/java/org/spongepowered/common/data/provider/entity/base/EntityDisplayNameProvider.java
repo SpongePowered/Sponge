@@ -35,7 +35,7 @@ import java.util.Optional;
 public class EntityDisplayNameProvider extends GenericMutableDataProvider<Entity, Text> {
 
     public EntityDisplayNameProvider() {
-        super(Keys.DISPLAY_NAME);
+        super(Keys.DISPLAY_NAME.get());
     }
 
     @Override

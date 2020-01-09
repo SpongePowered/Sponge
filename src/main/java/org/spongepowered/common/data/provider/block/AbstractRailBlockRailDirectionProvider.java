@@ -38,7 +38,7 @@ import java.util.Optional;
 public class AbstractRailBlockRailDirectionProvider extends BlockStateDataProvider<RailDirection> {
 
     AbstractRailBlockRailDirectionProvider() {
-        super(Keys.RAIL_DIRECTION, AbstractRailBlock.class);
+        super(Keys.RAIL_DIRECTION.get(), AbstractRailBlock.class);
     }
 
     @Override

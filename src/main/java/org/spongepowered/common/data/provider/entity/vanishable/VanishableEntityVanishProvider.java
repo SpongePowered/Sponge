@@ -35,7 +35,7 @@ import java.util.Optional;
 public class VanishableEntityVanishProvider extends GenericMutableDataProvider<VanishableBridge, Boolean> {
 
     public VanishableEntityVanishProvider() {
-        super(Keys.VANISH);
+        super(Keys.VANISH.get());
     }
 
     @Override

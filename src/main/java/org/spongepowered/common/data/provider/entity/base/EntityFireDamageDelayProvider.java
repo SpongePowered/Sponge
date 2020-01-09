@@ -35,7 +35,7 @@ import java.util.Optional;
 public class EntityFireDamageDelayProvider extends GenericMutableDataProvider<Entity, Integer> {
 
     public EntityFireDamageDelayProvider() {
-        super(Keys.FIRE_DAMAGE_DELAY);
+        super(Keys.FIRE_DAMAGE_DELAY.get());
     }
 
     @Override

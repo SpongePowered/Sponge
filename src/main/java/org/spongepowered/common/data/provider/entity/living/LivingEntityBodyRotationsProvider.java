@@ -38,7 +38,7 @@ import java.util.Optional;
 public class LivingEntityBodyRotationsProvider extends GenericMutableDataProvider<LivingEntity, Map<BodyPart, Vector3d>> {
 
     public LivingEntityBodyRotationsProvider() {
-        super(Keys.BODY_ROTATIONS);
+        super(Keys.BODY_ROTATIONS.get());
     }
 
     @Override
@@ -48,8 +48,8 @@ public class LivingEntityBodyRotationsProvider extends GenericMutableDataProvide
         final double yaw = dataHolder.rotationYaw;
 
         final Map<BodyPart, Vector3d> values = new HashMap<>();
-        values.put(BodyParts.HEAD, new Vector3d(pitch, headYaw, 0));
-        values.put(BodyParts.CHEST, new Vector3d(pitch, yaw, 0));
+        values.put(BodyParts.HEAD.get(), new Vector3d(pitch, headYaw, 0));
+        values.put(BodyParts.CHEST.get(), new Vector3d(pitch, yaw, 0));
         return Optional.of(values);
     }
 

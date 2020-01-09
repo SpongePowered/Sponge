@@ -33,6 +33,7 @@ import org.spongepowered.common.SpongeImpl;
 
 import java.lang.reflect.TypeVariable;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> extends MutableDataProvider<V, E> {
@@ -40,9 +41,17 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     private static final TypeVariable<?> holderTypeParameter = GenericMutableDataProviderBase.class.getTypeParameters()[0];
     private final Class<H> holderType;
 
+    GenericMutableDataProviderBase(Supplier<Key<V>> key, Class<H> holderType) {
+        this(key.get(), holderType);
+    }
+
     GenericMutableDataProviderBase(Key<V> key, Class<H> holderType) {
         super(key);
         this.holderType = holderType;
+    }
+
+    GenericMutableDataProviderBase(Supplier<Key<V>> key) {
+        this(key.get());
     }
 
     GenericMutableDataProviderBase(Key<V> key) {

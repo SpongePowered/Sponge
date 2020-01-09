@@ -34,7 +34,7 @@ import java.util.Optional;
 public class BlockWoodTypeProvider extends GenericImmutableDataProvider<Block, WoodType> {
 
     public BlockWoodTypeProvider() {
-        super(Keys.WOOD_TYPE);
+        super(Keys.WOOD_TYPE.get());
     }
 
     @Override

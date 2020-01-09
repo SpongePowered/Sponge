@@ -37,7 +37,7 @@ import java.util.Optional;
 public class ItemDisplayNameProvider extends GenericMutableDataProvider<Item, Text> {
 
     public ItemDisplayNameProvider() {
-        super(Keys.DISPLAY_NAME);
+        super(Keys.DISPLAY_NAME.get());
     }
 
     @Override

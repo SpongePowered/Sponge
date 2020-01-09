@@ -35,7 +35,7 @@ import java.util.Optional;
 public class StandingSignBlockDirectionProvider extends BlockStateDataProvider<Direction> {
 
     StandingSignBlockDirectionProvider() {
-        super(Keys.DIRECTION, StandingSignBlock.class);
+        super(Keys.DIRECTION.get(), StandingSignBlock.class);
     }
 
     @Override

@@ -35,7 +35,7 @@ import java.util.Optional;
 public class VanishableEntityVanishIgnoresCollisionProvider extends GenericMutableDataProvider<VanishableBridge, Boolean> {
 
     public VanishableEntityVanishIgnoresCollisionProvider() {
-        super(Keys.VANISH_IGNORES_COLLISION);
+        super(Keys.VANISH_IGNORES_COLLISION.get());
     }
 
     @Override

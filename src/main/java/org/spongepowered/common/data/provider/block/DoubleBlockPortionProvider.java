@@ -30,6 +30,8 @@ import net.minecraft.state.EnumProperty;
 import net.minecraft.state.properties.DoubleBlockHalf;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
+import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
 
@@ -38,19 +40,19 @@ public class DoubleBlockPortionProvider extends BlockStateDataProvider<PortionTy
     private final EnumProperty<DoubleBlockHalf> property;
 
     DoubleBlockPortionProvider(Class<? extends Block> blockType, EnumProperty<DoubleBlockHalf> property) {
-        super(Keys.PORTION_TYPE, blockType);
+        super(Keys.PORTION_TYPE.get(), blockType);
         this.property = property;
     }
 
     @Override
     protected Optional<PortionType> getFrom(BlockState dataHolder) {
         final DoubleBlockHalf half = dataHolder.get(this.property);
-        return Optional.of(half == DoubleBlockHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
+        return Optional.of(half == DoubleBlockHalf.LOWER ? PortionTypes.BOTTOM.get() : PortionTypes.TOP.get());
     }
 
     @Override
     protected Optional<BlockState> set(BlockState dataHolder, PortionType value) {
-        final DoubleBlockHalf half = value == PortionTypes.TOP ? DoubleBlockHalf.UPPER : DoubleBlockHalf.LOWER;
+        final DoubleBlockHalf half = value == PortionTypes.TOP.get() ? DoubleBlockHalf.UPPER : DoubleBlockHalf.LOWER;
         return Optional.of(dataHolder.with(this.property, half));
     }
 }

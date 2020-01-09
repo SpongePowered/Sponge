@@ -35,7 +35,7 @@ import java.util.Optional;
 public class LivingEntityLastAttackerProvider extends GenericMutableDataProvider<LivingEntity, Entity> {
 
     public LivingEntityLastAttackerProvider() {
-        super(Keys.LAST_ATTACKER);
+        super(Keys.LAST_ATTACKER.get());
     }
 
     @Override

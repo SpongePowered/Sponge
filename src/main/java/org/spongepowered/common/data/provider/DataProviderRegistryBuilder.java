@@ -28,6 +28,7 @@ import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -40,48 +41,40 @@ public abstract class DataProviderRegistryBuilder {
         this.register();
     }
 
-    protected <T, R> ObjectConverter<T, R> identity() {
-        return new ObjectConverter<T, R>() {
+    protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key, Function<H, E> getter) {
+        register(new GenericMutableDataProvider<H, E>(key, target) {
+
             @Override
-            public R to(T element) {
-                return (R) element;
+            protected Optional<E> getFrom(H dataHolder) {
+                return Optional.ofNullable(getter.apply(dataHolder));
             }
+
             @Override
-            public T from(R value) {
-                return (T) value;
+            protected boolean set(H dataHolder, E value) {
+                return false;
             }
-        };
-    }
-
-    protected interface ObjectConverter<E, T> {
-
-        T to(E element);
-
-        E from(T value);
-    }
-
-    protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key,
-            Function<H, E> getter) {
-
+        });
     }
 
     protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key,
             Function<H, E> getter, BiConsumer<H, E> setter) {
+        register(new GenericMutableDataProvider<H, E>(key, target) {
 
-    }
+            @Override
+            protected Optional<E> getFrom(H dataHolder) {
+                return Optional.ofNullable(getter.apply(dataHolder));
+            }
 
-    protected <E, H, T> void register(Class<H> target, Key<? extends Value<E>> key,
-            Function<H, T> getter, BiConsumer<H, T> setter, ObjectConverter<E, T> converter) {
-
-    }
-
-    protected <E, G, S> void register(Class<G> getterTarget, Class<S> setterTarget,
-            Key<? extends Value<E>> key, Function<G, E> getter, BiConsumer<S, E> setter) {
-
+            @Override
+            protected boolean set(H dataHolder, E value) {
+                setter.accept(dataHolder, value);
+                return true;
+            }
+        });
     }
 
     protected void register(DataProvider<?,?> provider) {
-
+        this.registry.register(provider);
     }
 
     protected abstract void register();

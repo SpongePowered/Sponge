@@ -26,12 +26,9 @@ package org.spongepowered.common.data.provider.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.properties.RedstoneSide;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.provider.BlockStateDataProvider;

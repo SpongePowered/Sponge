@@ -34,7 +34,7 @@ import java.util.Optional;
 public class ItemStackDurabilityProvider extends GenericMutableBoundedDataProvider<ItemStack, Integer> {
 
     public ItemStackDurabilityProvider() {
-        super(Keys.ITEM_DURABILITY);
+        super(Keys.ITEM_DURABILITY.get());
     }
 
     @Override

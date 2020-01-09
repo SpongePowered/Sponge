@@ -33,4 +33,8 @@ public abstract class GenericMutableDataProvider<H, E> extends GenericMutableDat
     public GenericMutableDataProvider(Key<? extends Value<E>> key) {
         super((Key<Value<E>>) key);
     }
+
+    GenericMutableDataProvider(Key<? extends Value<E>> key, Class<H> holderType) {
+        super((Key<Value<E>>) key, holderType);
+    }
 }

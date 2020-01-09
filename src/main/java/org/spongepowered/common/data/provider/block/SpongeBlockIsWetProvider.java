@@ -35,7 +35,7 @@ import java.util.Optional;
 public class SpongeBlockIsWetProvider extends BlockStateDataProvider<Boolean> {
 
     SpongeBlockIsWetProvider() {
-        super(Keys.IS_WET, SpongeBlock.class);
+        super(Keys.IS_WET.get(), SpongeBlock.class);
     }
 
     @Override

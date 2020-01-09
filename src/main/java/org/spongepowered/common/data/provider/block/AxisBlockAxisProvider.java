@@ -40,7 +40,7 @@ public class AxisBlockAxisProvider extends BlockStateDataProvider<Axis> {
     private final boolean validateValue;
 
     AxisBlockAxisProvider(Class<? extends Block> blockType, EnumProperty<Direction.Axis> property) {
-        super(Keys.AXIS, blockType);
+        super(Keys.AXIS.get(), blockType);
         this.property = property;
         this.validateValue = property.getAllowedValues().size() < 3;
     }

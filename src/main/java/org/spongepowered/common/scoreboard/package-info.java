@@ -22,29 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
-
-import net.minecraft.entity.monster.CreeperEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.monster.CreeperEntityAccessor;
-
-import java.util.Optional;
-
-public class CreeperEntityIsChargedProvider extends GenericMutableDataProvider<CreeperEntity, Boolean> {
-
-    public CreeperEntityIsChargedProvider() {
-        super(Keys.IS_CHARGED);
-    }
-
-    @Override
-    protected Optional<Boolean> getFrom(CreeperEntity dataHolder) {
-        return Optional.of(dataHolder.getPowered());
-    }
-
-    @Override
-    protected boolean set(CreeperEntity dataHolder, Boolean value) {
-        dataHolder.getDataManager().set(CreeperEntityAccessor.accessor$getPowered(), value);
-        return true;
-    }
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package org.spongepowered.common.scoreboard;

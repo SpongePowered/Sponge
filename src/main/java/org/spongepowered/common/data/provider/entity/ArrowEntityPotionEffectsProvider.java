@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class ArrowEntityPotionEffectsProvider extends GenericMutableDataProvider<ArrowEntity, List<PotionEffect>> {
 
     public ArrowEntityPotionEffectsProvider() {
-        super(Keys.POTION_EFFECTS);
+        super(Keys.POTION_EFFECTS.get());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ArrowEntityPotionEffectsProvider extends GenericMutableDataProvider
         ((ArrowEntityAccessor) dataHolder).accessor$getCustomPotionEffects().clear();
         for (final PotionEffect effect : value) {
             final EffectInstance mcEffect = new EffectInstance(((EffectInstance) effect).getPotion(), effect.getDuration(),
-                    effect.getAmplifier(), effect.isAmbient(), effect.getShowParticles());
+                    effect.getAmplifier(), effect.isAmbient(), effect.showsParticles());
             dataHolder.addEffect(mcEffect);
         }
         return true;

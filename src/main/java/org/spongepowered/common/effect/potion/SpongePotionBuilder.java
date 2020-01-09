@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -46,9 +47,11 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
     private int amplifier;
     private boolean isAmbient;
     private boolean showParticles;
+    private boolean showIcon;
 
     public SpongePotionBuilder() {
         super(PotionEffect.class, Constants.Sponge.Potion.CURRENT_VERSION);
+        reset();
     }
 
     @Override
@@ -57,7 +60,8 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
         this.duration = holder.getDuration();
         this.amplifier = holder.getAmplifier();
         this.isAmbient = holder.isAmbient();
-        this.showParticles = holder.getShowParticles();
+        this.showParticles = holder.showsParticles();
+        this.showIcon = holder.showsIcon();
         return this;
     }
 
@@ -70,7 +74,8 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
             return Optional.empty();
         }
         String effectName = container.getString(Constants.Item.Potions.POTION_TYPE).get();
-        Optional<PotionEffectType> optional = Sponge.getRegistry().getType(PotionEffectType.class, effectName);
+        Optional<PotionEffectType> optional = Sponge.getRegistry().getCatalogRegistry()
+                .get(PotionEffectType.class, CatalogKey.resolve(effectName));
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }
@@ -81,10 +86,10 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
         PotionEffect.Builder builder = new SpongePotionBuilder();
 
         return Optional.of(builder.potionType(optional.get())
-                .particles(particles)
+                .showParticles(particles)
                 .duration(duration)
                 .amplifier(amplifier)
-                .ambience(ambience)
+                .ambient(ambience)
                 .build());
     }
 
@@ -110,14 +115,20 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
     }
 
     @Override
-    public PotionEffect.Builder ambience(boolean ambience) {
+    public PotionEffect.Builder ambient(boolean ambience) {
         this.isAmbient = ambience;
         return this;
     }
 
     @Override
-    public PotionEffect.Builder particles(boolean showsParticles) {
-        this.showParticles = showsParticles;
+    public PotionEffect.Builder showParticles(boolean showParticles) {
+        this.showParticles = showParticles;
+        return this;
+    }
+
+    @Override
+    public PotionEffect.Builder showIcon(boolean showIcon) {
+        this.showIcon = showIcon;
         return this;
     }
 
@@ -128,7 +139,8 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
         return (PotionEffect) new net.minecraft.potion.EffectInstance((Effect) this.potionType, this.duration,
                 this.amplifier,
                 this.isAmbient,
-                this.showParticles);
+                this.showParticles,
+                this.showIcon);
     }
 
     @Override
@@ -138,6 +150,7 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
         this.duration = 0;
         this.isAmbient = true;
         this.showParticles = true;
+        this.showIcon = true;
         return this;
     }
 }

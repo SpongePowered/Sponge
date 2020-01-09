@@ -68,7 +68,7 @@ public abstract class EffectInstanceMixin_API implements PotionEffect {
     }
 
     @Override
-    public boolean getShowParticles() {
+    public boolean showsParticles() {
         return this.showParticles;
     }
 

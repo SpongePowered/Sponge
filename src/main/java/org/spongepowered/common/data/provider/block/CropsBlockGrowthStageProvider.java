@@ -36,7 +36,7 @@ import java.util.Optional;
 public class CropsBlockGrowthStageProvider extends BlockStateBoundedDataProvider<Integer> {
 
     public CropsBlockGrowthStageProvider() {
-        super(Keys.GROWTH_STAGE, CropsBlock.class);
+        super(Keys.GROWTH_STAGE.get(), CropsBlock.class);
     }
 
     @Override

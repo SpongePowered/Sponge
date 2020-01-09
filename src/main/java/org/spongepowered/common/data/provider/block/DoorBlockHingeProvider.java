@@ -37,13 +37,13 @@ import java.util.Optional;
 public class DoorBlockHingeProvider extends BlockStateDataProvider<Hinge> {
 
     public DoorBlockHingeProvider() {
-        super(Keys.HINGE_POSITION, DoorBlock.class);
+        super(Keys.HINGE_POSITION.get(), DoorBlock.class);
     }
 
     @Override
     protected Optional<Hinge> getFrom(BlockState dataHolder) {
         final DoorHingeSide hingeSide = dataHolder.get(DoorBlock.HINGE);
-        return Optional.of(hingeSide == DoorHingeSide.LEFT ? Hinges.LEFT : Hinges.RIGHT);
+        return Optional.of(hingeSide == DoorHingeSide.LEFT ? Hinges.LEFT.get() : Hinges.RIGHT.get());
     }
 
     @Override

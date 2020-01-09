@@ -37,7 +37,7 @@ import java.util.Optional;
 public class StairsBlockShapeProvider extends BlockStateDataProvider<StairShape> {
 
     StairsBlockShapeProvider() {
-        super(Keys.STAIR_SHAPE, StairsBlock.class);
+        super(Keys.STAIR_SHAPE.get(), StairsBlock.class);
     }
 
     @Override

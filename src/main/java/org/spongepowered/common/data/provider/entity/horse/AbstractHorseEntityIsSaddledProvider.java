@@ -34,7 +34,7 @@ import java.util.Optional;
 public class AbstractHorseEntityIsSaddledProvider extends GenericMutableDataProvider<AbstractHorseEntityBridge, Boolean> {
 
     public AbstractHorseEntityIsSaddledProvider() {
-        super(Keys.IS_SADDLED);
+        super(Keys.IS_SADDLED.get());
     }
 
     @Override

@@ -35,7 +35,7 @@ import java.util.Optional;
 public class VanishableEntityVanishPreventsTargetingProvider extends GenericMutableDataProvider<VanishableBridge, Boolean> {
 
     public VanishableEntityVanishPreventsTargetingProvider() {
-        super(Keys.VANISH_PREVENTS_TARGETING);
+        super(Keys.VANISH_PREVENTS_TARGETING.get());
     }
 
     @Override

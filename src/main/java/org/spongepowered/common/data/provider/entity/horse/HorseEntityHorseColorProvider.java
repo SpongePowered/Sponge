@@ -38,7 +38,7 @@ import java.util.Optional;
 public class HorseEntityHorseColorProvider extends GenericMutableDataProvider<HorseEntity, HorseColor> {
 
     public HorseEntityHorseColorProvider() {
-        super(Keys.HORSE_COLOR);
+        super(Keys.HORSE_COLOR.get());
     }
 
     @Override

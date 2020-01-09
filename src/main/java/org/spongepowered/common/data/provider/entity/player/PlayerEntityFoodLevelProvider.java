@@ -37,7 +37,7 @@ public class PlayerEntityFoodLevelProvider extends GenericMutableBoundedDataProv
     private static final int MAX = 20;
 
     public PlayerEntityFoodLevelProvider() {
-        super(Keys.FOOD_LEVEL);
+        super(Keys.FOOD_LEVEL.get());
     }
 
     @Override

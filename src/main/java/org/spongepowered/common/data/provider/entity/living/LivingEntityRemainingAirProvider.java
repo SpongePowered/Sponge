@@ -35,7 +35,7 @@ import java.util.Optional;
 public class LivingEntityRemainingAirProvider extends GenericMutableBoundedDataProvider<LivingEntity, Integer> {
 
     public LivingEntityRemainingAirProvider() {
-        super(Keys.REMAINING_AIR);
+        super(Keys.REMAINING_AIR.get());
     }
 
     @Override

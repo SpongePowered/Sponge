@@ -30,6 +30,6 @@ import org.spongepowered.common.util.Constants;
 public class ItemStackHideMiscellaneousProvider extends ItemStackHideFlagsValueProviderBase {
 
     public ItemStackHideMiscellaneousProvider() {
-        super(Keys.HIDE_MISCELLANEOUS, Constants.Item.HIDE_MISCELLANEOUS_FLAG);
+        super(Keys.HIDE_MISCELLANEOUS.get(), Constants.Item.HIDE_MISCELLANEOUS_FLAG);
     }
 }

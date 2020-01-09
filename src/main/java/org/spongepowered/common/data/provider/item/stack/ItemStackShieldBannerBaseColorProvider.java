@@ -39,7 +39,7 @@ import java.util.Optional;
 public class ItemStackShieldBannerBaseColorProvider extends GenericMutableDataProvider<ItemStack, DyeColor> {
 
     public ItemStackShieldBannerBaseColorProvider() {
-        super(Keys.BANNER_BASE_COLOR);
+        super(Keys.BANNER_BASE_COLOR.get());
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ItemStackShieldBannerBaseColorProvider extends GenericMutableDataPr
     protected Optional<DyeColor> getFrom(ItemStack dataHolder) {
         final CompoundNBT tag = dataHolder.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
         if (tag == null || tag.contains(Constants.TileEntity.Banner.BANNER_PATTERNS, Constants.NBT.TAG_LIST)) {
-            return Optional.of(DyeColors.WHITE);
+            return Optional.of(DyeColors.WHITE.get());
         }
         final int id = tag.getInt(Constants.TileEntity.Banner.BANNER_BASE);
         return Optional.of((DyeColor) (Object) net.minecraft.item.DyeColor.byId(id));

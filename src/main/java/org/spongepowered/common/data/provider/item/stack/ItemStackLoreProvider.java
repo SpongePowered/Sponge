@@ -41,7 +41,7 @@ import java.util.Optional;
 public class ItemStackLoreProvider extends GenericMutableDataProvider<ItemStack, List<Text>> {
 
     public ItemStackLoreProvider() {
-        super(Keys.ITEM_LORE);
+        super(Keys.ITEM_LORE.get());
     }
 
     @Override

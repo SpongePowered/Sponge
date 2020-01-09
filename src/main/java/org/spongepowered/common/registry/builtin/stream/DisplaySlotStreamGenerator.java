@@ -24,10 +24,18 @@
  */
 package org.spongepowered.common.registry.builtin.stream;
 
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
+import org.spongepowered.common.text.format.SpongeTextColor;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class DisplaySlotStreamGenerator {
@@ -36,10 +44,22 @@ public final class DisplaySlotStreamGenerator {
     }
 
     public static Stream<DisplaySlot> stream() {
-        return Stream.of(
-            new SpongeDisplaySlot(CatalogKey.minecraft("below_name"), 0),
-            new SpongeDisplaySlot(CatalogKey.minecraft("list"), 1),
-            new SpongeDisplaySlot(CatalogKey.minecraft("sidebar"), 2)
-        );
+        final Stream.Builder<DisplaySlot> builder = Stream.builder();
+        builder.add(new SpongeDisplaySlot(CatalogKey.minecraft("below_name"), 0));
+        builder.add(new SpongeDisplaySlot(CatalogKey.minecraft("list"), 1));
+
+        final Map<TextFormatting, DisplaySlot> sidebarByColor = new HashMap<>();
+        final Function<TextFormatting, DisplaySlot> sidebarWithColor = sidebarByColor::get;
+
+        sidebarByColor.put(TextFormatting.RESET, new SpongeDisplaySlot(CatalogKey.minecraft("sidebar"), 2, null, sidebarWithColor));
+        for (final TextFormatting formatting : TextFormatting.values()) {
+            if (formatting.isColor() && formatting != TextFormatting.RESET) {
+                sidebarByColor.put(formatting, new SpongeDisplaySlot(CatalogKey.minecraft("sidebar_team_" + formatting.getFriendlyName()),
+                        3 + formatting.getColorIndex(), formatting, sidebarWithColor));
+            }
+        }
+
+        sidebarByColor.values().forEach(builder::add);
+        return builder.build();
     }
 }

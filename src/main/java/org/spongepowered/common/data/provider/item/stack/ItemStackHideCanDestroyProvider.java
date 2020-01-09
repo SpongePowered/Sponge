@@ -30,6 +30,6 @@ import org.spongepowered.common.util.Constants;
 public class ItemStackHideCanDestroyProvider extends ItemStackHideFlagsValueProviderBase {
 
     public ItemStackHideCanDestroyProvider() {
-        super(Keys.HIDE_CAN_DESTROY, Constants.Item.HIDE_CAN_DESTROY_FLAG);
+        super(Keys.HIDE_CAN_DESTROY.get(), Constants.Item.HIDE_CAN_DESTROY_FLAG);
     }
 }

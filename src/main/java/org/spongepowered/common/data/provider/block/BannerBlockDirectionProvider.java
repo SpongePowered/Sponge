@@ -35,7 +35,7 @@ import java.util.Optional;
 public class BannerBlockDirectionProvider extends BlockStateDataProvider<Direction> {
 
     BannerBlockDirectionProvider() {
-        super(Keys.DIRECTION, BannerBlock.class);
+        super(Keys.DIRECTION.get(), BannerBlock.class);
     }
 
     @Override

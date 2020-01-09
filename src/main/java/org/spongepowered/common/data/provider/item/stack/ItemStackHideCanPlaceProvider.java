@@ -30,6 +30,6 @@ import org.spongepowered.common.util.Constants;
 public class ItemStackHideCanPlaceProvider extends ItemStackHideFlagsValueProviderBase {
 
     public ItemStackHideCanPlaceProvider() {
-        super(Keys.HIDE_CAN_PLACE, Constants.Item.HIDE_CAN_PLACE_FLAG);
+        super(Keys.HIDE_CAN_PLACE.get(), Constants.Item.HIDE_CAN_PLACE_FLAG);
     }
 }

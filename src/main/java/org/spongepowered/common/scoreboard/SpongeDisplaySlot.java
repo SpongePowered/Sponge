@@ -25,31 +25,52 @@
 package org.spongepowered.common.scoreboard;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.util.text.TextFormatting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public final class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot {
 
-    @Nullable private TextColor color;
-    private int index;
+    private final int index;
+    private final @Nullable TextFormatting formatting;
+    private final @Nullable Function<TextFormatting, DisplaySlot> withColorFunction;
+
+    private @Nullable TextColor color;
 
     public SpongeDisplaySlot(CatalogKey key, int index) {
+        this(key, index, null, null);
+    }
+
+    public SpongeDisplaySlot(CatalogKey key, int index,
+            @Nullable TextFormatting color, @Nullable Function<TextFormatting, DisplaySlot> withColorFunction) {
         super(key);
+        this.withColorFunction = withColorFunction;
         this.index = index;
+        this.formatting = color;
     }
 
     @Override
-    public void setTeamColor(@Nullable TextColor color) {
-        this.color = color;
+    public DisplaySlot withTeamColor(@Nullable TextColor color) {
+        if (this.withColorFunction == null) {
+            return this;
+        }
+        final DisplaySlot slot = this.withColorFunction.apply(
+                color == null ? TextFormatting.RESET : SpongeTextColor.of(color));
+        return slot == null ? this : slot;
     }
 
     @Override
     public Optional<TextColor> getTeamColor() {
+        if (this.color == null) {
+            this.color = SpongeTextColor.of(this.formatting);
+        }
         return Optional.ofNullable(this.color);
     }
 

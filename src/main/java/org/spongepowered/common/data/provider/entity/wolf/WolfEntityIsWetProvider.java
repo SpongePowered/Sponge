@@ -35,7 +35,7 @@ import java.util.Optional;
 public class WolfEntityIsWetProvider extends GenericMutableDataProvider<WolfEntity, Boolean> {
 
     public WolfEntityIsWetProvider() {
-        super(Keys.IS_WET);
+        super(Keys.IS_WET.get());
     }
 
     @Override

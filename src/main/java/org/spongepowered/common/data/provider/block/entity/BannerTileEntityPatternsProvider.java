@@ -36,7 +36,7 @@ import java.util.Optional;
 public class BannerTileEntityPatternsProvider extends GenericMutableDataProvider<BannerTileEntity, List<PatternLayer>> {
 
     public BannerTileEntityPatternsProvider() {
-        super(Keys.BANNER_PATTERNS);
+        super(Keys.BANNER_PATTERNS.get());
     }
 
     @Override
