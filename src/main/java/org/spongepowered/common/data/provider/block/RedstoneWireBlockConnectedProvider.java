@@ -33,12 +33,13 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class RedstoneWireBlockConnectedProvider extends BlockStateDataProvider<Boolean> {
 
     private final EnumProperty<RedstoneSide> property;
 
-    RedstoneWireBlockConnectedProvider(Key<? extends Value<Boolean>> key,
+    RedstoneWireBlockConnectedProvider(Supplier<? extends Key<? extends Value<Boolean>>> key,
             EnumProperty<RedstoneSide> property) {
         super(key, RedstoneWireBlock.class);
         this.property = property;

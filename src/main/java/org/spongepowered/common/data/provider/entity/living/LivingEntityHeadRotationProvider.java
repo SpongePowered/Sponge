@@ -34,7 +34,7 @@ import java.util.Optional;
 public class LivingEntityHeadRotationProvider extends GenericMutableDataProvider<LivingEntity, Vector3d> {
 
     public LivingEntityHeadRotationProvider() {
-        super(Keys.HEAD_ROTATION.get());
+        super(Keys.HEAD_ROTATION);
     }
 
     @Override

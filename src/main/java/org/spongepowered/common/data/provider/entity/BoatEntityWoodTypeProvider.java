@@ -36,7 +36,7 @@ import java.util.Optional;
 public class BoatEntityWoodTypeProvider extends GenericMutableDataProvider<BoatEntity, WoodType> {
 
     public BoatEntityWoodTypeProvider() {
-        super(Keys.WOOD_TYPE.get());
+        super(Keys.WOOD_TYPE);
     }
 
     @Override

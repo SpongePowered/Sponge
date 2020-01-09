@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public abstract class BlockStateDataProvider<E> extends BlockStateDataProviderBase<Value<E>, E> {
@@ -37,7 +38,15 @@ public abstract class BlockStateDataProvider<E> extends BlockStateDataProviderBa
         super((Key<Value<E>>) key, blockType);
     }
 
+    public BlockStateDataProvider(Supplier<? extends Key<? extends Value<E>>> key, Class<? extends Block> blockType) {
+        this(key.get(), blockType);
+    }
+
     public BlockStateDataProvider(Key<? extends Value<E>> key, Predicate<Block> blockPredicate) {
         super((Key<Value<E>>) key, blockPredicate);
+    }
+
+    public BlockStateDataProvider(Supplier<? extends Key<? extends Value<E>>> key, Predicate<Block> blockPredicate) {
+        this(key.get(), blockPredicate);
     }
 }

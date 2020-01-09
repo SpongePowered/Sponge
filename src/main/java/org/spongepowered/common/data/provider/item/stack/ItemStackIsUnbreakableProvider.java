@@ -37,7 +37,7 @@ import java.util.Optional;
 public class ItemStackIsUnbreakableProvider extends GenericMutableDataProvider<ItemStack, Boolean> {
 
     public ItemStackIsUnbreakableProvider() {
-        super(Keys.IS_UNBREAKABLE.get());
+        super(Keys.IS_UNBREAKABLE);
     }
 
     @Override

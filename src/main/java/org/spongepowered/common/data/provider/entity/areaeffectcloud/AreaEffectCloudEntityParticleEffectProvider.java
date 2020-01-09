@@ -35,7 +35,7 @@ import java.util.Optional;
 public class AreaEffectCloudEntityParticleEffectProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, ParticleEffect> {
 
     public AreaEffectCloudEntityParticleEffectProvider() {
-        super(Keys.AREA_EFFECT_CLOUD_PARTICLE_EFFECT.get());
+        super(Keys.AREA_EFFECT_CLOUD_PARTICLE_EFFECT);
     }
 
     @Override

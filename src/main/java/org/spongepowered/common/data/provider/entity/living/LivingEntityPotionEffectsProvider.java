@@ -38,7 +38,7 @@ import java.util.Optional;
 public class LivingEntityPotionEffectsProvider extends GenericMutableDataProvider<LivingEntity, List<PotionEffect>> {
 
     public LivingEntityPotionEffectsProvider() {
-        super(Keys.POTION_EFFECTS.get());
+        super(Keys.POTION_EFFECTS);
     }
 
     @Override

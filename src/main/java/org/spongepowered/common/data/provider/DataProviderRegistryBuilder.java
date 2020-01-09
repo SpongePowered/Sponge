@@ -31,6 +31,7 @@ import org.spongepowered.api.data.value.Value;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class DataProviderRegistryBuilder {
 
@@ -39,6 +40,10 @@ public abstract class DataProviderRegistryBuilder {
     public DataProviderRegistryBuilder(DataProviderRegistry registry) {
         this.registry = registry;
         this.register();
+    }
+
+    protected <E, H> void register(Class<H> target, Supplier<? extends Key<? extends Value<E>>> key, Function<H, E> getter) {
+        this.register(target, key.get(), getter);
     }
 
     protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key, Function<H, E> getter) {
@@ -54,6 +59,11 @@ public abstract class DataProviderRegistryBuilder {
                 return false;
             }
         });
+    }
+
+    protected <E, H> void register(Class<H> target, Supplier<? extends Key<? extends Value<E>>> key,
+            Function<H, E> getter, BiConsumer<H, E> setter) {
+        this.register(target, key.get(), getter, setter);
     }
 
     protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key,

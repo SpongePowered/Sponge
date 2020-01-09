@@ -34,7 +34,7 @@ import java.util.Optional;
 public class LivingEntityChestRotationProvider extends GenericMutableDataProvider<LivingEntity, Vector3d> {
 
     public LivingEntityChestRotationProvider() {
-        super(Keys.CHEST_ROTATION.get());
+        super(Keys.CHEST_ROTATION);
     }
 
     @Override

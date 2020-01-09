@@ -34,13 +34,14 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @SuppressWarnings("ConstantConditions")
 public class RedstoneWireBlockWireAttachmentProvider extends BlockStateDataProvider<WireAttachmentType> {
 
     private final EnumProperty<RedstoneSide> property;
 
-    RedstoneWireBlockWireAttachmentProvider(Key<? extends Value<WireAttachmentType>> key,
+    RedstoneWireBlockWireAttachmentProvider(Supplier<? extends Key<? extends Value<WireAttachmentType>>> key,
             EnumProperty<RedstoneSide> property) {
         super(key, RedstoneWireBlock.class);
         this.property = property;

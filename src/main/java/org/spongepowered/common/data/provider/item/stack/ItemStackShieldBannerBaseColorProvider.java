@@ -39,7 +39,7 @@ import java.util.Optional;
 public class ItemStackShieldBannerBaseColorProvider extends GenericMutableDataProvider<ItemStack, DyeColor> {
 
     public ItemStackShieldBannerBaseColorProvider() {
-        super(Keys.BANNER_BASE_COLOR.get());
+        super(Keys.BANNER_BASE_COLOR);
     }
 
     @Override

@@ -35,13 +35,14 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ArmorStandEntityRotationProvider<G, S> extends GenericMutableDataProvider<ArmorStandEntity, Vector3d> {
 
     private final Function<G, Rotations> getter;
     private final BiConsumer<S, Rotations> setter;
 
-    public ArmorStandEntityRotationProvider(Key<? extends Value<Vector3d>> key,
+    public ArmorStandEntityRotationProvider(Supplier<? extends Key<? extends Value<Vector3d>>> key,
             Function<G, Rotations> getter, BiConsumer<S, Rotations> setter) {
         super(key);
         this.getter = getter;

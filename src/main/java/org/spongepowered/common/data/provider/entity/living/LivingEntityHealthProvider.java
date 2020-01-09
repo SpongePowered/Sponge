@@ -36,7 +36,7 @@ import java.util.Optional;
 public class LivingEntityHealthProvider extends GenericMutableBoundedDataProvider<LivingEntity, Double> {
 
     public LivingEntityHealthProvider() {
-        super(Keys.HEALTH.get());
+        super(Keys.HEALTH);
     }
 
     @Override

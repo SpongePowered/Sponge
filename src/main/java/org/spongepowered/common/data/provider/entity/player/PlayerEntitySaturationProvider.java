@@ -38,7 +38,7 @@ public class PlayerEntitySaturationProvider extends GenericMutableBoundedDataPro
     private static final double MAX = 40.0;
 
     public PlayerEntitySaturationProvider() {
-        super(Keys.SATURATION.get());
+        super(Keys.SATURATION);
     }
 
     @Override

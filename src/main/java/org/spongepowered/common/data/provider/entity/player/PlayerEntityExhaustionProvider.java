@@ -38,7 +38,7 @@ public class PlayerEntityExhaustionProvider extends GenericMutableBoundedDataPro
     private static final double MAX = 4.0;
 
     public PlayerEntityExhaustionProvider() {
-        super(Keys.EXHAUSTION.get());
+        super(Keys.EXHAUSTION);
     }
 
     @Override

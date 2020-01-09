@@ -34,7 +34,7 @@ import java.util.Optional;
 public class EntityInvisibleProvider extends GenericMutableDataProvider<Entity, Boolean> {
 
     public EntityInvisibleProvider() {
-        super(Keys.INVISIBLE.get());
+        super(Keys.INVISIBLE);
     }
 
     @Override

@@ -27,10 +27,16 @@ package org.spongepowered.common.data.provider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.BoundedValue;
 
+import java.util.function.Supplier;
+
 @SuppressWarnings("unchecked")
 public abstract class GenericMutableBoundedDataProvider<H, E> extends GenericMutableDataProviderBase<H, BoundedValue<E>, E> {
 
     public GenericMutableBoundedDataProvider(Key<? extends BoundedValue<E>> key) {
         super((Key<BoundedValue<E>>) key);
+    }
+
+    public GenericMutableBoundedDataProvider(Supplier<? extends Key<? extends BoundedValue<E>>> key) {
+        this(key.get());
     }
 }

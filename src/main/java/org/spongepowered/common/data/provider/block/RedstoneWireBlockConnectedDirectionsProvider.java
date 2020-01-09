@@ -37,12 +37,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class RedstoneWireBlockConnectedDirectionsProvider extends BlockStateDataProvider<Set<Direction>> {
 
     private final Map<Direction, EnumProperty<RedstoneSide>> sides;
 
-    RedstoneWireBlockConnectedDirectionsProvider(Key<? extends Value<Set<Direction>>> key, Class<? extends Block> blockType,
+    RedstoneWireBlockConnectedDirectionsProvider(Supplier<? extends Key<? extends Value<Set<Direction>>>> key, Class<? extends Block> blockType,
             Map<Direction, EnumProperty<RedstoneSide>> sides) {
         super(key, blockType);
         this.sides = sides;

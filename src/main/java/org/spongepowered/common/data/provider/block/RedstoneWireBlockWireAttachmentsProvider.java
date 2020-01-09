@@ -37,13 +37,14 @@ import org.spongepowered.common.data.provider.BlockStateDataProvider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @SuppressWarnings("ConstantConditions")
 public class RedstoneWireBlockWireAttachmentsProvider extends BlockStateDataProvider<Map<Direction, WireAttachmentType>> {
 
     private final Map<Direction, EnumProperty<RedstoneSide>> sides;
 
-    RedstoneWireBlockWireAttachmentsProvider(Key<? extends Value<Map<Direction, WireAttachmentType>>> key,
+    RedstoneWireBlockWireAttachmentsProvider(Supplier<? extends Key<? extends Value<Map<Direction, WireAttachmentType>>>> key,
             Class<? extends Block> blockType, Map<Direction, EnumProperty<RedstoneSide>> sides) {
         super(key, blockType);
         this.sides = sides;

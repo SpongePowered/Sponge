@@ -34,7 +34,7 @@ import java.util.Optional;
 public class LivingEntityMaxHealthProvider extends GenericMutableDataProvider<LivingEntity, Double> {
 
     public LivingEntityMaxHealthProvider() {
-        super(Keys.MAX_HEALTH.get());
+        super(Keys.MAX_HEALTH);
     }
 
     @Override

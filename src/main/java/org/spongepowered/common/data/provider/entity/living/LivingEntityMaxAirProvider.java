@@ -34,7 +34,7 @@ import java.util.Optional;
 public class LivingEntityMaxAirProvider extends GenericMutableDataProvider<LivingEntity, Integer> {
 
     public LivingEntityMaxAirProvider() {
-        super(Keys.MAX_AIR.get());
+        super(Keys.MAX_AIR);
     }
 
     @Override

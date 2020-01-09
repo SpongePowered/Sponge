@@ -35,7 +35,7 @@ import java.util.Optional;
 public class LivingEntityActiveItemProvider extends GenericMutableDataProvider<LivingEntity, ItemStackSnapshot> {
 
     public LivingEntityActiveItemProvider() {
-        super(Keys.ACTIVE_ITEM.get());
+        super(Keys.ACTIVE_ITEM);
     }
 
     @Override

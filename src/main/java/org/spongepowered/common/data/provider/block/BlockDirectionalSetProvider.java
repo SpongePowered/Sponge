@@ -36,12 +36,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class BlockDirectionalSetProvider extends BlockStateDataProvider<Set<Direction>> {
 
     private final Map<Direction, BooleanProperty> sides;
 
-    BlockDirectionalSetProvider(Key<? extends Value<Set<Direction>>> key, Class<? extends Block> blockType,
+    BlockDirectionalSetProvider(Supplier<? extends Key<? extends Value<Set<Direction>>>> key, Class<? extends Block> blockType,
             Map<Direction, BooleanProperty> sides) {
         super(key, blockType);
         this.sides = sides;

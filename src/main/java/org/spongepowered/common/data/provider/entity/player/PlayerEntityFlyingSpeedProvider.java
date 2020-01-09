@@ -34,7 +34,7 @@ import java.util.Optional;
 public class PlayerEntityFlyingSpeedProvider extends GenericMutableDataProvider<PlayerEntity, Double> {
 
     public PlayerEntityFlyingSpeedProvider() {
-        super(Keys.FLYING_SPEED.get());
+        super(Keys.FLYING_SPEED);
     }
 
     @Override

@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class ArrowEntityPotionEffectsProvider extends GenericMutableDataProvider<ArrowEntity, List<PotionEffect>> {
 
     public ArrowEntityPotionEffectsProvider() {
-        super(Keys.POTION_EFFECTS.get());
+        super(Keys.POTION_EFFECTS);
     }
 
     @Override

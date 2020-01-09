@@ -38,7 +38,7 @@ import java.util.UUID;
 public class UserFirstDatePlayedProvider extends GenericMutableDataProvider<Identifiable, Instant> {
 
     public UserFirstDatePlayedProvider() {
-        super(Keys.FIRST_DATE_PLAYED.get());
+        super(Keys.FIRST_DATE_PLAYED);
     }
 
     @Override

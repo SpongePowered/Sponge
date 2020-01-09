@@ -38,7 +38,7 @@ import java.util.Optional;
 public class LivingEntityBodyRotationsProvider extends GenericMutableDataProvider<LivingEntity, Map<BodyPart, Vector3d>> {
 
     public LivingEntityBodyRotationsProvider() {
-        super(Keys.BODY_ROTATIONS.get());
+        super(Keys.BODY_ROTATIONS);
     }
 
     @Override

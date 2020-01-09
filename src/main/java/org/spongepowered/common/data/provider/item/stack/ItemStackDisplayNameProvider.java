@@ -40,7 +40,7 @@ import java.util.Optional;
 public class ItemStackDisplayNameProvider extends GenericMutableDataProvider<ItemStack, Text> {
 
     public ItemStackDisplayNameProvider() {
-        super(Keys.DISPLAY_NAME.get());
+        super(Keys.DISPLAY_NAME);
     }
 
     @Override

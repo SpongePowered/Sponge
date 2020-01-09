@@ -42,7 +42,7 @@ import java.util.function.Consumer;
 public class ArmorStandEntityBodyRotationsProvider extends GenericMutableDataProvider<ArmorStandEntity, Map<BodyPart, Vector3d>> {
 
     public ArmorStandEntityBodyRotationsProvider() {
-        super(Keys.BODY_ROTATIONS.get());
+        super(Keys.BODY_ROTATIONS);
     }
 
     @Override

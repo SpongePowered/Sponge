@@ -36,7 +36,7 @@ import java.util.Optional;
 public class PlayerEntityWalkingSpeedProvider extends GenericMutableDataProvider<PlayerEntity, Double> {
 
     public PlayerEntityWalkingSpeedProvider() {
-        super(Keys.WALKING_SPEED.get());
+        super(Keys.WALKING_SPEED);
     }
 
     @Override
