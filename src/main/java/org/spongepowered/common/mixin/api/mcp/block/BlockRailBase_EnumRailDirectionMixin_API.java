@@ -26,11 +26,14 @@ package org.spongepowered.common.mixin.api.mcp.block;
 
 import net.minecraft.block.BlockRailBase;
 import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Optional;
 
 @Mixin(BlockRailBase.EnumRailDirection.class)
 @Implements(@Interface(iface = RailDirection.class, prefix = "rail$"))
@@ -38,6 +41,7 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
 
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract int getMetadata();
+    @Shadow public abstract boolean shadow$isAscending();
 
     public String rail$getId() {
         return "minecraft:" + shadow$getName();
@@ -46,6 +50,71 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
     @Intrinsic
     public String rail$getName() {
         return shadow$getName();
+    }
+
+    @Override
+    public Optional<Direction> getAscendingDirection() {
+        switch (getMetadata()) {
+            case 2:
+                return Optional.of(Direction.EAST);
+            case 3:
+                return Optional.of(Direction.WEST);
+            case 4:
+                return Optional.of(Direction.NORTH);
+            case 5:
+                return Optional.of(Direction.SOUTH);
+            default:
+                return Optional.empty();
+        }
+    }
+
+    @Intrinsic
+    public boolean rail$isAscending() {
+        return shadow$isAscending();
+    }
+
+    @Override
+    public Direction getFirstDirection() {
+        switch (getMetadata()) {
+            case 0:
+            case 5:
+            case 8:
+            case 9:
+                return Direction.NORTH;
+            case 1:
+            case 3:
+                return Direction.EAST;
+            case 4:
+            case 6:
+            case 7:
+                return Direction.SOUTH;
+            case 2:
+                return Direction.WEST;
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    @Override
+    public Direction getSecondDirection() {
+        switch (getMetadata()) {
+            case 4:
+                return Direction.NORTH;
+            case 2:
+            case 6:
+            case 9:
+                return Direction.EAST;
+            case 0:
+            case 5:
+                return Direction.SOUTH;
+            case 1:
+            case 3:
+            case 7:
+            case 8:
+                return Direction.WEST;
+            default:
+                throw new AssertionError();
+        }
     }
 
     @SuppressWarnings("ConstantConditions")
