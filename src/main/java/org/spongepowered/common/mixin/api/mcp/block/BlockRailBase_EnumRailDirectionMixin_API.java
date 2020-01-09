@@ -41,7 +41,6 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
 
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract int getMetadata();
-    @Shadow public abstract boolean shadow$isAscending();
 
     public String rail$getId() {
         return "minecraft:" + shadow$getName();
@@ -66,11 +65,6 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
             default:
                 return Optional.empty();
         }
-    }
-
-    @Intrinsic
-    public boolean rail$isAscending() {
-        return shadow$isAscending();
     }
 
     @Override
