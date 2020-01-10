@@ -24,15 +24,25 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item.minecart;
 
+
+import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.carrier.CarrierMinecart;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Optional;
-import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
+import java.util.Set;
 
 @Mixin(ContainerMinecartEntity.class)
 public abstract class ContainerMinecartMixin_API<M extends CarrierMinecart<M>> extends AbstractMinecartEntityMixin_API implements CarrierMinecart<M> {
 
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // BlockOccupiedMinecart
+        values.add(this.block().asImmutable());
+
+        return values;
+    }
 
 }

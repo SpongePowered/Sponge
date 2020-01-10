@@ -25,11 +25,29 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.FallingBlockEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
+import java.util.Set;
+
 @Mixin(FallingBlockEntity.class)
 public abstract class FallingBlockEntityMixin_API extends EntityMixin_API implements FallingBlock {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.blockState().asImmutable());
+        values.add(this.damagePerBlock().asImmutable());
+        values.add(this.maxFallDamage().asImmutable());
+        values.add(this.placeAsBlock().asImmutable());
+        values.add(this.dropAsItem().asImmutable());
+        values.add(this.fallTime().asImmutable());
+        values.add(this.hurtEntities().asImmutable());
+
+        return values;
+    }
 
 }

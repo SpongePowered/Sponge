@@ -31,5 +31,4 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(ZombieEntity.class)
 public abstract class ZombieEntityMixin_API extends MonsterEntityMixin_API implements Zombie {
 
-
 }

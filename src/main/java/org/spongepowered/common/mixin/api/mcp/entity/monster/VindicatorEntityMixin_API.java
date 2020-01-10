@@ -24,30 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.illager.Vindicator;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import net.minecraft.entity.monster.VindicatorEntity;
 
-import java.util.Collection;
+import java.util.Set;
 
 @Mixin(VindicatorEntity.class)
 public abstract class VindicatorEntityMixin_API extends AbstractIllagerEntityMixin_API implements Vindicator {
 
-    @Shadow private boolean johnny;
-
     @Override
-    public Value.Mutable<Boolean> johnny() {
-        return new SpongeValue<>(Keys.IS_JOHNNY, false, this.johnny);
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeJohnnyData(this.johnny));
+        values.add(this.johnny().asImmutable());
+
+        return values;
     }
 
 }

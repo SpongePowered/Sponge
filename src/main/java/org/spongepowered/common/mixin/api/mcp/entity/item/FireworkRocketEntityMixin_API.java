@@ -24,22 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import static com.google.common.base.Preconditions.checkState;
-
-import com.google.common.collect.Lists;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.manipulator.mutable.FireworkEffectData;
+import net.minecraft.entity.item.FireworkRocketEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectData;
-import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.Collection;
-import net.minecraft.entity.item.FireworkRocketEntity;
+import java.util.Set;
 
 @Mixin(FireworkRocketEntity.class)
 public abstract class FireworkRocketEntityMixin_API extends EntityMixin_API implements FireworkRocket {
@@ -49,30 +41,6 @@ public abstract class FireworkRocketEntityMixin_API extends EntityMixin_API impl
 
     @Shadow public abstract void onUpdate();
 
-    private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
-
-    @Override
-    public ProjectileSource getShooter() {
-        return this.projectileSource;
-    }
-
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        this.projectileSource = shooter;
-    }
-
-
-    @Override
-    public FireworkEffectData getFireworkData() {
-        return new SpongeFireworkEffectData(FireworkUtils.getFireworkEffects(this).orElse(Lists.newArrayList()));
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getFireworkData());
-    }
-
     @Override
     public void detonate() {
         this.fireworkAge = this.lifetime + 1;
@@ -80,24 +48,19 @@ public abstract class FireworkRocketEntityMixin_API extends EntityMixin_API impl
     }
 
     @Override
-    public void prime() {
-        checkState(!this.isPrimed(), "already primed");
-        checkState(this.isDead, "firework about to be primed");
-        this.getWorld().spawnEntity(this);
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public void defuse() {
-        checkState(this.isPrimed(), "not primed");
-        if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
-            this.setDead();
-            ((FusedExplosiveBridge) this).bridge$postDefuse();
-        }
-    }
+        // Projectile
+        values.add(this.shooter().asImmutable());
 
-    @Override
-    public boolean isPrimed() {
-        return this.fireworkAge > 0 && this.fireworkAge <= this.lifetime && !this.isDead;
+        // FusedExplosive
+        values.add(this.primed().asImmutable());
+        values.add(this.fuseDuration().asImmutable());
+
+        values.add(this.effects().asImmutable());
+
+        return values;
     }
 
 }

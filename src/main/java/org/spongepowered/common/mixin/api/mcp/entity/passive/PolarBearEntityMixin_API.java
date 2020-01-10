@@ -25,10 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.PolarBearEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.PolarBear;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Set;
+
 @Mixin(PolarBearEntity.class)
 public abstract class PolarBearEntityMixin_API extends AnimalEntityMixin_API implements PolarBear {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.standing().asImmutable());
+
+        return values;
+    }
 
 }

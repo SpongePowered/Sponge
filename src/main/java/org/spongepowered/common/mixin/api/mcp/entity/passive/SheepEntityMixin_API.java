@@ -24,41 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.DyeableData;
-import org.spongepowered.api.data.type.DyeColor;
+import net.minecraft.entity.passive.SheepEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Sheep;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
-import java.util.Collection;
-import net.minecraft.entity.passive.SheepEntity;
+
+import java.util.Set;
 
 @Mixin(SheepEntity.class)
 public abstract class SheepEntityMixin_API extends AnimalEntityMixin_API implements Sheep {
 
-    @Shadow public abstract net.minecraft.item.DyeColor getFleeceColor();
-    @Shadow public abstract boolean getSheared();
-
     @Override
-    public DyeableData getDyeData() {
-        return new SpongeDyeableData((DyeColor) (Object) this.getFleeceColor());
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public Value.Mutable<DyeColor> color() {
-        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHEEP_COLOR, (DyeColor) (Object) this.getFleeceColor());
-    }
+        values.add(this.color().asImmutable());
 
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getDyeData());
-        manipulators.add(new SpongeShearedData(this.getSheared()));
+        return values;
     }
 
 }

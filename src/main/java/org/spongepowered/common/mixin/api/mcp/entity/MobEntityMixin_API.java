@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.GoalSelector;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
@@ -31,10 +34,9 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import java.util.Optional;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.GoalSelector;
+import java.util.Optional;
+import java.util.Set;
 
 @SuppressWarnings("unchecked")
 @Mixin(MobEntity.class)
@@ -52,4 +54,16 @@ public abstract class MobEntityMixin_API extends LivingEntityMixin_API implement
         }
         return Optional.empty();
     }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.aiEnabled().asImmutable());
+
+        this.targetEntity().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
+
 }

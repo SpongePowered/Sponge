@@ -25,9 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.PatrollerEntity;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Patroller;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Set;
 
 @Mixin(PatrollerEntity.class)
 public abstract class PatrollerEntityMixin_API extends MonsterEntityMixin_API implements Patroller {
@@ -37,6 +41,18 @@ public abstract class PatrollerEntityMixin_API extends MonsterEntityMixin_API im
     @Override
     public void findPatrolTarget() {
         this.shadow$resetPatrolTarget();
+    }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.leader().asImmutable());
+        values.add(this.patrolling().asImmutable());
+
+        this.targetPosition().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 
 }

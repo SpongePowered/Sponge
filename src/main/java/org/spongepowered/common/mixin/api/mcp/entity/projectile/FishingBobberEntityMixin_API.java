@@ -24,58 +24,27 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
-import org.spongepowered.api.entity.Entity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.FishingBobber;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.FishingBobberEntity;
+import java.util.Set;
 
 @Mixin(FishingBobberEntity.class)
 public abstract class FishingBobberEntityMixin_API extends EntityMixin_API implements FishingBobber {
 
-    @Shadow @Nullable private PlayerEntity angler;
-    @Shadow @Nullable public net.minecraft.entity.Entity caughtEntity;
-
-    @Nullable
-    private ProjectileSource projectileSource;
-
     @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        } else if (this.angler != null && this.angler instanceof ProjectileSource) {
-            return (ProjectileSource) this.angler;
-        }
-        return ProjectileSource.UNKNOWN;
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof PlayerEntity) {
-            // This allows things like Vanilla kill attribution to take place
-            this.angler = (PlayerEntity) shooter;
-        } else {
-            this.angler = null;
-        }
-        this.projectileSource = shooter;
-    }
+        // Projectile
+        values.add(this.shooter().asImmutable());
 
-    @Override
-    public Optional<Entity> getHookedEntity() {
-        return Optional.ofNullable((Entity) this.caughtEntity);
-    }
+        this.targetEntity().map(Value::asImmutable).ifPresent(values::add);
 
-    @Override
-    public void setHookedEntity(@Nullable Entity entity) {
-        this.caughtEntity = (net.minecraft.entity.Entity) entity;
+        return values;
     }
-
 
 }

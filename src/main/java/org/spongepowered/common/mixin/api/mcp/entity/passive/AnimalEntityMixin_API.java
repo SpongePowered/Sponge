@@ -25,10 +25,25 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.AnimalEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.AgeableEntityMixin_API;
 
+import java.util.Set;
+
 @Mixin(AnimalEntity.class)
 public abstract class AnimalEntityMixin_API extends AgeableEntityMixin_API implements Animal {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.breedTime().asImmutable());
+        values.add(this.canBreed().asImmutable());
+
+        this.breeder().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
 }

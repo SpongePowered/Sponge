@@ -25,10 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.PillagerEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.illager.Pillager;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Set;
+
 @Mixin(PillagerEntity.class)
 public abstract class PillagerEntityMixin_API extends AbstractIllagerEntityMixin_API implements Pillager {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.chargingCrossbow().asImmutable());
+
+        return values;
+    }
 
 }

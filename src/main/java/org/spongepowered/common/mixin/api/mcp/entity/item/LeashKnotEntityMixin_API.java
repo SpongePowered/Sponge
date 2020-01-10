@@ -25,16 +25,23 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.LeashKnotEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.hanging.LeashKnot;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.mcp.entity.item.HangingEntityMixin_API;
+
+import java.util.Set;
 
 @Mixin(LeashKnotEntity.class)
 public abstract class LeashKnotEntityMixin_API extends HangingEntityMixin_API implements LeashKnot {
 
     @Override
-    public Entity getLeashedEntity() {
-        return null;
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.leashedEntity().asImmutable());
+
+        return values;
     }
+
 }

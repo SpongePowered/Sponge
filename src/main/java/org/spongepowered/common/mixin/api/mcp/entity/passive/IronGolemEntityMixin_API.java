@@ -25,10 +25,23 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.IronGolemEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.golem.IronGolem;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.accessor.entity.passive.FoxEntityAccessor;
+
+import java.util.Set;
 
 @Mixin(IronGolemEntity.class)
 public abstract class IronGolemEntityMixin_API extends GolemEntityMixin_API implements IronGolem {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.playerCreated().asImmutable());
+
+        return values;
+    }
 
 }

@@ -24,59 +24,38 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import net.minecraft.entity.monster.CreeperEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFuseData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
+
+import java.util.Set;
 
 @Mixin(CreeperEntity.class)
 public abstract class CreeperEntityMixin_API extends MonsterEntityMixin_API implements Creeper {
 
-    @Shadow public abstract int getCreeperState();
-    @Shadow public abstract void setCreeperState(int state);
     @Shadow private void explode() { } // explode
-
-    @Shadow public abstract boolean getPowered();
-
-    @Override
-    public Value.Mutable<Boolean> charged() {
-        return new SpongeValue<>(Keys.CREEPER_CHARGED, false, this.getPowered());
-    }
-
-    @Override
-    public FuseData getFuseData() {
-        return new SpongeFuseData(((FusedExplosiveBridge) this).bridge$getFuseDuration(), ((FusedExplosiveBridge) this).bridge$getFuseTicksRemaining());
-    }
-
-    @Override
-    public void prime() {
-        checkState(!this.isPrimed(), "already primed");
-        this.setCreeperState(Constants.Entity.Creeper.STATE_PRIMED);
-    }
-
-    @Override
-    public void defuse() {
-        checkState(this.isPrimed(), "not primed");
-        this.setCreeperState(Constants.Entity.Creeper.STATE_IDLE);
-    }
-
-    @Override
-    public boolean isPrimed() {
-        return this.getCreeperState() == Constants.Entity.Creeper.STATE_PRIMED;
-    }
 
     @Override
     public void detonate() {
         this.explode();
+    }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // FusedExplosive
+        values.add(this.primed().asImmutable());
+        values.add(this.fuseDuration().asImmutable());
+
+        // Explosive
+        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+
+        values.add(this.charged().asImmutable());
+
+        return values;
     }
 
 }

@@ -24,42 +24,25 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
-import org.spongepowered.api.data.value.Value.Mutable;
+import net.minecraft.entity.item.ExperienceOrbEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
-import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.Collection;
-import net.minecraft.entity.item.ExperienceOrbEntity;
+import java.util.Set;
 
 @Mixin(ExperienceOrbEntity.class)
 public abstract class ExperienceOrbEntityMixin_API extends EntityMixin_API implements ExperienceOrb {
 
-    @Shadow private int xpValue;
-
     @Override
-    public Mutable<Integer> experience() {
-        return SpongeValueFactory.boundedBuilder(Keys.CONTAINED_EXPERIENCE)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .actualValue(this.xpValue)
-                .defaultValue(0)
-                .build();
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.experience().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public ExpOrbData experienceHeld() {
-        return new SpongeExpOrbData(this.xpValue);
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.experienceHeld());
-    }
 }

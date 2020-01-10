@@ -24,35 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
+import net.minecraft.entity.passive.PigEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Pig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import java.util.Collection;
-import net.minecraft.entity.passive.PigEntity;
+
+import java.util.Set;
 
 @Mixin(PigEntity.class)
 public abstract class PigEntityMixin_API extends AnimalEntityMixin_API implements Pig {
 
-    @Shadow public abstract boolean getSaddled();
-
     @Override
-    public PigSaddleData getPigSaddleData() {
-        return new SpongePigSaddleData(this.getSaddled());
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.saddled().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public Value.Mutable<Boolean> saddled() {
-        return new SpongeValue<>(Keys.IS_SADDLED, false, this.getSaddled());
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getPigSaddleData());
-    }
 }

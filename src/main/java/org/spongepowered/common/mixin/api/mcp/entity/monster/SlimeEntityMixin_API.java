@@ -24,41 +24,26 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
-import org.spongepowered.api.data.value.BoundedValue;
+import net.minecraft.entity.monster.SlimeEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.slime.Slime;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
-import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.api.mcp.entity.MobEntityMixin_API;
+
 import java.util.Collection;
-import net.minecraft.entity.monster.SlimeEntity;
+import java.util.Set;
 
 @Mixin(SlimeEntity.class)
 public abstract class SlimeEntityMixin_API extends MobEntityMixin_API implements Slime {
 
-    @Shadow public abstract int getSlimeSize();
-
     @Override
-    public BoundedValue.Mutable<Integer> slimeSize() {
-        return SpongeValueFactory.boundedBuilder(Keys.SLIME_SIZE)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .defaultValue(1)
-                .actualValue(this.getSlimeSize())
-                .build();
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.size().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public SlimeData getSlimeData() {
-        return new SpongeSlimeData(this.getSlimeSize());
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getSlimeData());
-    }
 }

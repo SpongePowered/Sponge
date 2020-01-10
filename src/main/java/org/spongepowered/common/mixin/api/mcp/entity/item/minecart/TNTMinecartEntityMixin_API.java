@@ -27,10 +27,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.item.minecart;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.item.minecart.TNTMinecartEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+
+import java.util.Set;
 
 @Mixin(TNTMinecartEntity.class)
 public abstract class TNTMinecartEntityMixin_API extends AbstractMinecartEntityMixin_API implements TNTMinecart {
@@ -39,28 +42,25 @@ public abstract class TNTMinecartEntityMixin_API extends AbstractMinecartEntityM
     @Shadow public abstract void ignite();
 
     @Override
-    public void prime() {
-        checkState(!this.isPrimed(), "already primed");
-        this.ignite();
-    }
-
-    @Override
-    public void defuse() {
-        checkState(this.isPrimed(), "not primed");
-        if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
-            ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(-1);
-            ((FusedExplosiveBridge) this).bridge$postDefuse();
-        }
-    }
-
-    @Override
-    public boolean isPrimed() {
-        return this.minecartTNTFuse >= 0;
-    }
-
-    @Override
     public void detonate() {
         ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(0);
+    }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // BlockOccupiedMinecart
+        values.add(this.block().asImmutable());
+
+        // FusedExplosive
+        values.add(this.primed().asImmutable());
+        values.add(this.fuseDuration().asImmutable());
+
+        // Explosive
+        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 
 }

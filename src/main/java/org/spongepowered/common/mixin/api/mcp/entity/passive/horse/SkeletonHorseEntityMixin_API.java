@@ -29,6 +29,6 @@ import org.spongepowered.api.entity.living.animal.horse.SkeletonHorse;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(SkeletonHorseEntity.class)
-public abstract class SkeletonHorseEntityMixin_API extends AbstractHorseMixin_API implements SkeletonHorse {
+public abstract class SkeletonHorseEntityMixin_API extends AbstractHorseEntityMixin_API implements SkeletonHorse {
 
 }

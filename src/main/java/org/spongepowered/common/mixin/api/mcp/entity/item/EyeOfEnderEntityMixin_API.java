@@ -25,26 +25,26 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EyeOfEnderEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
+
+import java.util.Set;
 
 @Mixin(EyeOfEnderEntity.class)
 public abstract class EyeOfEnderEntityMixin_API extends EntityMixin_API implements EyeOfEnder {
 
-    private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
-
     @Override
-    public ProjectileSource getShooter() {
-        return this.projectileSource;
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Projectile
+        values.add(this.shooter().asImmutable());
+
+        values.add(this.targetLocation().asImmutable());
+
+        return values;
     }
-
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        this.projectileSource = shooter;
-    }
-
-
 
 }

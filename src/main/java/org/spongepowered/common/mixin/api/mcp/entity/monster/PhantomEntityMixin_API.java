@@ -24,27 +24,25 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import net.minecraft.entity.monster.PhantomEntity;
-import org.spongepowered.api.data.type.PhantomPhase;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Phantom;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.mcp.entity.FlyingEntityMixin_API;
+
+import java.util.Set;
 
 @Mixin(PhantomEntity.class)
-public abstract class PhantomEntityMixin_API implements Phantom {
-
-    @Shadow private PhantomEntity.AttackPhase attackPhase;
+public abstract class PhantomEntityMixin_API extends FlyingEntityMixin_API implements Phantom {
 
     @Override
-    public PhantomPhase getPhase() {
-        return (PhantomPhase) (Object) this.attackPhase;
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.size().asImmutable());
+        values.add(this.phase().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public void setPhase(PhantomPhase phase) {
-        checkNotNull(phase);
-        this.attackPhase = (PhantomEntity.AttackPhase) (Object) phase;
-    }
 }

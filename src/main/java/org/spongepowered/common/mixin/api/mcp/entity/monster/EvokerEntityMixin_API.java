@@ -25,10 +25,22 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.EvokerEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.illager.spellcaster.Evoker;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Set;
+
 @Mixin(EvokerEntity.class)
 public abstract class EvokerEntityMixin_API extends SpellcastingIllagerEntityMixin_API implements Evoker {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        this.wololoTarget().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
 
 }

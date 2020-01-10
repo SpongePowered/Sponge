@@ -24,44 +24,25 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
-import org.spongepowered.api.data.value.BoundedValue;
+import net.minecraft.entity.monster.ZombiePigmanEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.zombie.ZombiePigman;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
-import org.spongepowered.common.data.value.SpongeValueFactory;
+
 import java.util.Collection;
-import net.minecraft.entity.monster.ZombiePigmanEntity;
+import java.util.Set;
 
 @Mixin(ZombiePigmanEntity.class)
 public abstract class ZombiePigmanEntityMixin_API extends ZombieEntityMixin_API implements ZombiePigman {
 
-    @Shadow private int angerLevel;
-
-    @Shadow public abstract boolean isAngry();
-
     @Override
-    public AngerableData getAngerData() {
-        return new SpongeAngerableData(this.angerLevel);
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.angerLevel().asImmutable());
+
+        return values;
     }
 
-    @Override
-    public BoundedValue.Mutable<Integer> angerLevel() {
-        return SpongeValueFactory.boundedBuilder(Keys.ANGER_LEVEL)
-                .actualValue(this.angerLevel)
-                .defaultValue(0)
-                .minimum(Integer.MIN_VALUE)
-                .maximum(Integer.MAX_VALUE)
-                .build();
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getAngerData());
-        manipulators.add(new SpongeAggressiveData(this.isAngry()));
-    }
 }

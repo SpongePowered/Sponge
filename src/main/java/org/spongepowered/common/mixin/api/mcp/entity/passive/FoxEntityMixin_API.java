@@ -25,14 +25,17 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.FoxEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Fox;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.accessor.entity.passive.FoxEntityAccessor;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Mixin(FoxEntity.class)
-public abstract class FoxEntityMixin_API implements Fox {
+public abstract class FoxEntityMixin_API extends AnimalEntityMixin_API implements Fox {
 
     @Shadow protected abstract boolean shadow$isTrustedUUID(UUID p_213468_1_);
 
@@ -40,4 +43,24 @@ public abstract class FoxEntityMixin_API implements Fox {
     public boolean trusts(UUID uniqueId) {
         return this.shadow$isTrustedUUID(uniqueId);
     }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.type().asImmutable());
+        values.add(this.sitting().asImmutable());
+        values.add(this.faceplanted().asImmutable());
+        values.add(this.defending().asImmutable());
+        values.add(this.sleeping().asImmutable());
+        values.add(this.pouncing().asImmutable());
+        values.add(this.crouching().asImmutable());
+        values.add(this.interested().asImmutable());
+
+        this.firstTrusted().map(Value::asImmutable).ifPresent(values::add);
+        this.secondTrusted().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
+
 }

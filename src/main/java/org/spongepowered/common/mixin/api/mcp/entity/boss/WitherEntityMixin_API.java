@@ -24,59 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.boss;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import org.spongepowered.api.boss.ServerBossBar;
-import org.spongepowered.api.entity.living.Living;
+import net.minecraft.entity.boss.WitherEntity;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.boss.Wither;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.monster.MonsterEntityMixin_API;
 
-import java.util.ArrayList;
-import java.util.List;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.world.ServerBossInfo;
+import java.util.Set;
 
 @Mixin(value = WitherEntity.class)
 public abstract class WitherEntityMixin_API extends MonsterEntityMixin_API implements Wither {
 
-    @Shadow @Final private ServerBossInfo bossInfo;
-    @Shadow public abstract int getWatchedTargetId(int p_82203_1_);
-    @Shadow public abstract void updateWatchedTargetId(int targetOffset, int newId);
-    @Shadow public abstract void setInvulTime(int ticks);
-
     private int fuseDuration = 220;
-
-    @Override
-    public List<Living> getTargets() {
-        List<Living> values = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            int id = this.getWatchedTargetId(i);
-            if (id > 0) {
-                values.add((Living) this.world.getEntityByID(id));
-            }
-        }
-        return values;
-    }
-
-    @Override
-    public void setTargets(List<Living> targets) {
-        checkNotNull(targets, "Targets are null!");
-        for (int i = 0; i < 2; i++) {
-            this.updateWatchedTargetId(i, targets.size() > i ? ((LivingEntity) targets.get(i)).getEntityId() : 0);
-        }
-    }
-
-    @Override
-    public ServerBossBar getBossBar() {
-        return (ServerBossBar) this.bossInfo;
-    }
-
 
     @Override
     public void detonate() {
@@ -84,26 +44,22 @@ public abstract class WitherEntityMixin_API extends MonsterEntityMixin_API imple
     }
 
     @Override
-    public void prime() {
-        checkState(!this.isPrimed(), "already primed");
-        if (((FusedExplosiveBridge) this).bridge$shouldPrime()) {
-            ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(this.fuseDuration);
-            ((FusedExplosiveBridge) this).bridge$postPrime();
-        }
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public void defuse() {
-        checkState(this.isPrimed(), "not primed");
-        if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
-            this.setInvulTime(0);
-            ((FusedExplosiveBridge) this).bridge$postDefuse();
-        }
-    }
+        // Boss
+        values.add(this.bossBar().asImmutable());
 
-    @Override
-    public boolean isPrimed() {
-        return ((FusedExplosiveBridge) this).bridge$getFuseTicksRemaining() > 0;
+        // FusedExplosive
+        values.add(this.primed().asImmutable());
+        values.add(this.fuseDuration().asImmutable());
+
+        // Explosive
+        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+
+        values.add(this.targetEntities().asImmutable());
+
+        return values;
     }
 
 }

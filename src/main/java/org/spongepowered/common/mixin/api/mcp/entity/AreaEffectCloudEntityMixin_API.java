@@ -27,10 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Potion;
-import net.minecraft.util.EnumParticleTypes;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
-import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.AreaEffectCloud;
@@ -38,143 +35,32 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAreaEffectData;
-import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 @Mixin(AreaEffectCloudEntity.class)
 public abstract class AreaEffectCloudEntityMixin_API extends EntityMixin_API implements AreaEffectCloud {
 
-    @Shadow private Potion potion;
-    @Shadow @Final private List<net.minecraft.potion.EffectInstance> effects;
-    @Shadow private int duration;
-    @Shadow private int waitTime;
-    @Shadow private int reapplicationDelay;
-    @Shadow private boolean colorSet;
-    @Shadow private int durationOnUse;
-    @Shadow private float radiusOnUse;
-    @Shadow private float radiusPerTick;
-    @Shadow private LivingEntity owner;
-    @Shadow private UUID ownerUniqueId;
-
-    @Shadow public abstract float getRadius();
-    @Shadow public abstract int getColor();
-    @Shadow public abstract EnumParticleTypes getParticle();
-
     @Override
-    public AreaEffectCloudData getAreaEffectCloudData() {
-        return new SpongeAreaEffectData(Color.ofRgb(this.getColor()),
-                this.getRadius(),
-                ParticleTypes.MOB_SPELL,
-                this.duration,
-                this.waitTime,
-                this.radiusOnUse,
-                this.radiusPerTick,
-                this.durationOnUse,
-                this.reapplicationDelay,
-                (List<PotionEffect>) (List<?>) this.effects,
-                this.ticksExisted
-                );
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public Mutable<Color> color() {
-        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, Color.ofRgb(this.getColor()));
-    }
+        values.add(this.color().asImmutable());
+        values.add(this.radius().asImmutable());
+        values.add(this.particleEffect().asImmutable());
+        values.add(this.duration().asImmutable());
+        values.add(this.waitTime().asImmutable());
+        values.add(this.radiusOnUse().asImmutable());
+        values.add(this.radiusPerTick().asImmutable());
+        values.add(this.durationOnUse().asImmutable());
+        values.add(this.applicationDelay().asImmutable());
+        values.add(this.effects().asImmutable());
+        values.add(this.age().asImmutable());
 
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Double> radius() {
-        return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS)
-                .minimum(0D)
-                .maximum((double) Float.MAX_VALUE)
-                .defaultValue(0.5D)
-                .actualValue((double) this.getRadius())
-                .build();
-    }
-
-    @Override
-    public Mutable<ParticleType> particleType() {
-        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_PARTICLE_EFFECT, ParticleTypes.MOB_SPELL, ParticleTypes.MOB_SPELL);
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> duration() {
-        return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION)
-                .minimum(Integer.MIN_VALUE)
-                .maximum(Integer.MAX_VALUE)
-                .defaultValue(600)
-                .actualValue(this.duration)
-                .build();
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> waitTime() {
-        return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_WAIT_TIME)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .defaultValue(20)
-                .actualValue(this.waitTime)
-                .build();
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Double> radiusOnUse() {
-        return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE)
-                .minimum(0.0D)
-                .maximum((double) Float.MAX_VALUE)
-                .defaultValue(0.0D)
-                .actualValue((double) this.radiusOnUse)
-                .build();
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Double> radiusPerTick() {
-        return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_PER_TICK)
-                .minimum(0.0D)
-                .maximum((double) Float.MAX_VALUE)
-                .defaultValue(0.0D)
-                .actualValue((double) this.radiusPerTick)
-                .build();
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> durationOnUse() {
-        return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(this.durationOnUse)
-                .build();
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> applicationDelay() {
-        return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(this.reapplicationDelay)
-                .build();
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.ListValue.Mutable<PotionEffect> effects() {
-        return new SpongeListValue<>(Keys.POTION_EFFECTS, (List<PotionEffect>) (List<?>) this.effects);
-    }
-
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> age() {
-        return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_AGE)
-                .defaultValue(0)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .actualValue(this.ticksExisted)
-                .build();
+        return values;
     }
 
 }

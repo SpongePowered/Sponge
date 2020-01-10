@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
@@ -43,12 +42,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -74,7 +72,6 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.EntityUtil;
@@ -83,12 +80,12 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
-import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
-import java.util.Collection;
+
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -113,42 +110,32 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public double motionZ;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
-    @Shadow public boolean onGround;
     @Shadow public boolean isDead;
     @Shadow public float width;
     @Shadow public float height;
     @Shadow protected Random rand;
     @Shadow public int ticksExisted;
     @Shadow public int fire;
-    @Shadow protected EntityDataManager dataManager;
     @Shadow public int dimension;
     @Shadow protected UUID entityUniqueID;
-
+    @Shadow public boolean removed;
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
     @Shadow public abstract int getAir();
     @Shadow public abstract void setAir(int air);
-    @Shadow public abstract float getEyeHeight();
     @Shadow public abstract UUID getUniqueID();
-    @Shadow public abstract AxisAlignedBB getEntityBoundingBox();
     @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int getEntityId();
-    @Shadow public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
-    @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
-    @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
-    @Shadow public abstract void removePassengers();
-    @Shadow public abstract void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack);
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
-    @Shadow public abstract boolean hasNoGravity();
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow protected abstract AxisAlignedBB shadow$getBoundingBox();
+    @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
 
     // @formatter:on
 
     @Shadow public abstract void dismountRidingEntity();
-
-    @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
 
     @Override
     public EntitySnapshot createSnapshot() {
@@ -414,7 +401,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Optional<AABB> getBoundingBox() {
-        final AxisAlignedBB boundingBox = this.getEntityBoundingBox();
+        final AxisAlignedBB boundingBox = this.shadow$getBoundingBox();
         if (boundingBox == null) {
             return Optional.empty();
         }
@@ -424,11 +411,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             // Bounding box is degenerate, the entity doesn't actually have one
             return Optional.empty();
         }
-    }
-
-    @Override
-    public boolean isOnGround() {
-        return this.onGround;
     }
 
     @Override
@@ -465,65 +447,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public UUID getUniqueId() {
         return this.entityUniqueID;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Intrinsic
-    public List<org.spongepowered.api.entity.Entity> entity$getPassengers() {
-        return (List) this.shadow$getPassengers();
-    }
-
-    @Override
-    public Optional<org.spongepowered.api.entity.Entity> getVehicle() {
-        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.getRidingEntity());
-    }
-
-    @Override
-    public org.spongepowered.api.entity.Entity getBaseVehicle() {
-        return (org.spongepowered.api.entity.Entity) this.getLowestRidingEntity();
-    }
-
-    @Override
-    public boolean hasPassenger(final org.spongepowered.api.entity.Entity entity) {
-        checkNotNull(entity);
-        return entity.getPassengers().contains(this);
-    }
-
-    @Override
-    public boolean addPassenger(final org.spongepowered.api.entity.Entity entity) {
-        checkNotNull(entity);
-        if (entity.getPassengers().contains(this)) {
-            throw new IllegalArgumentException(String.format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
-        }
-
-        return ((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true);
-    }
-
-    @Override
-    public void removePassenger(final org.spongepowered.api.entity.Entity entity) {
-        checkNotNull(entity);
-        if (!entity.getPassengers().contains(this)) {
-            throw new IllegalArgumentException(String.format("Cannot remove entity %s, because it is not a passenger of %s ", entity, this));
-        }
-
-        ((net.minecraft.entity.Entity) entity).stopRiding();
-    }
-
-    @Override
-    public void clearPassengers() {
-        this.removePassengers();
-    }
-
-    @Override
-    public boolean setVehicle(@Nullable final org.spongepowered.api.entity.Entity entity) {
-        if (this.getRidingEntity() == null && entity == null) {
-            return false;
-        }
-        if (this.getRidingEntity() != null) {
-            this.dismountRidingEntity();
-            return true;
-        }
-        return entity != null && entity.addPassenger(this);
     }
 
     @Override
@@ -604,29 +527,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Optional<UUID> getCreator() {
-        return Optional.empty(); // Mixed in via EntityMixin_TrackerAPI
-    }
-
-    @Override
-    public Optional<UUID> getNotifier() {
-        return Optional.empty(); // Mixed in via EntityMixin_TrackerAPI
-    }
-
-    @Override
-    public void setCreator(@Nullable final UUID uuid) {  // Mixed in via EntityMixin_TrackerAPI
-    }
-
-    @Override
-    public void setNotifier(@Nullable final UUID uuid) { // Mixed in via EntityMixin_TrackerAPI
-    }
-
-    @Override
-    public Vector3d getVelocity() {
-        return new Vector3d(this.motionX, this.motionY, this.motionZ);
-    }
-
-    @Override
     public Translation getTranslation() {
         return this.getType().getTranslation();
     }
@@ -644,16 +544,27 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public org.spongepowered.api.data.value.Value.Mutable<Boolean> gravity() {
-        return this.getValue(Keys.HAS_GRAVITY).get();
+    public Set<Value.Immutable<?>> getValues() {
+        // TODO: Merge custom and Vanilla values and return the merged result.
+        return this.api$getVanillaValues();
     }
 
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super Mutable<?, ?>> manipulators) {
-        this.get(VehicleData.class).ifPresent(manipulators::add);
-        if (this.fire > 0) {
-            manipulators.add(this.get(IgniteableData.class).get());
-        }
-        manipulators.add(new SpongeGravityData(!this.hasNoGravity()));
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = new HashSet<>();
+
+        values.add(this.displayName().asImmutable());
+        values.add(this.passengers().asImmutable());
+        values.add(this.onGround().asImmutable());
+        values.add(this.velocity().asImmutable());
+        values.add(this.gravity().asImmutable());
+        values.add(this.silent().asImmutable());
+
+        this.baseVehicle().map(Value::asImmutable).ifPresent(values::add);
+        this.creator().map(Value::asImmutable).ifPresent(values::add);
+        this.notifier().map(Value::asImmutable).ifPresent(values::add);
+        this.fireTicks().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 
 }

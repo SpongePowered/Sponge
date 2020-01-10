@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.trader.Trader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.AgeableEntityMixin_API;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Mixin(AbstractVillagerEntity.class)
 public abstract class AbstractVillagerEntityMixin_API extends AgeableEntityMixin_API implements Trader {
@@ -48,6 +50,18 @@ public abstract class AbstractVillagerEntityMixin_API extends AgeableEntityMixin
 
     public void setCustomer(@Nullable Humanoid humanoid) {
         this.shadow$setCustomer((PlayerEntity) humanoid);
+    }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // Merchant
+        values.add(this.tradeOffers().asImmutable());
+
+        values.add(this.trading().asImmutable());
+
+        return values;
     }
 
 }

@@ -25,69 +25,28 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item.minecart;
 
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
-import org.spongepowered.api.entity.vehicle.minecart.Minecart;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.math.vector.Vector3d;
+
+import java.util.Set;
 
 @Mixin(AbstractMinecartEntity.class)
 public abstract class AbstractMinecartEntityMixin_API extends EntityMixin_API implements MinecartEntity {
 
-    @Shadow protected abstract double shadow$getMaximumSpeed();
-
-    private double maxSpeed = 0.4D;
-    private boolean slowWhenEmpty = true;
-    private Vector3d airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
-    private Vector3d derailedMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD);
-
-
     @Override
-    public double getSwiftness() {
-        return this.maxSpeed;
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public void setSwiftness(double maxSpeed) {
-        this.maxSpeed = maxSpeed;
-    }
+        values.add(this.onRail().asImmutable());
+        values.add(this.swiftness().asImmutable());
+        values.add(this.potentialMaxSpeed().asImmutable());
+        values.add(this.slowsUnoccupied().asImmutable());
+        values.add(this.airborneVelocityModifier().asImmutable());
+        values.add(this.derailedVelocityModifier().asImmutable());
 
-    @Override
-    public double getPotentialMaxSpeed() {
-        // SpongeForge replaces this method so it returns the result of the Forge method
-        return this.shadow$getMaximumSpeed();
-    }
-
-    @Override
-    public boolean doesSlowWhenEmpty() {
-        return this.slowWhenEmpty;
-    }
-
-    @Override
-    public void setSlowWhenEmpty(boolean slowWhenEmpty) {
-        this.slowWhenEmpty = slowWhenEmpty;
-    }
-
-    @Override
-    public Vector3d getAirborneVelocityMod() {
-        return this.airborneMod;
-    }
-
-    @Override
-    public void setAirborneVelocityMod(Vector3d airborneMod) {
-        this.airborneMod = airborneMod;
-    }
-
-    @Override
-    public Vector3d getDerailedVelocityMod() {
-        return this.derailedMod;
-    }
-
-    @Override
-    public void setDerailedVelocityMod(Vector3d derailedVelocityMod) {
-        this.derailedMod = derailedVelocityMod;
+        return values;
     }
 
 }

@@ -25,53 +25,30 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive.horse;
 
 import net.minecraft.entity.passive.horse.LlamaEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.LlamaType;
-import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.llama.Llama;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
+
+import java.util.Set;
 
 @Mixin(LlamaEntity.class)
-public abstract class LlamaEntityMixin_API extends AbstractHorseMixin_API implements Llama {
+public abstract class LlamaEntityMixin_API extends AbstractChestedHorseEntityMixin_API implements Llama {
 
     @Shadow public abstract int getStrength();
     @Shadow public abstract int getVariant();
     @Shadow public abstract void setVariant(int p_190710_1_);
 
     @Override
-    public Value.Mutable<LlamaType> type() {
-        final int i = this.getVariant();
-        final LlamaType variant;
-        if (i == 0) {
-            variant = LlamaTypes.CREAMY;
-        } else if (i == 1) {
-            variant = LlamaTypes.WHITE;
-        } else if (i == 2) {
-            variant = LlamaTypes.BROWN;
-        } else if (i == 3) {
-            variant = LlamaTypes.GRAY;
-        } else {
-            this.setVariant(0); // Basically some validation
-            variant = LlamaTypes.CREAMY;
-        }
-        return new SpongeValue<>(Keys.LLAMA_TYPE, Constants.Entity.Llama.DEFAULT_TYPE, variant);
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public org.spongepowered.api.data.value.BoundedValue.Mutable<Integer> strength() {
-        return SpongeValueFactory.getInstance()
-                .createBoundedValueBuilder(Keys.LLAMA_STRENGTH)
-                .defaultValue(Constants.Entity.Llama.DEFAULT_STRENGTH)
-                .minimum(Constants.Entity.Llama.MINIMUM_STRENGTH)
-                .maximum(Constants.Entity.Llama.MAXIMUM_STRENGTH)
-                .actualValue(this.getStrength())
-                .build();
-    }
+        values.add(this.type().asImmutable());
+        values.add(this.strength().asImmutable());
 
+        this.tamer().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
 
 }
