@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.block.BlockRailBase;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.util.Direction;
@@ -109,6 +111,18 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
             default:
                 throw new AssertionError();
         }
+    }
+
+    @Override
+    public boolean isFacing(Direction direction) {
+        checkNotNull(direction, "direction");
+
+        Direction cardinalDirection = Direction.getClosest(direction.asOffset(), Direction.Division.CARDINAL);
+
+        Direction firstDirection = getFirstDirection();
+        Direction secondDirection = getSecondDirection();
+
+        return firstDirection.equals(cardinalDirection) || secondDirection.equals(cardinalDirection);
     }
 
     @SuppressWarnings("ConstantConditions")
