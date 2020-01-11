@@ -30,7 +30,18 @@ import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
 
-    public SpongeSpawnType(CatalogKey key) {
+    private boolean isForced = false;
+
+    public SpongeSpawnType(CatalogKey key, String name) {
         super(key);
+    }
+
+    public SpongeSpawnType forced() {
+        this.isForced = true;
+        return this;
+    }
+
+    public boolean isForced() {
+        return this.isForced;
     }
 }

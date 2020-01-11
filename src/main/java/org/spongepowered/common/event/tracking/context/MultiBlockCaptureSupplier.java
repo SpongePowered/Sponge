@@ -401,7 +401,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     public void captureNeighborNotification(
-            final ServerWorldBridge mixinWorldServer, final BlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
+            final ServerWorldBridge mixinWorldServer, final BlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos, boolean isMoving) {
         final int transactionIndex = ++this.transactionIndex;
         final BlockState actualSourceState = ((ServerWorld) mixinWorldServer).getBlockState(sourcePos);
         final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer,

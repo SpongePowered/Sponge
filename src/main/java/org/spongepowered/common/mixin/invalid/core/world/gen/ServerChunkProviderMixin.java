@@ -58,6 +58,7 @@ import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
@@ -206,7 +207,7 @@ public abstract class ServerChunkProviderMixin implements ServerChunkProviderBri
             .addDetail(currentContext.state.toString(), () -> {
 
                 final PrettyPrinter printer = new PrettyPrinter(50);
-                PhaseTracker.CONTEXT_PRINTER.accept(printer, currentContext);
+                PhasePrinter.CONTEXT_PRINTER.accept(printer, currentContext);
                 try (final PrintStream stream = new PrintStream(new ByteArrayOutputStream())) {
                     printer.print(stream);
                     return stream.toString();

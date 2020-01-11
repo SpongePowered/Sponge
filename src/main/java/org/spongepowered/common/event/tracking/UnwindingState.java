@@ -212,7 +212,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
             }
         } catch (Exception e) {
-            PhaseTracker.getInstance().printExceptionFromPhase(e, context);
+            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance(), e, context);
         }
     }
 
@@ -252,7 +252,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
                     TrackingUtil.processBlockCaptures(currentContext, depth + 1, original);
                 }
             } catch (Exception e) {
-                PhaseTracker.getInstance().printExceptionFromPhase(e, currentContext);
+                PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance(), e, currentContext);
             }
         }
     }

@@ -167,7 +167,7 @@ public final class TrackingUtil {
                 SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
             }
         } catch (Exception | NoClassDefFoundError e) {
-            PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
+            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
         }
     }
 
@@ -197,7 +197,7 @@ public final class TrackingUtil {
                 SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
             }
         } catch (Exception | NoClassDefFoundError e) {
-            PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
+            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
         }
     }
 
@@ -235,7 +235,7 @@ public final class TrackingUtil {
                 tile.tick();
             }
         } catch (Exception e) {
-            PhaseTracker.getInstance().printExceptionFromPhase(e, context);
+            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
         // We delay clearing active chunk if TE is invalidated during tick so we must remove it after
         if (tileEntity.isRemoved()) {
@@ -271,9 +271,9 @@ public final class TrackingUtil {
              final Timing timing = ((TimingBridge) state.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
-            block.updateTick(world, pos, state, random);
+            state.tick(world, pos, random);
         } catch (Exception | NoClassDefFoundError e) {
-            PhaseTracker.getInstance().printExceptionFromPhase(e, phaseContext);
+            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
 
         }
     }
@@ -307,7 +307,7 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             block.randomTick(world, pos, state, random);
         } catch (Exception | NoClassDefFoundError e) {
-            PhaseTracker.getInstance().printExceptionFromPhase(e, phaseContext);
+            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance(), e, phaseContext);
         }
     }
 
@@ -374,7 +374,7 @@ public final class TrackingUtil {
             printer.add("Exception trying to process over a phase!").centre().hr();
             printer.addWrapped(WIDTH, "%s : %s", "State", phaseContext.state);
             printer.addWrapped(WIDTH, "%s :", "PhaseContext");
-            PhaseTracker.CONTEXT_PRINTER.accept(printer, phaseContext);
+            PhasePrinter.CONTEXT_PRINTER.accept(printer, phaseContext);
             printer.add("Stacktrace:");
             final IllegalStateException exception = new IllegalStateException(s + " Please analyze the current phase context. ");
             printer.add(exception);

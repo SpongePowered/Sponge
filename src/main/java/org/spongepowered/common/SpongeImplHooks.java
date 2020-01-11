@@ -63,6 +63,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.Dimension;
@@ -188,8 +189,8 @@ public class SpongeImplHooks {
         return ((FireBlockAccessor) Blocks.FIRE).accessor$getFlammability(block) > 0;
     }
 
-    public static int getBlockLightOpacity(BlockState state, IBlockAccess world, BlockPos pos) {
-        return state.getLightOpacity();
+    public static int getBlockLightOpacity(BlockState state, IBlockReader world, BlockPos pos) {
+        return state.getLightValue();
     }
 
 	public static int getChunkPosLight(BlockState blockState, World world, BlockPos pos) {
