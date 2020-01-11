@@ -27,4 +27,5 @@ package org.spongepowered.common.bridge.server.management;
 public interface PlayerChunkMapBridge {
 
     boolean bridge$isChunkInUse(int x, int z);
+
 }

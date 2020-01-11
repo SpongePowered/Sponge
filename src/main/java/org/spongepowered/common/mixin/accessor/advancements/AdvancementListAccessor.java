@@ -22,21 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util.text;
+package org.spongepowered.common.mixin.accessor.advancements;
 
-import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementList;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(TextFormatting.class)
-public abstract class TextFormattingMixin implements TextFormattingBridge {
+import java.util.Map;
+import java.util.Set;
 
-    @Shadow @Final private char formattingCode;
+@Mixin(AdvancementList.class)
+public interface AdvancementListAccessor {
 
-    @Override
-    public char bridge$getFormattingCode() {
-        return this.formattingCode;
-    }
+    @Accessor("advancements") Map<ResourceLocation, Advancement> accessor$getAdvancements();
+
+    @Accessor("roots") Set<Advancement> accessor$getRootsSet();
+
+    @Accessor("nonRoots") Set<Advancement> accessor$getNonRootsSet();
+
+    @Accessor("listener") AdvancementList.IListener accessor$getListener();
+
 }

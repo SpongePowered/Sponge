@@ -34,6 +34,8 @@ public interface SubjectBridge {
 
     Subject bridge$resolve();
 
+    Optional<SubjectReference> bridge$resolveReferenceOptional();
+
     Optional<Subject> bridge$resolveOptional();
 
     void bridge$setSubject(SubjectReference subj);

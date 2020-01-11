@@ -76,12 +76,12 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -92,14 +92,13 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeEmptyChunk;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.World.class)
 public abstract class WorldMixin implements WorldBridge {

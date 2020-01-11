@@ -32,8 +32,8 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.CooldownTracker_CooldownBridge;
 import org.spongepowered.common.bridge.util.CooldownTrackerBridge;
+import org.spongepowered.common.mixin.accessor.util.CooldownTracker_CooldownAccessor;
 
 import java.util.Map;
 import java.util.OptionalDouble;
@@ -59,10 +59,10 @@ public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.
     public OptionalInt getCooldown(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
 
-        final CooldownTracker_CooldownBridge cooldown = (CooldownTracker_CooldownBridge) this.cooldowns.get((Item) type);
+        final CooldownTracker_CooldownAccessor cooldown = (CooldownTracker_CooldownAccessor) this.cooldowns.get((Item) type);
 
         if (cooldown != null) {
-            final int remainingCooldown = cooldown.bridge$getExpireTicks() - this.ticks;
+            final int remainingCooldown = cooldown.accessor$getExpireTicks() - this.ticks;
             if (remainingCooldown > 0) {
                 return OptionalInt.of(remainingCooldown);
             }

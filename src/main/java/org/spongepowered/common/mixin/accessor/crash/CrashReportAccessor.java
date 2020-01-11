@@ -22,9 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.util;
+package org.spongepowered.common.mixin.accessor.crash;
 
-public interface CooldownTracker_CooldownBridge {
+import net.minecraft.crash.CrashReport;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    int bridge$getExpireTicks();
+@Mixin(CrashReport.class)
+public interface CrashReportAccessor {
+
+    @Accessor("cause") Throwable accessor$getCause();
+
 }

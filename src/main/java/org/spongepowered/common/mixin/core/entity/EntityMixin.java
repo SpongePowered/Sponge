@@ -32,8 +32,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityTracker;
-import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -51,12 +49,13 @@ import net.minecraft.network.play.server.SDestroyEntitiesPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
@@ -96,8 +95,8 @@ import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.util.DataUtil;
@@ -106,17 +105,15 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.math.vector.Vector3d;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge {
@@ -134,14 +131,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Nullable private DestructEntityEvent impl$destructEvent;
 
     @Shadow @Nullable private Entity ridingEntity;
-    @Shadow @Final private List<Entity> riddenByEntities;
+    @Shadow @Final private List<Entity> passengers;
     @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
     @Shadow public double posY;
     @Shadow public double posZ;
-    @Shadow public double motionX;
-    @Shadow public double motionY;
-    @Shadow public double motionZ;
+    @Shadow private Vec3d motion;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
     @Shadow public boolean velocityChanged;
@@ -404,15 +399,15 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "onUpdate", at = @At("RETURN"))
+    @Inject(method = "tick", at = @At("RETURN"))
     private void impl$updateVanishState(final CallbackInfo callbackInfo) {
         if (this.vanish$pendingVisibilityUpdate && !this.world.isRemote) {
-            final EntityTracker entityTracker = ((ServerWorld) this.world).getEntityTracker();
-            // TODO - remove once Mixin 0.8 fixes accessors
-            final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
+            // TODO - this is all done in the ChunkManager/ChunkManager.TrackEntity logic, need to redo this
+            final EntityTracker entityTracker = ((ServerWorld) this.world).getChunkProvider().chunkManager
+            final EntityTrackerEntry lookup = ((EntityTrackerAccessor) entityTracker).accessor$getTrackedEntityTable().lookup(this.getEntityId());
             if (lookup != null && this.vanish$visibilityTicks % 4 == 0) {
                 if (this.vanish$isVanished) {
-                    for (final ServerPlayerEntity entityPlayerMP : lookup.trackingPlayers) { // TODO - remove once Mixin 0.8 fixes accessors
+                    for (final ServerPlayerEntity entityPlayerMP : ((EntityTrackerEntryAccessor) lookup).accessor$getTrackingPlayers()) {
                         entityPlayerMP.connection.sendPacket(new SDestroyEntitiesPacket(this.getEntityId()));
                         if ((Entity) (Object) this instanceof ServerPlayerEntity) {
                             entityPlayerMP.connection.sendPacket(
@@ -430,8 +425,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                             final IPacket<?> packet = new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, (ServerPlayerEntity) (Object) this);
                             entityPlayerMP.connection.sendPacket(packet);
                         }
-                        // TODO - replace with accessor once Mixin 0.8 fixes accessors within mixins
-                        final IPacket<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
+                        final IPacket<?> newPacket = ((EntityTrackerEntryAccessor) lookup).accessor$createSpawnPacket();
                         entityPlayerMP.connection.sendPacket(newPacket);
                     }
                 }

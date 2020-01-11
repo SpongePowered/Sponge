@@ -76,11 +76,6 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
         this.bridge$refreshTrackerStates();
     }
 
-    @Override
-    public void bridge$markDirty() {
-        this.shadow$markDirty();
-    }
-
 
     @SuppressWarnings({"rawtypes"})
     @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))

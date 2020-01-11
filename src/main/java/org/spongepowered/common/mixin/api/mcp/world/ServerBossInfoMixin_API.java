@@ -46,16 +46,16 @@ public abstract class ServerBossInfoMixin_API extends BossInfoMixin_API implemen
 
     @Shadow private boolean visible;
     @Shadow public abstract void shadow$addPlayer(ServerPlayerEntity player);
-    @Shadow public abstract void removePlayer(ServerPlayerEntity player);
+    @Shadow public abstract void shadow$removePlayer(ServerPlayerEntity player);
     @Shadow public abstract void shadow$setVisible(boolean visibleIn);
     @Shadow public abstract Collection<ServerPlayerEntity> shadow$getPlayers();
-    @Shadow private void sendUpdate(final SUpdateBossInfoPacket.Operation operation) { }
+    @Shadow private void shadow$sendUpdate(final SUpdateBossInfoPacket.Operation operation) { }
 
     @Override
     public ServerBossBar setName(final Text name) {
         if (this.name != name) {
             super.setName(name);
-            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_NAME);
+            this.shadow$sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_NAME);
         }
 
         return this;
@@ -65,7 +65,7 @@ public abstract class ServerBossInfoMixin_API extends BossInfoMixin_API implemen
     public ServerBossBar setPercent(final float percent) {
         if (this.percent != percent) {
             super.setPercent(percent);
-            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
+            this.shadow$sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
         }
 
         return this;
@@ -76,7 +76,7 @@ public abstract class ServerBossInfoMixin_API extends BossInfoMixin_API implemen
     public ServerBossBar setColor(final BossBarColor color) {
         if ((Object) this.color != color) {
             super.setColor(color);
-            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
+            this.shadow$sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
         }
 
         return (ServerBossBar) this;
@@ -87,7 +87,7 @@ public abstract class ServerBossInfoMixin_API extends BossInfoMixin_API implemen
     public ServerBossBar setOverlay(final BossBarOverlay overlay) {
         if ((Object) this.overlay != overlay) {
             super.setOverlay(overlay);
-            this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
+            this.shadow$sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_STYLE);
         }
 
         return (ServerBossBar) this;
@@ -107,7 +107,7 @@ public abstract class ServerBossInfoMixin_API extends BossInfoMixin_API implemen
 
     @Override
     public ServerBossBar setCreateFog(final boolean createFog) {
-        this.setCreateFog(createFog);
+        this.shadow$setCreateFog(createFog);
         return this;
     }
 
@@ -125,7 +125,7 @@ public abstract class ServerBossInfoMixin_API extends BossInfoMixin_API implemen
 
     @Override
     public ServerBossBar removePlayer(final Player player) {
-        this.removePlayer((ServerPlayerEntity) player);
+        this.shadow$removePlayer((ServerPlayerEntity) player);
         return this;
     }
 

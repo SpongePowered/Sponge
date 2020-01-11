@@ -43,14 +43,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
-import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
-import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.mixin.accessor.scoreboard.ScorePlayerTeamAccessor;
+import org.spongepowered.common.mixin.accessor.scoreboard.ScoreboardAccessor;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -59,8 +60,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("SuspiciousMethodCalls")
 @Mixin(ServerScoreboard.class)
@@ -83,15 +82,14 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
             throw new IllegalArgumentException("An objective with the name \'" + objective.getName() + "\' already exists!");
         }
         final ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        // TODO - Mixin 0.8 should allow for mixin accessors within mixins
-        List<ScoreObjective> objectives = ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().get(objective.getCriterion());
+        List<ScoreObjective> objectives = ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().get(objective.getCriterion());
         if (objectives == null) {
             objectives = new ArrayList<>();
-            ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().put((ScoreCriteria) objective.getCriterion(), objectives);
+            ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().put((ScoreCriteria) objective.getCriterion(), objectives);
         }
 
         objectives.add(scoreObjective);
-        ((ScoreboardBridge) this).accessor$getScoreObjectives().put(objective.getName(), scoreObjective);
+        ((ScoreboardAccessor) this).accessor$getScoreObjectives().put(objective.getName(), scoreObjective);
         this.onObjectiveAdded(scoreObjective);
 
         ((SpongeObjective) objective).updateScores(this);
@@ -104,12 +102,12 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
             throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
         }
         final int index = ((SpongeDisplaySlot) displaySlot).getIndex();
-        ((ScoreboardBridge) this).accessor$getObjectiveDisplaySlots()[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
-        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SDisplayObjectivePacket(index, ((ScoreboardBridge) this).accessor$getObjectiveDisplaySlots()[index]));
+        ((ScoreboardAccessor) this).accessor$getObjectiveDisplaySlots()[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
+        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SDisplayObjectivePacket(index, ((ScoreboardAccessor) this).accessor$getObjectiveDisplaySlots()[index]));
     }
 
     public Optional<Objective> scoreboard$getObjective(final DisplaySlot slot) {
-        final ScoreObjective objective = ((ScoreboardBridge) this).accessor$getObjectiveDisplaySlots()[((SpongeDisplaySlot) slot).getIndex()];
+        final ScoreObjective objective = ((ScoreboardAccessor) this).accessor$getObjectiveDisplaySlots()[((SpongeDisplaySlot) slot).getIndex()];
         if (objective != null) {
             return Optional.of(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
         }
@@ -117,8 +115,8 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
     }
 
     public Set<Objective> scoreboard$getObjectivesByCriteria(final Criterion criterion) {
-        if (((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().containsKey(criterion)) {
-            return ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().get(criterion).stream()
+        if (((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().containsKey(criterion)) {
+            return ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().get(criterion).stream()
                     .map(objective -> ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective()).collect(Collectors.toSet());
         }
         return new HashSet<>();
@@ -127,7 +125,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
     // Get objectives
 
     public Set<Objective> scoreboard$getObjectives() {
-        return ((ScoreboardBridge) this).accessor$getScoreObjectives().values().stream()
+        return ((ScoreboardAccessor) this).accessor$getScoreObjectives().values().stream()
                 .map(objective -> ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective())
                 .collect(Collectors.toSet());
     }
@@ -135,7 +133,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
     @SuppressWarnings({"rawtypes"})
     public void scoreboard$removeObjective(final Objective objective) {
         final ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        ((ScoreboardBridge) this).accessor$getScoreObjectives().remove(scoreObjective.getName());
+        ((ScoreboardAccessor) this).accessor$getScoreObjectives().remove(scoreObjective.getName());
 
         for (int i = 0; i < 19; ++i)
         {
@@ -148,14 +146,14 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
 
         ((ServerScoreboardBridge) this).bridge$sendToPlayers(new SScoreboardObjectivePacket(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
 
-        final List list = ((ScoreboardBridge) this).accessor$getScoreObjectiveCriterias().get(scoreObjective.getCriteria());
+        final List list = ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().get(scoreObjective.getCriteria());
 
         if (list != null)
         {
             list.remove(scoreObjective);
         }
 
-        for (final Map<ScoreObjective, Score> scoreMap : ((ScoreboardBridge) this).accessor$getEntitiesScoreObjectives().values()) {
+        for (final Map<ScoreObjective, Score> scoreMap : ((ScoreboardAccessor) this).accessor$getEntitiesScoreObjectives().values()) {
             final Score score = scoreMap.remove(scoreObjective);
             if (score != null) {
                 ((ScoreBridge) score).bridge$getSpongeScore().removeScoreFor(scoreObjective);
@@ -169,17 +167,17 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
     }
 
     public Optional<Team> scoreboard$getTeam(final String name) {
-        return Optional.ofNullable((Team) ((ScoreboardBridge) this).accessor$getTeams().get(name));
+        return Optional.ofNullable((Team) ((ScoreboardAccessor) this).accessor$getTeams().get(name));
     }
 
     @SuppressWarnings({"unchecked"})
     public Set<Team> scoreboard$getTeams() {
-        return new HashSet<>((Collection<Team>) (Collection<?>) ((ScoreboardBridge) this).accessor$getTeams().values());
+        return new HashSet<>((Collection<Team>) (Collection<?>) ((ScoreboardAccessor) this).accessor$getTeams().values());
     }
 
     @SuppressWarnings("deprecation")
     public Optional<Team> scoreboard$getMemberTeam(final Text member) {
-        return Optional.ofNullable((Team) ((ScoreboardBridge) this).accessor$getTeamMemberships().get(SpongeTexts.toLegacy(member)));
+        return Optional.ofNullable((Team) ((ScoreboardAccessor) this).accessor$getTeamMemberships().get(SpongeTexts.toLegacy(member)));
     }
 
     // Add team
@@ -191,22 +189,22 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
             throw new IllegalArgumentException("A team with the name \'" +spongeTeam.getName() + "\' already exists!");
         }
 
-        if (((ScorePlayerTeamBridge) team).accessor$getScoreboard() != null) {
+        if (((ScorePlayerTeamAccessor) team).accessor$getScoreboard() != null) {
             throw new IllegalArgumentException("The passed in team is already registered to a scoreboard!");
         }
 
-        ((ScorePlayerTeamBridge) team).accessor$setScoreboard(this);
-        ((ScoreboardBridge) this).accessor$getTeams().put(team.getName(), team);
+        ((ScorePlayerTeamAccessor) team).accessor$setScoreboard(this);
+        ((ScoreboardAccessor) this).accessor$getTeams().put(team.getName(), team);
 
         for (final String entry: team.getMembershipCollection()) {
-            this.addPlayerToTeam(entry, team.getName());
+            this.addPlayerToTeam(entry, team);
         }
         this.onTeamAdded(team);
     }
 
     public Set<org.spongepowered.api.scoreboard.Score> scoreboard$getScores() {
         final Set<org.spongepowered.api.scoreboard.Score> scores = new HashSet<>();
-        for (final ScoreObjective objective: ((ScoreboardBridge) this).accessor$getScoreObjectives().values()) {
+        for (final ScoreObjective objective: ((ScoreboardAccessor) this).accessor$getScoreObjectives().values()) {
             scores.addAll(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getScores().values());
         }
         return scores;
@@ -214,14 +212,14 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
 
     public Set<org.spongepowered.api.scoreboard.Score> scoreboard$getScores(final Text name) {
         final Set<org.spongepowered.api.scoreboard.Score> scores = new HashSet<>();
-        for (final ScoreObjective objective: ((ScoreboardBridge) this).accessor$getScoreObjectives().values()) {
+        for (final ScoreObjective objective: ((ScoreboardAccessor) this).accessor$getScoreObjectives().values()) {
             ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getScore(name).ifPresent(scores::add);
         }
         return scores;
     }
 
     public void scoreboard$removeScores(final Text name) {
-        for (final ScoreObjective objective: ((ScoreboardBridge) this).accessor$getScoreObjectives().values()) {
+        for (final ScoreObjective objective: ((ScoreboardAccessor) this).accessor$getScoreObjectives().values()) {
             final SpongeObjective spongeObjective = ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
             spongeObjective.getScore(name).ifPresent(spongeObjective::removeScore);
         }

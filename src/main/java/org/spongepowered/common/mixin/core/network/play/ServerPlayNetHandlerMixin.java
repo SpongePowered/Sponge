@@ -125,6 +125,7 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.mixin.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -289,13 +290,13 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
      * no clear way to go about it with the target position being null and the last position update checks.
      * @param packetIn
      */
-    @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;queuedEndExit:Z"))
+    @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;queuedEndExit:Z"))
     private boolean throwMoveEvent(final ServerPlayerEntity playerMP, final CPlayerPacket packetIn) {
         if (!playerMP.queuedEndExit) {
 
             // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
             // We don't fire an event to avoid confusing plugins.
-            if (!packetIn.moving && !packetIn.rotating) {
+            if (!((CPlayerPacketAccessor) packetIn).accessor$getMoving() && !((CPlayerPacketAccessor) packetIn).accessor$getRotating()) {
                 return playerMP.queuedEndExit;
             }
 
@@ -305,20 +306,20 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
             final Vector3d fromRotation = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
-            Location<World> fromLocation = player.getLocation();
+            Location fromLocation = player.getLocation();
             if (this.impl$lastMoveLocation != null) {
                 fromLocation = this.impl$lastMoveLocation;
             }
 
-            Location<World> toLocation = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
-            Vector3d toRotation = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
+            Location toLocation = Location.of(player.getWorld(), ((CPlayerPacketAccessor) packetIn).accessor$getX(), ((CPlayerPacketAccessor) packetIn).accessor$getY(), ((CPlayerPacketAccessor) packetIn).accessor$getZ());
+            Vector3d toRotation = new Vector3d(((CPlayerPacketAccessor) packetIn).accessor$getPitch(), ((CPlayerPacketAccessor) packetIn).accessor$getYaw(), 0);
 
             // If we have zero movement, we have rotation only, we might as well note that now.
-            final boolean zeroMovement = !packetIn.moving || toLocation.getPosition().equals(fromLocation.getPosition());
+            final boolean zeroMovement = !((CPlayerPacketAccessor) packetIn).accessor$getMoving() || toLocation.getPosition().equals(fromLocation.getPosition());
 
             // Minecraft does the same with rotation when it's only a positional update
             // Branch executed for CPacketPlayer.Position
-            boolean firePositionEvent = packetIn.moving && !packetIn.rotating;
+            boolean firePositionEvent = ((CPlayerPacketAccessor) packetIn).accessor$getMoving() && !((CPlayerPacketAccessor) packetIn).accessor$getRotating();
             if (firePositionEvent) {
                 // Correct the new rotation to match the old rotation
                 toRotation = fromRotation;
@@ -328,7 +329,8 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
             // Branch executed for CPacketPlayer.Rotation
-            boolean fireRotationEvent = !packetIn.moving && packetIn.rotating;
+            boolean fireRotationEvent = !((CPlayerPacketAccessor) packetIn).accessor$getMoving() && ((CPlayerPacketAccessor) packetIn).accessor$getRotating();
+
 
             if (fireRotationEvent) {
                 // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
@@ -340,7 +342,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
             }
 
             // Branch executed for CPacketPlayer.PositionRotation
-            if (packetIn.moving && packetIn.rotating) {
+            if (((CPlayerPacketAccessor) packetIn).accessor$getMoving() && ((CPlayerPacketAccessor) packetIn).accessor$getRotating()) {
                 firePositionEvent = !zeroMovement && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
                 fireRotationEvent = ShouldFire.ROTATE_ENTITY_EVENT;
             }
@@ -354,9 +356,9 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
             final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
 
             if (significantMovement || significantRotation) {
-                final Transform<World> fromTransform = player.getTransform().setLocation(fromLocation).setRotation(fromRotation);
-                Transform<World> toTransform = player.getTransform().setLocation(toLocation).setRotation(toRotation);
-                final Transform<World> originalToTransform = toTransform;
+                final Transform fromTransform = player.getTransform().withPosition(fromLocation).setRotation(fromRotation);
+                Transform toTransform = player.getTransform().withPosition(toLocation).setRotation(toRotation);
+                final Transform originalToTransform = toTransform;
 
                 // We should only have fireRotationEvent set to true only if there is no movement and so we are not
                 // firing the MoveEntityEvent.Position event anyway. Otherwise, there would be a bug (pointed out in

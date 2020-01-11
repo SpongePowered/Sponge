@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.registry.type.world.GeneratorTypeRegistryModule;
 
 @Mixin(WorldType.class)
 public abstract class WorldTypeMixin_API implements GeneratorType {
@@ -50,7 +49,7 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
     @Inject(method = "<init>(ILjava/lang/String;Ljava/lang/String;I)V", at = @At("RETURN"))
     private void onConstructSpongeRegister(int id, String name, String serializedName, int version, CallbackInfo ci) {
         this.api$key = CatalogKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), name);
-        GeneratorTypeRegistryModule.getInstance().registerAdditionalCatalog(this);
+        // TODO - register this with our registry?
     }
 
     @Override
@@ -77,12 +76,12 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof WorldType)) {
+        if (!(obj instanceof WorldTypeMixin_API)) {
             return false;
         }
 
-        final WorldType other = (WorldType) obj;
-        return this.api$key.equals(((WorldTypeBridge) other).bridge$getKey());
+        final WorldTypeMixin_API other = (WorldTypeMixin_API) obj;
+        return this.api$key.equals(other.api$key);
     }
 
     @Override

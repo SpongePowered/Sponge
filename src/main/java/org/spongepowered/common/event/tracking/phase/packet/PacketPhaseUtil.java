@@ -46,6 +46,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CClientSettingsPacket;
 import net.minecraft.network.play.client.CClientStatusPacket;
+import net.minecraft.network.play.client.CCustomPayloadPacket;
 import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.Hand;
@@ -67,10 +68,10 @@ import org.spongepowered.common.mixin.accessor.entity.passive.AbstractChestedHor
 import org.spongepowered.common.mixin.accessor.entity.passive.PigEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.passive.SheepEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.passive.WolfEntityAccessor;
-
-import java.util.List;
+import org.spongepowered.common.mixin.accessor.network.play.client.CPlayerPacketAccessor;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public final class PacketPhaseUtil {
 
@@ -85,7 +86,7 @@ public final class PacketPhaseUtil {
             final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
             if (openContainer == null) {
-                slot.set(((org.spongepowered.api.item.inventory.ItemStack) originalStack));
+                slot.set(((org.spongepowered.api.item.inventory.ItemStack) (Object) originalStack));
             } else {
                 final int slotNumber = slot.getOrdinal();
                 final Slot nmsSlot = openContainer.getSlot(slotNumber);
@@ -166,8 +167,15 @@ public final class PacketPhaseUtil {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(final IPacket packetIn, final INetHandler netHandler) {
         if (netHandler instanceof ServerPlayNetHandler) {
+            ServerPlayerEntity packetPlayer = ((ServerPlayNetHandler) netHandler).player;
+            // Only process the CustomPayload & Respawn packets from players if they are dead.
+            if (!packetPlayer.isAlive()
+                    && (!(packetIn instanceof CCustomPayloadPacket)
+                    && (!(packetIn instanceof CClientStatusPacket)
+                    || ((CClientStatusPacket) packetIn).getStatus() != CClientStatusPacket.State.PERFORM_RESPAWN))) {
+                return;
+            }
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                ServerPlayerEntity packetPlayer = ((ServerPlayNetHandler) netHandler).player;
                 frame.pushCause(packetPlayer);
                 if (SpongeImplHooks.creativeExploitCheck(packetIn, packetPlayer)) {
                     return;
@@ -179,7 +187,7 @@ public final class PacketPhaseUtil {
                     final CPlayerPacket movingPacket = ((CPlayerPacket) packetIn);
                     if (movingPacket instanceof CPlayerPacket.RotationPacket) {
                         ignoreMovementCapture = true;
-                    } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
+                    } else if (packetPlayer.posX == ((CPlayerPacketAccessor) movingPacket).accessor$getX() && packetPlayer.posY == ((CPlayerPacketAccessor) movingPacket).accessor$getY() && packetPlayer.posZ == ((CPlayerPacketAccessor) movingPacket).accessor$getZ()) {
                         ignoreMovementCapture = true;
                     } else {
                         ignoreMovementCapture = false;

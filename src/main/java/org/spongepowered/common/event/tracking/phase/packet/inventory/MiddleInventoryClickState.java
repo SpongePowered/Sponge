@@ -44,8 +44,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 public final class MiddleInventoryClickState extends BasicInventoryPacketState {
 
     public MiddleInventoryClickState() {
-        super(Constants.Networking.MODE_CLICK
-              | Constants.Networking.BUTTON_PRIMARY // The primary is set if the pick block is used as a different button mapping.
+        super(Constants.Networking.BUTTON_PRIMARY // The primary is set if the pick block is used as a different button mapping.
               | Constants.Networking.BUTTON_MIDDLE
               | Constants.Networking.MODE_PICKBLOCK
               | Constants.Networking.CLICK_INSIDE_WINDOW

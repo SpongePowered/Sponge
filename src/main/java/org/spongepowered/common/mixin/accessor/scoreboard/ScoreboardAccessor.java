@@ -25,15 +25,32 @@
 package org.spongepowered.common.mixin.accessor.scoreboard;
 
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
+import java.util.List;
 import java.util.Map;
 
 @Mixin(Scoreboard.class)
 public interface ScoreboardAccessor {
 
+    @Accessor("entitiesScoreObjectives") Map<String, Map<ScoreObjective, Score>>  accessor$getEntitiesScoreObjectivesMap();
+
+    @Accessor("scoreObjectives") Map<String, ScoreObjective> accessor$getScoreObjectives();
+
+    @Accessor("scoreObjectiveCriterias") Map<ScoreCriteria, List<ScoreObjective>> accessor$getScoreObjectiveCriterias();
+
     @Accessor("entitiesScoreObjectives") Map<String, Map<ScoreObjective, Score>> accessor$getEntitiesScoreObjectives();
+
+    @Accessor("objectiveDisplaySlots") ScoreObjective[] accessor$getObjectiveDisplaySlots();
+
+    @Accessor("teams") Map<String, ScorePlayerTeam> accessor$getTeams();
+
+    @Accessor("teamMemberships") Map<String, ScorePlayerTeam> accessor$getTeamMemberships();
+
+    @Accessor("displaySlots") String[] accessor$getDisplaySlots();
 }

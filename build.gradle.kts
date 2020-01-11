@@ -1,5 +1,6 @@
 import org.spongepowered.gradle.dev.SpongeDevExtension
 
+// TODO - Add mixin gradle when that comes around.
 plugins {
     id("org.spongepowered.gradle.sponge.common")
     id("net.minecraftforge.gradle")
@@ -32,6 +33,7 @@ dependencies {
 
     api("org.spongepowered:mixin:0.8-SNAPSHOT") {
     }
+    api("org.ow2.asm:asm-tree:6.2")
 
     runtime("org.apache.logging.log4j:log4j-slf4j-impl:2.8.1")
 

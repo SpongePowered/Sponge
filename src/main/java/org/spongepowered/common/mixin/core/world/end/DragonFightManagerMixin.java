@@ -28,7 +28,6 @@ import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BossInfo;
 import net.minecraft.world.ServerBossInfo;
 import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.end.DragonSpawnState;
@@ -38,7 +37,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.end.DragonFightManagerBridge;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.world.dragon.DragonPhase;
 
@@ -46,7 +44,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Mixin(DragonFightManager.class)
-public abstract class DragonFightManagerMixin implements DragonFightManagerBridge {
+public abstract class DragonFightManagerMixin {
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private ServerBossInfo bossInfo;
@@ -165,9 +163,4 @@ public abstract class DragonFightManagerMixin implements DragonFightManagerBridg
         }
     }
 
-
-    @Override
-    public BossInfo bridge$getBossInfo() {
-        return this.bossInfo;
-    }
 }

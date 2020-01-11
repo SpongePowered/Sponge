@@ -22,13 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.mixin.accessor.scoreboard;
 
-import net.minecraft.advancements.Advancement;
+import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.scoreboard.Scoreboard;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface ICriterionTrigger_ListenerBridge {
+import javax.annotation.Nullable;
 
-    Advancement bridge$getAdvancement();
+@Mixin(ScorePlayerTeam.class)
+public interface ScorePlayerTeamAccessor {
 
-    String bridge$getCriterionName();
+    @Accessor("scoreboard") @Nullable Scoreboard accessor$getScoreboard();
+
+    @Accessor("scoreboard") void accessor$setScoreboard(@Nullable Scoreboard scoreboard);
 }

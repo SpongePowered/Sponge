@@ -44,7 +44,6 @@ import javax.annotation.Nullable;
 public abstract class ExplosionMixin_API implements Explosion {
 
     @Shadow @Final private boolean causesFire;
-    @Shadow @Final private boolean damagesTerrain;
     @Shadow @Final private net.minecraft.world.World world;
     @Shadow @Final private double x;
     @Shadow @Final private double y;
@@ -52,12 +51,13 @@ public abstract class ExplosionMixin_API implements Explosion {
     @Shadow @Final private Entity exploder;
     @Shadow @Final private float size;
 
-    @Nullable private Location<World> api$location;
+    @Shadow @Final private net.minecraft.world.Explosion.Mode mode;
+    @Nullable private Location api$location;
 
     @Override
-    public Location<World> getLocation() {
+    public Location getLocation() {
         if (this.api$location == null) {
-            this.api$location = new Location<>((World) this.world, new Vector3d(this.x, this.y, this.z));
+            this.api$location = Location.of((World) this.world, new Vector3d(this.x, this.y, this.z));
         }
         return this.api$location;
     }
@@ -83,7 +83,7 @@ public abstract class ExplosionMixin_API implements Explosion {
 
     @Override
     public boolean shouldPlaySmoke() {
-        return this.damagesTerrain;
+        return this.mode != net.minecraft.world.Explosion.Mode.NONE;
     }
 
     @Override

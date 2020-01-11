@@ -22,32 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.accessor.util;
 
-import net.minecraft.world.GameRules;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.GameRulesBridge;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.TreeMap;
+@Mixin(targets = "net.minecraft.util.CooldownTracker$Cooldown")
+public interface CooldownTracker_CooldownAccessor {
 
-@Mixin(GameRules.class)
-public abstract class GameRulesMixin implements GameRulesBridge {
+    @Accessor("expireTicks") int accessor$getExpireTicks();
 
-    @Shadow @Final private TreeMap<String, ?> rules;
-
-    @Shadow public abstract void setOrCreateGameRule(String key, String ruleValue);
-
-    @Override
-    public boolean bridge$removeGameRule(final String gameRule) {
-        // Cannot remove default gamerule
-        if (Constants.Sponge.DEFAULT_GAME_RULES.hasRule(gameRule)) {
-            this.setOrCreateGameRule(gameRule, Constants.Sponge.DEFAULT_GAME_RULES.getString(gameRule));
-            return true;
-        }
-
-        return this.rules.remove(gameRule) != null;
-    }
 }

@@ -29,18 +29,16 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockTileEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeInternalListeners;
-import org.spongepowered.common.bridge.command.CommandSenderBridge;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
@@ -48,15 +46,13 @@ import org.spongepowered.common.service.permission.SubjectSettingCallback;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nullable;
-
 /**
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
 @Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class,
-        SpongeUser.class}, targets = "net/minecraft/tileentity/TileEntitySign$1")
-public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge {
+        SpongeUser.class}, targets = {"net/minecraft/tileentity/SignTileEntity$1", "net/minecraft/tileentity/SignTileEntity$2"})
+public abstract class SubjectMixin implements  SubjectBridge {
 
     @Nullable
     private SubjectReference impl$subjectReference;
@@ -74,13 +70,17 @@ public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge
     }
 
     @Override
-    public Optional<Subject> bridge$resolveOptional() {
+    public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
             final Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
             serv.ifPresent(permissionService -> new SubjectSettingCallback(this).test(permissionService));
         }
+        return Optional.ofNullable(this.impl$subjectReference);
+    }
 
-        return Optional.ofNullable(this.impl$subjectReference).map(SubjectReference::resolve).map(CompletableFuture::join);
+    @Override
+    public Optional<Subject> bridge$resolveOptional() {
+        return bridge$resolveReferenceOptional().map(SubjectReference::resolve).map(CompletableFuture::join);
     }
 
     @Override

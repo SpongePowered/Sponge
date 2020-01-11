@@ -22,22 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.mixin.accessor.network.play.client;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.play.client.CPlayerPacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Map;
-import java.util.Set;
+@Mixin(CPlayerPacket.class)
+public interface CPlayerPacketAccessor {
 
-public interface AdvancementListBridge {
+    @Accessor("x") double accessor$getX();
 
-    Map<ResourceLocation, Advancement> bridge$getAdvancements();
+    @Accessor("y") double accessor$getY();
 
-    Set<Advancement> bridge$getRootsSet();
+    @Accessor("z") double accessor$getZ();
 
-    Set<Advancement> bridge$getNonRootsSet();
+    @Accessor("yaw") float accessor$getYaw();
 
-    AdvancementList.IListener bridge$getListener();
+    @Accessor("pitch") float accessor$getPitch();
+
+    @Accessor("onGround") boolean accessor$getOnGround();
+
+    @Accessor("moving") boolean accessor$getMoving();
+
+    @Accessor("rotating") boolean accessor$getRotating();
 }

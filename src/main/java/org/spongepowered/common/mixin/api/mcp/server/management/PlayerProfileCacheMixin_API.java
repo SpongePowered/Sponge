@@ -41,9 +41,11 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.mixin.accessor.server.management.PlayerProfileCache_ProfileEntryAccessor;
 import org.spongepowered.common.profile.callback.MapProfileLookupCallback;
 import org.spongepowered.common.profile.callback.SingleProfileLookupCallback;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
@@ -54,13 +56,11 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.annotation.Nullable;
-
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
-    @Shadow @Final private Map<String, PlayerProfileCacheEntryBridge> usernameToProfileEntryMap;
-    @Shadow @Final private Map<UUID, PlayerProfileCacheEntryBridge> uuidToProfileEntryMap;
+    @Shadow @Final private Map<String, PlayerProfileCache_ProfileEntryAccessor> usernameToProfileEntryMap;
+    @Shadow @Final private Map<UUID, PlayerProfileCache_ProfileEntryAccessor> uuidToProfileEntryMap;
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();
     @Shadow private void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry) { }
@@ -298,7 +298,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     @Override
     public Collection<GameProfile> getProfiles() {
         return this.usernameToProfileEntryMap.values().stream()
-                .map(entry -> (GameProfile) entry.accessor$getProfile())
+                .map(entry -> (GameProfile) entry.accessor$getGameProfile())
                 .collect(ImmutableSet.toImmutableSet());
     }
 
@@ -314,10 +314,10 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
     @Nullable
     private com.mojang.authlib.GameProfile getByNameNoLookup(String username) {
-        @Nullable PlayerProfileCacheEntryBridge entry = this.usernameToProfileEntryMap.get(username.toLowerCase(Locale.ROOT));
+        @Nullable PlayerProfileCache_ProfileEntryAccessor entry = this.usernameToProfileEntryMap.get(username.toLowerCase(Locale.ROOT));
 
         if (entry != null && System.currentTimeMillis() >= entry.accessor$getExpirationDate().getTime()) {
-            com.mojang.authlib.GameProfile profile = entry.accessor$getProfile();
+            com.mojang.authlib.GameProfile profile = entry.accessor$getGameProfile();
             this.uuidToProfileEntryMap.remove(profile.getId());
             this.usernameToProfileEntryMap.remove(profile.getName().toLowerCase(Locale.ROOT));
             this.profiles.remove(profile);
@@ -325,12 +325,12 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         }
 
         if (entry != null) {
-            com.mojang.authlib.GameProfile profile = entry.accessor$getProfile();
+            com.mojang.authlib.GameProfile profile = entry.accessor$getGameProfile();
             this.profiles.remove(profile);
             this.profiles.add(profile);
         }
 
-        return entry == null ? null : entry.accessor$getProfile();
+        return entry == null ? null : entry.accessor$getGameProfile();
     }
 
 }

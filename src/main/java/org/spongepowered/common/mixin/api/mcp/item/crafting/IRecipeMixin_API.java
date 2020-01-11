@@ -26,12 +26,14 @@ package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
 import static org.spongepowered.common.inventory.util.InventoryUtil.toNativeInventory;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -39,53 +41,59 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.mixin.accessor.item.crafting.ShapedRecipeAccessor;
+import org.spongepowered.common.mixin.accessor.item.crafting.ShapelessRecipeAccessor;
+
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 @Mixin(IRecipe.class)
-public interface IRecipeMixin_API extends CraftingRecipe {
+public interface IRecipeMixin_API<C extends IInventory> extends CraftingRecipe {
 
-    @Shadow boolean matches(CraftingInventory inv, net.minecraft.world.World worldIn);
-    @Shadow net.minecraft.item.ItemStack getCraftingResult(CraftingInventory inv);
-    @Shadow net.minecraft.item.ItemStack getRecipeOutput();
-    @Shadow NonNullList<net.minecraft.item.ItemStack> getRemainingItems(CraftingInventory inv);
+    @Shadow ItemStack shadow$getCraftingResult(C inv);
+    @Shadow net.minecraft.item.ItemStack shadow$getRecipeOutput();
+    @Shadow ResourceLocation shadow$getId();
+    @Shadow boolean shadow$matches(C inv, net.minecraft.world.World worldIn);
+    @Shadow NonNullList<ItemStack> shadow$getRemainingItems(C inv);
 
     @Override
     @Nonnull
     default ItemStackSnapshot getExemplaryResult() {
-        return ItemStackUtil.snapshotOf(this.getRecipeOutput());
+        return ItemStackUtil.snapshotOf(this.shadow$getRecipeOutput());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     default boolean isValid(@Nonnull CraftingGridInventory inv, @Nonnull World world) {
-        return this.matches(toNativeInventory(inv), (net.minecraft.world.World) world);
+        return this.shadow$matches((C) toNativeInventory(inv), (net.minecraft.world.World) world);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @Nonnull
     default ItemStackSnapshot getResult(@Nonnull CraftingGridInventory inv) {
-        return ItemStackUtil.snapshotOf(this.getCraftingResult(toNativeInventory(inv)));
+        return ItemStackUtil.snapshotOf(this.shadow$getCraftingResult((C) toNativeInventory(inv)));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @Nonnull
     default List<ItemStackSnapshot> getRemainingItems(@Nonnull CraftingGridInventory inv) {
-        return this.getRemainingItems(toNativeInventory(inv)).stream()
+        return this.shadow$getRemainingItems((C) toNativeInventory(inv)).stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
     }
 
     @Override
-    default String getId() {
-        return CraftingManager.REGISTRY.getKey(((IRecipe) this)).toString();
+    default String getName() {
+        return this.shadow$getId().getPath();
     }
 
     @Override
-    default String getName() {
-        return this.getId();
+    default CatalogKey getKey() {
+        return (CatalogKey) (Object) this.shadow$getId();
     }
 
     @Override
@@ -93,10 +101,10 @@ public interface IRecipeMixin_API extends CraftingRecipe {
         String group = "";
         if (this instanceof ShapedRecipe) {
 
-            group = ((ShapedRecipe) this).group;
+            group = ((ShapedRecipeAccessor) this).accessor$getGroup();
         }
         if (this instanceof ShapelessRecipe) {
-            group = ((ShapelessRecipe) this).group;
+            group = ((ShapelessRecipeAccessor) this).accessor$getGroup();
         }
         if (group.isEmpty()) {
             return Optional.empty();

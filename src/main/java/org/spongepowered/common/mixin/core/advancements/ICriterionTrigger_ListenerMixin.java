@@ -48,11 +48,10 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
-import org.spongepowered.common.bridge.advancements.ICriterionTrigger_ListenerBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 
 @Mixin(ICriterionTrigger.Listener.class)
-public abstract class ICriterionTrigger_ListenerMixin implements ICriterionTrigger_ListenerBridge {
+public abstract class ICriterionTrigger_ListenerMixin {
 
     @Shadow @Final private ICriterionInstance criterionInstance;
     @Shadow @Final private Advancement advancement;
@@ -105,13 +104,4 @@ public abstract class ICriterionTrigger_ListenerMixin implements ICriterionTrigg
         SpongeImpl.getCauseStackManager().popCause();
     }
 
-    @Override
-    public Advancement bridge$getAdvancement() {
-        return this.advancement;
-    }
-
-    @Override
-    public String bridge$getCriterionName() {
-        return this.criterionName;
-    }
 }

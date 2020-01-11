@@ -22,9 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.mixin.accessor.tileentity;
 
-public interface GameRulesBridge {
+import net.minecraft.state.properties.StructureMode;
+import net.minecraft.tileentity.StructureBlockTileEntity;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    boolean bridge$removeGameRule(String gameRule);
+@Mixin(StructureBlockTileEntity.class)
+public interface StructureBlockTileEntityAccessor {
+
+    @Accessor("author") String accessor$getAuthor();
+
+    @Accessor("author") void accessor$setAuthor(String author);
+
+    @Accessor("ignoreEntities") boolean accessor$getIgnoreEntities();
+
+    @Accessor("integrity") float accessor$getIntegrity();
+
+    @Accessor("mode") StructureMode accessor$getMode();
+
+    @Accessor("mode") void accessor$setMode(StructureMode mode);
+
+    @Accessor("position") BlockPos accessor$getPosition();
+
+    @Accessor("position") void accessor$setPosition(BlockPos position);
+
+    @Accessor("showAir") boolean accessor$getShowAir();
+
+    @Accessor("showBoundingBox") boolean accessor$getShowBoundingBox();
+
+    @Accessor("size") BlockPos accessor$getSize();
+
+    @Accessor("size") void accessor$setSize(BlockPos size);
+    
 }

@@ -67,6 +67,7 @@ public final class InventoryUtil {
         return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }
 
+
     public static CraftingInventory toNativeInventory(CraftingGridInventory inv) {
         Fabric fabric = ((CraftingGridInventoryAdapter) inv).inventoryAdapter$getFabric();
         for (Object inventory : fabric.fabric$allInventories()) {

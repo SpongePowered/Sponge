@@ -40,9 +40,9 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -62,6 +62,7 @@ import org.spongepowered.common.mixin.accessor.world.GameRules_RuleValueAccessor
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;

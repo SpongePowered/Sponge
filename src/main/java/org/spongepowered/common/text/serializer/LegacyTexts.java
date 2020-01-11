@@ -33,16 +33,17 @@ import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
-import org.spongepowered.common.mixin.accessor.util.text.StyleAccessor;
 import org.spongepowered.common.mixin.accessor.util.text.StringTextComponentAccessor;
+import org.spongepowered.common.mixin.accessor.util.text.StyleAccessor;
+import org.spongepowered.common.mixin.accessor.util.text.TextFormattingAccessor;
+import org.spongepowered.common.text.format.SpongeTextColor;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
+@SuppressWarnings("ConstantConditions")
 public final class LegacyTexts {
 
     private static final int FORMATTING_CODE_LENGTH = 2;
@@ -57,7 +58,7 @@ public final class LegacyTexts {
         final char[] lookup = new char[formatting.length];
 
         for (int i = 0; i < formatting.length; i++) {
-            lookup[i] = ((TextFormattingBridge) (Object) formatting[i]).bridge$getFormattingCode();
+            lookup[i] = ((TextFormattingAccessor) (Object) formatting[i]).accessor$getFormattingCode();
         }
 
         LOOKUP = new String(lookup);
@@ -162,7 +163,7 @@ public final class LegacyTexts {
             // No formatted text found
             if (pos == 0) {
                 // Text contains only (redundant) formatting codes => empty text
-                return Text.EMPTY;
+                return Text.empty();
             } else {
                 // No valid formatting code found => plain text
                 return Text.of(input);

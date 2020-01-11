@@ -22,16 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.myhomes.data.home;
+package org.spongepowered.common.mixin.accessor.server.management;
 
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.value.mutable.MapValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import com.mojang.authlib.GameProfile;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-public interface HomeData extends DataManipulator<HomeData, ImmutableHomeData> {
+import java.util.Date;
 
-    Value<Home> defaultHome();
+@Mixin(targets = "net.minecraft.server.management.PlayerProfileCache$ProfileEntry")
+public interface PlayerProfileCache_ProfileEntryAccessor {
 
-    MapValue<String, Home> homes();
+    @Invoker("getGameProfile") GameProfile accessor$getGameProfile();
 
+    @Invoker("getExpirationDate") Date accessor$getExpirationDate();
 }

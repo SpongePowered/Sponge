@@ -54,9 +54,6 @@ import java.util.Set;
 
 public class SpawnerUtils {
 
-    public static WeightedSerializableObject<EntityArchetype> getNextEntity(final AbstractSpawnerBridge logicBridge) {
-        return getNextEntity((AbstractSpawnerAccessor) logicBridge);
-    }
 
     public static WeightedSerializableObject<EntityArchetype> getNextEntity(final AbstractSpawnerAccessor logic) {
         final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$getSpawnData()).accessor$getItemWeight();

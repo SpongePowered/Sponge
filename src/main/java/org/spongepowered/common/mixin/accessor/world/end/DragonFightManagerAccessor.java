@@ -22,11 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.end;
+package org.spongepowered.common.mixin.accessor.world.end;
 
-import net.minecraft.world.BossInfo;
+import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.end.DragonFightManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface DragonFightManagerBridge {
+@Mixin(DragonFightManager.class)
+public interface DragonFightManagerAccessor {
 
-    BossInfo bridge$getBossInfo();
+    // TODO - to be used for the key provider system on EnderDragon's Keys.BOSS_BAR
+    @Accessor("bossInfo") ServerBossInfo accessor$getBossInfo();
+
 }

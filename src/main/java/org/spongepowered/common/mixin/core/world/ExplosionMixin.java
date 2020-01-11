@@ -29,13 +29,15 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.IFluidState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -43,6 +45,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.loot.LootContext;
+import net.minecraft.world.storage.loot.LootParameters;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -67,14 +71,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.util.VecHelper;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class ExplosionMixin implements ExplosionBridge {
@@ -90,21 +93,25 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Shadow @Final private Map<PlayerEntity, Vec3d> playerKnockbackMap;
     @Shadow @Final private Random random;
     @Shadow @Final private boolean causesFire;
-    @Shadow @Final private boolean damagesTerrain;
     @Shadow @Final private net.minecraft.world.World world;
     @Shadow @Final private double x;
     @Shadow @Final private double y;
     @Shadow @Final private double z;
     @Shadow @Final private Entity exploder;
     @Shadow @Final private float size;
+    @Shadow @Final private net.minecraft.world.Explosion.Mode mode;
+
+    @Shadow public static float shadow$getBlockDensity(Vec3d p_222259_0_, Entity p_222259_1_) {
+        throw new UnsupportedOperationException("shadows");
+    }
+
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    private void onConstructed(final net.minecraft.world.World world, final Entity entity, final double originX, final double originY,
-            final double originZ, final float radius, final boolean isFlaming, final boolean isSmoking,
+    private void onConstructed(net.minecraft.world.World worldIn, @Nullable Entity exploderIn, double xIn, double yIn, double zIn, float sizeIn, boolean causesFireIn, net.minecraft.world.Explosion.Mode modeIn,
             final CallbackInfo ci) {
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
-        this.impl$shouldBreakBlocks = this.damagesTerrain;
+        this.impl$shouldBreakBlocks = this.mode == net.minecraft.world.Explosion.Mode.BREAK || this.mode == net.minecraft.world.Explosion.Mode.DESTROY;
         this.impl$shouldDamageEntities = true;
         this.impl$resolution = 16;
         this.impl$randomness = 1.0F;
@@ -121,7 +128,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     public void doExplosionA() {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
         if (this.impl$shouldBreakBlocks) {
-            final Set<BlockPos> set = Sets.<BlockPos>newHashSet();
+            final Set<BlockPos> set = Sets.newHashSet();
 
             for (int j = 0; j < impl$resolution; ++j) {
                 for (int k = 0; k < impl$resolution; ++k) {
@@ -142,17 +149,16 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
                                 final BlockPos blockpos = new BlockPos(d4, d6, d8);
                                 final BlockState iblockstate = this.world.getBlockState(blockpos);
+                                IFluidState ifluidstate = this.world.getFluidState(blockpos);
+                                if (!iblockstate.isAir() || !ifluidstate.isEmpty()) {
+                                    float f2 = Math.max(iblockstate.getBlock().getExplosionResistance(), ifluidstate.getExplosionResistance());
+                                    if (this.exploder != null) {
+                                        f2 = this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, ifluidstate, f2);
+                                    }
 
-                                if (iblockstate.getMaterial() != Material.AIR) {
-                                    final float f2 = this.exploder != null
-                                               ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
-                                            , this.world, blockpos, iblockstate)
-                                               : iblockstate.getBlock().getExplosionResistance((Entity) null);
                                     f -= (f2 + 0.3F) * 0.3F;
                                 }
-
-                                if (f > 0.0F && (this.exploder == null || this.exploder
-                                        .canExplosionDestroyBlock((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
+                                if (f > 0.0F && (this.exploder == null || this.exploder.canExplosionDestroyBlock((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
                                     set.add(blockpos);
                                 }
 
@@ -181,10 +187,10 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             : Collections.emptyList();
         // Now we can throw our Detonate Event
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
-            final List<Location<World>> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
+            final List<Location> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
             final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
             for (final BlockPos pos : this.affectedBlockPositions) {
-                blockPositions.add(new Location<>((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
+                blockPositions.add(Location.of((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
             }
             for (final Entity entity : list) {
                 // Make sure to check the entity is immune first.
@@ -202,7 +208,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                 return;
             }
             if (this.impl$shouldBreakBlocks) {
-                for (final Location<World> worldLocation : detonate.getAffectedLocations()) {
+                for (final Location worldLocation : detonate.getAffectedLocations()) {
                     this.affectedBlockPositions.add(VecHelper.toBlockPos(worldLocation));
                 }
             }
@@ -226,7 +232,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             final Entity entity = list.get(k2);
 
             if (!entity.isImmuneToExplosions()) {
-                final double d12 = entity.getDistance(this.x, this.y, this.z) / (double) f3;
+                final double d12 = (MathHelper.sqrt(entity.getDistanceSq(new Vec3d(this.x, this.y, this.z))) / f3);
 
                 if (d12 <= 1.0D) {
                     double d5 = entity.posX - this.x;
@@ -238,7 +244,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                         d5 = d5 / d13;
                         d7 = d7 / d13;
                         d9 = d9 / d13;
-                        final double d14 = (double) this.world.getBlockDensity(vec3d, entity.getBoundingBox());
+                        double d14 = (double) shadow$getBlockDensity(vec3d, entity);
                         final double d10 = (1.0D - d12) * d14;
                         entity.attackEntityFrom(
                                 DamageSource.causeExplosionDamage((net.minecraft.world.Explosion) (Object) this), (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
@@ -249,14 +255,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                         }
 
                         //Sponge Start
-                        entity.motionX += d5 * d11 * impl$knockback;
-                        entity.motionY += d7 * d11 * impl$knockback;
-                        entity.motionZ += d9 * d11 * impl$knockback;
+                        entity.setMotion(entity.getMotion().add(d5 * d11 * this.impl$knockback, d7 * d11 * this.impl$knockback, d9 * d11 * this.impl$knockback));
 
                         if (entity instanceof PlayerEntity) {
                             final PlayerEntity entityplayer = (PlayerEntity) entity;
 
-                            if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.capabilities.isFlying)) {
+                            if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.abilities.isFlying)) {
                                 this.playerKnockbackMap.put(entityplayer, new Vec3d(d5 * d10 * impl$knockback, d7 * d10 * impl$knockback, d9 * d10 * impl$knockback));
                                 //Sponge End
                             }
@@ -280,24 +284,25 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         this.world.playSound((PlayerEntity) null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
             SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
 
-        if (this.size >= 2.0F && (this.damagesTerrain || this.impl$shouldBreakBlocks)) {
+        final boolean flag = this.mode != net.minecraft.world.Explosion.Mode.NONE;
+        if (this.size >= 2.0F && (flag || this.impl$shouldBreakBlocks)) {
             // Sponge Start - Use WorldServer methods since we prune the explosion packets
             // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
             // hundreds of explosions at once
             if (this.world instanceof ServerWorld) {
-                ((ServerWorld) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+                ((ServerWorld) this.world).spawnParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
             } else {
                 // Sponge End
-                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+                this.world.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
             } // Sponge - brackets.
         } else {
             // Sponge Start - Use WorldServer methods since we prune the explosion packets
             // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
             // hundreds of explosions at once
             if (this.world instanceof ServerWorld) {
-                ((ServerWorld) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+                ((ServerWorld) this.world).spawnParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
             } else { // Sponge end
-                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+                this.world.addParticle(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
             } // Sponge - brackets.
         }
         // Sponge Start - set up some variables for more fasts
@@ -326,11 +331,11 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                     d3 = d3 * d7;
                     d4 = d4 * d7;
                     d5 = d5 * d7;
-                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
-                    this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
+                    this.world.addParticle(ParticleTypes.POOF, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5);
+                    this.world.addParticle(ParticleTypes.SMOKE, d0, d1, d2, d3, d4, d5);
                 }
 
-                if (iblockstate.getMaterial() != Material.AIR) {
+                if (iblockstate.isAir()) {
                     if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
                         // Sponge Start - Track the block position being destroyed
                         // We need to capture this block position if necessary
@@ -339,7 +344,13 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 pos.setPos(blockpos);
                             }
                             // Sponge End
-                            block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
+                            TileEntity tileentity = block.hasTileEntity() ? this.world.getTileEntity(blockpos) : null;
+                            LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.world)).withRandom(this.world.rand).withParameter(LootParameters.POSITION, blockpos).withParameter(LootParameters.TOOL, ItemStack.EMPTY).withNullableParameter(LootParameters.BLOCK_ENTITY, tileentity);
+                            if (this.mode == net.minecraft.world.Explosion.Mode.DESTROY) {
+                                lootcontext$builder.withParameter(LootParameters.EXPLOSION_RADIUS, this.size);
+                            }
+
+                            Block.spawnDrops(iblockstate, lootcontext$builder);
                         } // Sponge - brackets
                     }
 
@@ -362,7 +373,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         if (this.causesFire) {
             for (final BlockPos blockpos1 : this.affectedBlockPositions) {
-                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock() && this.random.nextInt(3) == 0) {
+                if (this.world.getBlockState(blockpos1).isAir() && this.world.getBlockState(blockpos1.down()).isOpaqueCube(this.world, blockpos1.down()) && this.random.nextInt(3) == 0) {
                     // Sponge Start - Track the block position being destroyed
                     try (final CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
                         if (pos != null) {
@@ -426,22 +437,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         return this.impl$knockback;
     }
 
-    @Nullable
-    @Override
-    public Entity bridge$getExploder() {
-        return this.exploder;
-    }
-
-    @Override
-    public net.minecraft.world.World bridge$getWorld() {
-        return this.world;
-    }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("causesFire", this.causesFire)
-                .add("damagesTerrain", this.damagesTerrain)
+                .add("mode", this.mode)
                 .add("world", this.world.getWorldInfo() == null ? "null" : this.world.getWorldInfo().getWorldName())
                 .add("x", this.x)
                 .add("y", this.y)

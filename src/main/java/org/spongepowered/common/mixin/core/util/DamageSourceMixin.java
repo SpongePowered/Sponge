@@ -47,8 +47,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.ExplosionBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.mixin.accessor.world.ExplosionAccessor;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 
 import javax.annotation.Nullable;
@@ -87,8 +87,8 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
     private static void onSetExplosionSource(@Nullable Explosion explosion, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
         if (explosion != null) {
-            final Entity entity = ((ExplosionBridge) explosion).bridge$getExploder();
-            if (entity != null && !((WorldBridge) ((ExplosionBridge) explosion).bridge$getWorld()).bridge$isFake()) {
+            final Entity entity = ((ExplosionAccessor) explosion).accessor$getExploder();
+            if (entity != null && !((WorldBridge) ((ExplosionAccessor) explosion).accessor$getWorld()).bridge$isFake()) {
                 if (explosion.getExplosivePlacedBy() == null && entity instanceof OwnershipTrackedBridge) {
                     // check creator
                     final OwnershipTrackedBridge ownerTrackedBridge = (OwnershipTrackedBridge) entity;
@@ -115,7 +115,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
         if (!this.damageType.contains(":")) {
             this.impl$damageType = DamageSourceToTypeProvider.getInstance().getOrCustom(this.damageType);
         } else {
-            this.impl$damageType = Sponge.getRegistry().getType(DamageType.class, CatalogKey.resolve(this.damageType)).orElse(DamageTypes.CUSTOM);
+            this.impl$damageType = Sponge.getRegistry().getCatalogRegistry().get(DamageType.class, CatalogKey.resolve(this.damageType)).orElseGet(DamageTypes.CUSTOM);
         }
     }
 

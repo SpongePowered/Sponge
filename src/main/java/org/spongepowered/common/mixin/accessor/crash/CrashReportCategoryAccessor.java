@@ -22,9 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.util.text;
+package org.spongepowered.common.mixin.accessor.crash;
 
-public interface TextFormattingBridge {
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    char bridge$getFormattingCode();
+@Mixin(CrashReportCategory.class)
+public interface CrashReportCategoryAccessor {
+
+    @Accessor("crashReport") CrashReport accessor$getCrashReport();
+
 }

@@ -548,8 +548,10 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             // Sponge End
             TileEntity tileentity = this.getTileEntity(pos, net.minecraft.world.chunk.Chunk.CreateEntityType.CHECK);
 
-            if (tileentity == null) {
-                // Sponge Start - use SpongeImplHooks for forge compatibility
+            // Sponge Start - Additional check for the tile entity being queued for removal.
+            // if (tileentity == null) { // Sponge
+            if (tileentity == null || (transaction != null && transaction.queuedRemoval != null)) {
+                // Use SpongeImplHooks for forge compatibility
                 // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
                 tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
 
@@ -863,11 +865,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             return true;
         }
         return this.loaded && !this.bridge$isQueuedForUnload() && this.bridge$getScheduledForUnload() == -1;
-    }
-
-    @Override
-    public void accessor$populate(final ChunkGenerator generator) {
-        this.populate(generator);
     }
 
     @Override

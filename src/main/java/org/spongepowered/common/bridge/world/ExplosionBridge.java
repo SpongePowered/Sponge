@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 public interface ExplosionBridge {
 
     boolean bridge$getShouldDamageBlocks();
@@ -50,8 +46,4 @@ public interface ExplosionBridge {
 
     double bridge$getKnockback();
 
-    @Nullable
-    Entity bridge$getExploder();
-
-    World bridge$getWorld();
 }

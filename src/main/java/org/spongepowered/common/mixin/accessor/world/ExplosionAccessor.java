@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.accessor.world;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,4 +40,7 @@ public interface ExplosionAccessor {
     @Accessor("y") double accessor$getY();
 
     @Accessor("z") double accessor$getZ();
+
+    @Accessor("exploder") Entity accessor$getExploder();
+
 }

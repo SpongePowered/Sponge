@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.AdvancementList;
+import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
@@ -37,13 +36,14 @@ import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
-import org.spongepowered.common.bridge.advancements.AdvancementListBridge;
+import org.spongepowered.common.mixin.accessor.advancements.AdvancementListAccessor;
 import org.spongepowered.common.mixin.accessor.advancements.AdvancementManagerAccessor;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
+
 @SuppressWarnings("unchecked")
-@RegistrationDependency(CriterionRegistryModule.class)
 public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<Advancement>
         implements AdditionalCatalogRegistryModule<Advancement> {
 
@@ -63,8 +63,16 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         super("minecraft");
     }
 
-    private static AdvancementListBridge getAdvancementList() {
-        return (AdvancementListBridge) AdvancementManagerAccessor.accessor$getAdvancementList();
+    public static AdvancementList getAdvancementList() {
+        // This is a hack for working around accessor mixins not being transformed on classload
+        // (since classloading the interface requires classloading the target first, which will transform the
+        // accessor, resulting in the accessor class being already classloaded)
+        try {
+            Class.forName(AdvancementManager.class.getName());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return AdvancementManagerAccessor.accessor$getAdvancementList();
     }
 
     @Override
@@ -85,12 +93,12 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         checkState(SpongeImplHooks.onServerThread());
         ((AdvancementBridge) advancement).bridge$setRegistered();
         final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
-        final AdvancementListBridge advList = getAdvancementList();
-        advList.bridge$getAdvancements().put(mcAdv.getId(), mcAdv);
+        final AdvancementList advList = (AdvancementList) getAdvancementList();
+        ((AdvancementListAccessor) advList).accessor$getAdvancements().put(mcAdv.getId(), mcAdv);
         // If the parent != null, that means that its not a root advancement
         if (mcAdv.getParent() != null && mcAdv.getParent() != DUMMY_ROOT_ADVANCEMENT &&
-                advList.bridge$getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
-            final AdvancementList.IListener listener = advList.bridge$getListener();
+                ((AdvancementListAccessor) advList).accessor$getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
+            final AdvancementList.IListener listener = ((AdvancementListAccessor) advList).accessor$getListener();
             if (listener != null) {
                 listener.func_191932_c(mcAdv);
             }

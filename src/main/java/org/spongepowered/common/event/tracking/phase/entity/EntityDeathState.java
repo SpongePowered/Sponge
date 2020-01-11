@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.GameRules;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.world.gamerule.GameRules;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
 
 final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
@@ -119,7 +119,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                 if (((PlayerEntityBridge) entityPlayer).bridge$keepInventory()) {
                     keepInventoryRule = entityPlayer.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
                     // Set global keep-inventory gamerule so mods do not drop items
-                    entityPlayer.world.getGameRules().setOrCreateGameRule(GameRules.KEEP_INVENTORY, "true");
+                     entityPlayer.world.getGameRules().setOrCreateGameRule(GameRules.KEEP_INVENTORY, "true");
                 }
             }
             SpongeCommonEventFactory.callDropItemDestruct(entities, context);
@@ -138,8 +138,5 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
-
     }
-
-
 }

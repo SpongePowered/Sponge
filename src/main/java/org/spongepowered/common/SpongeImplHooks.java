@@ -316,7 +316,7 @@ public class SpongeImplHooks {
     }
 
     public static void blockExploded(Block block, World world, BlockPos blockpos, Explosion explosion) {
-        world.setBlockToAir(blockpos);
+        world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 3);
         block.onExplosionDestroy(world, blockpos, explosion);
     }
 

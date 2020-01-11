@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 import net.minecraft.tileentity.MobSpawnerTileEntity;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(MobSpawnerTileEntity.class)
@@ -35,6 +34,6 @@ public abstract class MobSpawnerTileEntityMixin extends TileEntityMixin {
 
     @Override
     public SpawnType bridge$getTickedSpawnType() {
-        return SpawnTypes.MOB_SPAWNER;
+        return SpawnTypes.MOB_SPAWNER.get();
     }
 }
