@@ -42,18 +42,6 @@ public abstract class ChunkManagerMixin {
 
     @Shadow @Final private ServerWorld world;
 
-
-//    @Inject(method = "track(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
-//    private void impl$onTrackEntity(final Entity entityIn, final CallbackInfo ci) {
-//        if (entityIn instanceof HumanEntity) {
-//            this.track(entityIn, 512, 2);
-//            ci.cancel();
-//        }
-//    }
-    // TODO - Human types need to have an appropriate range set on their custom type. Since humans aren't
-    // player entities, they don't need any other extra logic.
-
-
     @Redirect(method = "track(Lnet/minecraft/entity/Entity;)V",
         at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
     private IllegalStateException impl$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn) {

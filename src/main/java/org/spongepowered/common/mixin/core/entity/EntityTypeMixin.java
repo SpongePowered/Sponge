@@ -28,10 +28,13 @@ import co.aikar.timings.Timing;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.CatalogKeyBridge;
@@ -41,7 +44,9 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityTrackerCategory;
 import org.spongepowered.common.config.category.EntityTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
+import org.spongepowered.common.registry.builtin.supplier.EntityTypeSupplier;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(EntityType.class)
 public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBridge, EntityTypeBridge {
@@ -56,45 +61,19 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     private boolean impl$overridesDamageEntity = false;
     private Timing impl$timings;
 
-    @Redirect(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
-    private static Object impl$setKeyAndInitializeTrackerState(Registry<Object> registry, String key, Object entityType) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        final CatalogKeyBridge catalogKeyBridge = (CatalogKeyBridge) entityType;
-        catalogKeyBridge.bridge$setKey(container.createCatalogKey(key));
-
-        final TrackableBridge trackableBridge = (TrackableBridge) entityType;
-
-        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeImpl.getTrackerConfigAdapter();
-        final EntityTrackerCategory entityTracker = trackerConfigAdapter.getConfig().getEntityTracker();
-
-        EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(container.getId());
-
-        if (modCapturing == null) {
-            modCapturing = new EntityTrackerModCategory();
-            entityTracker.getModMappings().put(container.getId(), modCapturing);
+    /**
+     * @author gabizou - January 10th, 2020 - 1.14.3
+     * @reason Because the original method uses field instance checks in a big if statement, and
+     * Forge moves the original method into a new method and replaces it with a {@link java.util.function.IntSupplier},
+     * we have to basically inject at the head and say "fuck it" to check for our human cases.
+     * @param cir The return value for the player tracking range, or do nothing
+     */
+    @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "RedundantCast", "rawtypes"})
+    @Inject(method = "getTrackingRange", at = @At("HEAD"), cancellable = true)
+    private void impl$getHumanTrackingRange(CallbackInfoReturnable<Integer> cir) {
+        if (((EntityType) (Object) this) == EntityTypes.HUMAN.get()) {
+            cir.setReturnValue(Constants.Entity.Player.TRACKING_RANGE);
         }
-
-        if (!modCapturing.isEnabled()) {
-            trackableBridge.bridge$setAllowsBlockBulkCaptures(false);
-            trackableBridge.bridge$setAllowsBlockEventCreation(false);
-            trackableBridge.bridge$setAllowsEntityBulkCaptures(false);
-            trackableBridge.bridge$setAllowsEntityEventCreation(false);
-            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(key, k -> false);
-            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(key, k -> false);
-            modCapturing.getBlockEventCreationMap().computeIfAbsent(key, k -> false);
-            modCapturing.getEntityEventCreationMap().computeIfAbsent(key, k -> false);
-        } else {
-            trackableBridge.bridge$setAllowsBlockBulkCaptures(modCapturing.getBlockBulkCaptureMap().computeIfAbsent(key, k -> true));
-            trackableBridge.bridge$setAllowsBlockEventCreation(modCapturing.getBlockEventCreationMap().computeIfAbsent(key, k -> true));
-            trackableBridge.bridge$setAllowsEntityBulkCaptures(modCapturing.getEntityBulkCaptureMap().computeIfAbsent(key, k -> true));
-            trackableBridge.bridge$setAllowsEntityEventCreation(modCapturing.getEntityEventCreationMap().computeIfAbsent(key, k -> true));
-        }
-
-        if (entityTracker.autoPopulateData()) {
-            trackerConfigAdapter.save();
-        }
-
-        return entityType;
     }
 
     @Override

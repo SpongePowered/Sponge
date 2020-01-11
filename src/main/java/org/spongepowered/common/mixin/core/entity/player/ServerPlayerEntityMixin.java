@@ -115,6 +115,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -200,8 +201,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
     }
 
-    @Inject(method = "removeEntity", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
+    @Inject(method = "removeEntity",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket(Lnet/minecraft/network/IPacket;)V"))
     private void impl$removeHumanHook(final Entity entityIn, final CallbackInfo ci) {
         if (entityIn instanceof HumanEntity) {
             ((HumanEntity) entityIn).onRemovedFrom((ServerPlayerEntity) (Object) this);
@@ -211,7 +212,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public boolean bridge$keepInventory() {
         if (this.impl$keepInventory == null) {
-            return this.world.getGameRules().getBoolean(org.spongepowered.api.world.gamerule.GameRules.KEEP_INVENTORY);
+            return this.world.getGameRules().getBoolean(org.spongepowered.api.world.gamerule.GameRules.KEEP_INVENTORY.get());
         }
         return this.impl$keepInventory;
     }
@@ -226,7 +227,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Overwrite
     public void onDeath(final DamageSource cause) {
         // Sponge start
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = SpongeImplHooks.onServerThread();
         final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause, isMainThread);
         if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;

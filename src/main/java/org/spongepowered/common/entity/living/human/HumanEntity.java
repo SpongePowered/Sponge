@@ -33,6 +33,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -44,7 +45,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.server.SDestroyEntitiesPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
-import net.minecraft.network.play.server.SPlayerListItemPacket.AddPlayerData;
 import net.minecraft.network.play.server.SSpawnPlayerPacket;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
@@ -52,30 +52,29 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.player.PlayerEntityAccessor;
 import org.spongepowered.common.mixin.accessor.network.play.server.SPlayerListItemPacketAccessor;
 import org.spongepowered.common.mixin.accessor.network.play.server.SSpawnPlayerPacketAccessor;
+import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 /*
  * Notes
@@ -85,6 +84,7 @@ import javax.annotation.Nullable;
  *
  * Hostile mobs don't attack the human, should this be default behaviour?
  */
+@SuppressWarnings("EntityConstructor") // MCDev needs an update for 1.14
 public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAttackMob {
 
     // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
@@ -96,16 +96,15 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
                     .getProperties());
 
     // A queue of packets waiting to send to players tracking this human
-    private final Map<UUID, List<IPacket<?>[]>> playerPacketMap = Maps.newHashMap();
+    private final Map<UUID, List<Stream<IPacket<?>>>> playerPacketMap = Maps.newHashMap();
 
     private GameProfile fakeProfile;
     @Nullable private UUID skinUuid;
     private boolean aiDisabled = false, leftHanded = false;
 
-    public HumanEntity(final World worldIn) {
-        super(worldIn);
+    public HumanEntity(final EntityType<? extends HumanEntity> type, final World worldIn) {
+        super(type, worldIn);
         this.fakeProfile = new GameProfile(this.entityUniqueID, "");
-        this.setSize(0.6F, 1.8F);
         this.setCanPickUpLoot(true);
     }
 
@@ -151,15 +150,17 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     @Override
-    public void setCustomNameTag(String name) {
-        if (name.length() > 16) {
-            // Vanilla restriction
-            name = name.substring(0, 16);
-        }
-        if (this.getCustomNameTag().equals(name)) {
+    public void setCustomName(@Nullable ITextComponent name) {
+        // TODO - figure out whether these restrictions still exist
+//        if (name.length() > 16) {
+//            // Vanilla restriction
+//            name = name.substring(0, 16);
+//        }
+        final ITextComponent customName = this.getCustomName();
+        if (customName == null && name == null || customName != null && customName.equals(name)) {
             return;
         }
-        super.setCustomNameTag(name);
+        super.setCustomName(name);
         this.renameProfile(name);
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
@@ -169,20 +170,20 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void readAdditional(final CompoundNBT tagCompund) {
         super.readAdditional(tagCompund);
-        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeDataCompound().getString("skinUuid");
+        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeDataCompound().getString(Constants.Entity.Human.SKIN_UUID_KEY);
         if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
         }
     }
 
     @Override
-    public void writeEntityToNBT(final CompoundNBT tagCompound) {
-        super.writeEntityToNBT(tagCompound);
+    public void writeAdditional(CompoundNBT compound) {
+        super.writeAdditional(compound);
         final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
         if (this.skinUuid != null) {
-            spongeData.putString("skinUuid", this.skinUuid.toString());
+            spongeData.putString(Constants.Entity.Human.SKIN_UUID_KEY, this.skinUuid.toString());
         } else {
-            spongeData.remove("skinUuid");
+            spongeData.remove(Constants.Entity.Human.SKIN_UUID_KEY);
         }
     }
 
@@ -225,7 +226,6 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void onDeath(@Nullable final DamageSource cause) {
         super.onDeath(cause);
-        this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);
         double motionX = 0.0D;
         double motionY = 0.1D;
@@ -249,7 +249,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
 
     @Override
     public double getYOffset() {
-        return -0.35D;
+        return Constants.Entity.Player.PLAYER_Y_OFFSET;
     }
 
     @Override
@@ -260,10 +260,6 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     protected SoundEvent getFallSound(final int height) {
         return height > 4 ? SoundEvents.ENTITY_PLAYER_BIG_FALL : SoundEvents.ENTITY_PLAYER_SMALL_FALL;
-    }
-    @Override
-    public float getEyeHeight() {
-        return 1.62f;
     }
 
     @Override
@@ -320,15 +316,16 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         return flag;
     }
 
-    private void renameProfile(final String newName) {
+    private void renameProfile(final ITextComponent newName) {
         final PropertyMap props = this.fakeProfile.getProperties();
-        this.fakeProfile = new GameProfile(this.fakeProfile.getId(), newName);
+        // TODO - is this right? calling getString on the name?
+        this.fakeProfile = new GameProfile(this.fakeProfile.getId(), newName.getString());
         this.fakeProfile.getProperties().putAll(props);
     }
 
     private boolean updateFakeProfileWithSkin(final UUID skin) {
         final PropertyMap properties = PROPERTIES_CACHE.get(skin);
-        if (properties.isEmpty()) {
+        if (properties == null || properties.isEmpty()) {
             return false;
         }
         this.fakeProfile.getProperties().replaceValues("textures", properties.get("textures"));
@@ -377,12 +374,14 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
             return DataTransactionResult.successNoData();
         }
         this.fakeProfile.getProperties().removeAll("textures");
-        final Immutable<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
-        this.skinUuid = null;
-        if (this.isAliveAndInWorld()) {
-            this.respawnOnClient();
-        }
-        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();
+        // TODO - figure out this new bit of mess.
+//        final Immutable<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
+//        this.skinUuid = null;
+//        if (this.isAliveAndInWorld()) {
+//            this.respawnOnClient();
+//        }
+//        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();
+        return DataTransactionResult.failNoData();
     }
 
     private boolean isAliveAndInWorld() {
@@ -422,7 +421,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
      * Creates a {@link SSpawnPlayerPacket} packet.
      *
      * Copied directly from the constructor of the packet, because that can't be
-     * used as we're not an EntityPlayer.
+     * used as we're not a PlayerEntity.
      *
      * @return A new spawn packet
      */
@@ -473,19 +472,19 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
      */
     public void pushPackets(@Nullable final ServerPlayerEntity player, final IPacket<?>... packets) {
         if (player == null) {
-            List<IPacket<?>[]> queue = this.playerPacketMap.get(null);
+            List<Stream<IPacket<?>>> queue = this.playerPacketMap.get(null);
             if (queue == null) {
                 queue = new ArrayList<>();
                 this.playerPacketMap.put(null, queue);
             }
-            queue.add(packets);
+            queue.add(Stream.of(packets));
         } else {
-            List<IPacket<?>[]> queue = this.playerPacketMap.get(player.getUniqueID());
+            List<Stream<IPacket<?>>> queue = this.playerPacketMap.get(player.getUniqueID());
             if (queue == null) {
                 queue = new ArrayList<>();
                 this.playerPacketMap.put(player.getUniqueID(), queue);
             }
-            queue.add(packets);
+            queue.add(Stream.of(packets));
         }
     }
 
@@ -495,8 +494,8 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
      * @param player The player to get packets for (or null for all players)
      * @return An array of packets to send in a single tick
      */
-    public IPacket<?>[] popQueuedPackets(@Nullable final ServerPlayerEntity player) {
-        final List<IPacket<?>[]> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
+    public Stream<IPacket<?>> popQueuedPackets(@Nullable final ServerPlayerEntity player) {
+        final List<Stream<IPacket<?>>> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
         return queue == null || queue.isEmpty() ? null : queue.remove(0);
     }
 
@@ -530,11 +529,8 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         }
 
         this.playSound(SoundEvents.ENTITY_ARROW_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-        this.world.addEntity0(entitytippedarrow);
+        this.world.addEntity(entitytippedarrow);
     }
 
-    @Override
-    public void setSwingingArms(final boolean var1) {
-        // TODO 1.12-pre2 Can we support this
-    }
+
 }

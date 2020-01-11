@@ -887,6 +887,10 @@ public final class Constants {
             public static final double CAT_SCAN_RADIUS = 16.0D;
         }
 
+        public static final class Human {
+
+            public static final String SKIN_UUID_KEY = "skinUuid";
+        }
         public static final class Player {
 
             public static final double DEFAULT_FLYING_SPEED = 0.05D;
@@ -904,6 +908,10 @@ public final class Constants {
             public static final DataQuery UUID = of("UUID");
             public static final DataQuery NAME = of("Name");
             public static final DataQuery SPAWNS = of("Spawns");
+            public static final float PLAYER_WIDTH = 0.6F;
+            public static final float PLAYER_HEIGHT = 1.8F;
+            public static final int TRACKING_RANGE = 32;
+            public static final double PLAYER_Y_OFFSET = -0.35D;
         }
 
         public static final class PrimedTNT {

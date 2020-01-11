@@ -63,11 +63,6 @@ public class SpoofedEntityDataManager extends EntityDataManager {
     }
 
     @Override
-    public <T> void setDirty(DataParameter<T> key) {
-        this.cached.setDirty(key);
-    }
-
-    @Override
     public boolean isDirty() {
         return this.cached.isDirty();
     }
@@ -75,7 +70,7 @@ public class SpoofedEntityDataManager extends EntityDataManager {
     @Nullable
     @Override
     public List<DataEntry<?>> getDirty() {
-         final List<DataEntry<?>> dirtyEntries = this.cached.getDirty();
+        final List<DataEntry<?>> dirtyEntries = this.cached.getDirty();
         final List<DataEntry<?>> dirty = new ArrayList<>(dirtyEntries.size());
         for (DataEntry<?> dataEntry : dirtyEntries) {
             if (dataEntry.getKey() == LivingEntityAccessor.accessor$getHealth()) {

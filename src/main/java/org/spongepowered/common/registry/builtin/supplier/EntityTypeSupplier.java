@@ -24,12 +24,27 @@
  */
 package org.spongepowered.common.registry.builtin.supplier;
 
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import org.spongepowered.common.util.Constants;
 
 public final class EntityTypeSupplier {
 
+    public static final net.minecraft.entity.EntityType<HumanEntity> HUMAN_TYPE = createHumanType();
+
     private EntityTypeSupplier() {
+    }
+
+    private static net.minecraft.entity.EntityType<HumanEntity> createHumanType() {
+        final ResourceLocation humanId = new ResourceLocation("sponge", "human");
+        final net.minecraft.entity.EntityType<HumanEntity> builder = net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.MISC)
+                .size(Constants.Entity.Player.PLAYER_WIDTH, Constants.Entity.Player.PLAYER_HEIGHT)
+                .build("human");
+        return Registry.register(Registry.ENTITY_TYPE, humanId, builder);
     }
 
     public static void registerSuppliers(SpongeCatalogRegistry registry) {
@@ -136,6 +151,7 @@ public final class EntityTypeSupplier {
             .registerSupplier(EntityType.class, "lightning_bolt", () -> (EntityType) net.minecraft.entity.EntityType.LIGHTNING_BOLT)
             .registerSupplier(EntityType.class, "player", () -> (EntityType) net.minecraft.entity.EntityType.PLAYER)
             .registerSupplier(EntityType.class, "fishing_bobber", () -> (EntityType) net.minecraft.entity.EntityType.FISHING_BOBBER)
+            .registerSupplier(EntityType.class, "human", () -> (EntityType) HUMAN_TYPE)
         ;
     }
 }

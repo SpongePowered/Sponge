@@ -101,6 +101,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import org.spongepowered.math.vector.Vector3d;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +120,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow public abstract void shadow$updatePermissionLevel(ServerPlayerEntity player);
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
 
+    @Shadow @Final private MinecraftServer server;
     @Nullable private DimensionType impl$updatePermissionLevelDimensionType;
 
     /**
@@ -279,8 +281,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
             // Force vanilla client to refresh its chunk cache if same dimension type
             if (fromWorld != toWorld && fromClientDimensionType == toClientDimensionType) {
-                newPlayer.connection.sendPacket(new SRespawnPacket(toClientDimensionType == DimensionTypes.OVERWORLD ? DimensionType.THE_NETHER :
-                    toClientDimensionType == DimensionTypes.THE_END ? DimensionType.THE_NETHER : DimensionType.OVERWORLD,
+                newPlayer.connection.sendPacket(new SRespawnPacket(toClientDimensionType == DimensionTypes.OVERWORLD.get() ? DimensionType.THE_NETHER :
+                    toClientDimensionType == DimensionTypes.THE_END.get() ? DimensionType.THE_NETHER : DimensionType.OVERWORLD,
                     toWorld.getWorldInfo().getGenerator(), newPlayer.interactionManager.getGameType()));
             }
         }
