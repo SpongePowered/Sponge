@@ -308,7 +308,7 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
     @Override
     public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
         if (!this.containsBlock(x, y, z)) {
-            return BlockSnapshot.NONE;
+            return BlockSnapshot.empty();
         }
         if (!this.isChunkLoaded(x >> 4, z >> 4, false)) {
             return BlockSnapshot.NONE;

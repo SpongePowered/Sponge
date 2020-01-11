@@ -651,7 +651,7 @@ public class SpongeCommonEventFactory {
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(
         final PlayerEntity player, final ItemStack heldItem, final Hand hand, @Nullable final Vector3d hitVec) {
-        return callInteractBlockEventPrimary(player, heldItem, BlockSnapshot.NONE, hand, null, hitVec);
+        return callInteractBlockEventPrimary(player, heldItem, BlockSnapshot.empty(), hand, null, hitVec);
     }
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(final PlayerEntity player, final ItemStack heldItem, final BlockSnapshot blockSnapshot, final Hand hand,

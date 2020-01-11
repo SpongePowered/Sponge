@@ -244,7 +244,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
             final ServerPlayerEntity player = SpongeCommonEventFactory.lastAnimationPlayer.get();
             if (player != null && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
-                final BlockSnapshot blockSnapshot = BlockSnapshot.NONE;
+                final BlockSnapshot blockSnapshot = BlockSnapshot.empty();
 
                 final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player) + 1);
 

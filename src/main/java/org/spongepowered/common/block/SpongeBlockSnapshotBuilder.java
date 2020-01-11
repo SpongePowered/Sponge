@@ -35,6 +35,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.Key;
@@ -142,14 +143,14 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public SpongeBlockSnapshotBuilder from(final Location<World> location) {
+    public SpongeBlockSnapshotBuilder from(final Location location) {
         this.blockState = location.getBlock();
-        this.worldUuid = location.getExtent().getUniqueId();
+        this.worldUuid = location.getWorldUniqueId();
         this.coords = location.getBlockPosition();
         if (this.blockState.getType() instanceof ITileEntityProvider) {
-            if (location.hasTileEntity()) {
+            if (location.hasBlockEntity()) {
                 this.compound = new CompoundNBT();
-                final org.spongepowered.api.block.entity.BlockEntity te = location.getTileEntity().get();
+                final BlockEntity te = location.getBlockEntity().get();
                 ((TileEntity) te).write(this.compound);
                 this.manipulators = ((CustomDataHolderBridge) te).bridge$getCustomManipulators().stream()
                         .map(Mutable::asImmutable)
@@ -169,6 +170,15 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     public SpongeBlockSnapshotBuilder notifier(final UUID uuid) {
         this.notifierUuid = uuid;
         return this;
+    }
+
+    @Override
+    public BlockSnapshot empty() {
+        return SpongeBlockSnapshotBuilder.pooled()
+                .worldId(Constants.World.INVALID_WORLD_UUID)
+                .position(new Vector3i(0, 0, 0))
+                .blockState(Blocks.AIR.getDefaultState())
+                .build();
     }
 
     public SpongeBlockSnapshotBuilder unsafeNbt(final CompoundNBT compound) {
@@ -224,7 +234,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
             this.notifierUuid = holder.getNotifier().get();
         }
         this.coords = holder.getPosition();
-        this.manipulators = Lists.newArrayList(holder.getManipulators());
+        this.manipulators = Lists.newArrayList(holder.getValues());
         if (holder instanceof SpongeBlockSnapshot) {
             final CompoundNBT compound = ((SpongeBlockSnapshot) holder).compound;
             if (compound != null) {

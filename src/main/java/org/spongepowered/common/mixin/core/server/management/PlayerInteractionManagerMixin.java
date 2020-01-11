@@ -419,7 +419,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
 
         // Sponge - start
         final ItemStack oldStack = stack.copy();
-        final BlockSnapshot currentSnapshot = BlockSnapshot.NONE;
+        final BlockSnapshot currentSnapshot = BlockSnapshot.empty();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(frame, player, oldStack, hand, null, currentSnapshot);
 

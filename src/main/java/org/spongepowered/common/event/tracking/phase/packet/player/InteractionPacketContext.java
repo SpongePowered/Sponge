@@ -31,7 +31,7 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 
 public class InteractionPacketContext extends PacketContext<InteractionPacketContext> {
 
-    private BlockSnapshot targetBlock = BlockSnapshot.NONE;
+    private BlockSnapshot targetBlock = BlockSnapshot.empty();
     private ItemStack activeItem = ItemStack.empty();
 
     InteractionPacketContext(PacketState<? extends InteractionPacketContext> state) {
@@ -43,7 +43,7 @@ public class InteractionPacketContext extends PacketContext<InteractionPacketCon
     @Override
     protected void reset() {
         super.reset();
-        this.targetBlock = BlockSnapshot.NONE;
+        this.targetBlock = BlockSnapshot.empty();
     }
 
     InteractionPacketContext targetBlock(BlockSnapshot snapshot) {

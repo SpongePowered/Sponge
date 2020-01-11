@@ -1794,17 +1794,17 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public SpongeBlockSnapshot bridge$createSnapshot(final BlockPos pos, final BlockChangeFlag flag) {
         if (!this.isBlockLoaded(pos)) {
-            return (SpongeBlockSnapshot) BlockSnapshot.NONE;
+            return (SpongeBlockSnapshot) BlockSnapshot.empty();
         }
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         final int chunkX = pos.getX() >> 4;
         final int chunkZ = pos.getZ() >> 4;
         final Chunk chunk = ((AbstractChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
         if (chunk == null) {
-            return (SpongeBlockSnapshot) BlockSnapshot.NONE;
+            return (SpongeBlockSnapshot) BlockSnapshot.empty();
         }
         final net.minecraft.block.BlockState blockState = chunk.getBlockState(pos);
-        builder.worldId(((org.spongepowered.api.world.World) this).getUniqueId());
+        builder.worldId(((org.spongepowered.api.world.World) this).getProperties().getUniqueId());
         builder.position(new Vector3i(pos.getX(), pos.getY(), pos.getZ()));
         builder.blockState(blockState);
         try {

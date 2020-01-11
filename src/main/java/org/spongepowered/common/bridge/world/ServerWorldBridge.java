@@ -64,7 +64,7 @@ public interface ServerWorldBridge {
     /**
      * Delegates to the {@link ServerWorld} to perform the lookup for a {@link Chunk}
      * such that if the target {@link BlockPos} results in a {@code false} for
-     * {@link ServerWorld#isBlockLoaded(BlockPos)}, {@link BlockSnapshot#NONE}
+     * {@link ServerWorld#isBlockLoaded(BlockPos)}, {@link BlockSnapshot#empty()}
      * will be returned. Likewise, optimizes the creation of the snapshot by performing
      * the {@link Chunk#getBlockState(BlockPos)} and {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
      * lookup on the same chunk, avoiding an additional chunk lookup.

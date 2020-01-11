@@ -94,7 +94,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         final BlockPos target = ((CPlayerDiggingPacket) packet).getPosition();
         if (!playerMP.world.isBlockLoaded(target)) {
-            context.targetBlock(BlockSnapshot.NONE);
+            context.targetBlock(BlockSnapshot.empty());
         } else {
             context.targetBlock(((ServerWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
