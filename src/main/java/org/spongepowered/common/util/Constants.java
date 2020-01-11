@@ -958,31 +958,68 @@ public final class Constants {
 
     public static final class BlockChangeFlags {
 
-        public static final int NEIGHBOR_MASK = 0b00000001;
-        public static final int NOTIFY_CLIENTS = 0b00000010;
-        public static final int IGNORE_RENDER = 0b00000100;
-        public static final int FORCE_RE_RENDER = 0b00001000;
-        public static final int OBSERVER_MASK = 0b00010000;
-        public static final int PHYSICS_MASK = 0b00100000; // Sponge Added mask, because vanilla doesn't support it yet
+        /* TODO - Re-evaluate how the flags are used, The current flow of a World#setBlockState with an example of 3
+            goes as follows:
+            (3 & 2 != 0) && (!world.isRemote || 3 & 4 == 0) && (world.isRemote || chunk.getLocationType().isTicking) ? world.notifyBlockUpdate() (send update to client)
+            (!world.isRemote && (3 & 1 != 0)) ? world.notifyNeighbors()
+            3 & 16 == 0 ? {
+              newFlag = 3 & -2 = 2;
+              originalState.updateDiagonal(world, pos, 2);
+              newState.updateNeighbors(world, pos, 2);
+              newState.updateDiagonalNeighbors(world, pos, 2);
+            }
+
+            The tricky part is in the updateDiagonal and updateNeighbors, currently updateDiagonal is used by redstone wire
+            to update placement of diagonally oriented neighboring blocks, and of course, it's a -2 anded, so it's negating the client notification update
+            for any new blocks changed, but retaining neighbor updates
+            updateNeighbors however is slightly different:
+            it goes through to update neighboring blocks on the new state's position in relation to the neighbor's state based on the neighbor's decision of what block state it should replace itself with, and as usual
+             disabling the neighbor  notification since the flag is already anded with -2 (2's complement)
+
+             The bigger issue here though is that Block.replaceBlock does some really silly things:
+             if the new state is air, it will do a world.destroyBlock(pos, 2 & 32 == 0 [true]) to drop the old block
+             Otherwise, the world.setBlockState(pos, newState, 2 & -33 [ basically says to allow future breakages and update neighbors] )
+
+         */
+        //    * 1 will cause a block update.
+        //    * 2 will send the change to clients.
+        //    * 4 will prevent the block from being re-rendered.
+        //    * 8 will force any re-renders to run on the main thread instead
+        //    * 16 will prevent neighbor reactions (e.g. fences connecting, observers pulsing).
+        //    * 32 will prevent neighbor reactions from spawning drops, if 16 is not set
+        //    * 64 will signify the block is being moved.
+        public static final int NEIGHBOR_MASK =   0b00000001; // 1
+        public static final int NOTIFY_CLIENTS =  0b00000010; // 2
+        public static final int IGNORE_RENDER =   0b00000100; // 4
+        public static final int FORCE_RE_RENDER = 0b00001000; // 8
+        public static final int OBSERVER_MASK =   0b00010000; // 16
+        public static final int NEIGHBOR_DROPS =  0b00100000; // 32
+        public static final int BLOCK_MOVING =    0b01000000; // 64
+        public static final int PHYSICS_MASK =    0b10000000; // Sponge Added mask, because vanilla doesn't support it yet
         // All of these flags are what we "expose" to the API
         // The flags that are naturally inverted are already inverted here by being masked in
         // with the opposite OR.
         // Example: If we DO want physics, we don't include the physics flag, if we DON'T want physics, we | it in.
         public static final int ALL = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.NEIGHBOR_MASK;
+        public static final int DEFAULT = Constants.BlockChangeFlags.NEIGHBOR_MASK
+            | Constants.BlockChangeFlags.NOTIFY_CLIENTS;
         public static final int NONE = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.PHYSICS_MASK
             | Constants.BlockChangeFlags.OBSERVER_MASK
-            | Constants.BlockChangeFlags.FORCE_RE_RENDER;
+            | Constants.BlockChangeFlags.FORCE_RE_RENDER
+            | Constants.BlockChangeFlags.NEIGHBOR_DROPS;
         public static final int NEIGHBOR = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.NEIGHBOR_MASK
             | Constants.BlockChangeFlags.PHYSICS_MASK
-            | Constants.BlockChangeFlags.OBSERVER_MASK;
+            | Constants.BlockChangeFlags.OBSERVER_MASK
+            | Constants.BlockChangeFlags.NEIGHBOR_DROPS;
         public static final int PHYSICS = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.OBSERVER_MASK;
 
         public static final int OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.PHYSICS_MASK;
+            | Constants.BlockChangeFlags.PHYSICS_MASK
+            | Constants.BlockChangeFlags.NEIGHBOR_DROPS;
 
         public static final int NEIGHBOR_PHYSICS = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.NEIGHBOR_MASK

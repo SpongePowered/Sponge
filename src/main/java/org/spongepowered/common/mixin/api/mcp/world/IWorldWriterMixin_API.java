@@ -32,7 +32,9 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.volume.game.MutableGameVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(IWorldWriter.class)
@@ -44,7 +46,7 @@ public interface IWorldWriterMixin_API extends MutableGameVolume {
 
     @Override
     default boolean setBlock(int x, int y, int z, org.spongepowered.api.block.BlockState state, BlockChangeFlag flag) {
-        return this.shadow$setBlockState(new BlockPos(x, y, z), (BlockState) state, BlockChangeFlagRegistryModule.toNative(flag));
+        return this.shadow$setBlockState(new BlockPos(x, y, z), (BlockState) state, ((SpongeBlockChangeFlag) flag).getRawFlag());
     }
 
     @Override
