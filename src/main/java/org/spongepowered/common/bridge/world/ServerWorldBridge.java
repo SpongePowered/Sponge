@@ -70,7 +70,7 @@ public interface ServerWorldBridge {
      * lookup on the same chunk, avoiding an additional chunk lookup.
      *
      * <p>This should be used when the "known" {@link BlockState} for the target
-     * position is not known. If it is known, use {@link #bridge$createSnapshot(BlockState, BlockState, BlockPos, BlockChangeFlag)}</p>
+     * position is not known. If it is known, use {@link #bridge$createSnapshot(BlockState, BlockPos, BlockChangeFlag)}</p>
      *
      * @param pos The target position to get the block snapshot for
      * @param flag The block change flag to associate with the snapshot.
@@ -92,15 +92,14 @@ public interface ServerWorldBridge {
      * any further chunk lookups.</p>
      *
      * @param state The block state
-     * @param extended The extended state
      * @param pos The target position
      * @param updateFlag The update flag
      * @return The snapshot, never NONE
      */
-    SpongeBlockSnapshot bridge$createSnapshot(BlockState state, BlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
+    SpongeBlockSnapshot bridge$createSnapshot(BlockState state, BlockPos pos, BlockChangeFlag updateFlag);
 
     /**
-     * Similar to {@link #bridge$createSnapshot(BlockState, BlockState, BlockPos, BlockChangeFlag)},
+     * Similar to {@link #bridge$createSnapshot(BlockState, BlockPos, BlockChangeFlag)},
      * but with the added avoidance of a {@link TileEntity} lookup during the creation of the resulting
      * {@link SpongeBlockSnapshot}.
      *

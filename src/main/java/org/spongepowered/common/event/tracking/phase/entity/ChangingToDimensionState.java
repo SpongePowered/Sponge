@@ -43,7 +43,7 @@ final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeCon
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final DimensionChangeContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final DimensionChangeContext context, final Entity entity) {
         final ServerWorld worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
         ((ServerWorldBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);

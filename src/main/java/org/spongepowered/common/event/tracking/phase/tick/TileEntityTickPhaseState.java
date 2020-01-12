@@ -160,7 +160,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final TileEntityTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final TileEntityTickContext context, final Entity entity) {
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
             .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         final TileEntityBridge mixinTileEntity = (TileEntityBridge) tickingTile;

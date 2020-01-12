@@ -54,6 +54,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
+import org.spongepowered.common.mixin.accessor.entity.item.ItemFrameEntityAccessor;
 import org.spongepowered.common.mixin.accessor.util.CombatEntryAccessor;
 import org.spongepowered.common.mixin.accessor.util.CombatTrackerAccessor;
 import org.spongepowered.common.util.Constants;
@@ -278,7 +279,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 if (entityHanging instanceof ItemFrameEntity) {
                     final ItemFrameEntity itemFrame = (ItemFrameEntity) entityHanging;
                     if (!itemFrame.removed) {
-                        itemFrame.dropItemOrSelf((net.minecraft.entity.Entity) tickingEntity, true);
+                        ((ItemFrameEntityAccessor) itemFrame).accessor$dropItemOrSelf((net.minecraft.entity.Entity) tickingEntity, true);
                     }
                     itemFrame.remove();
                 }
@@ -295,7 +296,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final EntityTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final EntityTickContext context, final Entity entity) {
         // Always need our source
         final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));

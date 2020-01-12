@@ -60,7 +60,7 @@ public class BlockPhaseState extends PooledPhaseState<GeneralizedContext> implem
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final GeneralizedContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final GeneralizedContext context, final Entity entity) {
         return context.captureEntity(entity);
     }
 

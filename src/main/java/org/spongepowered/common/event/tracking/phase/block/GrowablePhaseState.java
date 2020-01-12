@@ -65,7 +65,7 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
     }
 
     @Override
-    public boolean spawnEntityOrCapture(GrowablePhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(GrowablePhaseContext context, Entity entity) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

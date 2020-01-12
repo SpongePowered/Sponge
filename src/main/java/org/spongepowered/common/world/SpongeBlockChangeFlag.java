@@ -26,6 +26,7 @@ package org.spongepowered.common.world;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.Constants;
 
@@ -59,7 +60,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     @Override
-    public boolean updateNeighbors() {
+    public boolean notifyNeighbors() {
         return this.updateNeighbors;
     }
 
@@ -108,7 +109,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                | (this.notifyClients ? 0 : Constants.BlockChangeFlags.NOTIFY_CLIENTS)
                                | (this.ignoreRender ? 0 : Constants.BlockChangeFlags.IGNORE_RENDER)
                                | (this.forceReRender ? 0 : Constants.BlockChangeFlags.FORCE_RE_RENDER);
-        return BlockChangeFlagRegistryModule.fromNativeInt(maskedFlag);
+        return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
     @Override
@@ -120,7 +121,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                | (this.notifyClients || o.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                | (this.ignoreRender || o.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
                                | (this.forceReRender || o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
-        return BlockChangeFlagRegistryModule.fromNativeInt(maskedFlag);
+        return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
     @Override
@@ -132,10 +133,10 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                | (this.notifyClients && !o.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                | (this.ignoreRender && !o.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
                                | (this.forceReRender && !o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
-        return BlockChangeFlagRegistryModule.fromNativeInt(maskedFlag);
+        return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
-    public boolean isNotifyClients() {
+    public boolean notifyClients() {
         return this.notifyClients;
     }
 
@@ -159,7 +160,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("rawFlag", this.rawFlag)
-            .add("updateNeighbors", this.updateNeighbors)
+            .add("notifyNeighbors", this.updateNeighbors)
             .add("performBlockPhysics", this.performBlockPhysics)
             .add("notifyObservers", this.notifyObservers)
             .add("notifyClients", this.notifyClients)

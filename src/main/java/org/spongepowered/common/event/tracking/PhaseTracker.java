@@ -32,22 +32,27 @@ import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ThrowableEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.server.ChunkHolder;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -71,9 +76,7 @@ import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
-import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
@@ -81,7 +84,6 @@ import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.mixin.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.registry.builtin.supplier.SpawnTypeSupplier;
 import org.spongepowered.common.util.Constants;
@@ -91,12 +93,10 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -133,7 +133,7 @@ public final class PhaseTracker {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeSupplier.FORCED);
                         for (net.minecraft.entity.Entity entity : entities) {
                             // At this point, we don't care what the causes are...
-                            PhaseTracker.getInstance().spawnEntityWithCause((World) entity.getEntityWorld(), (Entity) entity);
+                            PhaseTracker.getInstance().spawnEntityWithCause((World<?>) entity.getEntityWorld(), (Entity) entity);
                         }
                     }
 
@@ -146,7 +146,6 @@ public final class PhaseTracker {
     private boolean hasRun = false;
 
 
-    @SuppressWarnings("ThrowableNotThrown")
     public void setThread(@Nullable final Thread thread) throws IllegalAccessException {
         final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         if ((stackTrace.length < 3)) {
@@ -181,19 +180,11 @@ public final class PhaseTracker {
         return PhaseTracker.SERVER;
     }
 
-    private static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
+    static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
 
     final PhaseStack stack = new PhaseStack();
 
-    private final ConcurrentHashMap<IPhaseState<?>, ArrayDeque<? extends PhaseContext<?>>> stateContextPool = new ConcurrentHashMap<>();
-
     // ----------------- STATE ACCESS ----------------------------------
-
-    public <C extends PhaseContext<C>> ArrayDeque<C> createContextPool(final IPhaseState<C> state) {
-        final ArrayDeque<C> pool = new ArrayDeque<>();
-        this.stateContextPool.put(state, pool);
-        return pool;
-    }
 
     @SuppressWarnings("rawtypes")
     void switchToPhase(final IPhaseState<?> state, final PhaseContext<?> phaseContext) {
@@ -328,32 +319,37 @@ public final class PhaseTracker {
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
                 // Try to save ourselves
-                final BlockEntityType type = currentContext
-                    .getSource(org.spongepowered.api.block.entity.BlockEntity.class)
-                    .map(org.spongepowered.api.block.entity.BlockEntity::getType)
-                    .orElse(null);
+                final TileEntity source = (TileEntity) currentContext.getSource();
+
+                final TileEntityType<?> type = Optional.ofNullable(source)
+                        .map(TileEntity::getType)
+                        .orElse(null);
                 if (type != null) {
+                    ResourceLocation id = TileEntityType.getId(type);
+                    if (id == null) {
+                        id = new ResourceLocation(source.getClass().getCanonicalName());
+                    }
                     final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();
-                    final boolean contained = autoFixedTiles.containsKey(type.getKey().toString());
+                    final boolean contained = autoFixedTiles.containsKey(type.toString());
                     // If we didn't map the tile entity yet, we should apply the mapping
                     // based on whether the source is the same as the TileEntity.
                     if (!contained) {
-                        if (pos.equals(currentContext.getSource(TileEntity.class).get().getPos())) {
-                            autoFixedTiles.put(type.getKey().toString(), true);
+                        if (pos.equals(source.getPos())) {
+                            autoFixedTiles.put(id.toString(), true);
                         } else {
-                            autoFixedTiles.put(type.getKey().toString(), false);
+                            autoFixedTiles.put(id.toString(), false);
                         }
                     }
-                    final boolean useTile = contained && autoFixedTiles.get(type.getKey().toString());
+                    final boolean useTile = contained && autoFixedTiles.get(id.toString());
                     if (useTile) {
-                        blockIn = ((TileEntity) currentContext.getSource()).getBlockState().getBlock();
+                        blockIn = source.getBlockState().getBlock();
                     } else {
                         blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
                                   ? chunk.getBlockState(pos).getBlock()
                                   : worldServer.getBlockState(pos).getBlock();
                     }
                     if (!contained && trackerConfig.isReportNullSourceBlocks()) {
-                        PhasePrinter.printNullSourceBlockWithTile(pos, blockIn, otherPos, type, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
+                        PhasePrinter.printNullSourceBlockWithTile(pos, blockIn, otherPos, id, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
                     }
                 } else {
                     blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
@@ -464,7 +460,7 @@ public final class PhaseTracker {
                 // the try with resources will perform a close without the phase context being entered, leading to issues of closing
                 // other phase contexts.
                 // Refer to https://github.com/SpongePowered/SpongeForge/issues/2706
-                if (PhaseTracker.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
+                if (PhasePrinter.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
                     return;
                 }
                 // Sponge End
@@ -505,11 +501,20 @@ public final class PhaseTracker {
             return false;
         }
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
-        final net.minecraft.world.server.ServerWorld minecraftWorld = (ServerWorld) mixinWorld;
+        final net.minecraft.world.server.ServerWorld world = (ServerWorld) mixinWorld;
 
-        // Vanilla start - get the chunk
-        final Chunk chunk = minecraftWorld.getChunkAt(pos);
-        // Sponge - double check the chunk is not empty.
+        // World#setBlockState - A Sponge Story
+        // Vanilla already has the `isOutsideBuildHeight(pos)` check
+        //if (isOutsideBuildHeight(pos)) {
+        //    return false;
+        // Vanilla already checks if it's a server world and that the generator is not a debugger (otherwise we wouldn't
+        // be here)
+        //} else if (!this.isRemote && this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) {
+        //    return false;
+        //} else {
+        // Vanilla gets the chunk
+        final Chunk chunk = world.getChunkAt(pos);
+        // Sponge Start - double check the chunk is not empty.
         // It is now possible for setBlockState to be called on an empty chunk due to our optimization
         // for returning empty chunks when we don't want a chunk to load.
         // If chunk is empty, we simply return to avoid any further logic.
@@ -517,12 +522,13 @@ public final class PhaseTracker {
             return false;
         }
         // Sponge End
-        final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
-        // Forge patches - allows getting the light changes to check for relighting.
-        final int oldLight = SpongeImplHooks.getChunkPosLight(currentState, minecraftWorld, pos);
-        final int oldOpacity = SpongeImplHooks.getBlockLightOpacity(currentState, minecraftWorld, pos);
+        final Block block = newState.getBlock();
+        // Vanilla uses the bitwise flag, we use BlockChangeFlag.
+        // Sponge Start - Since vanilla will at this point tell the chunk to set the state, we need
+        // to start a tracking position
 
-        // Sponge Start - micro optimization to avoid calling extra stuff on the same block state instance
+        final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
+        // Small optimization to avoid further state logic and only check if we need to update the proxies in play
         if (currentState == newState) {
             // Some micro optimization in case someone is trying to set the new state to the same as current
             final SpongeProxyBlockAccess proxyAccess = mixinWorld.bridge$getProxyAccess();
@@ -534,15 +540,7 @@ public final class PhaseTracker {
 
         final PhaseContext<?> context = this.stack.peek();
         final IPhaseState<?> phaseState = context.state;
-        final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
-        // Do a sanity check, if we're not in any phase state that accepts block changes, well, why the hell are
-        // we doing any changes?? The changes themselves will still go through, but we want to be as verbose
-        // about those changes as possible, if we're configured to do so.
-        if (isComplete && SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) { // Fail fast.
-            // The random occurrence that we're told to complete a phase
-            // while a world is being changed unknowingly.
-//            this.printUnexpectedBlockChange(mixinWorld, pos, currentState, newState);
-        }
+
         // We can allow the block to get changed, regardless how it's captured, not captured, etc.
         // because ChunkMixin will perform the necessary changes, and appropriately prevent any specific
         // physics handling.
@@ -550,22 +548,28 @@ public final class PhaseTracker {
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         // Sponge - Use our mixin method that allows using the BlockChangeFlag.
 
-        final net.minecraft.block.BlockState originalBlockState = mixinChunk.bridge$setBlockState(pos, newState, currentState, spongeFlag);
+        // Up until this point, we've been setting up sponge stuff, this next line is from vanilla
+        // where it tells the chunk to set the new state, but we have to call our custom method
+        // to do transaction handling
+        // final net.minecraft.block.BlockState blockstate = chunk.setBlockState(pos, newState, (flags & 64) != 0);
+        final net.minecraft.block.BlockState originalState = mixinChunk.bridge$setBlockState(pos, newState, currentState, spongeFlag);
         // Sponge End
-        if (originalBlockState == null) {
+        if (originalState == null) {
             return false;
+        } // else { // Sponge - redundant else
+
+        // blockstate1 -> newWorldState
+        final net.minecraft.block.BlockState newWorldState = world.getBlockState(pos);
+        if (newWorldState != originalState && (newWorldState.getOpacity(world, pos) != originalState.getOpacity(world, pos) || newWorldState.getLightValue() != originalState.getLightValue() || newWorldState.func_215691_g() || originalState.func_215691_g())) {
+            // this.profiler.startSection("queueCheckLight");
+            world.getProfiler().startSection("queueCheckLight");
+            // this.getChunkProvider().getLightManager().checkBlock(pos);
+            world.getChunkProvider().getLightManager().checkBlock(pos);
+            // this.profiler.endSection();
+            world.getProfiler().endSection();
         }
 
-        // else { // Sponge - unnecessary formatting
-        // Forge changes the BlockState.getLightOpacity to use Forge's hook.
-        if (SpongeImplHooks.getBlockLightOpacity(newState, minecraftWorld, pos) != oldOpacity || SpongeImplHooks.getChunkPosLight(newState, minecraftWorld, pos) != oldLight) {
-            // Sponge - End
-            minecraftWorld.getProfiler().startSection("checkLight");
-            minecraftWorld.checkLight(pos);
-            minecraftWorld.getProfiler().endSection();
-        }
-
-        // Sponge Start - At this point, we can stop and check for captures.
+        // Sponge Start - At this point, we can stop and check for captures;
         //  by short circuiting here, we avoid additional block processing that would otherwise
         //  have potential side effects (and ChunkMixin#bridge$setBlockState does a wonderful job at avoiding
         //  unnecessary logic in those cases).
@@ -577,6 +581,9 @@ public final class PhaseTracker {
             // that transaction.
             return true;
         }
+
+        // Since we don't do bulk capturing, we should also check if we are simply allowed to
+        // throw an event, if we are, then we should do that process.
         if (((IPhaseState) phaseState).doesBlockEventTracking(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
             try {
                 // Fall back to performing a singular block capture and throwing an event with all the
@@ -591,7 +598,7 @@ public final class PhaseTracker {
                 // Create and throw normal event
                 final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
                 final ChangeBlockEvent normalEvent =
-                    originalBlockSnapshot.blockChange.createEvent(currentCause, transactions);
+                        originalBlockSnapshot.blockChange.createEvent(currentCause, transactions);
                 try (@SuppressWarnings("try") final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     SpongeImpl.postEvent(normalEvent);
                     // We put the normal event at the end of the cause, still keeping in line with the
@@ -636,26 +643,50 @@ public final class PhaseTracker {
         }
         // Sponge End - continue with vanilla mechanics
 
-        // Sponge - Use SpongeFlag. Inline world.isRemote since it's checked, and use the BlockChangeFlag#isNotifyClients()) And chunks are never null
-        // flags & 2 is replaced with BlockChangeFlag#isNotifyClients
-        // !this.isRemote is guaranteed since we are on the server
-        // chunks are never null
-        // if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated()))
-        if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
-            // Sponge End
-            minecraftWorld.notifyBlockUpdate(pos, originalBlockState, newState, spongeFlag.getRawFlag());
+        // Vanilla does this whole block short circuit
+        // Sponge Start - eliminate big block
+        // if (newWorldState == newState) {
+        if (newWorldState != newState) {
+            return true;
+        }
+        // Sponge End
+        if (originalState != newWorldState) {
+            // this.func_225319_b(pos, originalState, newWorldState);
+            world.func_225319_b(pos, originalState, newWorldState);
         }
 
-        final Block block = newState.getBlock();
-        if (spongeFlag.updateNeighbors()) { // Sponge - Replace flags & 1 != 0 with BlockChangeFlag#updateNeighbors
-            minecraftWorld.notifyNeighborsRespectDebug(pos, originalBlockState.getBlock(), true);
+        // Vanilla flags & 2 to check if clients are notified. isRemote is redundant since it's guaranteed a server world.
+        // And the last bit is the equivalent to basically checking if the chunk is not a border and populated.
+        // if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (this.isRemote || chunk.getLocationType() != null && chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
+        if (spongeFlag.notifyClients() && (chunk.getLocationType() != null && chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
+            // this.notifyBlockUpdate(pos, blockstate, newWorldState, flags);
+            world.notifyBlockUpdate(pos, originalState, newWorldState, spongeFlag.getRawFlag());
+        }
 
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, block);
+        // Vanilla isremote is redundant
+        // if (!this.isRemote && (flags & 1) != 0) {
+        if (spongeFlag.notifyNeighbors()) {
+            // this.notifyNeighbors(pos, originalState.getBlock());
+            world.notifyNeighbors(pos, originalState.getBlock());
+            if (newWorldState.hasComparatorInputOverride()) {
+                // this.updateComparatorOutputLevel(pos, block);
+                world.updateComparatorOutputLevel(pos, block);
             }
-        } else if ( spongeFlag.notifyObservers()) { // Sponge - Replace flags & 16 == 0 with BlockChangeFlag#notifyObservers.
-            minecraftWorld.updateObservingBlocksAt(pos, block);
         }
+
+        // if ((flags & 16) == 0) { // Sponge BlockChangeFlag acknowledges this
+        if (spongeFlag.notifyObservers()) {
+            // final int i = flags & -2; // Vanilla negates 2 to flip the neighbor notification mask
+            final int newFlag = spongeFlag.withUpdateNeighbors(false).getRawFlag();
+            // blockstate.updateDiagonalNeighbors(this, pos, i);
+            currentState.updateDiagonalNeighbors(world, pos, newFlag);
+            // newWorldState.updateNeighbors(this, pos, i);
+            newWorldState.updateNeighbors(world, pos, newFlag);
+            // newWorldState.updateDiagonalNeighbors(this, pos, i);
+            newWorldState.updateDiagonalNeighbors(world, pos, newFlag);
+        }
+
+        world.func_217393_a(pos, originalState, newWorldState);
 
         return true;
         // } // Sponge - unnecessary formatting
@@ -663,7 +694,7 @@ public final class PhaseTracker {
     }
 
     /**
-     * This is the replacement of {@link WorldServer#spawnEntity(net.minecraft.entity.Entity)}
+     * This is the replacement of {@link net.minecraft.world.World#addEntity(net.minecraft.entity.Entity)}
      * where it captures into phases. The causes and relations are processed by the phases.
      *
      * The difference between {@link #spawnEntityWithCause(World, Entity)} is that it bypasses
@@ -676,8 +707,15 @@ public final class PhaseTracker {
     @SuppressWarnings("rawtypes")
     public boolean spawnEntity(final ServerWorld world, final net.minecraft.entity.Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
-        // Forge requires checking if we're restoring in a world to avoid spawning item drops.
+        // Sponge Start - Check if restoring blocks, don't want entities to be spawned
         if (entity instanceof ItemEntity && SpongeImplHooks.isRestoringBlocks(world)) {
+            return false;
+        }
+        // Sponge End
+        if (entity.removed) {
+            // Vanilla raw logger usage, Sponge uses the accessor, same thing.
+            // LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object)EntityType.getKey(entityIn.getType()));
+            ServerWorldAccessor.accessor$LOGGER().warn("Tried to add entity {} but it was marked as removed already", EntityType.getKey(entity.getType()));
             return false;
         }
 
@@ -686,7 +724,6 @@ public final class PhaseTracker {
             ((EntityBridge) entity).bridge$fireConstructors();
         }
 
-        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) world;
         final PhaseContext<?> context = this.stack.peek();
         final IPhaseState<?> phaseState = context.state;
         final boolean isForced = entity.forceSpawn || entity instanceof PlayerEntity;
@@ -695,54 +732,46 @@ public final class PhaseTracker {
         if (!isForced && !phaseState.doesAllowEntitySpawns()) {
             return false;
         }
-
-        // Sponge End - continue with vanilla mechanics
-        final int chunkX = MathHelper.floor(entity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor(entity.posZ / 16.0D);
-
-        if (!isForced && !((ServerWorld) world).chunkExists(chunkX, chunkZ, true)) {
+        // Sponge End
+        // } else if (this.hasDuplicateEntity(entityIn)) { // Sponge can't use the direct method, it's private.
+        if (((ServerWorldAccessor) world).accessor$hasDuplicateEntity(entity)) {
             return false;
         }
-        if (entity instanceof PlayerEntity) {
-            final PlayerEntity entityplayer = (PlayerEntity) entity;
-            world.playerEntities.add(entityplayer);
-            world.updateAllPlayersSleepingFlag();
-            SpongeImplHooks.firePlayerJoinSpawnEvent((ServerPlayerEntity) entityplayer);
-        } else {
-            // Sponge start - check for vanilla owner
-            if (entity instanceof IEntityOwnable) {
-                final IEntityOwnable ownable = (IEntityOwnable) entity;
-                final net.minecraft.entity.Entity owner = ownable.getOwner();
-                if (owner instanceof PlayerEntity) {
-                    context.owner = (User) owner;
-                    if (entity instanceof OwnershipTrackedBridge) {
-                        ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) owner);
-                    } else {
-                        ((Entity) entity).setCreator(ownable.getOwnerId());
-                    }
+        // Forge needs their event here for EntityJoinWorldEvent
+        // if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(entity, this)))
+        //    return false;
+        if (SpongeImplHooks.canEntityJoinWorld(entity, world)) {
+            return false;
+        }
+        // Forge End
+        final IChunk ichunk = world.getChunk(MathHelper.floor(entity.posX / 16.0D), MathHelper.floor(entity.posZ / 16.0D), ChunkStatus.FULL, entity.forceSpawn);
+        if (!(ichunk instanceof Chunk)) {
+            return false;
+        }
+
+
+        // Sponge start - check for vanilla owner
+        if (entity instanceof ThrowableEntity) {
+            final ThrowableEntity throwable = (ThrowableEntity) entity;
+            final LivingEntity thrower = throwable.getThrower();
+            if (thrower != null) {
+                final User user;
+                if (thrower instanceof OwnershipTrackedBridge) {
+                    user = ((OwnershipTrackedBridge) thrower).tracked$getOwnerReference().orElse(null);
+                } else {
+                    user = (User) thrower;
                 }
-            } else if (entity instanceof ThrowableEntity) {
-                final ThrowableEntity throwable = (ThrowableEntity) entity;
-                final LivingEntity thrower = throwable.getThrower();
-                if (thrower != null) {
-                    final User user;
-                    if (thrower instanceof OwnershipTrackedBridge) {
-                        user = ((OwnershipTrackedBridge) thrower).tracked$getOwnerReference().orElse(null);
+                if (user != null) {
+                    context.owner = user;
+                    if (entity instanceof OwnershipTrackedBridge) {
+                        ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(user);
                     } else {
-                        user = (User) thrower;
-                    }
-                    if (user != null) {
-                        context.owner = user;
-                        if (entity instanceof OwnershipTrackedBridge) {
-                            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(user);
-                        } else {
-                            ((Entity) entity).setCreator(user.getUniqueId());
-                        }
+                        ((Entity) entity).offer(Keys.CREATOR, user.getUniqueId());
                     }
                 }
             }
-            // Sponge end
         }
+        // Sponge end
         // Sponge Start
         // First, check if the owning world is a remote world. Then check if the spawn is forced.
         // Finally, if all checks are true, then let the phase process the entity spawn. Most phases
@@ -757,7 +786,7 @@ public final class PhaseTracker {
                     && ((IPhaseState) phaseState).tracksBlockSpecificDrops(context)
                     && context.getCaptureBlockPos().getPos().isPresent())) {
                 try {
-                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, (Entity) entity, chunkX, chunkZ);
+                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, (Entity) entity);
                 } catch (final Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us
@@ -769,9 +798,8 @@ public final class PhaseTracker {
         final net.minecraft.entity.Entity customEntity = SpongeImplHooks.getCustomEntityIfItem(entity);
         final net.minecraft.entity.Entity finalEntityToSpawn = customEntity == null ? entity : customEntity;
         // Sponge end - continue on with the checks.
-        world.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
-        world.loadedEntityList.add(finalEntityToSpawn);
-        // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
+        ichunk.addEntity(entity);
+        // world.onEntityAdded(entity); // Vanilla has a privaate method, Forge makes it public, accessors go!
         ((ServerWorldAccessor) world).accessor$onEntityAdded(finalEntityToSpawn);
         return true;
 
@@ -785,7 +813,7 @@ public final class PhaseTracker {
      * @param entity The entity
      * @return True if entity was spawned, false if not
      */
-    public boolean spawnEntityWithCause(final World world, final Entity entity) {
+    public boolean spawnEntityWithCause(final World<?> world, final Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
 
         // Sponge Start - handle construction phases
@@ -795,16 +823,13 @@ public final class PhaseTracker {
 
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final ServerWorld worldServer = (ServerWorld) world;
-        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
         // Sponge End - continue with vanilla mechanics
 
-        final int chunkX = MathHelper.floor(minecraftEntity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
-        final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof PlayerEntity;
-
-        if (!isForced && !((ServerWorldAccessor) world).accessor$isChunkLoaded(chunkX, chunkZ, true)) {
+        final IChunk ichunk = worldServer.getChunk(MathHelper.floor(minecraftEntity.posX / 16.0D), MathHelper.floor(minecraftEntity.posZ / 16.0D), ChunkStatus.FULL, minecraftEntity.forceSpawn);
+        if (!(ichunk instanceof Chunk)) {
             return false;
         }
+
         // Sponge Start - throw an event
         final List<Entity> entities = new ArrayList<>(1); // We need to use an arraylist so that filtering will work.
         entities.add(entity);
@@ -832,104 +857,16 @@ public final class PhaseTracker {
      * @return True if the entity spawn is on the main thread.
      */
     public static boolean isEntitySpawnInvalid(final Entity entity) {
-        if (Sponge.isServerAvailable() && (Sponge.getServer().isMainThread() || SpongeImpl.getServer().isServerStopped())) {
+        if (Sponge.isServerAvailable() && (Sponge.getServer().onMainThread() || SpongeImpl.getServer().isServerStopped())) {
             return false;
         }
-        // We aren't in the server thread at this point, and an entity is spawning on the server....
-        // We will DEFINITELY be doing bad things otherwise. We need to artificially capture here.
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().captureEntitiesAsync()) {
-            // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
-            if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
-                return true;
-            }
-            // Just checking if we've already printed once about it.
-            // If we have, we don't want to print any more times.
-            if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors() && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
-                return true;
-            }
-            // Otherwise, let's print out either the first time, or several more times.
-            new PrettyPrinter(60)
-                .add("Async Entity Spawn Warning").centre().hr()
-                .add("An entity was attempting to spawn off the \"main\" server thread")
-                .add()
-                .add("Details of the spawning are disabled according to the Sponge")
-                .add("configuration file. A stack trace of the attempted spawn should")
-                .add("provide information about how it was being spawned. Sponge is")
-                .add("currently configured to NOT attempt to capture this spawn and")
-                .add("spawn the entity at an appropriate time, while on the main server")
-                .add("thread.")
-                .add()
-                .add("Details of the spawn:")
-                .add("%s : %s", "Entity", entity)
-                .add("Stacktrace")
-                .add(new Exception("Async entity spawn attempt"))
-                .trace(SpongeImpl.getLogger(), Level.WARN);
-            PhaseTracker.getInstance().hasPrintedAsyncEntities = true;
-            return true;
-        }
-        PhaseTracker.ASYNC_CAPTURED_ENTITIES.add((net.minecraft.entity.Entity) entity);
-        // At this point we can print an exception about it, if we are told to.
-        // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
-            return true;
-        }
-        // Just checking if we've already printed once about it.
-        // If we have, we don't want to print any more times.
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors() && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
-            return true;
-        }
-        // Otherwise, let's print out either the first time, or several more times.
-        new PrettyPrinter(60)
-            .add("Async Entity Spawn Warning").centre().hr()
-            .add("An entity was attempting to spawn off the \"main\" server thread")
-            .add()
-            .add("Delayed spawning is ENABLED for Sponge.")
-            .add("The entity is safely captured by Sponge while off the main")
-            .add("server thread, and therefore will be spawned the next tick.")
-            .add("Some cases where a mod is expecting the entity back while")
-            .add("async can cause issues with said mod.")
-            .add()
-            .add("Details of the spawn:")
-            .add("%s : %s", "Entity", entity)
-            .add("Stacktrace")
-            .add(new Exception("Async entity spawn attempt"))
-            .trace(SpongeImpl.getLogger(), Level.WARN);
-        PhaseTracker.getInstance().hasPrintedAsyncEntities = true;
-
-
-        return true;
-    }
-
-    public static boolean checkMaxBlockProcessingDepth(final IPhaseState<?> state, final PhaseContext<?> context, final int currentDepth) {
-        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
-        final PhaseTrackerCategory trackerConfig = globalConfigAdapter.getConfig().getPhaseTracker();
-        int maxDepth = trackerConfig.getMaxBlockProcessingDepth();
-        if (maxDepth == 100 && state == TickPhase.Tick.NEIGHBOR_NOTIFY) {
-            maxDepth = 1000;
-            trackerConfig.resetMaxDepthTo1000();
-            globalConfigAdapter.save();
-        }
-        if (currentDepth < maxDepth) {
-            return false;
-        }
-
-        final PhaseTracker tracker = PhaseTracker.getInstance();
-        if (!trackerConfig.isVerbose() && tracker.printedExceptionForMaximumProcessDepth.contains(state)) {
-            // We still want to abort processing even if we're not logigng an error
-            return true;
-        }
-
-        tracker.printedExceptionForMaximumProcessDepth.add(state);
-        final String message = String.format("Sponge is still trying to process captured blocks after %s iterations of depth-first processing."
-                                            + " This is likely due to a mod doing something unusual.", currentDepth);
-        tracker.printMessageWithCaughtException("Maximum block processing depth exceeded!", message, state, context, null);
-
+        PhasePrinter.printAsyncEntitySpawn(entity);
         return true;
     }
 
     public void ensureEmpty() {
         if (!this.stack.isEmpty()) {
-            PhasePrinter.printNonEmptyStack(stack);
+            PhasePrinter.printNonEmptyStack(this.stack);
 
             while (!this.stack.isEmpty()) {
                 this.getCurrentContext().close();

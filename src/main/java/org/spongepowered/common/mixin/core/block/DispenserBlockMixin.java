@@ -72,7 +72,7 @@ public abstract class DispenserBlockMixin extends ContainerBlock {
     @Inject(method = "dispense", at = @At(value = "HEAD"))
     private void impl$createContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
         final net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
-        final SpongeBlockSnapshot spongeBlockSnapshot = ((ServerWorldBridge) worldIn).bridge$createSnapshot(state, state, pos, BlockChangeFlags.ALL);
+        final SpongeBlockSnapshot spongeBlockSnapshot = ((ServerWorldBridge) worldIn).bridge$createSnapshot(state, pos, BlockChangeFlags.ALL);
         final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunkAt(pos);
         this.impl$context = BlockPhase.State.DISPENSE.createPhaseContext()
             .source(spongeBlockSnapshot)

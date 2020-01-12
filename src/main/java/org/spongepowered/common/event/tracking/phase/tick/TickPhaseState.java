@@ -93,7 +93,7 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
     }
 
     @Override
-    public abstract boolean spawnEntityOrCapture(C context, Entity entity, int chunkX, int chunkZ);
+    public abstract boolean spawnEntityOrCapture(C context, Entity entity);
 
     @Override
     public boolean doesDenyChunkRequests() {

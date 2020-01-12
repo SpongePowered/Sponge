@@ -231,11 +231,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param context The current context
      * @param entity The entity being captured
-     * @param chunkX The chunk x position
-     * @param chunkZ The chunk z position
      * @return True if the entity was successfully captured
      */
-    default boolean spawnEntityOrCapture(final C context, final org.spongepowered.api.entity.Entity entity, final int chunkX, final int chunkZ) {
+    default boolean spawnEntityOrCapture(final C context, final org.spongepowered.api.entity.Entity entity) {
         final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -74,7 +74,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(UnwindingPhaseContext context) {
+    public boolean ignoresBlockUpdateTick(final UnwindingPhaseContext context) {
         return true;
     }
 
@@ -109,13 +109,13 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public boolean hasSpecificBlockProcess(UnwindingPhaseContext context) {
+    public boolean hasSpecificBlockProcess(final UnwindingPhaseContext context) {
         return !context.isPostingSpecialProcess();
     }
 
     @Override
-    public BlockTransaction.ChangeBlock captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, BlockState newState,
-        BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+    public BlockTransaction.ChangeBlock captureBlockChange(final UnwindingPhaseContext phaseContext, final BlockPos pos, final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
+                                                           final BlockChangeFlag flags, @Nullable final TileEntity tileEntity) {
         if (!phaseContext.isPostingSpecialProcess()) { // If we're posting special, we need to
             return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, flags);
         }
@@ -128,23 +128,23 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public boolean tracksTileEntityChanges(UnwindingPhaseContext context) {
+    public boolean tracksTileEntityChanges(final UnwindingPhaseContext context) {
         return context.allowsBulkBlockCaptures() && !context.isPostingSpecialProcess() && context.usesMulti && context.tracksTiles;
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(UnwindingPhaseContext context) {
+    public boolean doesCaptureNeighborNotifications(final UnwindingPhaseContext context) {
         return context.allowsBulkBlockCaptures() && !context.isPostingSpecialProcess() && context.usesMulti && context.tracksNeighborNotifications;
     }
 
     @Override
-    public boolean getShouldCancelAllTransactions(UnwindingPhaseContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+    public boolean getShouldCancelAllTransactions(final UnwindingPhaseContext context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
+                                                  final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
         return context.allowsBulkBlockCaptures() && context.isPostingSpecialProcess() && context.getUnwindingState().getShouldCancelAllTransactions(context.getUnwindingContext(), blockEvents, postEvent, scheduledEvents, noCancelledTransactions);
     }
 
     @Override
-    public void processCancelledTransaction(UnwindingPhaseContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+    public void processCancelledTransaction(final UnwindingPhaseContext context, final Transaction<BlockSnapshot> transaction, final BlockSnapshot original) {
         if (context.isPostingSpecialProcess()) {
             context.getCapturedBlockSupplier().cancelTransaction(original);
         }
@@ -153,7 +153,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @SuppressWarnings("unchecked")
     @Override
-    public void appendContextPreExplosion(ExplosionContext explosionContext, UnwindingPhaseContext context) {
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final UnwindingPhaseContext context) {
         final IPhaseState<?> phaseState = context.getUnwindingState();
         final PhaseContext<?> unwinding = context.getUnwindingContext();
         ((IPhaseState) phaseState).appendContextPreExplosion(explosionContext, unwinding);
@@ -161,8 +161,8 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @SuppressWarnings("unchecked")
     @Override
-    public void associateNeighborStateNotifier(UnwindingPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-        ServerWorld minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(final UnwindingPhaseContext context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+                                               final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext<?> unwindingContext = context.getUnwindingContext();
         ((IPhaseState) unwindingState).associateNeighborStateNotifier(unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
@@ -170,7 +170,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @SuppressWarnings({"unchecked", "try"})
     @Override
-    public void unwind(UnwindingPhaseContext context) {
+    public void unwind(final UnwindingPhaseContext context) {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext<?> unwindingContext = context.getUnwindingContext();
         try {
@@ -183,7 +183,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
                     // The auto closeable is set up to only pop the pushed supplier after the fact.
                     // The pushed supplier is only provided in the case where a new set of block
                     // changes needs to be processed due to depth first processing.
-                    try (AutoCloseable ignored = context::popBlockSupplier) {
+                    try (final AutoCloseable ignored = context::popBlockSupplier) {
                         final MultiBlockCaptureSupplier recursiveSupplier = context.getCapturedBlockSupplier();
                         if (!recursiveSupplier.isEmpty()) {
                             // So, first we mark ourselves with a new capture supplier
@@ -211,15 +211,15 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
                 SpongeCommonEventFactory.callSpawnEntity(items, unwindingContext);
 
             }
-        } catch (Exception e) {
-            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance(), e, context);
+        } catch (final Exception e) {
+            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
     }
 
     @SuppressWarnings("try")
     @Override
-    public void postProcessSpecificBlockChange(UnwindingPhaseContext currentContext, BlockTransaction.ChangeBlock changeBlock, int depth) {
-        if (PhaseTracker.checkMaxBlockProcessingDepth(this, currentContext, depth)) {
+    public void postProcessSpecificBlockChange(final UnwindingPhaseContext currentContext, final BlockTransaction.ChangeBlock changeBlock, final int depth) {
+        if (PhasePrinter.checkMaxBlockProcessingDepth(this, currentContext, depth)) {
             return;
         }
 
@@ -237,7 +237,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
                         // The auto closeable is set up to only pop the pushed supplier after the fact.
                         // The pushed supplier is only provided in the case where a new set of block
                         // changes needs to be processed due to depth first processing.
-                        try (AutoCloseable ignored = currentContext::popBlockSupplier) {
+                        try (final AutoCloseable ignored = currentContext::popBlockSupplier) {
                             final MultiBlockCaptureSupplier recursiveSupplier = currentContext.getCapturedBlockSupplier();
                             if (!recursiveSupplier.isEmpty()) {
                                 // So, first we mark ourselves with a new capture supplier
@@ -251,14 +251,14 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
                 } else {
                     TrackingUtil.processBlockCaptures(currentContext, depth + 1, original);
                 }
-            } catch (Exception e) {
-                PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance(), e, currentContext);
+            } catch (final Exception e) {
+                PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, currentContext);
             }
         }
     }
 
     @Override
-    public boolean spawnEntityOrCapture(UnwindingPhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final UnwindingPhaseContext context, final Entity entity) {
         return context.getCapturedEntities().add(entity);
     }
 
@@ -268,8 +268,8 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public void performOnBlockAddedSpawns(UnwindingPhaseContext context, int depth) {
-        if (PhaseTracker.checkMaxBlockProcessingDepth(this, context, depth)) {
+    public void performOnBlockAddedSpawns(final UnwindingPhaseContext context, final int depth) {
+        if (PhasePrinter.checkMaxBlockProcessingDepth(this, context, depth)) {
             return;
         }
 
@@ -281,12 +281,12 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context,
-        BlockState newState, SpongeBlockChangeFlag changeFlag, int depth) {
+    public void performPostBlockNotificationsAndNeighborUpdates(final UnwindingPhaseContext context,
+                                                                final BlockState newState, final SpongeBlockChangeFlag changeFlag, final int depth) {
         if (context.isPostingSpecialProcess()) {
             return; // it will keep on going internally.
         }
-        if (PhaseTracker.checkMaxBlockProcessingDepth(this, context, depth)) {
+        if (PhasePrinter.checkMaxBlockProcessingDepth(this, context, depth)) {
             return;
         }
         context.setBulkBlockCaptures(false);
@@ -295,7 +295,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public boolean doesBulkBlockCapture(UnwindingPhaseContext context) {
+    public boolean doesBulkBlockCapture(final UnwindingPhaseContext context) {
         return !context.isPostingSpecialProcess() && context.allowsBulkBlockCaptures();
     }
 
@@ -306,7 +306,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
      * @return
      */
     @Override
-    public boolean alreadyCapturingBlockTicks(UnwindingPhaseContext context) {
+    public boolean alreadyCapturingBlockTicks(final UnwindingPhaseContext context) {
         return true;
     }
 
@@ -319,8 +319,8 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<? extends BlockSnapshot> snapshotTransaction,
-        UnwindingPhaseContext context) {
+    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> snapshotTransaction,
+                                                final UnwindingPhaseContext context) {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext unwindingContext = context.getUnwindingContext();
         ((IPhaseState) unwindingState).postBlockTransactionApplication(blockChange, snapshotTransaction, unwindingContext);

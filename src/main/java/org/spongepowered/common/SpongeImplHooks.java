@@ -683,4 +683,14 @@ public class SpongeImplHooks {
             return tileentity2;
         }
     }
+
+    /**
+     * A Forge event bridge for us to use
+     * @param entity
+     * @param world
+     * @return
+     */
+    public static boolean canEntityJoinWorld(Entity entity, ServerWorld world) {
+        return false;
+    }
 }

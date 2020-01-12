@@ -91,10 +91,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * @return
      */
     public static PhaseContext<?> empty() {
-        if (EMPTY == null) {
-            EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE).markEmpty();
+        if (PhaseContext.EMPTY == null) {
+            PhaseContext.EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE).markEmpty();
         }
-        return EMPTY;
+        return PhaseContext.EMPTY;
     }
 
 

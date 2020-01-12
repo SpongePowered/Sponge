@@ -25,45 +25,62 @@
 package org.spongepowered.common.event.tracking;
 
 import java.util.ArrayDeque;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Nullable;
 
 public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPhaseState<C> {
 
-    private final ArrayDeque<C> contextPool = PhaseTracker.SERVER.createContextPool(this);
+    private static final ConcurrentHashMap<IPhaseState<?>, ArrayDeque<? extends PhaseContext<?>>> stateContextPool = new ConcurrentHashMap<>();
+    private final ArrayDeque<C> contextPool;
     @Nullable private C cached;
+    final ReentrantLock lock = new ReentrantLock();
 
     protected PooledPhaseState() {
+        final ArrayDeque<C> pool = new ArrayDeque<>();
+        PooledPhaseState.stateContextPool.put(this, pool);
+        this.contextPool = pool;
     }
 
     @Override
     public final C createPhaseContext() {
-        if (this.cached != null && !this.cached.isCompleted) {
-            final C cached = this.cached;
-            this.cached = null;
-            return cached;
+        this.lock.lock();
+        try {
+            if (this.cached != null && !this.cached.isCompleted) {
+                final C cached = this.cached;
+                this.cached = null;
+                return cached;
+            }
+            final C peek = this.contextPool.pollFirst();
+            if (peek != null) {
+                this.cached = peek;
+                return peek;
+            }
+            this.cached = this.createNewContext();
+            return this.cached;
+        } finally {
+            this.lock.unlock();
         }
-        final C peek = this.contextPool.pollFirst();
-        if (peek != null) {
-            this.cached = peek;
-            return peek;
-        }
-        this.cached = this.createNewContext();
-        return this.cached;
     }
 
     final void releaseContextFromPool(final C context) {
-        if (this.cached == context) {
-            return;
+        this.lock.lock();
+        try {
+            if (this.cached == context) {
+                return;
+            }
+            if (this.cached == null) {
+                // We can cache this context to recycle it if it's requested later.
+                // If there's no requests and just pushing, then it can be pushed to the
+                // deque.
+                this.cached = context;
+                return;
+            }
+            this.contextPool.push(context);
+        } finally {
+            this.lock.unlock();
         }
-        if (this.cached == null) {
-            // We can cache this context to recycle it if it's requested later.
-            // If there's no requests and just pushing, then it can be pushed to the
-            // deque.
-            this.cached = context;
-            return;
-        }
-        this.contextPool.push(context);
     }
 
     protected abstract C createNewContext();

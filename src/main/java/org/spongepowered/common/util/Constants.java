@@ -965,14 +965,14 @@ public final class Constants {
             3 & 16 == 0 ? {
               newFlag = 3 & -2 = 2;
               originalState.updateDiagonal(world, pos, 2);
-              newState.updateNeighbors(world, pos, 2);
+              newState.notifyNeighbors(world, pos, 2);
               newState.updateDiagonalNeighbors(world, pos, 2);
             }
 
-            The tricky part is in the updateDiagonal and updateNeighbors, currently updateDiagonal is used by redstone wire
+            The tricky part is in the updateDiagonal and notifyNeighbors, currently updateDiagonal is used by redstone wire
             to update placement of diagonally oriented neighboring blocks, and of course, it's a -2 anded, so it's negating the client notification update
             for any new blocks changed, but retaining neighbor updates
-            updateNeighbors however is slightly different:
+            notifyNeighbors however is slightly different:
             it goes through to update neighboring blocks on the new state's position in relation to the neighbor's state based on the neighbor's decision of what block state it should replace itself with, and as usual
              disabling the neighbor  notification since the flag is already anded with -2 (2's complement)
 
@@ -988,13 +988,13 @@ public final class Constants {
         //    * 16 will prevent neighbor reactions (e.g. fences connecting, observers pulsing).
         //    * 32 will prevent neighbor reactions from spawning drops, if 16 is not set
         //    * 64 will signify the block is being moved.
-        public static final int NEIGHBOR_MASK =   0b00000001; // 1
-        public static final int NOTIFY_CLIENTS =  0b00000010; // 2
-        public static final int IGNORE_RENDER =   0b00000100; // 4
-        public static final int FORCE_RE_RENDER = 0b00001000; // 8
-        public static final int OBSERVER_MASK =   0b00010000; // 16
-        public static final int NEIGHBOR_DROPS =  0b00100000; // 32
-        public static final int BLOCK_MOVING =    0b01000000; // 64
+        public static final int NEIGHBOR_MASK =   1 << 0; // 1
+        public static final int NOTIFY_CLIENTS =  1 << 1; // 2
+        public static final int IGNORE_RENDER =   1 << 2; // 4
+        public static final int FORCE_RE_RENDER = 1 << 3; // 8
+        public static final int OBSERVER_MASK =   1 << 4; // 16
+        public static final int NEIGHBOR_DROPS =  1 << 5; // 32
+        public static final int BLOCK_MOVING =    1 << 6; // 64
         public static final int PHYSICS_MASK =    0b10000000; // Sponge Added mask, because vanilla doesn't support it yet
         // All of these flags are what we "expose" to the API
         // The flags that are naturally inverted are already inverted here by being masked in

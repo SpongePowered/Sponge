@@ -1,16 +1,22 @@
 package org.spongepowered.common.event.tracking;
 
 import net.minecraft.block.Block;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.PhaseTrackerCategory;
+import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -41,6 +47,7 @@ final class PhasePrinter {
     private static final List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
     static final Set<IPhaseState<?>> printedExceptionsForUnprocessedState = new HashSet<>();
     static final Set<IPhaseState<?>> printedExceptionForMaximumProcessDepth = new HashSet<>();
+    static final PhaseStack EMPTY = new PhaseStack();
 
 
     public static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
@@ -66,7 +73,7 @@ final class PhasePrinter {
                         + "issue tracker on GitHub. Please provide the following information: ")
             .add()
             .add(" %s : %s", "Source position", pos)
-            .add(" %s : %s", "World", ((World) worldServer).getProperties().getName())
+            .add(" %s : %s", "World", ((World<?>) worldServer).getProperties().getName())
             .add(" %s : %s", "Source Block Recovered", blockIn)
             .add(" %s : %s", "Notified Position", otherPos).add();
 
@@ -114,16 +121,16 @@ final class PhasePrinter {
     }
 
     public static void printNullSourceBlockWithTile(
-            final BlockPos pos, final Block blockIn, final BlockPos otherPos, final BlockEntityType type, final boolean useTile,
+            final BlockPos pos, final Block blockIn, final BlockPos otherPos, final ResourceLocation type, final boolean useTile,
             final NullPointerException e) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block on TileEntity!").centre().hr()
             .addWrapped("Hey, Sponge is saving the game from crashing because a TileEntity "
-                        + "is sending out a \'null\' Block as it's source (more likely) and "
+                        + "is sending out a 'null' Block as it's source (more likely) and "
                         + "attempting to perform a neighbor notification with it. Because "
                         + "this is guaranteed to lead to a crash or a spam of reports, "
                         + "Sponge is going ahead and fixing the issue. The offending Tile "
-                        + "is " + type.getKey().toString())
+                        + "is " + type.toString())
             .add()
             .add("%s : %s", "Source position", pos)
             .add("%s : %s", "Source TileEntity", type)
@@ -140,7 +147,7 @@ final class PhasePrinter {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block on TileEntity!").centre().hr()
             .addWrapped("Hey, Sponge is saving the game from crashing because a TileEntity "
-                        + "is sending out a \'null\' Block as it's source (more likely) and "
+                        + "is sending out a 'null' Block as it's source (more likely) and "
                         + "attempting to perform a neighbor notification with it. Because "
                         + "this is guaranteed to lead to a crash or a spam of reports, "
                         + "Sponge is going ahead and fixing the issue. The offending Tile "
@@ -365,5 +372,94 @@ final class PhasePrinter {
             .add()
             .add(new Exception("Async Block Change Detected"))
             .log(SpongeImpl.getLogger(), Level.ERROR);
+    }
+
+    public static void printAsyncEntitySpawn(final Entity entity) {
+        // We aren't in the server thread at this point, and an entity is spawning on the server....
+        // We will DEFINITELY be doing bad things otherwise. We need to artificially capture here.
+        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().captureEntitiesAsync()) {
+            // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
+            if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+                return;
+            }
+            // Just checking if we've already printed once about it.
+            // If we have, we don't want to print any more times.
+            if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors() && PhasePrinter.hasPrintedAsyncEntities) {
+                return;
+            }
+            // Otherwise, let's print out either the first time, or several more times.
+            new PrettyPrinter(60)
+                    .add("Async Entity Spawn Warning").centre().hr()
+                    .add("An entity was attempting to spawn off the \"main\" server thread")
+                    .add()
+                    .add("Details of the spawning are disabled according to the Sponge")
+                    .add("configuration file. A stack trace of the attempted spawn should")
+                    .add("provide information about how it was being spawned. Sponge is")
+                    .add("currently configured to NOT attempt to capture this spawn and")
+                    .add("spawn the entity at an appropriate time, while on the main server")
+                    .add("thread.")
+                    .add()
+                    .add("Details of the spawn:")
+                    .add("%s : %s", "Entity", entity)
+                    .add("Stacktrace")
+                    .add(new Exception("Async entity spawn attempt"))
+                    .trace(SpongeImpl.getLogger(), Level.WARN);
+            PhasePrinter.hasPrintedAsyncEntities = true;
+            return;
+        }
+        PhaseTracker.ASYNC_CAPTURED_ENTITIES.add((net.minecraft.entity.Entity) entity);
+        // At this point we can print an exception about it, if we are told to.
+        // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
+        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+            return;
+        }
+        // Just checking if we've already printed once about it.
+        // If we have, we don't want to print any more times.
+        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors() && PhasePrinter.hasPrintedAsyncEntities) {
+            return;
+        }
+        // Otherwise, let's print out either the first time, or several more times.
+        new PrettyPrinter(60)
+                .add("Async Entity Spawn Warning").centre().hr()
+                .add("An entity was attempting to spawn off the \"main\" server thread")
+                .add()
+                .add("Delayed spawning is ENABLED for Sponge.")
+                .add("The entity is safely captured by Sponge while off the main")
+                .add("server thread, and therefore will be spawned the next tick.")
+                .add("Some cases where a mod is expecting the entity back while")
+                .add("async can cause issues with said mod.")
+                .add()
+                .add("Details of the spawn:")
+                .add("%s : %s", "Entity", entity)
+                .add("Stacktrace")
+                .add(new Exception("Async entity spawn attempt"))
+                .trace(SpongeImpl.getLogger(), Level.WARN);
+        PhasePrinter.hasPrintedAsyncEntities = true;
+    }
+
+    public static boolean checkMaxBlockProcessingDepth(final IPhaseState<?> state, final PhaseContext<?> context, final int currentDepth) {
+        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
+        final PhaseTrackerCategory trackerConfig = globalConfigAdapter.getConfig().getPhaseTracker();
+        int maxDepth = trackerConfig.getMaxBlockProcessingDepth();
+        if (maxDepth == 100 && state == TickPhase.Tick.NEIGHBOR_NOTIFY) {
+            maxDepth = 1000;
+            trackerConfig.resetMaxDepthTo1000();
+            globalConfigAdapter.save();
+        }
+        if (currentDepth < maxDepth) {
+            return false;
+        }
+
+        if (!trackerConfig.isVerbose() && PhasePrinter.printedExceptionForMaximumProcessDepth.contains(state)) {
+            // We still want to abort processing even if we're not logigng an error
+            return true;
+        }
+
+        PhasePrinter.printedExceptionForMaximumProcessDepth.add(state);
+        final String message = String.format("Sponge is still trying to process captured blocks after %s iterations of depth-first processing."
+                                            + " This is likely due to a mod doing something unusual.", currentDepth);
+        PhasePrinter.printMessageWithCaughtException(PhasePrinter.EMPTY, "Maximum block processing depth exceeded!", message, state, context, null);
+
+        return true;
     }
 }

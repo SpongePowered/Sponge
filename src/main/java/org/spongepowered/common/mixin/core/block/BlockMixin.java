@@ -270,7 +270,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 final PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
-                        .source(mixinWorld.bridge$createSnapshot(state, state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
+                        .source(mixinWorld.bridge$createSnapshot(state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
                 // use current notifier and owner if available
                 currentContext.applyNotifierIfAvailable(context::notifier);
                 currentContext.applyOwnerIfAvailable(context::owner);

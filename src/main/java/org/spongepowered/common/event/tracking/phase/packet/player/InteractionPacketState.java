@@ -102,7 +102,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final InteractionPacketContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final InteractionPacketContext context, final Entity entity) {
         return context.captureEntity(entity);
     }
 

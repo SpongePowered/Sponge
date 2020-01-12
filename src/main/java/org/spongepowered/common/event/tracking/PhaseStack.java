@@ -50,7 +50,7 @@ final class PhaseStack {
     private final Deque<PhaseContext<?>> phases;
 
     PhaseStack() {
-        this(DEFAULT_QUEUE_SIZE);
+        this(PhaseStack.DEFAULT_QUEUE_SIZE);
     }
 
     private PhaseStack(int size) {

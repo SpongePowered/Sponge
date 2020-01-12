@@ -44,8 +44,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.BlockTransaction.TransactionContext;
-import org.spongepowered.common.event.tracking.context.BlockTransaction.TransactionProcessState;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -471,7 +469,7 @@ public abstract class BlockTransaction {
             phaseState.postBlockTransactionApplication(this.original.blockChange, eventTransaction, phaseContext);
             ((IPhaseState) currentContext.state).postProcessSpecificBlockChange(currentContext, this, currentDepth + 1);
 
-            if (this.blockChangeFlag.isNotifyClients()) { // Always try to notify clients of the change.
+            if (this.blockChangeFlag.notifyClients()) { // Always try to notify clients of the change.
                 worldServer.notifyBlockUpdate(targetPosition, oldState, this.newState, this.blockChangeFlag.getRawFlag());
             }
 
