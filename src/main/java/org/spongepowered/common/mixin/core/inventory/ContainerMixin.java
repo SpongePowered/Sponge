@@ -424,7 +424,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
             output.setInventorySlotContents(index, itemstack);
             return;
         }
-        this.impl$capturedCraftPreviewTransactions.clear();
+        // We cannot clear transactions here to support drag transactions that can include more than 1
 
         final ItemStackSnapshot orig = ItemStackUtil.snapshotOf(output.getStackInSlot(index));
         output.setInventorySlotContents(index, itemstack);

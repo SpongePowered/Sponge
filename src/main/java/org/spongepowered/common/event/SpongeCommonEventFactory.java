@@ -45,6 +45,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.ContainerRepair;
+import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -1490,8 +1491,15 @@ public class SpongeCommonEventFactory {
                 if (event.isCancelled() || !event.getPreview().isValid()) {
                     stack = event.getPreview().getOriginal();
                 }
+
+                final net.minecraft.item.ItemStack mcStack = ItemStackUtil.fromSnapshotToNative(stack);
+                if (container instanceof ContainerWorkbench) {
+                    ((ContainerWorkbench) container).craftResult.setInventorySlotContents(0, mcStack);
+                } else if (container instanceof ContainerPlayer) {
+                    ((ContainerPlayer) container).craftResult.setInventorySlotContents(0, mcStack);
+                }
                 // Resend modified output
-                ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(0, 0, ItemStackUtil.fromSnapshotToNative(stack)));
+                ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(0, 0, mcStack));
             }
 
         }
@@ -1517,7 +1525,7 @@ public class SpongeCommonEventFactory {
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
         if (event.isCancelled() || !event.getCursorTransaction().isValid() || event.getCursorTransaction().getCustom().isPresent()) {
             // handle cursor-transaction
-            final ItemStackSnapshot newCursor = event.isCancelled() || event.getCursorTransaction().isValid() ? event.getCursorTransaction().getOriginal() : event.getCursorTransaction().getFinal();
+            final ItemStackSnapshot newCursor = event.isCancelled() || !event.getCursorTransaction().isValid() ? event.getCursorTransaction().getOriginal() : event.getCursorTransaction().getFinal();
             player.inventory.setItemStack(ItemStackUtil.fromSnapshotToNative(newCursor));
             if (player instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(-1, -1, player.inventory.getItemStack()));
