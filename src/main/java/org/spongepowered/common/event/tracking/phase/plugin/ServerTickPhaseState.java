@@ -30,6 +30,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.List;
@@ -39,17 +40,17 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
 
     private final String desc;
 
-    ServerTickPhaseState(String name) {
+    ServerTickPhaseState(final String name) {
         this.desc = TrackingUtil.phaseStateToString("Plugin", name, this);
     }
 
     @Override
-    public ServerTickContext createNewContext() {
+    public ServerTickContext createNewContext(final PhaseTracker tracker) {
         return new ServerTickContext(this).addCaptures().player();
     }
 
     @Override
-    public void unwind(ServerTickContext phaseContext) {
+    public void unwind(final ServerTickContext phaseContext) {
 
         final Object listener = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
@@ -61,7 +62,7 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
         // Would depend on whether entity captures are done.
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.pushCause(listener);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
@@ -76,7 +77,7 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
     }
 
     @Override
-    public boolean doesBulkBlockCapture(ServerTickContext context) {
+    public boolean doesBulkBlockCapture(final ServerTickContext context) {
         return false;
     }
 
@@ -86,7 +87,7 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(ServerTickContext context) {
+    public boolean doesCaptureEntityDrops(final ServerTickContext context) {
         return false;
     }
 

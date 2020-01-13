@@ -25,10 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class GenericGenerationContext extends GenerationContext<GenericGenerationContext> {
 
-    GenericGenerationContext(final IPhaseState<? extends GenericGenerationContext> state) {
-        super(state);
+    GenericGenerationContext(final IPhaseState<? extends GenericGenerationContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 }

@@ -173,7 +173,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
             return;
         }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext().source(player)) {
+             final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
             context.buildAndSwitch();
             frame.pushCause(player);
             player.playerTick();

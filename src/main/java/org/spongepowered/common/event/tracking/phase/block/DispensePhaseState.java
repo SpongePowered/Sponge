@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
@@ -38,8 +39,8 @@ import java.util.Collection;
 final class DispensePhaseState extends BlockPhaseState {
 
     @Override
-    public GeneralizedContext createNewContext() {
-        return super.createNewContext()
+    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
+        return super.createNewContext(tracker)
             .addBlockCaptures()
             .addEntityCaptures()
             .addEntityDropCaptures();

@@ -32,8 +32,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 public class EntityDeathContext extends EntityContext<EntityDeathContext> {
 
     EntityDeathContext(
-        final IPhaseState<? extends EntityDeathContext> state) {
-        super(state);
+            final IPhaseState<? extends EntityDeathContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     /**

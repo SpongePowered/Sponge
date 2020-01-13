@@ -24,65 +24,54 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import java.util.ArrayDeque;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
-
 import javax.annotation.Nullable;
 
 public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPhaseState<C> {
 
-    private static final ConcurrentHashMap<IPhaseState<?>, ArrayDeque<? extends PhaseContext<?>>> stateContextPool = new ConcurrentHashMap<>();
-    private final ArrayDeque<C> contextPool;
-    @Nullable private C cached;
-    final ReentrantLock lock = new ReentrantLock();
+    @Nullable
+    private C cached;
 
     protected PooledPhaseState() {
-        final ArrayDeque<C> pool = new ArrayDeque<>();
-        PooledPhaseState.stateContextPool.put(this, pool);
-        this.contextPool = pool;
     }
 
     @Override
-    public final C createPhaseContext() {
-        this.lock.lock();
-        try {
-            if (this.cached != null && !this.cached.isCompleted) {
-                final C cached = this.cached;
-                this.cached = null;
-                return cached;
-            }
-            final C peek = this.contextPool.pollFirst();
-            if (peek != null) {
-                this.cached = peek;
-                return peek;
-            }
-            this.cached = this.createNewContext();
-            return this.cached;
-        } finally {
-            this.lock.unlock();
+    public final C createPhaseContext(final PhaseTracker server) {
+        if (Thread.currentThread() != server.getSidedThread()) {
+            throw new IllegalStateException("Asynchronous Thread Access to PhaseTracker: " + server);
         }
+
+        if (this.cached != null && !this.cached.isCompleted) {
+            final C cached = this.cached;
+            this.cached = null;
+            return cached;
+        }
+        final C peek = server.getContextPoolFor(this).pollFirst();
+        if (peek != null) {
+            this.cached = peek;
+            return peek;
+        }
+        this.cached = this.createNewContext(server);
+        return this.cached;
     }
 
     final void releaseContextFromPool(final C context) {
-        this.lock.lock();
-        try {
-            if (this.cached == context) {
-                return;
-            }
-            if (this.cached == null) {
-                // We can cache this context to recycle it if it's requested later.
-                // If there's no requests and just pushing, then it can be pushed to the
-                // deque.
-                this.cached = context;
-                return;
-            }
-            this.contextPool.push(context);
-        } finally {
-            this.lock.unlock();
+        if (Thread.currentThread() != context.createdTracker.getSidedThread()) {
+            throw new IllegalStateException("Asynchronous Thread Access to PhaseTracker: " + context.createdTracker);
         }
+        if (this.cached == context) {
+            return;
+        }
+        if (this.cached == null) {
+            // We can cache this context to recycle it if it's requested later.
+            // If there's no requests and just pushing, then it can be pushed to the
+            // deque.
+            this.cached = context;
+            return;
+        }
+        context.createdTracker.getContextPoolFor(this).push(context);
+
     }
 
-    protected abstract C createNewContext();
+    protected abstract C createNewContext(PhaseTracker tracker);
 
 }

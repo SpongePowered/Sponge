@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 final class EventListenerPhaseState extends ListenerPhaseState<EventListenerPhaseContext> {
@@ -33,8 +34,8 @@ final class EventListenerPhaseState extends ListenerPhaseState<EventListenerPhas
 
 
     @Override
-    public EventListenerPhaseContext createNewContext() {
-        return new EventListenerPhaseContext(this)
+    public EventListenerPhaseContext createNewContext(final PhaseTracker tracker) {
+        return new EventListenerPhaseContext(this, tracker)
             .addCaptures()
             .player();
     }

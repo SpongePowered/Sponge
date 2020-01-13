@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.MapMaker;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -75,7 +76,9 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -93,7 +96,9 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -108,6 +113,7 @@ public final class PhaseTracker {
     public static final PhaseTracker CLIENT = new PhaseTracker();
     public static final PhaseTracker SERVER = new PhaseTracker();
 
+    private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
 
     public void init() {
         if (this != PhaseTracker.SERVER) {
@@ -151,6 +157,10 @@ public final class PhaseTracker {
         if ((stackTrace.length < 3)) {
             throw new IllegalAccessException("Cannot call directly to change thread.");
         }
+        if (this != PhaseTracker.SERVER && this != PhaseTracker.CLIENT && this.sidedThread == null) {
+            this.sidedThread = thread;
+            return;
+        }
 
         final String callingClass = stackTrace[1].getClassName();
         final String callingParent = stackTrace[2].getClassName();
@@ -169,14 +179,29 @@ public final class PhaseTracker {
 
     }
 
-
-
     @Nullable
     public Thread getSidedThread() {
         return this.sidedThread;
     }
 
     public static PhaseTracker getInstance() {
+        final Thread current = Thread.currentThread();
+        if (current == PhaseTracker.SERVER.sidedThread) {
+            return PhaseTracker.SERVER;
+        }
+        if (current == PhaseTracker.CLIENT.sidedThread) {
+            return PhaseTracker.CLIENT;
+        }
+
+        PhaseTracker.SPINOFF_TRACKERS.computeIfAbsent(current, (thread) -> {
+            try {
+                final PhaseTracker phaseTracker = new PhaseTracker();
+                phaseTracker.setThread(thread);
+                return phaseTracker;
+            } catch (final IllegalAccessException e) {
+                throw new RuntimeException("Unable to create a new PhaseTracker for Thread: " + thread, e);
+            }
+        });
         return PhaseTracker.SERVER;
     }
 
@@ -188,7 +213,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings("rawtypes")
     void switchToPhase(final IPhaseState<?> state, final PhaseContext<?> phaseContext) {
-        if (!SpongeImplHooks.onServerThread()) {
+        if (phaseContext.createdTracker != this && Thread.currentThread() != this.sidedThread) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
@@ -217,8 +242,8 @@ public final class PhaseTracker {
     }
 
     @SuppressWarnings({"rawtypes", "unused", "try"})
-    void completePhase(final IPhaseState<?> prevState) {
-        if (!SpongeImplHooks.onServerThread()) {
+    void completePhase(final PhaseContext<?> context) {
+        if (context.createdTracker != this && Thread.currentThread() != this.sidedThread) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
@@ -237,8 +262,8 @@ public final class PhaseTracker {
             return;
         }
 
-        if (prevState != state) {
-            PhasePrinter.printIncorrectPhaseCompletion(this.stack, prevState, state);
+        if (context.state != state) {
+            PhasePrinter.printIncorrectPhaseCompletion(this.stack, context.state, state);
 
             // The phase on the top of the stack was most likely never completed.
             // Since we don't know when and where completePhase was intended to be called for it,
@@ -281,8 +306,8 @@ public final class PhaseTracker {
 
         if (this.stack.isEmpty()) {
             for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeImpl.getWorldManager().getWorlds()) {
-                final ServerWorldBridge serverBridge = (ServerWorldBridge) apiWorld;
-                if (serverBridge.bridge$getProxyAccess().hasProxy()) {
+                final TrackedWorldBridge trackedWorld = (TrackedWorldBridge) apiWorld;
+                if (trackedWorld.bridge$getProxyAccess().hasProxy()) {
                     new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
                         .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
                         .add()
@@ -391,10 +416,16 @@ public final class PhaseTracker {
     // ----------------- SIMPLE GETTERS --------------------------------------
 
     public IPhaseState<?> getCurrentState() {
+        if (Thread.currentThread() != this.sidedThread) {
+            throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
+        }
         return this.stack.peekState();
     }
 
     public PhaseContext<?> getCurrentContext() {
+        if (Thread.currentThread() != this.sidedThread) {
+            throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
+        }
         return this.stack.peekContext();
     }
 
@@ -411,7 +442,7 @@ public final class PhaseTracker {
      * @param isMoving If the block is moving
      */
     @SuppressWarnings("rawtypes")
-    public void notifyBlockOfStateChange(final ServerWorldBridge mixinWorld, final net.minecraft.block.BlockState notifyState, final BlockPos notifyPos,
+    public void notifyBlockOfStateChange(final TrackedWorldBridge mixinWorld, final net.minecraft.block.BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos, final boolean isMoving) {
         if (!SpongeImplHooks.onServerThread()) {
             // lol no, report the block change properly
@@ -444,7 +475,7 @@ public final class PhaseTracker {
                 .world(((World) mixinWorld))
                 .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
                 .state((BlockState) sourceBlock.getDefaultState()).build();
-            try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext()
+            try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext(PhaseTracker.SERVER)
                 .source(block)
                 .sourceBlock(sourceBlock)
                 .setNotifiedBlockPos(notifyPos)
@@ -493,7 +524,7 @@ public final class PhaseTracker {
      * @return True if the block was successfully set (or captured)
      */
     @SuppressWarnings("rawtypes")
-    public boolean setBlockState(final ServerWorldBridge mixinWorld, final BlockPos pos,
+    public boolean setBlockState(final TrackedWorldBridge mixinWorld, final BlockPos pos,
                                  final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) {
         if (!SpongeImplHooks.onServerThread()) {
             // lol no, report the block change properly
@@ -528,24 +559,12 @@ public final class PhaseTracker {
         // to start a tracking position
 
         final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
-        // Small optimization to avoid further state logic and only check if we need to update the proxies in play
-        if (currentState == newState) {
-            // Some micro optimization in case someone is trying to set the new state to the same as current
-            final SpongeProxyBlockAccess proxyAccess = mixinWorld.bridge$getProxyAccess();
-            if (proxyAccess.hasProxy() && proxyAccess.getBlockState(pos) != currentState) {
-                proxyAccess.onChunkChanged(pos, newState);
-            }
-            return false;
-        }
-
-        final PhaseContext<?> context = this.stack.peek();
-        final IPhaseState<?> phaseState = context.state;
 
         // We can allow the block to get changed, regardless how it's captured, not captured, etc.
         // because ChunkMixin will perform the necessary changes, and appropriately prevent any specific
         // physics handling.
 
-        final ChunkBridge mixinChunk = (ChunkBridge) chunk;
+        final TrackedChunkBridge mixinChunk = (TrackedChunkBridge) chunk;
         // Sponge - Use our mixin method that allows using the BlockChangeFlag.
 
         // Up until this point, we've been setting up sponge stuff, this next line is from vanilla
@@ -573,6 +592,9 @@ public final class PhaseTracker {
         //  by short circuiting here, we avoid additional block processing that would otherwise
         //  have potential side effects (and ChunkMixin#bridge$setBlockState does a wonderful job at avoiding
         //  unnecessary logic in those cases).
+
+        final PhaseContext<?> context = this.stack.peek();
+        final IPhaseState<?> phaseState = context.state;
         if (((IPhaseState) phaseState).doesBulkBlockCapture(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
             // Basically at this point, there's nothing left for us to do since
             // ChunkMixin will capture the block change, and submit it to be
@@ -873,5 +895,9 @@ public final class PhaseTracker {
             }
         }
     }
+    private final IdentityHashMap<IPhaseState<?>, ArrayDeque<? extends PhaseContext<?>>> stateContextPool = new IdentityHashMap<>();
 
+    public <C extends PhaseContext<C>> ArrayDeque<C> getContextPoolFor(final PooledPhaseState<? extends C> state) {
+        return (ArrayDeque<C>) this.stateContextPool.computeIfAbsent(state, (newState) -> new ArrayDeque<>());
+    }
 }

@@ -74,7 +74,7 @@ import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.core.world.chunk.ChunkMixin;
-import org.spongepowered.common.mixin.tracker.world.chunk.ChunkMixin_Tracker;
+import org.spongepowered.common.mixin.tracker.world.chunk.ChunkMixin_OwnershipTracked;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
@@ -114,8 +114,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * fields for the state's expected usage.
      *
      * @return The new phase context
+     * @param server The PhaseTracker instance for thread handling
      */
-    C createPhaseContext();
+    C createPhaseContext(PhaseTracker server);
 
     /**
      * Gets the frame modifier for default frame modifications, like pushing
@@ -126,7 +127,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     @SuppressWarnings("unchecked")
     default BiConsumer<CauseStackManager.StackFrame, C> getFrameModifier() {
-        return (BiConsumer<CauseStackManager.StackFrame, C>) DEFAULT_OWNER_NOTIFIER; // Default does nothing
+        return (BiConsumer<CauseStackManager.StackFrame, C>) IPhaseState.DEFAULT_OWNER_NOTIFIER; // Default does nothing
     }
 
     /**
@@ -373,7 +374,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * within a {@link net.minecraft.world.World} or {@link Chunk}.
      *
      * <p>Specifically used in
-     * {@link ChunkMixin_Tracker#bridge$addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
+     * {@link ChunkMixin_OwnershipTracked#bridge$addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
      * to make sure that the current state would be providing said information,
      * instead of spending the processing to query for it.</p>
      *

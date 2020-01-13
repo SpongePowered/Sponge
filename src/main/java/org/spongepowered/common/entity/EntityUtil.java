@@ -88,7 +88,6 @@ import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.entity.EntityUtil.EntityTrace;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -278,7 +277,7 @@ public final class EntityUtil {
         ((EntityBridge) toReturn).bridge$setLocationAndAngles(toTransform);
         fromWorld.profiler.endSection();
 
-        try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
+        try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext(PhaseTracker.SERVER).setTargetWorld(toWorld).buildAndSwitch()) {
             if (recreate) {
                 final boolean flag = toReturn.forceSpawn;
                 toReturn.forceSpawn = true;
@@ -462,7 +461,7 @@ public final class EntityUtil {
         final Vector3d position = toTransform.getPosition();
         player.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
 
-        try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
+        try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext(PhaseTracker.SERVER).setTargetWorld(toWorld).buildAndSwitch()) {
             toWorld.addEntity0(player);
             toWorld.updateEntityWithOptionalForce(player, false);
         }
@@ -570,7 +569,7 @@ public final class EntityUtil {
         fromWorld.profiler.endSection();
 
         // Portals create blocks and the PhaseTracker is known to capture blocks..
-        final InvokingTeleporterContext context = EntityPhase.State.INVOKING_TELEPORTER.createPhaseContext()
+        final InvokingTeleporterContext context = EntityPhase.State.INVOKING_TELEPORTER.createPhaseContext(PhaseTracker.SERVER)
             .setTargetWorld(toWorld)
             .setTeleporter((PortalAgent) teleporter)
             .setExitTransform(toTransform)

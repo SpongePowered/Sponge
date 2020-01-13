@@ -24,14 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState<PopulatorPhaseContext> {
 
-    PopulatorGenerationPhaseState(String id) {
+    PopulatorGenerationPhaseState(final String id) {
         super(id);
     }
 
     @Override
-    public PopulatorPhaseContext createNewContext() {
+    public PopulatorPhaseContext createNewContext(final PhaseTracker tracker) {
         return new PopulatorPhaseContext(this)
             .addEntityCaptures();
     }

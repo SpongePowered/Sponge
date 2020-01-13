@@ -54,6 +54,7 @@ import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridg
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
@@ -73,7 +74,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
 
     @Override
-    public InteractionPacketContext createNewContext() {
+    public InteractionPacketContext createNewContext(final PhaseTracker tracker) {
         return new InteractionPacketContext(this);
     }
 

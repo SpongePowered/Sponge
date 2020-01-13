@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
 
     @Override
-    public BasicEntityContext createNewContext() {
-        return new BasicEntityContext(this)
+    public BasicEntityContext createNewContext(final PhaseTracker tracker) {
+        return new BasicEntityContext(this, tracker)
             .addCaptures();
     }
 

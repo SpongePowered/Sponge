@@ -49,6 +49,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -73,8 +74,8 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         });
 
     @Override
-    public CommandPhaseContext createNewContext() {
-        return new CommandPhaseContext(this)
+    public CommandPhaseContext createNewContext(final PhaseTracker tracker) {
+        return new CommandPhaseContext(this, tracker)
             .addCaptures()
             .addEntityDropCaptures();
     }

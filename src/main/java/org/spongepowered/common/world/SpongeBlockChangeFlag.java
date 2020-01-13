@@ -50,7 +50,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     public SpongeBlockChangeFlag(String name, int flag) {
         this.updateNeighbors = (flag & Constants.BlockChangeFlags.NEIGHBOR_MASK) != 0;
         this.performBlockPhysics = (flag & Constants.BlockChangeFlags.PHYSICS_MASK) == 0;
-        this.notifyObservers = (flag & Constants.BlockChangeFlags.OBSERVER_MASK) == 0;
+        this.notifyObservers = (flag & Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE) == 0;
         this.notifyClients = (flag & Constants.BlockChangeFlags.NOTIFY_CLIENTS) != 0;
         this.ignoreRender = (flag & Constants.BlockChangeFlags.IGNORE_RENDER) != 0;
         this.forceReRender = (flag & Constants.BlockChangeFlags.FORCE_RE_RENDER) != 0 && !this.ignoreRender;
@@ -105,7 +105,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     public BlockChangeFlag inverse() {
         final int maskedFlag = (this.updateNeighbors ? 0 : Constants.BlockChangeFlags.NEIGHBOR_MASK)
                                | (this.performBlockPhysics ? Constants.BlockChangeFlags.PHYSICS_MASK : 0)
-                               | (this.notifyObservers ? Constants.BlockChangeFlags.OBSERVER_MASK : 0)
+                               | (this.notifyObservers ? Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE : 0)
                                | (this.notifyClients ? 0 : Constants.BlockChangeFlags.NOTIFY_CLIENTS)
                                | (this.ignoreRender ? 0 : Constants.BlockChangeFlags.IGNORE_RENDER)
                                | (this.forceReRender ? 0 : Constants.BlockChangeFlags.FORCE_RE_RENDER);
@@ -117,7 +117,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         final SpongeBlockChangeFlag o = (SpongeBlockChangeFlag) flag;
         final int maskedFlag = (this.updateNeighbors || o.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
                                | (this.performBlockPhysics || o.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
-                               | (this.notifyObservers || o.notifyObservers ? 0 : Constants.BlockChangeFlags.OBSERVER_MASK)
+                               | (this.notifyObservers || o.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
                                | (this.notifyClients || o.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                | (this.ignoreRender || o.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
                                | (this.forceReRender || o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
@@ -129,7 +129,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         final SpongeBlockChangeFlag o = (SpongeBlockChangeFlag) flag;
         final int maskedFlag = (this.updateNeighbors && !o.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
                                | (this.performBlockPhysics && !o.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
-                               | (this.notifyObservers && !o.notifyObservers ? 0 : Constants.BlockChangeFlags.OBSERVER_MASK)
+                               | (this.notifyObservers && !o.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
                                | (this.notifyClients && !o.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                | (this.ignoreRender && !o.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
                                | (this.forceReRender && !o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);

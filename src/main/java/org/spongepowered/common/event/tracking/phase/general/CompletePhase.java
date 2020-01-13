@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.function.BiConsumer;
@@ -37,27 +38,27 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
         };
 
     @Override
-    public GeneralizedContext createNewContext() {
-        return new GeneralizedContext(this);
+    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
+        return new GeneralizedContext(this, tracker);
     }
 
     @Override
-    public void unwind(GeneralizedContext context) {
+    public void unwind(final GeneralizedContext context) {
 
     }
 
     @Override
     public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
-        return EMPTY_MODIFIER;
+        return CompletePhase.EMPTY_MODIFIER;
     }
 
     @Override
-    public boolean doesBulkBlockCapture(GeneralizedContext context) {
+    public boolean doesBulkBlockCapture(final GeneralizedContext context) {
         return false;
     }
 
     @Override
-    public boolean doesBlockEventTracking(GeneralizedContext context) {
+    public boolean doesBlockEventTracking(final GeneralizedContext context) {
         return false;
     }
 

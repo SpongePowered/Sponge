@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 final class GenerationCompatibilityState extends GeneralGenerationPhaseState<GenerationCompatibileContext> {
 
     GenerationCompatibilityState() {
@@ -31,8 +33,8 @@ final class GenerationCompatibilityState extends GeneralGenerationPhaseState<Gen
     }
 
     @Override
-    public GenerationCompatibileContext createNewContext() {
-        return new GenerationCompatibileContext(this)
+    public GenerationCompatibileContext createNewContext(final PhaseTracker tracker) {
+        return new GenerationCompatibileContext(this, tracker)
             .addBlockCaptures()
             .addEntityCaptures();
     }

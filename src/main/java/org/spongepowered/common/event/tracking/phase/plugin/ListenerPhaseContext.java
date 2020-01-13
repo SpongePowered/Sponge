@@ -44,7 +44,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
     private CapturePlayer capturePlayer;
 
     ListenerPhaseContext(final IPhaseState<L> state) {
-        super(state);
+        super(state, tracker);
     }
 
     @SuppressWarnings("rawtypes")

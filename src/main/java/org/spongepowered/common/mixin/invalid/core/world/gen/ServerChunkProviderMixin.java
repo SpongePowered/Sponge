@@ -175,7 +175,7 @@ public abstract class ServerChunkProviderMixin implements ServerChunkProviderBri
             value = "INVOKE",
             target = "Lnet/minecraft/util/math/ChunkPos;asLong(II)J"))
     private void impl$StartTerrainGenerationPhase(final int x, final int z, final CallbackInfoReturnable<Chunk> cir) {
-        GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+        GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.SERVER)
             .world(this.world)
             .buildAndSwitch();
     }

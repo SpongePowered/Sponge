@@ -37,6 +37,7 @@ import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
 import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.volume.block.worker.BlockVolumeStream;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.math.vector.Vector3i;
@@ -73,7 +74,7 @@ public class SpongeBlockVolumeWorker<V extends ReadableBlockVolume> implements B
         final int yMax = unmodifiableVolume.getBlockMax().getY();
         final int zMax = unmodifiableVolume.getBlockMax().getZ();
         // a single go, requiring only one event
-        try (BasicPluginContext phaseState = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+        try (BasicPluginContext phaseState = PluginPhase.State.BLOCK_WORKER.createPhaseContext(PhaseTracker.SERVER)
             .source(this)) {
             phaseState.buildAndSwitch();
             for (int z = zMin; z <= zMax; z++) {
@@ -106,7 +107,7 @@ public class SpongeBlockVolumeWorker<V extends ReadableBlockVolume> implements B
         final int yMax = firstUnmodifiableVolume.getBlockMax().getY();
         final int zMax = firstUnmodifiableVolume.getBlockMax().getZ();
         final UnmodifiableBlockVolume secondUnmodifiableVolume = second.getUnmodifiableBlockView();
-        try (BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+        try (BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext(PhaseTracker.SERVER)
             .source(this)) {
             context.buildAndSwitch();
             for (int z = zMin; z <= zMax; z++) {
@@ -130,7 +131,7 @@ public class SpongeBlockVolumeWorker<V extends ReadableBlockVolume> implements B
         final int yMax = this.volume.getBlockMax().getY();
         final int zMax = this.volume.getBlockMax().getZ();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-            BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+            BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext(PhaseTracker.SERVER)
                 .source(this)) {
             context.buildAndSwitch();
             for (int z = zMin; z <= zMax; z++) {

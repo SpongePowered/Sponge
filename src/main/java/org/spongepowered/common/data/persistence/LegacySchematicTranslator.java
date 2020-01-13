@@ -170,7 +170,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 tileNbt = VANILLA_FIXER.process(FixTypes.BLOCK_ENTITY, tileNbt, 0);
                 upgraded = NbtTranslator.getInstance().translate(tileNbt);
 
-                if (type!= null && SpongeImplHooks.hasBlockTileEntity(((Block) state.getType()), (net.minecraft.block.BlockState) state)) {
+                if (type!= null && SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) state)) {
                     BlockEntityArchetype archetype = new SpongeBlockEntityArchetypeBuilder()
                         .state(state)
                         .tileData(upgraded)

@@ -13,6 +13,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
@@ -359,7 +360,7 @@ final class PhasePrinter {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    static void printAsyncBlockChange(final ServerWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.block.BlockState newState) {
+    static void printAsyncBlockChange(final TrackedWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.block.BlockState newState) {
         new PrettyPrinter(60).add("Illegal Async Block Change").centre().hr()
             .addWrapped(PhasePrinter.ASYNC_BLOCK_CHANGE_MESSAGE)
             .add()

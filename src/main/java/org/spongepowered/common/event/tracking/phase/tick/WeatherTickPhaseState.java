@@ -30,6 +30,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
 
 
     @Override
-    public TickContext.General createNewContext() {
-        return new TickContext.General(this).addCaptures();
+    public TickContext.General createNewContext(final PhaseTracker tracker) {
+        return new TickContext.General(this, tracker).addCaptures();
     }
 
     @Override

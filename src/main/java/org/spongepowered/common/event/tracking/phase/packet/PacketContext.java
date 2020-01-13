@@ -30,6 +30,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 
 import javax.annotation.Nullable;
@@ -41,33 +42,33 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     @SuppressWarnings("NullableProblems") protected ServerPlayerEntity packetPlayer; // Set by packetPlayer(EntityPlayerMP)
     @Nullable IPacket<?> packet;
-    private ItemStackSnapshot cursor = ItemStackSnapshot.NONE;
+    private ItemStackSnapshot cursor = ItemStackSnapshot.empty();
     private ItemStack itemUsed = ItemStack.empty();
-    private SpongeItemStackSnapshot itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.NONE;
+    private SpongeItemStackSnapshot itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.empty();
     @Nullable private HandType handUsed;
     private boolean ignoreCreative;
     private boolean interactItemChanged;
 
-    protected PacketContext(PacketState<? extends P> state) {
-        super(state);
+    protected PacketContext(final PacketState<? extends P> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
-    public P packet(IPacket<?> packet) {
+    public P packet(final IPacket<?> packet) {
         this.packet = packet;
         return (P) this;
     }
 
-    public P packetPlayer(ServerPlayerEntity playerMP) {
+    public P packetPlayer(final ServerPlayerEntity playerMP) {
         this.packetPlayer = playerMP;
         return (P) this;
     }
 
-    public P cursor(ItemStackSnapshot snapshot) {
+    public P cursor(final ItemStackSnapshot snapshot) {
         this.cursor = snapshot;
         return (P) this;
     }
 
-    public P ignoreCreative(boolean creative) {
+    public P ignoreCreative(final boolean creative) {
         this.ignoreCreative = creative;
         return (P) this;
     }
@@ -93,7 +94,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return this.ignoreCreative;
     }
 
-    public P itemUsed(ItemStack stack) {
+    public P itemUsed(final ItemStack stack) {
         this.itemUsed = stack;
         this.itemUsedSnapshot = (SpongeItemStackSnapshot) this.itemUsed.createSnapshot();
         return (P) this;
@@ -107,7 +108,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return this.itemUsedSnapshot;
     }
 
-    public P interactItemChanged(boolean changed) {
+    public P interactItemChanged(final boolean changed) {
         this.interactItemChanged = changed;
         return (P) this;
     }
@@ -116,7 +117,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return this.interactItemChanged;
     }
 
-    public P handUsed(HandType hand) {
+    public P handUsed(final HandType hand) {
         this.handUsed = hand;
         return (P) this;
     }
@@ -126,8 +127,8 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$"+indent+"s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "PacketPlayer", this.packetPlayer)
             .add(s + "- %s: %s", "Packet", this.packet)
@@ -141,9 +142,9 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         super.reset();
         this.packetPlayer = null;
         this.packet = null;
-        this.cursor = ItemStackSnapshot.NONE;
+        this.cursor = ItemStackSnapshot.empty();
         this.itemUsed = ItemStack.empty();
-        this.itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.NONE;
+        this.itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.empty();
         this.handUsed = null;
         this.ignoreCreative = false;
         this.interactItemChanged = false;

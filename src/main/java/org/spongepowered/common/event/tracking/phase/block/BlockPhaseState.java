@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.block;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
@@ -45,8 +46,8 @@ public class BlockPhaseState extends PooledPhaseState<GeneralizedContext> implem
     }
 
     @Override
-    public GeneralizedContext createNewContext() {
-        return new GeneralizedContext(this);
+    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
+        return new GeneralizedContext(this, tracker);
     }
 
     @Override

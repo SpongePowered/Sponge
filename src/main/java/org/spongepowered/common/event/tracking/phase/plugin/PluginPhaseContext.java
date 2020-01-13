@@ -26,11 +26,12 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class PluginPhaseContext<P extends PluginPhaseContext<P>> extends PhaseContext<P> {
 
 
-    protected PluginPhaseContext(final IPhaseState<? extends P> phaseState) {
-        super(phaseState);
+    protected PluginPhaseContext(final IPhaseState<? extends P> phaseState, final PhaseTracker tracker) {
+        super(phaseState, tracker);
     }
 }

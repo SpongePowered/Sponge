@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.function.BiConsumer;
 
@@ -39,8 +40,8 @@ public class BasicPluginState extends PluginPhaseState<BasicPluginContext> {
         });
 
     @Override
-    public BasicPluginContext createNewContext() {
-        return new BasicPluginContext(this)
+    public BasicPluginContext createNewContext(final PhaseTracker tracker) {
+        return new BasicPluginContext(this, tracker)
             .addCaptures();
     }
 
@@ -50,7 +51,7 @@ public class BasicPluginState extends PluginPhaseState<BasicPluginContext> {
     }
 
     @Override
-    public void unwind(BasicPluginContext phaseContext) {
+    public void unwind(final BasicPluginContext phaseContext) {
 
     }
 }

@@ -96,7 +96,7 @@ public abstract class WorldEntitySpawnerMixin {
             return 0;
         }
 
-        try (final PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
+        try (final PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.SERVER)
                 .world(world)) {
             context.buildAndSwitch();
             Iterator<Chunk> chunkIterator = this.impl$eligibleSpawnChunks.iterator();
@@ -336,7 +336,7 @@ public abstract class WorldEntitySpawnerMixin {
 
     @Inject(method = "performWorldGenSpawning", at = @At("HEAD"))
     private static void onPerformWorldGenSpawningHead(final World worldServer, final Biome biome, final int j, final int k, final int l, final int m, final Random rand, final CallbackInfo ci) {
-        GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
+        GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext(PhaseTracker.SERVER)
                 .source(worldServer)
                 .world(worldServer)
                 .buildAndSwitch();

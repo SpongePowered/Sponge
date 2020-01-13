@@ -93,7 +93,7 @@ public final class BlockChangeFlagManager {
          */
 
         // devise all permutations
-        for (int i = 0; i < 129; i++) { // 64 because we get to the 6th bit of possible combinations
+        for (int i = 0; i < 128; i++) { // 64 because we get to the 6th bit of possible combinations
             final StringJoiner builder = new StringJoiner("|");
             if ((i & Constants.BlockChangeFlags.NEIGHBOR_MASK) != 0) {
                 builder.add(Flag.NOTIFY_NEIGHBOR.name);
@@ -113,8 +113,8 @@ public final class BlockChangeFlagManager {
                 // but with a slight difference due to the client only flag.
                 builder.add(Flag.FORCE_RE_RENDER.name);
             }
-            if ((i & Constants.BlockChangeFlags.OBSERVER_MASK) == 0) {
-                builder.add(Flag.IGNORE_OBSERVER.name);
+            if ((i & Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE) == 0) {
+                builder.add(Flag.DENY_NEIGHBOR_SHAPE_UPDATE.name);
             }
             if ((i & Constants.BlockChangeFlags.PHYSICS_MASK) == 0) {
                 builder.add(Flag.IGNORE_PHYSICS.name);
@@ -158,10 +158,10 @@ public final class BlockChangeFlagManager {
         public static final Flag NOTIFY_CLIENTS = new Flag("NOTIFY_CLIENTS", Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         public static final Flag IGNORE_RENDER = new Flag("IGNORE_RENDER", Constants.BlockChangeFlags.IGNORE_RENDER);
         public static final Flag FORCE_RE_RENDER = new Flag("FORCE_RE_RENDER", Constants.BlockChangeFlags.FORCE_RE_RENDER);
-        public static final Flag IGNORE_OBSERVER = new Flag("OBSERVER", Constants.BlockChangeFlags.OBSERVER_MASK);
+        public static final Flag DENY_NEIGHBOR_SHAPE_UPDATE = new Flag("NEIGHBOR_SHAPE_UPDATE", Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE);
         public static final Flag IGNORE_PHYSICS = new Flag("PHYSICS", Constants.BlockChangeFlags.PHYSICS_MASK);
 
-        private static final ImmutableList<Flag> flags = ImmutableList.of(Flag.NOTIFY_NEIGHBOR, Flag.NOTIFY_CLIENTS, Flag.IGNORE_RENDER, Flag.FORCE_RE_RENDER, Flag.IGNORE_OBSERVER, Flag.IGNORE_PHYSICS);
+        private static final ImmutableList<Flag> flags = ImmutableList.of(Flag.NOTIFY_NEIGHBOR, Flag.NOTIFY_CLIENTS, Flag.IGNORE_RENDER, Flag.FORCE_RE_RENDER, Flag.DENY_NEIGHBOR_SHAPE_UPDATE, Flag.IGNORE_PHYSICS);
 
         private final String name;
         private final int mask;

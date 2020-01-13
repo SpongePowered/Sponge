@@ -151,7 +151,7 @@ public final class TrackingUtil {
             return;
         }
 
-        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
+        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
         try (final EntityTickContext context = tickContext;
              final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
         ) {
@@ -180,7 +180,7 @@ public final class TrackingUtil {
             return;
         }
 
-        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
+        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
         try (final EntityTickContext context = tickContext;
              final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
         ) {
@@ -209,7 +209,7 @@ public final class TrackingUtil {
             return;
         }
 
-        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
+        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
         try (
              final EntityTickContext context = tickContext;
              final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
@@ -246,7 +246,7 @@ public final class TrackingUtil {
             ((ActiveChunkReferantBridge) tile).bridge$setActiveChunk((ChunkBridge) tileEntity.getWorld().getChunkAt(tileEntity.getPos()));
         }
 
-        final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(mixinTileEntity);
+        final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext(PhaseTracker.SERVER).source(mixinTileEntity);
         try (final PhaseContext<?> phaseContext = context) {
 
             if (tile instanceof OwnershipTrackedBridge) {
@@ -289,7 +289,7 @@ public final class TrackingUtil {
         }
 
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).state((BlockState)block).build();
-        final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext().source(locatable);
+        final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
@@ -326,7 +326,7 @@ public final class TrackingUtil {
         }
 
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).state((BlockState) state).build();
-        final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
+        final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
@@ -335,7 +335,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
         try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
-            state.randomTick(world, pos, state, random);
+            state.randomTick(world, pos, random);
         } catch (Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
         }
@@ -344,7 +344,7 @@ public final class TrackingUtil {
 
     public static void tickWorldProvider(final ServerWorldBridge worldServer) {
         final Dimension worldProvider = ((ServerWorld) worldServer).dimension;
-        try (final DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider)) {
+        try (final DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext(PhaseTracker.SERVER).source(worldProvider)) {
             context.buildAndSwitch();
             worldProvider.tick();
         }
@@ -358,7 +358,7 @@ public final class TrackingUtil {
             // No source present which means we are ignoring the phase state
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
-        final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext();
+        final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
         phaseContext.source(source);
 
         final User user = ((BlockEventDataBridge) event).bridge$getSourceUser();
@@ -730,7 +730,7 @@ public final class TrackingUtil {
         final SpongeBlockChangeFlag changeFlag, final net.minecraft.block.BlockState originalState, final net.minecraft.block.BlockState newState) {
         final Block newBlock = newState.getBlock();
         if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics()
-            && (!SpongeImplHooks.hasBlockTileEntity(newBlock, newState))) {
+            && (!SpongeImplHooks.hasBlockTileEntity(newState))) {
             newBlock.onBlockAdded(world, pos, newState);
             ((IPhaseState) phaseContext.state).performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
         }
@@ -898,9 +898,10 @@ public final class TrackingUtil {
     public static void addTileEntityToBuilder(@Nullable final TileEntity existing, final SpongeBlockSnapshotBuilder builder) {
         // We MUST only check to see if a TE exists to avoid creating a new one.
         final BlockEntity tile = (BlockEntity) existing;
-        for (final Mutable<?, ?> manipulator : ((CustomDataHolderBridge) tile).bridge$getCustomManipulators()) {
-            builder.add(manipulator);
+        if (existing == null) {
+            return;
         }
+        // TODO - gather custom data.
         final CompoundNBT nbt = new CompoundNBT();
         // Some mods like OpenComputers assert if attempting to save robot while moving
         try {

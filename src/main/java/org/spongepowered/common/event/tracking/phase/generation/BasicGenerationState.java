@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 public class BasicGenerationState extends GeneralGenerationPhaseState<GenericGenerationContext> {
 
-    public BasicGenerationState(String id) {
+    public BasicGenerationState(final String id) {
         super(id);
     }
 
     @Override
-    public GenericGenerationContext createNewContext() {
-        return new GenericGenerationContext(this)
+    public GenericGenerationContext createNewContext(final PhaseTracker tracker) {
+        return new GenericGenerationContext(this, tracker)
                 .addCaptures();
     }
 

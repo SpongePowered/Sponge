@@ -32,6 +32,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
@@ -44,8 +45,8 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
     @Nullable BlockSnapshot notificationSnapshot;
     private int depth;
 
-    NeighborNotificationContext(final IPhaseState<NeighborNotificationContext> phaseState) {
-        super(phaseState);
+    NeighborNotificationContext(final IPhaseState<NeighborNotificationContext> phaseState, PhaseTracker tracker) {
+        super(phaseState, tracker);
     }
 
     @Override

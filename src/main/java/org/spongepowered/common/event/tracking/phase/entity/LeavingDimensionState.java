@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 final class LeavingDimensionState extends EntityPhaseState<BasicEntityContext> {
 
     @Override
-    public BasicEntityContext createNewContext() {
-        return new BasicEntityContext(this);
+    public BasicEntityContext createNewContext(final PhaseTracker tracker) {
+        return new BasicEntityContext(this, tracker);
     }
 
     @Override

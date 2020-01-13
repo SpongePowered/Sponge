@@ -48,6 +48,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.util.VecHelper;
@@ -67,7 +68,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         );
     private final String desc;
 
-    BlockTickPhaseState(String name) {
+    BlockTickPhaseState(final String name) {
         this.desc = TrackingUtil.phaseStateToString("Tick", name, this);
     }
 
@@ -77,30 +78,30 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public BlockTickContext createNewContext() {
+    public BlockTickContext createNewContext(final PhaseTracker tracker) {
         return new BlockTickContext(this)
                 .addCaptures();
     }
 
     @Override
-    public boolean tracksTileEntityChanges(BlockTickContext currentContext) {
+    public boolean tracksTileEntityChanges(final BlockTickContext currentContext) {
         return false;
     }
 
 
     @Override
-    public boolean shouldProvideModifiers(BlockTickContext phaseContext) {
+    public boolean shouldProvideModifiers(final BlockTickContext phaseContext) {
         return phaseContext.providesModifier;
     }
 
     @Override
-    public boolean getShouldCancelAllTransactions(BlockTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+    public boolean getShouldCancelAllTransactions(final BlockTickContext context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
+                                                  final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
         if (!postEvent.getTransactions().isEmpty()) {
             return postEvent.getTransactions().stream().anyMatch(transaction -> {
                 final BlockState state = transaction.getOriginal().getState();
                 final BlockType type = state.getType();
-                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, (net.minecraft.block.BlockState) state);
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) state);
                 final BlockPos pos = VecHelper.toBlockPos(context.getSource(LocatableBlock.class).get().getPosition());
                 final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
                 if (pos.equals(blockPos) && !transaction.isValid()) {
@@ -110,7 +111,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                     return transaction.getIntermediary().stream().anyMatch(inter -> {
                         final BlockState iterState = inter.getState();
                         final BlockType interType = state.getType();
-                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, (net.minecraft.block.BlockState) iterState);
+                        return SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) iterState);
                     });
                 }
                 return hasTile;
@@ -120,29 +121,29 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(BlockTickContext context) {
+    public boolean doesCaptureNeighborNotifications(final BlockTickContext context) {
         return context.allowsBulkBlockCaptures();
     }
 
     @Override
-    LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context) {
+    LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
         return context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
     }
 
     @Override
-    public boolean hasSpecificBlockProcess(BlockTickContext context) {
+    public boolean hasSpecificBlockProcess(final BlockTickContext context) {
         return true;
     }
 
     @Override
-    public void unwind(BlockTickContext context) {
+    public void unwind(final BlockTickContext context) {
         TrackingUtil.processBlockCaptures(context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (ItemEntity entity : items) {
+                        for (final ItemEntity entity : items) {
                             capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
@@ -151,7 +152,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public void appendContextPreExplosion(ExplosionContext explosionContext, BlockTickContext context) {
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final BlockTickContext context) {
         context.applyOwnerIfAvailable(explosionContext::owner);
         context.applyNotifierIfAvailable(explosionContext::notifier);
         final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
@@ -159,12 +160,12 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(BlockTickContext context, Entity entity) {
+    public boolean spawnEntityOrCapture(final BlockTickContext context, final Entity entity) {
         final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
         if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
             return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
         }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
             if (entity instanceof ExperienceOrbEntity) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
@@ -191,7 +192,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
      * @return True if bulk block captures are usable for this entity type (default true)
      */
     @Override
-    public boolean doesBulkBlockCapture(BlockTickContext context) {
+    public boolean doesBulkBlockCapture(final BlockTickContext context) {
         return context.allowsBulkBlockCaptures();
     }
 
@@ -201,18 +202,18 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
      * @return True if block events are to be tracked by the specific type of entity (default is true)
      */
     @Override
-    public boolean doesBlockEventTracking(BlockTickContext context) {
+    public boolean doesBlockEventTracking(final BlockTickContext context) {
         return context.allowsBlockEvents();
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(BlockTickContext context) {
+    public boolean doesCaptureEntityDrops(final BlockTickContext context) {
         return true; // Maybe make this configurable as well.
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(BlockTickContext phaseContext, net.minecraft.block.BlockState newState, Block newBlock,
-        net.minecraft.block.BlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
+    public BlockChange associateBlockChangeWithSnapshot(final BlockTickContext phaseContext, final net.minecraft.block.BlockState newState, final Block newBlock,
+                                                        final net.minecraft.block.BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
         if (phaseContext.tickingBlock instanceof IGrowable) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;

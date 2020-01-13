@@ -35,6 +35,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
@@ -55,8 +56,8 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
             });
 
     @Override
-    public NeighborNotificationContext createNewContext() {
-        return new NeighborNotificationContext(this)
+    public NeighborNotificationContext createNewContext(final PhaseTracker tracker) {
+        return new NeighborNotificationContext(this, tracker)
                 .addCaptures();
     }
 

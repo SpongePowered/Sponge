@@ -353,7 +353,7 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
                     }
                     timing.startTimingIfSync();
                 }
-                try (PhaseContext<?> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                try (PhaseContext<?> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext(PhaseTracker.SERVER)
                     .world((ServerWorld) world)
                     .populator(type)) {
                     context.buildAndSwitch();
@@ -401,7 +401,7 @@ public class SpongeChunkGenerator implements TerrainGenerator, ChunkGenerator {
             for (Feature populator : this.pop) {
                 if (populator instanceof OceanMonumentStructure) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                         GenerationContext<PopulatorPhaseContext> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                         GenerationContext<PopulatorPhaseContext> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext(PhaseTracker.SERVER)
                              .world(this.world)
                              .populator(populator.getType())
                             .buildAndSwitch()) {

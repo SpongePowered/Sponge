@@ -35,6 +35,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
@@ -68,8 +69,8 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
     }
 
     @Override
-    public EntityDeathContext createNewContext() {
-        return new EntityDeathContext(this)
+    public EntityDeathContext createNewContext(final PhaseTracker tracker) {
+        return new EntityDeathContext(this, tracker)
             .addCaptures()
             .addEntityDropCaptures();
     }

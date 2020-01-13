@@ -30,6 +30,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
@@ -40,8 +41,8 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     }
 
     @Override
-    public DimensionContext createNewContext() {
-        return new DimensionContext()
+    public DimensionContext createNewContext(final PhaseTracker tracker) {
+        return new DimensionContext(tracker)
                 .addBlockCaptures()
                 .addEntityCaptures()
                 .addEntityDropCaptures();

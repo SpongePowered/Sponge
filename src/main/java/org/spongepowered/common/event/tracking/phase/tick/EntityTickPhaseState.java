@@ -52,6 +52,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.mixin.accessor.entity.item.ItemFrameEntityAccessor;
@@ -238,8 +239,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    protected EntityTickContext createNewContext() {
-        return new EntityTickContext(this).addCaptures();
+    protected EntityTickContext createNewContext(final PhaseTracker tracker) {
+        return new EntityTickContext(this, tracker).addCaptures();
     }
 
     @Override

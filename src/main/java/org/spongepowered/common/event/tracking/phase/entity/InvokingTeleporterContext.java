@@ -29,6 +29,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public final class InvokingTeleporterContext extends EntityContext<InvokingTeleporterContext> {
 
@@ -37,8 +38,8 @@ public final class InvokingTeleporterContext extends EntityContext<InvokingTelep
     private Transform<World> transform;
     private boolean didPort = false;
 
-    InvokingTeleporterContext(final IPhaseState<? extends InvokingTeleporterContext> state) {
-        super(state);
+    InvokingTeleporterContext(final IPhaseState<? extends InvokingTeleporterContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     @Override

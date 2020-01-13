@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 public class MapConversionPhase extends GeneralState<MapConversionContext> {
 
     @Override
-    public MapConversionContext createNewContext() {
-        return new MapConversionContext(this);
+    public MapConversionContext createNewContext(final PhaseTracker tracker) {
+        return new MapConversionContext(this, tracker);
     }
 
     @Override

@@ -41,6 +41,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.registry.type.advancement.AdvancementMap;
@@ -66,7 +67,7 @@ public abstract class AdvancementListMixin {
         if (!SpongeImplHooks.onServerThread() || !ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
             return;
         }
-        try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
+        try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.SERVER)
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 
@@ -85,7 +86,7 @@ public abstract class AdvancementListMixin {
         if (!SpongeImplHooks.onServerThread()) {
             return;
         }
-        try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
+        try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.SERVER)
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 

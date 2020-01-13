@@ -1,13 +1,11 @@
 package org.spongepowered.common.mixin.invalid.core.world.server;
 
-import co.aikar.timings.Timing;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PistonBlock;
-import net.minecraft.block.material.Material;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.Entity;
@@ -74,7 +72,6 @@ import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.gen.GeneratorTypes;
@@ -289,7 +286,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/WorldServer;createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V"))
     private void impl$startGeneration(final WorldSettings settings, final CallbackInfo ci) {
-        this.impl$spawnGenerationContext = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+        this.impl$spawnGenerationContext = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.SERVER)
                 .source(this)
                 .buildAndSwitch();
     }
@@ -516,7 +513,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         for (final Iterator<net.minecraft.world.chunk.Chunk> iterator =
              SpongeImplHooks.getChunkIterator((ServerWorld) (Object) this); iterator.hasNext(); ) // this.profiler.endSection()) // Sponge - don't use the profiler
         {
-            this.profiler.startSection("getChunk");
+            this.profiler.startSection("shadow$getChunk");
             final net.minecraft.world.chunk.Chunk chunk = iterator.next();
             final net.minecraft.world.World world = chunk.getWorld();
             final int j = chunk.x * 16;
@@ -540,7 +537,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
             // Sponge start - wrap call to canDoLightning in phase, since mods can run arbitrary code here
 
-            try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)) {
+            try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext(PhaseTracker.SERVER).source(this)) {
                 context.buildAndSwitch();
 
                 //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
@@ -798,7 +795,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
         if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
             blockEvent.bridge$setSourceUser(currentContext.getActiveUser());
-            if (SpongeImplHooks.hasBlockTileEntity(blockIn, this.getBlockState(pos))) {
+            if (SpongeImplHooks.hasBlockTileEntity(this.getBlockState(pos))) {
                 blockEvent.bridge$setTileEntity((org.spongepowered.api.block.entity.BlockEntity) this.getTileEntity(pos));
             }
             if (blockEvent.bridge$getTileEntity() == null) {
@@ -823,7 +820,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 return true;
             }
         }
-        try (final PhaseContext<?> context = BlockPhase.State.BLOCK_EVENT_QUEUE.createPhaseContext()
+        try (final PhaseContext<?> context = BlockPhase.State.BLOCK_EVENT_QUEUE.createPhaseContext(PhaseTracker.SERVER)
                 .source(blockEvent)) {
             context.buildAndSwitch();
             phaseState.appendNotifierToBlockEvent(currentContext, context, this, pos, blockEvent);
@@ -1314,88 +1311,6 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
 
-    /**
-     * @author gabizou, March 12th, 2016
-     *
-     * Move this into WorldServer as we should not be modifying the client world.
-     *
-     * Purpose: Rewritten to support capturing blocks
-     */
-    @Override
-    public boolean setBlockState(final BlockPos pos, final net.minecraft.block.BlockState newState, final int flags) {
-        if (!this.isValid(pos)) {
-            return false;
-        } else if (this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
-            return false;
-        } else {
-            // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), newState, BlockChangeFlagRegistryModule.fromNativeInt(flags));
-        }
-    }
-
-    /**
-     * @author gabizou - July 25th, 2018
-     * @reason Technically an overwrite for {@link World#destroyBlock(BlockPos, boolean)}
-     * so that we can artificially capture/associate entity spawns from the proposed block
-     * destruction when the actual block event is thrown, whether captures are taking
-     * place or not. In the context of "if block changes are not captured", we do still need
-     * to associate the drops before the actual block is removed
-     *
-     * @param pos
-     * @param dropBlock
-     * @return
-     */
-    @Override
-    public boolean destroyBlock(final BlockPos pos, final boolean dropBlock) {
-        final net.minecraft.block.BlockState iblockstate = this.getBlockState(pos);
-        final Block block = iblockstate.getBlock();
-
-        if (iblockstate.getMaterial() == Material.AIR) {
-            return false;
-        }
-        // Sponge Start - Fire the change block pre here, before we bother with drops. If the pre is cancelled, just don't bother.
-        if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
-                return false;
-            }
-        }
-        // Sponge End
-        this.playEvent(2001, pos, Block.getStateId(iblockstate));
-
-        if (dropBlock) {
-            // Sponge Start - since we are going to perform block drops, we need
-            // to notify the current phase state and find out if capture pos is to be used.
-            final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
-            final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentState();
-            final boolean isCapturingBlockDrops = state.alreadyProcessingBlockItemDrops();
-            final BlockPos previousPos;
-            if (isCapturingBlockDrops) {
-                previousPos = context.getCaptureBlockPos().getPos().orElse(null);
-                context.getCaptureBlockPos().setPos(pos);
-            } else {
-                previousPos = null;
-            }
-            // Sponge End
-            block.dropBlockAsItem((ServerWorld) (Object) this, pos, iblockstate, 0);
-            // Sponge Start
-            if (isCapturingBlockDrops) {
-                // we need to reset the capture pos because we've been capturing item and entity drops this way.
-                context.getCaptureBlockPos().setPos(previousPos);
-            }
-            // Sponge End
-
-        }
-
-        // Sponge - reduce the call stack by calling the more direct method.
-        if (!this.isValid(pos)) {
-            return false;
-        } else if (this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
-            return false;
-        } else {
-            // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
-        }
-    }
 
     /**
      * @author gabizou - March 12th, 2016
@@ -1756,7 +1671,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         final Optional<UUID> notifier = ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos);
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
-        final boolean hasTileEntity = SpongeImplHooks.hasBlockTileEntity(state.getBlock(), state);
+        final boolean hasTileEntity = SpongeImplHooks.hasBlockTileEntity(state);
         final TileEntity tileEntity = chunk.getTileEntity(pos, Chunk.CreateEntityType.CHECK);
         if (hasTileEntity || tileEntity != null) {
             // We MUST only check to see if a TE exists to avoid creating a new one.
@@ -1828,7 +1743,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
 
         // Sponge Start - all the remaining behavior is in bridge$triggerInternalExplosion().
         explosion = this.bridge$triggerInternalExplosion((org.spongepowered.api.world.explosion.Explosion) explosion, e -> GeneralPhase.State.EXPLOSION
-                .createPhaseContext()
+                .createPhaseContext(PhaseTracker.SERVER)
                 .explosion(e)
                 .potentialExplosionSource((ServerWorld) (Object) this, entityIn));
         // Sponge End
@@ -1881,7 +1796,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 pos = new BlockPos(pos.getX(), 255, pos.getZ());
             }
             // Sponge Start - Use our hook to get the chunk only if it is loaded
-            // return this.getChunk(pos).getLightSubtracted(pos, 0);
+            // return this.shadow$getChunk(pos).getLightSubtracted(pos, 0);
             final Chunk chunk = ((AbstractChunkProviderBridge) this.getChunkProvider())
                     .bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
             return chunk == null ? 0 : chunk.getLightSubtracted(pos, 0);
@@ -1937,7 +1852,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 }
 
                 // Sponge - Gets only loaded chunks, unloaded chunks will not get loaded to check lighting
-                // Chunk chunk = this.getChunk(pos);
+                // Chunk chunk = this.shadow$getChunk(pos);
                 // return chunk.getLightSubtracted(pos, this.skylightSubtracted);
                 final Chunk chunk = ((AbstractChunkProviderBridge) this.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
                 return chunk == null ? 0 : chunk.getLightSubtracted(pos, this.getSkylightSubtracted());

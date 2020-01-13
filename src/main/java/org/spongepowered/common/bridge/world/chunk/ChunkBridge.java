@@ -61,8 +61,6 @@ public interface ChunkBridge {
 
     Optional<UUID> bridge$getBlockNotifierUUID(BlockPos pos);
 
-    @Nullable
-    BlockState bridge$setBlockState(BlockPos pos, BlockState newState, BlockState currentState, BlockChangeFlag flag);
 
     void bridge$setBlockNotifier(BlockPos pos, UUID uuid);
 
@@ -107,20 +105,6 @@ public interface ChunkBridge {
     void bridge$markChunkDirty();
 
     boolean bridge$isActive();
-
-    void bridge$removeTileEntity(TileEntity removed);
-
-    /**
-     * Specifically similar to {@link Chunk#addTileEntity(BlockPos, TileEntity)}
-     * except without the validation check of {@link Chunk#getBlockState(BlockPos)}
-     * equality due to delayed tracking. This will allow the tracker to perform delayed tile entity additions
-     * and removals with physics without causing issues. Should not be called in any other fashion except from
-     * {@link BlockTransaction#process(Transaction, IPhaseState, PhaseContext, int)}.
-     *
-     * @param targetPos
-     * @param added
-     */
-    void bridge$setTileEntity(BlockPos targetPos, TileEntity added);
 
     Chunk[] bridge$getNeighborArray();
 }

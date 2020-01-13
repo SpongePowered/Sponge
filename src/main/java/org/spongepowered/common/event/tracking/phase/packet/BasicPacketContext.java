@@ -30,16 +30,17 @@ import org.spongepowered.asm.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
 import net.minecraft.inventory.container.Container;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class BasicPacketContext extends PacketContext<BasicPacketContext> {
 
     @Nullable private Container container;
 
-    public BasicPacketContext(PacketState<? extends BasicPacketContext> state) {
-        super(state);
+    public BasicPacketContext(final PacketState<? extends BasicPacketContext> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
-    public BasicPacketContext openContainer(Container openContainer) {
+    public BasicPacketContext openContainer(final Container openContainer) {
         this.container = openContainer;
         return this;
     }
@@ -62,8 +63,8 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$"+indent+"s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "OpenContainer", this.container)
             ;

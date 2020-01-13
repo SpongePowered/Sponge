@@ -26,13 +26,14 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public final class MapConversionContext extends GeneralPhaseContext<MapConversionContext> {
 
     private String worldFolder;
 
-    MapConversionContext(final IPhaseState<MapConversionContext> state) {
-        super(state);
+    MapConversionContext(final IPhaseState<MapConversionContext> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     public MapConversionContext world(final String overworldFolder) {

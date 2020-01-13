@@ -26,10 +26,11 @@ package org.spongepowered.common.event.tracking.context;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class GeneralizedContext extends PhaseContext<GeneralizedContext> {
-    public GeneralizedContext(IPhaseState<? extends GeneralizedContext> state) {
-        super(state);
+    public GeneralizedContext(final IPhaseState<? extends GeneralizedContext> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
 }

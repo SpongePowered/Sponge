@@ -32,8 +32,8 @@ import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.tracker.OwnershipTrackedMixin_Tracker;
-import org.spongepowered.common.mixin.tracker.world.chunk.ChunkMixin_Tracker;
-import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
+import org.spongepowered.common.mixin.tracker.world.chunk.ChunkMixin_OwnershipTracked;
+import org.spongepowered.common.mixin.tracker.world.WorldMixin_OwnershipTracked;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -43,7 +43,7 @@ import java.util.UUID;
  * {@link UUID} and/or {@link User} from the targets. This
  * is implemented by {@link OwnershipTrackedMixin_Tracker}
  * backing hooks and implementation by {@link EntityMixin_Tracker},
- * {@link ChunkMixin_Tracker}, and {@link WorldMixin_Tracker}.
+ * {@link ChunkMixin_OwnershipTracked}, and {@link WorldMixin_OwnershipTracked}.
  * Note that it is not guaranteed this interface is mixed onto
  * {@link Entity} and {@link TileEntity} because of the option
  * for {@link ModuleCategory#useTracking()}. If the tracking is

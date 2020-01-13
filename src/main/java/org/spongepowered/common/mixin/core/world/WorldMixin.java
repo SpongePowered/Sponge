@@ -60,11 +60,6 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     @Shadow @Final protected WorldInfo worldInfo;
     @Shadow @Final public Dimension dimension;
 
-    @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
-    @Shadow public abstract Chunk shadow$getChunk(int chunkX, int chunkZ);
-
-
-    @Shadow public abstract void func_217390_a(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
 
     @Shadow @Final public Random rand;
     private boolean impl$isDefinitelyFake = false;
@@ -114,38 +109,5 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
         return spongeTile.getType() == null || ((TileEntityTypeBridge) spongeTile.getType()).bridge$canTick();
     }
 
-    /**
-     * @author gabizou - January 10th, 2020 - Minecraft 1.14.3
-     * @reason We introduce the protected method to be overridden in
-     * {@code org.spongepowered.common.mixin.core.world.server.ServerWorldMixin#impl$wrapTileEntityTick(ITickableTileEntity)}
-     * to appropriately wrap where needed.
-     *
-     * @param tileEntity The tile entity
-     */
-    @Redirect(method = "func_217391_K",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/tileentity/ITickableTileEntity;tick()V"))
-    protected void impl$wrapTileEntityTick(final ITickableTileEntity tileEntity) {
-        tileEntity.tick();
-    }
-
-    /**
-     * @author gabizou - August 4th, 2016
-     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
-     *
-     * @param pos The position
-     * @return The block state at the desired position
-     */
-    @Overwrite
-    public BlockState getBlockState(final BlockPos pos) {
-        // Sponge - Replace with inlined method
-        // if (this.isOutsideBuildHeight(pos)) // Vanilla
-        if (((BlockPosBridge) pos).bridge$isInvalidYPosition()) {
-            // Sponge end
-            return Blocks.VOID_AIR.getDefaultState();
-        }
-        final IChunk chunk = this.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
-        return chunk.getBlockState(pos);
-    }
 
 }

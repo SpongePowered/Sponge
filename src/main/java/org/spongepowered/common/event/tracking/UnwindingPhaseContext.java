@@ -49,7 +49,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     }
 
     @Nullable
-    static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context, boolean hasCaptures) {
+    static UnwindingPhaseContext unwind(final IPhaseState<?> state, final PhaseContext<?> context, final boolean hasCaptures) {
         if (!state.requiresPost() || !hasCaptures) {
             return null;
         }
@@ -72,8 +72,8 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     final boolean tracksTiles;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private UnwindingPhaseContext(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext) {
-        super(GeneralPhase.Post.UNWINDING);
+    private UnwindingPhaseContext(final IPhaseState<?> unwindingState, final PhaseContext<?> unwindingContext) {
+        super(GeneralPhase.Post.UNWINDING, unwindingContext.createdTracker);
         this.unwindingState = unwindingState;
         this.unwindingContext = unwindingContext;
         this.tracksTiles = ((IPhaseState) unwindingState).tracksTileEntityChanges(unwindingContext);
@@ -141,7 +141,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     }
 
     @Override
-    public void setSingleSnapshot(@Nullable SpongeBlockSnapshot singleSnapshot) {
+    public void setSingleSnapshot(@Nullable final SpongeBlockSnapshot singleSnapshot) {
         if (singleSnapshot == null) {
             if (this.singleSnapshots != null && !this.singleSnapshots.isEmpty()) {
                 this.singleSnapshots.pop();
@@ -191,8 +191,8 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$" + indent + "s", "");
+    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
+        final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent)
             .add(s + "- %s: %s", "UnwindingState", this.unwindingState)
             .add(s + "- %s: %s", "UnwindingContext", this.unwindingContext)

@@ -484,7 +484,7 @@ public abstract class WorldMixin implements WorldBridge {
     }
 
     @Redirect(method = "updateEntityWithOptionalForce",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;shadow$getChunk(II)Lnet/minecraft/world/chunk/Chunk;"),
         slice = @Slice(
             // Note- we cannot specify the slice to use the entity.addedToChunk putfield because in production/vanilla
             //   that label/block is after the chunk.addEntity label/block, causing a slice index exception.
@@ -871,7 +871,7 @@ public abstract class WorldMixin implements WorldBridge {
         // Sponge end
         //if (entity1.addedToChunk && this.isChunkLoaded(j, k1, true))
         //{
-        //    this.getChunk(j, k1).removeEntity(entity1);
+        //    this.shadow$getChunk(j, k1).removeEntity(entity1);
         //}
         // Sponge end
         // Always return false to avoid the rest of the if statement. we handle it in the active chunk check above.
@@ -1100,7 +1100,7 @@ public abstract class WorldMixin implements WorldBridge {
         // Sponge start - use cached chunk
         final Chunk activeChunk = (Chunk) ((ActiveChunkReferantBridge) tileEntity).bridge$getActiveChunk();
         if (activeChunk != null) {
-            //this.getChunk(tileentity.getPos()).removeTileEntity(tileentity.getPos());
+            //this.shadow$getChunk(tileentity.getPos()).removeTileEntity(tileentity.getPos());
             //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
             if (activeChunk.getTileEntity(tileEntity.getPos(), Chunk.CreateEntityType.CHECK) == tileEntity) {
                 activeChunk.removeTileEntity(tileEntity.getPos());

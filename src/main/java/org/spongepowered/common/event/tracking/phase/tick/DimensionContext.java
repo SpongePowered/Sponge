@@ -30,13 +30,14 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public final class DimensionContext extends TickContext<DimensionContext> {
 
     @Nullable private World world;
 
-    DimensionContext() {
-        super(TickPhase.Tick.DIMENSION);
+    DimensionContext(PhaseTracker tracker) {
+        super(TickPhase.Tick.DIMENSION, tracker);
     }
 
     public DimensionContext world(ServerWorld worldServer) {

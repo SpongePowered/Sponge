@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BeaconBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.EndGatewayBlock;
 import net.minecraft.block.EnderChestBlock;
@@ -38,12 +39,13 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.BlockStateContainer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.Key;
@@ -70,6 +72,7 @@ import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockTrackerCategory;
@@ -116,10 +119,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
 
     private CatalogKey impl$key;
 
-    @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
-    private static void onRegisterBlock(final int id, final ResourceLocation location, final Block block, final CallbackInfo ci) {
-        BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
-    }
 
     @Override
     public CatalogKey bridge$getKey() {
@@ -131,106 +130,19 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         this.impl$key = key;
     }
 
-    @Override
-    public boolean bridge$supports(final Class<? extends Immutable<?, ?>> immutable) {
-        return false;
-    }
-
-    @Override
-    public Optional<BlockState> bridge$getStateWithData(final net.minecraft.block.BlockState blockState, final Immutable<?, ?> manipulator) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <E> Optional<BlockState> bridge$getStateWithValue(final net.minecraft.block.BlockState blockState, final Key<? extends Value<E>> key, final E value) {
-        return Optional.empty(); // By default, all blocks just have a single state unless otherwise dictated.
-    }
-
-    @Override
-    public List<Immutable<?, ?>> bridge$getManipulators(final net.minecraft.block.BlockState blockState) {
-        return ImmutableList.of();
-    }
-
-    @Override
-    public ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> bridge$getProperties(final net.minecraft.block.BlockState blockState) {
-        return this.populateSpongeProperties(ImmutableMap.builder(), blockState).build();
-    }
-
-    @SuppressWarnings("unchecked")
-    private ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> populateSpongeProperties(
-        final ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> builder, final net.minecraft.block.BlockState blockState) {
-        for (final Property<?, ?> property : SpongeImpl.getPropertyRegistry().getPropertiesFor((BlockState) blockState)) {
-            builder.put((Class<? extends Property<?, ?>>) property.getClass(), property);
-        }
-        return builder;
-    }
-
-    @Inject(method = "dropBlockAsItem", at = @At("HEAD"), cancellable = true)
-    private void checkBlockDropForTransactions(final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final int fortune,
-        final CallbackInfo ci) {
-        if (((WorldBridge) worldIn).bridge$isFake()) {
-            return;
-        }
-        final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldIn).bridge$getProxyAccess();
-        if (proxyAccess.hasProxy() && proxyAccess.isProcessingTransactionWithNextHavingBreak(pos, state)) {
-            ci.cancel();
-        }
-    }
 
 
-    // Please, for the love of all that is good, do NOT re-order the following two injections, if you do, you end up causing errors
-    // from Mixin complaining about a leaked CallbackInfo. More can be read here: https://github.com/SpongePowered/Mixin/issues/337
-    @Inject(method = "spawnAsEntity",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDefaultPickupDelay()V", shift = At.Shift.AFTER),
-        locals = LocalCapture.CAPTURE_FAILSOFT,
-        cancellable = true)
-    private static void impl$attemptCaptureOrAllowSpawn(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
-        final CallbackInfo ci, final float unused, final double xOffset, final double yOffset, final double zOffset,
-        final ItemEntity toSpawn) {
-        // Sponge Start - Tell the phase state to track this position, and then unset it.
-        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
-
-        if (context.allowsBulkEntityCaptures() && context.allowsBlockPosCapturing()) {
-            context.getCaptureBlockPos().setPos(pos);
-            worldIn.addEntity0(toSpawn);
-            context.getCaptureBlockPos().setPos(null);
-            ci.cancel();
-        }
-    }
-
-    /**
-     * @author gabizou - July 23rd, 2019 - 1.12
-     * @reason Because adding a few redirects for the massive if
-     * statement is less performant than doing the fail fast check
-     * of "is main thread or are we restoring", before we reach the
-     * {@link net.minecraft.world.World#isRemote} check or
-     * {@link ItemStack#isEmpty()} check, we can eliminate a larger
-     * majority of the hooks that would otherwise be required for
-     * doing an overwrite of this method.
-     *
-     * @param worldIn The world
-     * @param pos The position
-     * @param stack The stack
-     * @param ci Callbackinfo to cancel if we're not on the main thread or we're restoring
-     */
-    @Inject(method = "spawnAsEntity", at = @At("HEAD"), cancellable = true)
-    private static void impl$checkMainThreadAndRestoring(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
-        final CallbackInfo ci) {
-        if (!SpongeImplHooks.onServerThread() || PhaseTracker.getInstance().getCurrentState().isRestoring()) {
-            ci.cancel();
-        }
-    }
 
     @Inject(method = "spawnAsEntity",
-        at = @At(value = "NEW", target = "net/minecraft/entity/item/EntityItem"),
-        cancellable = true,
-        locals = LocalCapture.CAPTURE_FAILSOFT,
-        require = 0,
-        expect = 0
+            at = @At(value = "NEW", target = "net/minecraft/entity/item/ItemEntity"),
+            cancellable = true,
+            locals = LocalCapture.CAPTURE_FAILSOFT,
+            require = 0,
+            expect = 0
     )
     private static void impl$throwConstructPreEvent(
-        final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack, final CallbackInfo ci,
-        final float unused, final double xOffset, final double yOffset, final double zOffset) {
+            final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack, final CallbackInfo ci,
+            final float unused, final double xOffset, final double yOffset, final double zOffset) {
         if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             return;
         }
@@ -242,8 +154,8 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(worldIn.getBlockState(pos));
             final ConstructEntityEvent.Pre
-                eventPre =
-                SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, position);
+                    eventPre =
+                    SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM.get(), position, (World<?>) worldIn);
             SpongeImpl.postEvent(eventPre);
             if (eventPre.isCancelled()) {
                 ci.cancel();
@@ -251,49 +163,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         }
     }
 
-    // This method can be called directly by pistons, mods, etc. so the hook must go here
-    @Inject(method = "dropBlockAsItemWithChance", at = @At("HEAD"), cancellable = true)
-    private void onDropBlockAsItemWithChanceHead(final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state,
-        final float chance, final int fortune,
-        final CallbackInfo ci) {
-        if (!((WorldBridge) worldIn).bridge$isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
-            if (PhaseTracker.getInstance().getCurrentState().isRestoring()) {
-                ci.cancel();
-                return;
-            }
-
-            final ServerWorldBridge mixinWorld = (ServerWorldBridge) worldIn;
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final IPhaseState<?> currentState = phaseTracker.getCurrentState();
-            final PhaseContext<?> currentContext = phaseTracker.getCurrentContext();
-            final boolean shouldEnterBlockDropPhase = !currentContext.isCapturingBlockItemDrops() && !currentState.alreadyProcessingBlockItemDrops() && !currentState.isWorldGeneration();
-            if (shouldEnterBlockDropPhase) {
-                // TODO: Change source to LocatableBlock
-                final PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
-                        .source(mixinWorld.bridge$createSnapshot(state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
-                // use current notifier and owner if available
-                currentContext.applyNotifierIfAvailable(context::notifier);
-                currentContext.applyOwnerIfAvailable(context::owner);
-                context.buildAndSwitch();
-                this.data = context;
-            }
-        }
-    }
-
-    @Nullable private PhaseContext<?> data = null; // Soft reference for the methods between this
-
-    @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
-    private void onDropBlockAsItemWithChanceReturn(final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final float chance, final int fortune,
-        final CallbackInfo ci) {
-        if (!((WorldBridge) worldIn).bridge$isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
-            if (this.data == null) {
-                // means that we didn't need to capture before
-                return;
-            }
-            this.data.close();
-            this.data = null;
-        }
-    }
 
     @Override
     public boolean bridge$isVanilla() {

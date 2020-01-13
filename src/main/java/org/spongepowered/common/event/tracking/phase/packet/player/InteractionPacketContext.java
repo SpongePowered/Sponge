@@ -35,7 +35,7 @@ public class InteractionPacketContext extends PacketContext<InteractionPacketCon
     private ItemStack activeItem = ItemStack.empty();
 
     InteractionPacketContext(PacketState<? extends InteractionPacketContext> state) {
-        super(state);
+        super(state, tracker);
         this.addCaptures();
         this.addEntityDropCaptures();
     }

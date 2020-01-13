@@ -41,8 +41,10 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.world.BlockChange;
@@ -344,7 +346,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             this.processingWorld.loadedTileEntityList.remove(removed);
             this.processingWorld.tickableTileEntities.remove(removed);
         }
-        final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) removed).bridge$getActiveChunk();
+        final TrackedChunkBridge activeChunk = (TrackedChunkBridge) ((ActiveChunkReferantBridge) removed).bridge$getActiveChunk();
         if (activeChunk != null) {
             activeChunk.bridge$removeTileEntity(removed);
         }
@@ -372,7 +374,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         } else {
             final Chunk chunk = this.processingWorld.getChunkAt(targetPos);
             if (!chunk.isEmpty()) {
-                ((ChunkBridge) chunk).bridge$setTileEntity(targetPos, added);
+                ((TrackedChunkBridge) chunk).bridge$setTileEntity(targetPos, added);
             }
             this.processingWorld.addTileEntity(added);
         }
@@ -474,8 +476,8 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         }
     }
 
-    public ServerWorldBridge getWorld() {
-        return (ServerWorldBridge) this.processingWorld;
+    public TrackedWorldBridge getWorld() {
+        return (TrackedWorldBridge) this.processingWorld;
     }
 
     public void addToPrinter(final PrettyPrinter printer) {

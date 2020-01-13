@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericGenerationContext> {
 
     public WorldSpawnerPhaseState() {
@@ -31,8 +33,8 @@ public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericG
     }
 
     @Override
-    public GenericGenerationContext createNewContext() {
-        return new GenericGenerationContext(this)
+    public GenericGenerationContext createNewContext(final PhaseTracker tracker) {
+        return new GenericGenerationContext(this, tracker)
                 .addCaptures();
     }
 
@@ -42,7 +44,7 @@ public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericG
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(GenericGenerationContext context) {
+    public boolean ignoresBlockUpdateTick(final GenericGenerationContext context) {
         return false;
     }
 }

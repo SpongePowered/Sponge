@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.generation;
 import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 
 import javax.annotation.Nullable;
@@ -41,8 +42,8 @@ public class GenerationCompatibileContext extends GenerationContext<GenerationCo
     @Nullable ChunkGenerator modGen;
 
     GenerationCompatibileContext(
-        final IPhaseState<? extends GenerationCompatibileContext> state) {
-        super(state);
+            final IPhaseState<? extends GenerationCompatibileContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     @Override

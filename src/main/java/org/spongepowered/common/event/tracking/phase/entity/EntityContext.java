@@ -28,6 +28,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
@@ -35,8 +36,8 @@ public class EntityContext<E extends EntityContext<E>> extends PhaseContext<E> {
 
     @Nullable protected DamageSource damageSource;
 
-    public EntityContext(final IPhaseState<? extends E> state) {
-        super(state);
+    public EntityContext(final IPhaseState<? extends E> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     @Override

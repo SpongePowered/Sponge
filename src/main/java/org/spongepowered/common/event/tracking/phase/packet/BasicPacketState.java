@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 public class BasicPacketState extends PacketState<BasicPacketContext> {
 
     @Override
-    public BasicPacketContext createNewContext() {
-        return new BasicPacketContext(this)
+    public BasicPacketContext createNewContext(final PhaseTracker tracker) {
+        return new BasicPacketContext(this, tracker)
             .addCaptures()
             .addEntityDropCaptures();
     }

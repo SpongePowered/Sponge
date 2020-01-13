@@ -26,17 +26,18 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class TickContext<T extends TickContext<T>> extends PhaseContext<T> {
 
-    TickContext(final IPhaseState<? extends T> phaseState) {
-        super(phaseState);
+    TickContext(final IPhaseState<? extends T> phaseState, final PhaseTracker tracker) {
+        super(phaseState, tracker);
     }
 
     public static class General extends TickContext<General> {
 
-        public General(final IPhaseState<? extends General> phaseState) {
-            super(phaseState);
+        public General(final IPhaseState<? extends General> phaseState, final PhaseTracker tracker) {
+            super(phaseState, tracker);
         }
     }
 }

@@ -5,8 +5,8 @@
     "plugin": "org.spongepowered.common.mixin.plugin.TrackerPlugin",
     "mixinPriority" : 1111,
     "mixins": [
-        "world.chunk.ChunkMixin_Tracker",
-        "world.WorldMixin_Tracker",
+        "world.chunk.ChunkMixin_OwnershipTracked",
+      "world.WorldMixin_OwnershipTracked",
         "OwnershipTrackedMixin_Tracker"
     ],
     "server": [

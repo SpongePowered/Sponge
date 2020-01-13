@@ -32,6 +32,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
@@ -42,24 +43,24 @@ final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
 
     private final String desc;
 
-    WorldTickPhaseState(String name) {
+    WorldTickPhaseState(final String name) {
         this.desc = TrackingUtil.phaseStateToString("Plugin", name, this);
     }
 
     @Override
-    public WorldTickContext createNewContext() {
-        return new WorldTickContext(this).addCaptures().player();
+    public WorldTickContext createNewContext(final PhaseTracker tracker) {
+        return new WorldTickContext(this, tracker).addCaptures().player();
     }
 
     @Override
-    public void unwind(WorldTickContext phaseContext) {
+    public void unwind(final WorldTickContext phaseContext) {
         final Object container = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
         TrackingUtil.processBlockCaptures(phaseContext);
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     final LocatableBlock
                         block =

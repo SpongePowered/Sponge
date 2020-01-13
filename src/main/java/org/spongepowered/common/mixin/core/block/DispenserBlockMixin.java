@@ -74,7 +74,7 @@ public abstract class DispenserBlockMixin extends ContainerBlock {
         final net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
         final SpongeBlockSnapshot spongeBlockSnapshot = ((ServerWorldBridge) worldIn).bridge$createSnapshot(state, pos, BlockChangeFlags.ALL);
         final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunkAt(pos);
-        this.impl$context = BlockPhase.State.DISPENSE.createPhaseContext()
+        this.impl$context = BlockPhase.State.DISPENSE.createPhaseContext(PhaseTracker.SERVER)
             .source(spongeBlockSnapshot)
             .owner(() -> mixinChunk.bridge$getBlockOwner(pos))
             .notifier(() -> mixinChunk.bridge$getBlockNotifier(pos))

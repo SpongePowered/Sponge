@@ -43,6 +43,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
@@ -56,8 +57,8 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         super.getFrameModifier().andThen((frame, context) -> frame.pushCause(context.getExplosion()));
 
     @Override
-    public ExplosionContext createNewContext() {
-        return new ExplosionContext()
+    public ExplosionContext createNewContext(final PhaseTracker tracker) {
+        return new ExplosionContext(tracker)
             .addEntityCaptures()
             .addEntityDropCaptures()
             .addBlockCaptures()

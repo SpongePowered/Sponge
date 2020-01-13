@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
@@ -35,8 +36,8 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
 
     private int oldHighlightedSlotId;
 
-    public InventoryPacketContext(final PacketState<? extends InventoryPacketContext> state) {
-        super(state);
+    public InventoryPacketContext(final PacketState<? extends InventoryPacketContext> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     public int getOldHighlightedSlotId() {

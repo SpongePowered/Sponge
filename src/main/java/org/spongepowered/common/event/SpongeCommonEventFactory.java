@@ -1014,7 +1014,7 @@ public class SpongeCommonEventFactory {
             if (explosion.getRadius() > 0) {
                 ((ServerWorldBridge) ((Explosive) explosiveBridge).getWorld())
                     .bridge$triggerInternalExplosion(explosion,
-                        e -> GeneralPhase.State.EXPLOSION.createPhaseContext().explosion(e));
+                        e -> GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(e));
             }
             return Optional.of((net.minecraft.world.Explosion) explosion);
         }

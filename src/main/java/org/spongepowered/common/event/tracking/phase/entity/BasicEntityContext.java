@@ -25,11 +25,12 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class BasicEntityContext extends EntityContext<BasicEntityContext> {
 
-    BasicEntityContext(final IPhaseState<? extends BasicEntityContext> state) {
-        super(state);
+    BasicEntityContext(final IPhaseState<? extends BasicEntityContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 
 }

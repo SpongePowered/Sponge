@@ -992,7 +992,7 @@ public final class Constants {
         public static final int NOTIFY_CLIENTS =  1 << 1; // 2
         public static final int IGNORE_RENDER =   1 << 2; // 4
         public static final int FORCE_RE_RENDER = 1 << 3; // 8
-        public static final int OBSERVER_MASK =   1 << 4; // 16
+        public static final int DENY_NEIGHBOR_SHAPE_UPDATE =   1 << 4; // 16
         public static final int NEIGHBOR_DROPS =  1 << 5; // 32
         public static final int BLOCK_MOVING =    1 << 6; // 64
         public static final int PHYSICS_MASK =    0b10000000; // Sponge Added mask, because vanilla doesn't support it yet
@@ -1006,16 +1006,16 @@ public final class Constants {
             | Constants.BlockChangeFlags.NOTIFY_CLIENTS;
         public static final int NONE = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.PHYSICS_MASK
-            | Constants.BlockChangeFlags.OBSERVER_MASK
+            | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
             | Constants.BlockChangeFlags.FORCE_RE_RENDER
             | Constants.BlockChangeFlags.NEIGHBOR_DROPS;
         public static final int NEIGHBOR = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.NEIGHBOR_MASK
             | Constants.BlockChangeFlags.PHYSICS_MASK
-            | Constants.BlockChangeFlags.OBSERVER_MASK
+            | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
             | Constants.BlockChangeFlags.NEIGHBOR_DROPS;
         public static final int PHYSICS = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.OBSERVER_MASK;
+            | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE;
 
         public static final int OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.PHYSICS_MASK
@@ -1023,7 +1023,7 @@ public final class Constants {
 
         public static final int NEIGHBOR_PHYSICS = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.NEIGHBOR_MASK
-            | Constants.BlockChangeFlags.OBSERVER_MASK;
+            | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE;
         public static final int NEIGHBOR_OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.NEIGHBOR_MASK
             | Constants.BlockChangeFlags.PHYSICS_MASK;

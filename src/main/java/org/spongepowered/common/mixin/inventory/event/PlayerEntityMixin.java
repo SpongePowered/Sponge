@@ -46,6 +46,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -89,7 +90,7 @@ public class PlayerEntityMixin {
             final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
 
 
-            try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
+            try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext(PhaseTracker.SERVER)
                     .source(serverPlayer)
                     .packetPlayer(serverPlayer)
                     .openContainer(container)) {

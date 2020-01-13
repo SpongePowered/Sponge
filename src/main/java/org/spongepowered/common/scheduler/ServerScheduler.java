@@ -30,6 +30,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
@@ -53,7 +54,7 @@ public final class ServerScheduler extends SyncScheduler {
 
     @Override
     protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
-        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
                 .source(task)) {
             context.buildAndSwitch();
             super.executeTaskRunnable(task, runnable);
@@ -62,7 +63,7 @@ public final class ServerScheduler extends SyncScheduler {
 
     @Override
     protected PhaseContext<?> createContext(SpongeScheduledTask task, PluginContainer container) {
-        return PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+        return PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
                 .source(task)
                 .container(container);
     }

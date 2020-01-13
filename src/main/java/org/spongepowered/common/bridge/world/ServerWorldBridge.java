@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.Entity;
@@ -51,13 +50,11 @@ import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.function.Function;
 
-public interface ServerWorldBridge {
+public interface ServerWorldBridge extends TrackedWorldBridge {
 
     void bridge$setPreviousWeather(Weather weather);
 
     void bridge$updateRotation(Entity entityIn);
-
-    boolean bridge$forceSpawnEntity(Entity entity);
 
     void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
 
@@ -82,7 +79,7 @@ public interface ServerWorldBridge {
      * Creates a {@link BlockSnapshot} but performs an additional {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
      * lookup if the providing {@link BlockState#getBlock()} {@code instanceof} is
      * {@code true} for being an {@link ITileEntityProvider} or
-     * {@link SpongeImplHooks#hasBlockTileEntity(Block, BlockState)}, and associates
+     * {@link SpongeImplHooks#hasBlockTileEntity(BlockState)}, and associates
      * the resulting snapshot of said Tile with the snapshot. This is useful for in-progress
      * snapshot creation during transaction building for {@link MultiBlockCaptureSupplier}
      * or where sensitivity to the {@link SpongeProxyBlockAccess} is needed.
@@ -133,8 +130,6 @@ public interface ServerWorldBridge {
     void bridge$incrementChunkLoadCount();
 
     void bridge$updateConfigCache();
-
-    SpongeProxyBlockAccess bridge$getProxyAccess();
 
     SpongeChunkGenerator bridge$getSpongeGenerator();
 
