@@ -551,8 +551,9 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             TileEntity tileentity = this.getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
 
             // Sponge Start - Additional check for the tile entity being queued for removal.
+            // Note: Furnaces change their block when lit so we cannot look for a queued TE when this happens
             // if (tileentity == null) { // Sponge
-            if (tileentity == null || (transaction != null && transaction.queuedRemoval != null)) {
+            if (tileentity == null || (transaction != null && transaction.queuedRemoval != null && currentBlock == newBlock)) {
                 // Use SpongeImplHooks for forge compatibility
                 // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
                 tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
