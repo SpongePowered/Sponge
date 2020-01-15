@@ -339,12 +339,15 @@ public final class TrackingUtil {
             phaseContext.notifier = user;
         }
 
+        boolean result = true;
         try (final BlockEventTickContext o = phaseContext) {
             o.buildAndSwitch();
             phaseContext.setEventSucceeded(currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter()));
+            // We need to grab the result here as the phase context close will trigger a reset
+            result = phaseContext.wasNotCancelled();
         } // We can't return onBlockEventReceived because the phase state may have cancelled all transactions
         // at which point we want to keep track of the return value from the target, and from the block events.
-        return phaseContext.wasNotCancelled();
+        return result;
     }
 
     static boolean forceModify(final Block originalBlock, final Block newBlock) {
