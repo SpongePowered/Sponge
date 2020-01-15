@@ -37,7 +37,7 @@ public class BlockEventTickContext extends LocationBasedTickContext<BlockEventTi
     protected void reset() {
         super.reset();
         this.wasNotCancelled = true;
-        this.eventSucceeded = false;
+        this.eventSucceeded = true;
     }
 
     public void setWasNotCancelled(final boolean wasNotCancelled) {
