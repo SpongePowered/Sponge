@@ -550,11 +550,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             // Sponge End
             TileEntity tileentity = this.getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
 
-            // Sponge Start - Additional check for the tile entity being queued for removal.
-            // Note: Furnaces change their block when lit so we cannot look for a queued TE when this happens
-            // if (tileentity == null) { // Sponge
-            if (tileentity == null || (transaction != null && transaction.queuedRemoval != null && currentBlock == newBlock)) {
-                // Use SpongeImplHooks for forge compatibility
+            if (tileentity == null) {
+                // Sponge start - Use SpongeImplHooks for forge compatibility
                 // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
                 tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
 
@@ -566,16 +563,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                         this.bridge$addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
                     }
                 }
-                if (transaction != null) {
-                    // Go ahead and log the tile being replaced, the tile being removed will be at least already notified of removal
-                    transaction.queueTileSet = tileentity;
-                    if (tileentity != null) {
-                        ((TileEntityBridge) tileentity).bridge$setCaptured(true);
-                        tileentity.setWorld(this.world);
-                        tileentity.setPos(pos);// Set the position
-                    }
-                    transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
-                } else {
+
+                if (transaction == null) {
                     // Some mods are relying on the world being set prior to setting the tile
                     // world prior to the position. It's weird, but during block restores, this can
                     // cause an exception.
@@ -587,7 +576,21 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                     }
                     this.world.setTileEntity(pos, tileentity);
                 }
+                // Sponge end
             }
+
+            // Sponge start - enqueue any changes to the transaction
+            if (transaction != null) {
+                // Go ahead and log the tile being replaced, the tile being removed will be at least already notified of removal
+                transaction.queueTileSet = tileentity;
+                if (tileentity != null) {
+                    ((TileEntityBridge) tileentity).bridge$setCaptured(true);
+                    tileentity.setWorld(this.world);
+                    tileentity.setPos(pos);
+                }
+                transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
+            }
+            // Sponge end
 
             if (tileentity != null) {
                 tileentity.updateContainingBlockInfo();
