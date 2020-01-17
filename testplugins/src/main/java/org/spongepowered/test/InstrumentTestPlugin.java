@@ -29,11 +29,9 @@ import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.property.block.InstrumentProperty;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -44,6 +42,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 @SuppressWarnings("ConstantConditions")
@@ -56,18 +55,17 @@ public class InstrumentTestPlugin implements LoadableModule {
 
     @Listener
     public void onInitialization(final GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setExecutor((ctx) -> {
                             PaginationList.builder()
                                     .title(Text.of(TextColors.GREEN, "Instrument Types"))
                                     .padding(Text.of(TextColors.DARK_GREEN, "="))
-                                    .contents(Sponge.getRegistry().getAllOf(InstrumentType.class).stream()
-                                            .map(i -> Text.of(TextColors.GREEN, "Id: ", TextColors.GRAY, i.getId(),
-                                                    TextColors.GREEN, " Name: ", TextColors.GRAY, i.getName(),
-                                                    TextColors.GREEN, " SoundType: ", TextColors.GRAY, i.getSound().getName()))
+                                    .contents(Sponge.getRegistry().getCatalogRegistry().getAllOf(InstrumentType.class)
+                                            .map(i -> Text.of(TextColors.GREEN, "Id: ", TextColors.GRAY, i.getKey(),
+                                                    TextColors.GREEN, " SoundType: ", TextColors.GRAY, i.getSound().getKey()))
                                             .collect(ImmutableList.toImmutableList()))
-                                    .sendTo(src);
+                                    .sendTo(ctx.getMessageReceiver());
                             return CommandResult.success();
                         })
                         .build(),
@@ -75,7 +73,7 @@ public class InstrumentTestPlugin implements LoadableModule {
     }
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -86,20 +84,18 @@ public class InstrumentTestPlugin implements LoadableModule {
             if (!player.get(Keys.IS_SNEAKING).get()) {
                 return;
             }
-            final BlockSnapshot snapshot = event.getTargetBlock();
-            if (snapshot.getState().getType().equals(BlockTypes.NOTEBLOCK)) {
-                final InstrumentProperty instrumentProperty = player.getWorld().getBlock(snapshot.getPosition().sub(0, 1, 0)).getProperty(InstrumentProperty.class).orElse(null);
-                if (instrumentProperty != null) {
-                    final InstrumentType instrument = instrumentProperty.getValue();
-                    player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block with instrument: ", TextColors.GREEN, instrument.getName()));
+            final BlockSnapshot snapshot = event.getBlock();
+            if (snapshot.getState().getType() == BlockTypes.NOTE_BLOCK.get()) {
+                InstrumentType instrumentType = player.getWorld().getBlock(snapshot.getPosition().sub(0, 1, 0)).get(Keys.INSTRUMENT).orElse(null);
+                if (instrumentType != null) {
+                    player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block with instrument: ", TextColors.GREEN, instrumentType.getKey()));
                 } else {
                     player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block that strangely did not have any instrument type."));
                 }
             } else {
-                final InstrumentProperty instrumentProperty = snapshot.getProperty(InstrumentProperty.class).orElse(null);
-                if (instrumentProperty != null) {
-                    final InstrumentType instrument = instrumentProperty.getValue();
-                    player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block with instrument type: ", TextColors.GREEN, instrument.getName()));
+                InstrumentType instrumentType = snapshot.get(Keys.INSTRUMENT).orElse(null);
+                if (instrumentType != null) {
+                    player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block with instrument type: ", TextColors.GREEN, instrumentType.getKey()));
                 } else {
                     player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block which had no instrument type."));
                 }

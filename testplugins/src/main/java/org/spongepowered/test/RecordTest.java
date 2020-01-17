@@ -27,8 +27,10 @@ package org.spongepowered.test;
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.property.item.RecordProperty;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -37,6 +39,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.Optional;
 
@@ -47,10 +50,8 @@ public class RecordTest implements LoadableModule {
 
     private final RecordListener listener = new RecordListener();
 
-
-
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -58,13 +59,14 @@ public class RecordTest implements LoadableModule {
 
         @Listener
         public void onPlayerInteract(InteractItemEvent.Secondary event, @Root Player player) {
-            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(null);
-            if (itemStack != null) {
-                final Optional<RecordProperty> optRecord = itemStack.getProperty(RecordProperty.class);
+            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND.get());
+            if (!itemStack.isEmpty()) {
+
+                final Optional<MusicDisc> optRecord = itemStack.get(RecordProperty.class); // TODO Key missing?
                 if (optRecord.isPresent()) {
-                    player.playRecord(player.getLocation().getPosition().toInt(), optRecord.get().getValue());
-                } else if (itemStack.getType() == ItemTypes.SPONGE) {
-                    player.stopRecord(player.getLocation().getPosition().toInt());
+                    player.playMusicDisc(player.getBlockPosition(), optRecord.get());
+                } else if (itemStack.getType() == ItemTypes.SPONGE.get()) {
+                    player.stopMusicDisc(player.getBlockPosition());
                 }
             }
         }

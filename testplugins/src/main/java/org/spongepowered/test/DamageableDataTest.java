@@ -24,16 +24,17 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -42,22 +43,25 @@ import java.util.Optional;
 @Plugin(id = "damageabledatatest", name = "Damageable Data Test", description = "A plugin to test damageable data.", version = "0.0.0")
 public class DamageableDataTest {
 
+    @Inject private PluginContainer container;
+
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.onlyOne(GenericArguments.entityOrSource(Text.of("target"))))
-                        .executor((src, args) -> {
-                            final Entity entity = args.<Entity>getOne("target").get();
+        Parameter.Value<Entity> paramTarget = Parameter.entityOrSource().setKey("target").build();
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .parameters(paramTarget)
+                        .setExecutor((ctx) -> {
+                            final Entity entity = ctx.getOne(paramTarget).get();
 
-                            final Optional<EntitySnapshot> optionalAttacker = entity.get(Keys.LAST_ATTACKER).get();
-                            final Optional<Double> lastDamage = entity.get(Keys.LAST_DAMAGE).get();
+                            final Optional<Entity> optionalAttacker = entity.get(Keys.LAST_ATTACKER);
+                            final Optional<Double> lastDamage = entity.get(Keys.LAST_DAMAGE_RECEIVED);
                             if (optionalAttacker.isPresent() && lastDamage.isPresent()) {
-                                final EntitySnapshot attacker = optionalAttacker.get();
-                                src.sendMessage(Text.of(attacker.get(Keys.DISPLAY_NAME).orElse(Text.of(attacker.getUniqueId())) + " dealt "
+                                final Entity attacker = optionalAttacker.get();
+                                ctx.getMessageReceiver().sendMessage(Text.of(attacker.get(Keys.DISPLAY_NAME).orElse(Text.of(attacker.getUniqueId())) + " dealt "
                                         + lastDamage.get() + " damage to " + entity.get(Keys.DISPLAY_NAME).orElse(Text.of(entity.getUniqueId()))));
                             } else {
-                                src.sendMessage(Text.of(TextColors.RED, "This target does not have a last attacker."));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.RED, "This target does not have a last attacker."));
                             }
 
                             return CommandResult.success();

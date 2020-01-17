@@ -24,17 +24,19 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
@@ -46,18 +48,21 @@ import java.util.stream.Collectors;
 @Plugin(id = "entityspawntest", name = "EntitySpawnTest", version = "0.1.0", description = "Tests entity spawning.")
 public final class EntitySpawnTest {
 
+    @Inject private PluginContainer container;
+
     @SuppressWarnings("rawtypes")
     @Listener
     public void onInitialization(final GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.allOf(GenericArguments.catalogedElement(Text.of("type"), EntityType.class)))
-                        .executor((src, args) -> {
-                            if (!(src instanceof Player)) {
+        Parameter.Key<EntityType> keyType = Parameter.key("type", EntityType.class);
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .parameters(Parameter.catalogedElement(EntityType.class).setKey(keyType).consumeAllRemaining().build())
+                        .setExecutor((ctx) -> {
+                            if (!(ctx.getMessageReceiver() instanceof Player)) {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
                             }
 
-                            final List<EntityType> types = new ArrayList<>(args.getAll("type"));
+                            final List<EntityType> types = new ArrayList<>(ctx.getAll(keyType));
 
                             final int size = types.size();
 
@@ -65,15 +70,15 @@ public final class EntitySpawnTest {
                                 throw new CommandException(Text.of(TextColors.RED, "You must specify at least one entity type to spawn any."));
                             }
 
-                            final Location location = ((Player) src).getLocation();
+                            final Location location = ((Player) ctx.getSubject()).getLocation();
 
                             if (size == 1) {
                                 boolean failed = false;
                                 final EntityType type = types.get(0);
                                 final Entity entity = location.createEntity(type);
                                 try {
-                                    if (location.getExtent().spawnEntity(entity)) {
-                                        src.sendMessage(Text.of(TextColors.GOLD, "You have successfully spawned a ",
+                                    if (location.getWorld().spawnEntity(entity)) {
+                                        ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "You have successfully spawned a ",
                                                 TextColors.DARK_GREEN, entity.getTranslation()));
                                     } else {
                                         failed = true;
@@ -82,13 +87,13 @@ public final class EntitySpawnTest {
                                     failed = true;
                                 }
                                 if (failed) {
-                                    throw new CommandException(Text.of(TextColors.RED, "You have failed to spawn a " + type.getId()));
+                                    throw new CommandException(Text.of(TextColors.RED, "You have failed to spawn a " + type.getKey()));
                                 }
                             } else {
-                                src.sendMessage(Text.of(TextColors.GOLD, "You have spawned the following entities:"));
-                                location.getExtent()
-                                        .spawnEntities(types.stream().map(location::createEntity).collect(Collectors.toList()))
-                                        .forEach(e -> src.sendMessage(Text.of(TextColors.DARK_GREEN, e.getTranslation())));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "You have spawned the following entities:"));
+                                // TODO World generic type missing on location.getWorld()?
+                                location.getWorld().spawnEntities(types.stream().map(location::createEntity).collect(Collectors.toList()))
+                                        .forEach(e -> ctx.getMessageReceiver().sendMessage(Text.of(TextColors.DARK_GREEN, e.getTranslation())));
                             }
 
                             return CommandResult.success();

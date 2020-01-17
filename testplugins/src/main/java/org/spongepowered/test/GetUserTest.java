@@ -24,14 +24,16 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -45,19 +47,21 @@ import java.util.concurrent.ExecutionException;
 @Plugin(id = "get_user", name = "Get User Test", description = "Test getting a user from a string", version = "0.0.0")
 public class GetUserTest {
 
+    @Inject private PluginContainer container;
     @Listener
     public void onInit(GameInitializationEvent event) {
+        Parameter.Key<String> keyName = Parameter.key("name", String.class);
         Sponge.getCommandManager()
-                .register(this, CommandSpec.builder()
-                        .arguments(GenericArguments.string(Text.of("name")))
-                        .executor((source, context) -> {
+                .register(this.container, Command.builder()
+                        .parameters(Parameter.string().setKey(keyName).build())
+                        .setExecutor((context) -> {
                             Optional<User> user =
-                                    Sponge.getServiceManager().provideUnchecked(UserStorageService.class).get(context.<String>requireOne("name"));
+                                    Sponge.getServiceManager().provideUnchecked(UserStorageService.class).get(context.requireOne(keyName));
                             if (user.isPresent()) {
-                                source.sendMessage(Text.of("The user exists"));
-                                source.sendMessage(Text.of(user.get()));
+                                context.getMessageReceiver().sendMessage(Text.of("The user exists"));
+                                context.getMessageReceiver().sendMessage(Text.of(user.get()));
                             } else {
-                                source.sendMessage(Text.of("The user does not exist"));
+                                context.getMessageReceiver().sendMessage(Text.of("The user does not exist"));
                             }
 
                             return CommandResult.success();
@@ -66,20 +70,20 @@ public class GetUserTest {
                 );
 
         Sponge.getCommandManager()
-                .register(this, CommandSpec.builder()
-                                .arguments(GenericArguments.string(Text.of("name")))
-                                .executor((source, context) -> {
+                .register(this.container, Command.builder()
+                                .parameters(Parameter.string().setKey(keyName).build())
+                                .setExecutor((context) -> {
                                     GameProfile profile;
                                     try {
-                                         profile = Sponge.getServer().getGameProfileManager().get(context.<String>requireOne("name")).get();
+                                         profile = Sponge.getServer().getGameProfileManager().get(context.requireOne(keyName)).get();
                                     } catch (InterruptedException | ExecutionException e) {
-                                        source.sendMessage(Text.of("The game profile probably doesn't exist"));
+                                        context.getMessageReceiver().sendMessage(Text.of("The game profile probably doesn't exist"));
                                         return CommandResult.empty();
                                     }
 
                                     User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate(profile);
-                                    source.sendMessage(Text.of("The user exists"));
-                                    source.sendMessage(Text.of(user));
+                                    context.getMessageReceiver().sendMessage(Text.of("The user exists"));
+                                    context.getMessageReceiver().sendMessage(Text.of(user));
                                     return CommandResult.success();
                                 }).build(),
                         "getorcreateuser"

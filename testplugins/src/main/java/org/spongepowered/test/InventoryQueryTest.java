@@ -61,17 +61,17 @@ public class InventoryQueryTest implements LoadableModule {
             Inventory hotbar = inventory.query(QueryTypes.INVENTORY_TYPE.of(Hotbar.class));
             player.sendMessage(Text.of("You have ", hotbar.totalQuantity(), " items in your hotbar."));
 
-            Inventory sticks = inventory.query(QueryTypes.ITEM_TYPE.of(ItemTypes.STICK));
+            Inventory sticks = inventory.query(QueryTypes.ITEM_TYPE.get().of(ItemTypes.STICK.get()));
             player.sendMessage(Text.of("You have ", sticks.totalQuantity(), " sticks in your inventory."));
 
-            ItemStack lapis = ItemStack.of(ItemTypes.LAPIS_LAZULI, 4);
-            Inventory lapisItems = inventory.query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.of(lapis));
+            ItemStack lapis = ItemStack.of(ItemTypes.LAPIS_LAZULI.get(), 4);
+            Inventory lapisItems = inventory.query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(lapis));
             player.sendMessage(Text.of("You have ", lapisItems.totalQuantity(), " lapis lazuli in your inventory."));
 
-            Inventory lapisItemsExact = inventory.query(QueryTypes.ITEM_STACK_EXACT.of(lapis));
+            Inventory lapisItemsExact = inventory.query(QueryTypes.ITEM_STACK_EXACT.get().of(lapis));
             player.sendMessage(Text.of("You have ", lapisItemsExact.capacity(), " stacks of 4 lapis lazuli in your inventory."));
 
-            Inventory evenCountStacks = inventory.query(QueryTypes.ITEM_STACK_CUSTOM.of(
+            Inventory evenCountStacks = inventory.query(QueryTypes.ITEM_STACK_CUSTOM.get().of(
                     x -> x.getQuantity() > 0 && x.getQuantity() % 2 == 0));
             player.sendMessage(Text.of("You have ", evenCountStacks.capacity(), " stacks with an even number of items in your inventory."));
 
@@ -80,12 +80,12 @@ public class InventoryQueryTest implements LoadableModule {
             player.sendMessage(Text.of("You have ", slots.totalQuantity(), " items in the first 3 slots of your hotbar."));
 
             Inventory slots2 = ((PlayerInventory) inventory).getHotbar()
-                    .query(QueryTypes.INVENTORY_TRANSLATION.of(Sponge.getRegistry().getTranslationById("slot.name").get()));
+                    .query(QueryTypes.INVENTORY_TRANSLATION.get().of(Sponge.getRegistry().getTranslationById("slot.name").get()));
             player.sendMessage(Text.of("You have ", slots2.totalQuantity(), " items in your hotbar."));
 
-            inventory.query(QueryTypes.PLAYER_PRIMARY_HOTBAR_FIRST.toQuery())
-                    .query(QueryTypes.REVERSE.toQuery())
-                    .offer(ItemStack.of(ItemTypes.PAPER, 46));
+            inventory.query(QueryTypes.PLAYER_PRIMARY_HOTBAR_FIRST.get().toQuery())
+                    .query(QueryTypes.REVERSE.get().toQuery())
+                    .offer(ItemStack.of(ItemTypes.PAPER.get(), 46));
             player.sendMessage(Text.of("Added paper to hotbar last."));
         }
     }

@@ -115,7 +115,7 @@ public class CustomInventoryTest implements LoadableModule {
 
                 int i = 1;
                 for (Slot slot : inventory.slots()) {
-                    slot.set(ItemStack.of(ItemTypes.APPLE, i++));
+                    slot.set(ItemStack.of(ItemTypes.APPLE.get(), i++));
                 }
                 Text text = Text.of("Custom Horse");
                 if (event.getEntity() instanceof Mule) {
@@ -129,11 +129,11 @@ public class CustomInventoryTest implements LoadableModule {
             }
 
             if (event.getEntity() instanceof Slime) {
-                ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_3x3)
+                ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_3x3.get())
                         .completeStructure()
                         .identity(UUID.randomUUID())
                         .build();
-                ItemStack flard = ItemStack.of(ItemTypes.SLIME_BLOCK, 1);
+                ItemStack flard = ItemStack.of(ItemTypes.SLIME_BLOCK.get(), 1);
                 flard.offer(Keys.DISPLAY_NAME, Text.of("Flard?"));
                 for (Slot slot : inventory.slots()) {
                     slot.set(flard);
@@ -146,10 +146,10 @@ public class CustomInventoryTest implements LoadableModule {
 
         private void interactOtherBlock(InteractBlockEvent.Primary event, Player player, Location loc) {
             if (loc.getBlock().getType() == BlockTypes.CRAFTING_TABLE) {
-                ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.CRAFTING).completeStructure()
+                ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.CRAFTING.get()).completeStructure()
                         .build();
                 for (Slot slot : inventory.slots()) {
-                    slot.set(ItemStack.of(ItemTypes.IRON_NUGGET, 1));
+                    slot.set(ItemStack.of(ItemTypes.IRON_NUGGET.get(), 1));
                 }
 
                 player.openInventory(inventory, Text.of("Custom Workbench"));
@@ -219,7 +219,7 @@ public class CustomInventoryTest implements LoadableModule {
         Inventory inv3 = Inventory.builder().grid(9, 3).completeStructure().build();
 
         ViewableInventory inv = ViewableInventory.builder()
-                .type(ContainerTypes.GENERIC_9x3)
+                .type(ContainerTypes.GENERIC_9x3.get())
                 .grid(inv1.slots(), new Vector2i(3,3), 0)
                 .grid(inv2.slots(), new Vector2i(3,3), new Vector2i(3, 1))
                 .grid(inv3.slots() /*TODO query for grid*/, new Vector2i(3, 3), new Vector2i(6, 3))
@@ -231,19 +231,19 @@ public class CustomInventoryTest implements LoadableModule {
                 .build();
 
         ViewableInventory basicChest = ViewableInventory.builder()
-                .type(ContainerTypes.GENERIC_9x3)
+                .type(ContainerTypes.GENERIC_9x3.get())
                 .completeStructure()
                 .build();
 
-        ItemStackSnapshot disabled = ItemStack.of(ItemTypes.LIGHT_GRAY_STAINED_GLASS_PANE, 1).createSnapshot();
-        ItemStackSnapshot emerald = ItemStack.of(ItemTypes.EMERALD, 1).createSnapshot();
+        ItemStackSnapshot disabled = ItemStack.of(ItemTypes.LIGHT_GRAY_STAINED_GLASS_PANE.get(), 1).createSnapshot();
+        ItemStackSnapshot emerald = ItemStack.of(ItemTypes.EMERALD.get(), 1).createSnapshot();
 
 
         EquipmentInventory armor = null;
         GridInventory mainGrid = null;
         Slot offhand = null;
 
-        ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3)
+        ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3.get())
                 .slots(armor.slots(), 0)
                 .slots(mainGrid.slots(), armor.slots().size())
                 .slots(offhand.slots(), armor.slots().size() + mainGrid.slots().size())

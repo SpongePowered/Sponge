@@ -26,18 +26,13 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(authors = "gabizou", name = "DeathTest", id = "deathtest", description = "test death event cancellation", version = "0.0.0")
 public class DeathTest implements LoadableModule {
@@ -47,14 +42,14 @@ public class DeathTest implements LoadableModule {
     private final DeathListener listener = new DeathListener();
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class DeathListener {
 
         @Listener
-        public void onDeath(DestructEntityEvent.Death entityEvent, @Getter("getTargetEntity") Player player) {
+        public void onDeath(DestructEntityEvent.Death entityEvent, @Getter("getEntity") Player player) {
             entityEvent.setCancelled(true);
         }
     }

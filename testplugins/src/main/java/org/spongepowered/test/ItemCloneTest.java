@@ -24,12 +24,13 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -38,6 +39,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -47,28 +49,30 @@ import java.io.IOException;
 public class ItemCloneTest {
     private static String ITEM_STRING = null;
 
+    @Inject private PluginContainer container;
+
     @Listener
     public void init(GameInitializationEvent e) {
         registerCommands();
     }
 
     private void registerCommands() {
-        CommandSpec save = CommandSpec.builder()
-            .executor((commandSource, commandContext) -> {
-                Player player = (Player) commandSource;
+        Command save = Command.builder()
+            .setExecutor((commandContext) -> {
+                Player player = (Player) commandContext.getSubject();
 
-                if (!player.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
+                if (!player.getItemInHand(HandTypes.MAIN_HAND.get()).isEmpty()) {
                     player.sendMessages(Text.of(TextColors.RED, "You must be holding an item in hand to perform the data clone test"));
                     return CommandResult.empty();
                 }
 
-                final ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND).get();
+                final ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND.get());
                 final ItemStackSnapshot snapshot = item.createSnapshot();
                 String json = null;
 
                 final DataContainer data = snapshot.toContainer();
                 try {
-                    json = DataFormats.JSON.write(data);
+                    json = DataFormats.JSON.get().write(data);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -79,13 +83,13 @@ public class ItemCloneTest {
                 return CommandResult.success();
             }).build();
 
-        CommandSpec check = CommandSpec.builder()
-            .executor((commandSource, commandContext) -> {
-                Player player = (Player) commandSource;
+        Command check = Command.builder()
+            .setExecutor((commandContext) -> {
+                Player player = (Player) commandContext.getSubject();
                 final DataContainer container;
 
                 try {
-                    container = DataFormats.JSON.read(ITEM_STRING);
+                    container = DataFormats.JSON.get().read(ITEM_STRING);
                 } catch (IOException e) {
                     e.printStackTrace();
                     return CommandResult.empty();
@@ -104,8 +108,8 @@ public class ItemCloneTest {
                 return CommandResult.success();
             }).build();
 
-        Sponge.getCommandManager().register(this, save, "cssave");
-        Sponge.getCommandManager().register(this, check, "cscheck");
+        Sponge.getCommandManager().register(this.container, save, "cssave");
+        Sponge.getCommandManager().register(this.container, check, "cscheck");
     }
 
 }

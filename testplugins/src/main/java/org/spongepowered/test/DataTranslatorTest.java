@@ -25,17 +25,17 @@
 package org.spongepowered.test;
 
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
 import org.slf4j.Logger;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
+import org.spongepowered.api.event.registry.RegistryEvent;
 import org.spongepowered.api.plugin.Plugin;
-
-import javax.inject.Inject;
 
 @Plugin(id = "data_translator_test", name = "Data Translator Test", description = "test custom DataTranslator", version = "0.0.0")
 public class DataTranslatorTest {
@@ -43,7 +43,7 @@ public class DataTranslatorTest {
     @Inject private Logger logger;
 
     @Listener
-    public void onRegisterDataTranslators(GameRegistryEvent.Register<DataTranslator<?>> event) {
+    public void onRegisterDataTranslators(RegistryEvent.Catalog<DataTranslator<?>> event) {
         event.register(new MyObjectDataTranslator());
         this.logger.info("Registered MyObjectDataTranslator");
     }

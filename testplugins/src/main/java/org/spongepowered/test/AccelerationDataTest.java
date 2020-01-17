@@ -24,18 +24,19 @@
  */
 package org.spongepowered.test;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.explosive.fireball.FireballEntity;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -50,13 +51,13 @@ public class AccelerationDataTest implements LoadableModule {
     public static final String DESCRIPTION = "Testing fireball acceleration.";
     public static final String VERSION = "0.0.0";
 
-    @Nullable private Task task;
+    @Nullable private ScheduledTask scheduledTask;
     @Nullable private FireballEntity fireball;
 
     @Override
-    public void disable(final CommandSource src) {
-        if (this.task != null) {
-            this.task.cancel();
+    public void disable(final MessageReceiver src) {
+        if (this.scheduledTask != null) {
+            this.scheduledTask.cancel();
 
             // Remove the fireball
             if (this.fireball != null && !this.fireball.isRemoved()) {
@@ -68,9 +69,9 @@ public class AccelerationDataTest implements LoadableModule {
     }
 
     @Override
-    public void enable(final CommandSource src) {
-        if (this.task != null) {
-            this.task.cancel();
+    public void enable(final MessageReceiver src) {
+        if (this.scheduledTask != null) {
+            this.scheduledTask.cancel();
         }
 
         if (!(src instanceof Player)) {
@@ -79,7 +80,7 @@ public class AccelerationDataTest implements LoadableModule {
 
         final Player player = (Player) src;
 
-        this.task = Task.builder()
+        Task task = Task.builder()
           .name("accelerationtest")
           .interval(1, TimeUnit.SECONDS)
           .execute(() -> {
@@ -99,7 +100,9 @@ public class AccelerationDataTest implements LoadableModule {
               this.updateFireball();
           })
           .delay(1, TimeUnit.SECONDS)
-          .submit(this);
+          .build();
+        this.scheduledTask = Sponge.getServer().getScheduler().submit(task);
+
     }
 
     private void createAndSpawnFireball(Player player) {
@@ -108,13 +111,13 @@ public class AccelerationDataTest implements LoadableModule {
         final Vector3i origin = player.getLocation().getBlockPosition().add(offset);
 
         // Spawn the fireball
-        this.fireball = (FireballEntity) player.getWorld().createEntity(EntityTypes.FIREBALL, origin);
+        this.fireball = (FireballEntity) player.getWorld().createEntity(EntityTypes.FIREBALL.get(), origin);
 
         // Set initial velocity
         this.fireball.offer(Keys.VELOCITY, Direction.UP.asOffset());
 
         // Spawn fireball
-        player.getWorld().spawnEntity(fireball);
+        player.getWorld().spawnEntity(this.fireball);
     }
 
     private void updateFireball() {
@@ -123,7 +126,7 @@ public class AccelerationDataTest implements LoadableModule {
         }
 
         // Set the acceleration to a random offset
-        this.fireball.offer(Keys.ACCELERATION, getRandomOffset());
+        this.fireball.offer(Keys.ACCELERATION, this.getRandomOffset());
     }
 
     private Vector3d getRandomOffset() {

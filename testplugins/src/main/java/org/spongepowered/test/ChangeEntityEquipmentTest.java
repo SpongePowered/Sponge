@@ -27,19 +27,11 @@ package org.spongepowered.test;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-
-import javax.annotation.Nullable;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(id = "changeentityequipmenttest", name = "Entity Equipment Change Test", description = ChangeEntityEquipmentTest.DESCRIPTION, version = "0.0.0")
 public class ChangeEntityEquipmentTest implements LoadableModule {
@@ -52,7 +44,7 @@ public class ChangeEntityEquipmentTest implements LoadableModule {
     @Inject private PluginContainer container;
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 

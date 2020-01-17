@@ -24,26 +24,24 @@
  */
 package org.spongepowered.test;
 
-import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
-import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 
 @Plugin(id = SchematicBoundsTest.ID, name = SchematicBoundsTest.NAME, description = SchematicBoundsTest.DESCRIPTION, version = SchematicBoundsTest.VERSION)
 public class SchematicBoundsTest implements LoadableModule {
@@ -53,69 +51,65 @@ public class SchematicBoundsTest implements LoadableModule {
     public static final String DESCRIPTION = "Testing schematic bounds.";
     public static final String VERSION = "0.0.0";
 
-    private final Logger logger;
+    @Inject
+    private Logger logger;
 
     @Nullable private CommandMapping mapping;
 
-    @Inject
-    public SchematicBoundsTest(Logger logger) {
-        this.logger = logger;
-    }
-
     @Override
-    public void disable(final CommandSource src) {
+    public void disable(final MessageReceiver src) {
         if (this.mapping != null) {
-            Sponge.getCommandManager().removeMapping(this.mapping);
+            Sponge.getCommandManager().unregister(this.mapping);
             src.sendMessage(Text.of("Removed /schbuild command"));
         }
     }
 
     @Override
-    public void enable(final CommandSource src) {
+    public void enable(final MessageReceiver src) {
         if (this.mapping == null) {
+            Parameter.Value<WorldProperties> paramWorld = Parameter.worldProperties().setKey("world").build();
+            Parameter.Value<Integer> x1 = Parameter.integerNumber().setKey("x1").build();
+            Parameter.Value<Integer> y1 = Parameter.integerNumber().setKey("y1").build();
+            Parameter.Value<Integer> z1 = Parameter.integerNumber().setKey("z1").build();
+            Parameter.Value<Integer> x2 = Parameter.integerNumber().setKey("x2").build();
+            Parameter.Value<Integer> y2 = Parameter.integerNumber().setKey("y2").build();
+            Parameter.Value<Integer> z2 = Parameter.integerNumber().setKey("z2").build();
             this.mapping = Sponge.getCommandManager()
                     .register(this,
-                            CommandSpec.builder().arguments(
-                                    GenericArguments.world(Text.of("world")),
-                                    GenericArguments.integer(Text.of("x1")),
-                                    GenericArguments.integer(Text.of("y1")),
-                                    GenericArguments.integer(Text.of("z1")),
-                                    GenericArguments.integer(Text.of("x2")),
-                                    GenericArguments.integer(Text.of("y2")),
-                                    GenericArguments.integer(Text.of("z2"))
-                            ).executor((source, context) -> {
+                            Command.builder().parameters(paramWorld, x1, y1, z1, x2, y2, z2)
+                                    .setExecutor((context) -> {
                                 Vector3i first = new Vector3i(
-                                        context.requireOne("x1"),
-                                        context.requireOne("y1"),
-                                        context.requireOne("z1")
+                                        context.requireOne(x1),
+                                        context.requireOne(y1),
+                                        context.requireOne(z1)
                                 );
 
                                 Vector3i second = new Vector3i(
-                                        context.requireOne("x2"),
-                                        context.requireOne("y2"),
-                                        context.requireOne("z2")
+                                        context.requireOne(x2),
+                                        context.requireOne(y2),
+                                        context.requireOne(z2)
                                 );
 
                                 Vector3i min = first.min(second);
                                 Vector3i max = first.max(second);
 
-                                WorldProperties properties = context.requireOne("world");
+                                WorldProperties properties = context.requireOne(paramWorld);
                                 // Extent extent = Sponge.getServer().getWorld(properties.getUniqueId()).get().getExtentView(min, max);
-                                ArchetypeVolume extent = Sponge.getServer().getWorld(properties.getUniqueId()).get()
+                                ArchetypeVolume extent = Sponge.getServer().getWorldManager().getWorld(properties.getUniqueId()).get()
                                         .createArchetypeVolume(min, max, min);
 
                                 Schematic sch = Schematic.builder()
                                         .volume(extent)
-                                        .blockPaletteType(PaletteTypes.LOCAL_BLOCKS)
-                                        .biomePaletteType(PaletteTypes.LOCAL_BIOMES)
+                                        .blockPaletteType(PaletteTypes.LOCAL_BLOCKS.get())
+                                        .biomePaletteType(PaletteTypes.LOCAL_BIOMES.get())
                                         .build();
                                 Vector3i size = sch.getBlockSize();
-                                source.sendMessage(Text.of("Block size: " + size.getX() * size.getY() * size.getZ()));
-                                source.sendMessage(Text.of("Block dimensions: " + size));
+                                context.getMessageReceiver().sendMessage(Text.of("Block size: " + size.getX() * size.getY() * size.getZ()));
+                                context.getMessageReceiver().sendMessage(Text.of("Block dimensions: " + size));
 
                                 CountingIterator it = new CountingIterator();
                                 sch.getBlockWorker().iterate(it);
-                                source.sendMessage(Text.of("Iterated size: " + it.count));
+                                context.getMessageReceiver().sendMessage(Text.of("Iterated size: " + it.count));
                                 return CommandResult.success();
                             })
                             .build(),

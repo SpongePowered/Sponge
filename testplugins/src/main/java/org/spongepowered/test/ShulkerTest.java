@@ -26,17 +26,16 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.ShulkerBullet;
 import org.spongepowered.api.entity.living.golem.Shulker;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.ShulkerBullet;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -45,11 +44,13 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.world.World;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Plugin(id = "shulkertest", version = "0.0.0", name = "ShulkerTest", description = "Play with Shulkers!")
 public class ShulkerTest implements LoadableModule {
@@ -60,50 +61,50 @@ public class ShulkerTest implements LoadableModule {
 
     @Listener
     public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder().executor((src, args) -> {
-            if (!(src instanceof Player)) {
+        Sponge.getCommandManager().register(this.container, Command.builder().setExecutor((ctx) -> {
+            if (!(ctx.getSubject() instanceof Player)) {
                 throw new CommandException(Text.of("Only players can execute this command"));
             }
 
-            ((Player) src).getNearbyEntities(20).forEach(entity -> {
+            ((Player) ctx.getSubject()).getNearbyEntities(20).forEach(entity -> {
                 if (entity instanceof ShulkerBullet) {
-                    entity.remove(Keys.TARGETED_ENTITY);
+                    entity.remove(Keys.TARGET_ENTITY);
                 }
             });
 
             return CommandResult.success();
         }).build(), "untarget");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder().executor((src, args) -> {
-            if (!(src instanceof Player)) {
+        Sponge.getCommandManager().register(this.container, Command.builder().setExecutor((ctx) -> {
+            if (!(ctx.getSubject() instanceof Player)) {
                 throw new CommandException(Text.of("Only players can execute this command"));
             }
 
-            Iterator<Entity> iterator = ((Player) src).getNearbyEntities(entity -> entity instanceof Shulker).iterator();
+            Iterator<? extends Entity> iterator = ((Player) ctx.getSubject()).getNearbyEntities(10d, entity -> entity instanceof Shulker).iterator();
             if (iterator.hasNext()) {
                 Shulker shulker = (Shulker) iterator.next();
                 World world = shulker.getWorld();
                 Random random = new Random();
                 // Creates the spider at a random location within a 10x5x10 zone around the bullet
-                Entity spider = world.createEntity(EntityTypes.SPIDER, shulker.getLocation().add(
+                Entity spider = world.createEntity(EntityTypes.SPIDER.get(), shulker.getLocation().add(
                         random.nextInt(20) - 10,
                         random.nextInt(5),
                         random.nextInt(20) - 10).getPosition());
                 world.spawnEntity(spider);
 
-                shulker.launchWithTarget(ShulkerBullet.class, spider);
+                shulker.launchToTarget(ShulkerBullet.class, spider);
             }
 
             return CommandResult.success();
         }).build(), "launch");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder().executor((src, args) -> {
-            if (!(src instanceof Player)) {
+        Sponge.getCommandManager().register(this.container, Command.builder().setExecutor((ctx) -> {
+            if (!(ctx.getSubject() instanceof Player)) {
                 throw new CommandException(Text.of("Only players can execute this command"));
             }
 
-            ((Player) src).getNearbyEntities(entity -> entity instanceof ShulkerBullet)
-                    .forEach(bullet -> System.out.println(bullet.get(Keys.TARGETED_ENTITY).orElse(null)));
+            ((Player) ctx.getSubject()).getNearbyEntities(10d, entity -> entity instanceof ShulkerBullet)
+                    .forEach(bullet -> System.out.println(bullet.get(Keys.TARGET_ENTITY).orElse(null)));
             return CommandResult.success();
         }).build(), "target");
     }
@@ -111,7 +112,7 @@ public class ShulkerTest implements LoadableModule {
 
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -124,7 +125,7 @@ public class ShulkerTest implements LoadableModule {
 
             event.getEntities().forEach(entity -> {
                 if (entity instanceof Shulker) {
-                    Collection<DyeColor> dyeColors = Sponge.getRegistry().getAllOf(DyeColor.class);
+                    Collection<DyeColor> dyeColors = Sponge.getRegistry().getCatalogRegistry().getAllOf(DyeColor.class).collect(Collectors.toList());
                     DyeColor dyeColor = dyeColors.toArray(new DyeColor[]{})[this.random.nextInt(dyeColors.size())];
                     entity.offer(Keys.DYE_COLOR, dyeColor);
                 }

@@ -24,81 +24,88 @@
  */
 package org.spongepowered.test;
 
-import com.flowpowered.math.vector.Vector3d;
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.math.vector.Vector3d;
 
 @Plugin(id = "world-limit-test", name = "World Limit Test", description = "Tests on the edge of the world", version = "0.0.0")
 public class WorldLimitTest {
 
+    @Inject private PluginContainer container;
     @Listener
     public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (src instanceof Player) {
-                                Vector3d coord = args.<Vector3d>getOne("coord").get();
+        Parameter.Value<Vector3d> paramCoord = Parameter.vector3d().setKey("coord").build();
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setExecutor((ctx) -> {
+                            if (ctx.getSubject() instanceof Player) {
+                                Vector3d coord = ctx.getOne(paramCoord).get();
 
-                                ((Player) src).getWorld().setBlock(coord.toInt(), BlockTypes.GLOWSTONE.getDefaultState());
+                                ((Player) ctx.getSubject()).getWorld().setBlock(coord.toInt(), BlockTypes.GLOWSTONE.get().getDefaultState());
                             }
                             return CommandResult.success();
                         })
-                        .arguments(GenericArguments.vector3d(Text.of("coord")))
+                        .parameters(paramCoord)
                         .build(),
                 "setglowstone"
         );
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (!(src instanceof Player)) {
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setExecutor((ctx) -> {
+                            if (!(ctx.getSubject() instanceof Player)) {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
-                            Vector3d coord = args.<Vector3d>getOne("coord").get();
+                            Vector3d coord = ctx.<Vector3d>getOne(paramCoord).get();
 
-                            BlockState block = ((Player) src).getWorld().getBlock(coord.getFloorX(), coord.getFloorY(), coord.getFloorZ());
+                            BlockState block = ((Player) ctx.getSubject()).getWorld().getBlock(coord.getFloorX(), coord.getFloorY(), coord.getFloorZ());
 
-                            src.sendMessage(Text.of("That's a " + block));
+                            ctx.getMessageReceiver().sendMessage(Text.of("That's a " + block));
                             return CommandResult.success();
                         })
-                        .arguments(GenericArguments.vector3d(Text.of("coord")))
+                        .parameters(paramCoord)
                         .build(),
                 "getblock"
         );
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (!(src instanceof Player)) {
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setExecutor((ctx) -> {
+                            if (!(ctx.getSubject() instanceof Player)) {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
-                            final Vector3d position = args.<Vector3d>getOne("coord").get();
-                            ((Player) src).setLocation(((Player) src).getLocation().setPosition(position));
+                            final Vector3d position = ctx.<Vector3d>getOne(paramCoord).get();
+                            Player player = (Player) ctx.getSubject();
+                            player.setLocation(Location.of(player.getWorld(), position));
                             return CommandResult.success();
                         })
-                        .arguments(GenericArguments.vector3d(Text.of("coord")))
+                        .parameters(paramCoord)
                         .build(),
                 "setlocation"
         );
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (!(src instanceof Player)) {
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setExecutor((ctx) -> {
+                            if (!(ctx.getSubject() instanceof Player)) {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
-                            ((Player) src).transferToWorld(((Player) src).getWorld(), Vector3d.from(Double.MAX_VALUE, ((Player) src).getPosition().getY(), Double.MAX_VALUE));
+                            Player player = (Player) ctx.getSubject();
+                            player.transferToWorld(player.getWorld(), Vector3d.from(Double.MAX_VALUE, player.getPosition().getY(), Double.MAX_VALUE));
 
                             return CommandResult.success();
                         })

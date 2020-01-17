@@ -26,14 +26,14 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.api.entity.living.monster.Enderman;
+import org.spongepowered.api.entity.living.trader.Villager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(id = "villager_grief", name = "Villager Test", description = "test villagers and enderman grief", version = "0.0.0")
 public class VillagerGriefTest implements LoadableModule {
@@ -42,10 +42,8 @@ public class VillagerGriefTest implements LoadableModule {
 
     private final VillagerGriefListener listener = new VillagerGriefListener();
 
-
-
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 

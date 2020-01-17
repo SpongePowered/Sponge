@@ -24,14 +24,13 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelId;
 import org.spongepowered.api.plugin.Plugin;
-
-import javax.inject.Inject;
 
 @Plugin(id = "injection-test", authors = "kashike", version = "0.0.0", description = "tests injectors", name = "Guice Injection Test")
 public class InjectionTest {

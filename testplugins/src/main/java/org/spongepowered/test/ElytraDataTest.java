@@ -25,10 +25,13 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -42,9 +45,9 @@ public class ElytraDataTest {
 
     @Listener
     public void onPreInit(final GamePreInitializationEvent event) {
-        final CommandSpec isFlying = CommandSpec.builder()
-            .executor((src, args) -> {
-                if (!(src instanceof Player)) {
+        final Command isFlying = Command.builder()
+            .setExecutor((ctx) -> {
+                if (!(ctx.getSubject() instanceof Player)) {
                     throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
                 }
 
@@ -56,27 +59,27 @@ public class ElytraDataTest {
                 return CommandResult.success();
             }).build();
 
-        final CommandSpec setFlying = CommandSpec.builder()
-            .arguments(GenericArguments.onlyOne(GenericArguments.bool(Text.of("enable"))))
-            .executor((src, args) -> {
-                if (!(src instanceof Player)) {
+        final Command setFlying = Command.builder()
+            .parameter(GenericArguments.onlyOne(GenericArguments.bool(Text.of("enable"))))
+            .setExecutor((ctx) -> {
+                if (!(ctx.getSubject() instanceof Player)) {
                     throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
                 }
 
-                final Player player = (Player) src;
+                final Player player = (Player) ctx.getSubject();
 
-                player.offer(Keys.IS_ELYTRA_FLYING, args.<Boolean>getOne("enable").orElse(false));
+                player.offer(Keys.IS_ELYTRA_FLYING, ctx.<Boolean>getOne("enable").orElse(false));
 
                 player.sendMessage(Text.of(TextColors.GOLD, "You have successfully changed your elytra flying state!"));
 
                 return CommandResult.success();
             }).build();
 
-        final CommandSpec enable = CommandSpec.builder()
-            .arguments()
-            .executor((src, args) -> {
-                src.sendMessage(Text.of(TextColors.DARK_GREEN, "You have enabled elytra listening."));
-                Keys.IS_ELYTRA_FLYING.registerEvent(Player.class, e -> {
+        final Command enable = Command.builder()
+            .parameters()
+            .setExecutor((ctx) -> {
+                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.DARK_GREEN, "You have enabled elytra listening."));
+                Keys.IS_ELYTRA_FLYING.get().registerEvent(Player.class, e -> {
                     if (e.getTargetHolder() instanceof Player) {
                         ((Player) e.getTargetHolder()).sendMessage(Text.of(TextColors.DARK_GREEN, "Changed elytra status!"));
                     }
@@ -86,7 +89,7 @@ public class ElytraDataTest {
             })
             .build();
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        Sponge.getCommandManager().register(this.container, Command.builder()
             .child(isFlying, "test")
             .child(setFlying, "set")
             .child(enable, "listen")

@@ -26,9 +26,7 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.Listener;
@@ -36,6 +34,7 @@ import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(id = "respawnspectatortest", name = "Respawn Spectator Test", description = "Spectator after death", version = "0.0.0")
 public class RespawnSpectatorTest implements LoadableModule{
@@ -43,10 +42,8 @@ public class RespawnSpectatorTest implements LoadableModule{
     private final RespawnSpectatorListener listener = new RespawnSpectatorListener();
     @Inject private PluginContainer container;
 
-
-
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -55,7 +52,7 @@ public class RespawnSpectatorTest implements LoadableModule{
         @Listener
         public void onRespawn(RespawnPlayerEvent event, @Root Player player) {
             if (event.isDeath()) {
-                player.offer(Keys.GAME_MODE, GameModes.SPECTATOR);
+                player.offer(Keys.GAME_MODE, GameModes.SPECTATOR.get());
             }
         }
     }

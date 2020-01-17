@@ -25,12 +25,13 @@
 package org.spongepowered.test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -40,6 +41,7 @@ import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -49,23 +51,29 @@ import java.util.List;
 @Plugin(id = "enchantmenttest", name = "Enchantment Test", description = "Tests Sponge's simple enchantment API.", version = "0.0.0")
 public final class EnchantmentTest {
 
+    @Inject private PluginContainer container;
+
     @Listener
     public void onGameInitialization(final GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.onlyOne(GenericArguments.catalogedElement(Text.of("enchantment"), EnchantmentType.class)),
-                                GenericArguments.onlyOne(GenericArguments.integer(Text.of("level"))))
-                        .executor((src, args) -> {
-                            if (!(src instanceof Player)) {
+        Parameter.Key<EnchantmentType> keyEnch = Parameter.key("enchantment", EnchantmentType.class);
+        Parameter.Key<Integer> keyLevel = Parameter.key("level", Integer.class);
+
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .parameters(
+                                Parameter.catalogedElement(EnchantmentType.class).setKey(keyEnch).build(), // TODO onlyone?
+                                Parameter.integerNumber().setKey(keyLevel).build())                        // TODO onlyone?
+                        .setExecutor((ctx) -> {
+                            if (!(ctx.getSubject() instanceof Player)) {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
-                            final Player player = (Player) src;
-                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty());
+                            final Player player = (Player) ctx.getSubject();
+                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND.get());
                             if (!itemStack.supports(Keys.ITEM_ENCHANTMENTS)) {
                                 throw new CommandException(Text.of(TextColors.RED, "This item does not support item enchantments."));
                             }
-                            final EnchantmentType type = args.<EnchantmentType>getOne("enchantment").orElse(EnchantmentTypes.BINDING_CURSE);
-                            final int level = args.<Integer>getOne("level").orElse(1);
+                            final EnchantmentType type = ctx.getOne(keyEnch).orElse(EnchantmentTypes.BINDING_CURSE.get());
+                            final int level = ctx.getOne(keyLevel).orElse(1);
                             final Enchantment newEnchantment = Enchantment.builder()
                                     .type(type)
                                     .level(level)
@@ -73,39 +81,39 @@ public final class EnchantmentTest {
                             final List<Enchantment> enchantments = itemStack.get(Keys.ITEM_ENCHANTMENTS).orElse(new ArrayList<>());
                             enchantments.add(newEnchantment);
                             itemStack.offer(Keys.ITEM_ENCHANTMENTS, enchantments);
-                            player.setItemInHand(HandTypes.MAIN_HAND, itemStack);
-                            player.sendMessage(Text.of(TextColors.GOLD, "You have successfully added the enchantment " + type.getName() + " with a level of " + level + "."));
+                            player.setItemInHand(HandTypes.MAIN_HAND.get(), itemStack);
+                            player.sendMessage(Text.of(TextColors.GOLD, "You have successfully added the enchantment " + type.getKey() + " with a level of " + level + "."));
                             return CommandResult.success();
                         })
                         .build(),
                 "spongeenchant");
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (!(src instanceof Player)) {
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setExecutor((ctx) -> {
+                            if (!(ctx.getSubject() instanceof Player)) {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
-                            final Player player = (Player) src;
-                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty());
+                            final Player player = (Player) ctx.getSubject();
+                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND.get());
                             if (!itemStack.supports(Keys.ITEM_ENCHANTMENTS)) {
                                 throw new CommandException(Text.of(TextColors.RED, "This item does not support item enchantments."));
                             }
                             final List<Enchantment> enchantments = itemStack.get(Keys.ITEM_ENCHANTMENTS).orElse(ImmutableList.of());
                             if (enchantments.isEmpty()) {
-                                src.sendMessage(Text.of(TextColors.RED, "This item has no enchantments!"));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.RED, "This item has no enchantments!"));
                             }
                             enchantments.forEach(enchantment -> {
                                 final EnchantmentType type = enchantment.getType();
-                                src.sendMessage(Text.of(TextColors.GOLD, "============================="));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Type: ", TextColors.GRAY, type.getName()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Type ID: ", TextColors.GRAY, type.getId()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Translation: ", TextColors.GRAY, enchantment.getType().getTranslation()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Level: ", TextColors.GRAY, enchantment.getLevel()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Maximum level: ", TextColors.GRAY, type.getMaximumLevel()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Minimum level: ", TextColors.GRAY, type.getMinimumLevel()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Weight: ", TextColors.GRAY, type.getWeight()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Curse: ", TextColors.GRAY, type.isCurse()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Treasure: ", TextColors.GRAY, type.isTreasure()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "============================="));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Type: ", TextColors.GRAY, type.getTranslation()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Type ID: ", TextColors.GRAY, type.getKey()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Translation: ", TextColors.GRAY, enchantment.getType().getTranslation()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Level: ", TextColors.GRAY, enchantment.getLevel()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Maximum level: ", TextColors.GRAY, type.getMaximumLevel()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Minimum level: ", TextColors.GRAY, type.getMinimumLevel()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Weight: ", TextColors.GRAY, type.getWeight()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Curse: ", TextColors.GRAY, type.isCurse()));
+                                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Treasure: ", TextColors.GRAY, type.isTreasure()));
                             });
                             return CommandResult.success();
                         })

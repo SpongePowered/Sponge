@@ -24,13 +24,15 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -45,17 +47,19 @@ import java.util.Optional;
         description = "Ensures profile lookups don't crash when Mojang returns an invalid UUID.")
 public class InvalidUuidTest {
 
+    @Inject private PluginContainer container;
+
     @Listener
     public void onInit(GameInitializationEvent e) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder().executor((src, args) -> {
+        Sponge.getCommandManager().register(this.container, Command.builder().setExecutor((ctx) -> {
             // This must NOT throw an exception. If no exception is thrown, the
             // test passes.
             Optional<User> user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).get("_");
             if (user.isPresent()) {
-                src.sendMessage(Text.of(TextColors.GOLD, "WARN: The username used in InvalidUuidTest is now assigned to a valid user."));
-                src.sendMessage(Text.of(TextColors.GOLD, "This should be assigned to a user with an invalid UUID."));
+                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "WARN: The username used in InvalidUuidTest is now assigned to a valid user."));
+                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "This should be assigned to a user with an invalid UUID."));
                 try {
-                    src.sendMessage(Text.of(TextColors.GOLD, "Replace the username with one listed in ",
+                    ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GOLD, "Replace the username with one listed in ",
                             Text.of(TextActions.openUrl(new URL("https://bugs.mojang.com/browse/WEB-1290")),
                                     TextColors.AQUA, TextStyles.UNDERLINE, "WEB-1290"),
                             "."));
@@ -63,7 +67,7 @@ public class InvalidUuidTest {
                     throw new AssertionError(ex);
                 }
             } else {
-                src.sendMessage(Text.of(TextColors.GREEN, "Success"));
+                ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GREEN, "Success"));
             }
             return CommandResult.success();
         }).build(), "invaliduuidtest");

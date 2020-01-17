@@ -88,7 +88,7 @@ public class OfflineInventoryTest implements LoadableModule {
             // Modify offline inventory
             logger.info("and a hotbar full of diamonds!");
             for (Slot inv : user.getInventory().query(Hotbar.class).get().slots()) {
-                inv.offer(ItemStack.of(ItemTypes.DIAMOND, 1));
+                inv.offer(ItemStack.of(ItemTypes.DIAMOND.get(), 1));
             }
         }
 
