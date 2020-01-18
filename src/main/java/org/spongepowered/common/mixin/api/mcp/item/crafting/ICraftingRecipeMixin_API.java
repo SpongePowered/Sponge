@@ -22,36 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.adapter.impl.comp;
+package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.item.crafting.ICraftingRecipe;
+import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.item.crafting.ShapelessRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.accessor.item.crafting.ShapedRecipeAccessor;
+import org.spongepowered.common.mixin.accessor.item.crafting.ShapelessRecipeAccessor;
 
 import java.util.Optional;
 
-public class CraftingGridInventoryAdapter extends GridInventoryAdapter implements CraftingGridInventory {
-
-    protected final CraftingGridInventoryLens craftingLens;
-
-    public CraftingGridInventoryAdapter(Fabric fabric, CraftingGridInventoryLens root) {
-        this(fabric, root, null);
-    }
-
-    public CraftingGridInventoryAdapter(Fabric fabric, CraftingGridInventoryLens root, Inventory parent) {
-        super(fabric, root, parent);
-        this.craftingLens = root;
-    }
+@Mixin(ICraftingRecipe.class)
+public interface ICraftingRecipeMixin_API<C extends CraftingInventory> extends IRecipeMixin_API<C>, CraftingRecipe {
 
     @Override
-    public Optional<CraftingRecipe> getRecipe(World world) {
-        return Sponge.getRegistry().getRecipeRegistry().findMatchingRecipe(this, checkNotNull(world, "world"));
+    default Optional<String> getGroup() {
+        String group = "";
+        if (this instanceof ShapedRecipe) {
+            group = ((ShapedRecipeAccessor) this).accessor$getGroup();
+        }
+        if (this instanceof ShapelessRecipe) {
+            group = ((ShapelessRecipeAccessor) this).accessor$getGroup();
+        }
+        if (group.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(group);
     }
-
 }

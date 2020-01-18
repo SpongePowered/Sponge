@@ -22,34 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.recipe.crafting;
+package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import javax.annotation.Nullable;
+import net.minecraft.item.crafting.StonecuttingRecipe;
+import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.item.recipe.crafting.custom.SpongeStonecuttingRecipe;
 
-/**
- * Delegates a custom implemented {@link org.spongepowered.api.item.recipe.crafting.Ingredient}
- */
-public class DelegateIngredient extends Ingredient {
+@Mixin(value = {StonecuttingRecipe.class, SpongeStonecuttingRecipe.class})
+public abstract class StonecuttingRecipeMixin_API implements StoneCutterRecipe {
 
-    private org.spongepowered.api.item.recipe.crafting.Ingredient delegate;
-
-    private DelegateIngredient(org.spongepowered.api.item.recipe.crafting.Ingredient delegate) {
-        super(ItemStackUtil.fromSnapshotToNative(delegate.displayedItems()));
-        this.delegate = delegate;
-    }
-
-    @Override
-    public boolean apply(@Nullable ItemStack item) {
-        return this.delegate.test(ItemStackUtil.fromNative(item));
-    }
-
-    public static Ingredient of(org.spongepowered.api.item.recipe.crafting.Ingredient delegate) {
-        if ((Object) delegate instanceof Ingredient) {
-            return ((Ingredient) (Object) delegate);
-        }
-        return new DelegateIngredient(delegate);
-    }
 }

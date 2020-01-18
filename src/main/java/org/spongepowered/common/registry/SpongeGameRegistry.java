@@ -63,7 +63,7 @@ public final class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public CraftingRecipeRegistry getCraftingRecipeRegistry() {
+    public CraftingRecipeRegistry getRecipeRegistry() {
         return null;
     }
 

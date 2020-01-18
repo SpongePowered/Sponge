@@ -25,20 +25,21 @@
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.crafting.ICraftingRecipe;
+import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.network.IPacket;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
-import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
+import java.util.Optional;
 
 public abstract class DragInventoryStopState extends NamedInventoryState {
 
@@ -66,10 +67,12 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
         if (craftInv instanceof CraftingInventory) {
             List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) player.openContainer).bridge$getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {
-                CraftingRecipe recipe = SpongeCraftingRecipeRegistry
-                        .getInstance().findMatchingRecipe(((CraftingInventory) craftInv).getCraftingGrid(), ((World) player.world)).orElse(null);
+                Optional<ICraftingRecipe> recipe = player.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING,
+                        (net.minecraft.inventory.CraftingInventory) ((CraftingInventory) craftInv).getCraftingGrid(),
+                        player.world
+                );
                 InventoryEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransactions.get(0),
-                        recipe, player.openContainer, previewTransactions);
+                        ((CraftingRecipe) recipe.orElse(null)), player.openContainer, previewTransactions);
                 previewTransactions.clear();
             }
         }
