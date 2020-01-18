@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
@@ -34,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ShapedRecipe.class)
-public abstract class ShapedRecipeMixin_API implements IRecipe, ShapedCraftingRecipe {
+public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
 
     @Shadow @Final private int recipeWidth;
     @Shadow @Final private int recipeHeight;

@@ -29,34 +29,37 @@ import static org.spongepowered.common.inventory.util.InventoryUtil.toNativeInve
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.item.crafting.ShapelessRecipe;
+import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.api.item.recipe.Recipe;
+import org.spongepowered.api.item.recipe.RecipeType;
+import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.recipe.crafting.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.accessor.item.crafting.ShapedRecipeAccessor;
-import org.spongepowered.common.mixin.accessor.item.crafting.ShapelessRecipeAccessor;
 
-import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 @Mixin(IRecipe.class)
-public interface IRecipeMixin_API<C extends IInventory> extends CraftingRecipe {
+public interface IRecipeMixin_API<C extends IInventory> extends Recipe {
 
     @Shadow ItemStack shadow$getCraftingResult(C inv);
     @Shadow net.minecraft.item.ItemStack shadow$getRecipeOutput();
     @Shadow ResourceLocation shadow$getId();
+    @Shadow boolean shadow$isDynamic();
     @Shadow boolean shadow$matches(C inv, net.minecraft.world.World worldIn);
     @Shadow NonNullList<ItemStack> shadow$getRemainingItems(C inv);
+    @Shadow IRecipeType<?> shadow$getType();
+    @Shadow NonNullList<net.minecraft.item.crafting.Ingredient> shadow$getIngredients();
 
     @Override
     @Nonnull
@@ -64,31 +67,23 @@ public interface IRecipeMixin_API<C extends IInventory> extends CraftingRecipe {
         return ItemStackUtil.snapshotOf(this.shadow$getRecipeOutput());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    default boolean isValid(@Nonnull CraftingGridInventory inv, @Nonnull World world) {
-        return this.shadow$matches((C) toNativeInventory(inv), (net.minecraft.world.World) world);
+    default boolean isValid(@Nonnull Inventory inv, @Nonnull World world) {
+        return this.shadow$matches(toNativeInventory(inv), (net.minecraft.world.World) world);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     @Nonnull
-    default ItemStackSnapshot getResult(@Nonnull CraftingGridInventory inv) {
-        return ItemStackUtil.snapshotOf(this.shadow$getCraftingResult((C) toNativeInventory(inv)));
+    default ItemStackSnapshot getResult(@Nonnull Inventory inv) {
+        return ItemStackUtil.snapshotOf(this.shadow$getCraftingResult(toNativeInventory(inv)));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     @Nonnull
-    default List<ItemStackSnapshot> getRemainingItems(@Nonnull CraftingGridInventory inv) {
-        return this.shadow$getRemainingItems((C) toNativeInventory(inv)).stream()
+    default List<ItemStackSnapshot> getRemainingItems(@Nonnull Inventory inv) {
+        return this.shadow$getRemainingItems(toNativeInventory(inv)).stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    default String getName() {
-        return this.shadow$getId().getPath();
     }
 
     @Override
@@ -97,18 +92,17 @@ public interface IRecipeMixin_API<C extends IInventory> extends CraftingRecipe {
     }
 
     @Override
-    default Optional<String> getGroup() {
-        String group = "";
-        if (this instanceof ShapedRecipe) {
+    default List<Ingredient> getIngredients() {
+        return this.shadow$getIngredients().stream().map(IngredientUtil::fromNative).collect(Collectors.toList());
+    }
 
-            group = ((ShapedRecipeAccessor) this).accessor$getGroup();
-        }
-        if (this instanceof ShapelessRecipe) {
-            group = ((ShapelessRecipeAccessor) this).accessor$getGroup();
-        }
-        if (group.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(group);
+    @Override
+    default boolean isDynamic() {
+        return this.shadow$isDynamic();
+    }
+
+    @Override
+    default RecipeType getType() {
+        return (RecipeType) this.shadow$getType();
     }
 }

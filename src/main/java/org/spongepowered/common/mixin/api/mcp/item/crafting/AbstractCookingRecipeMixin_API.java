@@ -24,35 +24,51 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.item.recipe.smelting.SmeltingResult;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.recipe.crafting.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-import javax.annotation.Nullable;
+@Mixin(AbstractCookingRecipe.class)
+public abstract class AbstractCookingRecipeMixin_API implements SmeltingRecipe {
 
-@Mixin(Ingredient.class)
-@Implements(@Interface(iface = org.spongepowered.api.item.recipe.crafting.Ingredient.class, prefix = "ingredient$"))
-public abstract class IngredientMixin_API {
+    @Shadow @Final protected Ingredient ingredient;
+    @Shadow public abstract float shadow$getExperience();
+    @Shadow public abstract int shadow$getCookTime();
 
-    @Shadow private ItemStack[] matchingStacks;
-    @Shadow protected abstract void shadow$determineMatchingStacks();
-    @Shadow public abstract boolean shadow$test(@Nullable ItemStack p_test_1_);
-
-    public List<org.spongepowered.api.item.inventory.ItemStackSnapshot> ingredient$displayedItems() {
-        this.shadow$determineMatchingStacks();
-        return Arrays.stream(this.matchingStacks).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
+    @Override
+    public org.spongepowered.api.item.recipe.crafting.Ingredient getIngredient() {
+        return IngredientUtil.fromNative(this.ingredient);
     }
 
-    public boolean ingredient$test(final org.spongepowered.api.item.inventory.ItemStack itemStack) {
-        return this.shadow$test(ItemStackUtil.toNative(itemStack));
+    @Override
+    public boolean isValid(ItemStackSnapshot ingredient) {
+        return this.ingredient.test(ItemStackUtil.fromSnapshotToNative(ingredient));
     }
 
+    @Override
+    public Optional<SmeltingResult> getResult(ItemStackSnapshot ingredient) {
+        if (this.isValid(ingredient)) {
+            return Optional.of(new SmeltingResult(this.getExemplaryResult(), this.shadow$getExperience()));
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public int getSmeltTime() {
+        return this.shadow$getCookTime();
+    }
+
+    @Override
+    public float getExperience() {
+        return this.getExperience();
+    }
 }

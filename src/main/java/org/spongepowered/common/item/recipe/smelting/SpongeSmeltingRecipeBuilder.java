@@ -55,7 +55,7 @@ public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRe
         checkNotNull(value, "value");
 
         this.exemplaryResult = value.getExemplaryResult();
-        this.exemplaryIngredient = value.getExemplaryIngredient();
+        this.exemplaryIngredient = value.getIngredient();
         this.experience = 0;
 
         super.reset();

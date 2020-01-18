@@ -76,6 +76,8 @@ import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
+import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
+import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.registry.BuilderRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -142,6 +144,8 @@ import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
 import org.spongepowered.common.item.recipe.crafting.SpongeIngredientBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeShapedCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingRecipeBuilder;
+import org.spongepowered.common.item.recipe.crafting.SpongeSpecialCraftingRecipeBuilder;
+import org.spongepowered.common.item.recipe.crafting.SpongeStoneCutterRecipeBuilder;
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
@@ -242,7 +246,9 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(Ingredient.Builder.class, SpongeIngredientBuilder::new)
             .register(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
             .register(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
+            .register(SpecialCraftingRecipe.Builder.class, SpongeSpecialCraftingRecipeBuilder::new)
             .register(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
+            .register(StoneCutterRecipe.Builder.class, SpongeStoneCutterRecipeBuilder::new)
             .register(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
             .register(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
             .register(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)

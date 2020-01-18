@@ -30,16 +30,17 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
+import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.item.crafting.ShapedRecipeAccessor;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
+import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -56,29 +57,10 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
 
     private final List<String> aisle = Lists.newArrayList();
     private final Map<Character, Ingredient> ingredientMap = new Char2ObjectArrayMap<>();
+    private ShapedCraftingRecipe shape;
+
     private ItemStack result = ItemStack.empty();
     private String groupName = "";
-
-    @Override
-    public EndStep group(@Nullable final String name) {
-        this.groupName = Strings.nullToEmpty(name);
-        return this;
-    }
-
-    @Override
-    public EndStep id(final String id) {
-        return (EndStep) super.id(id);
-    }
-
-    @Override
-    public EndStep name(final String name) {
-        return (EndStep) super.name(name);
-    }
-
-    @Override
-    public EndStep name(final Translation name) {
-        return (EndStep) super.name(name);
-    }
 
     @Override
     public AisleStep aisle(final String... aisle) {
@@ -136,15 +118,32 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     }
 
     @Override
+    public ShapedCraftingRecipe.Builder.ResultStep shapedLike(ShapedCraftingRecipe recipe) {
+        this.shape = recipe; // TODO
+        return this;
+    }
+
+    @Override
     public EndStep result(final ItemStack result) {
         checkNotNull(result, "result");
         this.result = result.copy();
         return this;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
-    protected ShapedCraftingRecipe build(final PluginContainer plugin, final String id, final Translation name) {
+    public EndStep group(@Nullable final String name) {
+        this.groupName = Strings.nullToEmpty(name);
+        return this;
+    }
+
+    @Override
+    public ShapedCraftingRecipe.Builder.EndStep key(CatalogKey key) {
+        super.key(key);
+        return this;
+    }
+
+    @Override
+    protected ShapedCraftingRecipe build(CatalogKey key) {
         checkState(!this.aisle.isEmpty(), "aisle has not been set");
         checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
         checkState(!this.result.isEmpty(), "no result set");
@@ -173,42 +172,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
         final NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipeAccessor
             .accessor$deserializeIngredients(keys, ingredientsMap, width, height);
 
-        return ((ShapedCraftingRecipe) new SpongeShapedRecipe(plugin.getId() + ':' + id, this.groupName,
-                width, height, ingredients, ItemStackUtil.toNative(this.result)));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public ShapedCraftingRecipe.Builder from(final ShapedCraftingRecipe value) {
-        this.aisle.clear();
-        this.ingredientMap.clear();
-        this.groupName = "";
-        if (value instanceof ShapedRecipeAccessor) {
-            this.groupName = ((ShapedRecipeAccessor) value).accessor$getGroup();
-        }
-
-        if (value != null) {
-            for (int y = 0; y < value.getHeight(); y++) {
-                String row = "";
-
-                for (int x = 0; x < value.getWidth(); x++) {
-                    final char symbol = (char) ('a' + x + y * value.getWidth());
-                    row += symbol;
-                    final Ingredient ingredient = value.getIngredient(x, y);
-
-                    this.ingredientMap.put(symbol, ingredient);
-                }
-
-                this.aisle.add(row);
-            }
-
-            this.result = value.getExemplaryResult().createStack();
-        } else {
-            this.result = null;
-        }
-
-        super.reset();
-        return this;
+        return (ShapedCraftingRecipe) new ShapedRecipe((ResourceLocation)(Object) key, this.groupName, width, height, ingredients, ItemStackUtil.toNative(this.result));
     }
 
     @Override

@@ -22,35 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.recipe.crafting;
+package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapelessRecipe;
-import net.minecraft.util.NonNullList;
-import org.spongepowered.api.CatalogType;
+import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.recipe.Recipe;
+import org.spongepowered.api.item.recipe.RecipeType;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class SpongeShapelessRecipe extends ShapelessRecipe implements CatalogType {
-
-    private final String id;
-
-    public SpongeShapelessRecipe(String id, String groupName, ItemStack itemStack, NonNullList<Ingredient> ingredients) {
-        super(groupName, itemStack, ingredients);
-        this.id = id;
-    }
+@Mixin(IRecipeType.class)
+public interface IRecipeTypeMixin_API<R extends Recipe> extends RecipeType<R> {
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.getId();
-    }
-
-    @Override
-    public boolean isDynamic() {
-        return true; // For RecipeBook
+    default CatalogKey getKey() {
+        ResourceLocation key = Registry.RECIPE_TYPE.getKey(((IRecipeType) this));
+        return (CatalogKey) (Object) key;
     }
 }

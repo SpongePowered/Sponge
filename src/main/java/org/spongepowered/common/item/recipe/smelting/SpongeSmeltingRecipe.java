@@ -88,7 +88,7 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe {
 
     @Override
     @Nonnull
-    public ItemStackSnapshot getExemplaryIngredient() {
+    public ItemStackSnapshot getIngredient() {
         return this.exemplaryIngredient;
     }
 

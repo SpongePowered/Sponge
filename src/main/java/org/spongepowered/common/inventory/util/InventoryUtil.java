@@ -68,7 +68,7 @@ public final class InventoryUtil {
     }
 
 
-    public static CraftingInventory toNativeInventory(CraftingGridInventory inv) {
+    public static <C extends IInventory> C toNativeInventory(Inventory inv) {
         Fabric fabric = ((CraftingGridInventoryAdapter) inv).inventoryAdapter$getFabric();
         for (Object inventory : fabric.fabric$allInventories()) {
             if (inventory instanceof CraftingInventory) {

@@ -24,15 +24,42 @@
  */
 package org.spongepowered.common.item.recipe.crafting;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.IItemProvider;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.ItemType;
+
+import java.util.Arrays;
+
+import javax.annotation.Nullable;
 
 public class IngredientUtil {
 
     public static org.spongepowered.api.item.recipe.crafting.Ingredient fromNative(Ingredient ingredient) {
-        return ((org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) ingredient);
+        return (org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) ingredient;
     }
 
     public static Ingredient toNative(org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
-        return DelegateIngredient.of(ingredient);
+        return (Ingredient) (Object) ingredient;
+
     }
+
+    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ItemType... items) {
+        IItemProvider[] providers = Arrays.stream(items).map(item -> (IItemProvider) () -> ((Item) item)).toArray(IItemProvider[]::new);
+        return fromNative(Ingredient.fromItems(providers));
+    }
+
+    @Nullable
+    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(CatalogKey tagKey) {
+        Tag<Item> itemTag = ItemTags.getCollection().get(((ResourceLocation) (Object) tagKey));
+        if (itemTag == null) {
+            return null;
+        }
+        return fromNative(Ingredient.fromTag(itemTag));
+    }
+
 }

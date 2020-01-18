@@ -161,7 +161,7 @@ public abstract class FurnaceRecipesMixin implements SpongeAdditionalCatalogRegi
         checkArgument(!this.recipesById.containsKey(recipe.getId()),
                 "Duplicate id: %s", recipe.getId());
 
-        final ItemStackSnapshot exemplaryIngredient = recipe.getExemplaryIngredient();
+        final ItemStackSnapshot exemplaryIngredient = recipe.getIngredient();
         final ItemStack nativeExemplaryIngredient = ItemStackUtil.fromSnapshotToNative(exemplaryIngredient);
         final ItemStack nativeExemplaryResult = ItemStackUtil.fromSnapshotToNative(recipe.getExemplaryResult());
         final float nativeExemplaryExperience = (float) recipe.getResult(exemplaryIngredient)

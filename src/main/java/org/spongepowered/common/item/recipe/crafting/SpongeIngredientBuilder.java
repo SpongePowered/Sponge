@@ -24,111 +24,44 @@
  */
 package org.spongepowered.common.item.recipe.crafting;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.accessor.item.crafting.IngredientAccessor;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
 
 public class SpongeIngredientBuilder implements Ingredient.Builder {
 
-    private List<Predicate<ItemStack>> predicates = new ArrayList<>();
-    private List<ItemStack> matchItems = new ArrayList<>();
-    private List<ItemStack> displayItems = new ArrayList<>();
-
-    @SuppressWarnings({"rawtypes", "ConstantConditions"})
-    @Override
-    public Ingredient.Builder from(final Ingredient value) {
-        this.reset();
-
-        final Class ingredientClass = value.getClass();
-        if (ingredientClass == net.minecraft.item.crafting.Ingredient.class) {
-            // Vanilla Ingredient?
-            this.matchItems.addAll(ItemStackUtil.fromNative(((IngredientAccessor) value).accessor$getMatchingStacks()));
-            this.displayItems.addAll(this.matchItems);
-        }
-        else if (ingredientClass == CustomIngredient.class) {
-            // CustomIngredient?
-            final CustomIngredient custom = (CustomIngredient) (Object) value;
-            this.displayItems = ItemStackUtil.fromNative(((IngredientAccessor) custom).accessor$getMatchingStacks());
-            this.predicates = custom.predicates;
-            this.matchItems = custom.matchItems;
-        }
-        else if (net.minecraft.item.crafting.Ingredient.class.isAssignableFrom(ingredientClass)) {
-            // Extends Vanilla Ingredient?
-            this.displayItems.addAll(ItemStackUtil.fromNative(((IngredientAccessor) value).accessor$getMatchingStacks()));
-            this.predicates.add(value);
-        }
-        else {
-            // Unknown
-            this.predicates.add(value);
-        }
-        return this;
-    }
+    private ItemType[] types;
+    private CatalogKey itemTag;
 
     @Override
     public Ingredient.Builder reset() {
-        this.predicates.clear();
-        this.matchItems.clear();
-        this.displayItems.clear();
+        this.types = null;
+        this.itemTag = null;
         return this;
     }
 
     @Override
-    public Ingredient.Builder with(final Predicate<ItemStack> predicate) {
-        this.predicates.add(predicate);
-        this.displayItems.clear();
+    public Ingredient.Builder with(ItemType... types) {
+        this.types = types;
+        this.itemTag = null;
         return this;
     }
 
     @Override
-    public Ingredient.Builder with(final ItemStackSnapshot... items) {
-        Arrays.stream(items).map(ItemStackSnapshot::createStack).forEach(this.matchItems::add);
-        return this.withDisplay(items);
-    }
-
-    @Override
-    public Ingredient.Builder with(final ItemStack... items) {
-        Arrays.stream(items).map(ItemStack::copy).forEach(this.matchItems::add);
-        return this.withDisplay(items);
-    }
-
-    @Override
-    public Ingredient.Builder with(final ItemType... items) {
-        Arrays.stream(items).map(t -> (Predicate<ItemStack>) t::matches).forEach(this.predicates::add);
-        return this.withDisplay(items);
-    }
-
-    @Override
-    public Ingredient.Builder withDisplay(final ItemStack... items) {
-        Arrays.stream(items).map(ItemStack::copy).forEach(this.displayItems::add);
-        return this;
-    }
-
-    @Override
-    public Ingredient.Builder withDisplay(final ItemType... types) {
-        Arrays.stream(types).map(t -> ItemStack.of(t, 1)).forEach(this.displayItems::add);
-        return this;
-    }
-
-    @Override
-    public Ingredient.Builder withDisplay(final ItemStackSnapshot... items) {
-        Arrays.stream(items).map(ItemStackSnapshot::createStack).forEach(this.displayItems::add);
+    public Ingredient.Builder with(CatalogKey itemTag) {
+        this.itemTag = itemTag;
+        this.types = null;
         return this;
     }
 
     @Override
     public Ingredient build() {
-        if (this.predicates.isEmpty() && this.matchItems.equals(this.displayItems)) {
-            final net.minecraft.item.ItemStack[] stacks = this.matchItems.stream().map(ItemStackUtil::toNative).toArray(net.minecraft.item.ItemStack[]::new);
-            return IngredientUtil.fromNative(net.minecraft.item.crafting.Ingredient.fromStacks(stacks));
+        if (this.itemTag != null) {
+            return IngredientUtil.of(this.itemTag);
         }
-        return IngredientUtil.fromNative(new CustomIngredient(this.predicates, this.matchItems, this.displayItems));
+        if (this.types != null && this.types.length > 0) {
+            return IngredientUtil.of(this.types);
+        }
+        throw new IllegalStateException("An ingredient must have at least one ItemType or an item tag");
     }
 }
