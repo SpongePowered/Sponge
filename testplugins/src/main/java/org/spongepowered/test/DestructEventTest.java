@@ -24,49 +24,41 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.type.Exclude;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(name = "Destruct Test", id = "destructtest", version = "0.0.0")
-public class DestructEventTest {
+public class DestructEventTest implements LoadableModule {
 
     private final DestructListener listener = new DestructListener();
-    private boolean registered = false;
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
-                    if (this.registered) {
-                        this.registered = false;
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    } else {
-                        this.registered = true;
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    }
-                    source.sendMessage(Text.of("destructlog set to " + this.registered));
-                    return CommandResult.success();
-                }).build(), "toggledestructlog");
+    @Inject private PluginContainer container;
+
+    @Override
+    public void enable(MessageReceiver src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    @Override
+    public void disable(MessageReceiver src) {
+        Sponge.getEventManager().unregisterListeners(this.listener);
     }
 
     public static class DestructListener {
 
         @Listener
         @Exclude(DestructEntityEvent.Death.class)
-        public void onIgnite(DestructEntityEvent event, @Getter("getTargetEntity") Entity entity) {
-            Text message = Text.of(event.getTargetEntity().getType().getName() + " has been removed by " + event.getCause().root());
+        public void onIgnite(DestructEntityEvent event, @Getter("getEntity") Entity entity) {
+            Text message = Text.of(event.getEntity().getType().getKey() + " has been removed by " + event.getCause().root());
             Sponge.getServer().getBroadcastChannel().send(message);
         }
     }

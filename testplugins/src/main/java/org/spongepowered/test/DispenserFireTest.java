@@ -27,16 +27,13 @@ package org.spongepowered.test;
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.world.LocatableBlock;
 
 @Plugin(id = "dispenserfiretest", name = "Dispenser Fire Test", description = DispenserFireTest.DESCRIPTION, version = "0.0.0")
@@ -48,18 +45,18 @@ public class DispenserFireTest implements LoadableModule {
     private final DispenserFireListener listener = new DispenserFireListener();
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class DispenserFireListener {
         @Listener
         public void onDispense(DropItemEvent.Dispense event, @First LocatableBlock dispenser) {
-            if (dispenser.getBlockState().getType() != BlockTypes.DISPENSER) {
+            if (dispenser.getBlockState().getType() != BlockTypes.DISPENSER.get()) {
                 return;
             }
 
-            dispenser.getWorld().playSound(SoundTypes.ENTITY_GENERIC_EXPLODE, dispenser.getPosition().toDouble(), 2.0);
+            dispenser.getWorld().playSound(SoundTypes.ENTITY_GENERIC_EXPLODE, dispenser.getBlockPosition().toDouble(), 2.0);
         }
     }
 }

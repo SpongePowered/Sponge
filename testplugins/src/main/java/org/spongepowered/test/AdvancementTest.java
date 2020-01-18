@@ -24,11 +24,11 @@
  */
 package org.spongepowered.test;
 
-import com.flowpowered.math.vector.Vector2d;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.slf4j.Logger;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -40,11 +40,10 @@ import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.tileentity.carrier.Furnace;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.block.entity.carrier.furnace.Furnace;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.advancement.AdvancementEvent;
@@ -55,17 +54,20 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.event.registry.RegistryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.InventoryKeys;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.math.vector.Vector2d;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,12 +78,12 @@ public class AdvancementTest implements LoadableModule {
 
     public static final String ID = "advancement_test";
 
-    private static final String ADVANCEMENT_TREE = "dirt";
-    private static final String ROOT_ADVANCEMENT = "dirt";
+    private static final CatalogKey ADVANCEMENT_TREE = CatalogKey.of(ID, "dirt");
+    private static final CatalogKey ROOT_ADVANCEMENT = CatalogKey.of(ID,"dirt");
     private static final String BREAK_DIRT_CRITERION = "broken_dirt";
-    private static final String BREAK_DIRT_ADVANCEMENT = "dirt_digger";
-    private static final String COOK_DIRT_ADVANCEMENT = "dirt_cooker";
-    private static final String SUICIDAL_ADVANCEMENT = "suicidal";
+    private static final CatalogKey BREAK_DIRT_ADVANCEMENT = CatalogKey.of(ID, "dirt_digger");
+    private static final CatalogKey COOK_DIRT_ADVANCEMENT = CatalogKey.of(ID, "dirt_cooker");
+    private static final CatalogKey SUICIDAL_ADVANCEMENT = CatalogKey.of(ID, "suicidal");
     private static final String TRIGGER = "my_trigger";
 
     @Inject private Logger logger;
@@ -98,7 +100,7 @@ public class AdvancementTest implements LoadableModule {
 
     @SuppressWarnings("rawtypes")
     @Listener
-    public void onRegisterTriggers(GameRegistryEvent.Register<Trigger> event) {
+    public void onRegisterTriggers(RegistryEvent.Catalog<Trigger> event) {
         this.logger.info("Advancements test source: " + this.pluginContainer.getSource().orElse(null));
         Trigger trigger = Trigger.builder()
                 .typeSerializableConfig(MyTriggerConfig.class)
@@ -107,7 +109,7 @@ public class AdvancementTest implements LoadableModule {
                     final float value = random.nextFloat();
                     final float chance = triggerEvent.getTrigger().getConfiguration().chance;
                     triggerEvent.setResult(value < chance);
-                    triggerEvent.getTargetEntity().sendMessage(Text.of(value + " < " + chance + " -> " + triggerEvent.getResult()));
+                    triggerEvent.getPlayer().sendMessage(Text.of(value + " < " + chance + " -> " + triggerEvent.getResult()));
                 })
                 .id(TRIGGER)
                 .build();
@@ -115,29 +117,29 @@ public class AdvancementTest implements LoadableModule {
     }
 
     @Listener
-    public void onRegisterAdvancementTrees(GameRegistryEvent.Register<AdvancementTree> event) {
+    public void onRegisterAdvancementTrees(RegistryEvent.Catalog<AdvancementTree> event) {
         this.logger.info("Loading advancement trees...");
         // Create the advancement tree
-        Advancement rootAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + ROOT_ADVANCEMENT).get();
+        Advancement rootAdvancement = Sponge.getRegistry().getCatalogRegistry().get(Advancement.class, ROOT_ADVANCEMENT).get();
         AdvancementTree advancementTree = AdvancementTree.builder()
                 .rootAdvancement(rootAdvancement)
                 .background("minecraft:textures/blocks/dirt.png")
-                .id(ADVANCEMENT_TREE)
+                .key(ADVANCEMENT_TREE)
                 .build();
         event.register(advancementTree);
     }
 
     @Listener
-    public void onRegisterAdvancements(GameRegistryEvent.Register<Advancement> event) {
+    public void onRegisterAdvancements(RegistryEvent.Catalog<Advancement> event) {
         this.logger.info("Loading advancements...");
         // Create the root advancement
         Advancement rootAdvancement = Advancement.builder()
                 .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.DIRT)
+                        .icon(ItemTypes.DIRT.get())
                         .title(Text.of("Dirt? Dirt!"))
                         .build())
-                .criterion(AdvancementCriterion.DUMMY)
-                .id(ROOT_ADVANCEMENT)
+                .criterion(AdvancementCriterion.dummy())
+                .key(ROOT_ADVANCEMENT)
                 .build();
         event.register(rootAdvancement);
 
@@ -149,49 +151,49 @@ public class AdvancementTest implements LoadableModule {
         Advancement breakDirtAdvancement = Advancement.builder()
                 .parent(rootAdvancement)
                 .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.STONE_SHOVEL)
+                        .icon(ItemTypes.STONE_SHOVEL.get())
                         .title(Text.of("Digger"))
                         .description(Text.of("Start digging."))
                         .build())
                 .criterion(breakDirtCriterion)
-                .id(BREAK_DIRT_ADVANCEMENT)
+                .key(BREAK_DIRT_ADVANCEMENT)
                 .build();
         event.register(breakDirtAdvancement);
 
         // Create the cook dirt advancement
         Advancement cookDirtAdvancement = Advancement.builder()
                 .parent(rootAdvancement)
-                .criterion(AdvancementCriterion.DUMMY)
+                .criterion(AdvancementCriterion.dummy())
                 .displayInfo(DisplayInfo.builder()
-                        .icon(ItemTypes.FURNACE)
+                        .icon(ItemTypes.FURNACE.get())
                         .title(Text.of("Dirty cook"))
                         .description(Text.of("Try to cook dirt"))
-                        .type(AdvancementTypes.CHALLENGE)
+                        .type(AdvancementTypes.CHALLENGE.get())
                         .build())
-                .id(COOK_DIRT_ADVANCEMENT)
+                .key(COOK_DIRT_ADVANCEMENT)
                 .build();
         event.register(cookDirtAdvancement);
 
-        event.getRegistryModule().getById("minecraft:adventure_root").ifPresent(parent -> {
+        Sponge.getRegistry().getCatalogRegistry().get(Advancement.class, CatalogKey.of("minecraft", "adventure_root")).ifPresent(parent -> {
             // Create the suicidal advancement
             Advancement suicidalAdvancement = Advancement.builder()
                     .parent(parent)
-                    .criterion(AdvancementCriterion.DUMMY)
+                    .criterion(AdvancementCriterion.dummy())
                     .displayInfo(DisplayInfo.builder()
-                            .icon(ItemTypes.TNT)
+                            .icon(ItemTypes.TNT.get())
                             .title(Text.of("Suicidal?"))
                             .description(Text.of("Put TNT in a burning furnace"))
-                            .type(AdvancementTypes.CHALLENGE)
+                            .type(AdvancementTypes.CHALLENGE.get())
                             .hidden(true)
                             .build())
-                    .id(SUICIDAL_ADVANCEMENT)
+                    .key(SUICIDAL_ADVANCEMENT)
                     .build();
             event.register(suicidalAdvancement);
         });
     }
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.pluginContainer, this.listener);
     }
 
@@ -199,13 +201,13 @@ public class AdvancementTest implements LoadableModule {
 
         @Listener
         public void onPlayerJoin(ClientConnectionEvent.Join event) {
-            Advancement rootAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + ROOT_ADVANCEMENT).get();
-            event.getTargetEntity().getProgress(rootAdvancement).grant();
+            Advancement rootAdvancement = Sponge.getRegistry().getCatalogRegistry().get(Advancement.class, ROOT_ADVANCEMENT).get();
+            event.getPlayer().getProgress(rootAdvancement).grant();
         }
 
         @Listener
         public void onGenerateTreeLayout(AdvancementTreeEvent.GenerateLayout event) {
-            AdvancementTree advancementTree = Sponge.getRegistry().getType(AdvancementTree.class, ID + ":" + ADVANCEMENT_TREE).get();
+            AdvancementTree advancementTree = Sponge.getRegistry().getCatalogRegistry().get(AdvancementTree.class, ADVANCEMENT_TREE).get();
             if (event.getTree() != advancementTree) {
                 return;
             }
@@ -248,18 +250,25 @@ public class AdvancementTest implements LoadableModule {
 
         @Listener
         public void onChangeBlock(ChangeBlockEvent.Break event, @First Player player) {
-            Trigger<?> trigger = Sponge.getRegistry().getType(Trigger.class, ID + ":" + TRIGGER).get();
-            Advancement breakDirtAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + BREAK_DIRT_ADVANCEMENT).get();
-            Criterion breakDirtCriterion = Sponge.getRegistry().getType(Criterion.class, ID + ":" + BREAK_DIRT_CRITERION).get();
+            Trigger<?> trigger = Sponge.getRegistry().getCatalogRegistry().get(Trigger.class, CatalogKey.of(ID, TRIGGER)).get();
+            Advancement breakDirtAdvancement = Sponge.getRegistry().getCatalogRegistry().get(Advancement.class, BREAK_DIRT_ADVANCEMENT).get();
+            Criterion breakDirtCriterion = Sponge.getRegistry().getCatalogRegistry().get(Criterion.class, CatalogKey.of(ID, BREAK_DIRT_CRITERION)).get();
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-                if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
-                        (transaction.getOriginal().getState().getType() == BlockTypes.DIRT ||
-                                transaction.getOriginal().getState().getType() == BlockTypes.GRASS)) {
+                BlockType originalType = transaction.getOriginal().getState().getType();
+                BlockType finalType = transaction.getFinal().getState().getType();
+                if (finalType == BlockTypes.AIR.get() &&
+                        (originalType == BlockTypes.DIRT.get() ||
+                                originalType == BlockTypes.GRASS.get())) {
 
                     player.getProgress(breakDirtAdvancement).get((ScoreAdvancementCriterion) breakDirtCriterion).get().add(1);
-                } else if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
-                        (transaction.getOriginal().getState().getType() == BlockTypes.LEAVES ||
-                                transaction.getOriginal().getState().getType() == BlockTypes.LEAVES2)) {
+                } else if (finalType == BlockTypes.AIR.get() &&
+                        (
+                         originalType == BlockTypes.ACACIA_LEAVES.get() ||
+                         originalType == BlockTypes.BIRCH_LEAVES.get() ||
+                         originalType == BlockTypes.DARK_OAK_LEAVES.get() ||
+                         originalType == BlockTypes.JUNGLE_LEAVES.get() ||
+                         originalType == BlockTypes.OAK_LEAVES.get() ||
+                         originalType == BlockTypes.SPRUCE_LEAVES.get())) {
                     trigger.trigger(player);
                 }
             }
@@ -268,10 +277,7 @@ public class AdvancementTest implements LoadableModule {
         @SuppressWarnings("ConstantConditions")
         @Listener
         public void onChangeInventory(ChangeInventoryEvent event, @First Player player,
-                                      @Getter("getTargetInventory") CarriedInventory<?> container) {
-            if (!container.getName().get().equals("Furnace")) {
-                return;
-            }
+                                      @Getter("getInventory") CarriedInventory<?> container) {
             final Carrier carrier = container.getCarrier().orElse(null);
             if (!(carrier instanceof Furnace)) {
                 return;
@@ -282,14 +288,14 @@ public class AdvancementTest implements LoadableModule {
             if (max <= 0 || passed >= max) {
                 return;
             }
-            Advancement cookDirtAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + COOK_DIRT_ADVANCEMENT).get();
-            Advancement suicidalAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + SUICIDAL_ADVANCEMENT).get();
+            Advancement cookDirtAdvancement = Sponge.getRegistry().getCatalogRegistry().get(Advancement.class, COOK_DIRT_ADVANCEMENT).get();
+            Advancement suicidalAdvancement = Sponge.getRegistry().getCatalogRegistry().get(Advancement.class, SUICIDAL_ADVANCEMENT).get();
             for (SlotTransaction transaction : event.getTransactions()) {
-                if (transaction.getSlot().getInventoryProperty(SlotIndex.class).get().getValue() == 0) {
-                    if (transaction.getFinal().getType() == ItemTypes.DIRT) {
+                if (transaction.getSlot().get(InventoryKeys.SLOT_INDEX).orElse(-1) == 0) {
+                    if (transaction.getFinal().getType() == ItemTypes.DIRT.get()) {
                         player.getProgress(cookDirtAdvancement).grant();
-                    } else if (suicidalAdvancement != null && (transaction.getFinal().getType() == ItemTypes.TNT ||
-                            transaction.getFinal().getType() == ItemTypes.TNT_MINECART)) {
+                    } else if (suicidalAdvancement != null && (transaction.getFinal().getType() == ItemTypes.TNT.get() ||
+                            transaction.getFinal().getType() == ItemTypes.TNT_MINECART.get())) {
                         player.getProgress(suicidalAdvancement).grant();
                         final Explosion explosion = Explosion.builder()
                                 .location(furnace.getLocation())
@@ -298,6 +304,7 @@ public class AdvancementTest implements LoadableModule {
                                 .shouldDamageEntities(true)
                                 .radius(7)
                                 .build();
+
                         explosion.getWorld().triggerExplosion(explosion);
                     }
                 }
@@ -306,12 +313,12 @@ public class AdvancementTest implements LoadableModule {
 
         @Listener
         public void onCriterionGrant(CriterionEvent.Grant event) {
-            event.getTargetEntity().sendMessage(Text.of(TextColors.GREEN, "Congratulations on achieving criterion " + event.getCriterion().getName()));
+            event.getPlayer().sendMessage(Text.of(TextColors.GREEN, "Congratulations on achieving criterion " + event.getCriterion().getName()));
         }
 
         @Listener
         public void onAdvancementGrant(AdvancementEvent.Grant event) {
-            event.getTargetEntity().sendMessage(Text.of(TextColors.BLUE, "You achieved advancement " + event.getAdvancement().getName()));
+            event.getPlayer().sendMessage(Text.of(TextColors.BLUE, "You achieved advancement " + event.getAdvancement().getName()));
         }
     }
 }

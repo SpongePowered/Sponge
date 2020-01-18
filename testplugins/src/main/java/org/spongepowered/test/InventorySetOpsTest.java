@@ -67,7 +67,7 @@ public class InventorySetOpsTest implements LoadableModule {
 
     @SuppressWarnings("deprecation")
     private void testIntersect() {
-        ViewableInventory chest = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3).completeStructure().build();
+        ViewableInventory chest = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3.get()).completeStructure().build();
 
         Inventory firstSlots = chest.query(SlotMatchers.index(0));
         Inventory firstRow = chest.query(InventoryRow.class).get().children().get(0);
@@ -79,7 +79,7 @@ public class InventorySetOpsTest implements LoadableModule {
     @SuppressWarnings("deprecation")
     private void testUnion() {
 
-        ViewableInventory chest = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3).completeStructure().build();
+        ViewableInventory chest = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3.get()).completeStructure().build();
 
         Inventory firstSlots = chest.query(SlotMatchers.index(0));
         Inventory firstRow = chest.query(InventoryRow.class).get().children().get(0);
@@ -113,7 +113,7 @@ public class InventorySetOpsTest implements LoadableModule {
                         nugget = true;
                     }
                     if (nugget && ItemTypes.IRON_INGOT.equals(transaction.getOriginal().getType())) {
-                        transaction.setCustom(ItemStack.of(ItemTypes.GOLD_INGOT, transaction.getOriginal().getQuantity()));
+                        transaction.setCustom(ItemStack.of(ItemTypes.GOLD_INGOT.get(), transaction.getOriginal().getQuantity()));
                     }
                 }
             }

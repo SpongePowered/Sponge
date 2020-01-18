@@ -24,17 +24,18 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -42,8 +43,6 @@ import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.selector.Selector;
-
-import javax.inject.Inject;
 
 @Plugin(id = "selectortexttest", name = "Selector Text test", description = "A plugin to test selector texts", version = "0.0.0")
 public class SelectorTextTest {
@@ -53,47 +52,48 @@ public class SelectorTextTest {
     private static final Text TWO = Text.of(TextColors.GREEN, Text.of("2."));
 
     @Inject private Logger logger;
+    @Inject private PluginContainer container;
 
     @Listener
     public void onGameStartingServer(GameStartingServerEvent event) {
         //"/scoreboard objectives add test dummy test"
         Sponge.getCommandManager().register(
-                this,
-                CommandSpec.builder()
-                        .executor(this::showTest)
-                        .description(Text.of("Creates a dummy objective 'test', adds 1 to it, then shows you the ScoreText"))
+                this.container,
+                Command.builder()
+                        .setExecutor(this::showTest)
+                        .setShortDescription(Text.of("Creates a dummy objective 'test', adds 1 to it, then shows you the ScoreText"))
                         .build(),
                 "scoretext"
         );
     }
 
-    private CommandResult showTest(CommandSource src, CommandContext ctx) throws CommandException {
-        if (!(src instanceof Player)) {
+    private CommandResult showTest(CommandContext ctx) throws CommandException {
+        if (!(ctx.getSubject() instanceof Player)) {
             throw new CommandException(ERROR_PLAYER);
         }
-        final Player player = (Player) src;
-        Sponge.getCommandManager().process(src, "scoreboard objectives add test dummy test");
-        Sponge.getCommandManager().process(src, "scoreboard players add @p test 1");
+        final Player player = (Player) ctx.getSubject();
+        Sponge.getCommandManager().process(player, "scoreboard objectives add test dummy test");
+        Sponge.getCommandManager().process(player, "scoreboard players add @p test 1");
 
         final Scoreboard sb = Sponge.getServer().getServerScoreboard().get();
         final Objective test = sb.getObjective("test").get();
         final Score score = test.getScore(player.getTeamRepresentation()).get();
 
-        src.sendMessage(ONE);
+        ctx.getMessageReceiver().sendMessage(ONE);
         //This should work, Score should remember the player and objective.
         try {
-            src.sendMessage(Text.of(TextColors.GREEN, Text.of(score)));
+            ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GREEN, Text.of(score)));
         } catch (RuntimeException e){
-            src.sendMessage(Text.of(TextColors.RED, Text.of((e.getMessage() == null) ? "null" : e.getMessage())));
+            ctx.getMessageReceiver().sendMessage(Text.of(TextColors.RED, Text.of((e.getMessage() == null) ? "null" : e.getMessage())));
             this.logger.error("1. Error: ", e);
         }
 
-        src.sendMessage(TWO);
+        ctx.getMessageReceiver().sendMessage(TWO);
         //This should pass, it should display the name of the player to the player.
         try {
-            src.sendMessage(Text.of(TextColors.GREEN, Text.of(Selector.parse("@p"))));
+            ctx.getMessageReceiver().sendMessage(Text.of(TextColors.GREEN, Text.of(Selector.parse("@p"))));
         } catch (RuntimeException e){
-            src.sendMessage(Text.of(TextColors.RED, Text.of(e.getMessage())));
+            ctx.getMessageReceiver().sendMessage(Text.of(TextColors.RED, Text.of(e.getMessage())));
             this.logger.error("2. Error: ", e);
         }
 

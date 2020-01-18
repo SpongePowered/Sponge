@@ -34,9 +34,9 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Test Potion Types
@@ -55,8 +55,8 @@ public class PotionTypeTest implements LoadableModule {
     }
 
     private ItemStack getRandomPotion() {
-        ItemStack potion = ItemStack.of(ItemTypes.POTION, 1);
-        List<PotionType> potions = new ArrayList<>(Sponge.getRegistry().getAllOf(PotionType.class));
+        ItemStack potion = ItemStack.of(ItemTypes.POTION.get(), 1);
+        List<PotionType> potions = Sponge.getRegistry().getCatalogRegistry().getAllOf(PotionType.class).collect(Collectors.toList());
         int i = new Random().nextInt(potions.size());
         potion.offer(Keys.POTION_TYPE, potions.get(i));
         return potion;

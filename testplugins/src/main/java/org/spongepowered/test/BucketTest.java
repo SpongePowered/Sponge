@@ -26,24 +26,17 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.filter.type.Exclude;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(id = "bucket_cancel_test", name = "Bucket Cancel Test", description = "Bucket Cancel Test", version = "0.0.0")
 public class BucketTest implements LoadableModule {
@@ -54,7 +47,7 @@ public class BucketTest implements LoadableModule {
 
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -76,7 +69,7 @@ public class BucketTest implements LoadableModule {
         @Listener
         public void onInteract(InteractBlockEvent.Secondary event, @Root Player player) {
             event.getContext().get(EventContextKeys.USED_ITEM).ifPresent(used -> {
-                if (used.getType() == ItemTypes.WATER_BUCKET) {
+                if (used.getType() == ItemTypes.WATER_BUCKET.get()) {
                     event.setCancelled(true);
                 }
             });

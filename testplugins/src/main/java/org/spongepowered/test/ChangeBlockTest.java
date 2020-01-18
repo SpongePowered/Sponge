@@ -27,10 +27,9 @@ package org.spongepowered.test;
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -40,6 +39,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 @Plugin(id = "change_block_test", name = "ChangeBlock Listener Test", description = "log Change Block event", version = "0.0.0")
@@ -51,20 +51,20 @@ public class ChangeBlockTest implements LoadableModule {
 
     @Listener
     public void onPreInit(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                .executor(((src, args) -> {
-                    if (!(src instanceof Player)) {
+        Sponge.getCommandManager().register(this.container, Command.builder()
+                .setExecutor(((context) -> {
+                    if (!(context.getSubject() instanceof Player)) {
                         throw new CommandException(Text.of(TextColors.RED, "Must be a player to use this command!"));
                     }
                     Sponge.getEventManager().registerListeners(this.container, this.listener);
-                    ((Player) src).getLocation().sub(0, 1, 0).setBlock(BlockTypes.AIR.getDefaultState());
+                    ((Player) context.getSubject()).getLocation().sub(0, 1, 0).setBlock(BlockTypes.AIR.get().getDefaultState());
                     Sponge.getEventManager().unregisterListeners(this.listener);
                     return CommandResult.success();
                 })).build(), "changeblocktest");
     }
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 

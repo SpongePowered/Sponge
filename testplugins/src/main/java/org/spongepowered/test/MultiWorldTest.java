@@ -24,38 +24,45 @@
  */
 package org.spongepowered.test;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldArchetypes;
+import org.spongepowered.api.world.gen.GeneratorTypes;
+import org.spongepowered.api.world.server.WorldRegistration;
 import org.spongepowered.api.world.storage.WorldProperties;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Plugin(id = "multi-world-test", name = "Multi World Test", version = "0.0.0")
 public final class MultiWorldTest implements LoadableModule {
 
     @Override
-    public void disable(CommandSource src) {
-        Sponge.getServer().getWorld("temp").ifPresent(world -> Sponge.getServer().unloadWorld(world));
+    public void disable(MessageReceiver src) {
+        Sponge.getServer().getWorldManager().getWorld("temp").ifPresent(world -> Sponge.getServer().getWorldManager().unloadWorld(world));
     }
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         try {
-            final WorldArchetype archetype = Sponge.getRegistry().getType(WorldArchetype.class, "multi-world-test:overnether").orElse(
+            CatalogKey key = CatalogKey.of("multi-world-test", "overnether");
+            final WorldArchetype archetype = Sponge.getRegistry().getCatalogRegistry().get(WorldArchetype.class, key).orElse(
                 WorldArchetype.builder().
-                    from(WorldArchetypes.THE_NETHER)
-                    .serializationBehavior(SerializationBehaviors.NONE)
-                    .generatorType(GeneratorTypes.OVERWORLD)
-                    .build("multi-world-test:overnether", "Overnether")
+                    from(WorldArchetypes.THE_NETHER.get())
+                    .serializationBehavior(SerializationBehaviors.NONE.get())
+                    .generatorType(GeneratorTypes.OVERWORLD.get())
+                    .key(key)
+                    .build()
             );
-            final WorldProperties worldProperties = Sponge.getServer().createWorldProperties("temp", archetype);
+            WorldRegistration registration = WorldRegistration.builder().directoryName("temp").build();
 
-            Sponge.getServer().loadWorld(worldProperties);
+            Optional<WorldProperties> properties = Sponge.getServer().getWorldManager().createProperties(registration, archetype);
+
+            Sponge.getServer().getWorldManager().loadWorld(properties.get());
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -35,6 +35,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.tileentity.SmeltEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -46,7 +47,7 @@ public class FurnaceSmeltTest implements LoadableModule {
     private final FurnaceSmeltListener listener = new FurnaceSmeltListener();
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 

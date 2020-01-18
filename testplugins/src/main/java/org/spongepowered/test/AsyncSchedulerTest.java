@@ -27,9 +27,11 @@ package org.spongepowered.test;
 import com.google.inject.Inject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +40,7 @@ public class AsyncSchedulerTest implements LoadableModule {
 
     private final Logger logger;
 
-    @Nullable private Task task;
+    @Nullable private ScheduledTask task;
 
     @Inject
     public AsyncSchedulerTest(Logger logger) {
@@ -46,9 +48,8 @@ public class AsyncSchedulerTest implements LoadableModule {
     }
 
     @Override
-    public void enable(CommandSource src) {
-        this.task = Task.builder()
-                .async()
+    public void enable(MessageReceiver src) {
+        this.task = Sponge.getAsyncScheduler().submit(Task.builder()
                 .delay(5, TimeUnit.SECONDS)
                 .interval(5, TimeUnit.SECONDS)
                 .execute(task -> {
@@ -61,11 +62,11 @@ public class AsyncSchedulerTest implements LoadableModule {
                     }
                     this.logger.info("Async Logger Test End");
                 })
-                .submit(this);
+                .build());
     }
 
     @Override
-    public void disable(CommandSource src) {
+    public void disable(MessageReceiver src) {
         if (this.task != null) {
             this.task.cancel();
         }

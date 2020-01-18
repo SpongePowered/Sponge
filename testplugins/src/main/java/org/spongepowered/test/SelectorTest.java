@@ -24,16 +24,10 @@
  */
 package org.spongepowered.test;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -48,6 +42,8 @@ import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.WorldManager;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,12 +68,12 @@ public class SelectorTest {
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                        CommandSpec.builder()
-                            .arguments(new SelectorArgument())
-                            .executor((source, context) -> {
+                        Command.builder()
+                            .parameters(new SelectorArgument())
+                            .setExecutor((context) -> {
                                 Collection<Entity> selectedEntities = context.getAll(ARG_KEY);
                                 if (selectedEntities.isEmpty()) {
-                                    source.sendMessage(NOTHING_SELECTED);
+                                    context.getMessageReceiver().sendMessage(NOTHING_SELECTED);
                                     return CommandResult.empty();
                                 }
 
@@ -91,10 +87,12 @@ public class SelectorTest {
                                 Vector3d currentPosition = context.requireOne(ORIGIN_KEY);
                                 World world;
 
-                                if (source instanceof Locatable) {
-                                    world = ((Locatable) source).getWorld();
+                                if (context.getSubject() instanceof Locatable) {
+                                    world = ((Locatable) context.getSubject()).getWorld();
                                 } else {
-                                    world = Sponge.getServer().getWorld(Sponge.getServer().getDefaultWorld().get().getUniqueId()).get();
+
+                                    WorldManager worldManager = Sponge.getServer().getWorldManager();
+                                    world = worldManager.getWorld(worldManager.getDefaultPropertiesName()).get();
                                 }
 
                                 List<Text> contents = new ArrayList<>();
@@ -110,13 +108,13 @@ public class SelectorTest {
                                     contents.add(
                                             Text.of(
                                                 isPlayer ? TextColors.YELLOW : TextColors.GRAY,
-                                                entity.getWorld().getName(),
+                                                entity.getWorld().getProperties().getName(),
                                                 " [", entity.getLocation().getBlockX(), ", ",
                                                 entity.getLocation().getBlockY(), ", ",
                                                 entity.getLocation().getBlockZ(), "] (d: ", distance, ") -> ",
-                                                isPlayer ? ((Player) entity).getName() : entity.getType().getName()));
+                                                isPlayer ? ((Player) entity).getName() : entity.getType().getKey()));
                                 }
-                                paginationBuilder.contents(contents).sendTo(source);
+                                paginationBuilder.contents(contents).sendTo(context.getMessageReceiver());
                                 return CommandResult.success();
                             })
                             .build(),

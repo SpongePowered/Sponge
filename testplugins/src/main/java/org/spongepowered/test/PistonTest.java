@@ -31,15 +31,15 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.block.tileentity.TileEntityTypes;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.block.entity.BlockEntityTypes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(id = "pistontest", name = "Piston Test", description = "A plugin to test cancelling pistons", version = "0.0.0")
 public class PistonTest implements LoadableModule {
@@ -50,7 +50,7 @@ public class PistonTest implements LoadableModule {
     private final PistonListener listener = new PistonListener();
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -61,8 +61,8 @@ public class PistonTest implements LoadableModule {
         @Listener
         @Exclude(ChangeBlockEvent.Post.class)
         public void onChangeBlock(ChangeBlockEvent event) {
-            final TileEntityType tileEntityType = event.getCause().first(TileEntity.class).map(TileEntity::getType).orElse(TileEntityTypes.CHEST);
-            if (tileEntityType == TileEntityTypes.PISTON) {
+            final BlockEntityType tileEntityType = event.getCause().first(BlockEntity.class).map(BlockEntity::getType).orElse(BlockEntityTypes.CHEST.get());
+            if (tileEntityType == BlockEntityTypes.PISTON.get()) {
                 event.setCancelled(true);
                 return;
             }
@@ -70,7 +70,7 @@ public class PistonTest implements LoadableModule {
                 final BlockSnapshot original = transaction.getOriginal();
                 final BlockState state = original.getState();
                 final BlockType type = state.getType();
-                if (type == BlockTypes.PISTON || type == BlockTypes.PISTON_EXTENSION || type == BlockTypes.PISTON_HEAD || type == BlockTypes.STICKY_PISTON) {
+                if (type == BlockTypes.PISTON.get() || type == BlockTypes.MOVING_PISTON.get() || type == BlockTypes.PISTON_HEAD.get() || type == BlockTypes.STICKY_PISTON.get()) {
                     event.setCancelled(true);
                 }
             });

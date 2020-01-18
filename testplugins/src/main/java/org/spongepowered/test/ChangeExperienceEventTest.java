@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test;
 
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ChangeEntityExperienceEvent;
@@ -44,15 +43,13 @@ public class ChangeExperienceEventTest {
         if (!this.enabled) {
             return;
         }
-        MessageChannel target = event.getTargetEntity() instanceof Player ? MessageChannel.fixed((Player)event.getTargetEntity()) : MessageChannel.TO_NONE;
-        int xpChange = event.getFinalData().totalExperience().get() - event.getOriginalData().totalExperience().get();
+        MessageChannel target = event.getEntity() instanceof Player ? MessageChannel.to((Player)event.getEntity()) : MessageChannel.toNone();
+        int xpChange = event.getExperience() - event.getOriginalExperience();
         if (xpChange > 0) {
             Text text;
             if (Math.random() < 0.1) {
                 xpChange *= 2;
-                event.getFinalData().set(Keys.TOTAL_EXPERIENCE, event.getOriginalData().totalExperience().get() + xpChange);
-                event.getFinalData().set(Keys.TOTAL_EXPERIENCE,
-                        event.getOriginalData().totalExperience().get() + xpChange);
+                event.setExperience(event.getOriginalExperience() + xpChange);
                 text = Text.of(TextColors.GREEN, "You just gained ",
                         TextColors.GOLD, xpChange,
                         TextColors.GREEN, " XP ",
@@ -68,12 +65,10 @@ public class ChangeExperienceEventTest {
             Text text;
             if (Math.random() < 0.1) {
                 xpChange *= 2;
-                if (-xpChange < event.getOriginalData().totalExperience().get()) {
-                    xpChange = -event.getOriginalData().totalExperience().get();
+                if (-xpChange < event.getOriginalExperience()) {
+                    xpChange = -event.getOriginalExperience();
                 }
-                event.getFinalData().set(Keys.TOTAL_EXPERIENCE, event.getOriginalData().totalExperience().get() + xpChange);
-                event.getFinalData().set(Keys.TOTAL_EXPERIENCE,
-                        event.getOriginalData().totalExperience().get() + xpChange);
+                event.setExperience(event.getOriginalExperience() + xpChange);
                 text = Text.of(TextColors.DARK_RED, "You just lost ",
                         TextColors.RED, -xpChange,
                         TextColors.DARK_RED, " XP ",

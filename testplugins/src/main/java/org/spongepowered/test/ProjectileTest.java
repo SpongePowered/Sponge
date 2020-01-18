@@ -26,20 +26,17 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.event.filter.type.Exclude;
-import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
@@ -58,7 +55,7 @@ public class ProjectileTest implements LoadableModule {
     private final ProjListener listener = new ProjListener();
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -67,35 +64,37 @@ public class ProjectileTest implements LoadableModule {
         @Exclude(UseItemStackEvent.Tick.class)
         @Listener
         public void onUseItemStack(UseItemStackEvent event) {
-            title(event.getClass().getSimpleName());
-            broadcast("Cause", event.getCause());
-            broadcast("Stack", event.getItemStackInUse());
+            this.title(event.getClass().getSimpleName());
+            this.broadcast("Cause", event.getCause());
+            this.broadcast("Stack", event.getItemStackInUse());
         }
 
         @Listener
         public void onLaunchProjectile(LaunchProjectileEvent event) {
-            title("LaunchProjectile");
-            broadcast("     Cause", event.getCause());
-            broadcast("Projectile", event.getTargetEntity());
+            this.title("LaunchProjectile");
+            this.broadcast("     Cause", event.getCause());
+            this.broadcast("Projectile", event.getProjectile());
         }
 
         @Listener
         public void onEntityCreate(ConstructEntityEvent.Post event) {
-            if (!(event.getTargetEntity() instanceof Projectile)) {
+            if (!(event.getEntity() instanceof Projectile)) {
                 return;
             }
-            Projectile proj = (Projectile) event.getTargetEntity();
-            Text creatorText = proj.getCreator().map(creatorUUID ->
-                    Sponge.getServer().getWorlds().stream()
+            Projectile proj = (Projectile) event.getEntity();
+
+            Text creatorText = proj.get(Keys.CREATOR).map(creatorUUID ->
+                    Sponge.getServer().getWorldManager().getWorlds().stream()
                             .map(w -> w.getEntity(creatorUUID))
                             .flatMap(this::streamOpt)
                             .findFirst()
                             .<Text>map(Text::of)
                             .orElse(UNKNOWN)
             ).orElse(UNKNOWN);
-            title("ConstructEntity");
-            broadcast("Shooter", Text.of(proj.getShooter()));
-            broadcast("Creator", creatorText);
+            this.title("ConstructEntity");
+
+            this.broadcast("Shooter", Text.of(proj.get(Keys.SHOOTER)));
+            this.broadcast("Creator", creatorText);
         }
 
         private void title(String title) {

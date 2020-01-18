@@ -67,9 +67,9 @@ public class EnchantEventTestPlugin implements LoadableModule {
         @Listener
         public void onEnchantmentCalc(EnchantItemEvent.CalculateEnchantment event, @First Player player) {
             List<Enchantment> pool = Arrays.asList(
-                    Enchantment.of(EnchantmentTypes.FORTUNE, 5),
-                    Enchantment.of(EnchantmentTypes.EFFICIENCY, 7),
-                    Enchantment.of(EnchantmentTypes.UNBREAKING, 10));
+                    Enchantment.of(EnchantmentTypes.FORTUNE.get(), 5),
+                    Enchantment.of(EnchantmentTypes.EFFICIENCY.get(), 7),
+                    Enchantment.of(EnchantmentTypes.UNBREAKING.get(), 10));
 
             Enchantment.RandomListBuilder builder = Enchantment.randomListBuilder()
                     .seed(event.getSeed())

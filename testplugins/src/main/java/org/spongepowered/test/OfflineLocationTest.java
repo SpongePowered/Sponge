@@ -24,10 +24,10 @@
  */
 package org.spongepowered.test;
 
-import com.flowpowered.math.vector.Vector3d;
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
@@ -35,9 +35,12 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -51,17 +54,18 @@ public class OfflineLocationTest {
 
     private Set<UUID> set = new HashSet<>();
 
+    @Inject private PluginContainer container;
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                .description(Text.of("Teleport while offline"))
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of(TextColors.RED, "Player only."));
+        Sponge.getCommandManager().register(this.container, Command.builder()
+                .setShortDescription(Text.of("Teleport while offline"))
+                .setExecutor((ctx) -> {
+                    if (!(ctx.getSubject() instanceof Player)) {
+                        ctx.getMessageReceiver().sendMessage(Text.of(TextColors.RED, "Player only."));
                         return CommandResult.success();
                     }
-                    Player player = (Player) src;
-                    set.add(player.getUniqueId());
+                    Player player = (Player) ctx.getSubject();
+                    this.set.add(player.getUniqueId());
                     player.kick(Text.of("You got moved"));
                     return CommandResult.success();
                 })
@@ -71,8 +75,9 @@ public class OfflineLocationTest {
     @Listener
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player) {
         UUID uuid = player.getUniqueId();
-        if (set.remove(uuid)) {
-            Sponge.getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
+        if (this.set.remove(uuid)) {
+            Task task = Task.builder().delayTicks(20).execute(() -> this.run(uuid)).build();
+            Sponge.getServer().getScheduler().submit(task);
         }
     }
 

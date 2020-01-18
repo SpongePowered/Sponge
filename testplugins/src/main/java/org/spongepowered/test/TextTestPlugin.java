@@ -24,52 +24,43 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-
-import java.util.Collections;
-import java.util.List;
-
-import javax.annotation.Nullable;
 
 @Plugin(id = "text-test", name = "Text Test", description = "Tests text related functions", version = "0.0.0")
 public class TextTestPlugin {
+    @Inject private PluginContainer container;
 
     @Listener
     public void onInit(GameInitializationEvent event) {
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.text(Text.of("test"), TextSerializers.FORMATTING_CODE, true))
-                        .executor((src, args) -> {
-                            src.sendMessage(args.<Text>requireOne("test"));
+        Parameter.Value<Text> paramTest = Parameter.formattingCodeText().consumeAllRemaining().setKey("test").build();
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .parameters(paramTest)
+                        .setExecutor((ctx) -> {
+                            ctx.getMessageReceiver().sendMessage(ctx.<Text>requireOne(paramTest));
                             return CommandResult.success();
                         }).build(),
                 "test-text-ampersand");
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setExecutor((ctx) -> {
                             Text message = Text.of(
                                     TextColors.YELLOW, "This is ", TextColors.GOLD, TextStyles.BOLD, "BOLD GOLD"
                             );
-                            src.sendMessage(message);
+                            ctx.getMessageReceiver().sendMessage(message);
                             return CommandResult.success();
                         }).build(),
                 "test-text-message");

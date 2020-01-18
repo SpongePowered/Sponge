@@ -26,11 +26,8 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.explosive.FusedExplosive;
-import org.spongepowered.api.entity.explosive.PrimedTNT;
+import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -38,6 +35,7 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 @Plugin(id = "defuseexplosivetest", name = "Defuse Explosive Test", description = "Defuse Explosive", version = "0.0.0")
@@ -47,14 +45,14 @@ public class DefuseExplosiveTest implements LoadableModule {
     private final Listeners listener = new Listeners();
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class Listeners {
         @Listener
         public void onInteractExplosive(InteractEntityEvent.Secondary.MainHand event, @Root Player player) {
-            final Entity entity = event.getTargetEntity();
+            final Entity entity = event.getEntity();
 
             if (!(entity instanceof FusedExplosive)) {
                 return;
@@ -66,7 +64,7 @@ public class DefuseExplosiveTest implements LoadableModule {
             }
 
             ((FusedExplosive) entity).defuse();
-            player.sendMessage(Text.of(TextColors.DARK_GREEN, entity.getType().getName(), " defused"));
+            player.sendMessage(Text.of(TextColors.DARK_GREEN, entity.getType().getKey(), " defused"));
         }
     }
 }

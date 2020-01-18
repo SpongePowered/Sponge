@@ -56,24 +56,24 @@ public class InventoryMenuTest implements LoadableModule {
 
         Inventory inv = Inventory.builder().grid(3, 3).completeStructure().build();
 
-        ItemStackSnapshot disabled = ItemStack.of(ItemTypes.LIGHT_GRAY_STAINED_GLASS_PANE, 1).createSnapshot();
-        ItemStackSnapshot emerald = ItemStack.of(ItemTypes.EMERALD, 1).createSnapshot();
+        ItemStackSnapshot disabled = ItemStack.of(ItemTypes.LIGHT_GRAY_STAINED_GLASS_PANE.get(), 1).createSnapshot();
+        ItemStackSnapshot emerald = ItemStack.of(ItemTypes.EMERALD.get(), 1).createSnapshot();
 
-        ViewableInventory display = ViewableInventory.builder().type(ContainerTypes.GENERIC_3x3)
+        ViewableInventory display = ViewableInventory.builder().type(ContainerTypes.GENERIC_3x3.get())
                 .fillDummy().item(disabled)
                 .slots(Arrays.asList(inv.query(GridInventory.class).get().getSlot(1,1).get()), new Vector2i(1, 1))
                 .completeStructure().build();
-        display.query(GridInventory.class).get().set(1,1, ItemStack.of(ItemTypes.DIAMOND, 1));
+        display.query(GridInventory.class).get().set(1,1, ItemStack.of(ItemTypes.DIAMOND.get(), 1));
 
-        ViewableInventory display2 = ViewableInventory.builder().type(ContainerTypes.GENERIC_3x3)
+        ViewableInventory display2 = ViewableInventory.builder().type(ContainerTypes.GENERIC_3x3.get())
                 .fillDummy()
                 .dummySlots(1, new Vector2i(1,1)).item(emerald)
                 .completeStructure().build();
-        display.query(GridInventory.class).get().set(1,1, ItemStack.of(ItemTypes.DIAMOND, 1));
+        display.query(GridInventory.class).get().set(1,1, ItemStack.of(ItemTypes.DIAMOND.get(), 1));
 
 
         ViewableInventory basicChest = ViewableInventory.builder()
-                .type(ContainerTypes.GENERIC_9x3)
+                .type(ContainerTypes.GENERIC_9x3.get())
                 .completeStructure()
                 .build();
 

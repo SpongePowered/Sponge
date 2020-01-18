@@ -25,17 +25,14 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.concurrent.TimeUnit;
 
@@ -44,10 +41,10 @@ import javax.annotation.Nullable;
 @Plugin(id = "activeitemdatatest", name = "Active Item Data Test", description = "Testing some nice active item data.", version = "0.0.0")
 public final class ActiveItemDataTest implements LoadableModule {
 
-    @Nullable private Task task;
+    @Nullable private ScheduledTask task;
 
     @Override
-    public void disable(CommandSource src) {
+    public void disable(MessageReceiver src) {
         if (this.task != null) {
             this.task.cancel();
             Sponge.getServer().getBroadcastChannel().send(Text.of("Active item task cancelled."));
@@ -55,22 +52,22 @@ public final class ActiveItemDataTest implements LoadableModule {
     }
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         if (this.task != null) {
             this.task.cancel();
         }
-        this.task = Task.builder()
+        this.task = Sponge.getServer().getScheduler().submit(Task.builder()
                 .interval(5, TimeUnit.SECONDS)
                 .name("activeitemtask")
                 .execute(() -> {
                     for (Player p : Sponge.getServer().getOnlinePlayers()) {
                         p.sendMessage(Text.of(Text.of("Your active item is " +
-                                p.get(Keys.ACTIVE_ITEM).orElse(ItemStackSnapshot.NONE).getType().getId())));
-                        p.offer(Keys.ACTIVE_ITEM, ItemStackSnapshot.NONE);
+                                p.get(Keys.ACTIVE_ITEM).orElse(ItemStackSnapshot.empty()).getType().getKey())));
+                        p.offer(Keys.ACTIVE_ITEM, ItemStackSnapshot.empty());
                     }
                 })
                 .delay(5, TimeUnit.SECONDS)
-                .submit(this);
+                .build());
 
         Sponge.getServer().getBroadcastChannel().send(Text.of("Active item task set."));
     }

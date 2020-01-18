@@ -24,23 +24,22 @@
  */
 package org.spongepowered.test;
 
-import static org.spongepowered.api.command.args.GenericArguments.playerOrSource;
-import static org.spongepowered.api.command.args.GenericArguments.catalogedElement;
-
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.SkullType;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 
@@ -50,42 +49,44 @@ import java.util.function.BiFunction;
 @Plugin(id = "skulltest", name = "Skull Test", description = "A plugin to test Skulls", version = "0.0.0")
 public class SkullTest {
 
-    final static Text SKULL = Text.of("skulltype");
-    private static final Text PLAYER = Text.of("player");
+    @Inject private PluginContainer container;
+
+    private static Parameter.Value<Player> PARAM_PLAYER = Parameter.playerOrSource().setKey("player").build();
+    private static Parameter.Value<SkullType> PARAM_SKULL = Parameter.catalogedElement(SkullType.class).setKey("skulltype").build();
 
     @Listener
     public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .description(Text.of("Gives you your player mobHead"))
-                        .arguments(playerOrSource(PLAYER))
-                        .executor(giveSkull(SkullTest::playerHead))
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setShortDescription(Text.of("Gives you your player mobHead"))
+                        .parameters(PARAM_PLAYER)
+                        .setExecutor(giveSkull(SkullTest::playerHead))
                         .build(),
                 "skullme");
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .description(Text.of("Gives you a Marcs Head Format Blaze"))
-                        .arguments(playerOrSource(PLAYER))
-                        .executor(giveSkull(SkullTest::blazeHead))
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setShortDescription(Text.of("Gives you a Marcs Head Format Blaze"))
+                        .parameters(PARAM_PLAYER)
+                        .setExecutor(giveSkull(SkullTest::blazeHead))
                         .build(),
                 "skullblaze");
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .description(Text.of("Gives you a monster head"))
-                        .arguments(
-                                playerOrSource(PLAYER),
-                                catalogedElement(SKULL, SkullType.class)
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setShortDescription(Text.of("Gives you a monster head"))
+                        .parameters(
+                                PARAM_PLAYER,
+                                PARAM_SKULL
                         )
-                        .executor(giveSkull(SkullTest::mobHead))
+                        .setExecutor(giveSkull(SkullTest::mobHead))
                         .build(),
                 "skullmob");
     }
 
     private static ItemStack.Builder playerHead(CommandContext commandContext, ItemStack.Builder builder) {
         return builder.add(
-                Keys.REPRESENTED_PLAYER, commandContext.<Player>getOne(PLAYER).get().getProfile()
+                Keys.REPRESENTED_PLAYER, commandContext.<Player>getOne(PARAM_PLAYER).get().getProfile()
         );
     }
 
@@ -96,17 +97,17 @@ public class SkullTest {
     }
 
     private static ItemStack.Builder mobHead(CommandContext ctx, ItemStack.Builder builder) {
-        return builder.add(Keys.SKULL_TYPE, ctx.<SkullType>getOne(SKULL).get());
+        return builder.add(Keys.SKULL_TYPE, ctx.<SkullType>getOne(PARAM_SKULL).get());
     }
 
     private static CommandExecutor giveSkull(final BiFunction<CommandContext, ItemStack.Builder, ItemStack.Builder> profile) {
-        return (commandSource, commandContext) -> {
-            if (!(commandSource instanceof Player)) {
+        return (commandContext) -> {
+            if (!(commandContext.getSubject() instanceof Player)) {
                 throw new CommandException(Text.of("CommandSource must be a player"));
             }
-            ItemStack.Builder builder = ItemStack.builder().itemType(ItemTypes.SKULL);
+            ItemStack.Builder builder = ItemStack.builder().itemType(ItemTypes.PLAYER_HEAD);
             profile.apply(commandContext, builder);
-            ((Player) commandSource).getInventory().offer(builder.build());
+            ((Player) commandContext.getSubject()).getInventory().offer(builder.build());
             return CommandResult.success();
         };
     }

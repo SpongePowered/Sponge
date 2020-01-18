@@ -26,15 +26,15 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
-import org.spongepowered.api.entity.projectile.ThrownPotion;
+import org.spongepowered.api.entity.projectile.Potion;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.CollideEvent;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(id = "thrown-potion-test", name = "Thrown Potion Test", description = "A plugin testing that thrown potions have items", version = "0.0.0")
 public class ThrownPotionTest implements LoadableModule {
@@ -43,19 +43,17 @@ public class ThrownPotionTest implements LoadableModule {
 
     private final ThrownPotionListener listener = new ThrownPotionListener();
 
-
-
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class ThrownPotionListener {
 
         @Listener
-        public void onPotionThrown(CollideEvent event, @First ThrownPotion potion) {
-            final RepresentedItemData potionItemData = potion.getPotionItemData();
-            Sponge.getServer().getBroadcastChannel().send(Text.of(potionItemData.item().get()));
+        public void onPotionThrown(CollideEvent event, @First Potion potion) {
+            ItemStackSnapshot itemStackSnapshot = potion.item().get();
+            Sponge.getServer().getBroadcastChannel().send(Text.of(itemStackSnapshot.getTranslation()));
         }
     }
 

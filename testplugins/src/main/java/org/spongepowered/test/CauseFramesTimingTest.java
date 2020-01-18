@@ -24,10 +24,14 @@
  */
 package org.spongepowered.test;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Listener;
@@ -50,21 +54,20 @@ public class CauseFramesTimingTest {
 
     @Listener
     public void init(GameInitializationEvent event) {
-        this.testContextKey = EventContextKey.builder(Integer.class)
-                .id("frames-timing:test")
-                .name("Test numberOfFrames")
+        this.testContextKey = EventContextKey.builder().type(Integer.class)
+                .key(CatalogKey.of("frames-timing", "test"))
                 .type(Integer.class)
                 .build();
 
         Sponge.getCommandManager().register(
                 this,
-                CommandSpec.builder()
-                        .arguments(
+                Command.builder()
+                        .parameters(
                                 GenericArguments.flags()
                                         .valueFlag(GenericArguments.integer(this.numberOfFrames), "-frames", "f")
                                         .valueFlag(GenericArguments.integer(this.numberOfRepeats), "-repeats", "r")
                                         .buildWith(GenericArguments.none()))
-                        .executor((src, context) -> {
+                        .setExecutor((context) -> {
                             int noOfFrames = context.<Integer>getOne(this.numberOfFrames).orElse(50);
                             if (noOfFrames < 1) {
                                 throw new CommandException(Text.of("There must be a positive number of frames!"));
@@ -101,8 +104,7 @@ public class CauseFramesTimingTest {
                                 }
                             }
                             long endTime = System.nanoTime();
-
-                            src.sendMessage(Text.of("Test completed in: ", endTime - startTime, "ns."));
+                            context.getMessageReceiver().sendMessage(Text.of("Test completed in: ", endTime - startTime, "ns."));
                             return CommandResult.success();
                         }).build(),
                 "timecsm"

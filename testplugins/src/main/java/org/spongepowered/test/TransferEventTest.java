@@ -54,7 +54,7 @@ public class TransferEventTest implements LoadableModule {
         @SuppressWarnings("deprecation")
         @Listener
         public void onPreTransferEvent(TransferInventoryEvent.Pre event) {
-            if (event.getSourceInventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.of(ItemStack.of(ItemTypes.BEDROCK, 1))).capacity() != 0) {
+            if (event.getSourceInventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(ItemStack.of(ItemTypes.BEDROCK.get(), 1))).capacity() != 0) {
                 event.setCancelled(true);
             }
         }

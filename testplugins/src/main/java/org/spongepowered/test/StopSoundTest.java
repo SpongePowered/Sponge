@@ -26,18 +26,17 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.effect.sound.SoundCategories;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 @Plugin(id = "stopsoundtest", version = "0.0.0", name = "StopSounds", description = "Stops sounds when right clicking an ender rod")
 public class StopSoundTest implements LoadableModule {
@@ -48,10 +47,8 @@ public class StopSoundTest implements LoadableModule {
 
     private final StopSoundListener listener = new StopSoundListener();
 
-
-
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.pluginContainer, this.listener);
     }
 
@@ -59,16 +56,16 @@ public class StopSoundTest implements LoadableModule {
 
         @Listener
         public void onUseItem(InteractItemEvent event, @First Player player) {
-            if (event.getItemStack().getType() != ItemTypes.END_ROD) {
+            if (event.getItemStack().getType() != ItemTypes.END_ROD.get()) {
                 return;
             }
-            player.playSound(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER, player.getLocation().getPosition(), 1.0);
+            player.playSound(SoundTypes.ENTITY_ENDERMAN_DEATH, SoundCategories.MASTER, player.getLocation().getPosition(), 1.0);
             if (event instanceof InteractItemEvent.Secondary) {
-                PluginContainer pluginContainer = Sponge.getPluginManager().getPlugin(ID).get();
-                Task.builder()
+                Task task = Task.builder()
                         .delayTicks(5)
-                        .execute(() -> player.stopSounds(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER))
-                        .submit(pluginContainer);
+                        .execute(() -> player.stopSounds(SoundTypes.ENTITY_ENDERMAN_DEATH, SoundCategories.MASTER))
+                        .build();
+                Sponge.getServer().getScheduler().submit(task);
             }
         }
     }

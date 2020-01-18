@@ -24,15 +24,15 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -40,6 +40,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -53,35 +54,39 @@ import java.util.stream.Collectors;
 @Plugin(id = "book_pages_test", name = "Book pages test", description = "Tests reading and writing books.", version = "1.0")
 public class BookPagesTest {
 
+    @Inject PluginContainer container;
+    private static Parameter.Value<String> paramText  = Parameter.remainingRawJoinedStrings().setKey("text").build();
+
     @Listener
     public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                    .executor(this::readBook)
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                    .setExecutor(this::readBook)
                     .build(), "readbook");
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.remainingRawJoinedStrings(Text.of("text")))
-                        .executor(this::writeBook)
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .parameters(paramText)
+                        .setExecutor(this::writeBook)
                         .build(), "writebook");
     }
 
-    private CommandResult readBook(CommandSource source, CommandContext context) throws CommandException {
-        if (!(source instanceof Player)) {
+    private CommandResult readBook(CommandContext context) throws CommandException {
+        if (!(context.getSubject() instanceof Player)) {
             throw new CommandException(Text.of("Must be a player!"));
         }
 
-        Player player = (Player) source;
+        Player player = (Player) context.getSubject();
 
         // get the item in hand if it is a book
-        ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND)
-                        .filter(x -> x.getType() == ItemTypes.WRITABLE_BOOK || x.getType() == ItemTypes.WRITTEN_BOOK)
-                        .orElseThrow(() -> new CommandException(Text.of("Must be holding a book!")));
+        ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND.get());
+        if (item.getType() != ItemTypes.WRITABLE_BOOK.get() && item.getType() != ItemTypes.WRITABLE_BOOK.get()) {
+            throw new CommandException(Text.of("Must be holding a book!"));
+        }
 
         List<Text> text;
         Text type = Text.of(item.getTranslation());
-        if (item.getType() == ItemTypes.WRITTEN_BOOK) {
+        if (item.getType() == ItemTypes.WRITTEN_BOOK.get()) {
             // get the standard text
             text = item.get(Keys.BOOK_PAGES).orElseGet(ArrayList::new);
         } else {
@@ -89,25 +94,26 @@ public class BookPagesTest {
             text = item.get(Keys.PLAIN_BOOK_PAGES).map(x -> x.stream().<Text>map(Text::of).collect(Collectors.toList())).orElseGet(ArrayList::new);
         }
 
-        Sponge.getServiceManager().provideUnchecked(PaginationService.class).builder().title(type).contents(text).sendTo(source);
+        Sponge.getServiceManager().provideUnchecked(PaginationService.class).builder().title(type).contents(text).sendTo(context.getMessageReceiver());
         return CommandResult.success();
     }
 
-    private CommandResult writeBook(CommandSource source, CommandContext context) throws CommandException {
-        if (!(source instanceof Player)) {
+    private CommandResult writeBook(CommandContext context) throws CommandException {
+        if (!(context.getSubject() instanceof Player)) {
             throw new CommandException(Text.of("Must be a player!"));
         }
 
-        Player player = (Player) source;
+        Player player = (Player) context.getSubject();
 
         // get the item in hand if it is a book
-        ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND)
-                .filter(x -> x.getType() == ItemTypes.WRITABLE_BOOK || x.getType() == ItemTypes.WRITTEN_BOOK)
-                .orElseThrow(() -> new CommandException(Text.of("Must be holding a book!")));
+        ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND.get());
+        if (item.getType() != ItemTypes.WRITABLE_BOOK.get() && item.getType() != ItemTypes.WRITABLE_BOOK.get()) {
+            throw new CommandException(Text.of("Must be holding a book!"));
+        }
 
-        String toSet = context.requireOne("text");
+        String toSet = context.requireOne(paramText);
         DataTransactionResult result;
-        if (item.getType() == ItemTypes.WRITTEN_BOOK) {
+        if (item.getType() == ItemTypes.WRITTEN_BOOK.get()) {
             // then we need the text representation. We'll assume that we have ampersand encoded for ease of testing.
             result = item.offer(Keys.BOOK_PAGES, Collections.singletonList(TextSerializers.FORMATTING_CODE.deserialize(toSet)));
         } else { // writable

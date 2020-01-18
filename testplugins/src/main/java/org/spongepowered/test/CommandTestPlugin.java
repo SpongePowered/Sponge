@@ -25,20 +25,17 @@
 package org.spongepowered.test;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +44,7 @@ import javax.annotation.Nullable;
 
 @Plugin(id = "command-test", name = "Command Test", description = "Tests command related functions", version = "0.0.0")
 public class CommandTestPlugin {
+    @Inject PluginContainer container;
 
     private final ImmutableMap<String, String> CHOICES = ImmutableMap.<String, String>builder()
             .put("opt1", "opt1")
@@ -58,125 +56,125 @@ public class CommandTestPlugin {
     public void onInit(GameInitializationEvent event) {
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                    .child(CommandSpec.builder().arguments(GenericArguments.literal(Text.of("t"), "test"))
-                            .executor((src, args) -> {
-                                src.sendMessage(Text.of("Executed child"));
+                Command.builder()
+                    .child(Command.builder().parameters(GenericArguments.literal(Text.of("t"), "test"))
+                            .setExecutor(ctx -> {
+                                ctx.getMessageReceiver().sendMessage(Text.of("Executed child"));
                                 return CommandResult.success();
                             }).build(), "child")
-                    .child(CommandSpec.builder()
-                            .executor((src, args) -> {
-                                src.sendMessage(Text.of("Executed child2"));
+                    .child(Command.builder()
+                            .setExecutor(ctx -> {
+                                ctx.getMessageReceiver().sendMessage(Text.of("Executed child2"));
                                 return CommandResult.success();
                             }).build(), "child2")
-                    .arguments(GenericArguments.literal(Text.of("test"), "child"))
-                    .executor((src, args) -> {
-                        src.sendMessage(Text.of("Executed parent"));
+                    .parameters(GenericArguments.literal(Text.of("test"), "child"))
+                    .setExecutor(ctx -> {
+                        ctx.getMessageReceiver().sendMessage(Text.of("Executed parent"));
                         return CommandResult.success();
                     }).build(),
                 "commandtestwithfallback");
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .child(CommandSpec.builder().arguments(GenericArguments.literal(Text.of("t"), "test"))
-                                .executor((src, args) -> {
-                                    src.sendMessage(Text.of("Executed child"));
+                Command.builder()
+                        .child(Command.builder().parameters(GenericArguments.literal(Text.of("t"), "test"))
+                                .setExecutor(ctx -> {
+                                    ctx.getMessageReceiver().sendMessage(Text.of("Executed child"));
                                     return CommandResult.success();
                                 }).build(), "child")
-                        .arguments(GenericArguments.literal(Text.of("test"), "child"))
+                        .parameters(GenericArguments.literal(Text.of("test"), "child"))
                         .childArgumentParseExceptionFallback(false)
-                        .executor((src, args) -> {
-                            src.sendMessage(Text.of("Executed parent"));
+                        .setExecutor(ctx -> {
+                            ctx.getMessageReceiver().sendMessage(Text.of("Executed parent"));
                             return CommandResult.success();
                         }).build(),
                 "commandtestwithoutfallback");
 
             // With thanks to felixoi, see https://gist.github.com/felixoi/65ba84c2d85d4ed5c28330f3af15bdfa
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                    .executor((src, args) -> {
-                        src.sendMessage(Text.of("Command Executed"));
+        Sponge.getCommandManager().register(this, Command.builder()
+                    .setExecutor(ctx -> {
+                        ctx.getMessageReceiver().sendMessage(Text.of("Command Executed"));
 
                         return CommandResult.success();
                     })
-                    .child(CommandSpec.builder()
-                            .executor(((src, args) -> {
-                                src.sendMessage(Text.of("Command Child Executed"));
+                    .child(Command.builder()
+                            .setExecutor((ctx -> {
+                                ctx.getMessageReceiver().sendMessage(Text.of("Command Child Executed"));
 
                                 return CommandResult.success();
                             }))
-                            .arguments(new TestCommandElement(Text.of("test")))
+                            .parameters(new TestCommandElement(Text.of("test")))
                             .build(), "test")
                     .childArgumentParseExceptionFallback(false)
                     .build(), "commandelementtest");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                    .child(CommandSpec.builder()
-                            .executor(((src, args) -> {
-                                src.sendMessage(Text.of("Command Child Executed"));
+        Sponge.getCommandManager().register(this, Command.builder()
+                    .child(Command.builder()
+                            .setExecutor((ctx -> {
+                                ctx.getMessageReceiver().sendMessage(Text.of("Command Child Executed"));
 
                                 return CommandResult.success();
                             }))
-                            .arguments(new TestCommandElement(Text.of("test")))
+                            .parameters(new TestCommandElement(Text.of("test")))
                             .build(), "test").build(), "commandwithnofallback");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                        .arguments(GenericArguments.userOrSource(Text.of("user")))
-                        .executor(((src, args) -> {
-                            src.sendMessage(Text.of(args.getOne("user").get()));
+        Sponge.getCommandManager().register(this, Command.builder()
+                        .parameters(GenericArguments.userOrSource(Text.of("user")))
+                        .setExecutor((ctx -> {
+                            ctx.getMessageReceiver().sendMessage(Text.of(ctx.getOne("user").get()));
                             return CommandResult.success();
                         })).build(),
                 "user-test");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                        .arguments(GenericArguments.playerOrSource(Text.of("user")))
-                        .executor(((src, args) -> {
-                            src.sendMessage(Text.of(args.getOne("user").get()));
+        Sponge.getCommandManager().register(this, Command.builder()
+                        .parameters(GenericArguments.playerOrSource(Text.of("user")))
+                        .setExecutor((ctx -> {
+                            ctx.getMessageReceiver().sendMessage(Text.of(ctx.getOne("user").get()));
                             return CommandResult.success();
                         })).build(),
                 "player-test");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                        .arguments(GenericArguments.userOrSource(Text.of("user")), GenericArguments.integer(Text.of("number")))
-                        .executor(((src, args) -> {
-                            src.sendMessage(Text.of(args.getOne("user").get(), args.getOne("number").get()));
+        Sponge.getCommandManager().register(this, Command.builder()
+                        .parameters(GenericArguments.userOrSource(Text.of("user")), GenericArguments.integer(Text.of("number")))
+                        .setExecutor((ctx -> {
+                            ctx.getMessageReceiver().sendMessage(Text.of(ctx.getOne("user").get(), ctx.getOne("number").get()));
                             return CommandResult.success();
                         })).build(),
                 "user-parse");
 
-        CommandSpec cmd = CommandSpec.builder()
-                .arguments(
+        Command cmd = Command.builder()
+                .parameters(
                         GenericArguments.onlyOne(GenericArguments.integer(Text.of("i"))),
                         GenericArguments.onlyOne(GenericArguments.choices(Text.of("test"), CHOICES, true))
                 )
-                .executor((src, args) -> {
-                    src.sendMessage(Text.of("Chosen: ", args.getOne("test").get()));
+                .setExecutor(ctx -> {
+                    ctx.getMessageReceiver().sendMessage(Text.of("Chosen: ", ctx.getOne("test").get()));
                     return CommandResult.success();
                 })
                 .build();
 
-        CommandSpec cmd2 = CommandSpec.builder()
-                .arguments(
+        Command cmd2 = Command.builder()
+                .parameters(
                         GenericArguments.onlyOne(GenericArguments.choices(Text.of("test"), CHOICES, true)),
                         GenericArguments.onlyOne(GenericArguments.integer(Text.of("i")))
                 )
-                .executor((src, args) -> {
-                    src.sendMessage(Text.of("Chosen: ", args.getOne("test").get()));
+                .setExecutor(ctx -> {
+                    ctx.getMessageReceiver().sendMessage(Text.of("Chosen: ", ctx.getOne("test").get()));
                     return CommandResult.success();
                 })
                 .build();
 
-        CommandSpec parent = CommandSpec.builder()
+        Command parent = Command.builder()
                 .child(cmd, "cmd1")
                 .child(cmd2, "cmd2")
-                .executor((src, args) -> {
-                    src.sendMessage(Text.of("test"));
+                .setExecutor(ctx -> {
+                    ctx.getMessageReceiver().sendMessage(Text.of("test"));
                     return CommandResult.success();
                 })
                 .build();
 
-        Sponge.getCommandManager().register(this, parent, "child-choices-test");
-        Sponge.getCommandManager().register(this, cmd, "child-choices-test-child1");
-        Sponge.getCommandManager().register(this, cmd2, "child-choices-test-child2");
+        Sponge.getCommandManager().register(this.container, parent, "child-choices-test");
+        Sponge.getCommandManager().register(this.container, cmd, "child-choices-test-child1");
+        Sponge.getCommandManager().register(this.container, cmd2, "child-choices-test-child2");
 
     }
 

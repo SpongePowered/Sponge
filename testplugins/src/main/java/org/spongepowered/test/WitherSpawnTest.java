@@ -25,17 +25,15 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.stream.Collectors;
@@ -48,7 +46,7 @@ public class WitherSpawnTest implements LoadableModule {
     @Inject private PluginContainer container;
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
@@ -56,7 +54,7 @@ public class WitherSpawnTest implements LoadableModule {
         @Listener
         public void onSpawn(SpawnEntityEvent event) {
             final String entities = event.getEntities().stream()
-                    .map(entity -> entity.getType().getId())
+                    .map(entity -> entity.getType().getKey().toString())
                     .collect(Collectors.joining(", "));
             Sponge.getServer().getBroadcastChannel().send(
                     Text.of(TextColors.GREEN, "Spawning: ", entities, " ", TextColors.WHITE, event.getCause())
@@ -65,7 +63,7 @@ public class WitherSpawnTest implements LoadableModule {
 
         @Listener
         public void onConstruct(ConstructEntityEvent.Post event) {
-            final String entity = event.getTargetType().getId();
+            final CatalogKey entity = event.getTargetType().getKey();
             Sponge.getServer().getBroadcastChannel().send(
                     Text.of(TextColors.RED, "Constructing: ", TextColors.WHITE, entity)
             );

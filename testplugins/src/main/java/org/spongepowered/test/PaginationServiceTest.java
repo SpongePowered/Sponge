@@ -28,12 +28,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
@@ -45,6 +46,7 @@ import java.util.Optional;
 public class PaginationServiceTest {
 
     @Inject private Logger logger;
+    @Inject private PluginContainer container;
 
     private PaginationList paginationList;
 
@@ -93,12 +95,14 @@ public class PaginationServiceTest {
             return;
         }
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.optionalWeak(GenericArguments.onlyOne(GenericArguments.integer(Text.of("page")))))
-                        .executor((src, args) -> {
-                            this.paginationList.sendTo(src, args.<Integer>getOne("page").orElse(1));
 
+        Parameter.Value<Integer> paramPage = Parameter.integerNumber().setKey("page").optional().build();
+
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .parameters(paramPage)
+                        .setExecutor((args) -> {
+                            this.paginationList.sendTo(args.getMessageReceiver(), args.<Integer>getOne(paramPage).orElse(1));
                             return CommandResult.success();
                         })
                         .build(),

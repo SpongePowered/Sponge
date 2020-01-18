@@ -26,11 +26,10 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -43,6 +42,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 
 @Plugin(id = "damagesourcetest", name = "Damage Source Test", description = "A plugin to test damage sources", version = "0.0.0")
@@ -55,39 +55,40 @@ public final class DamageSourceTest implements LoadableModule {
     public void onInit(GameInitializationEvent event) {
 
         final DamageSource damageSource = DamageSource.builder()
-                .type(DamageTypes.CUSTOM)
+                .type(DamageTypes.CUSTOM.get())
                 .exhaustion(5)
                 .scalesWithDifficulty()
                 .build();
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (src instanceof Player) {
-                                final Player player = (Player) src;
-                                player.damage(args.<Double>getOne("damage").orElse(2.0), damageSource);
+        Parameter.Value<Double> paramDamage = Parameter.doubleNumber().setKey("damage").build();
+        Sponge.getCommandManager().register(this.container,
+                Command.builder()
+                        .setExecutor((ctx) -> {
+                            if (ctx.getSubject() instanceof Player) {
+                                final Player player = (Player) ctx.getSubject();
+                                player.damage(ctx.<Double>getOne(paramDamage).orElse(2.0), damageSource);
                                 player.sendMessage(Text.of("You have damaged yourself with the custom damage source."));
                                 return CommandResult.success();
                             }
                             throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
                         })
-                        .arguments(GenericArguments.doubleNum(Text.of("damage")))
+                        .parameters(paramDamage)
                         .build(),
                 "dsdamage");
     }
 
     @Override
-    public void enable(CommandSource src) {
+    public void enable(MessageReceiver src) {
         Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class DamageSourceListener {
 
         @Listener(order = Order.POST)
-        public void onPlayerDamage(DamageEntityEvent event, @Getter("getTargetEntity") Player player, @Root DamageSource source) {
+        public void onPlayerDamage(DamageEntityEvent event, @Getter("getEntity") Player player, @Root DamageSource source) {
             Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.BLUE, "You have been damaged by the following source for " + event.getFinalDamage()));
             Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "======================================="));
-            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Damage type: ", TextColors.GRAY, source.getType().getName()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Damage type: ", TextColors.GRAY, source.getType().getKey()));
             Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Affects creative: ", TextColors.GRAY, source.doesAffectCreative()));
             Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Exhaustion: ", TextColors.GRAY, source.getExhaustion()));
             Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Absolute: ", TextColors.GRAY, source.isAbsolute()));

@@ -40,6 +40,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.event.registry.RegistryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
@@ -47,6 +48,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
@@ -86,11 +88,11 @@ public class RecipeTest implements LoadableModule {
     }
 
     @Listener
-    public void onRegisterCraftingRecipes(GameRegistryEvent.Register<CraftingRecipe> event) {
-        final Ingredient s = Ingredient.of(STONE);
-        final Ingredient b = Ingredient.of(WHITE_BED, WHITE_WOOL);
-        final ItemStack item = ItemStack.of(BEDROCK, 1);
-        final DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(Enchantment.of(EnchantmentTypes.UNBREAKING, 1)));
+    public void onRegisterCraftingRecipes(RegistryEvent.Catalog<CraftingRecipe> event) {
+        final Ingredient s = Ingredient.of(STONE.get());
+        final Ingredient b = Ingredient.of(WHITE_BED.get(), WHITE_WOOL.get());
+        final ItemStack item = ItemStack.of(BEDROCK.get(), 1);
+        final DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(Enchantment.of(EnchantmentTypes.UNBREAKING.get(), 1)));
         if (trans.getType() != DataTransactionResult.Type.SUCCESS) {
             this.logger.error("Could not build recipe output!");
         }
@@ -103,15 +105,15 @@ public class RecipeTest implements LoadableModule {
                 .build();
         event.register(recipe);
 
-        final ShapedCraftingRecipe arrowRecipe = (ShapedCraftingRecipe) event.getRegistryModule().getById("minecraft:arrow").get();
+        ShapedCraftingRecipe arrowRecipe = (ShapedCraftingRecipe) Sponge.getRegistry().getCraftingRecipeRegistry().getById("minecraft:arrow").get()
         event.register(new ArrowRecipe(arrowRecipe, 5));
         this.logger.info("Registering custom crafting recipes!");
     }
 
     @Listener
-    public void onRegisterSmeltingRecipes(GameRegistryEvent.Register<SmeltingRecipe> event) {
-        final ItemStack in = ItemStack.of(COAL, 1);
-        final ItemStack out = ItemStack.of(COAL, 1);
+    public void onRegisterSmeltingRecipes(RegistryEvent.Catalog<SmeltingRecipe> event) {
+        final ItemStack in = ItemStack.of(COAL.get(), 1);
+        final ItemStack out = ItemStack.of(COAL.get(), 1);
         out.offer(Keys.DISPLAY_NAME, Text.of("Hot Coal"));
 
         event.register(SmeltingRecipe.builder()
@@ -131,7 +133,8 @@ public class RecipeTest implements LoadableModule {
         this.logger.info("SmeltGoldRecipe ID: " + smeltGoldRecipe.getKey());
 
         this.logger.info("## Smelting recipes:");
-        event.getRegistryModule().getAll().forEach(recipe -> this.logger.info(" - " + recipe.getKey()));
+
+        Sponge.getRegistry().getCraftingRecipeRegistry().getAll().forEach(recipe -> this.logger.info(" - " + recipe.getKey()));
     }
 
     public static class CraftListener {
@@ -232,12 +235,12 @@ public class RecipeTest implements LoadableModule {
 
         @Override
         public ItemStackSnapshot getExemplaryIngredient() {
-            return ItemStack.of(ItemTypes.IRON_BLOCK).createSnapshot();
+            return ItemStack.of(ItemTypes.IRON_BLOCK.get()).createSnapshot();
         }
 
         @Override
         public boolean isValid(ItemStackSnapshot ingredient) {
-            return ingredient.getType() == ItemTypes.IRON_BLOCK;
+            return ingredient.getType() == ItemTypes.IRON_BLOCK.get();
         }
 
         @Override
@@ -245,12 +248,12 @@ public class RecipeTest implements LoadableModule {
             if (!isValid(ingredient)) {
                 return Optional.empty();
             }
-            return Optional.of(new SmeltingResult(ItemStack.of(ItemTypes.IRON_INGOT, 9).createSnapshot(), 0));
+            return Optional.of(new SmeltingResult(ItemStack.of(ItemTypes.IRON_INGOT.get(), 9).createSnapshot(), 0));
         }
 
         @Override
         public ItemStackSnapshot getExemplaryResult() {
-            return ItemStack.of(ItemTypes.IRON_INGOT, 9).createSnapshot();
+            return ItemStack.of(ItemTypes.IRON_INGOT.get(), 9).createSnapshot();
         }
     }
 
@@ -268,12 +271,12 @@ public class RecipeTest implements LoadableModule {
 
         @Override
         public ItemStackSnapshot getExemplaryIngredient() {
-            return ItemStack.of(ItemTypes.GOLD_BLOCK).createSnapshot();
+            return ItemStack.of(ItemTypes.GOLD_BLOCK.get()).createSnapshot();
         }
 
         @Override
         public boolean isValid(ItemStackSnapshot ingredient) {
-            return ingredient.getType() == ItemTypes.GOLD_BLOCK;
+            return ingredient.getType() == ItemTypes.GOLD_BLOCK.get();
         }
 
         @Override
@@ -281,12 +284,12 @@ public class RecipeTest implements LoadableModule {
             if (!isValid(ingredient)) {
                 return Optional.empty();
             }
-            return Optional.of(new SmeltingResult(ItemStack.of(ItemTypes.GOLD_INGOT, 9).createSnapshot(), 0));
+            return Optional.of(new SmeltingResult(ItemStack.of(ItemTypes.GOLD_INGOT.get(), 9).createSnapshot(), 0));
         }
 
         @Override
         public ItemStackSnapshot getExemplaryResult() {
-            return ItemStack.of(ItemTypes.GOLD_INGOT, 9).createSnapshot();
+            return ItemStack.of(ItemTypes.GOLD_INGOT.get(), 9).createSnapshot();
         }
     }
 }

@@ -56,7 +56,7 @@ public class InventoryOpenCloseTest implements LoadableModule {
 
         @Listener
         public void onInventoryPrimary(ClickContainerEvent.Primary event, @First Player player) {
-            ViewableInventory inv = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3).completeStructure().build();
+            ViewableInventory inv = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x3.get()).completeStructure().build();
             // This will open the inventory the next tick
             player.openInventory(inv);
         }

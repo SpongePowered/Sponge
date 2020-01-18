@@ -24,14 +24,11 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -41,9 +38,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,13 +47,15 @@ public class MainTestPlugin {
 
     private final Set<String> testPlugins = new HashSet<>();
 
+    @Inject private PluginContainer container;
+
     @Listener
     public void onInit(GameInitializationEvent event) {
-
-        CommandSpec enable = CommandSpec.builder()
-                .arguments(GenericArguments.optional(GenericArguments.plugin(Text.of("plugin"))))
-                .executor(((src, args) -> {
-                    Collection<PluginContainer> plugins = args.getAll(Text.of("plugin"));
+        Parameter.Key<PluginContainer> keyPlugin = Parameter.key("plugin", PluginContainer.class);
+        Command enable = Command.builder()
+                .parameters(Parameter.plugin().setKey(keyPlugin).optional().build())
+                .setExecutor(((ctx) -> {
+                    Collection<? extends PluginContainer> plugins = ctx.getAll(keyPlugin);
                     if (plugins.isEmpty()) {
                         plugins = Sponge.getPluginManager().getPlugins();
                     }
@@ -66,7 +63,7 @@ public class MainTestPlugin {
                         pc.getInstance().ifPresent(plugin -> {
                             if (plugin instanceof LoadableModule) {
                                 if (this.testPlugins.add(pc.getId())) {
-                                    ((LoadableModule) plugin).enable(src);
+                                    ((LoadableModule) plugin).enable(ctx.getMessageReceiver());
                                     Sponge.getServer().getBroadcastChannel().send(Text.of(pc.getId(), " enabled"));
                                 } else {
                                     Sponge.getServer().getBroadcastChannel().send(Text.of(pc.getId(), "was already enabled"));
@@ -78,10 +75,10 @@ public class MainTestPlugin {
                 }))
                 .build();
 
-        CommandSpec disable = CommandSpec.builder()
-                .arguments(GenericArguments.optional(GenericArguments.plugin(Text.of("plugin"))))
-                .executor(((src, args) -> {
-                    Collection<PluginContainer> plugins = args.getAll(Text.of("plugin"));
+        Command disable = Command.builder()
+                .parameters(Parameter.plugin().setKey(keyPlugin).optional().build())
+                .setExecutor(((ctx) -> {
+                    Collection<? extends PluginContainer> plugins = ctx.getAll(keyPlugin);
                     if (plugins.isEmpty()) {
                         plugins = this.testPlugins.stream().map(s -> Sponge.getPluginManager().getPlugin(s).get()).collect(Collectors.toSet());
                     }
@@ -89,7 +86,7 @@ public class MainTestPlugin {
                         pc.getInstance().ifPresent(plugin -> {
                             if (plugin instanceof LoadableModule) {
                                 if (this.testPlugins.remove(pc.getId())) {
-                                    ((LoadableModule) plugin).disable(src);
+                                    ((LoadableModule) plugin).disable(ctx.getMessageReceiver());
                                     Sponge.getServer().getBroadcastChannel().send(Text.of(pc.getId(), " disabled"));
                                 } else {
                                     Sponge.getServer().getBroadcastChannel().send(Text.of(pc.getId(), " is already disabled"));
@@ -101,29 +98,29 @@ public class MainTestPlugin {
                 }))
                 .build();
 
-        CommandSpec status = CommandSpec.builder()
-                .arguments(GenericArguments.none())
-                .executor(((src, args) -> {
+        Command status = Command.builder()
+                .parameters()
+                .setExecutor(((ctx) -> {
                     if (this.testPlugins.isEmpty()) {
-                        src.sendMessage(Text.of("There are no enabled testplugins"));
+                        ctx.getMessageReceiver().sendMessage(Text.of("There are no enabled testplugins"));
                         return CommandResult.success();
                     }
                     PaginationList.Builder builder = PaginationList.builder();
                     builder.title(Text.of("Enabled testplugins"))
                             .padding(Text.of(TextColors.GREEN, "="))
                             .contents(this.testPlugins.stream().map(Text::of).collect(Collectors.toSet()))
-                            .build().sendTo(src);
+                            .build().sendTo(ctx.getMessageReceiver());
                     return CommandResult.success();
                 }))
                 .build();
 
-        CommandSpec test = CommandSpec.builder()
+        Command test = Command.builder()
                 .child(enable, "enable", "e", "on")
                 .child(disable, "disable", "d", "off")
                 .child(status, "status")
                 .build();
 
-        Sponge.getCommandManager().register(this, test, "test", "testplugins");
+        Sponge.getCommandManager().register(this.container, test, "test", "testplugins");
     }
 
 }
