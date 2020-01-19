@@ -102,4 +102,10 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         this.pos = null;
         this.snapshot = null;
     }
+
+    @Override
+    protected GrowablePhaseContext defensiveCopy(PhaseTracker tracker) {
+        final GrowablePhaseContext newCopy = super.defensiveCopy(tracker);
+        return newCopy;
+    }
 }

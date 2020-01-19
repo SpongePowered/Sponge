@@ -28,11 +28,11 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Queues;
 import net.minecraft.block.BlockState;
+import net.minecraft.fluid.IFluidState;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
@@ -40,15 +40,14 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.world.BlockChange;
 
+import javax.annotation.Nullable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
@@ -57,10 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
-public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable {
-    private static final boolean DEBUG_PROXY = Boolean.valueOf(System.getProperty("sponge.debugProxyChanges", "false"));
+public final class SpongeProxyBlockAccess implements IBlockReader, AutoCloseable {
+    private static final boolean DEBUG_PROXY = Boolean.parseBoolean(System.getProperty("sponge.debugProxyChanges", "false"));
 
     private final LinkedHashMap<BlockPos, BlockState> processed = new LinkedHashMap<>();
     private final LinkedHashMap<BlockPos, TileEntity> affectedTileEntities = new LinkedHashMap<>();
@@ -73,20 +70,20 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     @Nullable private Deque<BlockTransaction> processingStack;
     private boolean isNeighbor = false;
 
-    public SpongeProxyBlockAccess(final ServerWorldBridge worldServer) {
+    public SpongeProxyBlockAccess(final TrackedWorldBridge worldServer) {
         this.processingWorld = ((ServerWorld) worldServer);
     }
 
     Proxy pushProxy() {
         final Proxy proxy = new Proxy(this);
         this.proxies.push(proxy);
-        if (DEBUG_PROXY) {
+        if (SpongeProxyBlockAccess.DEBUG_PROXY) {
             proxy.stack_debug = new Exception();
         }
         return proxy;
     }
 
-    SpongeProxyBlockAccess proceed(final BlockPos pos, final BlockState state, final boolean b) {
+    SpongeProxyBlockAccess proceed(final BlockPos pos, final BlockState state, final boolean setStateForProcessing) {
         if (this.proxies.isEmpty()) {
             throw new IllegalStateException("Cannot push a new block change without having proxies!");
         }
@@ -100,8 +97,8 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                 proxy.store(pos, state);
             }
         }
-        if (b && this.processingTransaction != null) {
-            PhaseTracker.getInstance().setBlockState((ServerWorldBridge) this.processingWorld, pos, state, BlockChangeFlags.NONE);
+        if (setStateForProcessing && this.processingTransaction != null) {
+            PhaseTracker.getInstance().setBlockState((TrackedWorldBridge) this.processingWorld, pos, state, BlockChangeFlags.NONE);
         }
         return this;
     }
@@ -113,7 +110,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             throw new IllegalArgumentException("Cannot pop a null proxy!");
         }
         final Proxy proxy = this.proxies.peek();
-        if (proxy != oldProxy) {
+        if (proxy == null || proxy != oldProxy) {
             int offset = -1;
             int i = 0;
             for (final Proxy f : this.proxies) {
@@ -123,7 +120,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                 }
                 i++;
             }
-            if (!DEBUG_PROXY && offset == -1) {
+            if (!SpongeProxyBlockAccess.DEBUG_PROXY && offset == -1) {
                 // if we're not debugging the cause proxies then throw an error
                 // immediately otherwise let the pretty printer output the proxy
                 // that was erroneously popped.
@@ -131,7 +128,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             }
             final PrettyPrinter printer = new PrettyPrinter(100).add("Block Change Proxy Corruption!").centre().hr()
                 .add("Found %n proxies left on the stack. Clearing them all.", new Object[]{offset + 1});
-            if (!DEBUG_PROXY) {
+            if (!SpongeProxyBlockAccess.DEBUG_PROXY) {
                 printer.add()
                     .add("Please add -Dsponge.debugProxyChanges=true to your startup flags to enable further debugging output.");
                 SpongeImpl.getLogger().warn("  Add -Dsponge.debugProxyChanges to your startup flags to enable further debugging output.");
@@ -145,7 +142,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             }
             while (offset >= 0) {
                 final Proxy f = this.proxies.peek();
-                if (DEBUG_PROXY && offset > 0) {
+                if (SpongeProxyBlockAccess.DEBUG_PROXY && offset > 0) {
                     printer.add("   Stack proxy in position %n :", offset);
                     printer.add(f.stack_debug);
                 }
@@ -270,14 +267,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     @Override
-    public boolean isAirBlock(final BlockPos pos) {
-        return this.processingWorld.isAirBlock(pos);
+    public IFluidState getFluidState(BlockPos pos) {
+        return null;
     }
 
-    @Override
-    public int getStrongPower(final BlockPos pos, final Direction direction) {
-        return this.processingWorld.getStrongPower(pos, direction);
-    }
 
     public void onChunkChanged(final BlockPos pos, final BlockState newState) {
         // We can prune the existing block state.
@@ -338,7 +331,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     private void removeTileEntityFromWorldAndChunk(final TileEntity removed) {
         if (((WorldAccessor) this.processingWorld).accessor$getProcessingLoadedTiles()) {
             ((WorldAccessor) this.processingWorld).accessor$getAddedTileEntityList().remove(removed);
-            if (!(removed instanceof ITickable)) { //Forge: If they are not tickable they wont be removed in the update loop.
+            if (!(removed instanceof ITickableTileEntity)) { //Forge: If they are not tickable they wont be removed in the update loop.
                 this.processingWorld.loadedTileEntityList.remove(removed);
             }
         } else {

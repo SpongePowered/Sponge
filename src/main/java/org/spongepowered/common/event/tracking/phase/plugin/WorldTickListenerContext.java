@@ -34,15 +34,15 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
-public class WorldTickContext extends ListenerPhaseContext<WorldTickContext> {
+public class WorldTickListenerContext extends ListenerPhaseContext<WorldTickListenerContext> {
 
     @Nullable private World tickingWorld;
 
-    WorldTickContext(final IPhaseState<WorldTickContext> state, PhaseTracker tracker) {
+    WorldTickListenerContext(final IPhaseState<WorldTickListenerContext> state, PhaseTracker tracker) {
         super(state);
     }
 
-    public WorldTickContext world(final World world) {
+    public WorldTickListenerContext world(final World world) {
         this.tickingWorld = world;
         return this;
     }

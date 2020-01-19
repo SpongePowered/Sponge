@@ -8,6 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -23,12 +24,16 @@ import java.util.function.Consumer;
 @Mixin(World.class)
 public abstract class WorldMixin_Tracker implements WorldBridge {
 
+    @Shadow @Final public Random rand;
+    @Shadow @Final protected WorldInfo worldInfo;
+
     @Shadow public abstract Chunk shadow$getChunk(int chunkX, int chunkZ);
     @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void func_217390_a(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
     @Shadow public abstract boolean setBlockState(BlockPos pos, BlockState state, int flags);
-
-    @Shadow @Final public Random rand;
+    @Shadow public static boolean shadow$isOutsideBuildHeight(final BlockPos pos) {
+        throw new UnsupportedOperationException("Untransformed shadow");
+    }
 
     /**
      * @author gabizou - January 10th, 2020 - Minecraft 1.14.3

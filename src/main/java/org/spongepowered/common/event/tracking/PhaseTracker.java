@@ -96,6 +96,7 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -103,6 +104,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The core state machine of Sponge. Acts a as proxy between various engine objects by processing actions through
@@ -148,7 +150,7 @@ public final class PhaseTracker {
                 .build();
     }
 
-    @Nullable private Thread sidedThread;
+    @Nullable private WeakReference<Thread> sidedThread;
     private boolean hasRun = false;
 
 
@@ -158,7 +160,7 @@ public final class PhaseTracker {
             throw new IllegalAccessException("Cannot call directly to change thread.");
         }
         if (this != PhaseTracker.SERVER && this != PhaseTracker.CLIENT && this.sidedThread == null) {
-            this.sidedThread = thread;
+            this.sidedThread = new WeakReference<>(thread);
             return;
         }
 
@@ -175,25 +177,25 @@ public final class PhaseTracker {
             throw new IllegalAccessException("Illegal Attempts to re-assign PhaseTracker threads on Sponge");
         }
 
-        this.sidedThread = thread;
+        this.sidedThread = new WeakReference<>(thread);
 
     }
 
     @Nullable
     public Thread getSidedThread() {
-        return this.sidedThread;
+        return this.sidedThread != null ? this.sidedThread.get() : null;
     }
 
     public static PhaseTracker getInstance() {
         final Thread current = Thread.currentThread();
-        if (current == PhaseTracker.SERVER.sidedThread) {
+        if (current == PhaseTracker.SERVER.getSidedThread()) {
             return PhaseTracker.SERVER;
         }
-        if (current == PhaseTracker.CLIENT.sidedThread) {
+        if (current == PhaseTracker.CLIENT.getSidedThread()) {
             return PhaseTracker.CLIENT;
         }
 
-        PhaseTracker.SPINOFF_TRACKERS.computeIfAbsent(current, (thread) -> {
+        return PhaseTracker.SPINOFF_TRACKERS.computeIfAbsent(current, (thread) -> {
             try {
                 final PhaseTracker phaseTracker = new PhaseTracker();
                 phaseTracker.setThread(thread);
@@ -202,7 +204,6 @@ public final class PhaseTracker {
                 throw new RuntimeException("Unable to create a new PhaseTracker for Thread: " + thread, e);
             }
         });
-        return PhaseTracker.SERVER;
     }
 
     static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
@@ -213,7 +214,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings("rawtypes")
     void switchToPhase(final IPhaseState<?> state, final PhaseContext<?> phaseContext) {
-        if (phaseContext.createdTracker != this && Thread.currentThread() != this.sidedThread) {
+        if (phaseContext.createdTracker != this && Thread.currentThread() != this.getSidedThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
@@ -243,7 +244,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings({"rawtypes", "unused", "try"})
     void completePhase(final PhaseContext<?> context) {
-        if (context.createdTracker != this && Thread.currentThread() != this.sidedThread) {
+        if (context.createdTracker != this && Thread.currentThread() != this.getSidedThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
@@ -416,14 +417,14 @@ public final class PhaseTracker {
     // ----------------- SIMPLE GETTERS --------------------------------------
 
     public IPhaseState<?> getCurrentState() {
-        if (Thread.currentThread() != this.sidedThread) {
+        if (Thread.currentThread() != this.getSidedThread()) {
             throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
         }
         return this.stack.peekState();
     }
 
     public PhaseContext<?> getCurrentContext() {
-        if (Thread.currentThread() != this.sidedThread) {
+        if (Thread.currentThread() != this.getSidedThread()) {
             throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
         }
         return this.stack.peekContext();
@@ -528,11 +529,16 @@ public final class PhaseTracker {
                                  final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) {
         if (!SpongeImplHooks.onServerThread()) {
             // lol no, report the block change properly
+            try {
+                PhaseTracker.SERVER.proposeScheduledBlockChange(this.getCurrentContext().defensiveCopy(PhaseTracker.SERVER), mixinWorld, pos, newState, flag);
+            } catch (final InterruptedException e) {
+                e.printStackTrace();
+            }
             PhasePrinter.printAsyncBlockChange(mixinWorld, pos, newState);
             return false;
         }
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
-        final net.minecraft.world.server.ServerWorld world = (ServerWorld) mixinWorld;
+        final ServerWorld world = (ServerWorld) mixinWorld;
 
         // World#setBlockState - A Sponge Story
         // Vanilla already has the `isOutsideBuildHeight(pos)` check
@@ -714,6 +720,35 @@ public final class PhaseTracker {
         // } // Sponge - unnecessary formatting
 
     }
+
+    /**
+     * This will schedule the block changes to occur at the beginning of the next game tick,
+     * or at the end of the current tick if we're already in the middle of a game tick.
+     *
+     * <p>Possible advanced solution may include:
+     * - Determining if the Server's PhaseTracker is in the middle of a Server tick,
+     *   - If in the middle of the Server tick, check if any worlds are ticking,
+     *      - If a world is ticking, check if the desired world has ticked, is ticking, or is going
+     *        to be ticked. If it's already ticked, schedule the block change at the end of the server
+     *        tick. If the world is ticking, schedule to change the block at the end of the world tick,
+     *        and if the world is going to be ticked, schedule the change to occur at the beginning
+     *        of the world tick.
+     * This solution would allow for "best" simulation in accordance to scheduled block updates
+     * as a byproduct of the block change, as well as possible entity changes in the world etc. etc.
+     * This also allows for most "time appropriate" changes to occur when they would otherwise
+     * occur if the original proposed change were on the main thread.
+     * </p>
+     *
+     * @param defensiveCopy
+     * @param trackedWorld
+     * @param pos
+     * @param newState
+     * @param flag
+     */
+    private void proposeScheduledBlockChange(final PhaseContext<?> defensiveCopy, final TrackedWorldBridge trackedWorld, final BlockPos pos, final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) throws InterruptedException {
+        trackedWorld.bridge$getScheduledBlockChangeList().put(new ScheduledBlockChange(defensiveCopy, pos, newState, flag));
+    }
+
 
     /**
      * This is the replacement of {@link net.minecraft.world.World#addEntity(net.minecraft.entity.Entity)}

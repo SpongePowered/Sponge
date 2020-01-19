@@ -1,19 +1,22 @@
 package org.spongepowered.common.mixin.tracker.world.server;
 
 import co.aikar.timings.Timing;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ServerTickList;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,26 +25,45 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.ScheduledBlockChange;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
+import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 @Mixin(ServerWorld.class)
-public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implements ServerWorldBridge {
+public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implements TrackedWorldBridge {
+
+    private SpongeProxyBlockAccess tracker$proxyBlockAccess = new SpongeProxyBlockAccess(this);
+    private LinkedBlockingDeque<ScheduledBlockChange> tracker$scheduledChanges = new LinkedBlockingDeque<>();
+
+    @Override
+    public SpongeProxyBlockAccess bridge$getProxyAccess() {
+        return this.tracker$proxyBlockAccess;
+    }
 
 
     @Shadow public abstract ServerChunkProvider shadow$getChunkProvider();
@@ -175,6 +197,53 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
     }
 
+    /**
+     * @author gabizou - January 18th, 2020 - Minecraft 1.14.3
+     * You're probably wondering why we're doing this... Well... Take a seat and grab a cup of coffee...
+     */
+    @SuppressWarnings("unused")
+    @Inject(method = "tick",
+            at = @At(value = "INVOKE",target = "Lnet/minecraft/world/ServerTickList;tick()V"),
+            slice = @Slice(
+                    from = @At(value = "FIELD",
+                            target = "Lnet/minecraft/world/server/ServerWorld;pendingBlockTicks:Lnet/minecraft/world/ServerTickList;"),
+                    to = @At(value = "FIELD",
+                            target = "Lnet/minecraft/world/server/ServerWorld;pendingFluidTicks:Lnet/minecraft/world/ServerTickList;")
+            )
+    )
+    private void tracker$dumpAsyncScheduledBlockChanges(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
+        // Grab the pending block changes from
+        final ScheduledBlockChange tail = this.tracker$scheduledChanges.peekLast();
+        if (tail == null) {
+            return;
+        }
+        /*
+        You remember being told to get a cup of coffee, here's why...
+        Because we have the "tail" end of where we want to stop processing block changes,
+        asynchronous threads can keep pushing new changes onto the dequeue, // Btw, Faith says "putting, not pushing" // Morph also says "offering" probably with a "key"
+        but we basically want to put a "stop" to say "Hey, your new changes are too late, they'll be processed later."
+        So, to do this, we have to iterate for the first elements up to the tail, while also checking that the queue
+        is basically empty after we've processed the most recently polled element.
+
+        Also, because BlockingDequeue does wait for populating, we have to check for peekFirst at the end of the block
+        to avoid waiting for the next pollFirst.
+
+         */
+        for (ScheduledBlockChange blockChange = this.tracker$scheduledChanges.pollFirst();
+             blockChange != null && this.tracker$scheduledChanges.peekFirst() != tail;
+             blockChange = this.tracker$scheduledChanges.pollFirst()) {
+            try (final PhaseContext<?> context = blockChange.context.buildAndSwitch()) {
+                PhaseTracker.SERVER.setBlockState(this, blockChange.pos, blockChange.state, blockChange.flag);
+            }
+            // We must check that the dequeue doesn't have any remaining elements because if it is empty
+            // after we polled, the poll will literally wait until the dequeue has new elements....
+            if (this.tracker$scheduledChanges.peekFirst() == null) {
+                break;
+            }
+        }
+    }
+
+
 
     /**
      * @author gabizou - August 4th, 2016
@@ -203,11 +272,11 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
         try {
             // Proxies have block changes for bulk special captures
-            final net.minecraft.block.BlockState blockState = this.impl$proxyBlockAccess.getBlockState(pos);
+            final net.minecraft.block.BlockState blockState = this.tracker$proxyBlockAccess.getBlockState(pos);
             if (blockState != null) {
                 return blockState;
             }
-            final IChunk chunk= this.getChunk(pos);
+            final IChunk chunk= this.shadow$getChunkAt(pos);
             return chunk.getBlockState(pos);
         } finally {
             if (entered) {
@@ -227,7 +296,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      */
     @Override
     public boolean setBlockState(final BlockPos pos, final net.minecraft.block.BlockState newState, final int flags) {
-        if (!this.isValid(pos)) {
+        if (!WorldMixin_Tracker.shadow$isOutsideBuildHeight(pos)) {
             return false;
         } else if (this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
             return false;
@@ -237,68 +306,46 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
     }
 
-    /**
-     * @author gabizou - July 25th, 2018
-     * @reason Technically an overwrite for {@link World#destroyBlock(BlockPos, boolean)}
-     * so that we can artificially capture/associate entity spawns from the proposed block
-     * destruction when the actual block event is thrown, whether captures are taking
-     * place or not. In the context of "if block changes are not captured", we do still need
-     * to associate the drops before the actual block is removed
-     *
-     * @param pos
-     * @param dropBlock
-     * @return
-     */
     @Override
-    public boolean destroyBlock(final BlockPos pos, final boolean dropBlock) {
-        final net.minecraft.block.BlockState iblockstate = this.getBlockState(pos);
-        final Block block = iblockstate.getBlock();
-
-        if (iblockstate.getMaterial() == Material.AIR) {
-            return false;
+    public SpongeBlockSnapshot bridge$createSnapshot(final net.minecraft.block.BlockState state, final BlockPos pos, final BlockChangeFlag updateFlag) {
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        builder.reset();
+        builder.blockState(state)
+                .worldId(((WorldProperties) this.worldInfo).getUniqueId())
+                .position(VecHelper.toVector3i(pos));
+        final Chunk chunk = this.shadow$getChunkAt(pos);
+        if (chunk == null) {
+            final SpongeBlockSnapshot build = builder.flag(updateFlag).build();
+            builder.reset();
+            return build;
         }
-        // Sponge Start - Fire the change block pre here, before we bother with drops. If the pre is cancelled, just don't bother.
-        if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
-                return false;
+        final Optional<UUID> creator = ((ChunkBridge) chunk).bridge$getBlockOwnerUUID(pos);
+        final Optional<UUID> notifier = ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos);
+        creator.ifPresent(builder::creator);
+        notifier.ifPresent(builder::notifier);
+        final boolean hasTileEntity = SpongeImplHooks.hasBlockTileEntity(state);
+        final TileEntity tileEntity = chunk.getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+        if (hasTileEntity || tileEntity != null) {
+            // We MUST only check to see if a TE exists to avoid creating a new one.
+            if (tileEntity != null) {
+                // TODO - custom data.
+                final CompoundNBT nbt = new CompoundNBT();
+                // Some mods like OpenComputers assert if attempting to save robot while moving
+                try {
+                    tileEntity.write(nbt);
+                    builder.unsafeNbt(nbt);
+                }
+                catch(final Throwable t) {
+                    // ignore
+                }
             }
         }
-        // Sponge End
-        this.playEvent(2001, pos, Block.getStateId(iblockstate));
-
-        if (dropBlock) {
-            // Sponge Start - since we are going to perform block drops, we need
-            // to notify the current phase state and find out if capture pos is to be used.
-            final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
-            final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentState();
-            final boolean isCapturingBlockDrops = state.alreadyProcessingBlockItemDrops();
-            final BlockPos previousPos;
-            if (isCapturingBlockDrops) {
-                previousPos = context.getCaptureBlockPos().getPos().orElse(null);
-                context.getCaptureBlockPos().setPos(pos);
-            } else {
-                previousPos = null;
-            }
-            // Sponge End
-            block.dropBlockAsItem((ServerWorld) (Object) this, pos, iblockstate, 0);
-            // Sponge Start
-            if (isCapturingBlockDrops) {
-                // we need to reset the capture pos because we've been capturing item and entity drops this way.
-                context.getCaptureBlockPos().setPos(previousPos);
-            }
-            // Sponge End
-
-        }
-
-        // Sponge - reduce the call stack by calling the more direct method.
-        if (!this.isValid(pos)) {
-            return false;
-        } else if (this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
-            return false;
-        } else {
-            // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
-        }
+        builder.flag(updateFlag);
+        return builder.build();
     }
 
+    @Override
+    public BlockingQueue<ScheduledBlockChange> bridge$getScheduledBlockChangeList() {
+        return this.tracker$scheduledChanges;
+    }
 }

@@ -36,21 +36,21 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
+final class ServerTickListenerState extends ListenerPhaseState<ServerTickListenerContext> {
 
     private final String desc;
 
-    ServerTickPhaseState(final String name) {
+    ServerTickListenerState(final String name) {
         this.desc = TrackingUtil.phaseStateToString("Plugin", name, this);
     }
 
     @Override
-    public ServerTickContext createNewContext(final PhaseTracker tracker) {
-        return new ServerTickContext(this).addCaptures().player();
+    public ServerTickListenerContext createNewContext(final PhaseTracker tracker) {
+        return new ServerTickListenerContext(this).addCaptures().player();
     }
 
     @Override
-    public void unwind(final ServerTickContext phaseContext) {
+    public void unwind(final ServerTickListenerContext phaseContext) {
 
         final Object listener = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
@@ -77,7 +77,7 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
     }
 
     @Override
-    public boolean doesBulkBlockCapture(final ServerTickContext context) {
+    public boolean doesBulkBlockCapture(final ServerTickListenerContext context) {
         return false;
     }
 
@@ -87,7 +87,7 @@ final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(final ServerTickContext context) {
+    public boolean doesCaptureEntityDrops(final ServerTickListenerContext context) {
         return false;
     }
 

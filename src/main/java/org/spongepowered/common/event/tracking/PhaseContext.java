@@ -766,4 +766,12 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     protected boolean isRunaway(final PhaseContext<?> phaseContext) {
         return phaseContext.getClass() == this.getClass();
     }
+
+    protected P defensiveCopy(final PhaseTracker tracker) {
+        final P newCopy = this.state instanceof PooledPhaseState ? ((PooledPhaseState<P>) this.state).createNewContext(tracker) :  this.state.createPhaseContext(tracker);
+        newCopy.source(this.source);
+        // tODO - blah
+
+        return newCopy;
+    }
 }

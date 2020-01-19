@@ -39,21 +39,21 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
+final class WorldTickListenerState extends ListenerPhaseState<WorldTickListenerContext> {
 
     private final String desc;
 
-    WorldTickPhaseState(final String name) {
+    WorldTickListenerState(final String name) {
         this.desc = TrackingUtil.phaseStateToString("Plugin", name, this);
     }
 
     @Override
-    public WorldTickContext createNewContext(final PhaseTracker tracker) {
-        return new WorldTickContext(this, tracker).addCaptures().player();
+    public WorldTickListenerContext createNewContext(final PhaseTracker tracker) {
+        return new WorldTickListenerContext(this, tracker).addCaptures().player();
     }
 
     @Override
-    public void unwind(final WorldTickContext phaseContext) {
+    public void unwind(final WorldTickListenerContext phaseContext) {
         final Object container = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 

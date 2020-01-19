@@ -52,6 +52,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -97,7 +98,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         if (!playerMP.world.isBlockLoaded(target)) {
             context.targetBlock(BlockSnapshot.empty());
         } else {
-            context.targetBlock(((ServerWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
+            context.targetBlock(((TrackedWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
         context.handUsed(HandTypes.MAIN_HAND);
     }

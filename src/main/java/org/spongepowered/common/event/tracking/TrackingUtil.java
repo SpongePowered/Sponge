@@ -81,6 +81,7 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -138,7 +139,7 @@ public final class TrackingUtil {
     static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
         (blockSnapshot) -> blockSnapshot.getWorldServer().map(worldServer -> {
             final BlockPos targetPos = blockSnapshot.getBlockPos();
-            final SpongeBlockSnapshot replacement = ((ServerWorldBridge) worldServer).bridge$createSnapshot(targetPos, BlockChangeFlags.NONE);
+            final SpongeBlockSnapshot replacement = ((TrackedWorldBridge) worldServer).bridge$createSnapshot(targetPos, BlockChangeFlags.NONE);
             return new Transaction<>(blockSnapshot, replacement);
         });
     public static final int WIDTH = 40;
@@ -232,7 +233,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings({"unused", "try"})
-    public static void tickTileEntity(final ServerWorldBridge mixinWorldServer, final ITickableTileEntity tile) {
+    public static void tickTileEntity(final TrackedWorldBridge mixinWorldServer, final ITickableTileEntity tile) {
         checkArgument(tile instanceof BlockEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final TileEntity tileEntity = (TileEntity) tile;
@@ -275,7 +276,7 @@ public final class TrackingUtil {
 
     @SuppressWarnings("rawtypes")
     public static void updateTickBlock(
-            final ServerWorldBridge mixinWorld, final net.minecraft.block.BlockState block, final BlockPos pos, final Random random) {
+            final TrackedWorldBridge mixinWorld, final net.minecraft.block.BlockState block, final BlockPos pos, final Random random) {
         final ServerWorld world = (ServerWorld) mixinWorld;
         final World apiWorld = (World) world;
 
@@ -309,7 +310,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static void randomTickBlock(final ServerWorldBridge mixinWorld,
+    public static void randomTickBlock(final TrackedWorldBridge mixinWorld,
                                        final net.minecraft.block.BlockState state, final BlockPos pos, final Random random) {
         final ServerWorld world = (ServerWorld) mixinWorld;
         final World apiWorld = (World) world;

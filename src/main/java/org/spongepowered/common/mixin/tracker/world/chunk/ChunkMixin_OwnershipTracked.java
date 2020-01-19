@@ -404,7 +404,7 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
         }
     }
 
-    @Inject(method = "onLoad", at = @At("RETURN"))
+    @Inject(method = "setLoaded", at = @At("RETURN"))
     private void tracker$endLoad(final CallbackInfo callbackInfo) {
         if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && SpongeImplHooks.onServerThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
