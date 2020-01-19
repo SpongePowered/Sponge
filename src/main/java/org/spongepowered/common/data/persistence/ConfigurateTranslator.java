@@ -24,17 +24,22 @@
  */
 package org.spongepowered.common.data.persistence;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
+import ninja.leaping.configurate.ValueType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,18 +70,6 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
         node.setValue(container.getMap(of()).get());
     }
 
-    @SuppressWarnings("unchecked")
-    private static void translateMapOrList(ConfigurationNode node, DataView container) {
-        Object value = node.getValue();
-        if (value instanceof Map) {
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
-                container.set(of('.', entry.getKey().toString()), entry.getValue());
-            }
-        } else if (value != null) {
-            container.set(of(node.getKey().toString()), value);
-        }
-    }
-
     public void translateContainerToData(ConfigurationNode node, DataView container) {
         ConfigurateTranslator.populateNode(node, container);
     }
@@ -103,14 +96,35 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     @Override
     public DataView addTo(ConfigurationNode node, DataView dataView) {
-        Object value = node.getValue();
-        Object key = node.getKey();
-        if (value != null) {
-            if (key == null || value instanceof Map || value instanceof List) {
-                translateMapOrList(node, dataView);
-            } else {
-                dataView.set(of('.', key.toString()), value);
+        if (node.hasMapChildren()) {
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) node.getValue()).entrySet()) {
+                final Object k = entry.getKey();
+                final ConfigurationNode n = node.getNode(k);
+                if (n.getValueType() == ValueType.MAP) {
+                    addTo(n, dataView.createView(of(k.toString())));
+                } else if (n.getValueType() == ValueType.LIST) {
+                    addTo(n, dataView);
+                } else {
+                    checkArgument(k != null, "map key");
+                    dataView.set(of(k.toString()), entry.getValue());
+                }
             }
+        } else if (node.hasListChildren()) {
+            final List<Object> l = new ArrayList<>();
+            for (ConfigurationNode o : node.getChildrenList()) {
+                if (o.getValueType().canHaveChildren()) {
+                    l.add(addTo(o, DataContainer.createNew()));
+                } else {
+                    l.add(o.getValue());
+                }
+            }
+            dataView.set(of(node.getKey().toString()), l);
+        } else {
+            final Object key = node.getKey();
+            final Object value = node.getValue();
+            checkArgument(key != null, "key");
+            checkArgument(value != null, "value");
+            dataView.set(DataQuery.of(key.toString()), node.getValue());
         }
         return dataView;
     }
