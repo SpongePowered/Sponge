@@ -48,7 +48,11 @@ public class ScheduledTask implements Task {
     private final PluginContainer owner;
     private final Consumer<Task> consumer;
     private long timestamp;
-    private ScheduledTaskState state;
+
+    // As this state is going to be read by multiple threads
+    // potentially very quickly, marking this a volatile will
+    // give the JVM a hint to not cache this
+    private volatile ScheduledTaskState state;
     private final UUID id;
     private final String name;
     private final TaskSynchronicity syncType;

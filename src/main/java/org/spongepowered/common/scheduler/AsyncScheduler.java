@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,6 +44,7 @@ public class AsyncScheduler extends SchedulerBase {
     // Locking mechanism
     private final Lock lock = new ReentrantLock();
     private final Condition condition = this.lock.newCondition();
+    private final AtomicBoolean stateChanged = new AtomicBoolean(false);
     // The dynamic thread pooling executor of asynchronous tasks.
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -113,7 +115,13 @@ public class AsyncScheduler extends SchedulerBase {
     protected void preTick() {
         this.lock.lock();
         try {
-            this.condition.await(this.minimumTimeout, TimeUnit.NANOSECONDS);
+            // If we have something that has indicated it needs to change,
+            // don't await, just continue.
+            if (!this.stateChanged.get()) {
+                this.condition.await(this.minimumTimeout, TimeUnit.NANOSECONDS);
+            }
+            // We're processing now. Set to false.
+            this.stateChanged.set(false);
         } catch (InterruptedException ignored) {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
@@ -142,6 +150,7 @@ public class AsyncScheduler extends SchedulerBase {
         this.lock.lock();
         try {
             super.addTask(task);
+            this.stateChanged.set(true);
             this.condition.signalAll();
         } finally {
             this.lock.unlock();
@@ -150,10 +159,14 @@ public class AsyncScheduler extends SchedulerBase {
 
     @Override
     protected void onTaskCompletion(ScheduledTask task) {
-        // This will likely be run from an executor thread rather than
-        // the thread that owns the task, hence no lock.
         if (task.getState() == ScheduledTask.ScheduledTaskState.RUNNING) {
-            this.condition.signalAll();
+            this.lock.lock();
+            try {
+                this.stateChanged.set(true);
+                this.condition.signalAll();
+            } finally {
+                this.lock.unlock();
+            }
         }
     }
 

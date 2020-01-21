@@ -49,16 +49,16 @@ public class AsyncSchedulerTest implements LoadableModule {
     public void enable(CommandSource src) {
         this.task = Task.builder()
                 .async()
-                .delay(5, TimeUnit.SECONDS)
-                .interval(5, TimeUnit.SECONDS)
+                .delay(1, TimeUnit.SECONDS)
+                .interval(1, TimeUnit.SECONDS)
                 .execute(task -> {
                     this.logger.info("Async Logger Test Start");
-                    try {
+                    /*try {
                         // Testing that the next iteration will fire straight after the first.
                         Thread.sleep(6000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
-                    }
+                    }*/
                     this.logger.info("Async Logger Test End");
                 })
                 .submit(this);
