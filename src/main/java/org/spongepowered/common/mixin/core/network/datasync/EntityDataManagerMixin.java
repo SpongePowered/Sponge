@@ -35,18 +35,21 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.network.datasync.EntityDataManagerBridge;
 import org.spongepowered.common.bridge.packet.DataParameterBridge;
 
 import java.util.Map;
 import java.util.Optional;
 
 @Mixin(EntityDataManager.class)
-public abstract class EntityDataManagerMixin {
+public abstract class EntityDataManagerMixin implements EntityDataManagerBridge {
 
     // This overrides the setter for the entries of the
     // data manager to use a "faster" map.
@@ -58,6 +61,18 @@ public abstract class EntityDataManagerMixin {
     @Shadow private boolean dirty;
 
     @Shadow protected abstract <T> EntityDataManager.DataEntry<T> getEntry(DataParameter<T> key);
+
+    @Override
+    public <T> void setSilently(DataParameter<T> key, T value) {
+        EntityDataManager.DataEntry<T> dataentry = this.getEntry(key);
+
+        if (ObjectUtils.notEqual(value, dataentry.getValue())) {
+            dataentry.setValue(value);
+            this.entity.notifyDataManagerChange(key);
+            dataentry.setDirty(true);
+            this.dirty = true;
+        }
+    }
 
     /**
      * @author gabizou December 27th, 2017
@@ -71,7 +86,7 @@ public abstract class EntityDataManagerMixin {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     public <T> void set(final DataParameter<T> key, T value) {
-        final EntityDataManager.DataEntry<T> dataentry = this.<T>getEntry(key);
+        final EntityDataManager.DataEntry<T> dataentry = this.getEntry(key);
 
         // Sponge Start - set up the current value, so we don't have to retrieve it multiple times
         final T currentValue = dataentry.getValue();

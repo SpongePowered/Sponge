@@ -40,6 +40,7 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
@@ -86,6 +87,7 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.LivingEntityBaseBridge;
 import org.spongepowered.common.bridge.entity.player.InventoryPlayerBridge;
+import org.spongepowered.common.bridge.network.datasync.EntityDataManagerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -586,6 +588,14 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                 return !flag; // Sponge - remove 'amount > 0.0F'
             }
         }
+    }
+
+    @Redirect(method = {"<init>", "readEntityFromNBT"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;setHealth(F)V"))
+    private void onInitHealth(final EntityLivingBase entity, final float health) {
+        DataParameter<Float> healthParameter = EntityLivingBaseAccessor.accessor$getHealthParameter();
+        float clampedValue = MathHelper.clamp(health, 0.0F, this.getMaxHealth());
+
+        ((EntityDataManagerBridge) entity.getDataManager()).setSilently(healthParameter, clampedValue);
     }
 
     /**
