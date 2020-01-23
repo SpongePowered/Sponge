@@ -71,6 +71,7 @@
         "network.handshake.client.CHandshakePacketAccessor",
         "network.play.client.CPlayerPacketAccessor",
         "network.play.client.CResourcePackStatusPacketAccessor",
+        "network.play.server.SChangeBlockPacketAccessor",
         "network.play.server.SEntityMetadataPacketAccessor",
         "network.play.server.SEntityStatusPacketAccessor",
         "network.play.server.SPlayerListHeaderFooterPacketAccessor",

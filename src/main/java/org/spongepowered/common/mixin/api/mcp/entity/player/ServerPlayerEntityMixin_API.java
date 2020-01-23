@@ -42,9 +42,11 @@ import net.minecraft.network.play.server.SSendResourcePackPacket;
 import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.spongepowered.api.Sponge;
@@ -77,6 +79,7 @@ import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
@@ -104,10 +107,12 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.mixin.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -288,7 +293,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void kick() {
-        this.kick(Text.of(SpongeImpl.getGame().getRegistry().getTranslationById("disconnect.disconnected").get()));
+        this.kick(Text.of(Translation.find("disconnect.disconnected").get()));
     }
 
     @Override
@@ -313,11 +318,11 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+            event = Registry.SOUND_EVENT.getOrDefault((ResourceLocation) (Object) sound.getKey());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
-            this.connection.sendPacket(new SPlaySoundPacket(sound.getId(), (net.minecraft.util.SoundCategory) (Object) category,
-                    position.getX(), position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
+            this.connection.sendPacket(new SPlaySoundPacket((ResourceLocation) (Object) sound.getKey(), (net.minecraft.util.SoundCategory) (Object) category,
+                VecHelper.toVec3d(position), (float) Math.max(minVolume, volume), (float) pitch));
             return;
         }
 
@@ -350,12 +355,12 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public void playRecord(final Vector3i position, final MusicDisc recordType) {
+    public void playMusicDisc(final Vector3i position, final MusicDisc recordType) {
         this.playRecord0(position, checkNotNull(recordType, "recordType"));
     }
 
     @Override
-    public void stopRecord(final Vector3i position) {
+    public void stopMusicDisc(final Vector3i position) {
         this.playRecord0(position, null);
     }
 
@@ -376,24 +381,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public boolean isSleepingIgnored() {
-        return this.api$sleepingIgnored;
-    }
-
-    @Override
-    public void setSleepingIgnored(final boolean sleepingIgnored) {
-        this.api$sleepingIgnored = sleepingIgnored;
-    }
-
-    @Override
-    public Vector3d getVelocity() {
-        if (((ServerPlayerEntityBridge) this).bridge$getVelocityOverride() != null) {
-            return ((ServerPlayerEntityBridge) this).bridge$getVelocityOverride();
-        }
-        return super.getVelocity();
-    }
-
-    @Override
     public TabList getTabList() {
         return this.api$tabList;
     }
@@ -409,8 +396,9 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     public void sendBlockChange(final BlockPos pos, final net.minecraft.block.BlockState state) {
         final SChangeBlockPacket packet = new SChangeBlockPacket();
-        packet.pos = pos;
-        packet.blockState = state;
+        final SChangeBlockPacketAccessor accessor = (SChangeBlockPacketAccessor) packet;
+        accessor.accessor$setPos(pos);
+        accessor.accessor$setState(state);
         this.connection.sendPacket(packet);
     }
 
@@ -428,7 +416,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean respawnPlayer() {
-        if (this.getHealth() > 0.0F) {
+        if (this.shadow$getHealth() > 0.0F) {
             return false;
         }
         this.connection.player = this.server.getPlayerList().recreatePlayerEntity((ServerPlayerEntity) (Object) this, this.dimension, false);

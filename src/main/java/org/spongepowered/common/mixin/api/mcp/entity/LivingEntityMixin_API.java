@@ -45,7 +45,8 @@ import java.util.Set;
 @Mixin(value = LivingEntity.class, priority = 999)
 public abstract class LivingEntityMixin_API extends EntityMixin_API implements Living {
 
-    @Shadow public abstract ItemStack getHeldItem(Hand hand);
+    @Shadow public abstract ItemStack shadow$getHeldItem(Hand hand);
+    @Shadow public abstract float shadow$getHealth();
 
     @Override
     public Text getTeamRepresentation() {
