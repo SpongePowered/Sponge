@@ -59,7 +59,7 @@ dependencies {
         exclude module: 'spongeapi'
     }
     compile 'org.ow2.asm:asm-debug-all:5.2'
-    compile('org.spongepowered:mixin:0.8-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.8') {
         exclude module: 'launchwrapper'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
     }
