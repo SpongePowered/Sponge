@@ -40,7 +40,6 @@ import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.state.properties.ChestType;
-import net.minecraft.state.properties.ComparatorMode;
 import net.minecraft.state.properties.DoorHingeSide;
 import net.minecraft.state.properties.Half;
 import net.minecraft.state.properties.NoteBlockInstrument;
@@ -69,7 +68,7 @@ import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.ChestAttachmentType;
-import org.spongepowered.api.data.type.ComparatorType;
+import org.spongepowered.api.data.type.ComparatorMode;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.api.data.type.HandPreference;
@@ -369,7 +368,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(ChatVisibility.class, CatalogKey.minecraft("chat_visibility"), Arrays.stream(net.minecraft.entity.player.ChatVisibility.values()), true)
             .generateRegistry(ChestAttachmentType.class, CatalogKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true)
             .generateRegistry(CollisionRule.class, CatalogKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
-            .generateRegistry(ComparatorType.class, CatalogKey.minecraft("comparator_type"), Arrays.stream(ComparatorMode.values()), true)
+            .generateRegistry(ComparatorMode.class, CatalogKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true)
             .registerRegistry(Currency.class, CatalogKey.sponge("currency"))
             .generateRegistry(Difficulty.class, CatalogKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true)
             .generateRegistry(DismountType.class, CatalogKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true)

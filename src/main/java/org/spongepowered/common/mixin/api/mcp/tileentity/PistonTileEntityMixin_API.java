@@ -26,9 +26,22 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.PistonTileEntity;
 import org.spongepowered.api.block.entity.Piston;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(PistonTileEntity.class)
 public abstract class PistonTileEntityMixin_API extends TileEntityMixin_API implements Piston {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.blockState().asImmutable());
+        values.add(this.extending().asImmutable());
+
+        return values;
+    }
 
 }

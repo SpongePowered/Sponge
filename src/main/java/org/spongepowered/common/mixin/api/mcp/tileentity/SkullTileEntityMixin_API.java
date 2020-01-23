@@ -24,39 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import org.spongepowered.api.block.entity.PlayerHead;
+import org.spongepowered.api.block.entity.Skull;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
-import org.spongepowered.common.data.processor.common.SkullUtils;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
-import SkullData;
 import net.minecraft.tileentity.SkullTileEntity;
 
+import java.util.Set;
+
 @Mixin(SkullTileEntity.class)
-public abstract class SkullTileEntityMixin_API extends TileEntityMixin_API implements PlayerHead {
+public abstract class SkullTileEntityMixin_API extends TileEntityMixin_API implements Skull {
 
     @Override
-    public SkullData getSkullData() {
-        return new SpongeSkullData(SkullUtils.getSkullType(((SkullTileEntity) (Object) this).getSkullType()));
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-    @Override
-    public Value.Mutable<SkullType> skullType() {
-        return new SpongeValue<>(Keys.SKULL_TYPE, Constants.TileEntity.Skull.DEFAULT_TYPE,
-            SkullUtils.getSkullType(((SkullTileEntity) (Object) this).getSkullType()));
-    }
+        this.gameProfile().map(Value::asImmutable).ifPresent(values::add);
 
-    @Override
-    public void supplyVanillaManipulators(List<org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getSkullData());
-        Optional<RepresentedPlayerData> profileData = this.get(RepresentedPlayerData.class);
-        if (profileData.isPresent()) {
-            manipulators.add(profileData.get());
-        }
+        return values;
     }
-
 
 }

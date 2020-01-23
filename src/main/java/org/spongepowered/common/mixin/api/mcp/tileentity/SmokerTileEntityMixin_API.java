@@ -24,27 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.BannerTileEntity;
-import org.spongepowered.api.block.entity.Banner;
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.tileentity.SmokerTileEntity;
+import org.spongepowered.api.block.entity.carrier.furnace.Smoker;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
-
-@Mixin(BannerTileEntity.class)
-public abstract class BannerTileEntityMixin_API extends TileEntityMixin_API implements Banner {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        // NameableBlockEntity
-        values.add(this.displayName().asImmutable());
-
-        values.add(this.baseColor().asImmutable());
-        values.add(this.patternsList().asImmutable());
-
-        return values;
-    }
+@Mixin(SmokerTileEntity.class)
+public abstract class SmokerTileEntityMixin_API extends AbstractFurnaceTileEntityMixin_API implements Smoker {
 
 }

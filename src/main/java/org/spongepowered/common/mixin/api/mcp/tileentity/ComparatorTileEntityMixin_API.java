@@ -26,9 +26,22 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.ComparatorTileEntity;
 import org.spongepowered.api.block.entity.Comparator;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(ComparatorTileEntity.class)
 public abstract class ComparatorTileEntityMixin_API extends TileEntityMixin_API implements Comparator {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.mode().asImmutable());
+
+        return values;
+    }
 
 }

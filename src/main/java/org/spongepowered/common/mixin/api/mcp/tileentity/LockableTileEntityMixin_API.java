@@ -29,23 +29,22 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.world.LockCode;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.manipulator.mutable.item.InventoryItemData;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
+import org.spongepowered.api.block.entity.carrier.NameableCarrierBlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
 @Mixin(LockableTileEntity.class)
-public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API {
+public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API implements NameableCarrierBlockEntity {
 
     @Shadow @Nullable private LockCode code;
 
@@ -63,7 +62,7 @@ public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API {
                 final DataContainer stackView = DataContainer.createNew()
                     .set(Queries.CONTENT_VERSION, 1)
                     .set(Constants.TileEntity.SLOT, i)
-                    .set(Constants.TileEntity.SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());
+                    .set(Constants.TileEntity.SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) (Object) stack).toContainer());
                 items.add(stackView);
             }
         }
@@ -72,14 +71,14 @@ public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API {
     }
 
     @Override
-    public void supplyVanillaManipulators(final List<Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        final Optional<LockableData> lockData = this.get(LockableData.class);
-        lockData.ifPresent(manipulators::add);
-        final Optional<InventoryItemData> inventoryData = this.get(InventoryItemData.class);
-        inventoryData.ifPresent(manipulators::add);
-        if (((LockableTileEntity) (Object) this).hasCustomName()) {
-            manipulators.add(this.get(DisplayNameData.class).get());
-        }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.displayName().asImmutable());
+
+        this.lockToken().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
+
 }

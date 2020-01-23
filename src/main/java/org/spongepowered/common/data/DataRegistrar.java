@@ -27,7 +27,7 @@ package org.spongepowered.common.data;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.PlayerHead;
+import org.spongepowered.api.block.entity.Skull;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.block.tileentity.*;
 import org.spongepowered.api.block.tileentity.carrier.*;
@@ -158,7 +158,7 @@ public final class DataRegistrar {
         dataManager.registerBuilder(org.spongepowered.api.block.entity.MobSpawner.class, new SpongeMobSpawnerBuilder());
         dataManager.registerBuilder(Note.class, new SpongeNoteBuilder());
         dataManager.registerBuilder(Sign.class, new SpongeSignBuilder());
-        dataManager.registerBuilder(PlayerHead.class, new SpongeSkullBuilder());
+        dataManager.registerBuilder(Skull.class, new SpongeSkullBuilder());
         dataManager.registerBuilder(org.spongepowered.api.block.entity.carrier.Beacon.class, new SpongeBeaconBuilder());
         dataManager.registerBuilder(LocatableBlock.class, new SpongeLocatableBlockBuilder());
 

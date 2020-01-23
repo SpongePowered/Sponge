@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
+
 import net.minecraft.tileentity.DispenserTileEntity;
 
 @Mixin(DispenserTileEntity.class)
@@ -46,4 +47,5 @@ public abstract class DispenserTileEntityMixin_API extends LockableLootTileEntit
     public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
         return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
     }
+
 }

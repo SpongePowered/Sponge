@@ -25,12 +25,16 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.entity.EnchantmentTable;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
 import net.minecraft.tileentity.EnchantingTableTileEntity;
+
+import java.util.Set;
 
 @Mixin(EnchantingTableTileEntity.class)
 public abstract class EnchantmentTableTileEntityMixin_API extends TileEntityMixin_API implements EnchantmentTable {
@@ -45,11 +49,13 @@ public abstract class EnchantmentTableTileEntityMixin_API extends TileEntityMixi
     }
 
     @Override
-    public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        if (((EnchantingTableTileEntity) (Object) this).hasCustomName()) {
-            manipulators.add(this.get(DisplayNameData.class).get());
-        }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // NameableBlockEntity
+        values.add(this.displayName().asImmutable());
+
+        return values;
     }
 
 }

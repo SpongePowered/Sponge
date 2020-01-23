@@ -24,16 +24,18 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
+import net.minecraft.tileentity.BeaconTileEntity;
 import org.spongepowered.api.block.entity.carrier.Beacon;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
-import net.minecraft.tileentity.BeaconTileEntity;
+import java.util.Set;
 
 @Mixin(BeaconTileEntity.class)
-public abstract class BeaconTileEntityMixin_API extends LockableTileEntityMixin_API<Beacon> implements Beacon {
+public abstract class BeaconTileEntityMixin_API extends TileEntityMixin_API implements Beacon {
 
     @Shadow private int levels;
 
@@ -44,7 +46,6 @@ public abstract class BeaconTileEntityMixin_API extends LockableTileEntityMixin_
         return this.levels < 0 ? 0 : this.levels;
     }
 
-
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
@@ -54,9 +55,16 @@ public abstract class BeaconTileEntityMixin_API extends LockableTileEntityMixin_
     }
 
     @Override
-    public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getBeaconData());
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        // NameableBlockEntity
+        values.add(this.displayName().asImmutable());
+
+        this.primaryEffect().map(Value::asImmutable).ifPresent(values::add);
+        this.secondaryEffect().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 
 }

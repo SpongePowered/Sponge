@@ -46,7 +46,7 @@ public class SkullRepresentedPlayerDataProcessor extends
         AbstractTileEntitySingleDataProcessor<SkullTileEntity, GameProfile, Mutable<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public SkullRepresentedPlayerDataProcessor() {
-        super(SkullTileEntity.class, Keys.REPRESENTED_PLAYER);
+        super(SkullTileEntity.class, Keys.GAME_PROFILE);
     }
 
     @Override
@@ -82,12 +82,12 @@ public class SkullRepresentedPlayerDataProcessor extends
 
     @Override
     protected Immutable<GameProfile> constructImmutableValue(GameProfile value) {
-        return new ImmutableSpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, value);
+        return new ImmutableSpongeValue<>(Keys.GAME_PROFILE, SpongeRepresentedPlayerData.NULL_PROFILE, value);
     }
 
     @Override
     protected Mutable<GameProfile> constructValue(GameProfile actualValue) {
-        return new SpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
+        return new SpongeValue<>(Keys.GAME_PROFILE, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
     }
 
     @Override

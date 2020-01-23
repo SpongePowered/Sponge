@@ -26,14 +26,28 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.BrewingStandTileEntity;
 import org.spongepowered.api.block.entity.carrier.BrewingStand;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Set;
+
 @Mixin(BrewingStandTileEntity.class)
-public abstract class BrewingStandTileEntityMixin_API extends LockableTileEntityMixin_API<BrewingStand> implements BrewingStand {
+public abstract class BrewingStandTileEntityMixin_API extends LockableTileEntityMixin_API implements BrewingStand {
 
     @Override
     public boolean brew() {
 
         return false;
     }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.fuel().asImmutable());
+        values.add(this.remainingBrewTime().asImmutable());
+
+        return values;
+    }
+
 }

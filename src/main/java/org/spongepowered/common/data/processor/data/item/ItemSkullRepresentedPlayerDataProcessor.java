@@ -49,7 +49,7 @@ public class ItemSkullRepresentedPlayerDataProcessor
         extends AbstractItemSingleDataProcessor<GameProfile, Mutable<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public ItemSkullRepresentedPlayerDataProcessor() {
-        super(ItemSkullRepresentedPlayerDataProcessor::isSupportedItem, Keys.REPRESENTED_PLAYER);
+        super(ItemSkullRepresentedPlayerDataProcessor::isSupportedItem, Keys.GAME_PROFILE);
     }
 
     private static boolean isSupportedItem(ItemStack stack) {

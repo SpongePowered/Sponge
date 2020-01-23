@@ -86,13 +86,13 @@ public class SkullTest {
 
     private static ItemStack.Builder playerHead(CommandContext commandContext, ItemStack.Builder builder) {
         return builder.add(
-                Keys.REPRESENTED_PLAYER, commandContext.<Player>getOne(PARAM_PLAYER).get().getProfile()
+                Keys.GAME_PROFILE, commandContext.<Player>getOne(PARAM_PLAYER).get().getProfile()
         );
     }
 
     private static ItemStack.Builder blazeHead(CommandContext commandContext, ItemStack.Builder builder) {
         return builder.add(
-                Keys.REPRESENTED_PLAYER, GameProfile.of(UUID.fromString("4c38ed11-596a-4fd4-ab1d-26f386c1cbac"), "MHF_Blaze")
+                Keys.GAME_PROFILE, GameProfile.of(UUID.fromString("4c38ed11-596a-4fd4-ab1d-26f386c1cbac"), "MHF_Blaze")
         );
     }
 
