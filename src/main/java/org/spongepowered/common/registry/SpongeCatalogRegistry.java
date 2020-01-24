@@ -35,6 +35,7 @@ import net.minecraft.entity.monster.SpellcastingIllagerEntity;
 import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.PandaEntity;
+import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.Team;
@@ -94,6 +95,7 @@ import org.spongepowered.api.data.type.SpellType;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.ToolType;
+import org.spongepowered.api.data.type.TropicalFishShape;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
@@ -390,6 +392,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(StairShape.class, CatalogKey.minecraft("stair_shape"), Arrays.stream(StairsShape.values()), true)
             .generateRegistry(StructureMode.class, CatalogKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true)
             .generateRegistry(ToolType.class, CatalogKey.minecraft("tool_type"), Arrays.stream(ItemTier.values()), true)
+            .generateRegistry(TropicalFishShape.class, CatalogKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true)
             .generateRegistry(WireAttachmentType.class, CatalogKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true)
             .generateRegistry(WoodType.class, CatalogKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true)
             .generateRegistry(Visibility.class, CatalogKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true)
