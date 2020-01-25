@@ -595,10 +595,15 @@ public abstract class WorldMixin implements WorldBridge {
             return;
         }
         if (this.isTileMarkedForRemoval(pos) && !this.bridge$isFake()) {
-            // if (PhaseTracker.getInstance().getCurrentState().allowsGettingQueuedRemovedTiles()) {
             // We must always return the queued TE for mods
             // See https://github.com/SpongePowered/SpongeForge/issues/3001
-            cir.setReturnValue(this.getQueuedRemovedTileFromProxy(pos));
+            if (PhaseTracker.getInstance().getCurrentState().allowsGettingQueuedRemovedTiles()) {
+                cir.setReturnValue(this.getQueuedRemovedTileFromProxy(pos));
+            } else {
+                // If we're not unwinding, then a mod wants what the tile entity
+                // will be
+                cir.setReturnValue(this.getProcessingTileFromProxy(pos));
+            }
         }
 
     }
