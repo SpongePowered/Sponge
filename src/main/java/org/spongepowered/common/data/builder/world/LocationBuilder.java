@@ -44,7 +44,7 @@ public class LocationBuilder extends AbstractDataBuilder<Location<World>> {
 
     @Override
     protected Optional<Location<World>> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(Queries.WORLD_NAME, Queries.WORLD_ID, Queries.POSITION_X, Queries.POSITION_Y, Queries.POSITION_Z)) {
+        if (!container.contains(Queries.WORLD_ID, Queries.POSITION_X, Queries.POSITION_Y, Queries.POSITION_Z)) {
             return Optional.empty();
         }
         if (container.contains(Queries.CHUNK_X, Queries.CHUNK_Y, Queries.CHUNK_Z)) {
