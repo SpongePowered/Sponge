@@ -30,6 +30,8 @@ import net.minecraft.entity.ai.EntityAITasks;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
+import org.spongepowered.api.data.manipulator.mutable.entity.DominantHandData;
+import org.spongepowered.api.data.manipulator.mutable.entity.PersistingData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.Goal;
@@ -81,8 +83,6 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
         }
     }
 
-
-
     @Override
     public AgentData getAgentData() {
         return new SpongeAgentData(!this.isAIDisabled());
@@ -94,9 +94,13 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getAgentData());
+
+        manipulators.add(this.getAgentData());
+
+        this.get(DominantHandData.class).ifPresent(manipulators::add);
+        this.get(PersistingData.class).ifPresent(manipulators::add);
     }
 
 }

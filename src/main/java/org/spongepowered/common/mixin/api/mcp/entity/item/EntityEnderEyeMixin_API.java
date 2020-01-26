@@ -45,6 +45,4 @@ public abstract class EntityEnderEyeMixin_API extends EntityMixin_API implements
         this.projectileSource = shooter;
     }
 
-
-
 }

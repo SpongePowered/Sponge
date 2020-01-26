@@ -25,10 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EntityEnderCrystal;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.EnderCrystal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.entity.item.EntityEnderCrystalBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
+
+import java.util.Collection;
 
 @Mixin(EntityEnderCrystal.class)
 public abstract class EntityEnderCrystalMixin_API extends EntityMixin_API implements EnderCrystal {
@@ -39,5 +42,11 @@ public abstract class EntityEnderCrystalMixin_API extends EntityMixin_API implem
         ((EntityEnderCrystalBridge) this).bridge$ThrowEventWithDetonation(this.world, null, this.posX, this.posY, this.posZ, true, null);
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        manipulators.add(this.getExplosionRadiusData());
+    }
 
 }

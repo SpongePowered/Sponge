@@ -54,4 +54,5 @@ public abstract class EntityGuardianMixin_API extends EntityMobMixin_API impleme
             this.setTargetedEntity(((EntityLivingBase) entity).getEntityId());
         }
     }
+
 }

@@ -60,8 +60,10 @@ public abstract class EntityHorseMixin_API extends AbstractHorseMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getHorseData());
+
+        manipulators.add(this.getHorseData());
     }
+    
 }

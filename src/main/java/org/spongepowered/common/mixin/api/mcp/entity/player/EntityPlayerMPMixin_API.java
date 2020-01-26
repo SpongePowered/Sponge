@@ -52,7 +52,9 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
+import org.spongepowered.api.data.manipulator.mutable.entity.HealthScalingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -475,6 +477,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         return super.getVelocity();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return (CarriedInventory<? extends Carrier>) this.inventory;
@@ -518,13 +521,6 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     public Value<GameMode> gameMode() {
         return new SpongeValue<>(Keys.GAME_MODE, Constants.Catalog.DEFAULT_GAMEMODE,
                 (GameMode) (Object) this.interactionManager.getGameType());
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getJoinData());
-        manipulators.add(getGameModeData());
     }
 
     public void sendBlockChange(final BlockPos pos, final IBlockState state) {
@@ -650,4 +646,17 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
         final World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
         return this.setLocation(new Location<>(loaded, position));
     }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        manipulators.add(this.getGameModeData());
+        manipulators.add(this.getJoinData());
+        manipulators.add(this.getStatisticData());
+
+        this.get(AffectsSpawningData.class).ifPresent(manipulators::add);
+        this.get(HealthScalingData.class).ifPresent(manipulators::add);
+    }
+    
 }

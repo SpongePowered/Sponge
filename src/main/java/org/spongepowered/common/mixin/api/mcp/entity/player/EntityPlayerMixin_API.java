@@ -31,7 +31,11 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.CooldownTracker;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FlyingAbilityData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
+import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -40,6 +44,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityLivingBaseMixin_API;
+
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
@@ -63,5 +69,15 @@ public abstract class EntityPlayerMixin_API extends EntityLivingBaseMixin_API {
         return shadow$getName();
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        this.get(ExperienceHolderData.class).ifPresent(manipulators::add);
+        this.get(FlyingAbilityData.class).ifPresent(manipulators::add);
+        this.get(FoodData.class).ifPresent(manipulators::add);
+        this.get(FoodData.class).ifPresent(manipulators::add);
+        this.get(MovementSpeedData.class).ifPresent(manipulators::add);
+    }
 
 }

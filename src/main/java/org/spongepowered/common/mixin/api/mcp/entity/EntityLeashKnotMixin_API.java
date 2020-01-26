@@ -36,4 +36,5 @@ public abstract class EntityLeashKnotMixin_API extends EntityHangingMixin_API im
     public Entity getLeashedEntity() {
         return null;
     }
+
 }

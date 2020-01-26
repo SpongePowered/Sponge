@@ -28,20 +28,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
-import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
-import net.minecraft.util.CombatTracker;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
+import org.spongepowered.api.data.manipulator.mutable.entity.AbsorptionData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ActiveItemData;
+import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ElytraFlyingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FallDistanceData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
+import org.spongepowered.api.data.manipulator.mutable.entity.StuckArrowsData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -57,8 +57,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -151,7 +151,22 @@ public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implemen
         return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectile class"), this, checkNotNull(velocity, "velocity"));
     }
 
-    // Start implementation of UseItemstackEvent
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
 
+        manipulators.add(this.getDamageableData());
+        manipulators.add(this.getHealthData());
+
+        this.get(AbsorptionData.class).ifPresent(manipulators::add);
+        this.get(ActiveItemData.class).ifPresent(manipulators::add);
+        this.get(BreathingData.class).ifPresent(manipulators::add);
+        this.get(ElytraFlyingData.class).ifPresent(manipulators::add);
+        this.get(FallDistanceData.class).ifPresent(manipulators::add);
+        this.get(PotionEffectData.class).ifPresent(manipulators::add);
+        this.get(StuckArrowsData.class).ifPresent(manipulators::add);
+    }
+
+    // Start implementation of UseItemstackEvent
 
 }

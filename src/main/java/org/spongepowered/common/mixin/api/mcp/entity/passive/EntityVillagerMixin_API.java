@@ -29,6 +29,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
+import org.spongepowered.api.data.manipulator.mutable.entity.PlayingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -90,12 +92,6 @@ public abstract class EntityVillagerMixin_API extends EntityAgeableMixin_API imp
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getCareerData());
-    }
-
-    @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return this;
     }
@@ -104,4 +100,15 @@ public abstract class EntityVillagerMixin_API extends EntityAgeableMixin_API imp
     public Optional<Villager> getCarrier() {
         return Optional.of(this);
     }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        manipulators.add(this.getCareerData());
+
+        this.get(PlayingData.class).ifPresent(manipulators::add);
+        this.get(TradeOfferData.class).ifPresent(manipulators::add);
+    }
+    
 }

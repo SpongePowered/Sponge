@@ -27,10 +27,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.item.EntityMinecartTNT;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+
+import java.util.Collection;
 
 @Mixin(EntityMinecartTNT.class)
 public abstract class EntityMinecartTNTMixin_API extends EntityMinecartMixin_API implements TNTMinecart {
@@ -61,6 +64,14 @@ public abstract class EntityMinecartTNTMixin_API extends EntityMinecartMixin_API
     @Override
     public void detonate() {
         ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(0);
+    }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        manipulators.add(this.getExplosionRadiusData());
+        manipulators.add(this.getFuseData());
     }
 
 }

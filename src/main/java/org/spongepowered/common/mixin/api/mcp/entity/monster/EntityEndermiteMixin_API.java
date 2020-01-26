@@ -59,8 +59,10 @@ public abstract class EntityEndermiteMixin_API extends EntityMobMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getExpirableData());
+
+        manipulators.add(this.getExpirableData());
     }
+    
 }

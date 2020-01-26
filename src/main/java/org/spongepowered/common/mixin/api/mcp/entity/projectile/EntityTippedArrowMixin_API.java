@@ -25,10 +25,21 @@
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityTippedArrow;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
 import org.spongepowered.api.entity.projectile.arrow.TippedArrow;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Collection;
+
 @Mixin(EntityTippedArrow.class)
 public abstract class EntityTippedArrowMixin_API extends EntityArrowMixin_API implements TippedArrow {
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        this.get(PotionEffectData.class).ifPresent(manipulators::add);
+    }
 
 }

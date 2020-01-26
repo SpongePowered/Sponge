@@ -26,11 +26,15 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityMinecart;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import org.spongepowered.common.util.Constants;
+
+import java.util.Collection;
 
 @Mixin(EntityMinecart.class)
 public abstract class EntityMinecartMixin_API extends EntityMixin_API implements Minecart {
@@ -87,6 +91,13 @@ public abstract class EntityMinecartMixin_API extends EntityMixin_API implements
     @Override
     public void setDerailedVelocityMod(Vector3d derailedVelocityMod) {
         this.derailedMod = derailedVelocityMod;
+    }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        this.get(MinecartBlockData.class).ifPresent(manipulators::add);
     }
 
 }

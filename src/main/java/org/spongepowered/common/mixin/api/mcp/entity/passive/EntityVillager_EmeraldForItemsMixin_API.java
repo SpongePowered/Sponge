@@ -67,4 +67,5 @@ public class EntityVillager_EmeraldForItemsMixin_API implements TradeOfferGenera
     public void accept(Merchant owner, List<TradeOffer> tradeOffers, Random random) {
         tradeOffers.add(apply(random));
     }
+
 }

@@ -73,4 +73,5 @@ public class EntityVillager_ListEnchantedBookForEmeraldsMixin_API implements Tra
     public void accept(Merchant owner, List<TradeOffer> tradeOffers, Random random) {
         tradeOffers.add(apply(random));
     }
+
 }

@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityArrow;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.CriticalHitData;
+import org.spongepowered.api.data.manipulator.mutable.entity.PickupRuleData;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,12 +60,6 @@ public abstract class EntityArrowMixin_API extends EntityMixin_API implements Ar
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getKnockbackData());
-    }
-
-    @Override
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof Entity) {
             // This allows things like Vanilla kill attribution to take place
@@ -72,6 +68,16 @@ public abstract class EntityArrowMixin_API extends EntityMixin_API implements Ar
             this.shootingEntity = null;
         }
         this.projectileSource = shooter;
+    }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        manipulators.add(this.getKnockbackData());
+
+        this.get(CriticalHitData.class).ifPresent(manipulators::add);
+        this.get(PickupRuleData.class).ifPresent(manipulators::add);
     }
 
 }

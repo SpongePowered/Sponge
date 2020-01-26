@@ -26,11 +26,12 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.EntityWolf;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
+import org.spongepowered.api.data.manipulator.mutable.DyeableData;
+import org.spongepowered.api.data.manipulator.mutable.WetData;
+import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityAgeableMixin_API;
 
 import java.util.Collection;
@@ -41,9 +42,12 @@ public abstract class EntityWolfMixin_API extends EntityAgeableMixin_API impleme
     @Shadow public abstract boolean shadow$isAngry();
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(get(SittingData.class).get());
-        manipulators.add(new SpongeAggressiveData(this.shadow$isAngry()));
+
+        this.get(AggressiveData.class).ifPresent(manipulators::add);
+        this.get(WetData.class).ifPresent(manipulators::add);
+        this.get(DyeableData.class).ifPresent(manipulators::add);
     }
+    
 }

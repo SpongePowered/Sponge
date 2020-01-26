@@ -26,9 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.CommandData;
 import org.spongepowered.api.entity.vehicle.minecart.CommandBlockMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Collection;
 
 @Mixin(EntityMinecartCommandBlock.class)
 public abstract class EntityMinecartCommandBlockMixin_API extends EntityMinecartMixin_API implements CommandBlockMinecart {
@@ -39,4 +43,12 @@ public abstract class EntityMinecartCommandBlockMixin_API extends EntityMinecart
     public String getName() {
         return getCommandBlockLogic().getName();
     }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        this.get(CommandData.class).ifPresent(manipulators::add);
+    }
+    
 }

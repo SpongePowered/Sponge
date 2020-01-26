@@ -77,5 +77,4 @@ public abstract class EntityFishHookMixin_API extends EntityMixin_API implements
         this.caughtEntity = (net.minecraft.entity.Entity) entity;
     }
 
-
 }

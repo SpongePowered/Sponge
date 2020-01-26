@@ -29,6 +29,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.PotionType;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
@@ -46,6 +47,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -178,6 +180,13 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
                 .maximum(Integer.MAX_VALUE)
                 .actualValue(this.ticksExisted)
                 .build();
+    }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+
+        manipulators.add(this.getAreaEffectCloudData());
     }
 
 }

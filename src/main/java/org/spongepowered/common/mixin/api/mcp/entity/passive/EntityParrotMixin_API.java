@@ -34,7 +34,6 @@ import org.spongepowered.api.entity.living.animal.Parrot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeParrotData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
 import org.spongepowered.common.util.Constants;
@@ -57,10 +56,10 @@ public abstract class EntityParrotMixin_API extends EntityTameableMixin_API impl
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
-        manipulators.add(getParrotData());
+
+        manipulators.add(this.getParrotData());
     }
 
 }

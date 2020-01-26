@@ -27,12 +27,12 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 import net.minecraft.entity.monster.EntityPigZombie;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.living.monster.ZombiePigman;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
@@ -61,9 +61,12 @@ public abstract class EntityPigZombieMixin_API extends EntityZombieMixin_API imp
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getAngerData());
-        manipulators.add(new SpongeAggressiveData(isAngry()));
+
+        manipulators.add(this.getAngerData());
+
+        this.get(AggressiveData.class).ifPresent(manipulators::add);
     }
+    
 }

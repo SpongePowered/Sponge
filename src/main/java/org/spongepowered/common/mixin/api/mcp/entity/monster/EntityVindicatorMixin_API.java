@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 import net.minecraft.entity.monster.EntityVindicator;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.JohnnyData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.monster.Vindicator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJohnnyData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Collection;
@@ -47,9 +47,10 @@ public abstract class EntityVindicatorMixin_API extends EntityMobMixin_API imple
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeJohnnyData(this.johnny));
+
+        this.get(JohnnyData.class).ifPresent(manipulators::add);
     }
 
 }
