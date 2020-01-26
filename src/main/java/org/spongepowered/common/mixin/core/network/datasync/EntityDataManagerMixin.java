@@ -35,13 +35,11 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.network.datasync.EntityDataManagerBridge;
 import org.spongepowered.common.bridge.packet.DataParameterBridge;
 
@@ -63,8 +61,8 @@ public abstract class EntityDataManagerMixin implements EntityDataManagerBridge 
     @Shadow protected abstract <T> EntityDataManager.DataEntry<T> getEntry(DataParameter<T> key);
 
     @Override
-    public <T> void setSilently(DataParameter<T> key, T value) {
-        EntityDataManager.DataEntry<T> dataentry = this.getEntry(key);
+    public <T> void bridge$setSilently(DataParameter<T> key, T value) {
+        final EntityDataManager.DataEntry<T> dataentry = this.getEntry(key);
 
         if (ObjectUtils.notEqual(value, dataentry.getValue())) {
             dataentry.setValue(value);

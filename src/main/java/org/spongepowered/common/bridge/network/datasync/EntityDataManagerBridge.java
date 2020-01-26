@@ -28,5 +28,6 @@ import net.minecraft.network.datasync.DataParameter;
 
 public interface EntityDataManagerBridge {
 
-    <T> void setSilently(DataParameter<T> key, T value);
+    <T> void bridge$setSilently(DataParameter<T> key, T value);
+
 }

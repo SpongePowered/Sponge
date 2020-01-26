@@ -590,12 +590,18 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         }
     }
 
+    /**
+     * This is necessary to avoid firing ChangeDataHolderEvent.ValueChange
+     * associated with changing health when constructing and spawning a player entity.
+     *
+     * @author Lignium - January 27th, 2020
+     */
     @Redirect(method = {"<init>", "readEntityFromNBT"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;setHealth(F)V"))
-    private void onInitHealth(final EntityLivingBase entity, final float health) {
-        DataParameter<Float> healthParameter = EntityLivingBaseAccessor.accessor$getHealthParameter();
-        float clampedValue = MathHelper.clamp(health, 0.0F, this.getMaxHealth());
+    private void impl$initializeHealthSilently(final EntityLivingBase entity, final float health) {
+        final DataParameter<Float> healthParameter = EntityLivingBaseAccessor.accessor$getHealthParameter();
+        final float clampedValue = MathHelper.clamp(health, 0.0F, this.getMaxHealth());
 
-        ((EntityDataManagerBridge) entity.getDataManager()).setSilently(healthParameter, clampedValue);
+        ((EntityDataManagerBridge) entity.getDataManager()).bridge$setSilently(healthParameter, clampedValue);
     }
 
     /**
