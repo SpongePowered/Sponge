@@ -103,13 +103,13 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
         if ((Class<?>) this.getClass() == InventoryPlayer.class) { // Build Player Lens
             return new SlotCollection.Builder()
                 .add(this.mainInventory.size())
-                .add(this.offHandInventory.size())
                 // TODO predicates for ItemStack/ItemType?
                 .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
                 .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
                 .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE))
                 .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR))
-                // for mods providing bigger inventories
+                .add(this.offHandInventory.size())
+                    // for mods providing bigger inventories
                 .add(this.armorInventory.size() - 4, EquipmentSlotAdapter.class)
                 .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
                 .build();
