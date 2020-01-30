@@ -125,6 +125,7 @@
         "mcp.entity.passive.fish.PufferfishEntityMixin_API",
         "mcp.entity.passive.fish.SalmonEntityMixin_API",
         "mcp.entity.passive.fish.TropicalFishEntityMixin_API",
+        "mcp.entity.passive.fish.TropicalFishEntityMixin_TypeMixin_API",
         "mcp.entity.passive.horse.AbstractChestedHorseEntityMixin_API",
         "mcp.entity.passive.horse.AbstractHorseEntityMixin_API",
         "mcp.entity.passive.horse.DonkeyEntityMixin_API",
