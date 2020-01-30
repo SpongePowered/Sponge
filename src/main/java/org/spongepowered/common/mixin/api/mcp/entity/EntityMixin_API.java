@@ -39,6 +39,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
@@ -116,7 +117,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected Random rand;
     @Shadow public int ticksExisted;
     @Shadow public int fire;
-    @Shadow public int dimension;
+    @Shadow public DimensionType dimension;
     @Shadow protected UUID entityUniqueID;
     @Shadow public boolean removed;
     @Shadow public abstract void setPosition(double x, double y, double z);

@@ -93,7 +93,7 @@ public abstract class EntityDataManagerMixin {
                         final ChangeDataHolderEvent.ValueChange
                             event =
                             SpongeEventFactory.createChangeDataHolderEventValueChange(Sponge.getCauseStackManager().getCurrentCause(), transaction,
-                                (DataHolder) this.entity);
+                                (DataHolder.Mutable) this.entity);
                         Sponge.getEventManager().post(event);
                         if (event.isCancelled()) {
                             //If the event is cancelled, well, don't change the underlying value.
