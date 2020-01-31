@@ -61,8 +61,6 @@ public abstract class EntityXPOrbMixin_API extends EntityMixin_API implements Ex
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.experienceHeld());
     }
-    
 }

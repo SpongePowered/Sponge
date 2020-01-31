@@ -60,6 +60,14 @@ public abstract class EntityArrowMixin_API extends EntityMixin_API implements Ar
     }
 
     @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getKnockbackData());
+        this.get(CriticalHitData.class).ifPresent(manipulators::add);
+        this.get(PickupRuleData.class).ifPresent(manipulators::add);
+    }
+
+    @Override
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof Entity) {
             // This allows things like Vanilla kill attribution to take place
@@ -68,16 +76,6 @@ public abstract class EntityArrowMixin_API extends EntityMixin_API implements Ar
             this.shootingEntity = null;
         }
         this.projectileSource = shooter;
-    }
-
-    @Override
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-
-        manipulators.add(this.getKnockbackData());
-
-        this.get(CriticalHitData.class).ifPresent(manipulators::add);
-        this.get(PickupRuleData.class).ifPresent(manipulators::add);
     }
 
 }

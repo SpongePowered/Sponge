@@ -185,8 +185,6 @@ public abstract class EntityAreaEffectCloudMixin_API extends EntityMixin_API imp
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getAreaEffectCloudData());
     }
-
 }

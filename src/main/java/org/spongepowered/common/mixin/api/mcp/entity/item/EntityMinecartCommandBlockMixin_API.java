@@ -47,8 +47,6 @@ public abstract class EntityMinecartCommandBlockMixin_API extends EntityMinecart
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(CommandData.class).ifPresent(manipulators::add);
     }
-    
 }

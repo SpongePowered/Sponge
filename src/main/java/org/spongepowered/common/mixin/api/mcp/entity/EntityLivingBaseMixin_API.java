@@ -154,10 +154,8 @@ public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implemen
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getDamageableData());
         manipulators.add(this.getHealthData());
-
         this.get(AbsorptionData.class).ifPresent(manipulators::add);
         this.get(ActiveItemData.class).ifPresent(manipulators::add);
         this.get(BreathingData.class).ifPresent(manipulators::add);
@@ -168,5 +166,6 @@ public abstract class EntityLivingBaseMixin_API extends EntityMixin_API implemen
     }
 
     // Start implementation of UseItemstackEvent
+
 
 }

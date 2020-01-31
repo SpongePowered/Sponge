@@ -86,11 +86,8 @@ public abstract class EntityCreeperMixin_API extends EntityMobMixin_API implemen
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getExplosionRadiusData());
         manipulators.add(this.getFuseData());
-
         this.get(ChargedData.class).ifPresent(manipulators::add);
     }
-
 }

@@ -44,5 +44,4 @@ public abstract class EntityMinecartContainerMixin_API<M extends ContainerMineca
     public Optional<M> getCarrier() {
         return Optional.of((M) this);
     }
-
 }

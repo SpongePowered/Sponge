@@ -60,9 +60,7 @@ public abstract class EntitySheepMixin_API extends EntityAnimalMixin_API impleme
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getDyeData());
-
         this.get(ShearedData.class).ifPresent(manipulators::add);
     }
 

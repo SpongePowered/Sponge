@@ -38,8 +38,6 @@ public abstract class EntityIronGolemMixin_API extends EntityGolemMixin_API impl
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(PlayerCreatedData.class).ifPresent(manipulators::add);
     }
-
 }

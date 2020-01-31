@@ -83,6 +83,8 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
         }
     }
 
+
+
     @Override
     public AgentData getAgentData() {
         return new SpongeAgentData(!this.isAIDisabled());
@@ -96,11 +98,8 @@ public abstract class EntityLivingMixin_API extends EntityLivingBaseMixin_API im
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getAgentData());
-
         this.get(DominantHandData.class).ifPresent(manipulators::add);
         this.get(PersistingData.class).ifPresent(manipulators::add);
     }
-
 }

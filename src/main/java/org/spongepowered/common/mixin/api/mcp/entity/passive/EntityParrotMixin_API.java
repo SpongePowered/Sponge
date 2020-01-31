@@ -58,7 +58,6 @@ public abstract class EntityParrotMixin_API extends EntityTameableMixin_API impl
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getParrotData());
     }
 

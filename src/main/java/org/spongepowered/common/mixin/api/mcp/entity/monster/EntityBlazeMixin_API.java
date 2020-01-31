@@ -49,8 +49,6 @@ public abstract class EntityBlazeMixin_API extends EntityMobMixin_API implements
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(FlammableData.class).ifPresent(manipulators::add);
     }
-    
 }

@@ -38,8 +38,6 @@ public abstract class EntityTippedArrowMixin_API extends EntityArrowMixin_API im
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(PotionEffectData.class).ifPresent(manipulators::add);
     }
-
 }

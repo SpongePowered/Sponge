@@ -83,8 +83,6 @@ public abstract class EntityLightningBoltMixin_API extends EntityWeatherEffectMi
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getExpiringData());
     }
-    
 }

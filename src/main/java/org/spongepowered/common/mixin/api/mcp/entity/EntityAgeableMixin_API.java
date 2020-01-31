@@ -78,10 +78,7 @@ public abstract class EntityAgeableMixin_API extends EntityCreatureMixin_API imp
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getAgeData());
-
         this.get(BreedableData.class).ifPresent(manipulators::add);
     }
-
 }

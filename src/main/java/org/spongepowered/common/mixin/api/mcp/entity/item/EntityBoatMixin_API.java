@@ -50,6 +50,25 @@ public abstract class EntityBoatMixin_API extends EntityMixin_API implements Boa
     private double occupiedDecelerationSpeed = 0D;
     private double unoccupiedDecelerationSpeed = 0.8D;
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        final EntityBoat.Type boatType = this.getBoatType();
+        if (boatType == EntityBoat.Type.OAK) {
+            manipulators.add(new SpongeTreeData(TreeTypes.OAK));
+        } else if ( boatType == EntityBoat.Type.BIRCH) {
+            manipulators.add(new SpongeTreeData(TreeTypes.BIRCH));
+        } else if ( boatType == EntityBoat.Type.JUNGLE) {
+            manipulators.add(new SpongeTreeData(TreeTypes.JUNGLE));
+        } else if ( boatType == EntityBoat.Type.DARK_OAK) {
+            manipulators.add(new SpongeTreeData(TreeTypes.DARK_OAK));
+        } else if ( boatType == EntityBoat.Type.ACACIA) {
+            manipulators.add(new SpongeTreeData(TreeTypes.ACACIA));
+        } else if ( boatType == EntityBoat.Type.SPRUCE) {
+            manipulators.add(new SpongeTreeData(TreeTypes.SPRUCE));
+        }
+    }
+
     @Intrinsic
     public boolean apiBoat$isInWater() {
         return !this.onGround;
@@ -93,27 +112,6 @@ public abstract class EntityBoatMixin_API extends EntityMixin_API implements Boa
     @Override
     public void setUnoccupiedDeceleration(double unoccupiedDeceleration) {
         this.unoccupiedDecelerationSpeed = unoccupiedDeceleration;
-    }
-
-    @Override
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-
-        final EntityBoat.Type boatType = this.getBoatType();
-
-        if (boatType == EntityBoat.Type.OAK) {
-            manipulators.add(new SpongeTreeData(TreeTypes.OAK));
-        } else if ( boatType == EntityBoat.Type.BIRCH) {
-            manipulators.add(new SpongeTreeData(TreeTypes.BIRCH));
-        } else if ( boatType == EntityBoat.Type.JUNGLE) {
-            manipulators.add(new SpongeTreeData(TreeTypes.JUNGLE));
-        } else if ( boatType == EntityBoat.Type.DARK_OAK) {
-            manipulators.add(new SpongeTreeData(TreeTypes.DARK_OAK));
-        } else if ( boatType == EntityBoat.Type.ACACIA) {
-            manipulators.add(new SpongeTreeData(TreeTypes.ACACIA));
-        } else if ( boatType == EntityBoat.Type.SPRUCE) {
-            manipulators.add(new SpongeTreeData(TreeTypes.SPRUCE));
-        }
     }
 
 }

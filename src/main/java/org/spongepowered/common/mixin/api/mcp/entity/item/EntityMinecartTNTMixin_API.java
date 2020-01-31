@@ -69,9 +69,7 @@ public abstract class EntityMinecartTNTMixin_API extends EntityMinecartMixin_API
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getExplosionRadiusData());
         manipulators.add(this.getFuseData());
     }
-
 }

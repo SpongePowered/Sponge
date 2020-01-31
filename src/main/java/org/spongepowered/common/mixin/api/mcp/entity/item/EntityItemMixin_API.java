@@ -73,11 +73,8 @@ public abstract class EntityItemMixin_API extends EntityMixin_API implements Ite
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getItemData());
-
         this.get(DespawnDelayData.class).ifPresent(manipulators::add);
         this.get(PickupDelayData.class).ifPresent(manipulators::add);
     }
-    
 }

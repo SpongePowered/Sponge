@@ -58,18 +58,17 @@ public abstract class EntityOcelotMixin_API extends EntityTameableMixin_API impl
     }
 
     @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getOcelotData());
+    }
+
+    @Override
     public Translation getTranslation() {
         if (shadow$isTamed()) {
             return new SpongeTranslation("entity.Cat.name");
         }
         return super.getTranslation();
-    }
-
-    @Override
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-
-        manipulators.add(this.getOcelotData());
     }
 
 }

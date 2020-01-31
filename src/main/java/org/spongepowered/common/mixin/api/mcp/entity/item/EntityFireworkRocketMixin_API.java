@@ -68,6 +68,15 @@ public abstract class EntityFireworkRocketMixin_API extends EntityMixin_API impl
     }
 
     @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getExplosionRadiusData());
+        manipulators.add(this.getFireworkData());
+        manipulators.add(this.getFireworkData());
+        manipulators.add(this.getFuseData());
+    }
+
+    @Override
     public void detonate() {
         this.fireworkAge = this.lifetime + 1;
         this.onUpdate();
@@ -92,16 +101,6 @@ public abstract class EntityFireworkRocketMixin_API extends EntityMixin_API impl
     @Override
     public boolean isPrimed() {
         return this.fireworkAge > 0 && this.fireworkAge <= this.lifetime && !this.isDead;
-    }
-
-    @Override
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-
-        manipulators.add(this.getExplosionRadiusData());
-        manipulators.add(this.getFireworkData());
-        manipulators.add(this.getFireworkData());
-        manipulators.add(this.getFuseData());
     }
 
 }

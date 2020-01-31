@@ -42,9 +42,7 @@ public abstract class EntityTameableMixin_API extends EntityAnimalMixin_API {
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(SittingData.class).ifPresent(manipulators::add);
         this.get(TameableData.class).ifPresent(manipulators::add);
     }
-
 }

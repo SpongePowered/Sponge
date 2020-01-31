@@ -40,9 +40,7 @@ public abstract class EntityItemFrameMixin_API extends EntityHangingMixin_API im
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(RepresentedItemData.class).ifPresent(manipulators::add);
         this.get(RotationalData.class).ifPresent(manipulators::add);
     }
-
 }

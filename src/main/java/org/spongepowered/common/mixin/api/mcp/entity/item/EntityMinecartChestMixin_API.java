@@ -31,4 +31,5 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(EntityMinecartChest.class)
 public abstract class EntityMinecartChestMixin_API extends EntityMinecartContainerMixin_API<ChestMinecart> implements ChestMinecart {
 
+
 }

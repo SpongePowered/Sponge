@@ -72,7 +72,6 @@ public abstract class EntityPlayerMixin_API extends EntityLivingBaseMixin_API {
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(ExperienceHolderData.class).ifPresent(manipulators::add);
         this.get(FlyingAbilityData.class).ifPresent(manipulators::add);
         this.get(FoodData.class).ifPresent(manipulators::add);

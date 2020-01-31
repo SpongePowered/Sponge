@@ -49,7 +49,6 @@ public abstract class EntityVindicatorMixin_API extends EntityMobMixin_API imple
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(JohnnyData.class).ifPresent(manipulators::add);
     }
 

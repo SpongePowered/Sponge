@@ -99,9 +99,9 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getExplosionRadiusData());
         manipulators.add(this.getFuseData());
     }
+
 
 }

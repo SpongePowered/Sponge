@@ -92,6 +92,14 @@ public abstract class EntityVillagerMixin_API extends EntityAgeableMixin_API imp
     }
 
     @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getCareerData());
+        this.get(PlayingData.class).ifPresent(manipulators::add);
+        this.get(TradeOfferData.class).ifPresent(manipulators::add);
+    }
+
+    @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return this;
     }
@@ -100,15 +108,4 @@ public abstract class EntityVillagerMixin_API extends EntityAgeableMixin_API imp
     public Optional<Villager> getCarrier() {
         return Optional.of(this);
     }
-
-    @Override
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-
-        manipulators.add(this.getCareerData());
-
-        this.get(PlayingData.class).ifPresent(manipulators::add);
-        this.get(TradeOfferData.class).ifPresent(manipulators::add);
-    }
-    
 }

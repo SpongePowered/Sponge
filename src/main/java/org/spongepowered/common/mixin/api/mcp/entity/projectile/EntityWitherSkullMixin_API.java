@@ -44,8 +44,6 @@ public abstract class EntityWitherSkullMixin_API extends EntityFireballMixin_API
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getExplosionRadiusData());
     }
-
 }

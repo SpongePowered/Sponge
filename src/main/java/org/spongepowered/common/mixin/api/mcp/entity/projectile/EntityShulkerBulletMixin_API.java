@@ -92,9 +92,7 @@ public abstract class EntityShulkerBulletMixin_API extends EntityMixin_API imple
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getDirectionalData());
         manipulators.add(this.getTargetData());
     }
-    
 }

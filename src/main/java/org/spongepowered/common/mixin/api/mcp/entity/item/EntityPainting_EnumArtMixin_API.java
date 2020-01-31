@@ -58,4 +58,5 @@ public abstract class EntityPainting_EnumArtMixin_API implements Art {
         return this.sizeX / Constants.Block.PIXELS_PER_BLOCK;
     }
 
+
 }

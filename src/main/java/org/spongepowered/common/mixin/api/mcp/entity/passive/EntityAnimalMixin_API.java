@@ -31,5 +31,4 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityAgeableMixin_API;
 
 @Mixin(EntityAnimal.class)
 public abstract class EntityAnimalMixin_API extends EntityAgeableMixin_API implements Animal {
-
 }

@@ -49,5 +49,4 @@ public abstract class EntityLlamaSpitMixin_API extends EntityMixin_API implement
         }
         this.owner = (EntityLlama) shooter;
     }
-
 }

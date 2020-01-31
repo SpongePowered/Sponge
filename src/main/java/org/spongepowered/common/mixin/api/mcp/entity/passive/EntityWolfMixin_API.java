@@ -44,10 +44,8 @@ public abstract class EntityWolfMixin_API extends EntityAgeableMixin_API impleme
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(AggressiveData.class).ifPresent(manipulators::add);
         this.get(WetData.class).ifPresent(manipulators::add);
         this.get(DyeableData.class).ifPresent(manipulators::add);
     }
-    
 }

@@ -39,9 +39,7 @@ public abstract class EntityPotionMixin_API extends EntityThrowableMixin_API imp
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(PotionEffectData.class).ifPresent(manipulators::add);
         this.get(RepresentedItemData.class).ifPresent(manipulators::add);
     }
-
 }

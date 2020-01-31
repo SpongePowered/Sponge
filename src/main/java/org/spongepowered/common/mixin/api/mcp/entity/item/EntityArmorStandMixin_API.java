@@ -112,7 +112,6 @@ public abstract class EntityArmorStandMixin_API extends EntityLivingBaseMixin_AP
     @Override
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         manipulators.add(this.getArmorStandData());
         manipulators.add(this.getBodyPartRotationalData());
         manipulators.add(this.getDisabledSlotsData());

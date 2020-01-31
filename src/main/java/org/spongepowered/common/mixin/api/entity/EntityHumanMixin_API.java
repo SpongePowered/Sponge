@@ -48,8 +48,6 @@ public abstract class EntityHumanMixin_API extends EntityCreatureMixin_API imple
     @Override
     protected void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-
         this.get(SkinData.class).ifPresent(manipulators::add);
     }
-
 }
