@@ -44,7 +44,7 @@ public abstract class EffectInstanceMixin_API implements PotionEffect {
     @Shadow @Final private Effect potion;
     @Shadow private int duration;
     @Shadow private int amplifier;
-    @Shadow private boolean isAmbient;
+    @Shadow private boolean ambient;
     @Shadow private boolean showParticles;
 
     @Override
@@ -64,7 +64,7 @@ public abstract class EffectInstanceMixin_API implements PotionEffect {
 
     @Override
     public boolean isAmbient() {
-        return this.isAmbient;
+        return this.ambient;
     }
 
     @Override
@@ -84,7 +84,7 @@ public abstract class EffectInstanceMixin_API implements PotionEffect {
                 .set(Constants.Item.Potions.POTION_TYPE, this.getType().getId())
                 .set(Constants.Item.Potions.POTION_DURATION, this.duration)
                 .set(Constants.Item.Potions.POTION_AMPLIFIER, this.amplifier)
-                .set(Constants.Item.Potions.POTION_AMBIANCE, this.isAmbient)
+                .set(Constants.Item.Potions.POTION_AMBIANCE, this.ambient)
                 .set(Constants.Item.Potions.POTION_SHOWS_PARTICLES, this.showParticles);
     }
 }

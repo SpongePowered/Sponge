@@ -28,16 +28,11 @@ import net.minecraft.entity.passive.horse.LlamaEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.llama.Llama;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Set;
 
 @Mixin(LlamaEntity.class)
 public abstract class LlamaEntityMixin_API extends AbstractChestedHorseEntityMixin_API implements Llama {
-
-    @Shadow public abstract int getStrength();
-    @Shadow public abstract int getVariant();
-    @Shadow public abstract void setVariant(int p_190710_1_);
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

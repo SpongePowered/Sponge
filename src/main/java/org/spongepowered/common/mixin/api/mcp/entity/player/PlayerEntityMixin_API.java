@@ -48,11 +48,11 @@ public abstract class PlayerEntityMixin_API extends LivingEntityMixin_API {
 
     @Shadow public Container openContainer;
     @Shadow public float experience;
-    @Shadow public PlayerAbilities capabilities;
+    @Shadow public PlayerAbilities abilities;
     @Shadow public PlayerInventory inventory;
-    @Shadow protected EnderChestInventory enderChest;
+    @Shadow protected EnderChestInventory enterChestInventory;
     @Shadow public abstract String shadow$getName();
-    @Shadow @Nullable public abstract Team getTeam();
+    @Shadow @Nullable public abstract Team shadow$getTeam();
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     final boolean impl$isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);

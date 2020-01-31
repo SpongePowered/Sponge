@@ -88,11 +88,9 @@ public class SpongeWave implements Wave {
     @Override
     public boolean removeRaider(Raider raider) {
         checkNotNull(raider, "Raider cannot be null.");
-        if (raider.getRaid().isPresent()) {
-            if (this.equals(raider.getRaid().get().getWaves().get(this.waveId))) {
-                this.raid.leaveRaid((AbstractRaiderEntity) raider, true);
-                return true;
-            }
+        if (raider.raidWave().isPresent() && this.equals(raider.raidWave().get().get())) {
+            this.raid.leaveRaid((AbstractRaiderEntity) raider, true);
+            return true;
         }
 
         return false;

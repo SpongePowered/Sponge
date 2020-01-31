@@ -25,16 +25,12 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EnderCrystalEntity;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.explosive.EnderCrystal;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.item.EnderCrystalEntityBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 @Mixin(EnderCrystalEntity.class)
@@ -42,7 +38,7 @@ public abstract class EnderCrystalEntityMixin_API extends EntityMixin_API implem
 
     @Override
     public void detonate() {
-        this.setDead();
+        this.shadow$setDead();
         ((EnderCrystalEntityBridge) this).bridge$ThrowEventWithDetonation(this.world, null, this.posX, this.posY, this.posZ, true, null);
     }
 

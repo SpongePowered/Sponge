@@ -36,21 +36,21 @@ import javax.annotation.Nullable;
 @Mixin(SoundEvent.class)
 public abstract class SoundEventMixin_API implements SoundType {
 
-    @Shadow @Final private ResourceLocation soundName;
+    @Shadow @Final private ResourceLocation name;
 
     @Nullable private String id;
 
     @Override
     public String getId() {
         if (this.id == null) {
-            this.id = this.soundName.toString();
+            this.id = this.name.toString();
         }
         return this.id;
     }
 
     @Override
     public String getName() {
-        return this.soundName.getPath();
+        return this.name.getPath();
     }
 
 }

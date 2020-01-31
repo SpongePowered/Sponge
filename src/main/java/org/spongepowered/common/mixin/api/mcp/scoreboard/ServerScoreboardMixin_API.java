@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
 @Implements(@Interface(iface = org.spongepowered.api.scoreboard.Scoreboard.class, prefix = "scoreboard$"))
 public abstract class ServerScoreboardMixin_API extends Scoreboard {
 
-    @Shadow protected abstract void markSaveDataDirty();
+    @Shadow protected abstract void shadow$markSaveDataDirty();
 
     // Get Objective
 
@@ -161,7 +161,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
         }
 
         // We deliberately don't call func_96533_c, because there's no need
-        this.markSaveDataDirty();
+        this.shadow$markSaveDataDirty();
 
         ((SpongeObjective) objective).removeObjectiveFor(this);
     }

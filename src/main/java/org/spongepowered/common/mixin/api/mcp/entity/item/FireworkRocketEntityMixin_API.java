@@ -39,12 +39,12 @@ public abstract class FireworkRocketEntityMixin_API extends EntityMixin_API impl
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
 
-    @Shadow public abstract void onUpdate();
+    @Shadow public abstract void shadow$func_213893_k();
 
     @Override
     public void detonate() {
         this.fireworkAge = this.lifetime + 1;
-        this.onUpdate();
+        this.shadow$func_213893_k();
     }
 
     @Override

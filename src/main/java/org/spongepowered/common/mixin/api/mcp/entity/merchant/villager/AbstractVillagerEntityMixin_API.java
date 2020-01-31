@@ -40,7 +40,6 @@ import java.util.Set;
 @Mixin(AbstractVillagerEntity.class)
 public abstract class AbstractVillagerEntityMixin_API extends AgeableEntityMixin_API implements Trader {
 
-    @Shadow public abstract boolean shadow$hasCustomer();
     @Shadow public abstract void shadow$setCustomer(PlayerEntity player);
     @Shadow public abstract PlayerEntity shadow$getCustomer();
 

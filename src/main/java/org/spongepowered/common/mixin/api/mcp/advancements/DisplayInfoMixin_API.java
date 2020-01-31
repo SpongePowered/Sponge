@@ -55,9 +55,7 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @Shadow @Final private boolean showToast;
     @Shadow private float x;
     @Shadow private float y;
-
     @Shadow public abstract boolean shadow$shouldAnnounceToChat();
-
     @Shadow public abstract boolean shadow$isHidden();
 
     @Override

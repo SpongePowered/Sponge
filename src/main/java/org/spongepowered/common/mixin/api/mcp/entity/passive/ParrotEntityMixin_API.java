@@ -28,14 +28,11 @@ import net.minecraft.entity.passive.ParrotEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Parrot;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Set;
 
 @Mixin(ParrotEntity.class)
 public abstract class ParrotEntityMixin_API extends TameableEntityMixin_API implements Parrot {
-
-    @Shadow public abstract int getVariant();
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

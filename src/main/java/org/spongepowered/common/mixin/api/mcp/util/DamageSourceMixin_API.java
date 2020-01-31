@@ -33,51 +33,51 @@ import org.spongepowered.common.bridge.util.DamageSourceBridge;
 @Mixin(value = net.minecraft.util.DamageSource.class)
 public abstract class DamageSourceMixin_API implements DamageSource {
 
-    @Shadow public abstract boolean isProjectile();
-    @Shadow public abstract boolean isUnblockable();
-    @Shadow public abstract boolean canHarmInCreative();
-    @Shadow public abstract boolean isDamageAbsolute();
-    @Shadow public abstract boolean isMagicDamage();
-    @Shadow public abstract float getHungerDamage();
-    @Shadow public abstract boolean isDifficultyScaled();
-    @Shadow public abstract boolean isExplosion();
-    @Shadow public abstract String getDamageType();
+    @Shadow public abstract boolean shadow$isProjectile();
+    @Shadow public abstract boolean shadow$isUnblockable();
+    @Shadow public abstract boolean shadow$canHarmInCreative();
+    @Shadow public abstract boolean shadow$isDamageAbsolute();
+    @Shadow public abstract boolean shadow$isMagicDamage();
+    @Shadow public abstract float shadow$getHungerDamage();
+    @Shadow public abstract boolean shadow$isDifficultyScaled();
+    @Shadow public abstract boolean shadow$isExplosion();
+    @Shadow public abstract String shadow$getDamageType();
 
     @Shadow public String damageType;
 
     @Override
     public boolean isExplosive() {
-        return this.isExplosion();
+        return this.shadow$isExplosion();
     }
 
     @Override
     public boolean isMagic() {
-        return this.isMagicDamage();
+        return this.shadow$isMagicDamage();
     }
 
     @Override
     public boolean doesAffectCreative() {
-        return this.canHarmInCreative();
+        return this.shadow$canHarmInCreative();
     }
 
     @Override
     public boolean isAbsolute() {
-        return this.isDamageAbsolute();
+        return this.shadow$isDamageAbsolute();
     }
 
     @Override
     public boolean isBypassingArmor() {
-        return this.isUnblockable();
+        return this.shadow$isUnblockable();
     }
 
     @Override
     public boolean isScaledByDifficulty() {
-        return this.isDifficultyScaled();
+        return this.shadow$isDifficultyScaled();
     }
 
     @Override
     public double getExhaustion() {
-        return this.getHungerDamage();
+        return this.shadow$getHungerDamage();
     }
 
     @Override

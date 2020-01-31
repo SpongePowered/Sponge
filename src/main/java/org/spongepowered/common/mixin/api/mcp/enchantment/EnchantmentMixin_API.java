@@ -49,13 +49,13 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Shadow protected String name;
     @Shadow @Final private net.minecraft.enchantment.Enchantment.Rarity rarity;
-    @Shadow public abstract int getMinLevel();
-    @Shadow public abstract int getMaxLevel();
-    @Shadow public abstract int getMinEnchantability(int level);
-    @Shadow public abstract int getMaxEnchantability(int level);
-    @Shadow protected abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
+    @Shadow public abstract int shadow$getMinLevel();
+    @Shadow public abstract int shadow$getMaxLevel();
+    @Shadow public abstract int shadow$getMinEnchantability(int level);
+    @Shadow public abstract int shadow$getMaxEnchantability(int level);
+    @Shadow protected abstract boolean shadow$canApplyTogether(net.minecraft.enchantment.Enchantment ench);
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract boolean isTreasureEnchantment();
+    @Shadow public abstract boolean shadow$isTreasureEnchantment();
     @Shadow public abstract boolean shadow$isCurse();
 
     @Shadow @Final public static SimpleRegistry<ResourceLocation, Enchantment> REGISTRY;
@@ -80,22 +80,22 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public int getMinimumLevel() {
-        return this.getMinLevel();
+        return this.shadow$getMinLevel();
     }
 
     @Override
     public int getMaximumLevel() {
-        return this.getMaxLevel();
+        return this.shadow$getMaxLevel();
     }
 
     @Override
     public int getMinimumEnchantabilityForLevel(int level) {
-        return this.getMinEnchantability(level);
+        return this.shadow$getMinEnchantability(level);
     }
 
     @Override
     public int getMaximumEnchantabilityForLevel(int level) {
-        return this.getMaxEnchantability(level);
+        return this.shadow$getMaxEnchantability(level);
     }
 
     @Override
@@ -110,7 +110,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public boolean isCompatibleWith(EnchantmentType ench) {
-        return this.canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
+        return this.shadow$canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
     }
 
     @Intrinsic
@@ -125,7 +125,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public boolean isTreasure() {
-        return this.isTreasureEnchantment();
+        return this.shadow$isTreasureEnchantment();
     }
 
     @Intrinsic

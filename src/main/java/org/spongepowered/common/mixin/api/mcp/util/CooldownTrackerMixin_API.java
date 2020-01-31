@@ -44,15 +44,14 @@ public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.
 
     @Shadow @Final private Map<Item, ?> cooldowns;
     @Shadow private int ticks;
-
-    @Shadow public abstract boolean hasCooldown(Item itemIn);
-    @Shadow public abstract float getCooldown(Item itemIn, float partialTicks);
-    @Shadow public abstract void setCooldown(final Item item, final int ticks);
+    @Shadow public abstract boolean shadow$hasCooldown(Item itemIn);
+    @Shadow public abstract float shadow$getCooldown(Item itemIn, float partialTicks);
+    @Shadow public abstract void shadow$setCooldown(final Item item, final int ticks);
 
     @Override
     public boolean hasCooldown(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
-        return this.hasCooldown((Item) type);
+        return this.shadow$hasCooldown((Item) type);
     }
 
     @Override
@@ -73,7 +72,7 @@ public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.
     @Override
     public boolean setCooldown(final ItemType type, final int ticks) {
         checkNotNull(type, "Item type cannot be null!");
-        this.setCooldown((Item) type, ticks);
+        this.shadow$setCooldown((Item) type, ticks);
         return ((CooldownTrackerBridge) this).bridge$getSetCooldownResult();
     }
 
@@ -86,7 +85,7 @@ public abstract class CooldownTrackerMixin_API implements org.spongepowered.api.
     @Override
     public OptionalDouble getFractionRemaining(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
-        final float cooldown = this.getCooldown((Item) type, 0);
+        final float cooldown = this.shadow$getCooldown((Item) type, 0);
 
         if (cooldown > 0.0F) {
             return OptionalDouble.of(cooldown);

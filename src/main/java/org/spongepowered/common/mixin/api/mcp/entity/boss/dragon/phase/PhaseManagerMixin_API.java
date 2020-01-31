@@ -36,8 +36,8 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(PhaseManager.class)
 public abstract class PhaseManagerMixin_API implements DragonPhaseManager {
 
-    @Shadow public abstract void setPhase(PhaseType<?> phaseIn);
     @Shadow private IPhase phase;
+    @Shadow public abstract void shadow$setPhase(PhaseType<?> phaseIn);
 
     @Override
     public DragonPhase getPhase() {
@@ -46,7 +46,7 @@ public abstract class PhaseManagerMixin_API implements DragonPhaseManager {
 
     @Override
     public DragonPhase setPhase(DragonPhaseType phase) {
-        this.setPhase((PhaseType<?>) phase);
+        this.shadow$setPhase((PhaseType<?>) phase);
         return (DragonPhase) this.phase;
     }
 }

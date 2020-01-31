@@ -41,7 +41,7 @@ public abstract class FireballEntityMixin_API extends AbstractFireballEntityMixi
     @Override
     public void detonate() {
         ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
-        this.setDead();
+        this.shadow$setDead();
     }
 
     @Override
