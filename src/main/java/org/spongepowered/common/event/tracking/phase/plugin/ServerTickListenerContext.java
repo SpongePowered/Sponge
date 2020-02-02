@@ -26,9 +26,9 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
 
-public class ServerTickContext extends ListenerPhaseContext<ServerTickContext> {
+public class ServerTickListenerContext extends ListenerPhaseContext<ServerTickListenerContext> {
 
-    ServerTickContext(final IPhaseState<ServerTickContext> state) {
+    ServerTickListenerContext(final IPhaseState<ServerTickListenerContext> state) {
         super(state);
     }
 }

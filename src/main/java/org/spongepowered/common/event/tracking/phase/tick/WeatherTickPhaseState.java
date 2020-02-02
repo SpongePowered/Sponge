@@ -30,6 +30,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
 
 
     @Override
-    public TickContext.General createNewContext() {
-        return new TickContext.General(this).addCaptures();
+    public TickContext.General createNewContext(final PhaseTracker tracker) {
+        return new TickContext.General(this, tracker).addCaptures();
     }
 
     @Override
@@ -57,7 +58,7 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final TickContext.General context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final TickContext.General context, final Entity entity) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             final ArrayList<Entity> entities = new ArrayList<>();

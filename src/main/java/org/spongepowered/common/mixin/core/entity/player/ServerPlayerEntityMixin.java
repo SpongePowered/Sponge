@@ -304,7 +304,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Nullable
     private PhaseContext<?> impl$createDeathContext(final DamageSource cause, final boolean tracksEntityDeaths) {
         return !tracksEntityDeaths
-               ? EntityPhase.State.DEATH.createPhaseContext()
+               ? EntityPhase.State.DEATH.createPhaseContext(PhaseTracker.SERVER)
                    .source(this)
                    .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
                : null;
@@ -345,7 +345,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Overwrite
     public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {
         // Sponge start - enter phase
-        try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
+        try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext(PhaseTracker.SERVER)
                 .source(this)) {
             basicEntityContext.buildAndSwitch();
             // Sponge end

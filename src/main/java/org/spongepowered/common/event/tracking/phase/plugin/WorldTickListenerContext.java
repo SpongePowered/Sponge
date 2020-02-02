@@ -30,18 +30,19 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
-public class WorldTickContext extends ListenerPhaseContext<WorldTickContext> {
+public class WorldTickListenerContext extends ListenerPhaseContext<WorldTickListenerContext> {
 
     @Nullable private World tickingWorld;
 
-    WorldTickContext(final IPhaseState<WorldTickContext> state) {
+    WorldTickListenerContext(final IPhaseState<WorldTickListenerContext> state, PhaseTracker tracker) {
         super(state);
     }
 
-    public WorldTickContext world(final World world) {
+    public WorldTickListenerContext world(final World world) {
         this.tickingWorld = world;
         return this;
     }

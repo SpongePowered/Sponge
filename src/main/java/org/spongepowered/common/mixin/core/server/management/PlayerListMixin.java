@@ -88,6 +88,7 @@ import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
 import org.spongepowered.common.server.PerWorldBorderListener;
@@ -345,7 +346,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "playerLoggedOut", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;removePlayer(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
     private void impl$trackPlayerLogoutThroughPhaseTracker(ServerWorld world, ServerPlayerEntity player) {
-        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext().source(player)) {
+        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext(PhaseTracker.SERVER).source(player)) {
             context.buildAndSwitch();
             world.removePlayer(player);
         }

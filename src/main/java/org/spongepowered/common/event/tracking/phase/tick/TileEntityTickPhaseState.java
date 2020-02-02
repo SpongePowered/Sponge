@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import com.google.common.collect.ListMultimap;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -48,6 +47,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
@@ -65,8 +65,8 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
 
     @Override
-    public TileEntityTickContext createNewContext() {
-        return new TileEntityTickContext(this)
+    public TileEntityTickContext createNewContext(final PhaseTracker tracker) {
+        return new TileEntityTickContext(this, tracker)
                 .addEntityCaptures()
                 .addEntityDropCaptures()
                 .addBlockCaptures();
@@ -160,7 +160,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final TileEntityTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final TileEntityTickContext context, final Entity entity) {
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
             .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         final TileEntityBridge mixinTileEntity = (TileEntityBridge) tickingTile;
@@ -200,7 +200,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
             return postEvent.getTransactions().stream().anyMatch(transaction -> {
                 final BlockState state = transaction.getOriginal().getState();
                 final BlockType type = state.getType();
-                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, (net.minecraft.block.BlockState) state);
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) state);
                 final BlockPos pos = context.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos();
                 final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
                 if (pos.equals(blockPos) && !transaction.isValid()) {
@@ -210,7 +210,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                     return transaction.getIntermediary().stream().anyMatch(inter -> {
                         final BlockState iterState = inter.getState();
                         final BlockType interType = state.getType();
-                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, (net.minecraft.block.BlockState) iterState);
+                        return SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) iterState);
                     });
                 }
                 return hasTile;

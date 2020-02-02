@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.function.BiConsumer;
 
@@ -40,8 +41,8 @@ public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<Chunk
     }
 
     @Override
-    public ChunkLoadContext createNewContext() {
-        return new ChunkLoadContext(this);
+    public ChunkLoadContext createNewContext(final PhaseTracker tracker) {
+        return new ChunkLoadContext(this, tracker);
     }
 
     @Override

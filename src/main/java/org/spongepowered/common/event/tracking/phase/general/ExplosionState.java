@@ -43,6 +43,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
@@ -56,8 +57,8 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         super.getFrameModifier().andThen((frame, context) -> frame.pushCause(context.getExplosion()));
 
     @Override
-    public ExplosionContext createNewContext() {
-        return new ExplosionContext()
+    public ExplosionContext createNewContext(final PhaseTracker tracker) {
+        return new ExplosionContext(tracker)
             .addEntityCaptures()
             .addEntityDropCaptures()
             .addBlockCaptures()
@@ -132,7 +133,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final ExplosionContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final ExplosionContext context, final Entity entity) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
             final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getPerBlockEntitySpawnSuppplier().get();

@@ -174,7 +174,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) world;
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
-        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
+        try (final PhaseContext<?> context = PhaseTracker.SERVER.createContext(BlockPhase.State.RESTORING_BLOCKS)) {
+        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
+//        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
             context.buildAndSwitch();
             final BlockPos pos = VecHelper.toBlockPos(this.pos);
             if (!((WorldAccessor) world).accessor$isValid(pos)) { // Invalid position. Inline this check

@@ -31,6 +31,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
@@ -41,8 +42,8 @@ import net.minecraft.entity.item.ItemEntity;
 class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
 
     @Override
-    protected PlayerTickContext createNewContext() {
-        return new PlayerTickContext()
+    protected PlayerTickContext createNewContext(final PhaseTracker tracker) {
+        return new PlayerTickContext(tracker)
                 .addCaptures()
                 .addEntityDropCaptures()
                 ;
@@ -83,7 +84,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final PlayerTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final PlayerTickContext context, final Entity entity) {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -29,49 +29,66 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
+final class ServerTickListenerState extends ListenerPhaseState<ServerTickListenerContext> {
 
     private final String desc;
 
-    WorldTickPhaseState(String name) {
+    ServerTickListenerState(final String name) {
         this.desc = TrackingUtil.phaseStateToString("Plugin", name, this);
     }
 
     @Override
-    public WorldTickContext createNewContext() {
-        return new WorldTickContext(this).addCaptures().player();
+    public ServerTickListenerContext createNewContext(final PhaseTracker tracker) {
+        return new ServerTickListenerContext(this).addCaptures().player();
     }
 
     @Override
-    public void unwind(WorldTickContext phaseContext) {
-        final Object container = phaseContext.getSource(Object.class)
+    public void unwind(final ServerTickListenerContext phaseContext) {
+
+        final Object listener = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(phaseContext);
+        // This could be happening regardless whether block bulk captures are done or not.
+        // Would depend on whether entity captures are done.
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    frame.pushCause(listener);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    final LocatableBlock
-                        block =
-                        new SpongeLocatableBlockBuilder().world((World) phaseContext.getWorld()).position(key.getX(), key.getY(),
-                            key.getZ()).build();
-                    frame.pushCause(container);
-                    frame.pushCause(block);
                     final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                     SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
                 }
-
             }));
+    }
+
+    @Override
+    public boolean doesDenyChunkRequests() {
+        return true;
+    }
+
+    @Override
+    public boolean doesBulkBlockCapture(final ServerTickListenerContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(final ServerTickListenerContext context) {
+        return false;
     }
 
     @Override

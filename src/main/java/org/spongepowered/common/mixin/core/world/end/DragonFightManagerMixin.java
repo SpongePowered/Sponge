@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.world.dragon.DragonPhase;
 
@@ -131,7 +132,7 @@ public abstract class DragonFightManagerMixin {
                 }
 
                 // Sponge Start - Cause tracker - todo: do more logistical configuration of how this all works.
-                try (final GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext()) {
+                try (final GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext(PhaseTracker.SERVER)) {
                     context.buildAndSwitch();
                     // Sponge End
                     this.respawnState

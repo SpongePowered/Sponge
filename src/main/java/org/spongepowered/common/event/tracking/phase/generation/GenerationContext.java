@@ -30,6 +30,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
@@ -37,8 +38,8 @@ public class GenerationContext<G extends GenerationContext<G>> extends PhaseCont
 
     @Nullable private World world;
 
-    GenerationContext(final IPhaseState<? extends G> state) {
-        super(state);
+    GenerationContext(final IPhaseState<? extends G> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     @Override

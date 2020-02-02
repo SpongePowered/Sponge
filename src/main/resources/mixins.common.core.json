@@ -35,7 +35,6 @@
         "block.CactusBlockMixin",
         "block.CarvedPumpkinBlockMixin",
         "block.CommandBlockMixin",
-        "block.DispenserBlockMixin",
         "block.FallingBlockMixin",
         "block.FarmlandBlockMixin",
         "block.FireBlockMixin",

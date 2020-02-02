@@ -25,10 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class LocationBasedTickContext<T extends LocationBasedTickContext<T>> extends TickContext<T> {
 
-    protected LocationBasedTickContext(IPhaseState<T> phaseState) {
-        super(phaseState);
+    protected LocationBasedTickContext(final IPhaseState<T> phaseState, final PhaseTracker tracker) {
+        super(phaseState, tracker);
     }
 }

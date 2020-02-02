@@ -138,7 +138,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      */
     @Overwrite
     public void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions) {
-        try (final MapConversionContext context = GeneralPhase.State.MAP_CONVERSION.createPhaseContext()
+        try (final MapConversionContext context = GeneralPhase.State.MAP_CONVERSION.createPhaseContext(PhaseTracker.SERVER)
             .source(this)
             .world(directoryName)) {
             context.buildAndSwitch();
@@ -160,7 +160,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             return;
         }
 
-        try (final GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+        try (final GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.SERVER)
             .source(world)
             .world( world)) {
             context.buildAndSwitch();
@@ -363,7 +363,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         }
 
         final Object value;
-        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
                 .source(callable)) {
             context.buildAndSwitch();
             value = callable.call();

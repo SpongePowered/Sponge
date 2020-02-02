@@ -62,6 +62,7 @@ import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.world.BlockChange;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -70,8 +71,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 /**
  * Similar to {@link Cause} except it can be built continuously and retains no
@@ -85,16 +84,17 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable private static PhaseContext<?> EMPTY;
     @Nullable public BlockSnapshot neighborNotificationSource;
     @Nullable SpongeBlockSnapshot singleSnapshot;
+    protected final PhaseTracker createdTracker;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
      * @return
      */
     public static PhaseContext<?> empty() {
-        if (EMPTY == null) {
-            EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE).markEmpty();
+        if (PhaseContext.EMPTY == null) {
+            PhaseContext.EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE, tracker).markEmpty();
         }
-        return EMPTY;
+        return PhaseContext.EMPTY;
     }
 
 
@@ -562,8 +562,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
     }
 
-    protected PhaseContext(final IPhaseState<? extends P> state) {
+    protected PhaseContext(final IPhaseState<? extends P> state, final PhaseTracker tracker) {
         this.state = state;
+        this.createdTracker = checkNotNull(tracker, "Null PhaseTracker!");
     }
 
     @Override
@@ -607,13 +608,13 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     public void close() { // Should never throw an exception
         if (this.isEmpty()) {
             // We aren't ever supposed to close here...
-            PhaseTracker.getInstance()
-                .printMessageWithCaughtException("Closing an empty Phasecontext",
+            PhasePrinter
+                .printMessageWithCaughtException(this.createdTracker.stack, "Closing an empty Phasecontext",
                     "We should never be closing an empty phase context (or complete phase) This is likely an error from sponge.",
-                    new IllegalStateException("Closing empty phase context"));
+                    this.state, this, new IllegalStateException("Closing empty phase context"));
             return;
         }
-        PhaseTracker.getInstance().completePhase(this.state);
+        PhaseTracker.getInstance().completePhase(this);
         if (!((IPhaseState) this.state).shouldProvideModifiers(this)) {
             if (this.usedFrame != null) {
                 this.usedFrame.iterator().forEachRemaining(Sponge.getCauseStackManager()::popCauseFrame);
@@ -764,5 +765,13 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     protected boolean isRunaway(final PhaseContext<?> phaseContext) {
         return phaseContext.getClass() == this.getClass();
+    }
+
+    protected P defensiveCopy(final PhaseTracker tracker) {
+        final P newCopy = this.state instanceof PooledPhaseState ? ((PooledPhaseState<P>) this.state).createNewContext(tracker) :  this.state.createPhaseContext(tracker);
+        newCopy.source(this.source);
+        // tODO - blah
+
+        return newCopy;
     }
 }

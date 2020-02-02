@@ -27,12 +27,13 @@ package org.spongepowered.common.event.tracking.phase.entity;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeContext> {
 
     @Override
-    public DimensionChangeContext createNewContext() {
-        return new DimensionChangeContext(this)
+    public DimensionChangeContext createNewContext(final PhaseTracker tracker) {
+        return new DimensionChangeContext(this, tracker)
             .addBlockCaptures()
             .addEntityCaptures();
     }
@@ -43,7 +44,7 @@ final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeCon
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final DimensionChangeContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final DimensionChangeContext context, final Entity entity) {
         final ServerWorld worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
         ((ServerWorldBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);

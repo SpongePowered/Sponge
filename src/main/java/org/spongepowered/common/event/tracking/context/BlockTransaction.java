@@ -40,12 +40,11 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.BlockTransaction.TransactionContext;
-import org.spongepowered.common.event.tracking.context.BlockTransaction.TransactionProcessState;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -84,7 +83,7 @@ public abstract class BlockTransaction {
             .toString();
     }
 
-    abstract Optional<ServerWorldBridge> getWorldBridge();
+    abstract Optional<TrackedWorldBridge> getWorldBridge();
 
     abstract void cancel(ServerWorld worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess);
 
@@ -124,7 +123,7 @@ public abstract class BlockTransaction {
     }
 
     @Nullable
-    public SpongeProxyBlockAccess.Proxy getProxy(final ServerWorldBridge mixinWorldServer) {
+    public SpongeProxyBlockAccess.Proxy getProxy(final TrackedWorldBridge mixinWorldServer) {
         return null;
     }
 
@@ -180,7 +179,7 @@ public abstract class BlockTransaction {
                 return;
             }
             final ServerWorld worldServer = maybeWorld.get();
-            final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).bridge$getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = ((TrackedWorldBridge) worldServer).bridge$getProxyAccess();
             final BlockPos targetPos = this.addedSnapshot.getBlockPos();
             proxyAccess.proceedWithAdd(targetPos, this.added);
             ((TileEntityBridge) this.added).bridge$setCaptured(false);
@@ -201,14 +200,14 @@ public abstract class BlockTransaction {
 
         @Nullable
         @Override
-        public SpongeProxyBlockAccess.Proxy getProxy(final ServerWorldBridge mixinWorldServer) {
-            final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.bridge$getProxyAccess();
+        public SpongeProxyBlockAccess.Proxy getProxy(final TrackedWorldBridge trackedWorld) {
+            final SpongeProxyBlockAccess proxyAccess = trackedWorld.bridge$getProxyAccess();
             return proxyAccess.pushProxy();
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        Optional<ServerWorldBridge> getWorldBridge() {
+        Optional<TrackedWorldBridge> getWorldBridge() {
             return (Optional<ServerWorldBridge>) (Optional<?>) this.addedSnapshot.getWorldServer();
         }
 
@@ -259,7 +258,7 @@ public abstract class BlockTransaction {
                 return;
             }
             final ServerWorld worldServer = maybeWorld.get();
-            final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).bridge$getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = ((TrackedWorldBridge) worldServer).bridge$getProxyAccess();
             ((TileEntityBridge) this.removed).bridge$setCaptured(false); // Disable the capture logic in other places.
             proxyAccess.proceedWithRemoval(targetPosition, this.removed);
             // Reset captured state since we want it to be removed
@@ -289,13 +288,13 @@ public abstract class BlockTransaction {
 
         @Nullable
         @Override
-        public SpongeProxyBlockAccess.Proxy getProxy(final ServerWorldBridge mixinWorldServer) {
-            return mixinWorldServer.bridge$getProxyAccess().pushProxy();
+        public SpongeProxyBlockAccess.Proxy getProxy(final TrackedWorldBridge trackedWorld) {
+            return trackedWorld.bridge$getProxyAccess().pushProxy();
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        Optional<ServerWorldBridge> getWorldBridge() {
+        Optional<TrackedWorldBridge> getWorldBridge() {
             return (Optional<ServerWorldBridge>) (Optional<?>) this.tileSnapshot.getWorldServer();
         }
 
@@ -328,9 +327,9 @@ public abstract class BlockTransaction {
         @Override
         void process(final Transaction<BlockSnapshot> eventTransaction, final IPhaseState phaseState, final PhaseContext<?> phaseContext,
             final int currentDepth) {
-            final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) this.added.getWorld();
+            final TrackedWorldBridge trackedWorld = (TrackedWorldBridge) this.added.getWorld();
             final BlockPos position = this.added.getPos();
-            final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.bridge$getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = trackedWorld.bridge$getProxyAccess();
             ((TileEntityBridge) this.removed).bridge$setCaptured(false);
             proxyAccess.proceedWithRemoval(position, this.removed);
             ((TileEntityBridge) this.added).bridge$setCaptured(false);
@@ -352,13 +351,13 @@ public abstract class BlockTransaction {
 
         @Nullable
         @Override
-        public SpongeProxyBlockAccess.Proxy getProxy(final ServerWorldBridge mixinWorldServer) {
-            return mixinWorldServer.bridge$getProxyAccess().pushProxy();
+        public SpongeProxyBlockAccess.Proxy getProxy(final TrackedWorldBridge trackedWorld) {
+            return trackedWorld.bridge$getProxyAccess().pushProxy();
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        Optional<ServerWorldBridge> getWorldBridge() {
+        Optional<TrackedWorldBridge> getWorldBridge() {
             return (Optional<ServerWorldBridge>) (Optional<?>) this.removedSnapshot.getWorldServer();
         }
 
@@ -432,15 +431,15 @@ public abstract class BlockTransaction {
                 SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
                 return;
             }
-            final ServerWorld worldServer = maybeWorld.get();
+            final ServerWorld serverWorld = maybeWorld.get();
             final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) eventTransaction.getFinal();
 
             TrackingUtil.performBlockEntitySpawns(phaseState, phaseContext, this.original, targetPosition);
-            SpongeHooks.logBlockAction(worldServer, this.original.blockChange, eventTransaction);
+            SpongeHooks.logBlockAction(serverWorld, this.original.blockChange, eventTransaction);
             final BlockState oldState = (BlockState) this.original.getState();
             // Any requests to the world need to propogate to having the "changed" block, before
             // the block potentially changes from future changes.
-            final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).bridge$getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = ((TrackedWorldBridge) serverWorld).bridge$getProxyAccess();
 
             // We can proceed to calling the break block logic since the new state has been "proxied" onto the world
             final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
@@ -462,7 +461,7 @@ public abstract class BlockTransaction {
             // ChunkMixin#bridge$setBlockState will call onBlockAdded for blocks
             // with a TileEntity or when capturing is not being done.
             if (this.queueOnAdd) {
-                this.newState.getBlock().onBlockAdded(worldServer, targetPosition, this.newState);
+                this.newState.getBlock().onBlockAdded(serverWorld, targetPosition, this.newState);
                 phaseState.performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
             }
             if (this.queueTileSet != null) {
@@ -471,12 +470,12 @@ public abstract class BlockTransaction {
             phaseState.postBlockTransactionApplication(this.original.blockChange, eventTransaction, phaseContext);
             ((IPhaseState) currentContext.state).postProcessSpecificBlockChange(currentContext, this, currentDepth + 1);
 
-            if (this.blockChangeFlag.isNotifyClients()) { // Always try to notify clients of the change.
-                worldServer.notifyBlockUpdate(targetPosition, oldState, this.newState, this.blockChangeFlag.getRawFlag());
+            if (this.blockChangeFlag.notifyClients()) { // Always try to notify clients of the change.
+                serverWorld.notifyBlockUpdate(targetPosition, oldState, this.newState, this.blockChangeFlag.getRawFlag());
             }
 
             TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, newBlockSnapshot,
-                ((ServerWorldBridge) worldServer), targetPosition, this.newState, this.blockChangeFlag);
+                ((ServerWorldBridge) serverWorld), targetPosition, this.newState, this.blockChangeFlag);
             // And perform any more additional spawns.
             TrackingUtil.performBlockEntitySpawns(phaseState, phaseContext, this.original, targetPosition);
         }
@@ -491,13 +490,13 @@ public abstract class BlockTransaction {
 
         @Nullable
         @Override
-        public SpongeProxyBlockAccess.Proxy getProxy(final ServerWorldBridge mixinWorldServer) {
-            return mixinWorldServer.bridge$getProxyAccess().pushProxy();
+        public SpongeProxyBlockAccess.Proxy getProxy(final TrackedWorldBridge trackedWorld) {
+            return trackedWorld.bridge$getProxyAccess().pushProxy();
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        Optional<ServerWorldBridge> getWorldBridge() {
+        Optional<TrackedWorldBridge> getWorldBridge() {
             return (Optional<ServerWorldBridge>) (Optional<?>) this.original.getWorldServer();
         }
 
@@ -519,13 +518,13 @@ public abstract class BlockTransaction {
 
 
     static final class NeighborNotification extends BlockTransaction {
-        final ServerWorldBridge worldBridge;
+        final TrackedWorldBridge worldBridge;
         final BlockState notifyState;
         final BlockPos notifyPos;
         final Block sourceBlock;
         final BlockPos sourcePos;
 
-        NeighborNotification(final int transactionIndex, final int snapshotIndex, final ServerWorldBridge worldBridge, final BlockState notifyState, final BlockPos notifyPos,
+        NeighborNotification(final int transactionIndex, final int snapshotIndex, final TrackedWorldBridge worldBridge, final BlockState notifyState, final BlockPos notifyPos,
                              final Block sourceBlock, final BlockPos sourcePos, final BlockState sourceState) {
             super(transactionIndex, snapshotIndex, sourcePos, sourceState);
             this.worldBridge = worldBridge;
@@ -578,7 +577,7 @@ public abstract class BlockTransaction {
             final Chunk chunk = ((ServerWorld) this.worldBridge).getChunkAt(sourcePos);
             final Block used = PhaseTracker.validateBlockForNeighborNotification((ServerWorld) this.worldBridge, sourcePos, sourceBlock, notifyPos, chunk);
 
-            PhaseTracker.getInstance().notifyBlockOfStateChange(this.worldBridge, blockState, notifyPos, used, sourcePos);
+            PhaseTracker.getInstance().notifyBlockOfStateChange(this.worldBridge, blockState, notifyPos, used, sourcePos, false);
         }
 
         @Override
@@ -609,7 +608,7 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        Optional<ServerWorldBridge> getWorldBridge() {
+        Optional<TrackedWorldBridge> getWorldBridge() {
             return Optional.of(this.worldBridge);
         }
     }
@@ -622,7 +621,7 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public TransactionContext createPhaseContext() {
+        public TransactionContext createPhaseContext(PhaseTracker server) {
             throw new IllegalStateException("Cannot create context");
         }
 
@@ -662,7 +661,7 @@ public abstract class BlockTransaction {
     static final class TransactionContext extends PhaseContext<TransactionContext> {
 
         protected TransactionContext() {
-            super(TransactionProcessState.TRANSACTION_PROCESS);
+            super(TransactionProcessState.TRANSACTION_PROCESS, PhaseTracker.SERVER);
         }
     }
 }

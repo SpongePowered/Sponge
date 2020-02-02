@@ -39,8 +39,8 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
 
     private Explosion explosion;
 
-    public ExplosionContext() {
-        super(GeneralPhase.State.EXPLOSION);
+    public ExplosionContext(PhaseTracker tracker) {
+        super(GeneralPhase.State.EXPLOSION, tracker);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

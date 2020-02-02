@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.Entity;
@@ -57,60 +56,7 @@ public interface ServerWorldBridge {
 
     void bridge$updateRotation(Entity entityIn);
 
-    boolean bridge$forceSpawnEntity(Entity entity);
-
     void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
-
-    /**
-     * Delegates to the {@link ServerWorld} to perform the lookup for a {@link Chunk}
-     * such that if the target {@link BlockPos} results in a {@code false} for
-     * {@link ServerWorld#isBlockLoaded(BlockPos)}, {@link BlockSnapshot#empty()}
-     * will be returned. Likewise, optimizes the creation of the snapshot by performing
-     * the {@link Chunk#getBlockState(BlockPos)} and {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
-     * lookup on the same chunk, avoiding an additional chunk lookup.
-     *
-     * <p>This should be used when the "known" {@link BlockState} for the target
-     * position is not known. If it is known, use {@link #bridge$createSnapshot(BlockState, BlockState, BlockPos, BlockChangeFlag)}</p>
-     *
-     * @param pos The target position to get the block snapshot for
-     * @param flag The block change flag to associate with the snapshot.
-     * @return The snapshot, or none if not loaded
-     */
-    SpongeBlockSnapshot bridge$createSnapshot(BlockPos pos, BlockChangeFlag flag);
-
-    /**
-     * Creates a {@link BlockSnapshot} but performs an additional {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
-     * lookup if the providing {@link BlockState#getBlock()} {@code instanceof} is
-     * {@code true} for being an {@link ITileEntityProvider} or
-     * {@link SpongeImplHooks#hasBlockTileEntity(Block, BlockState)}, and associates
-     * the resulting snapshot of said Tile with the snapshot. This is useful for in-progress
-     * snapshot creation during transaction building for {@link MultiBlockCaptureSupplier}
-     * or where sensitivity to the {@link SpongeProxyBlockAccess} is needed.
-     *
-     * <p>If the {@link TileEntity} is already known, and no lookups are needed, use
-     * {@link #bridge$createSnapshotWithEntity(BlockState, BlockPos, BlockChangeFlag, TileEntity)} as it avoids
-     * any further chunk lookups.</p>
-     *
-     * @param state The block state
-     * @param extended The extended state
-     * @param pos The target position
-     * @param updateFlag The update flag
-     * @return The snapshot, never NONE
-     */
-    SpongeBlockSnapshot bridge$createSnapshot(BlockState state, BlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
-
-    /**
-     * Similar to {@link #bridge$createSnapshot(BlockState, BlockState, BlockPos, BlockChangeFlag)},
-     * but with the added avoidance of a {@link TileEntity} lookup during the creation of the resulting
-     * {@link SpongeBlockSnapshot}.
-     *
-     * @param state The state
-     * @param pos The position
-     * @param updateFlag The update flag
-     * @param tileEntity The tile entity to serialize, if available
-     * @return The snapshot, never NONE
-     */
-    SpongeBlockSnapshot bridge$createSnapshotWithEntity(BlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity tileEntity);
 
     SpongeWorldGenerator bridge$createTerrainGenerator(DataContainer settings);
 
@@ -134,8 +80,6 @@ public interface ServerWorldBridge {
     void bridge$incrementChunkLoadCount();
 
     void bridge$updateConfigCache();
-
-    SpongeProxyBlockAccess bridge$getProxyAccess();
 
     SpongeChunkGenerator bridge$getSpongeGenerator();
 

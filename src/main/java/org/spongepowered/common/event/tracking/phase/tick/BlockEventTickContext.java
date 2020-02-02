@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 public class BlockEventTickContext extends LocationBasedTickContext<BlockEventTickContext> {
 
     private boolean wasNotCancelled = true;
     private boolean eventSucceeded;
 
-    BlockEventTickContext() {
-        super(TickPhase.Tick.BLOCK_EVENT);
+    BlockEventTickContext(final PhaseTracker tracker) {
+        super(TickPhase.Tick.BLOCK_EVENT, tracker);
     }
 
     @Override

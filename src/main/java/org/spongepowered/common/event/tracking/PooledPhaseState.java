@@ -24,35 +24,40 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import java.util.ArrayDeque;
-
 import javax.annotation.Nullable;
 
 public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPhaseState<C> {
 
-    private final ArrayDeque<C> contextPool = PhaseTracker.SERVER.createContextPool(this);
-    @Nullable private C cached;
+    @Nullable
+    private C cached;
 
     protected PooledPhaseState() {
     }
 
     @Override
-    public final C createPhaseContext() {
+    public final C createPhaseContext(final PhaseTracker server) {
+        if (Thread.currentThread() != server.getSidedThread()) {
+            throw new IllegalStateException("Asynchronous Thread Access to PhaseTracker: " + server);
+        }
+
         if (this.cached != null && !this.cached.isCompleted) {
             final C cached = this.cached;
             this.cached = null;
             return cached;
         }
-        final C peek = this.contextPool.pollFirst();
+        final C peek = server.getContextPoolFor(this).pollFirst();
         if (peek != null) {
             this.cached = peek;
             return peek;
         }
-        this.cached = this.createNewContext();
+        this.cached = this.createNewContext(server);
         return this.cached;
     }
 
     final void releaseContextFromPool(final C context) {
+        if (Thread.currentThread() != context.createdTracker.getSidedThread()) {
+            throw new IllegalStateException("Asynchronous Thread Access to PhaseTracker: " + context.createdTracker);
+        }
         if (this.cached == context) {
             return;
         }
@@ -63,9 +68,10 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
             this.cached = context;
             return;
         }
-        this.contextPool.push(context);
+        context.createdTracker.getContextPoolFor(this).push(context);
+
     }
 
-    protected abstract C createNewContext();
+    protected abstract C createNewContext(PhaseTracker tracker);
 
 }

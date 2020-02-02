@@ -52,8 +52,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
@@ -73,7 +75,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
 
     @Override
-    public InteractionPacketContext createNewContext() {
+    public InteractionPacketContext createNewContext(final PhaseTracker tracker) {
         return new InteractionPacketContext(this);
     }
 
@@ -96,13 +98,13 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         if (!playerMP.world.isBlockLoaded(target)) {
             context.targetBlock(BlockSnapshot.empty());
         } else {
-            context.targetBlock(((ServerWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
+            context.targetBlock(((TrackedWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
         context.handUsed(HandTypes.MAIN_HAND);
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final InteractionPacketContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final InteractionPacketContext context, final Entity entity) {
         return context.captureEntity(entity);
     }
 

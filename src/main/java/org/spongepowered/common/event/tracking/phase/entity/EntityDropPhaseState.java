@@ -31,6 +31,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 
@@ -64,8 +65,8 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public BasicEntityContext createNewContext() {
-        return new BasicEntityContext(this).addCaptures()
+    public BasicEntityContext createNewContext(final PhaseTracker tracker) {
+        return new BasicEntityContext(this, tracker).addCaptures()
             .addEntityDropCaptures();
     }
 

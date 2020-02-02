@@ -50,7 +50,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
@@ -106,7 +106,7 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
                                 + "entity types. This may be a bug with a mod or sponge.")
                 .add("%s : %s", "Entity Name", entityTypeString)
                 .add();
-            PhaseTracker.getInstance().generateVersionInfo(printer);
+            PhasePrinter.generateVersionInfo(printer);
             printer.trace(System.err, SpongeImpl.getLogger(), Level.WARN);
             return null;
         }

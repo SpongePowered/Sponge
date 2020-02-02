@@ -40,6 +40,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.world.BlockChange;
@@ -59,8 +60,8 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     });
 
     @Override
-    public GeneralizedContext createNewContext() {
-        return super.createNewContext()
+    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
+        return super.createNewContext(tracker)
             .addCaptures();
     }
 

@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.general;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 public class WorldUnload extends GeneralState<GeneralizedContext> {
@@ -39,8 +40,8 @@ public class WorldUnload extends GeneralState<GeneralizedContext> {
     }
 
     @Override
-    public GeneralizedContext createNewContext() {
-        return new GeneralizedContext(this);
+    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
+        return new GeneralizedContext(this, tracker);
     }
 
     @Override

@@ -103,7 +103,9 @@ import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -142,6 +144,7 @@ import org.spongepowered.common.registry.builtin.supplier.DimensionTypeSupplier;
 import org.spongepowered.common.registry.builtin.supplier.EffectSupplier;
 import org.spongepowered.common.registry.builtin.supplier.EnchantmentSupplier;
 import org.spongepowered.common.registry.builtin.supplier.EntityTypeSupplier;
+import org.spongepowered.common.registry.builtin.supplier.EventContextKeySupplier;
 import org.spongepowered.common.registry.builtin.supplier.FluidSupplier;
 import org.spongepowered.common.registry.builtin.supplier.ItemSupplier;
 import org.spongepowered.common.registry.builtin.supplier.PaintingTypeSupplier;
@@ -149,6 +152,7 @@ import org.spongepowered.common.registry.builtin.supplier.ParticleTypeSupplier;
 import org.spongepowered.common.registry.builtin.supplier.SoundEventSupplier;
 import org.spongepowered.common.registry.builtin.stream.TextColorStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.TextStyleTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.supplier.SpawnTypeSupplier;
 import org.spongepowered.common.registry.builtin.supplier.TileEntityTypeSupplier;
 import org.spongepowered.common.registry.builtin.stream.WoodTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.VillagerProfessionSupplier;
@@ -259,6 +263,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this.registerRegistry(catalogClass, key, null, false);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(Class<T> catalogClass, CatalogKey key, @Nullable Supplier<Set<T>> defaultsSupplier, boolean generateSuppliers) {
         checkNotNull(catalogClass);
         checkNotNull(key);
@@ -396,6 +401,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(WireAttachmentType.class, CatalogKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true)
             .generateRegistry(WoodType.class, CatalogKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true)
             .generateRegistry(Visibility.class, CatalogKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true)
+            .generateRegistry(SpawnType.class, CatalogKey.sponge("spawn_type"), SpawnTypeSupplier.stream(), true)
+            .generateRegistry(EventContextKey.class, CatalogKey.sponge("event_context_key"), EventContextKeySupplier.stream(), true)
         ;
 
         this

@@ -92,7 +92,7 @@ public abstract class DyeItemMixin extends ItemMixin {
         final boolean doesEvent = state.doesBlockEventTracking(current);
         if (doesBulk || doesEvent) {
             // We can enter the new phase state.
-            try (GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext()
+            try (GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(PhaseTracker.SERVER)
                 .provideItem(stack)
                 .world(worldIn)
                 .block(blockState)

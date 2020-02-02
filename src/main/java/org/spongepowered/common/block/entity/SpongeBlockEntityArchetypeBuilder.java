@@ -82,7 +82,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     @Override
     public BlockEntityArchetype.Builder state(BlockState state) {
         final net.minecraft.block.BlockState blockState = (net.minecraft.block.BlockState) state;
-        if (!SpongeImplHooks.hasBlockTileEntity(blockState.getBlock(), blockState)) {
+        if (!SpongeImplHooks.hasBlockTileEntity(blockState)) {
             new IllegalArgumentException("BlockState: "+ state + " does not provide TileEntities!").printStackTrace();
         }
         if (this.blockState != state) {

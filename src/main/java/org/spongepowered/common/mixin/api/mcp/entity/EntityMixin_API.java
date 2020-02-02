@@ -29,10 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPlayerPositionLookPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
@@ -64,7 +61,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
@@ -78,6 +74,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
@@ -181,7 +178,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             return false;
         }
 
-        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext()) {
+        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
             context.buildAndSwitch();
 
             MoveEntityEvent.Teleport event;

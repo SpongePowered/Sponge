@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3i;
 import java.util.function.BiConsumer;
 
@@ -41,8 +42,8 @@ public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState
     }
 
     @Override
-    public ChunkRegenerateContext createNewContext() {
-        return new ChunkRegenerateContext(this);
+    public ChunkRegenerateContext createNewContext(final PhaseTracker tracker) {
+        return new ChunkRegenerateContext(this, tracker);
     }
 
     @Override
@@ -51,7 +52,7 @@ public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState
     }
 
     @Override
-    public Vector3i getChunkPopulatorOffset(Chunk chunk, int chunkX, int chunkZ) {
+    public Vector3i getChunkPopulatorOffset(final Chunk chunk, final int chunkX, final int chunkZ) {
         return chunk.getBlockMin();
     }
 

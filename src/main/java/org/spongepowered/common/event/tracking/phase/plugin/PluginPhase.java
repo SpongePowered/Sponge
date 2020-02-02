@@ -42,10 +42,10 @@ public final class PluginPhase {
     public static final class Listener {
 
         public static final IPhaseState<EventListenerPhaseContext> GENERAL_LISTENER = new EventListenerPhaseState();
-        public static final IPhaseState<WorldTickContext> PRE_WORLD_TICK_LISTENER = new WorldTickPhaseState("PreWorldTickState");
-        public static final IPhaseState<WorldTickContext> POST_WORLD_TICK_LISTENER = new WorldTickPhaseState("PostWorldTickState");
-        public static final IPhaseState<ServerTickContext> PRE_SERVER_TICK_LISTENER = new ServerTickPhaseState("PreServerTickState");
-        public static final IPhaseState<ServerTickContext> POST_SERVER_TICK_LISTENER = new ServerTickPhaseState("PostServerTickState");
+        public static final IPhaseState<WorldTickListenerContext> PRE_WORLD_TICK_LISTENER = new WorldTickListenerState("PreWorldTickState");
+        public static final IPhaseState<WorldTickListenerContext> POST_WORLD_TICK_LISTENER = new WorldTickListenerState("PostWorldTickState");
+        public static final IPhaseState<ServerTickListenerContext> PRE_SERVER_TICK_LISTENER = new ServerTickListenerState("PreServerTickState");
+        public static final IPhaseState<ServerTickListenerContext> POST_SERVER_TICK_LISTENER = new ServerTickListenerState("PostServerTickState");
         public static final IPhaseState<EventListenerPhaseContext> EVENT_BUS = new EventListenerPhaseState();
 
         private Listener() {

@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 public class PlayerTickContext extends TickContext<PlayerTickContext> {
-    public PlayerTickContext() {
-        super(TickPhase.Tick.PLAYER);
+    public PlayerTickContext(PhaseTracker tracker) {
+        super(TickPhase.Tick.PLAYER, tracker);
     }
 }

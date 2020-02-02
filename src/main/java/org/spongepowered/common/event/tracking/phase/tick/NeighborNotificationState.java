@@ -35,6 +35,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
@@ -55,8 +56,8 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
             });
 
     @Override
-    public NeighborNotificationContext createNewContext() {
-        return new NeighborNotificationContext(this)
+    public NeighborNotificationContext createNewContext(final PhaseTracker tracker) {
+        return new NeighborNotificationContext(this, tracker)
                 .addCaptures();
     }
 
@@ -80,7 +81,7 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final NeighborNotificationContext context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final NeighborNotificationContext context, final Entity entity) {
         final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
         if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
             return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));

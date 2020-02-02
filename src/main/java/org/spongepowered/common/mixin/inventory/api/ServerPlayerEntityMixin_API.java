@@ -43,6 +43,7 @@ import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -98,7 +99,7 @@ public abstract class ServerPlayerEntityMixin_API implements Player {
             return false;
         }
         // Create Close_Window to capture item drops
-        try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
+        try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext(PhaseTracker.SERVER)
                 .source(this)
                 .packetPlayer(((ServerPlayerEntity)(Object) this))
                 .openContainer(openContainer)

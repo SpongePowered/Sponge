@@ -27,14 +27,15 @@ package org.spongepowered.common.event.tracking.phase.entity;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class DimensionChangeContext extends EntityContext<DimensionChangeContext> {
 
     private ServerWorld targetWorld;
 
     DimensionChangeContext(
-        IPhaseState<? extends DimensionChangeContext> state) {
-        super(state);
+            IPhaseState<? extends DimensionChangeContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     public ServerWorld getTargetWorld() {

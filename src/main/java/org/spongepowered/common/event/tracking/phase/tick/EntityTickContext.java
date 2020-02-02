@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.entity.Entity;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class EntityTickContext extends TickContext<EntityTickContext> {
 
@@ -38,8 +39,8 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
     public double prevZ;
 
 
-    EntityTickContext(final IPhaseState<? extends EntityTickContext> phaseState) {
-        super(phaseState);
+    EntityTickContext(final IPhaseState<? extends EntityTickContext> phaseState, PhaseTracker tracker) {
+        super(phaseState, tracker);
     }
 
     @Override

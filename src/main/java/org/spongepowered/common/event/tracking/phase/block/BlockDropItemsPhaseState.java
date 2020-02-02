@@ -36,6 +36,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -66,20 +67,20 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public GeneralizedContext createNewContext() {
-        return super.createNewContext()
+    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
+        return super.createNewContext(tracker)
                 .addBlockCaptures()
                 .addEntityCaptures();
     }
 
     @SuppressWarnings({"unchecked", "Duplicates", "RedundantCast"})
     @Override
-    public void unwind(GeneralizedContext context) {
+    public void unwind(final GeneralizedContext context) {
 
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
-                for (ItemEntity item : items) {
+                for (final ItemEntity item : items) {
                     entities.add((Entity) item);
                 }
                 SpongeCommonEventFactory.callDropItemDestruct(entities, context);
@@ -114,7 +115,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             }));
         context.getBlockDropSupplier()
             .acceptAndClearIfNotEmpty(drops -> {
-                for (BlockPos key : drops.asMap().keySet()) {
+                for (final BlockPos key : drops.asMap().keySet()) {
                     final List<ItemDropData> values = drops.get(key);
                     if (!values.isEmpty()) {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -126,7 +127,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(GeneralizedContext context) {
+    public boolean tracksBlockSpecificDrops(final GeneralizedContext context) {
         return true;
     }
 }

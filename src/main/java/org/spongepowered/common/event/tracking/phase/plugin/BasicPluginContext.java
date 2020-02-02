@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
@@ -34,8 +35,8 @@ public class BasicPluginContext extends PluginPhaseContext<BasicPluginContext> {
 
     @Nullable PluginContainer container;
 
-    public BasicPluginContext(final IPhaseState<? extends BasicPluginContext> phaseState) {
-        super(phaseState);
+    public BasicPluginContext(final IPhaseState<? extends BasicPluginContext> phaseState, final PhaseTracker tracker) {
+        super(phaseState, tracker);
     }
 
     public BasicPluginContext container(final PluginContainer container) {

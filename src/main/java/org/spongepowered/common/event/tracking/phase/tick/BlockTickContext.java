@@ -40,7 +40,7 @@ public class BlockTickContext extends LocationBasedTickContext<BlockTickContext>
     World world;
 
     protected BlockTickContext(IPhaseState<BlockTickContext> phaseState) {
-        super(phaseState);
+        super(phaseState, tracker);
     }
 
     @Override

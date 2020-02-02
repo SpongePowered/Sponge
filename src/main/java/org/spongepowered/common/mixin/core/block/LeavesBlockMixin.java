@@ -54,7 +54,7 @@ public abstract class LeavesBlockMixin extends BlockMixin {
     private boolean onUpdateDecayState(final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, final int flags) {
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState<?> currentState = currentContext.state;
-        try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
+        try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
                                            .source(new SpongeLocatableBlockBuilder()
                                                .world((World) worldIn)
                                                .position(pos.getX(), pos.getY(), pos.getZ())
@@ -83,10 +83,13 @@ public abstract class LeavesBlockMixin extends BlockMixin {
     private void destroy(final net.minecraft.world.World worldIn, final BlockPos pos) {
         final net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
         // Sponge Start - Cause tracking
+        if (worldIn.isRemote) {
+            PhaseTracker.CLIENT.getSidedThread() == Thread.currentThread()
+        }
         if (!((WorldBridge) worldIn).bridge$isFake()) {
             final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
             final IPhaseState<?> currentState = peek.state;
-            try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext()
+            try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
                 .source(new SpongeLocatableBlockBuilder()
                     .world((World) worldIn)
                     .position(pos.getX(), pos.getY(), pos.getZ())

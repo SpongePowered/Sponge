@@ -35,7 +35,7 @@ public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseConte
     @Nullable private Feature type;
 
     PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state) {
-        super(state);
+        super(state, tracker);
     }
 
     @Override

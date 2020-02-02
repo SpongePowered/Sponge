@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.general;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
@@ -35,8 +36,8 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
     @Nullable String command;
     @Nullable private TrackedInventoryBridge inventory;
 
-    CommandPhaseContext(final IPhaseState<CommandPhaseContext> state) {
-        super(state);
+    CommandPhaseContext(final IPhaseState<CommandPhaseContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     @Override

@@ -26,14 +26,15 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class TileEntityTickContext extends LocationBasedTickContext<TileEntityTickContext> {
-    public TileEntityTickContext(IPhaseState<TileEntityTickContext> phaseState) {
-        super(phaseState);
+    public TileEntityTickContext(final IPhaseState<TileEntityTickContext> phaseState, final PhaseTracker tracker) {
+        super(phaseState, tracker);
     }
 
     @Override
-    public TileEntityTickContext source(Object owner) {
+    public TileEntityTickContext source(final Object owner) {
         super.source(owner);
         if (owner instanceof TrackableBridge) {
             final TrackableBridge mixinTileentity = (TrackableBridge) owner;

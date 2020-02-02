@@ -49,8 +49,8 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
     BlockPos pos;
     SpongeBlockSnapshot snapshot;
 
-    protected GrowablePhaseContext(final IPhaseState<? extends GrowablePhaseContext> state) {
-        super(state);
+    protected GrowablePhaseContext(final IPhaseState<? extends GrowablePhaseContext> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     public GrowablePhaseContext provideItem(final ItemStack stack) {
@@ -82,7 +82,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         checkState(this.priorContext != null, "Prior context is null");
         checkState(this.world != null, "World is null");
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
-            .worldId(((org.spongepowered.api.world.World) this.world).getUniqueId())
+            .worldId(((org.spongepowered.api.world.World<?>) this.world).getProperties().getUniqueId())
             .position(VecHelper.toVector3i(this.pos))
             .blockState(this.blockState)
             .flag(BlockChangeFlags.PHYSICS_OBSERVER);
@@ -101,5 +101,11 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         this.blockState = null;
         this.pos = null;
         this.snapshot = null;
+    }
+
+    @Override
+    protected GrowablePhaseContext defensiveCopy(PhaseTracker tracker) {
+        final GrowablePhaseContext newCopy = super.defensiveCopy(tracker);
+        return newCopy;
     }
 }

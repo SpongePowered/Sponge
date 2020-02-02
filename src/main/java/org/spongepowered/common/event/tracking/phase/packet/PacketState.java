@@ -150,10 +150,10 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final P context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final P context, final Entity entity) {
         return this.shouldCaptureEntity()
         ? context.getCapturedEntities().add(entity)
-        : this.spawnEntity(context, entity, chunkX, chunkZ);
+        : this.spawnEntity(context, entity);
     }
 
     public boolean shouldCaptureEntity() {
@@ -175,11 +175,9 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
      *
      * @param context
      * @param entity
-     * @param chunkX
-     * @param chunkZ
      * @return True if the entity was spawned
      */
-    public boolean spawnEntity(final P context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntity(final P context, final Entity entity) {
         final Player player = context.getSource(Player.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player", context));
         final ArrayList<Entity> entities = new ArrayList<>(1);

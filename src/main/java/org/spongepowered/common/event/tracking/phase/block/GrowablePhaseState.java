@@ -34,6 +34,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
@@ -54,29 +55,29 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
         });
 
     @Override
-    public GrowablePhaseContext createNewContext() {
-        final GrowablePhaseContext context = new GrowablePhaseContext(this);
+    public GrowablePhaseContext createNewContext(final PhaseTracker tracker) {
+        final GrowablePhaseContext context = new GrowablePhaseContext(this, tracker);
         return context.addBlockCaptures();
     }
 
     @Override
-    public void unwind(GrowablePhaseContext phaseContext) {
+    public void unwind(final GrowablePhaseContext phaseContext) {
         TrackingUtil.processBlockCaptures(phaseContext);
     }
 
     @Override
-    public boolean spawnEntityOrCapture(GrowablePhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(final GrowablePhaseContext context, final Entity entity) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.STRUCTURE);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(GrowablePhaseContext phaseContext,
-        BlockState newState, Block newBlock, BlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
+    public BlockChange associateBlockChangeWithSnapshot(final GrowablePhaseContext phaseContext,
+                                                        final BlockState newState, final Block newBlock, final BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
         return BlockChange.GROW;
     }
 
@@ -86,7 +87,7 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
     }
 
     @Override
-    public boolean doesBulkBlockCapture(GrowablePhaseContext context) {
+    public boolean doesBulkBlockCapture(final GrowablePhaseContext context) {
         return true;
     }
 

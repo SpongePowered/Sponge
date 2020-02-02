@@ -29,12 +29,19 @@ import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.server.ServerWorld;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ServerWorld.class)
 public interface ServerWorldAccessor {
+
+    @Accessor("LOGGER") static Logger accessor$LOGGER() {
+        throw new UnsupportedOperationException("Untransformed Accessor");
+    }
+
+    @Invoker("hasDuplicateEntity") boolean accessor$hasDuplicateEntity(Entity entity);
 
     @Accessor("entitiesById") Int2ObjectMap<Entity> accessor$getEntitiesById();
 

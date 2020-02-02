@@ -43,7 +43,7 @@ abstract class GeneralState<G extends PhaseContext<G>> extends PooledPhaseState<
     public abstract void unwind(G context);
 
     /**
-     * A duplicate of {@link IPhaseState#spawnEntityOrCapture(PhaseContext, Entity, int, int)}
+     * A duplicate of {@link IPhaseState#spawnEntityOrCapture(PhaseContext, Entity)}
      * such that the general states will not know what to do for entity spawns. Eventually, this is going to be centralized
      * so that it's not always delegated between the phases and phase states.
      *
@@ -54,12 +54,10 @@ abstract class GeneralState<G extends PhaseContext<G>> extends PooledPhaseState<
      *
      * @param context
      * @param entity
-     * @param chunkX
-     * @param chunkZ
      * @return
      */
     @Override
-    public boolean spawnEntityOrCapture(final G context, final Entity entity, final int chunkX, final int chunkZ) {
+    public boolean spawnEntityOrCapture(final G context, final Entity entity) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

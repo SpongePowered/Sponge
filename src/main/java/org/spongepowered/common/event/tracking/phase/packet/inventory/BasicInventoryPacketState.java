@@ -43,6 +43,7 @@ import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridg
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -136,8 +137,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public InventoryPacketContext createNewContext() {
-        return new InventoryPacketContext(this).addCaptures().addEntityDropCaptures(); // if for whatever reason there's a capture.. i don't know...
+    public InventoryPacketContext createNewContext(final PhaseTracker tracker) {
+        return new InventoryPacketContext(this, tracker).addCaptures().addEntityDropCaptures(); // if for whatever reason there's a capture.. i don't know...
     }
 
 

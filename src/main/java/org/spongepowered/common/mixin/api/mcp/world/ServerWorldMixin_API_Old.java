@@ -72,7 +72,6 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -208,7 +207,7 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
         final List<ServerPlayerEntity> playerList = new ArrayList<>();
         final List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
         org.spongepowered.api.world.chunk.Chunk spongeChunk;
-        try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext()
+        try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext(PhaseTracker.SERVER)
             .world((net.minecraft.world.World)(Object) this)) {
             context.buildAndSwitch();
             spongeChunk = this.loadChunk(cx, cy, cz, false).orElse(null);
@@ -224,7 +223,7 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
 
         final net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) spongeChunk;
         final boolean keepEntities = flag.entities();
-        try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING.createPhaseContext()
+        try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING.createPhaseContext(PhaseTracker.SERVER)
             .chunk(chunk)) {
             context.buildAndSwitch();
             // If we reached this point, an existing chunk was found so we need to regen
@@ -297,7 +296,7 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
         }
         try (final PhaseContext<?> context = isWorldGen || handlesOwnCompletion
                 ? null
-                : PluginPhase.State.BLOCK_WORKER.createPhaseContext()) {
+                : PluginPhase.State.BLOCK_WORKER.createPhaseContext(PhaseTracker.SERVER)) {
             if (context != null) {
                 context.buildAndSwitch();
             }
@@ -386,7 +385,7 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
             return;
         }
 
-        try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext()
+        try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER)
             .explosion((Explosion) explosion)
             .source(explosion.getSourceExplosive().isPresent() ? explosion.getSourceExplosive() : this)) {
             ignored.buildAndSwitch();
@@ -416,7 +415,7 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (!state.alreadyCapturingEntitySpawns()) {
-            try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()) {
+            try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext(PhaseTracker.SERVER)) {
                 context.buildAndSwitch();
                 phaseTracker.spawnEntityWithCause(this, entity);
                 return true;

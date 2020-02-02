@@ -60,6 +60,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -201,7 +202,7 @@ public final class PacketPhaseUtil {
                     final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
-                    final PacketContext<?> context = packetState.createPhaseContext();
+                    final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.SERVER);
                     if (!PacketPhase.getInstance().isPacketInvalid(packetIn, packetPlayer, packetState)) {
                         context
                             .source(packetPlayer)
