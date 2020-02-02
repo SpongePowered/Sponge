@@ -49,6 +49,7 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Shadow public abstract int getItemStackLimit();
     @Shadow public abstract String getTranslationKey();
+    @Shadow private Item containerItem;
 
     @Nullable protected BlockType blockType = null;
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
@@ -86,6 +87,11 @@ public abstract class ItemMixin_API implements ItemType {
     @Override
     public Optional<BlockType> getBlock() {
         return Optional.ofNullable(this.blockType);
+    }
+
+    @Override
+    public Optional<ItemType> getContainer() {
+        return Optional.ofNullable((ItemType) this.containerItem);
     }
 
 }

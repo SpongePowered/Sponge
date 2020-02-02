@@ -60,10 +60,10 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.Text;
@@ -128,7 +128,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private boolean vanish$isVanished = false;
     private boolean vanish$pendingVisibilityUpdate = false;
     private int vanish$visibilityTicks = 0;
-    @Nullable private DestructEntityEvent impl$destructEvent;
+    @Nullable private Cause impl$destructCause;
 
     @Shadow @Nullable private Entity ridingEntity;
     @Shadow @Final private List<Entity> passengers;
@@ -237,11 +237,14 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         this.trackedInWorld = tracked;
         // Since this is called during removeEntity from world, we can
         // post the removal event here, basically.
-        if (!tracked) {
-            if (this.impl$destructEvent != null) {
-                SpongeImpl.postEvent(this.impl$destructEvent);
-            }
-            this.impl$destructEvent = null;
+        if (!tracked && this.impl$destructCause != null) {
+            final MessageChannel originalChannel = MessageChannel.TO_NONE;
+            SpongeImpl.postEvent(SpongeEventFactory.createDestructEntityEvent(
+                    this.impl$destructCause, originalChannel, Optional.of(originalChannel),
+                    new MessageEvent.MessageFormatter(), (org.spongepowered.api.entity.Entity) this, true
+            ));
+
+            this.impl$destructCause = null;
         }
     }
 
@@ -848,16 +851,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (ShouldFire.DESTRUCT_ENTITY_EVENT
             && !((WorldBridge) this.world).bridge$isFake()
             && !((Entity) (Object) this instanceof MobEntity)) {
-            final MessageChannel originalChannel = MessageChannel.TO_NONE;
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
-                final DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
-                    frame.getCurrentCause(), originalChannel, Optional.of(originalChannel),
-                    new MessageEvent.MessageFormatter(), (org.spongepowered.api.entity.Entity) this, true
-                );
-
-                this.impl$destructEvent = event;
-            }
+            this.impl$destructCause = Sponge.getCauseStackManager().getCurrentCause();
         }
     }
 

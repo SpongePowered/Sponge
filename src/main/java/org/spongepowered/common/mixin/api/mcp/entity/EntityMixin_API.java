@@ -424,7 +424,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public void remove() {
-        this.isDead = true;
+        this.setDead();
     }
 
     @Override
