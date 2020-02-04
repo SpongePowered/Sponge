@@ -75,6 +75,7 @@ public class ExtentViewDownsize implements DefaultedExtent {
     private final Extent extent;
     private final Vector3i blockMin;
     private final Vector3i blockMax;
+    private final Vector3i realSpaceMax;
     private final Vector3i blockSize;
     private final Vector3i biomeMin;
     private final Vector3i biomeMax;
@@ -88,6 +89,7 @@ public class ExtentViewDownsize implements DefaultedExtent {
         this.biomeMin = new Vector3i(blockMin.getX(), 0, blockMin.getZ());
         this.biomeMax = new Vector3i(blockMax.getX(), 0, blockMax.getZ());
         this.biomeSize = this.biomeMax.sub(this.biomeMin).add(Vector3i.ONE);
+        this.realSpaceMax = blockMax.add(Vector3i.ONE);
     }
 
     @Override
@@ -158,6 +160,16 @@ public class ExtentViewDownsize implements DefaultedExtent {
         return VecHelper.inBounds(x, y, z, this.blockMin, this.blockMax);
     }
 
+    // A note on the following check methods:
+    //
+    // checkBlockRange checks **block co-ordinates**. These are the co-ordinates where the co-ordinate identifies a block ONLY.
+    // checkRealRange checks **real space co-ordinates**, where the equivalent block co-ordinate will resolve to one of the
+    // corners. Therefore, at the maximum block co-ordinate, the real space co-ordinate that is at the maximum corner of that
+    // block is one unit in all directions further.
+    //
+    // In other words, a block at block co-ordinate (1,1,1) spans from (1,1,1) to (2,2,2). Real range accounts for this -
+    // particularly needed for AABBs which work in real space, not block co-ordinate space.
+
     private void checkBlockRange(double x, double y, double z) {
         if (!VecHelper.inBounds(x, y, z, this.blockMin, this.blockMax)) {
             throw new PositionOutOfBoundsException(new Vector3d(x, y, z), this.blockMin.toDouble(), this.blockMax.toDouble());
@@ -173,6 +185,12 @@ public class ExtentViewDownsize implements DefaultedExtent {
     private void checkBlockRange(int x, int z) {
         if (!VecHelper.inBounds(x, z, this.blockMin.toVector2(true), this.blockMax.toVector2(true))) {
             throw new PositionOutOfBoundsException(new Vector2i(x, z), this.blockMin, this.blockMax);
+        }
+    }
+
+    private void checkRealRange(double x, double y, double z) {
+        if (!VecHelper.inBounds(x, y, z, this.blockMin, this.realSpaceMax)) {
+            throw new PositionOutOfBoundsException(new Vector3d(x, y, z), this.blockMin.toDouble(), this.realSpaceMax.toDouble());
         }
     }
 
@@ -521,39 +539,37 @@ public class ExtentViewDownsize implements DefaultedExtent {
 
     @Override
     public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
-        checkBlockRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
-        checkBlockRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
+        checkRealRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
+        checkRealRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
         return this.extent.getIntersectingEntities(box, filter);
     }
 
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
-        checkBlockRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
-        checkBlockRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
+        checkRealRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
+        checkRealRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
         return this.extent.getIntersectingBlockCollisionBoxes(box);
     }
 
     @Override
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
-        checkBlockRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
-        checkBlockRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
+        checkRealRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
+        checkRealRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
         return this.extent.getIntersectingCollisionBoxes(owner, box);
     }
 
     @Override
     public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        final Vector3i max = this.blockMax.add(Vector3i.ONE);
         return this.extent.getIntersectingEntities(start, direction, distance,
-            Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, max), filter));
+            Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, this.realSpaceMax), filter));
     }
 
     @Override
     public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        final Vector3i max = this.blockMax.add(Vector3i.ONE);
         return this.extent.getIntersectingEntities(start, end,
-                Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, max), filter));
+                Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, this.realSpaceMax), filter));
     }
 
     @Override
