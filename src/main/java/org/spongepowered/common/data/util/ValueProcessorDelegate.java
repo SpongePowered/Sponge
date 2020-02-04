@@ -98,6 +98,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
         for (ValueProcessor<E, V> processor : this.processors) {
@@ -113,14 +114,16 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
                 final Optional<V> currentValueOptional = processor.getApiValueFromContainer(container);
                 if (currentValueOptional.isPresent()) {
                     V currentValue = currentValueOptional.get();
-                    Value<E> rejectedValue;
+                    ImmutableValue<?> rejectedValue;
                     if (currentValue instanceof Value<?>) {
-                        rejectedValue = (Value<E>) currentValue;
+                        Value<E> mutableCurrentValue = (Value<E>) currentValue;
+                        mutableCurrentValue.set(value);
+                        rejectedValue = mutableCurrentValue.asImmutable();
                     } else {
-                        rejectedValue = ((ImmutableValue<E>) currentValue).asMutable();
+                        ImmutableValue<E> immutableCurrentValue = (ImmutableValue<E>) currentValue;
+                        rejectedValue = immutableCurrentValue.with(value);
                     }
-                    rejectedValue.set(value);
-                    return DataTransactionResult.failResult(rejectedValue.asImmutable());
+                    return DataTransactionResult.failResult(rejectedValue);
                 }
             }
         }
