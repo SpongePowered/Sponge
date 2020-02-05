@@ -61,9 +61,9 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
     @Shadow @Final private Map<String, PlayerProfileCache_ProfileEntryAccessor> usernameToProfileEntryMap;
     @Shadow @Final private Map<UUID, PlayerProfileCache_ProfileEntryAccessor> uuidToProfileEntryMap;
-    @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
-    @Shadow public abstract void save();
-    @Shadow private void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry) { }
+    @Nullable @Shadow public abstract com.mojang.authlib.GameProfile shadow$getProfileByUUID(UUID uniqueId);
+    @Shadow public abstract void shadow$save();
+    @Shadow private void shadow$addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry) { }
     // Thread-safe queue
     private Queue<com.mojang.authlib.GameProfile> profiles = new ConcurrentLinkedQueue<>();
 
@@ -76,7 +76,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
             return false;
         }
 
-        this.addEntry((com.mojang.authlib.GameProfile) profile, expiry == null ? null : new Date(expiry.toEpochMilli()));
+        this.shadow$addEntry((com.mojang.authlib.GameProfile) profile, expiry == null ? null : new Date(expiry.toEpochMilli()));
 
         return true;
     }
@@ -121,12 +121,12 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         this.uuidToProfileEntryMap.clear();
         this.profiles.clear();
         this.usernameToProfileEntryMap.clear();
-        this.save();
+        this.shadow$save();
     }
 
     @Override
     public Optional<GameProfile> getById(UUID uniqueId) {
-        return Optional.ofNullable((GameProfile) this.getProfileByUUID(checkNotNull(uniqueId, "unique id")));
+        return Optional.ofNullable((GameProfile) this.shadow$getProfileByUUID(checkNotNull(uniqueId, "unique id")));
     }
 
     @Override
@@ -136,7 +136,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
 
         for (UUID uniqueId : uniqueIds) {
-            result.put(uniqueId, Optional.ofNullable((GameProfile) this.getProfileByUUID(uniqueId)));
+            result.put(uniqueId, Optional.ofNullable((GameProfile) this.shadow$getProfileByUUID(uniqueId)));
         }
 
         return result.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(result);
@@ -149,7 +149,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         com.mojang.authlib.GameProfile profile = SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(
                 new com.mojang.authlib.GameProfile(uniqueId, ""), true);
         if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
-            this.addEntry(profile, null);
+            this.shadow$addEntry(profile, null);
             return Optional.of((GameProfile) profile);
         }
         return Optional.empty();
@@ -165,12 +165,12 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         for (UUID uniqueId : uniqueIds) {
             com.mojang.authlib.GameProfile profile = service.fillProfileProperties(new com.mojang.authlib.GameProfile(uniqueId, ""), true);
             if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
-                this.addEntry(profile, null);
+                this.shadow$addEntry(profile, null);
                 result.put(uniqueId, Optional.of((GameProfile) profile));
             } else {
                 // create a dummy profile to avoid future lookups
                 // if actual user logs in, the profile will be updated during PlayerList#initializeConnectionToPlayer
-                this.addEntry(new com.mojang.authlib.GameProfile(uniqueId, "[sponge]"), null);
+                this.shadow$addEntry(new com.mojang.authlib.GameProfile(uniqueId, "[sponge]"), null);
                 result.put(uniqueId, Optional.empty());
             }
         }
@@ -231,7 +231,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
         Optional<GameProfile> profile = callback.getResult();
         if (profile.isPresent()) {
-            this.addEntry((com.mojang.authlib.GameProfile) profile.get(), null);
+            this.shadow$addEntry((com.mojang.authlib.GameProfile) profile.get(), null);
         }
 
         return profile;
@@ -249,7 +249,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         if (!result.isEmpty()) {
             for (Optional<GameProfile> entry : result.values()) {
                 if (entry.isPresent()) {
-                    this.addEntry((com.mojang.authlib.GameProfile) entry.get(), null);
+                    this.shadow$addEntry((com.mojang.authlib.GameProfile) entry.get(), null);
                 }
             }
             return ImmutableMap.copyOf(result);

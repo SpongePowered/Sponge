@@ -44,10 +44,9 @@ public abstract class ServerPlayNetHandlerMixin_API implements PlayerConnection 
     @Shadow @Final public NetworkManager netManager;
     @Shadow public ServerPlayerEntity player;
 
-    @Shadow public abstract void sendPacket(final IPacket<?> packetIn);
-    @Shadow public abstract void disconnect(ITextComponent reason);
-
-    @Shadow protected abstract long currentTimeMillis();
+    @Shadow public abstract void shadow$sendPacket(final IPacket<?> packetIn);
+    @Shadow public abstract void shadow$disconnect(ITextComponent reason);
+    @Shadow protected abstract long shadow$currentTimeMillis();
 
     @Override
     public Player getPlayer() {

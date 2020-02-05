@@ -117,16 +117,16 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public DimensionType dimension;
     @Shadow protected UUID entityUniqueID;
     @Shadow public boolean removed;
-    @Shadow public abstract void setPosition(double x, double y, double z);
-    @Shadow public abstract void setDead();
-    @Shadow public abstract int getAir();
-    @Shadow public abstract void setAir(int air);
-    @Shadow public abstract UUID getUniqueID();
-    @Shadow public abstract void setFire(int seconds);
-    @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
-    @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
-    @Shadow public abstract int getEntityId();
-    @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
+    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
+    @Shadow public abstract void shadow$setDead();
+    @Shadow public abstract int shadow$getAir();
+    @Shadow public abstract void shadow$setAir(int air);
+    @Shadow public abstract UUID shadow$getUniqueID();
+    @Shadow public abstract void shadow$setFire(int seconds);
+    @Shadow public abstract CompoundNBT shadow$writeToNBT(CompoundNBT compound);
+    @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
+    @Shadow public abstract int shadow$getEntityId();
+    @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
@@ -248,7 +248,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                             ((Entity) (Object) this).rotationPitch);
                     ((ServerPlayNetHandlerBridge) player.connection).bridge$setLastMoveLocation(null); // Set last move to teleport target
                 } else {
-                    this.setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
+                    this.shadow$setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
                 }
 
                 if (isTeleporting || isChangingDimension) {
@@ -434,7 +434,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             return false;
         }
         // Causes at this point should already be pushed from plugins before this point with the cause system.
-        return this.attackEntityFrom((DamageSource) damageSource, (float) damage);
+        return this.shadow$attackEntityFrom((DamageSource) damageSource, (float) damage);
     }
 
     @Override
@@ -466,7 +466,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public DataContainer toContainer() {
         final Transform<World> transform = this.getTransform();
         final CompoundNBT compound = new CompoundNBT();
-        this.writeToNBT(compound);
+        this.shadow$writeToNBT(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
@@ -514,7 +514,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         try {
             final CompoundNBT compound = new CompoundNBT();
-            this.writeToNBT(compound);
+            this.shadow$writeToNBT(compound);
             final Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
             compound.putUniqueId(Constants.UUID, entity.getUniqueID());
             entity.read(compound);

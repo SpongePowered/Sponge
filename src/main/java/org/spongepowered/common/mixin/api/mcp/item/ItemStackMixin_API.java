@@ -29,7 +29,6 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -63,20 +62,20 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = ItemStack.class, prefix = "apiStack$")) // We need to soft implement this interface due to a synthetic bridge method
 public abstract class ItemStackMixin_API implements DataHolder {       // conflict from overriding ValueContainer#copy() from DataHolder
 
-    @Shadow public abstract int getCount();
-    @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
-    @Shadow public abstract void setItemDamage(int meta);
-    @Shadow public abstract void setTagCompound(@Nullable CompoundNBT compound);
-    @Shadow public abstract int getItemDamage();
-    @Shadow public abstract int getMaxStackSize();
-    @Shadow public abstract boolean hasTagCompound();
+    @Shadow public abstract int shadow$getCount();
+    @Shadow public abstract void shadow$setCount(int size); // Do not use field directly as Minecraft tracks the empty state
+    @Shadow public abstract void shadow$setDamage(int meta);
+    @Shadow public abstract void shadow$setTag(@Nullable CompoundNBT compound);
+    @Shadow public abstract int shadow$getDamage();
+    @Shadow public abstract int shadow$getMaxStackSize();
+    @Shadow public abstract boolean shadow$hasTag();
     @Shadow public abstract boolean shadow$isEmpty();
-    @Shadow public abstract CompoundNBT getTagCompound();
+    @Shadow public abstract CompoundNBT shadow$getTag();
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
     public int apiStack$getQuantity() {
-        return this.getCount();
+        return this.shadow$getCount();
     }
 
     public ItemType apiStack$getType() {
@@ -84,11 +83,11 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public void apiStack$setQuantity(int quantity) throws IllegalArgumentException {
-        this.setCount(quantity);
+        this.shadow$setCount(quantity);
     }
 
     public int apiStack$getMaxStackQuantity() {
-        return this.getMaxStackSize();
+        return this.shadow$getMaxStackSize();
     }
 
     @Override
@@ -106,10 +105,10 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
         }
         final DataView nbtData = container.getView(Constants.Sponge.UNSAFE_NBT).get();
         try {
-            final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.getItemDamage());
-            this.setItemDamage(integer);
+            final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.shadow$getDamage());
+            this.shadow$setDamage(integer);
             final CompoundNBT stackCompound = NbtTranslator.getInstance().translate(nbtData);
-            this.setTagCompound(stackCompound);
+            this.shadow$setTag(stackCompound);
         } catch (Exception e) {
             throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
         }
@@ -121,7 +120,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public ItemStack apiStack$copy() {
-        return (ItemStack) this.shadow$copy();
+        return (ItemStack) (Object) this.shadow$copy();
     }
 
     @Override
@@ -135,9 +134,9 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.ItemStack.TYPE, this.apiStack$getType().getId())
                 .set(Constants.ItemStack.COUNT, this.apiStack$getQuantity())
-                .set(Constants.ItemStack.DAMAGE_VALUE, this.getItemDamage());
-        if (this.hasTagCompound()) { // no tag? no data, simple as that.
-            final CompoundNBT compound = this.getTagCompound().copy();
+                .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamage());
+        if (this.shadow$hasTag()) { // no tag? no data, simple as that.
+            final CompoundNBT compound = this.shadow$getTag().copy();
             if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
                 final CompoundNBT spongeCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
                 if (spongeCompound.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
@@ -174,7 +173,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     public boolean apiStack$equalTo(ItemStack that) {
         return net.minecraft.item.ItemStack.areItemStacksEqual(
                 (net.minecraft.item.ItemStack) (Object) this,
-                (net.minecraft.item.ItemStack) that
+                (net.minecraft.item.ItemStack) (Object) that
         );
     }
 

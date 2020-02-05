@@ -39,7 +39,7 @@ import java.util.Set;
 public abstract class TNTMinecartEntityMixin_API extends AbstractMinecartEntityMixin_API implements TNTMinecart {
 
     @Shadow private int minecartTNTFuse;
-    @Shadow public abstract void ignite();
+    @Shadow public abstract void shadow$ignite();
 
     @Override
     public void detonate() {

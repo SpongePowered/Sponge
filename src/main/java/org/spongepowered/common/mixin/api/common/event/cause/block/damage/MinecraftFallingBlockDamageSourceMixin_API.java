@@ -52,7 +52,7 @@ public abstract class MinecraftFallingBlockDamageSourceMixin_API extends EntityD
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("FallingBlockDamageSource")
-            .add("Name", this.getDamageType())
+            .add("Name", this.shadow$getDamageType())
             .add("Key", this.getType().getKey())
             .add("FallingBlock", this.getSource().toString())
             .add("Data", this.getFallingBlockData())

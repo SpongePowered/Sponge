@@ -50,7 +50,7 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
 
     @Override
     public Text getTeamRepresentation() {
-        return Text.of(this.getUniqueID().toString());
+        return Text.of(this.shadow$getUniqueID().toString());
     }
 
     @Override

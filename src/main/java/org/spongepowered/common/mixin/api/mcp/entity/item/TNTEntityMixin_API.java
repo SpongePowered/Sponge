@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.TNTEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
@@ -34,18 +33,15 @@ import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 @Mixin(TNTEntity.class)
 public abstract class TNTEntityMixin_API extends EntityMixin_API implements PrimedTNT {
 
-    @Shadow @Nullable private LivingEntity tntPlacedBy;
-    @Shadow private void explode() { }
+    @Shadow private void shadow$explode() { }
 
     @Override
     public void detonate() {
-        this.setDead();
-        this.explode();
+        this.shadow$setDead();
+        this.shadow$explode();
     }
 
     @Override

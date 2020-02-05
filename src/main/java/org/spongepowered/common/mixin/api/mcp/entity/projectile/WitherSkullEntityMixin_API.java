@@ -38,7 +38,7 @@ public abstract class WitherSkullEntityMixin_API extends DamagingProjectileEntit
     @Override
     public void detonate() {
         ((WitherSkullEntityBridge) this).bridge$CreateAndProcessExplosionEvent(this.world, (WitherSkullEntity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
-        this.setDead();
+        this.shadow$setDead();
     }
 
     @Override

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
@@ -58,17 +59,17 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     @Shadow @Final private Set<String> membershipSet;
 
     @Shadow public abstract void shadow$setAllowFriendlyFire(boolean friendlyFire);
-    @Shadow public abstract void setSeeFriendlyInvisiblesEnabled(boolean friendlyInvisibles);
+    @Shadow public abstract void shadow$setSeeFriendlyInvisiblesEnabled(boolean friendlyInvisibles);
     @Shadow public abstract void shadow$setNameTagVisibility(net.minecraft.scoreboard.Team.Visible visibility);
     @Shadow public abstract void shadow$setDeathMessageVisibility(net.minecraft.scoreboard.Team.Visible visibility);
     @Shadow public abstract void shadow$setCollisionRule(net.minecraft.scoreboard.Team.CollisionRule rule);
-    @Shadow public abstract void setDisplayName(String name);
+    @Shadow public abstract void shadow$setDisplayName(ITextComponent text);
     @Shadow public abstract boolean shadow$getAllowFriendlyFire();
-    @Shadow public abstract boolean getSeeFriendlyInvisiblesEnabled();
+    @Shadow public abstract boolean shadow$getSeeFriendlyInvisiblesEnabled();
     @Shadow public abstract net.minecraft.scoreboard.Team.Visible shadow$getNameTagVisibility();
     @Shadow public abstract net.minecraft.scoreboard.Team.Visible shadow$getDeathMessageVisibility();
     @Shadow public abstract net.minecraft.scoreboard.Team.CollisionRule shadow$getCollisionRule();
-    @Shadow public abstract Collection<String> getMembershipCollection();
+    @Shadow public abstract Collection<String> shadow$getMembershipCollection();
 
     @Intrinsic
     public String team$getName() {
@@ -129,12 +130,12 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Override
     public boolean canSeeFriendlyInvisibles() {
-        return this.getSeeFriendlyInvisiblesEnabled();
+        return this.shadow$getSeeFriendlyInvisiblesEnabled();
     }
 
     @Override
     public void setCanSeeFriendlyInvisibles(final boolean enabled) {
-        this.setSeeFriendlyInvisiblesEnabled(enabled);
+        this.shadow$setSeeFriendlyInvisiblesEnabled(enabled);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -175,7 +176,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @Override
     public Set<Text> getMembers() {
-        return this.getMembershipCollection().stream().map(SpongeTexts::fromLegacy).collect(Collectors.toSet());
+        return this.shadow$getMembershipCollection().stream().map(SpongeTexts::fromLegacy).collect(Collectors.toSet());
     }
 
     @Override

@@ -45,8 +45,7 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
 
     @Shadow @Final private AdvancementProgress advancementProgress;
     @Shadow @Nullable private Date obtained;
-
-    @Shadow public abstract void reset();
+    @Shadow public abstract void shadow$reset();
 
     @Override
     public AdvancementCriterion getCriterion() {

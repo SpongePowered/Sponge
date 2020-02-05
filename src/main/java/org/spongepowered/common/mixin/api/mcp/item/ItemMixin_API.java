@@ -47,8 +47,8 @@ import javax.annotation.Nullable;
 @Mixin(Item.class)
 public abstract class ItemMixin_API implements ItemType {
 
-    @Shadow public abstract int getItemStackLimit();
-    @Shadow public abstract String getTranslationKey();
+    @Shadow public abstract int shadow$getMaxStackSize();
+    @Shadow public abstract String shadow$getTranslationKey();
     @Shadow private Item containerItem;
 
     @Nullable protected BlockType blockType = null;
@@ -76,12 +76,12 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + ".name");
+        return new SpongeTranslation(this.shadow$getTranslationKey() + ".name");
     }
 
     @Override
     public int getMaxStackQuantity() {
-        return this.getItemStackLimit();
+        return this.shadow$getMaxStackSize();
     }
 
     @Override
