@@ -24,25 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.tileentity.BannerTileEntity;
-import org.spongepowered.api.block.entity.Banner;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 
-@Mixin(BannerTileEntity.class)
-public abstract class BannerTileEntityMixin_API extends TileEntityMixin_API implements Banner {
+@Mixin(AbstractFurnaceTileEntity.class)
+public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // NameableBlockEntity
-        values.add(this.displayName().asImmutable());
-
-        values.add(this.baseColor().asImmutable());
-        values.add(this.patternsList().asImmutable());
+        values.add(this.passedBurnTime().asImmutable());
+        values.add(this.maxBurnTime().asImmutable());
+        values.add(this.passedCookTime().asImmutable());
+        values.add(this.maxCookTime().asImmutable());
 
         return values;
     }

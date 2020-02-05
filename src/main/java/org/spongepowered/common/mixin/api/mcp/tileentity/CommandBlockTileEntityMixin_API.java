@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.entity.CommandBlock;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.SpongeTexts;
@@ -34,16 +35,12 @@ import org.spongepowered.common.util.Constants;
 import net.minecraft.tileentity.CommandBlockLogic;
 import net.minecraft.tileentity.CommandBlockTileEntity;
 
+import java.util.Set;
+
 @Mixin(CommandBlockTileEntity.class)
 public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_API implements CommandBlock {
 
     @Shadow public abstract CommandBlockLogic getCommandBlockLogic();
-
-    @Override
-    public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getCommandData());
-    }
 
     @Override
     public void execute() {
@@ -68,4 +65,18 @@ public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_AP
         }
         return container;
     }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.storedCommand().asImmutable());
+        values.add(this.successCount().asImmutable());
+        values.add(this.doesTrackOutput().asImmutable());
+
+        this.lastOutput().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
+
 }

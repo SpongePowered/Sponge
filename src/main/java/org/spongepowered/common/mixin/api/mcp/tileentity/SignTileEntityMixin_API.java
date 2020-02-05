@@ -28,12 +28,15 @@ import com.google.common.collect.Lists;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.block.entity.Sign;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
+import java.util.Set;
 
 @Mixin(SignTileEntity.class)
 public abstract class SignTileEntityMixin_API extends TileEntityMixin_API implements Sign {
@@ -52,8 +55,12 @@ public abstract class SignTileEntityMixin_API extends TileEntityMixin_API implem
     }
 
     @Override
-    public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getSignData());
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.lines().asImmutable());
+
+        return values;
     }
+
 }

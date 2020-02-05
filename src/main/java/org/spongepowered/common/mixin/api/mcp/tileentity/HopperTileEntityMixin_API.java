@@ -25,12 +25,16 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.entity.carrier.Hopper;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
 import net.minecraft.tileentity.HopperTileEntity;
+
+import java.util.Set;
 
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixin_API extends LockableLootTileEntityMixin_API<Hopper> implements Hopper {
@@ -44,11 +48,12 @@ public abstract class HopperTileEntityMixin_API extends LockableLootTileEntityMi
     }
 
     @Override
-    public void supplyVanillaManipulators(final List<Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        this.get(CooldownData.class).ifPresent(manipulators::add);
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.cooldown().asImmutable());
+
+        return values;
     }
-
-
 
 }

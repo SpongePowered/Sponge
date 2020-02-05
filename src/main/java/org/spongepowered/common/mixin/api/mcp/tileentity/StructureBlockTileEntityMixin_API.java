@@ -26,9 +26,32 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.StructureBlockTileEntity;
 import org.spongepowered.api.block.entity.StructureBlock;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(StructureBlockTileEntity.class)
 public abstract class StructureBlockTileEntityMixin_API extends TileEntityMixin_API implements StructureBlock {
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.mode().asImmutable());
+        values.add(this.powered().asImmutable());
+        values.add(this.showBoundingBox().asImmutable());
+        values.add(this.showAir().asImmutable());
+        values.add(this.ignoreEntities().asImmutable());
+        values.add(this.size().asImmutable());
+        values.add(this.position().asImmutable());
+        values.add(this.seed().asImmutable());
+        values.add(this.integrity().asImmutable());
+
+        this.author().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
 
 }

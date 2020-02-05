@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.state.properties;
 
-import net.minecraft.state.properties.ComparatorMode;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.ComparatorType;
+import org.spongepowered.api.data.type.ComparatorMode;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 
-@Mixin(ComparatorMode.class)
-public abstract class ComparatorModeMixin_API implements ComparatorType {
+@Mixin(net.minecraft.state.properties.ComparatorMode.class)
+public abstract class ComparatorModeMixin_API implements ComparatorMode {
 
     private CatalogKey api$key;
 

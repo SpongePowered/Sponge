@@ -24,38 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
+import net.minecraft.tileentity.ShulkerBoxTileEntity;
 import org.spongepowered.api.block.entity.carrier.ShulkerBox;
-import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
-import DyeableData;
-import net.minecraft.tileentity.ShulkerBoxTileEntity;
+
+import java.util.Set;
 
 @Mixin(ShulkerBoxTileEntity.class)
 public abstract class ShulkerBoxTileEntityMixin_API extends LockableLootTileEntityMixin_API<ShulkerBox> implements ShulkerBox {
 
-    @Shadow private net.minecraft.item.DyeColor color;
-
-
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public DyeableData getDyeData() {
-        return new SpongeDyeableData((DyeColor) (Object) this.color);
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        this.color().map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public Value.Mutable<DyeColor> color() {
-        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHULKER_COLOR, (DyeColor) (Object) this.color);
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<org.spongepowered.api.data.DataManipulator.Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(this.getDyeData());
-    }
 }

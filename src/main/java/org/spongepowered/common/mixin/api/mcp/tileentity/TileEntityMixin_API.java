@@ -37,6 +37,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -52,6 +53,8 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class TileEntityMixin_API implements BlockEntity {
@@ -164,6 +167,18 @@ public abstract class TileEntityMixin_API implements BlockEntity {
         }
 
         return this.api$LocatableBlock;
+    }
+
+    @Override
+    public Set<Value.Immutable<?>> getValues() {
+        // TODO: Merge custom and Vanilla values and return the merged result.
+        return this.api$getVanillaValues();
+    }
+
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = new HashSet<>();
+
+        return values;
     }
 
 }

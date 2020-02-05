@@ -31,11 +31,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.MusicDiscItem;
 import net.minecraft.tileentity.JukeboxTileEntity;
 import org.spongepowered.api.block.entity.Jukebox;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
+
+import java.util.Set;
 
 @Mixin(JukeboxTileEntity.class)
 public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API implements Jukebox {
@@ -44,21 +47,21 @@ public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API imp
     @Shadow public abstract void setRecord(net.minecraft.item.ItemStack recordStack);
 
     @Override
-    public void playRecord() {
+    public void play() {
         if (!this.getRecord().isEmpty()) {
             this.world.playEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(this.getRecord().getItem()));
         }
     }
 
     @Override
-    public void stopRecord() {
+    public void stop() {
         this.world.playEvent(Constants.WorldEvents.PLAY_RECORD_EVENT, this.pos, 0);
         this.world.playRecord(this.pos, null);
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public void ejectRecord() {
+    public void eject() {
         final BlockState block = this.world.getBlockState(this.pos);
         if (block.getBlock() == Blocks.JUKEBOX) {
             // TODO - Mixin 0.8 accessors
@@ -68,7 +71,7 @@ public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API imp
     }
 
     @Override
-    public void insertRecord(final ItemStack record) {
+    public void insert(final ItemStack record) {
         final net.minecraft.item.ItemStack itemStack = ItemStackUtil.toNative(record);
         if (!(itemStack.getItem() instanceof MusicDiscItem)) {
             return;
@@ -82,9 +85,12 @@ public abstract class JukeboxTileEntityMixin_API extends TileEntityMixin_API imp
     }
 
     @Override
-    public void supplyVanillaManipulators(final List<Mutable<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        this.get(RepresentedItemData.class).ifPresent(manipulators::add);
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.item().asImmutable());
+
+        return values;
     }
 
 }

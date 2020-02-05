@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 import net.minecraft.tileentity.LockableLootTileEntity;
 
 @Mixin(LockableLootTileEntity.class)
-public abstract class LockableLootTileEntityMixin_API<T extends BlockEntity & Carrier> extends LockableTileEntityMixin_API<T> {
+public abstract class LockableLootTileEntityMixin_API<T extends BlockEntity & Carrier> extends LockableTileEntityMixin_API {
 
     @Nullable @Shadow protected String customName; // Not really nullable, but it should be...
 

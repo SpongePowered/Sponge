@@ -26,7 +26,10 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.DropperTileEntity;
 import org.spongepowered.api.block.entity.carrier.Dropper;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(DropperTileEntity.class)
 public abstract class DropperTileEntityMixin_API extends DispenserTileEntityMixin_API implements Dropper {
