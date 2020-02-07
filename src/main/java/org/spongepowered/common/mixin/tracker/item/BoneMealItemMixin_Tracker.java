@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item;
+package org.spongepowered.common.mixin.tracker.item;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.IGrowable;
-import net.minecraft.item.DyeItem;
+import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -44,8 +44,8 @@ import org.spongepowered.common.event.tracking.phase.block.GrowablePhaseContext;
 
 import java.util.Random;
 
-@Mixin(DyeItem.class)
-public abstract class DyeItemMixin extends ItemMixin {
+@Mixin(BoneMealItem.class)
+public abstract class BoneMealItemMixin_Tracker {
 
     /**
      * @author gabizou - March 20th, 2019 - 1.12.2
@@ -74,13 +74,13 @@ public abstract class DyeItemMixin extends ItemMixin {
         method = "applyBonemeal",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/IGrowable;grow(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)V"
+            target = "Lnet/minecraft/block/IGrowable;grow(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"
         ),
         require = 0, // Will be removed once the above github issue is resolved with a proper solution
         // Even though we're in a group, expecting this to succeed in forge environments will not work since there is a different mixin
         expect = 0
     )
-    private static void onGrowableVanilla(IGrowable iGrowable, World worldIn, Random rand, BlockPos pos, BlockState blockState, ItemStack stack, World sameWorld, BlockPos target) {
+    private static void tracker$wrapGrowWithPhaseEntry(IGrowable iGrowable, World worldIn, Random rand, BlockPos pos, BlockState blockState, ItemStack stack, World sameWorld, BlockPos target) {
         if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_GROW) {
             iGrowable.grow(worldIn, rand, pos, blockState);
             return;
