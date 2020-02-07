@@ -36,7 +36,6 @@ public final class GeneralPhase {
         public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
         public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
         public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
-        public static final IPhaseState<MapConversionContext> MAP_CONVERSION = new MapConversionPhase();
 
         private State() { }
     }

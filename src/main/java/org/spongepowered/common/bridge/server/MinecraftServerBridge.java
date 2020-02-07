@@ -38,6 +38,19 @@ public interface MinecraftServerBridge {
 
     void bridge$removeWorldTickTimes(DimensionType dimensionType);
 
+    /**
+     * Used by an implementation's specific
+     * {@link org.spongepowered.common.world.server.SpongeWorldManager} to load
+     * a specific world since the world loading code in vanilla only loads based
+     * on {@link DimensionType}s and not world instances that are usable with
+     * multi-world modifications that Sponge makes.
+     *
+     * <p>Note that calls to this method should have a mixin appropriate
+     * {@link org.spongepowered.common.event.tracking.PhaseTracker} phase entry
+     * for {@link org.spongepowered.common.event.tracking.phase.generation.GenerationPhase.State#TERRAIN_GENERATION}</p>
+     *
+     * @param world the world to load
+     */
     void bridge$loadInitialChunks(ServerWorld world);
 
     void bridge$setSaveEnabled(boolean enabled);

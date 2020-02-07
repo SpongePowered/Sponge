@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.google.gson.JsonElement;
 import it.unimi.dsi.fastutil.longs.LongIterator;
-import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -67,9 +66,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
@@ -80,22 +77,11 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.general.MapConversionContext;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
-import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import javax.annotation.Nullable;
 import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements MinecraftServerBridge, SubjectBridge {
@@ -112,7 +98,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isServerRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
-    @Shadow public abstract boolean shadow$isServerStopped();
 
     @Nullable private ResourcePack impl$resourcePack;
     private boolean impl$enableSaving = true;
@@ -138,12 +123,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      */
     @Overwrite
     public void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions) {
-        try (final MapConversionContext context = GeneralPhase.State.MAP_CONVERSION.createPhaseContext(PhaseTracker.SERVER)
-            .source(this)
-            .world(directoryName)) {
-            context.buildAndSwitch();
-            this.shadow$convertMapIfNeeded(directoryName);
-        }
+        this.shadow$convertMapIfNeeded(directoryName);
 
         this.shadow$setUserMessage(new TranslationTextComponent("menu.loadingLevel"));
 
@@ -160,47 +140,42 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             return;
         }
 
-        try (final GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.SERVER)
-            .source(world)
-            .world( world)) {
-            context.buildAndSwitch();
+        final IChunkStatusListener chunkStatusListener = this.chunkStatusListenerFactory.create(11);
 
-            final IChunkStatusListener chunkStatusListener = this.chunkStatusListenerFactory.create(11);
+        this.shadow$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
+        LOGGER.info("Preparing start region for world '[{}}]'...", ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
+        final BlockPos blockpos = world.getSpawnPoint();
+        chunkStatusListener.start(new ChunkPos(blockpos));
+        final ServerChunkProvider serverChunkProvider = world.getChunkProvider();
+        serverChunkProvider.getLightManager().func_215598_a(500);
+        this.serverTime = Util.milliTime();
+        serverChunkProvider.func_217228_a(TicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
 
-            this.shadow$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
-            LOGGER.info("Preparing start region for world '[{}}]'...", ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
-            final BlockPos blockpos = world.getSpawnPoint();
-            chunkStatusListener.start(new ChunkPos(blockpos));
-            final ServerChunkProvider serverChunkProvider = world.getChunkProvider();
-            serverChunkProvider.getLightManager().func_215598_a(500);
-            this.serverTime = Util.milliTime();
-            serverChunkProvider.func_217228_a(TicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
-
-            while (serverChunkProvider.func_217229_b() != 441) {
-                this.serverTime = Util.milliTime() + 10L;
-                this.shadow$runScheduledTasks();
-            }
-
+        while (serverChunkProvider.func_217229_b() != 441) {
             this.serverTime = Util.milliTime() + 10L;
             this.shadow$runScheduledTasks();
-
-            final ForcedChunksSaveData forcedChunksData = world.getSavedData().get(ForcedChunksSaveData::new, "chunks");
-
-            if (forcedChunksData != null) {
-                final LongIterator longiterator = forcedChunksData.getChunks().iterator();
-
-                while (longiterator.hasNext()) {
-                    final long i = longiterator.nextLong();
-                    final ChunkPos chunkpos = new ChunkPos(i);
-                    serverChunkProvider.forceChunk(chunkpos, true);
-                }
-            }
-
-            this.serverTime = Util.milliTime() + 10L;
-            this.shadow$runScheduledTasks();
-            chunkStatusListener.stop();
-            serverChunkProvider.getLightManager().func_215598_a(5);
         }
+
+        this.serverTime = Util.milliTime() + 10L;
+        this.shadow$runScheduledTasks();
+
+        final ForcedChunksSaveData forcedChunksData = world.getSavedData().get(ForcedChunksSaveData::new, "chunks");
+
+        if (forcedChunksData != null) {
+            final LongIterator longiterator = forcedChunksData.getChunks().iterator();
+
+            while (longiterator.hasNext()) {
+                final long i = longiterator.nextLong();
+                final ChunkPos chunkpos = new ChunkPos(i);
+                serverChunkProvider.forceChunk(chunkpos, true);
+            }
+        }
+
+        this.serverTime = Util.milliTime() + 10L;
+        this.shadow$runScheduledTasks();
+        chunkStatusListener.stop();
+        serverChunkProvider.getLightManager().func_215598_a(5);
+
     }
 
     @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
@@ -237,7 +212,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     @Inject(method = "tick", at = @At(value = "RETURN"))
-    private void impl$completeTickCheckAnimationAndPhaseTracker(CallbackInfo ci) {
+    private void impl$completeTickCheckAnimation(CallbackInfo ci) {
         final int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
         final int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
         final int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
@@ -264,8 +239,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             SpongeCommonEventFactory.lastAnimationPlayer = null;
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-
-        PhaseTracker.getInstance().ensureEmpty();
 
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
@@ -340,6 +313,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                 }
             }
         }
+        return true;
     }
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
@@ -349,38 +323,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !SpongeImplHooks.onServerThread())) {
             ci.cancel();
         }
-    }
-
-    @Redirect(method = "callFromMainThread",
-        at = @At(
-            value = "INVOKE",
-            target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;",
-            remap = false))
-    private Object impl$callOnMainThreadWithPhaseState(Callable<?> callable) throws Exception {
-        // This method can be called async while server is stopping
-        if (this.shadow$isServerStopped() && !SpongeImplHooks.onServerThread()) {
-            return callable.call();
-        }
-
-        final Object value;
-        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
-                .source(callable)) {
-            context.buildAndSwitch();
-            value = callable.call();
-        }
-        return value;
-    }
-
-    @Nullable
-    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
-    private Object impl$trackUtilTaskRun(FutureTask<?> task, Logger logger) {
-        return SpongeImplHooks.onUtilRunTask(task, logger);
-    }
-
-    @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
-    private void impl$addPhaseTrackerToCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
-        report.makeCategory("Sponge PhaseTracker").addDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
-        cir.setReturnValue(report);
     }
 
     /**

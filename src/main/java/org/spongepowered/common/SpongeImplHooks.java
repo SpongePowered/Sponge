@@ -84,6 +84,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -292,22 +293,6 @@ public class SpongeImplHooks {
         return SpawnerSpawnType.NONE;
     }
 
-    @Nullable
-    public static Object onUtilRunTask(final FutureTask<?> task, final Logger logger) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
-                .source(task))  {
-            context.buildAndSwitch();
-            final Object o = Util.runTask(task, logger);
-            return o;
-        } catch (final Exception e) {
-            phaseTracker
-                .printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", e);
-
-            return null;
-        }
-    }
-
     public static void onEntityError(final Entity entity, final CrashReport crashReport) {
         throw new ReportedException(crashReport);
     }
@@ -331,6 +316,10 @@ public class SpongeImplHooks {
      */
     @SuppressWarnings("unused") // overridden to be used in MixinSpongeImplHooks.
     public static boolean isRestoringBlocks(final World world) {
+        if (((WorldBridge) world).bridge$isFake()) {
+            return false;
+        }
+        
         return PhaseTracker.getInstance().getCurrentState().isRestoring();
 
     }
