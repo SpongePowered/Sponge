@@ -5,8 +5,13 @@
     "plugin": "org.spongepowered.common.mixin.plugin.TrackerPlugin",
     "mixinPriority" : 1111,
     "mixins": [
+        "block.BlockMixin_Tracker",
+        "block.DispenserBlockMixin_Tracker",
+        "block.LeavesBlockMixin_Tracker",
+        "item.BoneMealItemMixin_Tracker",
         "world.chunk.ChunkMixin_OwnershipTracked",
-      "world.WorldMixin_OwnershipTracked",
+        "world.end.DragonFightManagerMixin_Tracker",
+        "world.WorldMixin_OwnershipTracked",
         "OwnershipTrackedMixin_Tracker"
     ],
     "server": [
