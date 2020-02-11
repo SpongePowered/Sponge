@@ -22,35 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block;
+package org.spongepowered.common.mixin.tracker.network.play;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.state.IProperty;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.world.World;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 
-@Mixin(LeavesBlock.class)
-public abstract class LeavesBlockMixin extends BlockMixin {
+@Mixin(ServerPlayNetHandler.class)
+public class ServerPlayNetHandlerMixin_Tracker {
 
-    @Inject(method = "ticksRandomly", at = @At("HEAD"), cancellable = true)
-    private void impl$checkConfigForLeafTicking(BlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getLeafDecay()) {
-            cir.setReturnValue(false);
+
+    @Shadow public ServerPlayerEntity player;
+
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;playerTick()V"))
+    private void tracker$wrapPlayerTickWithPhase(final ServerPlayerEntity player) {
+        if (SpongeImplHooks.isFakePlayer(player) || ((WorldBridge) player.world).bridge$isFake()) {
+            player.playerTick();
+            return;
+        }
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+             final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
+            context.buildAndSwitch();
+            frame.pushCause(player);
+            player.playerTick();
         }
     }
 

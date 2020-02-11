@@ -166,20 +166,6 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         this.captureCurrentPosition();
     }
 
-    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
-    private void impl$onPlayerTick(final ServerPlayerEntity player) {
-        if (player.world.isRemote) {
-            player.playerTick();
-            return;
-        }
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
-            context.buildAndSwitch();
-            frame.pushCause(player);
-            player.playerTick();
-        }
-    }
-
     /**
      * @param manager The player network connection
      * @param packet The original packet to be sent

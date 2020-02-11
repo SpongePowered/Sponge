@@ -344,14 +344,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerScoreboardBridge) ((Player) player).getScoreboard()).bridge$removePlayer(player, false);
     }
 
-    @Redirect(method = "playerLoggedOut", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;removePlayer(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
-    private void impl$trackPlayerLogoutThroughPhaseTracker(ServerWorld world, ServerPlayerEntity player) {
-        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext(PhaseTracker.SERVER).source(player)) {
-            context.buildAndSwitch();
-            world.removePlayer(player);
-        }
-    }
-
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))
     private void impl$saveAllSpongeUsers(CallbackInfo ci) {
         for (final SpongeUser user : SpongeUser.dirtyUsers) {

@@ -344,46 +344,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Override
     public void bridge$setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) { }
 
-    // Continuing the rest of the implementation
-
-    @SuppressWarnings("ConstantConditions")
-    @Redirect(
-        method = "populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
-    private net.minecraft.world.chunk.Chunk impl$GetChunkWithoutMarkingAsActive(final AbstractChunkProvider chunkProvider, final int x, final int z) {
-        // Don't mark chunks as active
-        return ((AbstractChunkProviderBridge) chunkProvider).bridge$getLoadedChunkWithoutMarkingActive(x, z);
-    }
-
-    @Inject(
-        method = "populate(Lnet/minecraft/world/gen/IChunkGenerator;)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/gen/IChunkGenerator;populate(II)V"))
-    private void impl$StartTerrainGenerationState(final ChunkGenerator generator, final CallbackInfo callbackInfo) {
-        if (!this.world.isRemote) {
-            if (!PhaseTracker.getInstance().getCurrentState().isRegeneration()) {
-                GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.SERVER)
-                    .world(this.world)
-                    .buildAndSwitch();
-            }
-        }
-    }
-
-
-    @Inject(method = "populate(Lnet/minecraft/world/gen/IChunkGenerator;)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;markDirty()V"),
-        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/IChunkGenerator;populate(II)V"))
-    )
-    private void impl$CloseTerrainGenerationState(final ChunkGenerator generator, final CallbackInfo info) {
-        if (!this.world.isRemote) {
-            if (!PhaseTracker.getInstance().getCurrentState().isRegeneration()) {
-                PhaseTracker.getInstance().getCurrentContext().close();
-            }
-        }
-    }
 
     // Fast neighbor methods for internal use
     @Override

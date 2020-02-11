@@ -115,7 +115,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
     @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.block.BlockState state, int fortune);
     @Shadow public abstract BlockStateContainer getBlockState();
-    @Shadow protected abstract Block setTickRandomly(boolean shouldTick);
 
     private CatalogKey impl$key;
 

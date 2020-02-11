@@ -162,6 +162,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract float getSoundPitch();
     @Shadow protected abstract boolean canDropLoot();
     @Shadow protected abstract SoundEvent getDeathSound();
+    @Shadow public abstract boolean shadow$isSleeping();
     @Shadow private boolean checkTotemDeathProtection(final DamageSource p_190628_1_) {
         return false; // SHADOWED
     }

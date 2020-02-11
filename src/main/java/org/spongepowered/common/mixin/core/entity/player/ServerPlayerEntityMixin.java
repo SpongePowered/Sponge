@@ -336,32 +336,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         return keep;
     }
 
-    /**
-     * @author Aaron1101 August 11th, 2018
-     * @reason Wrap the method in a try-with-resources for a EntityPhase.State.PLAYER_WAKE_UP
-     */
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    @Overwrite
-    public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {
-        // Sponge start - enter phase
-        try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext(PhaseTracker.SERVER)
-                .source(this)) {
-            basicEntityContext.buildAndSwitch();
-            // Sponge end
 
-            if (this.isPlayerSleeping()) {
-                this.getServerWorld().getEntityTracker()
-                        .sendToTrackingAndSelf((Entity) (Object) this, new SAnimateHandPacket((Entity) (Object) this, 2)); // Sponge - cast to Entity
-            }
-
-            super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
-
-            if (this.connection != null) {
-                this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
-            }
-        } // Sponge - add bracket to close 'try' block
-    }
 
     @Override
     public Optional<User> bridge$getBackingUser() {
