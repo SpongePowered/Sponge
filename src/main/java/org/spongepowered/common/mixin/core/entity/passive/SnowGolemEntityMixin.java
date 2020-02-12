@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.SnowGolemEntity;
+import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,10 +36,10 @@ import org.spongepowered.common.mixin.core.entity.MobEntityMixin;
 @Mixin(SnowGolemEntity.class)
 public abstract class SnowGolemEntityMixin extends MobEntityMixin {
 
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor(D)I", ordinal = 3),
+    @Inject(method = "livingTick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor(D)I", ordinal = 3),
             cancellable = true)
-    private void onCanGrief(CallbackInfo ci) {
-        if (!this.world.getGameRules().getBoolean("mobGriefing") || !((GrieferBridge) this).bridge$canGrief()) {
+    private void impl$onCanGrief(CallbackInfo ci) {
+        if (!this.world.getGameRules().getBoolean(GameRules.MOB_GRIEFING) || !((GrieferBridge) this).bridge$canGrief()) {
             ci.cancel();
         }
     }

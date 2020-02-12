@@ -57,7 +57,7 @@ public abstract class RabbitEntity_RaidFarmGoalMixin extends MoveToBlockGoal {
         at = @At(value = "HEAD"),
         cancellable = true
     )
-    private void onCanGrief(final CallbackInfoReturnable<Boolean> cir) {
+    private void impl$onCanGrief(final CallbackInfoReturnable<Boolean> cir) {
         if (this.runDelay <= 0) {
             if (!((GrieferBridge) this.rabbit).bridge$canGrief()) {
                 cir.setReturnValue(false);

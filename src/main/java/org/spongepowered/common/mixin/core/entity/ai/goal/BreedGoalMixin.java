@@ -52,7 +52,7 @@ import javax.annotation.Nullable;
 public abstract class BreedGoalMixin {
 
     @Shadow @Final private AnimalEntity animal;
-    @Shadow private AnimalEntity targetMate;
+    @Shadow private AnimalEntity field_75391_e;
     @Shadow @Nullable private AnimalEntity getNearbyMate() {
         // Shadow implements
         return null;
@@ -65,7 +65,7 @@ public abstract class BreedGoalMixin {
     @Redirect(method = "shouldExecute",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/EntityAIMate;getNearbyMate()Lnet/minecraft/entity/passive/EntityAnimal;"))
+            target = "Lnet/minecraft/entity/ai/goal/BreedGoal;getNearbyMate()Lnet/minecraft/entity/passive/AnimalEntity;"))
     private AnimalEntity impl$callFindMateEvent(final BreedGoal entityAIMate) {
         AnimalEntity nearbyMate = this.getNearbyMate();
         if (nearbyMate == null) {
@@ -76,8 +76,8 @@ public abstract class BreedGoalMixin {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this.animal);
                 final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
-                    SpongeEventFactory.createBreedEntityEventFindMate(Sponge.getCauseStackManager().getCurrentCause(), TristateResult.Result.DEFAULT,
-                        TristateResult.Result.DEFAULT, Optional.empty(), (Animal) nearbyMate, (Ageable) this.animal, true);
+                    SpongeEventFactory.createBreedingEventFindMate(Sponge.getCauseStackManager().getCurrentCause(), TristateResult.Result.DEFAULT,
+                        TristateResult.Result.DEFAULT, (Animal) nearbyMate, true);
                 if (SpongeImpl.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
                     nearbyMate = null;
                 }
@@ -89,7 +89,7 @@ public abstract class BreedGoalMixin {
 
     @Inject(method = "spawnBaby",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z",
+            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
             shift = At.Shift.AFTER,
             ordinal = 0),
         cancellable = true)
@@ -103,21 +103,20 @@ public abstract class BreedGoalMixin {
     @Redirect(method = "spawnBaby()V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z",
+            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
             ordinal = 0))
     private boolean impl$throwBreedEvent(final World world, final Entity baby) {
         if (ShouldFire.BREED_ENTITY_EVENT_BREED) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause
                 frame.pushCause(this.animal);
-                frame.pushCause(this.targetMate);
+                frame.pushCause(this.field_75391_e);
                 final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
-                    SpongeEventFactory.createBreedEntityEventBreed(Sponge.getCauseStackManager().getCurrentCause(),
-                    Optional.empty(), (Ageable) baby, (Ageable) this.targetMate);
-                this.impl$spawnEntityResult = !SpongeImpl.postEvent(event) && world.addEntity0(baby);
+                    SpongeEventFactory.createBreedingEventBreed(Sponge.getCauseStackManager().getCurrentCause(), (Ageable) baby);
+                this.impl$spawnEntityResult = !SpongeImpl.postEvent(event) && world.addEntity(baby);
             }
         } else {
-            this.impl$spawnEntityResult = world.addEntity0(baby);
+            this.impl$spawnEntityResult = world.addEntity(baby);
         }
         return this.impl$spawnEntityResult;
     }

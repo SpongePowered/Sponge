@@ -8,6 +8,8 @@
         "block.BlockMixin_Tracker",
         "block.DispenserBlockMixin_Tracker",
         "block.LeavesBlockMixin_Tracker",
+        "entity.LivingEntityMixin_Tracker",
+        "entity.player.ServerPlayerEntityMixin_Tracker",
         "item.BoneMealItemMixin_Tracker",
         "world.chunk.ChunkMixin_OwnershipTracked",
         "world.end.DragonFightManagerMixin_Tracker",

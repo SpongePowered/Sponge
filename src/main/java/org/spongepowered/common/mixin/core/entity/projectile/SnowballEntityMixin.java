@@ -45,8 +45,8 @@ public abstract class SnowballEntityMixin extends ThrowableEntityMixin implement
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
             this.damageSet = true;
@@ -54,8 +54,8 @@ public abstract class SnowballEntityMixin extends ThrowableEntityMixin implement
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
         if (this.damageSet) {
             compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
         } else {

@@ -61,21 +61,21 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
 
-    @Shadow public abstract void onUpdate();
+    @Shadow public abstract void shadow$tick();
 
     private ProjectileSource impl$projectileSource = ProjectileSource.UNKNOWN;
     private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, (FireworkRocket) this);
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.impl$projectileSource, null);
     }
 
@@ -111,9 +111,11 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
     }
 
     @SuppressWarnings("deprecation")
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setEntityState"
-                                                                       + "(Lnet/minecraft/entity/Entity;B)V"))
-    private void onExplode(final World world, final Entity self, final byte state) {
+    @Redirect(method = "func_213893_k()V",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V")
+    )
+    private void impl$onExplosionDamage(final World world, final Entity self, final byte state) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion
@@ -130,8 +132,8 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
     }
 
     @SuppressWarnings("deprecation")
-    @Inject(method = "onUpdate", at = @At("RETURN"))
-    private void onUpdate(final CallbackInfo ci) {
+    @Inject(method = "tick()V", at = @At("RETURN"))
+    private void impl$postPrimeEvent(final CallbackInfo ci) {
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
@@ -142,9 +144,9 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
         }
     }
 
-    @Redirect(method = "dealExplosionDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;attackEntityFrom"
+    @Redirect(method = "dealExplosionDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;attackEntityFrom"
             + "(Lnet/minecraft/util/DamageSource;F)Z"))
-    private boolean useEntitySource(final LivingEntity entityLivingBase, final DamageSource source, final float amount) {
+    private boolean impl$useEntitySource(final LivingEntity entityLivingBase, final DamageSource source, final float amount) {
         try {
             final DamageSource fireworks = new EntityDamageSource(DamageSource.FIREWORKS.damageType, (Entity) (Object) this).setExplosion();
             ((DamageSourceBridge) fireworks).bridge$setFireworksSource();

@@ -29,6 +29,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.EnderPearlEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
@@ -51,17 +52,17 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
 
     @Shadow private LivingEntity perlThrower;
 
-    private double damageAmount;
+    private double impl$damageAmount;
 
     @ModifyArg(method = "onImpact",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onAttackEntityFrom(final float damage) {
-        return (float) this.damageAmount;
+    private float impl$onAttackEntityFromWithDamage(final float damage) {
+        return (float) this.impl$damageAmount;
     }
 
     @SuppressWarnings("deprecation")
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isPlayerSleeping()Z"))
-    private boolean onEnderPearlImpact(final ServerPlayerEntity player) {
+    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isSleeping()Z"))
+    private boolean impl$onEnderPearlImpact(final ServerPlayerEntity player) {
         if (player.isSleeping()) {
             return true;
         }
@@ -81,32 +82,33 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
+            this.impl$damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
-        compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
+    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
+        compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damageAmount);
     }
 
     /**
      * @author Zidane - June 2019 - 1.12.2
+     * @author i509VCB - Feb 2020 - 1.14.4
      * @reason Only have this ender pearl remove the thrower references if we actually changed dimension
      */
     @Override
     @Nullable
-    public Entity changeDimension(final int dimensionIn) {
-        final Entity entity = super.changeDimension(dimensionIn);
+    public Entity shadow$changeDimension(DimensionType dimensionIn) {
+        final Entity entity = super.shadow$changeDimension(dimensionIn);
 
         if (entity instanceof EnderPearlEntity) {
             // We actually teleported so...
             this.perlThrower = null;
-            this.thrower = null;
+            this.owner = null;
         }
 
         return entity;

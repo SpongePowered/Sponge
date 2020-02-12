@@ -44,14 +44,14 @@ public abstract class EyeOfEnderEntityMixin extends EntityMixin implements Locat
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, (EyeOfEnder) this);
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, null);
     }
 

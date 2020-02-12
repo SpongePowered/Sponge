@@ -74,7 +74,7 @@ public abstract class FallingBlockEntityMixin extends EntityMixin {
      * @param ci
      */
     @SuppressWarnings("unchecked")
-    @Inject(method = "onUpdate",
+    @Inject(method = "tick()V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z",
             shift = At.Shift.AFTER
@@ -101,7 +101,7 @@ public abstract class FallingBlockEntityMixin extends EntityMixin {
             if (!TrackingUtil.processBlockCaptures(currentContext)) {
                 // So, it's been cancelled, we want to absolutely remove this entity.
                 // And we want to stop the entity update at this point.
-                this.setDead();
+                this.shadow$remove();
                 ci.cancel();
             }
 
@@ -112,7 +112,7 @@ public abstract class FallingBlockEntityMixin extends EntityMixin {
             // that means that single event was cancelled, so, the block needs to remain
             // and this entity needs to die.
         } else if (this.world.getBlockState(pos) != Blocks.AIR.getDefaultState()) {
-            this.setDead();
+            this.shadow$remove();
             ci.cancel();
         }
     }

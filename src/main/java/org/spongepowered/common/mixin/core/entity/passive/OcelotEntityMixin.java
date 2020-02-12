@@ -62,7 +62,7 @@ public abstract class OcelotEntityMixin extends AgeableEntityMixin {
         return 1;
     }
 
-    @Inject(method = "setupTamedAI", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "func_213529_dV", at = @At(value = "HEAD"), cancellable = true)
     private void impl$IgnoreAISetupOnClientWorld(CallbackInfo ci) {
         if (this.world.isRemote) {
             // Because ocelot AI tasks are added on the client, for whatever reason

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime.world.server;
 
+import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,7 +42,7 @@ public abstract class ServerWorldMixin_RealTime extends WorldMixin_RealTime impl
         if (((WorldBridge) this).bridge$isFake()) {
             return;
         }
-        if (this.worldInfo.getGameRulesInstance().getBoolean("doDaylightCycle")) {
+        if (this.worldInfo.getGameRulesInstance().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)) {
             // Subtract the one the original tick method is going to add
             long diff = this.realTimeBridge$getRealTimeTicks() - 1;
             // Don't set if we're not changing it as other mods might be listening for changes

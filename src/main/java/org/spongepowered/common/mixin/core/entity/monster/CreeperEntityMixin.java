@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.Location;
@@ -45,6 +46,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -55,15 +57,15 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
     @Shadow private int fuseTime;
     @Shadow private int explosionRadius;
 
-    @Shadow public abstract void ignite();
-    @Shadow public abstract int getCreeperState();
-    @Shadow public abstract void setCreeperState(int state);
-    @Shadow private void explode() { } // explode
+    @Shadow public abstract void shadow$ignite();
+    @Shadow public abstract int shadow$getCreeperState();
+    @Shadow public abstract void shadow$setCreeperState(int state);
+    @Shadow private void shadow$explode() { } // explode
 
-    private int fuseDuration = 30;
-    private boolean interactPrimeCancelled;
-    private boolean stateDirty;
-    private boolean detonationCancelled;
+    private int impl$fuseDuration = Constants.Entity.Creeper.FUSE_DURATION;
+    private boolean impl$interactPrimeCancelled;
+    private boolean impl$stateDirty;
+    private boolean impl$detonationCancelled;
 
     // FusedExplosive Impl
 
@@ -79,12 +81,12 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
 
     @Override
     public int bridge$getFuseDuration() {
-        return this.fuseDuration;
+        return this.impl$fuseDuration;
     }
 
     @Override
     public void bridge$setFuseDuration(final int fuseTicks) {
-        this.fuseDuration = fuseTicks;
+        this.impl$fuseDuration = fuseTicks;
     }
 
     @Override
@@ -105,7 +107,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
 
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(final int state, final CallbackInfo ci) {
-        this.bridge$setFuseDuration(this.fuseDuration);
+        this.bridge$setFuseDuration(this.impl$fuseDuration);
         if (this.world.isRemote) {
             return;
         }
@@ -114,8 +116,8 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
             ci.cancel();
         } else if (((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_IDLE && !this.bridge$shouldDefuse()) {
             ci.cancel();
-        } else if (this.getCreeperState() != state) {
-            this.stateDirty = true;
+        } else if (this.shadow$getCreeperState() != state) {
+            this.impl$stateDirty = true;
         }
     }
 
@@ -125,13 +127,13 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
             return;
         }
 
-        if (this.stateDirty) {
+        if (this.impl$stateDirty) {
             if (state == Constants.Entity.Creeper.STATE_PRIMED) {
                 this.bridge$postPrime();
             } else if (state == Constants.Entity.Creeper.STATE_IDLE) {
                 this.bridge$postDefuse();
             }
-            this.stateDirty = false;
+            this.impl$stateDirty = false;
         }
     }
 
@@ -147,36 +149,39 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
                 .shouldPlaySmoke(smoking)
                 .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$canGrief()))
                 .orElseGet(() -> {
-                    this.detonationCancelled = true;
+                    this.impl$detonationCancelled = true;
                     return null;
                 });
     }
 
     @Inject(method = "explode", at = @At("RETURN"))
     private void postExplode(final CallbackInfo ci) {
-        if (this.detonationCancelled) {
-            this.detonationCancelled = this.isDead = false;
+        if (this.impl$detonationCancelled) {
+            this.impl$detonationCancelled = this.isDead = false;
         }
     }
 
-    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityCreeper;ignite()V"))
-    private void onInteractIgnite(final CreeperEntity self) {
-        this.interactPrimeCancelled = !this.bridge$shouldPrime();
-        if (!this.interactPrimeCancelled) {
-            this.ignite();
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/CreeperEntity;ignite()V"))
+    private void impl$onProcessIgnition(final CreeperEntity self) {
+        this.impl$interactPrimeCancelled = !this.bridge$shouldPrime();
+        if (!this.impl$interactPrimeCancelled) {
+            this.shadow$ignite();
         }
     }
 
-    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;damageItem"
-                                                                              + "(ILnet/minecraft/entity/EntityLivingBase;)V"))
-    private void onDamageFlintAndSteel(final ItemStack fas, final int amount, final LivingEntity player) {
-        if (!this.interactPrimeCancelled) {
-            fas.damageItem(amount, player);
+    @Redirect(method = "processInteract",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/item/ItemStack;damageItem(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V"
+        )
+    )
+    private void impl$onDamageFlintAndSteel(ItemStack fas, int amount, LivingEntity player, Consumer<LivingEntity> onBroken) {
+        if (!this.impl$interactPrimeCancelled) {
+            fas.damageItem(amount, player, onBroken);
             // TODO put this in the cause somehow?
 //            this.primeCause = Cause.of(NamedCause.of(NamedCause.IGNITER, player));
 //            this.detonationCause = this.primeCause;
         }
-        this.interactPrimeCancelled = false;
+        this.impl$interactPrimeCancelled = false;
     }
 
 }

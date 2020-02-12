@@ -46,10 +46,9 @@ import javax.annotation.Nullable;
 @Mixin(ItemFrameEntity.class)
 public abstract class ItemFrameEntityMixin extends HangingEntityMixin {
 
-    @Shadow public abstract void setDisplayedItem(@Nullable net.minecraft.item.ItemStack p_82334_1_);
+    @Shadow public abstract void shadow$setDisplayedItem(@Nullable net.minecraft.item.ItemStack p_82334_1_);
 
-    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItemFrame;dropItemOrSelf"
-      + "(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
+    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemFrameEntity;dropItemOrSelf(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
@@ -71,15 +70,15 @@ public abstract class ItemFrameEntityMixin extends HangingEntityMixin {
      * @param ci The callback info
      */
     @Inject(
-        method ="removeFrameFromMap",
+        method ="removeItem",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/EntityItemFrame;)V",
+            target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/ItemFrameEntity;)V",
             shift = At.Shift.AFTER
         )
     )
-    private void postOnSetItemFrame(CallbackInfo ci) {
-        this.setDisplayedItem(net.minecraft.item.ItemStack.EMPTY);
+    private void impl$postOnSetItemFrame(CallbackInfo ci) {
+        this.shadow$setDisplayedItem(net.minecraft.item.ItemStack.EMPTY);
     }
 
 }

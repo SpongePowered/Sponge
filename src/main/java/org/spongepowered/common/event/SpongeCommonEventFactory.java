@@ -50,6 +50,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
@@ -110,7 +111,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.gamerule.GameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -810,8 +810,8 @@ public class SpongeCommonEventFactory {
         if (entity instanceof ServerPlayerEntity) {
             originalChannel = channel = ((ServerPlayerEntityBridge) entity).bridge$getDeathMessageChannel();
         } else {
-            originalChannel = MessageChannel.TO_NONE;
-            channel = MessageChannel.TO_NONE;
+            originalChannel = MessageChannel.toNone();
+            channel = MessageChannel.toNone();
         }
         if (source instanceof EntityDamageSource) {
             final EntityDamageSource damageSource = (EntityDamageSource) source;
@@ -839,8 +839,8 @@ public class SpongeCommonEventFactory {
 
             final Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source == null ? entity : source);
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
-                originalChannel, Optional.of(channel), formatter,
-                (Living) entity, entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
+                originalChannel, Optional.of(channel), (Living) entity,
+                formatter, entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
             SpongeImpl.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
             final Text message = event.getMessage();
             // Check the event isn't cancelled either. If it is, then don't spawn the message.

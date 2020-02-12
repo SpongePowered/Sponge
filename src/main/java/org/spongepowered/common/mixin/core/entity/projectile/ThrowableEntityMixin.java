@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
@@ -43,27 +44,31 @@ import javax.annotation.Nullable;
 @Mixin(ThrowableEntity.class)
 public abstract class ThrowableEntityMixin extends EntityMixin {
 
-    @Shadow protected LivingEntity thrower;
+    @Shadow protected LivingEntity owner;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
     @Nullable
     public ProjectileSource projectileSource;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, ((Projectile) this));
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Projectile) this).getShooter(), this.thrower);
+    public void impl$writeToSpongeCompound(CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Projectile) this).getShooter(), this.owner);
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
-    public void onProjectileImpact(ThrowableEntity projectile, RayTraceResult movingObjectPosition) {
-        if (this.world.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
+    @Redirect(method = "tick()V",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/projectile/ThrowableEntity;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"
+        )
+    )
+    private void impl$handleProjectileImpact(ThrowableEntity projectile, RayTraceResult movingObjectPosition) {
+        if (((WorldBridge) this.world).bridge$isFake() || movingObjectPosition.getType() == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }

@@ -429,11 +429,6 @@ public final class Constants {
         }
     }
 
-    public static final class GameRule {
-
-        public static final String SHOW_DEATH_MESSAGES = "showDeathMessages";
-    }
-
     public static final class Chunk {
 
         public static final Direction[] CARDINAL_DIRECTIONS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
@@ -749,6 +744,9 @@ public final class Constants {
         public static final DataQuery ROTATION = of("Rotation");
         public static final DataQuery SCALE = of("Scale");
 
+        public static final String ATTACK_ENTITY_FROM_MAPPING = "attackEntityFrom";
+        public static final String ATTACK_ENTITY_FROM_OBFUSCATED = "func_70097_a";
+
         public static final class Ageable {
 
             public static final int ADULT = 6000;
@@ -790,6 +788,7 @@ public final class Constants {
             public static final int DEFAULT_EXPLOSION_RADIUS = 3;
             public static final int STATE_IDLE = -1;
             public static final int STATE_PRIMED = 1;
+            public static final int FUSE_DURATION = 30;
         }
 
         public static final class EnderCrystal {

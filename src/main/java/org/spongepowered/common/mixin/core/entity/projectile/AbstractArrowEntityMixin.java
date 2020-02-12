@@ -66,14 +66,14 @@ public abstract class AbstractArrowEntityMixin extends EntityMixin {
     @Nullable public ProjectileSource projectileSource;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, (Arrow) this);
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, ((Arrow) this).getShooter(), this.shootingEntity);
     }
 
@@ -91,7 +91,7 @@ public abstract class AbstractArrowEntityMixin extends EntityMixin {
                 this.rotationYaw += 180.0F;
                 ((AbstractArrowEntity) (Object) this).prevRotationYaw += 180.0F;
                 this.ticksInAir = 0;
-                this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                this.shadow$playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely
                 if (hitResult.entityHit == null) {
                     final BlockPos blockpos = hitResult.getBlockPos();

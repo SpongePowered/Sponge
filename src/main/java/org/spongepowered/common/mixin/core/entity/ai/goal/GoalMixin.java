@@ -35,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 import org.spongepowered.common.registry.MappedRegistry;
-import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 
 import java.util.Optional;
 

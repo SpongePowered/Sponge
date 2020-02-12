@@ -31,10 +31,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
-import org.spongepowered.common.registry.type.entity.CareerRegistryModule;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,13 +55,13 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         return Holder.INSTANCE;
     }
 
-    private final Map<Career, Multimap<Integer, TradeOfferListMutator>> careerGeneratorMap = new HashMap<>();
+    private final Map<Profession, Multimap<Integer, TradeOfferListMutator>> careerGeneratorMap = new HashMap<>();
 
     SpongeVillagerRegistry() {
     }
 
     @Override
-    public Multimap<Integer, TradeOfferListMutator> getTradeOfferLevelMap(Career career) {
+    public Multimap<Integer, TradeOfferListMutator> getTradeOfferLevelMap(Profession career) {
         final Multimap<Integer, TradeOfferListMutator> multimap = this.careerGeneratorMap.get(checkNotNull(career, "Career cannot be null!"));
         if (multimap == null) {
             return ImmutableMultimap.of();
@@ -71,7 +70,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
     }
 
     @Override
-    public VillagerRegistry addMutator(Career career, int level, TradeOfferListMutator generator) {
+    public VillagerRegistry addMutator(Profession career, int level, TradeOfferListMutator generator) {
         checkArgument(level > 0, "Career level must be at least greater than zero!");
         checkNotNull(career, "Career cannot be null!");
         checkNotNull(generator, "Generator cannot be null!");
@@ -85,7 +84,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
     }
 
     @Override
-    public VillagerRegistry addMutators(Career career, int level, TradeOfferListMutator generator, TradeOfferListMutator... generators) {
+    public VillagerRegistry addMutators(Profession career, int level, TradeOfferListMutator generator, TradeOfferListMutator... generators) {
         checkArgument(level > 0, "Career level must be at least greater than zero!");
         checkNotNull(career, "Career cannot be null!");
         checkNotNull(generator, "Generator cannot be null!");
@@ -105,7 +104,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
     }
 
     @Override
-    public VillagerRegistry setMutators(Career career, int level, List<TradeOfferListMutator> generators) {
+    public VillagerRegistry setMutators(Profession career, int level, List<TradeOfferListMutator> generators) {
         checkArgument(level > 0, "Career level must be at least greater than zero!");
         checkNotNull(career, "Career cannot be null!");
         checkNotNull(generators, "Generators cannot be null!");
@@ -119,7 +118,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
     }
 
     @Override
-    public VillagerRegistry setMutators(Career career, Multimap<Integer, TradeOfferListMutator> generatorMap) {
+    public VillagerRegistry setMutators(Profession career, Multimap<Integer, TradeOfferListMutator> generatorMap) {
         checkNotNull(career, "Career cannot be null!");
         checkNotNull(generatorMap, "Generators cannot be null!");
         Multimap<Integer, TradeOfferListMutator> multimap = this.careerGeneratorMap.get(career);
