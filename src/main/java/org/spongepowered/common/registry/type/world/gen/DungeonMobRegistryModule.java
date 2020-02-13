@@ -105,7 +105,10 @@ public class DungeonMobRegistryModule implements RegistryModule {
                 .getEntries()
                 .stream()
                 .map(entry -> (WeightedSerializableObject<EntityArchetype>) entry)
-                .findFirst();
+                .filter(entry -> {
+                    return entry.get().getType().getEntityClass().equals(type.getEntityClass());
+                }).findFirst();
+
     }
 
     public WeightedTable<EntityArchetype> getRaw() {
