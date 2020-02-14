@@ -776,19 +776,17 @@ public abstract class WorldMixin_API implements World {
                 zInChunk = GenericMath.mod(zCurrent, chunkWidth);
                 final int xChunk = (int) (xCurrent - (xInChunk == 0 && direction.getX() < 0 ? chunkWidth : xInChunk));
                 final int zChunk = (int) (zCurrent - (zInChunk == 0 && direction.getZ() < 0 ? chunkWidth : zInChunk));
-                // Make sure the start position in the chunk is not before the world start position
-                final Vector3d chunkStart = currentT <= 0 ? start : new Vector3d(xCurrent, yCurrent, zCurrent);
                 // Get the chunk and call the intersection method to perform the task locally
                 final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
                 if (chunk.isPresent()) {
                     ((ChunkBridge) chunk.get())
-                            .bridge$getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
+                            .bridge$getIntersectingEntities(start, direction, distance, filter, yCurrent, yNext, intersecting);
                 }
                 // If the intersections are near another chunk, its entities might be partially in the current chunk, so include it also
                 final ChunkBridge nearIntersections = getChunkNearIntersections(xChunk, zChunk, xCurrent, zCurrent, xNext, zNext);
                 if (nearIntersections != null) {
                     nearIntersections
-                            .bridge$getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
+                            .bridge$getIntersectingEntities(start, direction, distance, filter, yCurrent, yNext, intersecting);
                 }
                 // Remove the chunk from the distance
                 remainingDistance -= nextT - Math.max(0, currentT);
