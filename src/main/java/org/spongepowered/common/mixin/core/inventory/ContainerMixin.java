@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.item.EntityItem;
@@ -122,7 +123,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     private List<SlotTransaction> impl$capturedSlotTransactions = new ArrayList<>();
     private List<SlotTransaction> impl$capturedCurrentCraftShiftTransactions = new ArrayList<>();
     private List<SlotTransaction> impl$capturedCraftShiftTransactions = new ArrayList<>();
-    private List<SlotTransaction> impl$capturedCraftPreviewTransactions = new ArrayList<>();
+    @Nullable private SlotTransaction impl$capturedCraftPreviewTransaction;
     private boolean impl$isLensInitialized;
     @Nullable private Int2ObjectMap<SlotAdapter> impl$adapters;
     @Nullable private InventoryArchetype impl$archetype;
@@ -265,16 +266,8 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
                         SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
                         if (this.impl$shiftCraft) {
                             this.impl$capturedCurrentCraftShiftTransactions.add(newTransaction);
-                        } else {
-                            if (!this.impl$capturedCraftPreviewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
-                                final SlotTransaction previewTransaction = this.impl$capturedCraftPreviewTransactions.get(0);
-                                if (previewTransaction.equals(newTransaction)) {
-                                    newTransaction = null;
-                                }
-                            }
-                            if (newTransaction != null) {
-                                this.impl$capturedSlotTransactions.add(newTransaction);
-                            }
+                        } else if (!newTransaction.equals(this.impl$capturedCraftPreviewTransaction)) { // Check if Preview transaction is this transaction
+                            this.impl$capturedSlotTransactions.add(newTransaction);
                         }
                     } catch (IndexOutOfBoundsException e) {
                         SpongeImpl.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
@@ -434,7 +427,17 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
         final ItemStackSnapshot repl = ItemStackUtil.snapshotOf(output.getStackInSlot(index));
 
         final SlotAdapter slot = this.impl$getAdapters().get(index);
-        this.impl$capturedCraftPreviewTransactions.add(new SlotTransaction(slot, orig, repl));
+        if (this.impl$capturedCraftPreviewTransaction == null) {
+            this.impl$capturedCraftPreviewTransaction = new SlotTransaction(slot, orig, repl);
+        } else if (this.impl$capturedCraftPreviewTransaction.getSlot().equals(slot)
+                && this.impl$capturedCraftPreviewTransaction.getFinal().equals(orig)) {
+            this.impl$capturedCraftPreviewTransaction = new SlotTransaction(slot, this.impl$capturedCraftPreviewTransaction.getOriginal(), repl);
+        } else {
+            SlotTransaction replace = new SlotTransaction(slot, orig, repl);
+            SpongeImpl.getLogger().warn("Could not merge craft preview transactions - some events may break (original {}, replace {})",
+                    this.impl$capturedCraftPreviewTransaction, replace);
+            this.impl$capturedCraftPreviewTransaction = replace;
+        }
     }
 
     @Inject(method = "slotChangedCraftingGrid", cancellable = true,
@@ -442,18 +445,17 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     private void afterSlotChangedCraftingGrid(
         final World world, final EntityPlayer player, final InventoryCrafting craftingInventory, final InventoryCraftResult output, final CallbackInfo ci)
     {
-        if (this.impl$firePreview && !this.impl$capturedCraftPreviewTransactions.isEmpty()) {
+        if (this.impl$firePreview && this.impl$capturedCraftPreviewTransaction != null) {
             final Inventory inv = ((CarriedInventory<?>) this).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
                 SpongeImpl.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + this.getClass().getName());
                 return;
             }
-            final SlotTransaction previewTransaction = this.impl$capturedCraftPreviewTransactions.get(this.impl$capturedCraftPreviewTransactions.size() - 1);
 
             final IRecipe recipe = CraftingManager.findMatchingRecipe(craftingInventory, world);
-            SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) inv), previewTransaction, ((CraftingRecipe) recipe),
-                    ((Container)(Object) this), this.impl$capturedCraftPreviewTransactions);
-            this.impl$capturedCraftPreviewTransactions.clear();
+            SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) inv), this.impl$capturedCraftPreviewTransaction, ((CraftingRecipe) recipe),
+                    ((Container)(Object) this), ImmutableList.of(this.impl$capturedCraftPreviewTransaction));
+            this.impl$capturedCraftPreviewTransaction = null;
         }
     }
 
@@ -563,8 +565,13 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     }
 
     @Override
-    public List<SlotTransaction> bridge$getPreviewTransactions() {
-        return this.impl$capturedCraftPreviewTransactions;
+    public SlotTransaction bridge$getPreviewTransaction() {
+        return this.impl$capturedCraftPreviewTransaction;
+    }
+
+    @Override
+    public void bridge$setPreviewTransaction(@Nullable SlotTransaction transaction) {
+        this.impl$capturedCraftPreviewTransaction = transaction;
     }
 
     @Override

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -179,23 +180,21 @@ public abstract class SlotCraftingMixin extends Slot {
         ((ContainerBridge) container).bridge$setFirePreview(true);
         this.impl$craftedStack = null;
 
-        final List<SlotTransaction> previewTransactions = ((ContainerBridge) container).bridge$getPreviewTransactions();
+        SlotTransaction previewTransaction = ((ContainerBridge) container).bridge$getPreviewTransaction();
         if (this.craftMatrix.isEmpty()) {
             return; // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
         }
 
-        final SlotTransaction last;
-        if (previewTransactions.isEmpty()) {
-            last = new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getStack()));
-            previewTransactions.add(last);
-        } else {
-            last = previewTransactions.get(0);
+        if (previewTransaction == null) {
+            previewTransaction = new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE,
+                    ItemStackUtil.snapshotOf(this.getStack()));
         }
 
         final CraftingRecipe newRecipe = (CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world);
 
-        SpongeCommonEventFactory.callCraftEventPre(thePlayer, craftingInventory, last, newRecipe, container, previewTransactions);
-        previewTransactions.clear();
+        SpongeCommonEventFactory.callCraftEventPre(thePlayer, craftingInventory, previewTransaction, newRecipe, container,
+                ImmutableList.of(previewTransaction));
+        ((ContainerBridge) container).bridge$setPreviewTransaction(null);
 
     }
 }

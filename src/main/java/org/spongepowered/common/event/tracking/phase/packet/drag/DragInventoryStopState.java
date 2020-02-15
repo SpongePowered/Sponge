@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -64,13 +65,13 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
 
         Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (craftInv instanceof CraftingInventory) {
-            List<SlotTransaction> previewTransactions = ((ContainerBridge) player.openContainer).bridge$getPreviewTransactions();
-            if (!previewTransactions.isEmpty()) {
+            SlotTransaction previewTransaction = ((ContainerBridge) player.openContainer).bridge$getPreviewTransaction();
+            if (previewTransaction != null) {
                 CraftingRecipe recipe = SpongeCraftingRecipeRegistry
                         .getInstance().findMatchingRecipe(((CraftingInventory) craftInv).getCraftingGrid(), ((World) player.world)).orElse(null);
-                SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransactions.get(0),
-                        recipe, player.openContainer, previewTransactions);
-                previewTransactions.clear();
+                SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransaction,
+                        recipe, player.openContainer, ImmutableList.of(previewTransaction));
+                ((ContainerBridge) player.openContainer).bridge$setPreviewTransaction(null);
             }
         }
     }

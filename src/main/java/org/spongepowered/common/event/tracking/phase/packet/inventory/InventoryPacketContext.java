@@ -50,7 +50,7 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
 
     @Override
     public boolean hasCaptures() {
-        if (!((ContainerBridge) this.packetPlayer.openContainer).bridge$getPreviewTransactions().isEmpty()) {
+        if (((ContainerBridge) this.packetPlayer.openContainer).bridge$getPreviewTransaction() != null) {
             return true;
         }
         if (!((TrackedInventoryBridge) this.packetPlayer.openContainer).bridge$getCapturedSlotTransactions().isEmpty()) {

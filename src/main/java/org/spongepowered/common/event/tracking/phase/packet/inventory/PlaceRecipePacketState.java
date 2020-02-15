@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.Packet;
@@ -79,15 +80,14 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
             return;
         }
 
-        final List<SlotTransaction> previewTransactions = ((ContainerBridge) player.openContainer).bridge$getPreviewTransactions();
-        if (previewTransactions.isEmpty()) {
+        SlotTransaction previewTransaction = ((ContainerBridge) player.openContainer).bridge$getPreviewTransaction();
+        if (previewTransaction == null) {
             final CraftingOutput slot = ((CraftingInventory) craftInv).getResult();
-            final SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(slot.peek().orElse(ItemStack.empty())));
-            previewTransactions.add(st);
+            previewTransaction = new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(slot.peek().orElse(ItemStack.empty())));
         }
-        SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransactions.get(0),
-                ((CraftingRecipe) recipe), player.openContainer, previewTransactions);
-        previewTransactions.clear();
+        SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransaction,
+                ((CraftingRecipe) recipe), player.openContainer, ImmutableList.of(previewTransaction));
+        ((ContainerBridge) player.openContainer).bridge$setPreviewTransaction(null);
 
         final Entity spongePlayer = (Entity) player;
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
