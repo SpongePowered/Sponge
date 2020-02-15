@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.plugin;
 
-import org.apache.commons.lang3.StringUtils;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -34,10 +33,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MultiWorldCommandPlugin implements IMixinConfigPlugin {
 
-    private static final String MIXIN_PREFIX = "MixinCommand";
+    private static final Pattern MIXIN_OPTION_EXTRACTOR = Pattern.compile("^[a-z.]+\\.Command(?<option>[A-Za-z]+)Mixin_(MultiWorld|Global)Command$");
 
     private boolean configState;
 
@@ -53,7 +54,11 @@ public class MultiWorldCommandPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        String name = StringUtils.substringAfter(mixinClassName, MIXIN_PREFIX).toLowerCase(Locale.ENGLISH);
+        Matcher matcher = MIXIN_OPTION_EXTRACTOR.matcher(mixinClassName);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Mixin class name \"" + mixinClassName + "\" does not match form expected by MIXIN_OPTION_EXTRACTOR.");
+        }
+        String name = matcher.group("option").toLowerCase(Locale.ENGLISH);
 
         // MCP class name for the seed command is CommandShowSeed so we need to rename it manually
         if (name.equals("showseed")) {
