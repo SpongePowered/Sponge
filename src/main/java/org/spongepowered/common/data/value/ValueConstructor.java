@@ -24,19 +24,11 @@
  */
 package org.spongepowered.common.data.value;
 
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.key.SpongeKey;
 
-public class SpongeValueFactory implements Value.Factory {
+public interface ValueConstructor<V extends Value<E>, E> {
 
-    @Override
-    public <V extends Value<E>, E> V mutableOf(Key<V> key, E element) {
-        return ((SpongeKey<V, E>) key).getValueConstructor().getMutable(element);
-    }
+    V getMutable(E element);
 
-    @Override
-    public <V extends Value<E>, E> V immutableOf(Key<V> key, E element) {
-        return ((SpongeKey<V, E>) key).getValueConstructor().getImmutable(element);
-    }
+    V getImmutable(E element);
 }

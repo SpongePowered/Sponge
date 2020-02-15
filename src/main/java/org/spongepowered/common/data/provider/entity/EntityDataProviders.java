@@ -103,7 +103,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
     }
 
     @Override
-    protected void register() {
+    public void register() {
         register(new ArrowEntityPotionEffectsProvider());
         register(new BoatEntityWoodTypeProvider());
         register(new MobEntityDominantHandProvider());

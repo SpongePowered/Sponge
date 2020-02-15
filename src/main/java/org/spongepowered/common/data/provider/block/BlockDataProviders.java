@@ -153,6 +153,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
                 Direction.UP, up)));
     }
 
+    @Override
     public void register() {
         // TODO: Auto-register based on common used properties, like facing,
         //  powered, power, etc. Less common ones will still need to be done manually.

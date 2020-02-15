@@ -46,4 +46,9 @@ public abstract class AbstractDataProvider<V extends Value<E>, E> implements Dat
     public boolean allowsAsynchronousAccess(DataHolder dataHolder) {
         return false;
     }
+
+    interface KnownHolderType {
+
+        Class<?> getHolderType();
+    }
 }

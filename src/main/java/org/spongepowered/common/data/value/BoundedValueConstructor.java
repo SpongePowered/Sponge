@@ -24,19 +24,33 @@
  */
 package org.spongepowered.common.data.value;
 
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.key.SpongeKey;
+import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.common.data.key.BoundedKey;
 
-public class SpongeValueFactory implements Value.Factory {
+@SuppressWarnings("unchecked")
+class BoundedValueConstructor<V extends BoundedValue<E>, E> implements ValueConstructor<V, E> {
 
-    @Override
-    public <V extends Value<E>, E> V mutableOf(Key<V> key, E element) {
-        return ((SpongeKey<V, E>) key).getValueConstructor().getMutable(element);
+    private final BoundedKey<V, E> key;
+
+    BoundedValueConstructor(BoundedKey<V, E> key) {
+        this.key = key;
     }
 
     @Override
-    public <V extends Value<E>, E> V immutableOf(Key<V> key, E element) {
-        return ((SpongeKey<V, E>) key).getValueConstructor().getImmutable(element);
+    public V getMutable(E element) {
+        return this.getMutable(element, this.key.getMinimum().get(), this.key.getMaximum().get());
+    }
+
+    public V getMutable(E element, E minimum, E maximum) {
+        return (V) new MutableSpongeBoundedValue<>(this.key, element, minimum, maximum, this.key.getElementComparator());
+    }
+
+    @Override
+    public V getImmutable(E element) {
+        return this.getImmutable(element, this.key.getMinimum().get(), this.key.getMaximum().get());
+    }
+
+    public V getImmutable(E element, E minimum, E maximum) {
+        return (V) new ImmutableSpongeBoundedValue<>(this.key, element, minimum, maximum, this.key.getElementComparator());
     }
 }

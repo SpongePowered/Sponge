@@ -22,52 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.value.mutable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.api.data.value.Value.Mutable;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeItemValue;
+import org.spongepowered.common.data.copy.CopyHelper;
 
 import java.util.function.Function;
 
-public class SpongeItemValue extends SpongeValue<ItemStack> {
+public final class MutableSpongeValue<E> extends AbstractMutableSpongeValue<E> {
 
-    public SpongeItemValue(Key<? extends Value<ItemStack>> key, ItemStack defaultValue) {
-        super(key, defaultValue.copy());
-    }
-
-    public SpongeItemValue(Key<? extends Value<ItemStack>> key, ItemStack defaultValue, ItemStack actualValue) {
-        super(key, defaultValue.copy(), actualValue.copy());
+    public MutableSpongeValue(Key<? extends Value<E>> key, E element) {
+        super(key, element);
     }
 
     @Override
-    public ItemStack get() {
-        return super.get().copy();
+    public Mutable<E> transform(Function<E, E> function) {
+        return this.set(function.apply(this.get()));
     }
 
     @Override
-    public Mutable<ItemStack> set(ItemStack value) {
-        return super.set(value.copy());
+    public Immutable<E> asImmutable() {
+        return new ImmutableSpongeValue<>(this.getKey(), CopyHelper.copy(this.element));
     }
 
     @Override
-    public Mutable<ItemStack> transform(Function<ItemStack, ItemStack> function) {
-        this.actualValue = checkNotNull(checkNotNull(function).apply(this.actualValue)).copy();
-        return this;
-    }
-
-    @Override
-    public Immutable<ItemStack> asImmutable() {
-        return new ImmutableSpongeItemValue(this.getKey(), this.getDefault(), this.get());
-    }
-
-    @Override
-    public Mutable<ItemStack> copy() {
-        return new SpongeItemValue(this.getKey(), this.getDefault(), this.get());
+    public Mutable<E> copy() {
+        return new MutableSpongeValue<>(this.getKey(), CopyHelper.copy(this.element));
     }
 }

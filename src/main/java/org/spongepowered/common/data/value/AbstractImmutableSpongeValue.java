@@ -26,17 +26,18 @@ package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.key.SpongeKey;
+import org.spongepowered.common.data.copy.CopyHelper;
 
-public class SpongeValueFactory implements Value.Factory {
+import java.util.function.Function;
 
-    @Override
-    public <V extends Value<E>, E> V mutableOf(Key<V> key, E element) {
-        return ((SpongeKey<V, E>) key).getValueConstructor().getMutable(element);
+public abstract class AbstractImmutableSpongeValue<E> extends SpongeValue<E> implements Value.Immutable<E> {
+
+    public AbstractImmutableSpongeValue(Key<? extends Value<E>> key, E element) {
+        super(key, element);
     }
 
     @Override
-    public <V extends Value<E>, E> V immutableOf(Key<V> key, E element) {
-        return ((SpongeKey<V, E>) key).getValueConstructor().getImmutable(element);
+    public E get() {
+        return CopyHelper.copy(super.get());
     }
 }

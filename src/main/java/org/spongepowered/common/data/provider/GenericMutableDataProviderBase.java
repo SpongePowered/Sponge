@@ -36,7 +36,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
-public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> extends MutableDataProvider<V, E> {
+public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> extends MutableDataProvider<V, E>
+        implements AbstractDataProvider.KnownHolderType {
 
     private static final TypeVariable<?> holderTypeParameter = GenericMutableDataProviderBase.class.getTypeParameters()[0];
     private final Class<H> holderType;
@@ -61,6 +62,11 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
 
     private boolean isTypeAllowed(DataHolder dataHolder) {
         return this.holderType.isInstance(dataHolder);
+    }
+
+    @Override
+    public Class<H> getHolderType() {
+        return this.holderType;
     }
 
     /**

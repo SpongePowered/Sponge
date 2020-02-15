@@ -24,19 +24,35 @@
  */
 package org.spongepowered.common.data.value;
 
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.key.SpongeKey;
 
-public class SpongeValueFactory implements Value.Factory {
+public abstract class SpongeValue<E> implements Value<E> {
 
-    @Override
-    public <V extends Value<E>, E> V mutableOf(Key<V> key, E element) {
-        return ((SpongeKey<V, E>) key).getValueConstructor().getMutable(element);
+    protected final Key<? extends Value<E>> key;
+    protected E element;
+
+    public SpongeValue(Key<? extends Value<E>> key, E element) {
+        this.key = key;
+        this.element = element;
     }
 
     @Override
-    public <V extends Value<E>, E> V immutableOf(Key<V> key, E element) {
-        return ((SpongeKey<V, E>) key).getValueConstructor().getImmutable(element);
+    public E get() {
+        return this.element;
+    }
+
+    @Override
+    public Key<? extends Value<E>> getKey() {
+        return this.key;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("key", this.key)
+                .add("element", this.element)
+                .toString();
     }
 }

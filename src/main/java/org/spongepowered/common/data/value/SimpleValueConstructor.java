@@ -22,46 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.value.mutable;
+package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.api.data.value.Value.Mutable;
-import org.spongepowered.common.data.value.AbstractBaseValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
-public class SpongeValue<E> extends AbstractBaseValue<E> implements Mutable<E> {
+public class SimpleValueConstructor<V extends Value<E>, E> implements ValueConstructor<V, E> {
 
-    public SpongeValue(Key<? extends Value<E>> key, E defaultValue) {
-        this(key, defaultValue, defaultValue);
-    }
+    private final Key<V> key;
+    private final BiFunction<Key<V>, E, V> mutableConstructor;
+    private final BiFunction<Key<V>, E, V> immutableConstructor;
 
-    public SpongeValue(Key<? extends Value<E>> key, E defaultValue, E actualValue) {
-        super(key, defaultValue, actualValue);
-    }
-
-    @Override
-    public Mutable<E> set(E value) {
-        this.actualValue = value;
-        return this;
+    public SimpleValueConstructor(Key<V> key,
+            BiFunction<Key<V>, E, V> mutableConstructor,
+            BiFunction<Key<V>, E, V> immutableConstructor) {
+        this.key = key;
+        this.mutableConstructor = mutableConstructor;
+        this.immutableConstructor = immutableConstructor;
     }
 
     @Override
-    public Mutable<E> transform(Function<E, E> function) {
-        this.actualValue = function.apply(this.actualValue);
-        return this;
+    public V getMutable(E element) {
+        return this.mutableConstructor.apply(this.key, element);
     }
 
     @Override
-    public Immutable<E> asImmutable() {
-        return ImmutableSpongeValue.cachedOf(this.getKey(), this.getDefault(), this.actualValue);
-    }
-
-    @Override
-    public Mutable<E> copy() {
-        return new SpongeValue<>(this.getKey(), this.getDefault(), this.actualValue);
+    public V getImmutable(E element) {
+        return this.immutableConstructor.apply(this.key, element);
     }
 }

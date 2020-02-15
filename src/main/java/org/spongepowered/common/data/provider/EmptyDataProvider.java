@@ -22,52 +22,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.value.immutable;
+package org.spongepowered.common.data.provider;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataProvider;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.api.data.value.Value.Mutable;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.data.value.mutable.SpongeItemValue;
 
-import java.util.function.Function;
+import java.util.Optional;
 
-public class ImmutableSpongeItemValue extends ImmutableSpongeValue<ItemStack> {
+class EmptyDataProvider<V extends Value<E>, E> implements DataProvider<V, E> {
 
-    public ImmutableSpongeItemValue(Key<? extends Value<ItemStack>> key, ItemStack defaultValue) {
-        super(key, defaultValue.copy());
-    }
+    private final Key<V> key;
 
-    public ImmutableSpongeItemValue(Key<? extends Value<ItemStack>> key, ItemStack defaultValue, ItemStack actualValue) {
-        super(key, defaultValue.copy(), actualValue.copy());
+    EmptyDataProvider(Key<V> key) {
+        this.key = key;
     }
 
     @Override
-    public Immutable<ItemStack> with(ItemStack value) {
-        return super.with(value.copy());
+    public Key<V> getKey() {
+        return this.key;
     }
 
     @Override
-    public Immutable<ItemStack> transform(Function<ItemStack, ItemStack> function) {
-        final ItemStack value = checkNotNull(function).apply(this.get());
-        return new ImmutableSpongeItemValue(this.getKey(), this.getDefault(), checkNotNull(value));
+    public boolean allowsAsynchronousAccess(DataHolder dataHolder) {
+        return false;
     }
 
     @Override
-    public Mutable<ItemStack> asMutable() {
-        return new SpongeItemValue(this.getKey(), this.getDefault(), this.get());
+    public Optional<E> get(DataHolder dataHolder) {
+        return Optional.empty();
     }
 
     @Override
-    public ItemStack get() {
-        return super.get().copy();
+    public boolean isSupported(DataHolder dataHolder) {
+        return false;
     }
 
     @Override
-    public ItemStack getDefault() {
-        return super.getDefault().copy();
+    public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
+        return DataTransactionResult.failResult(Value.immutableOf(this.key, element));
+    }
+
+    @Override
+    public DataTransactionResult remove(DataHolder.Mutable dataHolder) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <I extends DataHolder.Immutable<I>> Optional<I> with(I immutable, E element) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <I extends DataHolder.Immutable<I>> Optional<I> without(I immutable) {
+        return Optional.of(immutable);
     }
 }

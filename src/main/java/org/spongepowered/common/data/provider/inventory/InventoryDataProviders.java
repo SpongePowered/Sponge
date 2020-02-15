@@ -47,7 +47,7 @@ public class InventoryDataProviders extends DataProviderRegistryBuilder {
     }
 
     @Override
-    protected void register() {
+    public void register() {
         // Lens Providers
         this.register(new GenericSlotLensDataProvider<>(InventoryKeys.EQUIPMENT_TYPE.get()));
         this.register(new GenericSlotLensDataProvider<>(InventoryKeys.SLOT_INDEX.get()));

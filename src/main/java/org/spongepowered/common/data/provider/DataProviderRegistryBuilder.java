@@ -39,7 +39,6 @@ public abstract class DataProviderRegistryBuilder {
 
     public DataProviderRegistryBuilder(DataProviderRegistry registry) {
         this.registry = registry;
-        this.register();
     }
 
     protected <E, H> void register(Class<H> target, Supplier<? extends Key<? extends Value<E>>> key, Function<H, E> getter) {
@@ -47,7 +46,7 @@ public abstract class DataProviderRegistryBuilder {
     }
 
     protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key, Function<H, E> getter) {
-        register(new GenericMutableDataProvider<H, E>(key, target) {
+        this.register(new GenericMutableDataProvider<H, E>(key, target) {
 
             @Override
             protected Optional<E> getFrom(H dataHolder) {
@@ -68,7 +67,7 @@ public abstract class DataProviderRegistryBuilder {
 
     protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key,
             Function<H, E> getter, BiConsumer<H, E> setter) {
-        register(new GenericMutableDataProvider<H, E>(key, target) {
+        this.register(new GenericMutableDataProvider<H, E>(key, target) {
 
             @Override
             protected Optional<E> getFrom(H dataHolder) {
@@ -87,5 +86,5 @@ public abstract class DataProviderRegistryBuilder {
         this.registry.register(provider);
     }
 
-    protected abstract void register();
+    public abstract void register();
 }

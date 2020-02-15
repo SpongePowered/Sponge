@@ -25,18 +25,28 @@
 package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.key.SpongeKey;
 
-public class SpongeValueFactory implements Value.Factory {
+public class SpongeBoundedValueFactory implements BoundedValue.Factory {
 
     @Override
-    public <V extends Value<E>, E> V mutableOf(Key<V> key, E element) {
+    public <V extends BoundedValue<E>, E> V mutableOf(Key<V> key, E element, E minimum, E maximum) {
+        return ((BoundedValueConstructor<V, E>) ((SpongeKey<V, E>) key).getValueConstructor()).getMutable(element, minimum, maximum);
+    }
+
+    @Override
+    public <V extends BoundedValue<E>, E> V mutableOf(Key<V> key, E element) {
         return ((SpongeKey<V, E>) key).getValueConstructor().getMutable(element);
     }
 
     @Override
-    public <V extends Value<E>, E> V immutableOf(Key<V> key, E element) {
+    public <V extends BoundedValue<E>, E> V immutableOf(Key<V> key, E element, E minimum, E maximum) {
+        return ((BoundedValueConstructor<V, E>) ((SpongeKey<V, E>) key).getValueConstructor()).getImmutable(element, minimum, maximum);
+    }
+
+    @Override
+    public <V extends BoundedValue<E>, E> V immutableOf(Key<V> key, E element) {
         return ((SpongeKey<V, E>) key).getValueConstructor().getImmutable(element);
     }
 }

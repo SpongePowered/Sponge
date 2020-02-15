@@ -32,6 +32,8 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.common.data.value.ValueConstructor;
+import org.spongepowered.common.data.value.ValueConstructorFactory;
 
 import java.util.Comparator;
 import java.util.function.BiPredicate;
@@ -43,6 +45,7 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     private final TypeToken<E> elementToken;
     private final Comparator<? super E> elementComparator;
     private final BiPredicate<? super E, ? super E> elementIncludesTester;
+    private final ValueConstructor<V, E> valueConstructor;
 
     SpongeKey(CatalogKey key, TypeToken<V> valueToken, TypeToken<E> elementToken, Comparator<? super E> elementComparator,
             BiPredicate<? super E, ? super E> elementIncludesTester) {
@@ -51,6 +54,7 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
         this.elementToken = elementToken;
         this.elementComparator = elementComparator;
         this.elementIncludesTester = elementIncludesTester;
+        this.valueConstructor = ValueConstructorFactory.getConstructor(this);
     }
 
     @Override
@@ -92,5 +96,9 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     @Override
     public String toString() {
         return toStringHelper().toString();
+    }
+
+    public ValueConstructor<V, E> getValueConstructor() {
+        return this.valueConstructor;
     }
 }
