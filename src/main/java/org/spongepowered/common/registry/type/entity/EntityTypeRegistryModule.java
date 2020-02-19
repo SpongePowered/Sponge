@@ -244,7 +244,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @Override
     public boolean hasRegistrationFor(Class<? extends Entity> mappedClass) {
-        return false;
+        return this.entityClassToTypeMappings.containsKey(mappedClass);
     }
 
     @Override
