@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.state.pattern.BlockStateMatcher;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
@@ -67,13 +66,18 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
             final BlockType type = blockType.get();
             final Collection<BlockTrait<?>> traits = type.getTraits();
             final String properties = split[1].replace("[", "").replace("]", "");
+            if (properties.isEmpty()) {
+                throw new IllegalArgumentException("The properties cannot be specified and empty (omit [] if there are no properties)");
+            }
             final String[] propertyValuePairs = properties.split(",");
             List<Tuple<BlockTrait<?>, ? extends Comparable<?>>> foundPairs = new ArrayList<>(propertyValuePairs.length);
             for (String propertyValuePair : propertyValuePairs) {
-                final String name = propertyValuePair.split("=")[0];
-                final String value = propertyValuePair.split("=")[1];
-                type.getTrait(name).ifPresent(trait -> {
-                    trait.parseValue(value).ifPresent(propertyValue -> {
+                final String[] pair = propertyValuePair.split("=");
+                if (pair.length == 1) {
+                    throw new IllegalArgumentException("The properties list is malformed in \"" + id + "\" (all properties must be key=value pairs)");
+                }
+                type.getTrait(pair[0]).ifPresent(trait -> {
+                    trait.parseValue(pair[1]).ifPresent(propertyValue -> {
                         foundPairs.add(Tuple.of(trait, propertyValue));
                     });
                 });
