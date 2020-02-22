@@ -58,7 +58,7 @@ public abstract class DataProviderRegistryBuilder {
         this.register(target, key.get(), getter);
     }
 
-    private static <E, H> Function<H, Optional<E>> toOptionalGetter(Key<? extends Value<E>> key, Function<H, E> getter) {
+    protected static <E, H> Function<H, Optional<E>> toOptionalGetter(Key<? extends Value<E>> key, Function<H, E> getter) {
         // Optimize boolean optionals
         if (key.getElementToken().getRawType() == Boolean.class) {
             //noinspection unchecked

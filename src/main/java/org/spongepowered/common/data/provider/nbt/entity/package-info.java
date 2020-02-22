@@ -22,38 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt.value;
-
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.nbt.NBTDataType;
-
-import java.util.Optional;
-import net.minecraft.nbt.CompoundNBT;
-
-public interface NbtValueProcessor<E, V extends Value<E>> {
-
-    int getPriority();
-
-    NBTDataType getTargetType();
-
-    boolean isCompatible(NBTDataType nbtDataType);
-
-    Optional<V> readFrom(CompoundNBT compound);
-
-    Optional<V> readFrom(DataView view);
-
-    Optional<E> readValue(CompoundNBT compound);
-
-    Optional<E> readValue(DataView view);
-
-    DataTransactionResult offer(CompoundNBT NBTTagCompound, E value);
-
-    DataTransactionResult offer(DataView view, E value);
-
-    DataTransactionResult remove(CompoundNBT compound);
-
-    DataTransactionResult remove(DataView view);
-
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package org.spongepowered.common.data.provider.nbt.entity;

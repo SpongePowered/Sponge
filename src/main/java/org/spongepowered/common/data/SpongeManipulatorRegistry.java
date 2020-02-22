@@ -50,8 +50,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CustomDataRegistrationCategory;
 import org.spongepowered.common.config.type.CustomDataConfig;
-import org.spongepowered.common.data.nbt.NBTDataType;
-import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
 import org.spongepowered.common.data.util.DataProcessorDelegate;

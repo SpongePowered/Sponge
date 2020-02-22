@@ -22,46 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider;
+package org.spongepowered.common.data.provider.nbt;
 
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
-public final class DataProviderLookup {
+@SuppressWarnings("unchecked")
+public abstract class NbtDataProvider<E> extends NbtDataProviderBase<Value<E>, E> {
 
-    private final Map<Key<?>, DataProvider<?,?>> providerMap = new ConcurrentHashMap<>();
-    private final List<DataProvider<?,?>> providers;
-
-    DataProviderLookup(Map<Key<?>, DataProvider<?, ?>> providerMap) {
-        this.providerMap.putAll(providerMap);
-        this.providers = ImmutableList.copyOf(providerMap.values());
+    public NbtDataProvider(Supplier<? extends Key<? extends Value<E>>> key, NbtDataType dataType) {
+        this(key.get(), dataType);
     }
 
-    /**
-     * Gets all the non-empty delegate {@link DataProvider}s.
-     *
-     * @return The delegate data providers
-     */
-    public List<DataProvider<?,?>> getAllProviders() {
-        return this.providers;
+    public NbtDataProvider(Key<? extends Value<E>> key, NbtDataType dataType) {
+        super((Supplier<Key<Value<E>>>) key, dataType);
     }
 
-    /**
-     * Gets the delegate {@link DataProvider} for the given {@link Key}.
-     *
-     * @param key The key
-     * @param <V> The value type
-     * @param <E> The element type
-     * @return The delegate provider
-     */
-    public <V extends Value<E>, E> DataProvider<V, E> getProvider(Key<V> key) {
-        //noinspection unchecked
-        return (DataProvider<V, E>) this.providerMap.computeIfAbsent(key, k -> new EmptyDataProvider<>(key));
+    public NbtDataProvider(Supplier<? extends Key<? extends Value<E>>> key, Predicate<NbtDataType> dataTypePredicate) {
+        this(key.get(), dataTypePredicate);
+    }
+
+    public NbtDataProvider(Key<? extends Value<E>> key, Predicate<NbtDataType> dataTypePredicate) {
+        super((Supplier<Key<Value<E>>>) key, dataTypePredicate);
     }
 }

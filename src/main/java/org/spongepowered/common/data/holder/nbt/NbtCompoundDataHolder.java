@@ -22,34 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt.data;
+package org.spongepowered.common.data.holder.nbt;
 
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.common.data.nbt.NBTDataType;
-
-import java.util.Optional;
 import net.minecraft.nbt.CompoundNBT;
+import org.spongepowered.common.data.holder.SpongeDataHolder;
+import org.spongepowered.common.data.provider.nbt.NbtDataType;
 
-public interface NbtDataProcessor<M extends Mutable<M, I>, I extends Immutable<I, M>> {
+public interface NbtCompoundDataHolder extends SpongeDataHolder {
 
-    int getPriority();
+    /**
+     * The NBT compound which contains backing
+     * data for this data holder.
+     *
+     * @return The nbt compound
+     */
+    CompoundNBT getNbtCompound();
 
-    NBTDataType getTargetType();
-
-    boolean isCompatible(CompoundNBT compound);
-
-    Optional<M> readFrom(CompoundNBT compound);
-
-    Optional<M> readFrom(DataView view);
-
-    Optional<CompoundNBT> storeToCompound(CompoundNBT compound, M manipulator);
-
-    Optional<DataView> storeToView(DataView view, M manipulator);
-
-    DataTransactionResult remove(CompoundNBT data);
-
-    DataTransactionResult remove(DataView data);
+    /**
+     * Gets the {@link NbtDataType} which this
+     * nbt data holder contains data for.
+     *
+     * @return The nbt data type
+     */
+    NbtDataType getNbtDataType();
 }

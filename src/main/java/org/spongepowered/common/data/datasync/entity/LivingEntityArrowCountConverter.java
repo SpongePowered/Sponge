@@ -35,9 +35,9 @@ import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 import java.util.List;
 import java.util.Optional;
 
-public class EntityLivingBaseArrowCountConverter extends DataParameterConverter<Integer> {
+public class LivingEntityArrowCountConverter extends DataParameterConverter<Integer> {
 
-    public EntityLivingBaseArrowCountConverter() {
+    public LivingEntityArrowCountConverter() {
         super(LivingEntityAccessor.accessor$getArrowCountInEntity());
     }
 

@@ -22,46 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider;
+package org.spongepowered.common.data.holder;
 
-import com.google.common.collect.ImmutableList;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.world.Archetype;
+import org.spongepowered.api.world.LocatableSnapshot;
+import org.spongepowered.common.data.holder.nbt.NbtCompoundDataHolder;
+import org.spongepowered.common.data.provider.DataProviderLookup;
+import org.spongepowered.common.data.provider.DataProviderRegistry;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-public final class DataProviderLookup {
+public abstract class SpongeArchetype<S extends LocatableSnapshot<S>, T> implements SpongeMutableDataHolder, NbtCompoundDataHolder, Archetype<S, T> {
 
-    private final Map<Key<?>, DataProvider<?,?>> providerMap = new ConcurrentHashMap<>();
-    private final List<DataProvider<?,?>> providers;
+    private final CompoundNBT compound;
+    private final DataProviderLookup lookup = DataProviderRegistry.get().getProviderLookup(this.getClass());
 
-    DataProviderLookup(Map<Key<?>, DataProvider<?, ?>> providerMap) {
-        this.providerMap.putAll(providerMap);
-        this.providers = ImmutableList.copyOf(providerMap.values());
+    protected SpongeArchetype(CompoundNBT compound) {
+        this.compound = compound;
     }
 
-    /**
-     * Gets all the non-empty delegate {@link DataProvider}s.
-     *
-     * @return The delegate data providers
-     */
-    public List<DataProvider<?,?>> getAllProviders() {
-        return this.providers;
+    @Override
+    public CompoundNBT getNbtCompound() {
+        return this.compound;
     }
 
-    /**
-     * Gets the delegate {@link DataProvider} for the given {@link Key}.
-     *
-     * @param key The key
-     * @param <V> The value type
-     * @param <E> The element type
-     * @return The delegate provider
-     */
-    public <V extends Value<E>, E> DataProvider<V, E> getProvider(Key<V> key) {
-        //noinspection unchecked
-        return (DataProvider<V, E>) this.providerMap.computeIfAbsent(key, k -> new EmptyDataProvider<>(key));
+    @Override
+    public <V extends Value<E>, E> DataProvider<V, E> getProviderFor(Key<V> key) {
+        return this.lookup.getProvider(key);
+    }
+
+    @Override
+    public List<DataProvider<?, ?>> getAllProviders() {
+        return this.lookup.getAllProviders();
     }
 }

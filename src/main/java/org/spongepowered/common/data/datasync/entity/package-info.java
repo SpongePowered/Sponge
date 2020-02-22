@@ -22,27 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt;
-
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
-
-public abstract class AbstractSpongeNbtProcessor<T extends Mutable<T, I>, I extends Immutable<I, T>> implements NbtDataProcessor<T, I> {
-
-    private final NBTDataType dataType;
-
-    protected AbstractSpongeNbtProcessor(NBTDataType dataType) {
-        this.dataType = dataType;
-    }
-
-    @Override
-    public int getPriority() {
-        return 100;
-    }
-
-    @Override
-    public final NBTDataType getTargetType() {
-        return this.dataType;
-    }
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package org.spongepowered.common.data.datasync.entity;

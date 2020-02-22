@@ -901,7 +901,7 @@ public final class Constants {
             public static final double DEFAULT_SATURATION = 0;
             public static final int DEFAULT_FOOD_LEVEL = 20;
             public static final double DEFAULT_HEALTH_SCALE = 20D;
-            public static final String IS_FLYING = "flying";
+            public static final String ABILITIES = "abilities";
             public static final String INVENTORY = "Inventory";
             public static final String INVULNERABLE = "Invulnerable";
             public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
@@ -914,6 +914,11 @@ public final class Constants {
             public static final float PLAYER_HEIGHT = 1.8F;
             public static final int TRACKING_RANGE = 32;
             public static final double PLAYER_Y_OFFSET = -0.35D;
+
+            public static final class Abilities {
+                public static final String IS_FLYING = "flying";
+                public static final String CAN_FLY = "mayfly";
+            }
         }
 
         public static final class PrimedTNT {

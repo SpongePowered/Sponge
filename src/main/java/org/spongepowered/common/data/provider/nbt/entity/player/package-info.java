@@ -22,13 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt;
-
-import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
-
-public class NBTDataTypes {
-
-    public static final NBTDataType ENTITY = DummyObjectProvider.createFor(NBTDataType.class, "ENTITY");
-    public static final NBTDataType TILE_ENTITY = DummyObjectProvider.createFor(NBTDataType.class, "TILE_ENTITY");
-
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package org.spongepowered.common.data.provider.nbt.entity.player;

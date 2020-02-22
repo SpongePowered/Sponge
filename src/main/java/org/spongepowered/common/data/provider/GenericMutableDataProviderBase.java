@@ -58,7 +58,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
                             type != BlockLocationDataProviderBase.class)
                     .get();
 
-    protected GenericMutableDataProviderBase(Supplier<Key<V>> key, Class<H> holderType) {
+    protected GenericMutableDataProviderBase(Supplier<? extends Key<V>> key, Class<H> holderType) {
         this(key.get(), holderType);
     }
 
@@ -67,7 +67,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
         this.holderType = holderType;
     }
 
-    protected GenericMutableDataProviderBase(Supplier<Key<V>> key) {
+    protected GenericMutableDataProviderBase(Supplier<? extends Key<V>> key) {
         this(key.get());
     }
 
@@ -193,7 +193,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public Optional<V> getValue(DataHolder dataHolder) {
+    public final Optional<V> getValue(DataHolder dataHolder) {
         if (!this.isSupported(dataHolder)) {
             return Optional.empty();
         }

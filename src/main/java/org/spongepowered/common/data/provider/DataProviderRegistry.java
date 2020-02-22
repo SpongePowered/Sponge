@@ -78,7 +78,7 @@ public final class DataProviderRegistry {
 
     private final Multimap<Key<?>, DataProvider<?,?>> dataProviders = HashMultimap.create();
     private final Map<LookupKey, DataProvider<?,?>> dataProviderCache = new ConcurrentHashMap<>();
-    private final Map<Class<?>, List<DataProvider<?,?>>> dataProviderListCache = new ConcurrentHashMap<>();
+    private final Map<Class<?>, DataProviderLookup> dataProviderLookupCache = new ConcurrentHashMap<>();
 
     private DataProviderRegistry() {
     }
@@ -94,18 +94,14 @@ public final class DataProviderRegistry {
 
     @SuppressWarnings("unchecked")
     private DataProvider<?,?> loadProvider(LookupKey key) {
-        final List<DataProvider<Value<Object>, Object>> providers = this.dataProviders.get(key.key).stream()
-                .filter(provider -> filterHolderType(provider, key.holderType))
-                .map(provider -> (DataProvider<Value<Object>, Object>) provider)
-                .collect(Collectors.toList());
-        return buildDelegateProvider((Key<Value<Object>>) key.key, providers);
+        return this.buildDelegate((Key<Value<Object>>) key.key, provider -> filterHolderType(provider, key.holderType));
     }
 
-    private List<DataProvider<?,?>> loadProviderList(Class<?> holderType) {
-        return this.dataProviders.keySet().stream()
+    private DataProviderLookup loadProviderLookup(Class<?> holderType) {
+        return new DataProviderLookup(this.dataProviders.keySet().stream()
                 .map(key -> this.getProvider(key, holderType))
                 .filter(provider -> !(provider instanceof EmptyDataProvider))
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(DataProvider::getKey, Function.identity())));
     }
 
     /**
@@ -133,8 +129,8 @@ public final class DataProviderRegistry {
      * @param dataHolderType The data holder type
      * @return The built lookup
      */
-    public DataProviderLookup buildLookupForHolderType(Class<?> dataHolderType) {
-        return this.buildLookup(dataProvider -> filterHolderType(dataProvider, dataHolderType));
+    public DataProviderLookup getProviderLookup(Class<?> dataHolderType) {
+        return this.dataProviderLookupCache.computeIfAbsent(dataHolderType, this::loadProviderLookup);
     }
 
     /**
@@ -152,13 +148,31 @@ public final class DataProviderRegistry {
     }
 
     /**
+     * Builds a delegate {@link DataProvider} from the {@link DataProvider} that
+     * are accepted by the given {@link Predicate}.
+     *
+     * @param key The key
+     * @param predicate The predicate
+     * @param <V> The value type
+     * @param <E> The element type
+     * @return The delegate data provider
+     */
+    public <V extends Value<E>, E> DataProvider<V, E> buildDelegate(Key<V> key, Predicate<DataProvider<V, E>> predicate) {
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        final List<DataProvider<V, E>> providers = (List) this.dataProviders.get(key);
+        return buildDelegateProvider(key, providers.stream()
+                .filter(predicate)
+                .collect(Collectors.toList()));
+    }
+
+    /**
      * Gets a delegate data providers for all the keys
      * registered for the specified data holder type.
      *
      * @return The delegate data provider
      */
     public List<DataProvider<?,?>> getAllProviders(Class<?> dataHolderType) {
-        return this.dataProviderListCache.computeIfAbsent(dataHolderType, this::loadProviderList);
+        return this.getProviderLookup(dataHolderType).getAllProviders();
     }
 
     /**
@@ -195,6 +209,6 @@ public final class DataProviderRegistry {
     public void register(DataProvider<?,?> provider) {
         this.dataProviders.put(provider.getKey(), provider);
         this.dataProviderCache.clear();
-        this.dataProviderListCache.clear();
+        this.dataProviderLookupCache.clear();
     }
 }

@@ -65,7 +65,6 @@ import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
 import org.spongepowered.common.data.fixer.entity.player.PlayerRespawnData;
 import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
-import org.spongepowered.common.data.nbt.NBTDataType;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;

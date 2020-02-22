@@ -25,43 +25,39 @@
 package org.spongepowered.common.data.datasync.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 
 import java.util.List;
 import java.util.Optional;
 
-public class EntityLivingBaseHealthConverter extends DataParameterConverter<Float> {
+public class MobEntityAIFlagsConverter extends DataParameterConverter<Byte> {
 
-    public EntityLivingBaseHealthConverter() {
-        super(LivingEntityAccessor.accessor$getHealth());
+    public MobEntityAIFlagsConverter() {
+        super(MobEntityAccessor.accessor$getAIFlags());
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(final Entity entity, final Float currentValue, final Float value) {
-        final float maxHealth = entity instanceof ServerPlayerEntityBridge
-                                ? (float) ((ServerPlayerEntityBridge) entity).bridge$getHealthScale()
-                                // Players scale their health and send it through the
-                                // data provider, only the server knows their actual max health
-                                : ((LivingEntity) entity).getMaxHealth();
+    public Optional<DataTransactionResult> createTransaction(final Entity entity, final Byte currentValue, final Byte value) {
+        final boolean oldHasAi = (currentValue & 1) == 0;
+        final boolean newHasAi = (value & 1) == 0;
         return Optional.of(DataTransactionResult.builder()
-                .replace(BoundedValue.immutableOf(Keys.HEALTH, currentValue.doubleValue(), 0.0, (double) maxHealth))
-                .success(BoundedValue.immutableOf(Keys.HEALTH, value.doubleValue(), 0.0, (double) maxHealth))
+                .replace(Value.immutableOf(Keys.IS_AI_ENABLED, oldHasAi))
+                .success(Value.immutableOf(Keys.IS_AI_ENABLED, newHasAi))
                 .result(DataTransactionResult.Type.SUCCESS)
                 .build());
     }
 
     @Override
-    public Float getValueFromEvent(final Float originalValue, final List<Immutable<?>> immutableValues) {
+    public Byte getValueFromEvent(Byte originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.HEALTH.get()) {
-                return (Float) immutableValue.get();
+            if (immutableValue.getKey() == Keys.IS_AI_ENABLED.get()) {
+                final Boolean hasAi = (Boolean) immutableValue.get();
+                originalValue = hasAi ? (byte) (originalValue & -2) : (byte) (originalValue | 1);
             }
         }
         return originalValue;
