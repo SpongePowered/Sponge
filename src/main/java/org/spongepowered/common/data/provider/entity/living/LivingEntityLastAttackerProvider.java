@@ -54,7 +54,7 @@ public class LivingEntityLastAttackerProvider extends GenericMutableDataProvider
     }
 
     @Override
-    protected boolean removeFrom(LivingEntity dataHolder) {
+    protected boolean delete(LivingEntity dataHolder) {
         dataHolder.setRevengeTarget(null);
         return true;
     }

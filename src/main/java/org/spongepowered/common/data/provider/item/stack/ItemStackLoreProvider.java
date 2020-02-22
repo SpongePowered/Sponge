@@ -30,7 +30,7 @@ import net.minecraft.nbt.ListNBT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.data.util.NbtCollectors;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
@@ -38,7 +38,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemStackLoreProvider extends GenericMutableDataProvider<ItemStack, List<Text>> {
+public class ItemStackLoreProvider extends ItemStackDataProvider<List<Text>> {
 
     public ItemStackLoreProvider() {
         super(Keys.ITEM_LORE);
@@ -60,7 +60,7 @@ public class ItemStackLoreProvider extends GenericMutableDataProvider<ItemStack,
     @Override
     protected boolean set(ItemStack dataHolder, List<Text> value) {
         if (value.isEmpty()) {
-            removeFrom(dataHolder);
+            delete(dataHolder);
         } else {
             final ListNBT list = SpongeTexts.asJsonNBT(value);
             dataHolder.getOrCreateChildTag(Constants.Item.ITEM_DISPLAY).put(Constants.Item.ITEM_LORE, list);
@@ -69,7 +69,7 @@ public class ItemStackLoreProvider extends GenericMutableDataProvider<ItemStack,
     }
 
     @Override
-    protected boolean removeFrom(ItemStack dataHolder) {
+    protected boolean delete(ItemStack dataHolder) {
         @Nullable final CompoundNBT tag = dataHolder.getTag();
         if (tag != null && tag.contains(Constants.Item.ITEM_DISPLAY)) {
             tag.getCompound(Constants.Item.ITEM_DISPLAY).remove(Constants.Item.ITEM_LORE);

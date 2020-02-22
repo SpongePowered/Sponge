@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
-public class NbtCollectors {
+public final class NbtCollectors {
 
     private static final Collector<INBT, ?, ListNBT> TO_TAG_LIST = toTagList(value -> value);
     private static final Collector<Long, ?, ListNBT> TO_LONG_TAG_LIST = toTagList(LongNBT::new);
@@ -115,5 +115,8 @@ public class NbtCollectors {
 
     public static Collector<INBT, ?, List<String>> toStringList() {
         return TO_STRING_LIST;
+    }
+
+    private NbtCollectors() {
     }
 }

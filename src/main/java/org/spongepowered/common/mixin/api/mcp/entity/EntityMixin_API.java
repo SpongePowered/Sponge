@@ -554,7 +554,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         values.add(this.passengers().asImmutable());
         values.add(this.onGround().asImmutable());
         values.add(this.velocity().asImmutable());
-        values.add(this.gravity().asImmutable());
+        values.add(this.gravityAffected().asImmutable());
         values.add(this.silent().asImmutable());
 
         this.baseVehicle().map(Value::asImmutable).ifPresent(values::add);

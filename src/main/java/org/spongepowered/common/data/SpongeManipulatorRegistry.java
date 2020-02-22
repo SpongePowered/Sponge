@@ -50,14 +50,11 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CustomDataRegistrationCategory;
 import org.spongepowered.common.config.type.CustomDataConfig;
-import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.nbt.NBTDataType;
 import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
-import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
-import org.spongepowered.common.data.util.ValueProcessorDelegate;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.util.Constants;
 

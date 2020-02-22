@@ -35,7 +35,7 @@ import java.util.Optional;
 public class AbstractSignBlockAttachedProvider extends BlockStateDataProvider<Boolean> {
 
     public AbstractSignBlockAttachedProvider() {
-        super(Keys.ATTACHED.get(), AbstractSignBlock.class);
+        super(Keys.IS_ATTACHED, AbstractSignBlock.class);
     }
 
     @Override

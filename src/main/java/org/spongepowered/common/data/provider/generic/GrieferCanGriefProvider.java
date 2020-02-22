@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.generic;
 
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
@@ -43,7 +44,7 @@ public class GrieferCanGriefProvider extends GenericMutableDataProvider<GrieferB
 
     @Override
     protected Optional<Boolean> getFrom(GrieferBridge dataHolder) {
-        return Optional.of(dataHolder.bridge$canGrief());
+        return OptBool.of(dataHolder.bridge$canGrief());
     }
 
     @Override

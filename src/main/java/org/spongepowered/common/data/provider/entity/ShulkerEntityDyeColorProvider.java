@@ -50,7 +50,7 @@ public class ShulkerEntityDyeColorProvider extends GenericMutableDataProvider<Sh
     }
 
     @Override
-    protected boolean removeFrom(ShulkerEntity dataHolder) {
+    protected boolean delete(ShulkerEntity dataHolder) {
         ((ShulkerEntityBridge) dataHolder).bridge$setColor(null);
         return true;
     }

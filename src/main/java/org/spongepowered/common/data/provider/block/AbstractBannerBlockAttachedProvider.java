@@ -35,7 +35,7 @@ import java.util.Optional;
 public class AbstractBannerBlockAttachedProvider extends BlockStateDataProvider<Boolean> {
 
     AbstractBannerBlockAttachedProvider() {
-        super(Keys.ATTACHED.get(), AbstractBannerBlock.class);
+        super(Keys.IS_ATTACHED, AbstractBannerBlock.class);
     }
 
     @Override

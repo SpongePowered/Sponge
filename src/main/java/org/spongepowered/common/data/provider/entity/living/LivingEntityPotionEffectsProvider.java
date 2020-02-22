@@ -60,7 +60,7 @@ public class LivingEntityPotionEffectsProvider extends GenericMutableDataProvide
     }
 
     @Override
-    protected boolean removeFrom(LivingEntity dataHolder) {
+    protected boolean delete(LivingEntity dataHolder) {
         dataHolder.clearActivePotions();
         return true;
     }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.item.DyeColor;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -33,7 +34,7 @@ import net.minecraft.tileentity.BannerPattern;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.data.util.NbtCollectors;
 import org.spongepowered.common.util.Constants;
 
@@ -45,7 +46,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("ConstantConditions")
-public class ItemStackShieldBannerPatternsProvider extends GenericMutableDataProvider<ItemStack, List<PatternLayer>> {
+public class ItemStackShieldBannerPatternsProvider extends ItemStackDataProvider<List<PatternLayer>> {
 
     private static final Map<String, BannerPatternShape> SHAPE_BY_HASHNAME = new HashMap<>();
 
@@ -60,8 +61,8 @@ public class ItemStackShieldBannerPatternsProvider extends GenericMutableDataPro
     }
 
     @Override
-    protected boolean supports(ItemStack dataHolder) {
-        return dataHolder.getItem() == Items.SHIELD;
+    protected boolean supports(Item item) {
+        return item == Items.SHIELD;
     }
 
     @Override

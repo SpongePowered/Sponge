@@ -27,9 +27,9 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 
 import java.util.List;
@@ -44,28 +44,16 @@ public class EntityLivingBaseArrowCountConverter extends DataParameterConverter<
     @Override
     public Optional<DataTransactionResult> createTransaction(final Entity entity, final Integer currentValue, final Integer value) {
         return Optional.of(DataTransactionResult.builder()
-            .replace(SpongeValueFactory.boundedBuilder(Keys.STUCK_ARROWS)
-                .defaultValue(0)
-                .actualValue(currentValue)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .build()
-                .asImmutable())
-            .success(SpongeValueFactory.boundedBuilder(Keys.STUCK_ARROWS)
-                .defaultValue(0)
-                .actualValue(value)
-                .minimum(0)
-                .maximum(Integer.MAX_VALUE)
-                .build()
-                .asImmutable())
-            .result(DataTransactionResult.Type.SUCCESS)
-            .build());
+                .replace(Value.immutableOf(Keys.STUCK_ARROWS, currentValue))
+                .success(Value.immutableOf(Keys.STUCK_ARROWS, value))
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build());
     }
 
     @Override
     public Integer getValueFromEvent(final Integer originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.STUCK_ARROWS) {
+            if (immutableValue.getKey() == Keys.STUCK_ARROWS.get()) {
                 return (Integer) immutableValue.get();
             }
         }

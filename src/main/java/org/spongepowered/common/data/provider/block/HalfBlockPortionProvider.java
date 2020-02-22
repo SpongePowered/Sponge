@@ -40,7 +40,7 @@ public class HalfBlockPortionProvider extends BlockStateDataProvider<PortionType
     private final EnumProperty<Half> property;
 
     HalfBlockPortionProvider(Class<? extends Block> blockType, EnumProperty<Half> property) {
-        super(Keys.PORTION_TYPE.get(), blockType);
+        super(Keys.PORTION_TYPE, blockType);
         this.property = property;
     }
 

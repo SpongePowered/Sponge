@@ -27,9 +27,9 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 
 import java.util.List;
@@ -61,28 +61,28 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         boolean changed = false;
         if (isSneaking != newIsSneaking) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, isSneaking));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, newIsSneaking));
+            builder.replace(Value.immutableOf(Keys.IS_SNEAKING, isSneaking));
+            builder.success(Value.immutableOf(Keys.IS_SNEAKING, newIsSneaking));
             changed = true;
         }
         if (sprinting != newSprinting) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.IS_SPRINTING, false, sprinting));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.IS_SPRINTING, false, newSprinting));
+            builder.replace(Value.immutableOf(Keys.IS_SPRINTING, sprinting));
+            builder.success(Value.immutableOf(Keys.IS_SPRINTING, newSprinting));
             changed = true;
         }
         if (invisible != newInvisible) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.INVISIBLE, false, invisible));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.INVISIBLE, false, newInvisible));
+            builder.replace(Value.immutableOf(Keys.IS_INVISIBLE, invisible));
+            builder.success(Value.immutableOf(Keys.IS_INVISIBLE, newInvisible));
             changed = true;
         }
         if (glowing != newGlowing) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.GLOWING, false, glowing));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.GLOWING, false, newGlowing));
+            builder.replace(Value.immutableOf(Keys.IS_GLOWING, glowing));
+            builder.success(Value.immutableOf(Keys.IS_GLOWING, newGlowing));
             changed = true;
         }
         if (elytra != newElytra) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.IS_ELYTRA_FLYING, false, elytra));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.IS_ELYTRA_FLYING, false, newElytra));
+            builder.replace(Value.immutableOf(Keys.IS_ELYTRA_FLYING, elytra));
+            builder.success(Value.immutableOf(Keys.IS_ELYTRA_FLYING, newElytra));
             changed = true;
         }
         builder.result(DataTransactionResult.Type.SUCCESS);
@@ -102,19 +102,19 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
         boolean newGlowing = this.getFlag(originalValue, GLOWING_MASK);
         boolean newElytra = this.getFlag(originalValue, FLYING_ELYTRA_MASK);
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_SNEAKING) {
+            if (immutableValue.getKey() == Keys.IS_SNEAKING.get()) {
                 newIsSneaking = ((Boolean) immutableValue.get());
             }
-            if (immutableValue.getKey() == Keys.IS_SPRINTING) {
+            if (immutableValue.getKey() == Keys.IS_SPRINTING.get()) {
                 newSprinting = ((Boolean) immutableValue.get());
             }
-            if (immutableValue.getKey() == Keys.INVISIBLE) {
+            if (immutableValue.getKey() == Keys.IS_INVISIBLE.get()) {
                 newInvisible = (Boolean) immutableValue.get();
             }
-            if (immutableValue.getKey() == Keys.GLOWING) {
+            if (immutableValue.getKey() == Keys.IS_GLOWING.get()) {
                 newGlowing = (Boolean) immutableValue.get();
             }
-            if (immutableValue.getKey() == Keys.IS_ELYTRA_FLYING) {
+            if (immutableValue.getKey() == Keys.IS_ELYTRA_FLYING.get()) {
                 newElytra = (Boolean) immutableValue.get();
             }
         }

@@ -53,7 +53,7 @@ public class LivingEntityActiveItemProvider extends GenericMutableDataProvider<L
     }
 
     @Override
-    protected boolean removeFrom(LivingEntity dataHolder) {
+    protected boolean delete(LivingEntity dataHolder) {
         dataHolder.stopActiveHand();
         return true;
     }

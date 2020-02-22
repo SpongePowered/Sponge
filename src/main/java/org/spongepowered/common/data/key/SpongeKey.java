@@ -37,6 +37,7 @@ import org.spongepowered.common.data.value.ValueConstructorFactory;
 
 import java.util.Comparator;
 import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 public class SpongeKey<V extends Value<E>, E> implements Key<V> {
 
@@ -46,14 +47,16 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     private final Comparator<? super E> elementComparator;
     private final BiPredicate<? super E, ? super E> elementIncludesTester;
     private final ValueConstructor<V, E> valueConstructor;
+    private final Supplier<E> defaultValueSupplier;
 
     SpongeKey(CatalogKey key, TypeToken<V> valueToken, TypeToken<E> elementToken, Comparator<? super E> elementComparator,
-            BiPredicate<? super E, ? super E> elementIncludesTester) {
+            BiPredicate<? super E, ? super E> elementIncludesTester, Supplier<E> defaultValueSupplier) {
         this.key = key;
         this.valueToken = valueToken;
         this.elementToken = elementToken;
         this.elementComparator = elementComparator;
         this.elementIncludesTester = elementIncludesTester;
+        this.defaultValueSupplier = defaultValueSupplier;
         this.valueConstructor = ValueConstructorFactory.getConstructor(this);
     }
 
@@ -100,5 +103,9 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
 
     public ValueConstructor<V, E> getValueConstructor() {
         return this.valueConstructor;
+    }
+
+    public Supplier<E> getDefaultValueSupplier() {
+        return this.defaultValueSupplier;
     }
 }

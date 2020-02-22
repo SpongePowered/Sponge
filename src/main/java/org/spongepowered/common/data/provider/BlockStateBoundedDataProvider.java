@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.BoundedValue;
 
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public abstract class BlockStateBoundedDataProvider<E> extends BlockStateDataProviderBase<BoundedValue<E>, E> {
@@ -37,7 +38,15 @@ public abstract class BlockStateBoundedDataProvider<E> extends BlockStateDataPro
         super((Key<BoundedValue<E>>) key, blockType);
     }
 
+    public BlockStateBoundedDataProvider(Supplier<? extends Key<? extends BoundedValue<E>>> key, Class<? extends Block> blockType) {
+        this(key.get(), blockType);
+    }
+
     public BlockStateBoundedDataProvider(Key<? extends BoundedValue<E>> key, Predicate<Block> blockPredicate) {
         super((Key<BoundedValue<E>>) key, blockPredicate);
+    }
+
+    public BlockStateBoundedDataProvider(Supplier<? extends Key<? extends BoundedValue<E>>> key, Predicate<Block> blockPredicate) {
+        this(key.get(), blockPredicate);
     }
 }

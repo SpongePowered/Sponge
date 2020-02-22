@@ -69,7 +69,7 @@ public final class EnchantmentTest {
                             }
                             final Player player = (Player) ctx.getSubject();
                             final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND.get());
-                            if (!itemStack.supports(Keys.ITEM_ENCHANTMENTS)) {
+                            if (!itemStack.supports(Keys.APPLIED_ENCHANTMENTS)) {
                                 throw new CommandException(Text.of(TextColors.RED, "This item does not support item enchantments."));
                             }
                             final EnchantmentType type = ctx.getOne(keyEnch).orElse(EnchantmentTypes.BINDING_CURSE.get());
@@ -78,9 +78,9 @@ public final class EnchantmentTest {
                                     .type(type)
                                     .level(level)
                                     .build();
-                            final List<Enchantment> enchantments = itemStack.get(Keys.ITEM_ENCHANTMENTS).orElse(new ArrayList<>());
+                            final List<Enchantment> enchantments = itemStack.get(Keys.APPLIED_ENCHANTMENTS).orElse(new ArrayList<>());
                             enchantments.add(newEnchantment);
-                            itemStack.offer(Keys.ITEM_ENCHANTMENTS, enchantments);
+                            itemStack.offer(Keys.APPLIED_ENCHANTMENTS, enchantments);
                             player.setItemInHand(HandTypes.MAIN_HAND.get(), itemStack);
                             player.sendMessage(Text.of(TextColors.GOLD, "You have successfully added the enchantment " + type.getKey() + " with a level of " + level + "."));
                             return CommandResult.success();
@@ -95,10 +95,10 @@ public final class EnchantmentTest {
                             }
                             final Player player = (Player) ctx.getSubject();
                             final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND.get());
-                            if (!itemStack.supports(Keys.ITEM_ENCHANTMENTS)) {
+                            if (!itemStack.supports(Keys.APPLIED_ENCHANTMENTS)) {
                                 throw new CommandException(Text.of(TextColors.RED, "This item does not support item enchantments."));
                             }
-                            final List<Enchantment> enchantments = itemStack.get(Keys.ITEM_ENCHANTMENTS).orElse(ImmutableList.of());
+                            final List<Enchantment> enchantments = itemStack.get(Keys.APPLIED_ENCHANTMENTS).orElse(ImmutableList.of());
                             if (enchantments.isEmpty()) {
                                 ctx.getMessageReceiver().sendMessage(Text.of(TextColors.RED, "This item has no enchantments!"));
                             }

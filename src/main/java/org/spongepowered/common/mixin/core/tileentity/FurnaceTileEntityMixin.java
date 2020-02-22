@@ -45,24 +45,18 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.data.CustomNameableBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collections;
 
 @Mixin(FurnaceTileEntity.class)
-public abstract class FurnaceTileEntityMixin extends LockableTileEntityMixin implements CustomNameableBridge {
+public abstract class FurnaceTileEntityMixin extends LockableTileEntityMixin {
 
     @Shadow private NonNullList<ItemStack> furnaceItemStacks;
     @Shadow private int cookTime;
     @Shadow private int currentItemBurnTime;
 
     @Shadow protected abstract boolean canSmelt();
-
-    @Override
-    public void bridge$setCustomDisplayName(final String customName) {
-        ((FurnaceTileEntity) (Object) this).setCustomInventoryName(customName);
-    }
 
     // Shrink Fuel
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))

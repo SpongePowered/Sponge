@@ -56,6 +56,7 @@ import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.world.BossInfo;
 import net.minecraft.world.GameType;
 import net.minecraft.world.raid.Raid;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
@@ -324,10 +325,17 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    public <T extends CatalogType, R extends Registry<T>> R getRegistry(Class<T> catalogClass) {
+    public <T extends CatalogType, R extends Registry<T>> @Nullable R getRegistry(Class<T> catalogClass) {
         checkNotNull(catalogClass);
+        return (R) this.registriesByType.get(catalogClass);
+    }
 
-        return (R) (Object) this.registriesByType.get(catalogClass);
+    public <T extends CatalogType, R extends Registry<T>> @NonNull R requireRegistry(Class<T> catalogClass) {
+        final R registry = this.getRegistry(catalogClass);
+        if (registry == null) {
+            throw new IllegalArgumentException("No registry is registered for " + catalogClass);
+        }
+        return registry;
     }
 
     public SpongeCatalogRegistry registerCatalog(CatalogType catalogType) {

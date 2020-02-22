@@ -24,41 +24,55 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 import net.minecraft.entity.monster.BlazeEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.EndermanEntity;
+import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.api.data.type.PickupRule;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.data.provider.util.FireworkUtils;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
+import org.spongepowered.common.data.provider.commandblock.CommandBlockLogicDataProviders;
+import org.spongepowered.common.data.provider.entity.ageable.AgeableEntityCanBreedProvider;
 import org.spongepowered.common.data.provider.entity.areaeffectcloud.AreaEffectCloudEntityParticleEffectProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityBodyRotationsProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityPlacingDisabledProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityRotationProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityTakingDisabledProvider;
-import org.spongepowered.common.data.provider.entity.base.EntityDisplayNameProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityFireDamageDelayProvider;
-import org.spongepowered.common.data.provider.entity.base.EntityInvisibleProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvulnerabilityTicksProvider;
 import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityIsSaddledProvider;
 import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseColorProvider;
@@ -73,26 +87,39 @@ import org.spongepowered.common.data.provider.entity.living.LivingEntityMaxAirPr
 import org.spongepowered.common.data.provider.entity.living.LivingEntityMaxHealthProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityPotionEffectsProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityRemainingAirProvider;
+import org.spongepowered.common.data.provider.entity.minecart.AbstractMinecartEntityBlockOffsetProvider;
+import org.spongepowered.common.data.provider.entity.minecart.AbstractMinecartEntityBlockStateProvider;
+import org.spongepowered.common.data.provider.entity.player.PlayerEntityCanFlyProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityExhaustionProvider;
+import org.spongepowered.common.data.provider.entity.player.PlayerEntityExperienceFromStartOfLevelValueProvider;
+import org.spongepowered.common.data.provider.entity.player.PlayerEntityExperienceLevelProvider;
+import org.spongepowered.common.data.provider.entity.player.PlayerEntityExperienceProvider;
+import org.spongepowered.common.data.provider.entity.player.PlayerEntityExperienceSinceLevelProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityFlyingSpeedProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityFoodLevelProvider;
+import org.spongepowered.common.data.provider.entity.player.PlayerEntityIsFlyingProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntitySaturationProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityWalkingSpeedProvider;
 import org.spongepowered.common.data.provider.entity.user.UserFirstDatePlayedProvider;
 import org.spongepowered.common.data.provider.entity.user.UserLastDatePlayedProvider;
+import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityInvisibleProvider;
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishIgnoresCollisionProvider;
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishPreventsTargetingProvider;
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishProvider;
 import org.spongepowered.common.data.provider.entity.wolf.WolfEntityIsWetProvider;
 import org.spongepowered.common.data.util.PotionEffectHelper;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.BlazeEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.CreeperEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.EndermanEntityAccessor;
-import org.spongepowered.common.mixin.accessor.tileentity.CommandBlockLogicAccessor;
+import org.spongepowered.common.mixin.accessor.entity.monster.VindicatorEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.monster.ZombiePigmanEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.projectile.AbstractArrowEntityAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -113,10 +140,6 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 BlazeEntity::isBurning,
                 (accessor, value) -> ((BlazeEntityAccessor) accessor).accessor$setOnFire(value));
 
-        register(AbstractArrowEntity.class, Keys.CRITICAL_HIT,
-                AbstractArrowEntity::getIsCritical,
-                AbstractArrowEntity::setIsCritical);
-
         register(AggressiveEntityBridge.class, Keys.IS_ANGRY,
                 AggressiveEntityBridge::bridge$isAngry,
                 AggressiveEntityBridge::bridge$setAngry);
@@ -125,24 +148,76 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 PigEntity::getSaddled,
                 PigEntity::setSaddled);
 
+        registerAbstractMinecartEntityData();
+        registerFireworkRocketEntityData();
+        registerPaintingEntityData();
+        registerAbstractArrowEntityData();
         registerAreaEffectCloudEntityData();
         registerFallingBlockEntityData();
         registerArmorStandEntityData();
         registerMinecartCommandBlockEntityData();
-        registerSheepEntityData();
         registerVanishableEntityData();
-        registerPlayerEntityData();
+        registerVindicatorEntityData();
+        registerIronGolemEntityData();
+        registerSheepEntityData();
+        registerZombiePigmanEntityData();
         registerWolfEntityData();
         registerEndermanEntityData();
         registerCreeperEntityData();
+        registerPlayerEntityData();
         registerUserData();
+        registerSlimeEntityData();
         registerHorseEntityData();
         registerAbstractHorseEntityData();
+        registerTameableEntityData();
         registerAgeableEntityData();
+        registerExplosiveData();
         registerItemEntityData();
         registerAgentEntityData();
         registerLivingEntityData();
         registerEntityData();
+    }
+
+    private void registerFireworkRocketEntityData() {
+        register(FireworkRocketEntity.class, Keys.FIREWORK_EFFECTS, ImmutableList.of(),
+                (accessor) -> FireworkUtils.getFireworkEffects(accessor).orElse(null),
+                FireworkUtils::setFireworkEffects);
+    }
+
+    private void registerPaintingEntityData() {
+        register(new PaintingEntityArtProvider());
+    }
+
+    private void registerAbstractArrowEntityData() {
+        register(AbstractArrowEntity.class, Keys.IS_CRITICAL_HIT,
+                AbstractArrowEntity::getIsCritical,
+                AbstractArrowEntity::setIsCritical);
+
+        register(AbstractArrowEntity.class, Keys.PICKUP_RULE,
+                (accessor) -> (PickupRule) (Object) accessor.pickupStatus,
+                (accessor, value) -> accessor.pickupStatus = (AbstractArrowEntity.PickupStatus) (Object) value);
+
+        register(AbstractArrowEntity.class, Keys.KNOCKBACK_STRENGTH,
+                (accessor) -> (double) ((AbstractArrowEntityAccessor) accessor).accessor$getKnockbackStrength(),
+                (accessor, value) -> accessor.setKnockbackStrength((int) Math.round(value)));
+    }
+
+    private void registerVindicatorEntityData() {
+        register(VindicatorEntityAccessor.class, Keys.IS_JOHNNY,
+                VindicatorEntityAccessor::accessor$getIsJohnny,
+                VindicatorEntityAccessor::accessor$setIsJohnny);
+    }
+
+    private void registerZombiePigmanEntityData() {
+        register(ZombiePigmanEntityAccessor.class, Keys.ANGER_LEVEL,
+                ZombiePigmanEntityAccessor::accessor$getAngerLevel,
+                ZombiePigmanEntityAccessor::accessor$setAngerLevel);
+    }
+
+    private void registerIronGolemEntityData() {
+        register(IronGolemEntity.class, Keys.IS_PLAYER_CREATED,
+                IronGolemEntity::isPlayerCreated,
+                IronGolemEntity::setPlayerCreated);
     }
 
     private void registerEndermanEntityData() {
@@ -155,6 +230,11 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(CreeperEntity.class, Keys.IS_CHARGED,
                 CreeperEntity::getPowered,
                 (accessor, value) -> accessor.getDataManager().set(CreeperEntityAccessor.accessor$getPowered(), value));
+    }
+
+    private void registerAbstractMinecartEntityData() {
+        register(new AbstractMinecartEntityBlockOffsetProvider());
+        register(new AbstractMinecartEntityBlockStateProvider());
     }
 
     private void registerFallingBlockEntityData() {
@@ -234,19 +314,12 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
     }
 
     private void registerMinecartCommandBlockEntityData() {
-        register(MinecartCommandBlockEntity.class, Keys.COMMAND,
-                (accessor) -> accessor.getCommandBlockLogic().getCommand(),
-                (accessor, value) -> ((CommandBlockLogicAccessor) accessor.getCommandBlockLogic()).accessor$setCommandStored(value));
+        new CommandBlockLogicDataProviders<>(this.registry, MinecartCommandBlockEntity.class,
+                MinecartCommandBlockEntity::getCommandBlockLogic).register();
+    }
 
-        register(MinecartCommandBlockEntity.class, Keys.SUCCESS_COUNT,
-                (accessor) -> accessor.getCommandBlockLogic().getSuccessCount(),
-                (accessor, value) -> ((CommandBlockLogicAccessor) accessor.getCommandBlockLogic()).accessor$setSuccessCount(value));
-
-        register(MinecartCommandBlockEntity.class, Keys.TRACKS_OUTPUT,
-                (accessor) -> accessor.getCommandBlockLogic().shouldReceiveErrors(),
-                (accessor, value) -> accessor.getCommandBlockLogic().setTrackOutput(value));
-
-        register(new MinecartCommandBlockEntityLastCommandOutputProvider());
+    private void registerSlimeEntityData() {
+        register(new SlimeEntitySizeProvider());
     }
 
     private void registerAbstractHorseEntityData() {
@@ -298,6 +371,12 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(new AreaEffectCloudEntityParticleEffectProvider());
     }
 
+    private void registerTameableEntityData() {
+        register(TameableEntity.class, Keys.IS_SITTING,
+                TameableEntity::isSitting,
+                TameableEntity::setSitting);
+    }
+
     private void registerAgeableEntityData() {
         register(AgeableEntity.class, Keys.AGEABLE_AGE,
                 AgeableEntity::getGrowingAge,
@@ -306,12 +385,17 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(AgeableEntity.class, Keys.IS_ADULT,
                 (accessor) -> !accessor.isChild(),
                 (accessor, value) -> accessor.setGrowingAge(value ? Constants.Entity.Ageable.ADULT : Constants.Entity.Ageable.CHILD));
+
+        register(new AgeableEntityCanBreedProvider());
     }
 
     private void registerAgentEntityData() {
         register(MobEntityAccessor.class, Keys.IS_AI_ENABLED,
                 (accessor) -> !accessor.accessor$isAIDisabled(),
                 (accessor, value) -> accessor.accessor$setNoAI(!value));
+        register(MobEntityAccessor.class, Keys.IS_PERSISTENT,
+                (accessor) -> ((MobEntity) accessor).isNoDespawnRequired(),
+                MobEntityAccessor::accessor$setPersistingRequired);
     }
 
     private void registerLivingEntityData() {
@@ -319,9 +403,17 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 (accessor) -> (double) accessor.getAbsorptionAmount(),
                 (accessor, value) -> accessor.setAbsorptionAmount(value.floatValue()));
 
+        register(LivingEntity.class, Keys.FALL_DISTANCE,
+                (accessor) -> (double) accessor.fallDistance,
+                (accessor, value) -> accessor.fallDistance = value.floatValue());
+
         register(LivingEntity.class, Keys.STUCK_ARROWS,
                 LivingEntity::getArrowCountInEntity,
                 (accessor, value) -> accessor.setArrowCountInEntity(MathHelper.clamp(value, 0, Integer.MAX_VALUE)));
+
+        register(LivingEntity.class, Keys.IS_ELYTRA_FLYING,
+                LivingEntity::isElytraFlying,
+                (accessor, value) ->((EntityAccessor) accessor).accessor$setFlag(Constants.Entity.ELYTRA_FLYING_FLAG, value));
 
         register(new LivingEntityActiveItemProvider());
         register(new LivingEntityBodyRotationsProvider());
@@ -335,19 +427,43 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(new LivingEntityRemainingAirProvider());
     }
 
+    private void registerExplosiveData() {
+        register(ExplosiveBridge.class, Keys.EXPLOSION_RADIUS,
+                (accessor) -> accessor.bridge$getExplosionRadius().map(Integer::doubleValue).orElse(null),
+                (accessor, value) -> accessor.bridge$setExplosionRadius(value.intValue()));
+    }
+
     private void registerEntityData() {
         register(Entity.class, Keys.VELOCITY,
                 (accessor) -> VecHelper.toVector3d(accessor.getMotion()),
                 (accessor, value) -> accessor.setMotion(VecHelper.toVec3d(value)));
 
+        register(Entity.class, Keys.IS_CUSTOM_NAME_VISIBLE,
+                Entity::isCustomNameVisible,
+                Entity::setCustomNameVisible);
+
+        register(Entity.class, Keys.IS_FLYING,
+                (accessor) -> accessor.isAirBorne,
+                (accessor, value) -> accessor.isAirBorne = value);
+
+        register(Entity.class, Keys.IS_GRAVITY_AFFECTED,
+                (accessor) -> !accessor.hasNoGravity(),
+                (accessor, value) -> accessor.setNoGravity(!value));
+
+        register(Entity.class, Keys.EYE_HEIGHT, entity -> (double) entity.getEyeHeight());
+        register(Entity.class, Keys.EYE_POSITION, entity -> VecHelper.toVector3d(entity.getEyePosition(1f)));
         register(Entity.class, Keys.IS_WET, Entity::isWet);
         register(Entity.class, Keys.IS_SNEAKING, Entity::isSneaking, Entity::setSneaking);
         register(Entity.class, Keys.IS_SPRINTING, Entity::isSprinting, Entity::setSprinting);
         register(Entity.class, Keys.ON_GROUND, entity -> entity.onGround);
+        register(Entity.class, Keys.IS_SILENT, Entity::isSilent, Entity::setSilent);
+        register(Entity.class, Keys.IS_GLOWING, Entity::isGlowing, Entity::setGlowing);
 
-        register(new EntityDisplayNameProvider());
+        register(EntityBridge.class, Keys.DISPLAY_NAME, (Text) null,
+                EntityBridge::bridge$getDisplayNameText,
+                EntityBridge::bridge$setDisplayName);
+
         register(new EntityFireDamageDelayProvider());
-        register(new EntityInvisibleProvider());
         register(new EntityInvulnerabilityTicksProvider());
     }
 
@@ -370,6 +486,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
     }
 
     private void registerVanishableEntityData() {
+        register(new VanishableEntityInvisibleProvider());
         register(new VanishableEntityVanishProvider());
         register(new VanishableEntityVanishIgnoresCollisionProvider());
         register(new VanishableEntityVanishPreventsTargetingProvider());
@@ -380,9 +497,23 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 (accessor) -> (HandPreference) (Object) accessor.getPrimaryHand(),
                 (accessor, value) -> accessor.setPrimaryHand((HandSide) (Object) value));
 
+        register(PlayerEntityBridge.class, Keys.AFFECTS_SPAWNING,
+                PlayerEntityBridge::bridge$affectsSpawning,
+                PlayerEntityBridge::bridge$setAffectsSpawning);
+
+        register(ServerPlayerEntity.class, Keys.GAME_MODE,
+                (accessor) -> (GameMode) (Object) accessor.interactionManager.getGameType(),
+                (accessor, value) -> accessor.setGameType((GameType) (Object) value));
+
+        register(new PlayerEntityCanFlyProvider());
         register(new PlayerEntityExhaustionProvider());
+        register(new PlayerEntityExperienceFromStartOfLevelValueProvider());
+        register(new PlayerEntityExperienceLevelProvider());
+        register(new PlayerEntityExperienceProvider());
+        register(new PlayerEntityExperienceSinceLevelProvider());
         register(new PlayerEntityFlyingSpeedProvider());
         register(new PlayerEntityFoodLevelProvider());
+        register(new PlayerEntityIsFlyingProvider());
         register(new PlayerEntitySaturationProvider());
         register(new PlayerEntityWalkingSpeedProvider());
     }
@@ -390,11 +521,23 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
     private void registerItemEntityData() {
         register(ItemEntityBridge.class, Keys.DESPAWN_DELAY,
                 ItemEntityBridge::bridge$getDespawnDelay,
-                ItemEntityBridge::bridge$setDespawnDelay);
+                (accessor, value) -> accessor.bridge$setDespawnDelay(accessor.bridge$getPickupDelay(), false));
 
-        register(ItemEntity.class, Keys.PICKUP_DELAY,
-                (accessor) -> ((ItemEntityBridge) accessor).bridge$getPickupDelay(),
-                ItemEntity::setPickupDelay);
+        register(ItemEntityBridge.class, Keys.PICKUP_DELAY,
+                ItemEntityBridge::bridge$getPickupDelay,
+                (accessor, value) -> accessor.bridge$setPickupDelay(accessor.bridge$getPickupDelay(), false));
+
+        register(ItemEntityBridge.class, Keys.INFINITE_DESPAWN_DELAY,
+                ItemEntityBridge::bridge$infiniteDespawnDelay,
+                (accessor, value) -> accessor.bridge$setDespawnDelay(accessor.bridge$getPickupDelay(), value));
+
+        register(ItemEntityBridge.class, Keys.INFINITE_DESPAWN_DELAY,
+                ItemEntityBridge::bridge$infinitePickupDelay,
+                (accessor, value) -> accessor.bridge$setPickupDelay(accessor.bridge$getPickupDelay(), value));
+
+        register(ItemEntity.class, Keys.ITEM_STACK_SNAPSHOT,
+                (accessor) -> ItemStackUtil.snapshotOf(accessor.getItem()),
+                (accessor, value) -> accessor.setItem(ItemStackUtil.fromSnapshotToNative(value)));
     }
 
     private void registerUserData() {

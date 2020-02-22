@@ -27,6 +27,8 @@ package org.spongepowered.common.data.provider;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.OptBool;
+import org.spongepowered.common.data.copy.CopyHelper;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -35,43 +37,92 @@ import java.util.function.Supplier;
 
 public abstract class DataProviderRegistryBuilder {
 
-    private final DataProviderRegistry registry;
+    protected final DataProviderRegistry registry;
 
     public DataProviderRegistryBuilder(DataProviderRegistry registry) {
         this.registry = registry;
     }
 
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * <p>No setter is provided which means that the provider is read-only.</p>
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param getter The getter function
+     * @param <E> The element type of the key
+     * @param <H> The target data holder type
+     */
     protected <E, H> void register(Class<H> target, Supplier<? extends Key<? extends Value<E>>> key, Function<H, E> getter) {
         this.register(target, key.get(), getter);
     }
 
+    private static <E, H> Function<H, Optional<E>> toOptionalGetter(Key<? extends Value<E>> key, Function<H, E> getter) {
+        // Optimize boolean optionals
+        if (key.getElementToken().getRawType() == Boolean.class) {
+            //noinspection unchecked
+            return dataHolder -> (Optional<E>) OptBool.of((Boolean) getter.apply(dataHolder));
+        } else {
+            return dataHolder -> Optional.ofNullable(getter.apply(dataHolder));
+        }
+    }
+
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * <p>No setter is provided which means that the provider is read-only.</p>
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param getter The getter function
+     * @param <E> The element type of the key
+     * @param <H> The target data holder type
+     */
     protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key, Function<H, E> getter) {
+        final Function<H, Optional<E>> optionalGetter = toOptionalGetter(key, getter);
         this.register(new GenericMutableDataProvider<H, E>(key, target) {
 
             @Override
             protected Optional<E> getFrom(H dataHolder) {
-                return Optional.ofNullable(getter.apply(dataHolder));
-            }
-
-            @Override
-            protected boolean set(H dataHolder, E value) {
-                return false;
+                return optionalGetter.apply(dataHolder);
             }
         });
     }
 
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param getter The getter function
+     * @param setter The setter function
+     * @param <E> The element type of the key
+     * @param <H> The target data holder type
+     */
     protected <E, H> void register(Class<H> target, Supplier<? extends Key<? extends Value<E>>> key,
             Function<H, E> getter, BiConsumer<H, E> setter) {
         this.register(target, key.get(), getter, setter);
     }
 
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param getter The getter function
+     * @param setter The setter function
+     * @param <E> The element type of the key
+     * @param <H> The target data holder type
+     */
     protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key,
             Function<H, E> getter, BiConsumer<H, E> setter) {
+        final Function<H, Optional<E>> optionalGetter = toOptionalGetter(key, getter);
         this.register(new GenericMutableDataProvider<H, E>(key, target) {
 
             @Override
             protected Optional<E> getFrom(H dataHolder) {
-                return Optional.ofNullable(getter.apply(dataHolder));
+                return optionalGetter.apply(dataHolder);
             }
 
             @Override
@@ -82,6 +133,97 @@ public abstract class DataProviderRegistryBuilder {
         });
     }
 
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param defaultValue The default value, which will be used to
+     *                     "remove" values and reset them to their original values.
+     * @param getter The getter function
+     * @param setter The setter function
+     * @param <E> The element type of the key
+     * @param <H> The target data holder type
+     */
+    protected <E, H> void register(Class<H> target, Supplier<? extends Key<? extends Value<E>>> key, E defaultValue,
+            Function<H, E> getter, BiConsumer<H, E> setter) {
+        this.register(target, key.get(), defaultValue, getter, setter);
+    }
+
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param defaultValue The default value, which will be used to
+     *                     "remove" values and reset them to their original values.
+     * @param getter The getter function
+     * @param setter The setter function
+     * @param <E> The element type of the key
+     * @param <H> The target data holder type
+     */
+    protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key, E defaultValue,
+            Function<H, E> getter, BiConsumer<H, E> setter) {
+        this.register(target, key, CopyHelper.createSupplier(defaultValue), getter, setter);
+    }
+
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param defaultSupplier The supplier for default values, which will be used to
+     *                        "remove" values and reset them to their original values.
+     * @param getter The getter function
+     * @param setter The setter function
+     * @param <E> The element type of the key
+     * @param <H> The target data holder type
+     */
+    protected <E, H> void register(Class<H> target, Supplier<? extends Key<? extends Value<E>>> key, Supplier<E> defaultSupplier,
+            Function<H, E> getter, BiConsumer<H, E> setter) {
+        this.register(target, key.get(), defaultSupplier, getter, setter);
+    }
+
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param defaultSupplier The supplier for default values, which will be used to
+     *                        "remove" values and reset them to their original values.
+     * @param getter The getter function
+     * @param setter The setter function
+     * @param <E> The element type of the key
+     * @param <H> The target data holder type
+     */
+    protected <E, H> void register(Class<H> target, Key<? extends Value<E>> key, Supplier<E> defaultSupplier,
+            Function<H, E> getter, BiConsumer<H, E> setter) {
+        final Function<H, Optional<E>> optionalGetter = toOptionalGetter(key, getter);
+        this.register(new GenericMutableDataProvider<H, E>(key, target) {
+
+            @Override
+            protected Optional<E> getFrom(H dataHolder) {
+                return optionalGetter.apply(dataHolder);
+            }
+
+            @Override
+            protected boolean set(H dataHolder, E value) {
+                setter.accept(dataHolder, value);
+                return true;
+            }
+
+            @Override
+            protected boolean delete(H dataHolder) {
+                return this.set(dataHolder, defaultSupplier.get());
+            }
+        });
+    }
+
+    /**
+     * Registers the {@link DataProvider}.
+     *
+     * @param provider The data provider
+     */
     protected void register(DataProvider<?,?> provider) {
         this.registry.register(provider);
     }

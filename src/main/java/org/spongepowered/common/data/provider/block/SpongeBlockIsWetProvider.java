@@ -35,7 +35,7 @@ import java.util.Optional;
 public class SpongeBlockIsWetProvider extends BlockStateDataProvider<Boolean> {
 
     SpongeBlockIsWetProvider() {
-        super(Keys.IS_WET.get(), SpongeBlock.class);
+        super(Keys.IS_WET, SpongeBlock.class);
     }
 
     @Override
@@ -45,6 +45,6 @@ public class SpongeBlockIsWetProvider extends BlockStateDataProvider<Boolean> {
 
     @Override
     protected Optional<BlockState> set(BlockState dataHolder, Boolean value) {
-        return Optional.of((value ? Blocks.SPONGE : Blocks.WET_SPONGE).getDefaultState());
+        return Optional.of((value ? Blocks.WET_SPONGE : Blocks.SPONGE).getDefaultState());
     }
 }

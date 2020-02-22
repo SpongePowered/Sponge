@@ -39,7 +39,6 @@ import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
 import org.spongepowered.common.mixin.core.block.BlockMixin;

@@ -36,7 +36,7 @@ import java.util.Optional;
 public class ComparatorBlockTypeProvider extends BlockStateDataProvider<ComparatorMode> {
 
     public ComparatorBlockTypeProvider() {
-        super(Keys.COMPARATOR_MODE.get(), ComparatorBlock.class);
+        super(Keys.COMPARATOR_MODE, ComparatorBlock.class);
     }
 
     @Override

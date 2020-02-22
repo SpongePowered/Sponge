@@ -56,7 +56,7 @@ public class AbstractSkullBlockAttachedProvider extends BlockStateDataProvider<B
     private final Map<SkullBlock.ISkullType, @Nullable Pair> wallAndGroundPairs = new HashMap<>();
 
     AbstractSkullBlockAttachedProvider() {
-        super(Keys.ATTACHED.get(), AbstractSkullBlock.class);
+        super(Keys.IS_ATTACHED, AbstractSkullBlock.class);
     }
 
     @Override

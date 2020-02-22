@@ -57,6 +57,7 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     public Optional<E> get(DataHolder dataHolder) {
         return this.providers.stream()
                 .map(provider -> provider.get(dataHolder))
+                .filter(Optional::isPresent)
                 .findFirst().flatMap(optional -> optional);
     }
 
@@ -68,8 +69,8 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     @Override
     public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
         return this.providers.stream()
-                .filter(provider -> provider.isSupported(dataHolder))
                 .map(provider -> provider.offer(dataHolder, element))
+                .filter(result -> result.getType() != DataTransactionResult.Type.FAILURE)
                 .findFirst()
                 .orElseGet(() -> DataTransactionResult.errorResult(Value.immutableOf(this.key, element)));
     }
@@ -77,8 +78,8 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     @Override
     public DataTransactionResult remove(DataHolder.Mutable dataHolder) {
         return this.providers.stream()
-                .filter(provider -> provider.isSupported(dataHolder))
                 .map(provider -> provider.remove(dataHolder))
+                .filter(result -> result.getType() != DataTransactionResult.Type.FAILURE)
                 .findFirst()
                 .orElseGet(DataTransactionResult::failNoData);
     }
@@ -86,8 +87,8 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     @Override
     public <I extends DataHolder.Immutable<I>> Optional<I> with(I immutable, E element) {
         return this.providers.stream()
-                .filter(provider -> provider.isSupported(immutable))
                 .map(provider -> provider.with(immutable, element))
+                .filter(Optional::isPresent)
                 .findFirst()
                 .orElse(Optional.empty());
     }
@@ -95,9 +96,9 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     @Override
     public <I extends DataHolder.Immutable<I>> Optional<I> without(I immutable) {
         return this.providers.stream()
-                .filter(provider -> provider.isSupported(immutable))
                 .map(provider -> provider.without(immutable))
+                .filter(Optional::isPresent)
                 .findFirst()
-                .orElse(Optional.of(immutable));
+                .orElseGet(() -> Optional.of(immutable));
     }
 }

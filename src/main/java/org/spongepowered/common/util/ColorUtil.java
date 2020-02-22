@@ -26,7 +26,7 @@ package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.item.ArmorItem;
+import net.minecraft.item.IDyeableArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -34,7 +34,6 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.mixin.accessor.entity.passive.SheepEntityAccessor;
 
-import java.util.Locale;
 import java.util.Optional;
 
 public final class ColorUtil {
@@ -42,12 +41,12 @@ public final class ColorUtil {
     public static Optional<Color> getItemStackColor(final ItemStack stack) {
         // Special case for armor: it has a special method
         final Item item = stack.getItem();
-        if (item instanceof ArmorItem) {
+        if (item instanceof IDyeableArmorItem) {
             final CompoundNBT tagCompound = stack.getTag();
             if (tagCompound == null || !tagCompound.contains(Constants.Item.Armor.ARMOR_COLOR_DISPLAY_TAG)) {
                 return Optional.empty();
             }
-            final int color = ((ArmorItem) item).getColor(stack);
+            final int color = ((IDyeableArmorItem) item).getColor(stack);
             return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }
         final CompoundNBT compound = stack.getTag();
@@ -67,7 +66,8 @@ public final class ColorUtil {
 
     public static int dyeColorToMojangColor(final DyeColor dyeColor) {
         // For the dye
-        final float[] dyeRgbArray = SheepEntityAccessor.accessor$createSheepColor(net.minecraft.item.DyeColor.valueOf(dyeColor.getName().toUpperCase(Locale.ENGLISH)));
+        final float[] dyeRgbArray = SheepEntityAccessor.accessor$createSheepColor(
+                (net.minecraft.item.DyeColor) (Object) dyeColor);
 
         // Convert!
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
@@ -79,7 +79,8 @@ public final class ColorUtil {
     }
 
     public static Color fromDyeColor(final DyeColor dyeColor) {
-        final float[] dyeRgbArray = SheepEntityAccessor.accessor$createSheepColor(net.minecraft.item.DyeColor.valueOf(dyeColor.getName().toUpperCase(Locale.ENGLISH)));
+        final float[] dyeRgbArray = SheepEntityAccessor.accessor$createSheepColor(
+                (net.minecraft.item.DyeColor) (Object) dyeColor);
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
         final int trueGreen = (int) (dyeRgbArray[1] * 255.0F);
         final int trueBlue = (int) (dyeRgbArray[2] * 255.0F);
@@ -113,9 +114,7 @@ public final class ColorUtil {
     }
 
     public static boolean hasColor(final ItemStack stack) {
-        final Item item = stack.getItem();
-        return item instanceof ArmorItem &&
-                ((ArmorItem) item).getArmorMaterial() == ArmorItem.ArmorMaterial.LEATHER;
+        return stack.getItem() instanceof IDyeableArmorItem;
     }
 
     private ColorUtil() {

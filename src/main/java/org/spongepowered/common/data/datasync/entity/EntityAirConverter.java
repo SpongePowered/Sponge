@@ -43,18 +43,18 @@ public class EntityAirConverter extends DataParameterConverter<Integer> {
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(Entity entity, Integer currentValue, Integer value) {
+    public Optional<DataTransactionResult> createTransaction(final Entity entity, final Integer currentValue, final Integer value) {
         return Optional.of(DataTransactionResult.builder()
-            .replace(BoundedValue.immutableOf(Keys.REMAINING_AIR, currentValue, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
-            .success(BoundedValue.immutableOf(Keys.REMAINING_AIR, value, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
-            .result(DataTransactionResult.Type.SUCCESS)
-            .build());
+                .replace(BoundedValue.immutableOf(Keys.REMAINING_AIR, currentValue, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
+                .success(BoundedValue.immutableOf(Keys.REMAINING_AIR, value, 0, Constants.Sponge.Entity.DEFAULT_MAX_AIR))
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build());
     }
 
     @Override
-    public Integer getValueFromEvent(Integer originalValue, List<Immutable<?>> immutableValues) {
-        for (Immutable<?> value : immutableValues) {
-            if (value.getKey() == Keys.REMAINING_AIR) {
+    public Integer getValueFromEvent(final Integer originalValue, final List<Immutable<?>> immutableValues) {
+        for (final Immutable<?> value : immutableValues) {
+            if (value.getKey() == Keys.REMAINING_AIR.get()) {
                 return (Integer) value.get();
             }
         }

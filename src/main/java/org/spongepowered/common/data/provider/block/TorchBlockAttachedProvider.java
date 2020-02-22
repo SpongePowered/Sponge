@@ -39,7 +39,7 @@ import java.util.Optional;
 public class TorchBlockAttachedProvider extends BlockStateDataProvider<Boolean> {
 
     TorchBlockAttachedProvider() {
-        super(Keys.ATTACHED.get(), TorchBlock.class);
+        super(Keys.IS_ATTACHED, TorchBlock.class);
     }
 
     @Override

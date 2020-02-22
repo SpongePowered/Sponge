@@ -38,7 +38,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkRocketData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.processor.common.FireworkUtils;
+import org.spongepowered.common.data.provider.util.FireworkUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;

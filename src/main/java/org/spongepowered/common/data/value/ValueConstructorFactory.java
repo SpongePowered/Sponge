@@ -47,27 +47,37 @@ public class ValueConstructorFactory {
             return new BoundedValueConstructor((BoundedKey<?, E>) key);
         }
         final Class<?> valueType = key.getValueToken().getRawType();
+        ValueConstructor<V, E> valueConstructor;
         if (ListValue.class.isAssignableFrom(valueType)) {
-            return new SimpleValueConstructor(key,
+            valueConstructor = new SimpleValueConstructor(key,
                     (key1, value) -> new MutableSpongeListValue((Key<? extends ListValue>) key1, (List) CopyHelper.copy(value)),
                     (key1, value) -> new ImmutableSpongeListValue((Key<? extends ListValue>) key1, (List) CopyHelper.copy(value)));
         } else if (SetValue.class.isAssignableFrom(valueType)) {
-            return new SimpleValueConstructor(key,
+            valueConstructor = new SimpleValueConstructor(key,
                     (key1, value) -> new MutableSpongeSetValue((Key<? extends SetValue>) key1, (Set) CopyHelper.copy(value)),
                     (key1, value) -> new ImmutableSpongeSetValue((Key<? extends SetValue>) key1, (Set) CopyHelper.copy(value)));
         } else if (MapValue.class.isAssignableFrom(valueType)) {
-            return new SimpleValueConstructor(key,
+            valueConstructor = new SimpleValueConstructor(key,
                     (key1, value) -> new MutableSpongeMapValue((Key<? extends MapValue>) key1, (Map) CopyHelper.copy(value)),
                     (key1, value) -> new ImmutableSpongeMapValue((Key<? extends MapValue>) key1, (Map) CopyHelper.copy(value)));
         } else if (WeightedCollectionValue.class.isAssignableFrom(valueType)) {
-            return new SimpleValueConstructor(key,
+            valueConstructor = new SimpleValueConstructor(key,
                     (key1, value) -> new MutableSpongeWeightedCollectionValue(
                             (Key<? extends WeightedCollectionValue>) key1, (WeightedTable) CopyHelper.copy(value)),
                     (key1, value) -> new ImmutableSpongeWeightedCollectionValue(
                             (Key<? extends WeightedCollectionValue>) key1, (WeightedTable) CopyHelper.copy(value)));
+        } else {
+            valueConstructor = new SimpleValueConstructor(key,
+                    (key1, value) -> new MutableSpongeValue((Key<? extends Value>) key1, CopyHelper.copy(value)),
+                    (key1, value) -> new ImmutableSpongeValue((Key<? extends Value>) key1, CopyHelper.copy(value)));
+            final Class<?> elementType = key.getElementToken().getRawType();
+            if (Enum.class.isAssignableFrom(elementType)) {
+                valueConstructor = new CachedEnumValueConstructor(valueConstructor, elementType);
+            } else if (elementType == Boolean.class) {
+                valueConstructor = (ValueConstructor<V, E>) new CachedBooleanValueConstructor(
+                        (ValueConstructor<Value<Boolean>, Boolean>) valueConstructor);
+            }
         }
-        return new SimpleValueConstructor(key,
-                (key1, value) -> new MutableSpongeValue((Key<? extends Value>) key1, CopyHelper.copy(value)),
-                (key1, value) -> new ImmutableSpongeValue((Key<? extends Value>) key1, CopyHelper.copy(value)));
+        return valueConstructor;
     }
 }

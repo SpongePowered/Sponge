@@ -27,9 +27,9 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 
 import java.util.List;
@@ -43,22 +43,21 @@ public class EntityLivingAIFlagsConverter extends DataParameterConverter<Byte> {
 
     @Override
     public Optional<DataTransactionResult> createTransaction(final Entity entity, final Byte currentValue, final Byte value) {
-
-        final boolean oldHasAi = (currentValue.byteValue() & 1) == 0;
-        final boolean newHasAi = (value.byteValue() & 1) == 0;
+        final boolean oldHasAi = (currentValue & 1) == 0;
+        final boolean newHasAi = (value & 1) == 0;
         return Optional.of(DataTransactionResult.builder()
-            .replace(ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, oldHasAi))
-            .success(ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, newHasAi))
-            .result(DataTransactionResult.Type.SUCCESS)
-            .build());
+                .replace(Value.immutableOf(Keys.IS_AI_ENABLED, oldHasAi))
+                .success(Value.immutableOf(Keys.IS_AI_ENABLED, newHasAi))
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build());
     }
 
     @Override
     public Byte getValueFromEvent(Byte originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.AI_ENABLED) {
+            if (immutableValue.getKey() == Keys.IS_AI_ENABLED.get()) {
                 final Boolean hasAi = (Boolean) immutableValue.get();
-                originalValue = Byte.valueOf(hasAi ? (byte) (originalValue.byteValue() & -2) : (byte) (originalValue.byteValue() | 1));
+                originalValue = hasAi ? (byte) (originalValue & -2) : (byte) (originalValue | 1);
             }
         }
         return originalValue;

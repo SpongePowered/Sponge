@@ -45,13 +45,28 @@ public final class MappedRegistry<T, U> extends SimpleRegistry<T> {
         this.reverseMappings.put(mapping, value);
     }
 
-    @Nullable
-    public U getMapping(T value) {
+    public @Nullable U getMapping(T value) {
         return this.mappings.get(value);
     }
 
-    @Nullable
-    public T getReverseMapping(U value) {
+    public U requireMapping(T value) {
+        final U mapping = this.mappings.get(value);
+        if (mapping == null) {
+            throw new IllegalArgumentException("Failed to get mapping for: " + value);
+        }
+        return mapping;
+    }
+
+    public @Nullable T getReverseMapping(U value) {
         return this.reverseMappings.get(value);
     }
+
+    public T requireReverseMapping(U value) {
+        final T mapping = this.reverseMappings.get(value);
+        if (mapping == null) {
+            throw new IllegalArgumentException("Failed to get reverse mapping for: " + value);
+        }
+        return mapping;
+    }
+
 }

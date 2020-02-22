@@ -27,9 +27,9 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 
 import java.util.List;
@@ -44,16 +44,16 @@ public class EntitySilentConverter extends DataParameterConverter<Boolean> {
     @Override
     public Optional<DataTransactionResult> createTransaction(final Entity entity, final Boolean currentValue, final Boolean value) {
         return Optional.of(DataTransactionResult.builder()
-            .replace(ImmutableSpongeValue.cachedOf(Keys.IS_SILENT, false, currentValue))
-            .success(ImmutableSpongeValue.cachedOf(Keys.IS_SILENT, false, value))
-            .result(DataTransactionResult.Type.SUCCESS)
-            .build());
+                .replace(Value.immutableOf(Keys.IS_SILENT, currentValue))
+                .success(Value.immutableOf(Keys.IS_SILENT, value))
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build());
     }
 
     @Override
     public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_SILENT) {
+            if (immutableValue.getKey() == Keys.IS_SILENT.get()) {
                 return (Boolean) immutableValue.get();
             }
         }

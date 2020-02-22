@@ -31,18 +31,25 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.data.copy.CopyHelper;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>>
         implements Key.Builder.BoundedBuilder<E, V> {
 
@@ -83,8 +90,7 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
     @Override
     public SpongeKeyBuilder<E, V> minValue(E minValue) {
         checkNotNull(minValue, "minValue");
-        // TODO: Copy the min value if needed
-        return minValueSupplier(() -> minValue);
+        return minValueSupplier(CopyHelper.createSupplier(minValue));
     }
 
     @Override
@@ -97,8 +103,7 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
     @Override
     public SpongeKeyBuilder<E, V> maxValue(E maxValue) {
         checkNotNull(maxValue, "maxValue");
-        // TODO: Copy the max value if needed
-        return maxValueSupplier(() -> maxValue);
+        return maxValueSupplier(CopyHelper.createSupplier(maxValue));
     }
 
     @Override
@@ -156,6 +161,7 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
             }
         }
 
+        Supplier<E> defaultValueSupplier = () -> null;
         if (BoundedValue.class.isAssignableFrom(this.valueToken.getRawType())) {
             @Nullable Supplier<? extends E> minValueSupplier = this.minValueSupplier;
             @Nullable Supplier<? extends E> maxValueSupplier = this.maxValueSupplier;
@@ -174,9 +180,15 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
 
             return new BoundedKey(key, this.valueToken, elementToken, comparator,
                     includesTester, minValueSupplier, maxValueSupplier);
+        } else if (ListValue.class.isAssignableFrom(this.valueToken.getRawType())) {
+            defaultValueSupplier = () -> (E) new ArrayList();
+        } else if (SetValue.class.isAssignableFrom(this.valueToken.getRawType())) {
+            defaultValueSupplier = () -> (E) new HashSet();
+        } else if (WeightedCollectionValue.class.isAssignableFrom(this.valueToken.getRawType())) {
+            defaultValueSupplier = () -> (E) new WeightedTable();
         }
 
-        return new SpongeKey<>(key, this.valueToken, elementToken, comparator, includesTester);
+        return new SpongeKey<>(key, this.valueToken, elementToken, comparator, includesTester, defaultValueSupplier);
     }
 
     @Override

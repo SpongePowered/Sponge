@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.tileentity.BannerTileEntity;
+import net.minecraft.world.World;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
@@ -46,7 +48,8 @@ public class BannerTileEntityPatternsProvider extends GenericMutableDataProvider
 
     @Override
     protected boolean set(BannerTileEntity dataHolder, List<PatternLayer> value) {
-        if (!dataHolder.getWorld().isRemote) { // This avoids a client crash because clientside.
+        @Nullable final World world = dataHolder.getWorld();
+        if (world != null && !world.isRemote) { // This avoids a client crash because clientside.
             ((BannerTileEntityBridge) dataHolder).bridge$setLayers(value);
             return true;
         }

@@ -29,7 +29,7 @@ import org.spongepowered.api.data.value.Value;
 
 import java.util.function.BiFunction;
 
-public class SimpleValueConstructor<V extends Value<E>, E> implements ValueConstructor<V, E> {
+final class SimpleValueConstructor<V extends Value<E>, E> implements ValueConstructor<V, E> {
 
     private final Key<V> key;
     private final BiFunction<Key<V>, E, V> mutableConstructor;

@@ -32,7 +32,6 @@ import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 
 @Mixin(BlockDoubleWoodSlab.class)

@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.tileentity.BannerTileEntity;
+import net.minecraft.world.World;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
@@ -45,7 +47,8 @@ public class BannerTileEntityBaseColorProvider extends GenericMutableDataProvide
 
     @Override
     protected boolean set(BannerTileEntity dataHolder, DyeColor value) {
-        if (!dataHolder.getWorld().isRemote) {
+        @Nullable final World world = dataHolder.getWorld();
+        if (world != null && !world.isRemote) {
             ((BannerTileEntityBridge) dataHolder).bridge$setBaseColor(value);
             return true;
         }

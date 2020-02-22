@@ -48,7 +48,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
@@ -92,7 +91,7 @@ public class RecipeTest implements LoadableModule {
         final Ingredient s = Ingredient.of(STONE.get());
         final Ingredient b = Ingredient.of(WHITE_BED.get(), WHITE_WOOL.get());
         final ItemStack item = ItemStack.of(BEDROCK.get(), 1);
-        final DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(Enchantment.of(EnchantmentTypes.UNBREAKING.get(), 1)));
+        final DataTransactionResult trans = item.offer(Keys.APPLIED_ENCHANTMENTS, Collections.singletonList(Enchantment.of(EnchantmentTypes.UNBREAKING.get(), 1)));
         if (trans.getType() != DataTransactionResult.Type.SUCCESS) {
             this.logger.error("Could not build recipe output!");
         }

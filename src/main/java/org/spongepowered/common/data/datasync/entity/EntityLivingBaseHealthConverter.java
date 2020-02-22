@@ -28,10 +28,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 
 import java.util.List;
@@ -51,28 +51,16 @@ public class EntityLivingBaseHealthConverter extends DataParameterConverter<Floa
                                 // data provider, only the server knows their actual max health
                                 : ((LivingEntity) entity).getMaxHealth();
         return Optional.of(DataTransactionResult.builder()
-            .replace(SpongeValueFactory.boundedBuilder(Keys.HEALTH)
-                .defaultValue((double) maxHealth)
-                .actualValue(currentValue.doubleValue())
-                .minimum(0.0D)
-                .maximum((double) maxHealth)
-                .build()
-                .asImmutable())
-            .success(SpongeValueFactory.boundedBuilder(Keys.HEALTH)
-                .defaultValue((double) maxHealth)
-                .actualValue(value.doubleValue())
-                .minimum(0.0D)
-                .maximum((double) maxHealth)
-                .build()
-                .asImmutable())
-            .result(DataTransactionResult.Type.SUCCESS)
-            .build());
+                .replace(BoundedValue.immutableOf(Keys.HEALTH, currentValue.doubleValue(), 0.0, (double) maxHealth))
+                .success(BoundedValue.immutableOf(Keys.HEALTH, value.doubleValue(), 0.0, (double) maxHealth))
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build());
     }
 
     @Override
     public Float getValueFromEvent(final Float originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.HEALTH) {
+            if (immutableValue.getKey() == Keys.HEALTH.get()) {
                 return (Float) immutableValue.get();
             }
         }

@@ -40,7 +40,7 @@ public abstract class DataParameterConverter<E> {
     private final DataParameter<E> parameter;
 
     @SuppressWarnings("unchecked")
-    public DataParameterConverter(DataParameter<E> parameter) {
+    public DataParameterConverter(final DataParameter<E> parameter) {
         this.parameter = parameter;
         ((DataParameterBridge<E>) parameter).bridge$setDataConverter(this);
     }
@@ -55,8 +55,7 @@ public abstract class DataParameterConverter<E> {
      * certain cases, there can be a "compound" value to represent multiple
      * values, such as the {@link Entity} flags bitmasks 5 "flags" in one value.
      *
-     *
-     * @param entity
+     * @param entity The entity
      * @param currentValue The current raw value
      * @return The list of immutable values converted
      */
@@ -72,14 +71,14 @@ public abstract class DataParameterConverter<E> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        DataParameterConverter<?> that = (DataParameterConverter<?>) o;
+        final DataParameterConverter<?> that = (DataParameterConverter<?>) o;
         return Objects.equals(this.parameter, that.parameter);
     }
 

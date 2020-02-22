@@ -53,8 +53,6 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
-import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
-import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.util.Constants;

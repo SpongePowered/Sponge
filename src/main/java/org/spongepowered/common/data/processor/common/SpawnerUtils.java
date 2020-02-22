@@ -25,15 +25,10 @@
 package org.spongepowered.common.data.processor.common;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedSpawnerEntity;
 import net.minecraft.world.spawner.AbstractSpawner;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -41,16 +36,11 @@ import org.spongepowered.api.util.weighted.TableEntry;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
 import org.spongepowered.common.mixin.accessor.util.WeightedRandom_ItemAccessor;
+import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
 import org.spongepowered.common.util.Constants;
-
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class SpawnerUtils {
 
@@ -119,27 +109,4 @@ public class SpawnerUtils {
             logic.accessor$getPotentialSpawns().add(new WeightedSpawnerEntity((int) entry.getWeight(), compound));
         }
     }
-
-    @SuppressWarnings("unchecked")
-    public static void applyData(final AbstractSpawnerAccessor logic, final Map<Key<?>, Object> values) {
-        logic.accessor$setSpawnDelay((int) values.get(Keys.SPAWNER_REMAINING_DELAY));
-        logic.accessor$setMinSpawnDelay((int) values.get(Keys.SPAWNER_MINIMUM_DELAY));
-        logic.accessor$setMaxSpawnDelay((int) values.get(Keys.SPAWNER_MAXIMUM_DELAY));
-        logic.accessor$setSpawnCount((short) values.get(Keys.SPAWNER_SPAWN_COUNT));
-        logic.accessor$setMaxNearbyEntities((short) values.get(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES));
-        logic.accessor$setActivatingRangeFromPlayer((short) values.get(Keys.SPAWNER_REQUIRED_PLAYER_RANGE));
-        logic.accessor$setSpawnRange((short) values.get(Keys.SPAWNER_SPAWN_RANGE));
-        setNextEntity((AbstractSpawner) logic, (WeightedSerializableObject<EntityArchetype>) values.get(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN));
-        setEntities(logic, (WeightedTable<EntityArchetype>) values.get(Keys.SPAWNER_ENTITIES));
-    }
-
-    public static void applyData(final AbstractSpawner logic, final MobSpawnerData data) {
-        final Map<Key<?>, Object> map = new IdentityHashMap<>();
-        final Set<Immutable<?>> newValues = data.getValues();
-        for (final Immutable<?> value : newValues) {
-            map.put(value.getKey(), value.get());
-        }
-        applyData(((AbstractSpawnerAccessor) logic), map);
-    }
-
 }

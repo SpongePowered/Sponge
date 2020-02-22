@@ -31,6 +31,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class BlockStateBooleanDataProvider extends BlockStateDataProvider<Boolean> {
 
@@ -40,6 +41,21 @@ public class BlockStateBooleanDataProvider extends BlockStateDataProvider<Boolea
             Class<? extends Block> blockType, BooleanProperty property) {
         super(key, blockType);
         this.property = property;
+    }
+
+    public BlockStateBooleanDataProvider(Supplier<? extends Key<? extends Value<Boolean>>> key,
+            Class<? extends Block> blockType, BooleanProperty property) {
+        this(key.get(), blockType, property);
+    }
+
+    public BlockStateBooleanDataProvider(Key<? extends Value<Boolean>> key,
+            BooleanProperty property) {
+        this(key, Block.class, property);
+    }
+
+    public BlockStateBooleanDataProvider(Supplier<? extends Key<? extends Value<Boolean>>> key,
+            BooleanProperty property) {
+        this(key.get(), Block.class, property);
     }
 
     @Override

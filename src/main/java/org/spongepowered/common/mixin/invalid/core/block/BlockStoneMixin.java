@@ -34,7 +34,6 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStoneData;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
 

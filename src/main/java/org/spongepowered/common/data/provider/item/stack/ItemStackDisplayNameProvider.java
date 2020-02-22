@@ -31,13 +31,13 @@ import net.minecraft.nbt.StringNBT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemStackDisplayNameProvider extends GenericMutableDataProvider<ItemStack, Text> {
+public class ItemStackDisplayNameProvider extends ItemStackDataProvider<Text> {
 
     public ItemStackDisplayNameProvider() {
         super(Keys.DISPLAY_NAME);
@@ -75,7 +75,7 @@ public class ItemStackDisplayNameProvider extends GenericMutableDataProvider<Ite
     }
 
     @Override
-    protected boolean removeFrom(ItemStack dataHolder) {
+    protected boolean delete(ItemStack dataHolder) {
         @Nullable final CompoundNBT display = dataHolder.getChildTag(Constants.Item.ITEM_DISPLAY);
         if (display != null) {
             display.remove(Constants.Item.ITEM_DISPLAY_NAME);

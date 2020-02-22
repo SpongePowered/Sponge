@@ -61,7 +61,7 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
                 return DataTransactionResult.failNoData();
             }
             final CompoundNBT display = stack.getChildTag(Constants.Item.ITEM_DISPLAY);
-            if(display != null) {
+            if (display != null) {
                 display.remove(Constants.Item.ITEM_COLOR);
             }
             return DataTransactionResult.successRemove(this.constructImmutableValue(old.get()));

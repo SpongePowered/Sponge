@@ -67,7 +67,7 @@ public class BeaconTileEntityEffectProvider extends GenericMutableDataProvider<B
     }
 
     @Override
-    protected boolean removeFrom(BeaconTileEntity dataHolder) {
+    protected boolean delete(BeaconTileEntity dataHolder) {
         final BeaconTileEntityAccessor accessor = (BeaconTileEntityAccessor) dataHolder;
         if (this.getter.apply(accessor) != null) {
             this.setter.accept(accessor, null);

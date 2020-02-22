@@ -32,7 +32,6 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;

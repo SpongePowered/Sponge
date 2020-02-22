@@ -92,7 +92,7 @@ public class EntityCategory extends ConfigCategory {
         this.humanPlayerListRemoveDelay = Math.max(0, Math.min(delay, 100));
     }
 
-    public int getPaintingRespawnDelaly() {
+    public int getPaintingRespawnDelay() {
         return this.paintingRespawnDelaly;
     }
 

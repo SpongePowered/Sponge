@@ -50,7 +50,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.processor.common.FireworkUtils;
+import org.spongepowered.common.data.provider.util.FireworkUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;

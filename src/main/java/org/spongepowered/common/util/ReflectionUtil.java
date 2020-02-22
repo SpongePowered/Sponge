@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

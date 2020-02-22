@@ -56,7 +56,7 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Abst
     @Override
     protected boolean set(AbstractMinecartEntity entity, Map<Key<?>, Object> keyValues) {
         BlockState type = (BlockState) keyValues.get(Keys.REPRESENTED_BLOCK);
-        int offset = (Integer) keyValues.get(Keys.OFFSET);
+        int offset = (Integer) keyValues.get(Keys.MINECART_BLOCK_OFFSET);
 
         entity.setDisplayTileOffset(offset);
         entity.setDisplayTile((net.minecraft.block.BlockState) type);
@@ -68,7 +68,7 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Abst
     protected Map<Key<?>, ?> getValues(AbstractMinecartEntity entity) {
         BlockState state = (BlockState) entity.getDisplayTile();
         int offset = entity.getDisplayTileOffset();
-        return ImmutableMap.of(Keys.REPRESENTED_BLOCK, state, Keys.OFFSET, offset);
+        return ImmutableMap.of(Keys.REPRESENTED_BLOCK, state, Keys.MINECART_BLOCK_OFFSET, offset);
     }
 
     @Override
@@ -79,15 +79,15 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Abst
     @Override
     public Optional<MinecartBlockData> fill(DataContainer container, MinecartBlockData data) {
         if(!container.contains(Keys.REPRESENTED_BLOCK.getQuery())
-            || !container.contains(Keys.OFFSET.getQuery())) {
+            || !container.contains(Keys.MINECART_BLOCK_OFFSET.getQuery())) {
             return Optional.empty();
         }
 
         BlockState block = container.getSerializable(Keys.REPRESENTED_BLOCK.getQuery(), BlockState.class).get();
-        int offset = container.getInt(Keys.OFFSET.getQuery()).get();
+        int offset = container.getInt(Keys.MINECART_BLOCK_OFFSET.getQuery()).get();
 
         data.set(Keys.REPRESENTED_BLOCK, block);
-        data.set(Keys.OFFSET, offset);
+        data.set(Keys.MINECART_BLOCK_OFFSET, offset);
 
         return Optional.of(data);
     }
@@ -99,7 +99,7 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Abst
             DataTransactionResult.Builder builder = DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS);
             if(cart.hasDisplayTile()) {
                 Immutable<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
-                Immutable<Integer> offset = new ImmutableSpongeValue<>(Keys.OFFSET, cart.getDisplayTileOffset());
+                Immutable<Integer> offset = new ImmutableSpongeValue<>(Keys.MINECART_BLOCK_OFFSET, cart.getDisplayTileOffset());
                 cart.setHasDisplayTile(false);
                 builder.replace(block).replace(offset);
             }

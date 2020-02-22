@@ -35,7 +35,7 @@ import java.util.Optional;
 public class SkullBlockDirectionProvider extends BlockStateDataProvider<Direction> {
 
     SkullBlockDirectionProvider() {
-        super(Keys.DIRECTION.get(), SkullBlock.class);
+        super(Keys.DIRECTION, SkullBlock.class);
     }
 
     @Override

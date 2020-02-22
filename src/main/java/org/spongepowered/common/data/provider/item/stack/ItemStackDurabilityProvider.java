@@ -24,22 +24,23 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.BoundedValue;
-import org.spongepowered.common.data.provider.GenericMutableBoundedDataProvider;
+import org.spongepowered.common.data.provider.item.ItemStackBoundedDataProvider;
 
 import java.util.Optional;
 
-public class ItemStackDurabilityProvider extends GenericMutableBoundedDataProvider<ItemStack, Integer> {
+public class ItemStackDurabilityProvider extends ItemStackBoundedDataProvider<Integer> {
 
     public ItemStackDurabilityProvider() {
         super(Keys.ITEM_DURABILITY);
     }
 
     @Override
-    protected boolean supports(ItemStack dataHolder) {
-        return dataHolder.getItem().isDamageable();
+    protected boolean supports(Item item) {
+        return item.isDamageable();
     }
 
     @Override

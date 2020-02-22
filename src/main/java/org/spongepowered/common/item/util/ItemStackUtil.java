@@ -40,8 +40,8 @@ public abstract class ItemStackUtil {
     }
 
     public static net.minecraft.item.ItemStack toNative(@Nullable ItemStack stack) {
-        if (stack instanceof net.minecraft.item.ItemStack || stack == null) {
-            return stack == null ? emptyNative() : (net.minecraft.item.ItemStack) stack;
+        if ((Object) stack instanceof net.minecraft.item.ItemStack || stack == null) {
+            return stack == null ? emptyNative() : (net.minecraft.item.ItemStack) (Object) stack;
         }
         throw new NativeStackException("The supplied item stack was not native to the current platform");
     }
@@ -67,8 +67,8 @@ public abstract class ItemStackUtil {
     }
 
     public static ItemStack fromNative(net.minecraft.item.ItemStack stack) {
-        if (stack instanceof ItemStack) {
-            return (ItemStack) stack;
+        if ((Object) stack instanceof ItemStack) {
+            return (ItemStack) (Object) stack;
         }
         throw new NativeStackException("The supplied native item stack was not compatible with the target environment");
     }
@@ -96,7 +96,7 @@ public abstract class ItemStackUtil {
     }
 
     public static ItemStack cloneDefensive(net.minecraft.item.ItemStack stack) {
-        return (ItemStack) ItemStackUtil.cloneDefensiveNative(stack);
+        return (ItemStack) (Object) ItemStackUtil.cloneDefensiveNative(stack);
     }
 
     public static ItemStack cloneDefensive(@Nullable ItemStack stack) {
@@ -104,7 +104,7 @@ public abstract class ItemStackUtil {
     }
 
     public static ItemStack cloneDefensive(net.minecraft.item.ItemStack stack, int newSize) {
-        return (ItemStack) ItemStackUtil.cloneDefensiveNative(stack, newSize);
+        return (ItemStack) (Object) ItemStackUtil.cloneDefensiveNative(stack, newSize);
     }
 
     public static ItemStack cloneDefensive(@Nullable ItemStack stack, int newSize) {

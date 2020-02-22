@@ -115,11 +115,6 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     }
 
     @Override
-    public void bridge$setDespawnDelay(final int delay) {
-        this.age = 6000 - delay;
-    }
-
-    @Override
     public void bridge$setDespawnDelay(final int delay, final boolean infinite) {
         this.age = 6000 - delay;
         final boolean previous = this.infiniteDespawnDelay;

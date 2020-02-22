@@ -79,7 +79,6 @@ import org.spongepowered.common.data.builder.block.state.SpongeBlockStateMetaCon
 import org.spongepowered.common.data.builder.block.tileentity.*;
 import org.spongepowered.common.data.builder.item.*;
 import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
-import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
 import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
@@ -105,7 +104,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.*;
 import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
 import org.spongepowered.common.data.manipulator.mutable.item.*;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.*;
-import org.spongepowered.common.data.processor.data.*;
 import org.spongepowered.common.data.processor.data.block.*;
 import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.extra.FluidItemDataProcessor;
@@ -120,7 +118,6 @@ import org.spongepowered.common.data.processor.value.block.*;
 import org.spongepowered.common.data.processor.value.entity.*;
 import org.spongepowered.common.data.processor.value.item.*;
 import org.spongepowered.common.data.processor.value.tileentity.*;
-import org.spongepowered.common.data.processor.value.*;
 import org.spongepowered.common.data.property.store.block.*;
 import org.spongepowered.common.data.property.store.entity.*;
 import org.spongepowered.common.data.property.store.item.*;
@@ -822,7 +819,7 @@ public final class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
         DataUtil.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
         DataUtil.registerValueProcessor(Keys.REPRESENTED_BLOCK, new RepresentedBlockValueProcessor());
-        DataUtil.registerValueProcessor(Keys.OFFSET, new OffsetValueProcessor());
+        DataUtil.registerValueProcessor(Keys.MINECART_BLOCK_OFFSET, new OffsetValueProcessor());
         DataUtil.registerValueProcessor(Keys.FALL_DAMAGE_PER_BLOCK, new FallHurtAmountValueProcessor());
         DataUtil.registerValueProcessor(Keys.MAX_FALL_DAMAGE, new MaxFallDamageValueProcessor());
         DataUtil.registerValueProcessor(Keys.FALLING_BLOCK_STATE, new FallingBlockStateValueProcessor());
@@ -845,7 +842,7 @@ public final class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.SUCCESS_COUNT, new TileEntitySuccessCountValueProcessor());
         DataUtil.registerValueProcessor(Keys.TRACKS_OUTPUT, new EntityTracksOutputValueProcessor());
         DataUtil.registerValueProcessor(Keys.TRACKS_OUTPUT, new TileEntityTracksOutputValueProcessor());
-        DataUtil.registerValueProcessor(Keys.INVISIBLE, new InvisibilityValueProcessor());
+        DataUtil.registerValueProcessor(Keys.IS_INVISIBLE, new InvisibilityValueProcessor());
         DataUtil.registerValueProcessor(Keys.VANISH, new VanishValueProcessor());
         DataUtil.registerValueProcessor(Keys.VANISH_IGNORES_COLLISION, new VanishCollisionValueProcessor());
         DataUtil.registerValueProcessor(Keys.VANISH_PREVENTS_TARGETING, new VanishTargetValueProcessor());
@@ -902,7 +899,7 @@ public final class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.END_GATEWAY_TELEPORT_COOLDOWN, new EndGatewayTeleportCooldownValueProcessor());
         DataUtil.registerValueProcessor(Keys.END_GATEWAY_AGE, new EndGatewayAgeValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXIT_POSITION, new EndGatewayExitPositionValueProcessor());
-        DataUtil.registerValueProcessor(Keys.EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
+        DataUtil.registerValueProcessor(Keys.DO_EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_TAKING_DISABLED, new TakingDisabledValueProcessor());
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_PLACING_DISABLED, new PlacingDisabledValueProcessor());
 

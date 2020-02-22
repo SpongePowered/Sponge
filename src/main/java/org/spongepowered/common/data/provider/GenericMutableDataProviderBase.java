@@ -42,20 +42,36 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     private static final TypeVariable<?> holderTypeParameter = GenericMutableDataProviderBase.class.getTypeParameters()[0];
     private final Class<H> holderType;
 
-    GenericMutableDataProviderBase(Supplier<Key<V>> key, Class<H> holderType) {
+    private final boolean isSetAndGetResultOverridden =
+            TypeToken.of(this.getClass()).getTypes().classes().stream()
+                    .map(TypeToken::getRawType)
+                    .filter(type -> {
+                        try {
+                            type.getDeclaredMethod("setAndGetResult", Object.class, Object.class);
+                            return true;
+                        } catch (NoSuchMethodException e) {
+                            return false;
+                        }
+                    })
+                    .findFirst()
+                    .map(type -> type != GenericMutableDataProviderBase.class &&
+                            type != BlockLocationDataProviderBase.class)
+                    .get();
+
+    protected GenericMutableDataProviderBase(Supplier<Key<V>> key, Class<H> holderType) {
         this(key.get(), holderType);
     }
 
-    GenericMutableDataProviderBase(Key<V> key, Class<H> holderType) {
+    protected GenericMutableDataProviderBase(Key<V> key, Class<H> holderType) {
         super(key);
         this.holderType = holderType;
     }
 
-    GenericMutableDataProviderBase(Supplier<Key<V>> key) {
+    protected GenericMutableDataProviderBase(Supplier<Key<V>> key) {
         this(key.get());
     }
 
-    GenericMutableDataProviderBase(Key<V> key) {
+    protected GenericMutableDataProviderBase(Key<V> key) {
         super(key);
         this.holderType = (Class<H>) TypeToken.of(this.getClass()).resolveType(holderTypeParameter).getRawType();
     }
@@ -88,13 +104,49 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     protected abstract Optional<E> getFrom(H dataHolder);
 
     /**
+     * Attempts to get data as a value from the target data holder
+     *
+     * @param dataHolder The data holder
+     * @return The value, if present
+     */
+    protected Optional<V> getValueFrom(H dataHolder) {
+        return this.getFrom(dataHolder).map(e -> this.constructValue(dataHolder, e));
+    }
+
+    /**
      * Attempts to set data for the target data holder.
      *
      * @param dataHolder The data holder
-     * @param value The value
+     * @param value The element
      * @return Whether applying was successful
      */
-    protected abstract boolean set(H dataHolder, E value);
+    protected boolean set(H dataHolder, E value) {
+        return false;
+    }
+
+    /**
+     * Attempts to offer data to the target data holder.
+     *
+     * @param dataHolder The data holder
+     * @param value The element
+     * @return Whether applying was successful
+     */
+    protected DataTransactionResult setAndGetResult(H dataHolder, E value) {
+        final Optional<Value.Immutable<E>> originalValue = this.getFrom(dataHolder)
+                .map(e -> this.constructValue(dataHolder, e).asImmutable());
+        final Value.Immutable<E> replacementValue = Value.immutableOf(this.getKey(), value);
+        try {
+            if (this.set(dataHolder, value)) {
+                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+                originalValue.ifPresent(builder::replace);
+                return builder.result(DataTransactionResult.Type.SUCCESS).success(replacementValue).build();
+            }
+            return DataTransactionResult.failResult(replacementValue);
+        } catch (Exception e) {
+            SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
+            return DataTransactionResult.errorResult(replacementValue);
+        }
+    }
 
     /**
      * Constructs a value for the given element and data holder.
@@ -104,9 +156,6 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @return The value
      */
     protected V constructValue(H dataHolder, E element) {
-        // TODO: Figure out how to prevent lookups for value factories
-        //   based on the key. Maybe store it in the key? Or store a
-        //   factory in this provider.
         return Value.genericImmutableOf(this.getKey(), element);
     }
 
@@ -116,8 +165,26 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @param dataHolder The data holder
      * @return Whether the removal was successful
      */
-    protected boolean removeFrom(H dataHolder) {
+    protected boolean delete(H dataHolder) {
         return false;
+    }
+
+    /**
+     * Attempts to remove the data from the target data holder.
+     *
+     * @param dataHolder The data holder
+     * @return Whether the removal was successful
+     */
+    protected DataTransactionResult deleteAndGetResult(H dataHolder) {
+        final Optional<Value.Immutable<E>> originalValue = this.getFrom(dataHolder)
+                .map(e -> this.constructValue(dataHolder, e).asImmutable());
+        if (!originalValue.isPresent()) {
+            return DataTransactionResult.failNoData();
+        }
+        if (this.delete(dataHolder)) {
+            return DataTransactionResult.successRemove(originalValue.get());
+        }
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -127,7 +194,10 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
 
     @Override
     public Optional<V> getValue(DataHolder dataHolder) {
-        return this.get(dataHolder).map(e -> this.constructValue((H) dataHolder, e));
+        if (!this.isSupported(dataHolder)) {
+            return Optional.empty();
+        }
+        return this.getValueFrom((H) dataHolder);
     }
 
     @Override
@@ -139,9 +209,12 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public DataTransactionResult offerValue(DataHolder.Mutable dataHolder, V value) {
+    public final DataTransactionResult offerValue(DataHolder.Mutable dataHolder, V value) {
         if (!this.isSupported(dataHolder)) {
             return DataTransactionResult.failNoData();
+        }
+        if (this.isSetAndGetResultOverridden) {
+            return this.setAndGetResult((H) dataHolder, value.get());
         }
         final Optional<Value.Immutable<E>> originalValue = this.getFrom((H) dataHolder)
                 .map(e -> this.constructValue((H) dataHolder, e).asImmutable());
@@ -162,22 +235,9 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     @Override
     public final DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
         if (!this.isSupported(dataHolder)) {
-            return DataTransactionResult.failNoData();
+            return DataTransactionResult.failResult(Value.immutableOf(this.getKey(), element));
         }
-        final Optional<Value.Immutable<E>> originalValue = this.getFrom((H) dataHolder)
-                .map(e -> this.constructValue((H) dataHolder, e).asImmutable());
-        final Value.Immutable<E> replacementValue = Value.genericImmutableOf(this.getKey(), element).asImmutable();
-        try {
-            if (this.set((H) dataHolder, element)) {
-                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                originalValue.ifPresent(builder::replace);
-                return builder.result(DataTransactionResult.Type.SUCCESS).success(replacementValue).build();
-            }
-            return DataTransactionResult.failResult(replacementValue);
-        } catch (Exception e) {
-            SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
-            return DataTransactionResult.errorResult(replacementValue);
-        }
+        return this.setAndGetResult((H) dataHolder, element);
     }
 
     @Override
@@ -185,14 +245,6 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
         if (!this.isSupported(dataHolder)) {
             return DataTransactionResult.failNoData();
         }
-        final Optional<Value.Immutable<E>> originalValue = this.getFrom((H) dataHolder)
-                .map(e -> this.constructValue((H) dataHolder, e).asImmutable());
-        if (!originalValue.isPresent()) {
-            return DataTransactionResult.failNoData();
-        }
-        if (this.removeFrom((H) dataHolder)) {
-            return DataTransactionResult.successRemove(originalValue.get());
-        }
-        return DataTransactionResult.failNoData();
+        return this.deleteAndGetResult((H) dataHolder);
     }
 }

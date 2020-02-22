@@ -27,17 +27,13 @@ package org.spongepowered.common.mixin.core.tileentity;
 import net.minecraft.potion.Effect;
 import net.minecraft.tileentity.BeaconTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.data.CustomNameableBridge;
 
 import javax.annotation.Nullable;
 
 @Mixin(BeaconTileEntity.class)
-public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin implements CustomNameableBridge {
-
-    @Shadow private String customName;
+public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin {
 
     /**
      * @author gabizou - June 11th, 2019 - 1.12.2
@@ -54,10 +50,5 @@ public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin impl
     @Nullable
     private Effect impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {
         return Effect.get(id);
-    }
-
-    @Override
-    public void bridge$setCustomDisplayName(final String customName) {
-        this.customName = customName;
     }
 }

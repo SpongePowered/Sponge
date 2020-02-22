@@ -30,11 +30,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemStackIsUnbreakableProvider extends GenericMutableDataProvider<ItemStack, Boolean> {
+public class ItemStackIsUnbreakableProvider extends ItemStackDataProvider<Boolean> {
 
     public ItemStackIsUnbreakableProvider() {
         super(Keys.IS_UNBREAKABLE);
@@ -64,7 +65,7 @@ public class ItemStackIsUnbreakableProvider extends GenericMutableDataProvider<I
     }
 
     @Override
-    protected boolean removeFrom(ItemStack dataHolder) {
+    protected boolean delete(ItemStack dataHolder) {
         return this.set(dataHolder, false);
     }
 }

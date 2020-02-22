@@ -37,6 +37,7 @@ import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
@@ -598,6 +599,7 @@ public final class Constants {
             public static final String FLICKER = "Flicker";
             public static final String TRAIL = "Trail";
             public static final String SHAPE_TYPE = "Type";
+            public static final String FLIGHT = "Flight";
         }
     }
 
@@ -1084,7 +1086,8 @@ public final class Constants {
                 final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
                 final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
 
-                final EnchantmentType enchantmentType = (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
+                final EnchantmentType enchantmentType =
+                        (EnchantmentType) Registry.ENCHANTMENT.getByValue(enchantmentId);
                 if (enchantmentType == null) {
                     continue;
                 }

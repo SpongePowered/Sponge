@@ -30,14 +30,16 @@ import org.spongepowered.common.data.copy.CopyHelper;
 
 import java.util.Comparator;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class MutableSpongeBoundedValue<E> extends AbstractMutableSpongeValue<E> implements BoundedValue.Mutable<E> {
 
-    private final E minValue;
-    private final E maxValue;
+    private final Supplier<E> minValue;
+    private final Supplier<E> maxValue;
     private final Comparator<? super E> comparator;
 
-    public MutableSpongeBoundedValue(Key<? extends BoundedValue<E>> key, E element, E minValue, E maxValue, Comparator<? super E> comparator) {
+    public MutableSpongeBoundedValue(Key<? extends BoundedValue<E>> key, E element,
+            Supplier<E> minValue, Supplier<E> maxValue, Comparator<? super E> comparator) {
         super(key, element);
         this.minValue = minValue;
         this.maxValue = maxValue;
@@ -63,12 +65,12 @@ public final class MutableSpongeBoundedValue<E> extends AbstractMutableSpongeVal
 
     @Override
     public E getMinValue() {
-        return CopyHelper.copy(this.minValue);
+        return this.minValue.get();
     }
 
     @Override
     public E getMaxValue() {
-        return CopyHelper.copy(this.maxValue);
+        return this.maxValue.get();
     }
 
     @Override

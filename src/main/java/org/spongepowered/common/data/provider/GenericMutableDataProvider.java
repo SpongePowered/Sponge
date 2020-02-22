@@ -40,7 +40,11 @@ public abstract class GenericMutableDataProvider<H, E> extends GenericMutableDat
         this(key.get());
     }
 
-    GenericMutableDataProvider(Key<? extends Value<E>> key, Class<H> holderType) {
+    public GenericMutableDataProvider(Key<? extends Value<E>> key, Class<H> holderType) {
         super((Key<Value<E>>) key, holderType);
+    }
+
+    public GenericMutableDataProvider(Supplier<? extends Key<? extends Value<E>>> key, Class<H> holderType) {
+        this(key.get(), holderType);
     }
 }

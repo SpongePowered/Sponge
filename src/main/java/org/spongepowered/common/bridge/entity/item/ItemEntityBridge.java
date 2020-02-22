@@ -36,7 +36,5 @@ public interface ItemEntityBridge {
 
     int bridge$getDespawnDelay();
 
-    void bridge$setDespawnDelay(int delay);
-
     void bridge$setDespawnDelay(int delay, boolean infinite);
 }

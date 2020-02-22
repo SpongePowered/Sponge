@@ -24,27 +24,28 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
 @SuppressWarnings("ConstantConditions")
-public class ItemStackShieldBannerBaseColorProvider extends GenericMutableDataProvider<ItemStack, DyeColor> {
+public class ItemStackShieldBannerBaseColorProvider extends ItemStackDataProvider<DyeColor> {
 
     public ItemStackShieldBannerBaseColorProvider() {
         super(Keys.BANNER_BASE_COLOR);
     }
 
     @Override
-    protected boolean supports(ItemStack dataHolder) {
-        return dataHolder.getItem() == Items.SHIELD;
+    protected boolean supports(Item item) {
+        return item == Items.SHIELD;
     }
 
     @Override
