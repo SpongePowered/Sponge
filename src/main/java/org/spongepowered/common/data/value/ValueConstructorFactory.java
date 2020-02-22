@@ -31,7 +31,6 @@ import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.data.copy.CopyHelper;
 import org.spongepowered.common.data.key.BoundedKey;
 import org.spongepowered.common.data.key.SpongeKey;
 
@@ -50,26 +49,26 @@ public class ValueConstructorFactory {
         ValueConstructor<V, E> valueConstructor;
         if (ListValue.class.isAssignableFrom(valueType)) {
             valueConstructor = new SimpleValueConstructor(key,
-                    (key1, value) -> new MutableSpongeListValue((Key<? extends ListValue>) key1, (List) CopyHelper.copy(value)),
-                    (key1, value) -> new ImmutableSpongeListValue((Key<? extends ListValue>) key1, (List) CopyHelper.copy(value)));
+                    (key1, value) -> new MutableSpongeListValue((Key<? extends ListValue>) key1, (List) value),
+                    (key1, value) -> new ImmutableSpongeListValue((Key<? extends ListValue>) key1, (List) value));
         } else if (SetValue.class.isAssignableFrom(valueType)) {
             valueConstructor = new SimpleValueConstructor(key,
-                    (key1, value) -> new MutableSpongeSetValue((Key<? extends SetValue>) key1, (Set) CopyHelper.copy(value)),
-                    (key1, value) -> new ImmutableSpongeSetValue((Key<? extends SetValue>) key1, (Set) CopyHelper.copy(value)));
+                    (key1, value) -> new MutableSpongeSetValue((Key<? extends SetValue>) key1, (Set) value),
+                    (key1, value) -> new ImmutableSpongeSetValue((Key<? extends SetValue>) key1, (Set) value));
         } else if (MapValue.class.isAssignableFrom(valueType)) {
             valueConstructor = new SimpleValueConstructor(key,
-                    (key1, value) -> new MutableSpongeMapValue((Key<? extends MapValue>) key1, (Map) CopyHelper.copy(value)),
-                    (key1, value) -> new ImmutableSpongeMapValue((Key<? extends MapValue>) key1, (Map) CopyHelper.copy(value)));
+                    (key1, value) -> new MutableSpongeMapValue((Key<? extends MapValue>) key1, (Map) value),
+                    (key1, value) -> new ImmutableSpongeMapValue((Key<? extends MapValue>) key1, (Map) value));
         } else if (WeightedCollectionValue.class.isAssignableFrom(valueType)) {
             valueConstructor = new SimpleValueConstructor(key,
                     (key1, value) -> new MutableSpongeWeightedCollectionValue(
-                            (Key<? extends WeightedCollectionValue>) key1, (WeightedTable) CopyHelper.copy(value)),
+                            (Key<? extends WeightedCollectionValue>) key1, (WeightedTable) value),
                     (key1, value) -> new ImmutableSpongeWeightedCollectionValue(
-                            (Key<? extends WeightedCollectionValue>) key1, (WeightedTable) CopyHelper.copy(value)));
+                            (Key<? extends WeightedCollectionValue>) key1, (WeightedTable) value));
         } else {
             valueConstructor = new SimpleValueConstructor(key,
-                    (key1, value) -> new MutableSpongeValue((Key<? extends Value>) key1, CopyHelper.copy(value)),
-                    (key1, value) -> new ImmutableSpongeValue((Key<? extends Value>) key1, CopyHelper.copy(value)));
+                    (key1, value) -> new MutableSpongeValue((Key<? extends Value>) key1, value),
+                    (key1, value) -> new ImmutableSpongeValue((Key<? extends Value>) key1, value));
             final Class<?> elementType = key.getElementToken().getRawType();
             if (Enum.class.isAssignableFrom(elementType)) {
                 valueConstructor = new CachedEnumValueConstructor(valueConstructor, elementType);

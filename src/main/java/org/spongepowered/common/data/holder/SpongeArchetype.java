@@ -34,7 +34,7 @@ import org.spongepowered.common.data.holder.nbt.NbtCompoundDataHolder;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 
-import java.util.List;
+import java.util.Collection;
 
 public abstract class SpongeArchetype<S extends LocatableSnapshot<S>, T> implements SpongeMutableDataHolder, NbtCompoundDataHolder, Archetype<S, T> {
 
@@ -56,7 +56,7 @@ public abstract class SpongeArchetype<S extends LocatableSnapshot<S>, T> impleme
     }
 
     @Override
-    public List<DataProvider<?, ?>> getAllProviders() {
+    public Collection<DataProvider<?, ?>> getAllProviders() {
         return this.lookup.getAllProviders();
     }
 }

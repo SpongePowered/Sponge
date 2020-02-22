@@ -32,6 +32,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.common.data.provider.EmptyDataProvider;
 import org.spongepowered.common.data.value.ValueConstructor;
 import org.spongepowered.common.data.value.ValueConstructorFactory;
 
@@ -48,6 +49,7 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     private final BiPredicate<? super E, ? super E> elementIncludesTester;
     private final ValueConstructor<V, E> valueConstructor;
     private final Supplier<E> defaultValueSupplier;
+    private final EmptyDataProvider<V, E> emptyDataProvider;
 
     SpongeKey(CatalogKey key, TypeToken<V> valueToken, TypeToken<E> elementToken, Comparator<? super E> elementComparator,
             BiPredicate<? super E, ? super E> elementIncludesTester, Supplier<E> defaultValueSupplier) {
@@ -57,6 +59,7 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
         this.elementComparator = elementComparator;
         this.elementIncludesTester = elementIncludesTester;
         this.defaultValueSupplier = defaultValueSupplier;
+        this.emptyDataProvider = new EmptyDataProvider<>(this);
         this.valueConstructor = ValueConstructorFactory.getConstructor(this);
     }
 
@@ -107,5 +110,9 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
 
     public Supplier<E> getDefaultValueSupplier() {
         return this.defaultValueSupplier;
+    }
+
+    public EmptyDataProvider<V, E> getEmptyDataProvider() {
+        return this.emptyDataProvider;
     }
 }

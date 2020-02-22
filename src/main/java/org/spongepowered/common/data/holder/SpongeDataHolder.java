@@ -31,8 +31,8 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -63,7 +63,7 @@ public interface SpongeDataHolder extends DataHolder {
      *
      * @return The data providers
      */
-    default List<DataProvider<?, ?>> getAllProviders() {
+    default Collection<DataProvider<?, ?>> getAllProviders() {
         return DataProviderRegistry.get().getAllProviders(this.getClass());
     }
 

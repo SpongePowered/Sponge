@@ -30,7 +30,9 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.key.SpongeKey;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -115,7 +117,7 @@ public final class DataProviderRegistry {
      */
     private static <V extends Value<E>, E> DataProvider<V, E> buildDelegateProvider(Key<V> key, List<DataProvider<V, E>> providers) {
         if (providers.isEmpty()) {
-            return new EmptyDataProvider<>(key);
+            return ((SpongeKey<V, E>) key).getEmptyDataProvider();
         }
         if (providers.size() == 1) {
             return providers.get(0);
@@ -171,7 +173,7 @@ public final class DataProviderRegistry {
      *
      * @return The delegate data provider
      */
-    public List<DataProvider<?,?>> getAllProviders(Class<?> dataHolderType) {
+    public Collection<DataProvider<?,?>> getAllProviders(Class<?> dataHolderType) {
         return this.getProviderLookup(dataHolderType).getAllProviders();
     }
 

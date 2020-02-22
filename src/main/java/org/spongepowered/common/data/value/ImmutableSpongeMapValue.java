@@ -29,7 +29,7 @@ import com.google.common.collect.Streams;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,9 +48,9 @@ public final class ImmutableSpongeMapValue<K, V> extends AbstractImmutableSponge
     }
 
     @Override
-    public Key<? extends MapValue<K, V>> getKey() {
+    public SpongeKey<? extends MapValue<K, V>, Map<K, V>> getKey() {
         //noinspection unchecked
-        return (Key<? extends MapValue<K, V>>) super.getKey();
+        return (SpongeKey<? extends MapValue<K, V>, Map<K, V>>) super.getKey();
     }
 
     @Override
@@ -90,7 +90,7 @@ public final class ImmutableSpongeMapValue<K, V> extends AbstractImmutableSponge
 
     @Override
     public MapValue.Immutable<K, V> with(Map<K, V> value) {
-        return new ImmutableSpongeMapValue<>(this.getKey(), CopyHelper.copy(value));
+        return this.getKey().getValueConstructor().getImmutable(value).asImmutable();
     }
 
     @Override
@@ -111,7 +111,7 @@ public final class ImmutableSpongeMapValue<K, V> extends AbstractImmutableSponge
             map = new HashMap<>(this.element);
             consumer.accept(map);
         }
-        return new ImmutableSpongeMapValue<>(this.getKey(), map);
+        return this.getKey().getValueConstructor().getRawImmutable(map).asImmutable();
     }
 
     @Override
@@ -138,11 +138,6 @@ public final class ImmutableSpongeMapValue<K, V> extends AbstractImmutableSponge
     @Override
     public MapValue.Immutable<K, V> withoutAll(Predicate<Map.Entry<K, V>> predicate) {
         return this.modifyMap(map -> map.entrySet().removeIf(predicate));
-    }
-
-    @Override
-    public MapValue.Immutable<K, V> asImmutable() {
-        return new ImmutableSpongeMapValue<>(this.getKey(), this.get());
     }
 
     @Override

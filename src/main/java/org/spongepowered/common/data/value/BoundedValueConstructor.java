@@ -28,8 +28,10 @@ import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.copy.CopyHelper;
 import org.spongepowered.common.data.key.BoundedKey;
 
+import java.util.function.Supplier;
+
 @SuppressWarnings("unchecked")
-class BoundedValueConstructor<V extends BoundedValue<E>, E> implements ValueConstructor<V, E> {
+public class BoundedValueConstructor<V extends BoundedValue<E>, E> implements ValueConstructor<V, E> {
 
     private final BoundedKey<V, E> key;
 
@@ -39,23 +41,31 @@ class BoundedValueConstructor<V extends BoundedValue<E>, E> implements ValueCons
 
     @Override
     public V getMutable(E element) {
-        return (V) new MutableSpongeBoundedValue<>(this.key, element,
-                this.key.getMinimum(), this.key.getMaximum(), this.key.getElementComparator());
+        return this.getMutable(element, this.key.getMinimum(), this.key.getMaximum());
     }
 
     public V getMutable(E element, E minimum, E maximum) {
-        return (V) new MutableSpongeBoundedValue<>(this.key, element,
-                CopyHelper.createSupplier(minimum), CopyHelper.createSupplier(maximum), this.key.getElementComparator());
+        return this.getMutable(element, CopyHelper.createSupplier(minimum), CopyHelper.createSupplier(maximum));
     }
 
-    @Override
-    public V getImmutable(E element) {
-        return (V) new ImmutableSpongeBoundedValue<>(this.key, element,
-                this.key.getMinimum(), this.key.getMaximum(), this.key.getElementComparator());
+    public V getMutable(E element, Supplier<E> minimum, Supplier<E> maximum) {
+        return (V) new MutableSpongeBoundedValue<>(this.key, element, minimum, maximum);
     }
 
     public V getImmutable(E element, E minimum, E maximum) {
-        return (V) new ImmutableSpongeBoundedValue<>(this.key, element,
-                CopyHelper.createSupplier(minimum), CopyHelper.createSupplier(maximum), this.key.getElementComparator());
+        return this.getImmutable(element, CopyHelper.createSupplier(minimum), CopyHelper.createSupplier(maximum));
+    }
+
+    public V getImmutable(E element, Supplier<E> minimum, Supplier<E> maximum) {
+        return this.getRawImmutable(CopyHelper.copy(element), minimum, maximum);
+    }
+
+    @Override
+    public V getRawImmutable(E element) {
+        return this.getRawImmutable(element, this.key.getMinimum(), this.key.getMaximum());
+    }
+
+    public V getRawImmutable(E element, Supplier<E> minimum, Supplier<E> maximum) {
+        return (V) new ImmutableSpongeBoundedValue<>(this.key, element, minimum, maximum);
     }
 }

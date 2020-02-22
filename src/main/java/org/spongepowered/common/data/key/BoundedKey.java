@@ -28,6 +28,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.common.data.value.BoundedValueConstructor;
 
 import java.util.Comparator;
 import java.util.function.BiPredicate;
@@ -44,6 +45,11 @@ public final class BoundedKey<V extends BoundedValue<E>, E> extends SpongeKey<V,
         super(key, valueToken, elementToken, elementComparator, elementIncludesTester, () -> null);
         this.minimum = minimum;
         this.maximum = maximum;
+    }
+
+    @Override
+    public BoundedValueConstructor<V, E> getValueConstructor() {
+        return (BoundedValueConstructor<V, E>) super.getValueConstructor();
     }
 
     public Supplier<E> getMinimum() {

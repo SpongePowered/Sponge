@@ -27,14 +27,16 @@ package org.spongepowered.common.data.value;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.key.SpongeKey;
 
 public abstract class SpongeValue<E> implements Value<E> {
 
-    protected final Key<? extends Value<E>> key;
+    protected final SpongeKey<? extends Value<E>, E> key;
     protected E element;
 
     public SpongeValue(Key<? extends Value<E>> key, E element) {
-        this.key = key;
+        //noinspection unchecked
+        this.key = (SpongeKey<? extends Value<E>, E>) key;
         this.element = element;
     }
 
@@ -44,7 +46,7 @@ public abstract class SpongeValue<E> implements Value<E> {
     }
 
     @Override
-    public Key<? extends Value<E>> getKey() {
+    public SpongeKey<? extends Value<E>, E> getKey() {
         return this.key;
     }
 

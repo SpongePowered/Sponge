@@ -49,7 +49,7 @@ final class SimpleValueConstructor<V extends Value<E>, E> implements ValueConstr
     }
 
     @Override
-    public V getImmutable(E element) {
+    public V getRawImmutable(E element) {
         return this.immutableConstructor.apply(this.key, element);
     }
 }

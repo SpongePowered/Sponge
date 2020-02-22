@@ -26,9 +26,6 @@ package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.copy.CopyHelper;
-
-import java.util.function.Function;
 
 public abstract class AbstractMutableSpongeValue<E> extends SpongeValue<E> implements Value.Mutable<E> {
 

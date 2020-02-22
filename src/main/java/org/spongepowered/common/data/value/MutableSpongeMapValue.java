@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -44,9 +45,9 @@ public final class MutableSpongeMapValue<K, V> extends AbstractMutableSpongeValu
     }
 
     @Override
-    public Key<? extends MapValue<K, V>> getKey() {
+    public SpongeKey<? extends MapValue<K, V>, Map<K, V>> getKey() {
         //noinspection unchecked
-        return (Key<? extends MapValue<K, V>>) super.getKey();
+        return (SpongeKey<? extends MapValue<K, V>, Map<K, V>>) super.getKey();
     }
 
     @Override
@@ -138,6 +139,6 @@ public final class MutableSpongeMapValue<K, V> extends AbstractMutableSpongeValu
 
     @Override
     public MapValue.Immutable<K, V> asImmutable() {
-        return new ImmutableSpongeMapValue<>(this.getKey(), CopyHelper.copy(this.get()));
+        return this.getKey().getValueConstructor().getImmutable(this.get()).asImmutable();
     }
 }

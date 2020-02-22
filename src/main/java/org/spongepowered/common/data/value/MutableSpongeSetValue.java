@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -41,14 +42,14 @@ public final class MutableSpongeSetValue<E> extends MutableSpongeCollectionValue
     }
 
     @Override
-    public Key<? extends SetValue<E>> getKey() {
+    public SpongeKey<? extends SetValue<E>, Set<E>> getKey() {
         //noinspection unchecked
-        return (Key<? extends SetValue<E>>) super.getKey();
+        return (SpongeKey<? extends SetValue<E>, Set<E>>) super.getKey();
     }
 
     @Override
     public SetValue.Immutable<E> asImmutable() {
-        return new ImmutableSpongeSetValue<>(this.getKey(), CopyHelper.copy(this.element));
+        return this.getKey().getValueConstructor().getImmutable(this.element).asImmutable();
     }
 
     @Override

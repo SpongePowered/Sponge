@@ -27,6 +27,7 @@ package org.spongepowered.common.data.value;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.key.BoundedKey;
 
 import java.util.Comparator;
 import java.util.function.Function;
@@ -36,20 +37,18 @@ public final class MutableSpongeBoundedValue<E> extends AbstractMutableSpongeVal
 
     private final Supplier<E> minValue;
     private final Supplier<E> maxValue;
-    private final Comparator<? super E> comparator;
 
     public MutableSpongeBoundedValue(Key<? extends BoundedValue<E>> key, E element,
-            Supplier<E> minValue, Supplier<E> maxValue, Comparator<? super E> comparator) {
+            Supplier<E> minValue, Supplier<E> maxValue) {
         super(key, element);
         this.minValue = minValue;
         this.maxValue = maxValue;
-        this.comparator = comparator;
     }
 
     @Override
-    public Key<? extends BoundedValue<E>> getKey() {
+    public BoundedKey<? extends BoundedValue<E>, E> getKey() {
         //noinspection unchecked
-        return (Key<? extends BoundedValue<E>>) super.getKey();
+        return (BoundedKey<? extends BoundedValue<E>, E>) super.getKey();
     }
 
     @Override
@@ -75,18 +74,17 @@ public final class MutableSpongeBoundedValue<E> extends AbstractMutableSpongeVal
 
     @Override
     public Comparator<? super E> getComparator() {
-        return this.comparator;
+        return this.getKey().getElementComparator();
     }
 
     @Override
     public BoundedValue.Mutable<E> copy() {
         return new MutableSpongeBoundedValue<>(this.getKey(),
-                CopyHelper.copy(this.get()), this.minValue, this.maxValue, this.comparator);
+                CopyHelper.copy(this.get()), this.minValue, this.maxValue);
     }
 
     @Override
     public BoundedValue.Immutable<E> asImmutable() {
-        return new ImmutableSpongeBoundedValue<>(this.getKey(),
-                CopyHelper.copy(this.get()), this.minValue, this.maxValue, this.comparator);
+        return this.getKey().getValueConstructor().getImmutable(this.get(), this.minValue, this.maxValue).asImmutable();
     }
 }

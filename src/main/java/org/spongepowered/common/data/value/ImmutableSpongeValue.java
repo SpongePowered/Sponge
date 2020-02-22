@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.copy.CopyHelper;
 
 import java.util.function.Function;
 
@@ -38,7 +37,7 @@ public final class ImmutableSpongeValue<E> extends AbstractImmutableSpongeValue<
 
     @Override
     public Immutable<E> with(E value) {
-        return new ImmutableSpongeValue<>(this.getKey(), CopyHelper.copy(value));
+        return this.getKey().getValueConstructor().getImmutable(value).asImmutable();
     }
 
     @Override

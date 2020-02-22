@@ -28,7 +28,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.TableEntry;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.List;
 import java.util.Random;
@@ -43,9 +43,9 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
     }
 
     @Override
-    public Key<? extends WeightedCollectionValue<E>> getKey() {
+    public SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>> getKey() {
         //noinspection unchecked
-        return (Key<? extends WeightedCollectionValue<E>>) super.getKey();
+        return (SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>>) super.getKey();
     }
 
     @Override
@@ -58,12 +58,12 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
         final WeightedTable<E> table = new WeightedTable<>(this.element.getRolls());
         table.addAll(this.element);
         consumer.accept(table);
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), table);
+        return this.getKey().getValueConstructor().getRawImmutable(table).asImmutable();
     }
 
     @Override
     public WeightedCollectionValue.Immutable<E> with(WeightedTable<E> value) {
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), CopyHelper.copy(value));
+        return this.getKey().getValueConstructor().getImmutable(value).asImmutable();
     }
 
     @Override

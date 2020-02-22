@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +42,9 @@ public final class MutableSpongeListValue<E> extends MutableSpongeCollectionValu
     }
 
     @Override
-    public Key<? extends ListValue<E>> getKey() {
+    public SpongeKey<? extends ListValue<E>, List<E>> getKey() {
         //noinspection unchecked
-        return (Key<? extends ListValue<E>>) super.getKey();
+        return (SpongeKey<? extends ListValue<E>, List<E>>) super.getKey();
     }
 
     @Override
@@ -83,7 +84,7 @@ public final class MutableSpongeListValue<E> extends MutableSpongeCollectionValu
 
     @Override
     public ListValue.Immutable<E> asImmutable() {
-        return new ImmutableSpongeListValue<>(this.getKey(), CopyHelper.copy(this.element));
+        return this.getKey().getValueConstructor().getImmutable(this.element).asImmutable();
     }
 
     @Override

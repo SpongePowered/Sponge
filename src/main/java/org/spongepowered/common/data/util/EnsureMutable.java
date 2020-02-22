@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data.util;
 
+import net.minecraft.util.NonNullList;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,7 +80,9 @@ public final class EnsureMutable {
                 type == LinkedList.class ||
                 type == CopyOnWriteArrayList.class ||
                 type == Stack.class ||
-                type == Vector.class) {
+                type == Vector.class ||
+                type == NonNullArrayList.class ||
+                type == NonNullList.class) {
             return list;
         }
         return new ArrayList<>(list);

@@ -30,6 +30,7 @@ import org.spongepowered.api.util.weighted.TableEntry;
 import org.spongepowered.api.util.weighted.UnmodifiableWeightedTable;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.List;
 import java.util.Random;
@@ -43,9 +44,9 @@ public final class MutableSpongeWeightedCollectionValue<E> extends MutableSponge
     }
 
     @Override
-    public Key<? extends WeightedCollectionValue<E>> getKey() {
+    public SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>> getKey() {
         //noinspection unchecked
-        return (Key<? extends WeightedCollectionValue<E>>) super.getKey();
+        return (SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>>) super.getKey();
     }
 
     @Override
@@ -55,7 +56,7 @@ public final class MutableSpongeWeightedCollectionValue<E> extends MutableSponge
 
     @Override
     public WeightedCollectionValue.Immutable<E> asImmutable() {
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), CopyHelper.copy(this.element));
+        return this.getKey().getValueConstructor().getImmutable(this.element).asImmutable();
     }
 
     @Override
