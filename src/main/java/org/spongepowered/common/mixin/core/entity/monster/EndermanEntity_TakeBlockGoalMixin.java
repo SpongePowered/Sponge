@@ -55,7 +55,7 @@ public abstract class EndermanEntity_TakeBlockGoalMixin extends Goal {
         method = "shouldExecute",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/monster/EntityEnderman;getHeldBlockState()Lnet/minecraft/block/state/IBlockState;"
+            target = "Lnet/minecraft/entity/monster/EndermanEntity;getHeldBlockState()Lnet/minecraft/block/BlockState;"
         )
     )
     @Nullable

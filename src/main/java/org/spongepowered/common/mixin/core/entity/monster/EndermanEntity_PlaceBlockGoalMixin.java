@@ -63,24 +63,25 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
      * @author gabizou - July 26th, 2018
      * @reason Adds sanity check for calling a change block event pre
      *
-     * @param entityEnderman The enderman doing griefing
+     * @param endermanEntity The enderman doing griefing
      * @return The block state that can be placed, or null if the enderman can't grief
      */
     @Redirect(
         method = "shouldExecute",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/monster/EntityEnderman;getHeldBlockState()Lnet/minecraft/block/state/IBlockState;"
+            target = "Lnet/minecraft/entity/monster/EndermanEntity;getHeldBlockState()Lnet/minecraft/block/BlockState;"
         )
     )
     @Nullable
-    private BlockState onCanGrief(final EndermanEntity entityEnderman) {
-        final BlockState heldBlockState = entityEnderman.getHeldBlockState();
+    private BlockState impl$onCanGrief(final EndermanEntity endermanEntity) {
+        final BlockState heldBlockState = endermanEntity.getHeldBlockState();
         return ((GrieferBridge) this.enderman).bridge$canGrief() ? heldBlockState : null;
     }
 
     /**
-     * @author gabizou - July 26th, 2018
+     * @author gabizou - July 26th, 2018\
+     * @author i509VCB - February 11th, 2020 - 1.14.4 TODO: This needs to be looked at with another eye to make sure this injection isn't stupidly made
      * @reason Makes enderman check for block changes before they can place their blocks.
      * This allows plugins to cancel the event regardless without issue.
      *
@@ -92,10 +93,14 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
      * @param state The new state
      * @return True if the state is a full cube, and the event didnt get cancelled
      */
-    @Redirect(method = "canPlaceBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/state/IBlockState;isFullCube()Z"))
-    private boolean onUpdateCancel(final BlockState blockState, final World world, final BlockPos pos, final Block toPlace,
-        final BlockState old, final BlockState state) {
-        if (state.isFullCube()) {
+    @Redirect(method = "func_220836_a",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/block/BlockState;isNormalCube(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"
+        )
+    )
+    private boolean impl$onPlaceBlockCancel(final BlockState blockState, final World world, final BlockPos pos, final Block toPlace,
+            final BlockState old, final BlockState state) {
+        if (state.isNormalCube(world, pos)) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
                 final Location<org.spongepowered.api.world.World> location =
                     new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos));

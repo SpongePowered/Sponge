@@ -55,34 +55,39 @@ import javax.annotation.Nullable;
 public abstract class HangingEntityMixin extends EntityMixin {
 
     @Shadow @Nullable public Direction facingDirection;
-    @Shadow public abstract boolean onValidSurface();
+    @Shadow public abstract boolean shadow$onValidSurface();
 
-    private boolean ignorePhysics = false;
+    private boolean impl$ignorePhysics = false;
 
     /**
      * Called to update the entity's position/logic.
      */
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;onValidSurface()Z"))
-    private boolean checkIfOnValidSurfaceAndIgnoresPhysics(HangingEntity entityHanging) {
-        return this.onValidSurface() && !this.ignorePhysics;
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/HangingEntity;onValidSurface()Z"))
+    private boolean impl$checkIfOnValidSurfaceAndIgnoresPhysics(HangingEntity entityHanging) {
+        return this.shadow$onValidSurface() && !this.impl$ignorePhysics;
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
-        compound.putBoolean("ignorePhysics", this.ignorePhysics);
+    public void impl$writeToSpongeCompound(CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
+        compound.putBoolean("ignorePhysics", this.impl$ignorePhysics);
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         if (compound.contains("ignorePhysics")) {
-            this.ignorePhysics = compound.getBoolean("ignorePhysics");
+            this.impl$ignorePhysics = compound.getBoolean("ignorePhysics");
         }
     }
 
-    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;setDead()V"), cancellable = true)
-    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "attackEntityFrom",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/item/HangingEntity;remove()V"
+        ),
+        cancellable = true
+    )
+    private void impl$postEventOnAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), (Entity) this, 0, amount);
@@ -108,7 +113,7 @@ public abstract class HangingEntityMixin extends EntityMixin {
             // Sponge End
             ItemEntity entityitem = new ItemEntity(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
             entityitem.setDefaultPickupDelay();
-            this.world.addEntity0(entityitem);
+            this.world.addEntity(entityitem);
             return entityitem;
         }
         // Sponge - redirect server sided logic to sponge to handle cause stacks and phase states

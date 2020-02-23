@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.merchant.villager;
 
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.item.MerchantOffer;
@@ -34,43 +35,44 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(VillagerEntity.class)
-public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
-    private List<MerchantOffer> impl$newOffers = new ArrayList<>();
-
+@Mixin(AbstractVillagerEntity.class)
+public abstract class AbstractVillagerEntityMixin extends AgeableEntityMixin {
     /**
      * @author i509VCB - February 21st, 2020 - 1.14.4
-     * @reason Here we apply the Trade Mutators to the villager's new merchant offers and then add them to the entity.
-     *
-     * @param givenMerchantOffers The merchant's current merchant offers.
-     * @param newTrades The trade factories representing the new trades this villager will receive.
-     * @param maxNumbers The maximum amount of trades for this villager to receive.
-     * @param ci CallbackInfo.
-     */
-    @Override
-    protected void impl$addAndApplyTradeMutators(MerchantOffers givenMerchantOffers, VillagerTrades.ITrade[] newTrades, int maxNumbers, CallbackInfo ci) {
-        VillagerEntity villager = (VillagerEntity) (Object) this;
-        SpongeVillagerRegistry.getInstance().populateOffers((Villager) this, (List<TradeOffer>) (List<?>) impl$newOffers, (Profession) villager.getVillagerData().getProfession(), villager.getVillagerData().getLevel(), this.rand);
-        givenMerchantOffers.addAll(this.impl$newOffers); // Finally add the mutated offers to the trade offer map.
-        this.impl$newOffers.clear(); // And clean up our temp values
-    }
-
-    /**
-     * @author i509VCB - February 21st, 2020 - 1.14.4
-     * @reason Override the redirect call in AbstractVillagerEntityMixin to capture merchant offers to be mutated.
+     * @reason In order to apply the Trade mutators, we need a way to intercept the merchant offers. In VillagerEntityMixin we override this redirect to capture all the merchant offers being added to the merchant.
+     * This does the exact same as vanilla but the VillagerEntity and WanderingTraderEntity would override this to implement their own logic.
      *
      * @param merchantOffers The current offers the villager has.
      * @param offer The merchant offer to add.
-     * @return true
+     * @return true.
      */
-    @Override
+    @Redirect(method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/item/MerchantOffers;add(Lnet/minecraft/item/MerchantOffer;)Z")
+    )
     protected boolean impl$addNewOfferToTempMap(MerchantOffers merchantOffers, MerchantOffer offer) {
-        return this.impl$newOffers.add(offer);
+        return merchantOffers.add(offer);
     }
+
+    /**
+     * @author i509VCB - February 21st, 2020 - 1.14.4
+     * @reason At TAIL, all merchant offers have been selected. Implementations of this method would process trade mutators and then add to the givenMerchantOffers.
+     *
+     * @param givenMerchantOffers
+     * @param newTrades
+     * @param maxNumbers
+     * @param ci
+     */
+    @Inject(method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
+        at = @At("TAIL"))
+    protected void impl$addAndApplyTradeMutators(MerchantOffers givenMerchantOffers, VillagerTrades.ITrade[] newTrades, int maxNumbers, CallbackInfo ci) {
+        // Do nothing, this is overriden by the Villager/WanderingTraderEntity
+    }
+
 }

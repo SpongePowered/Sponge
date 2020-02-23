@@ -28,6 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.WitherEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.living.monster.Wither;
+import org.spongepowered.api.entity.living.monster.boss.Wither;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -74,7 +75,7 @@ public abstract class WitherEntityMixin extends MonsterEntityMixin implements Fu
         slice = @Slice(
             from = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/entity/boss/EntityWither;blockBreakCounter:I",
+                target = "Lnet/minecraft/entity/boss/WitherEntity;blockBreakCounter:I",
                 opcode = Opcodes.PUTFIELD
             ),
             to = @At(
@@ -85,7 +86,7 @@ public abstract class WitherEntityMixin extends MonsterEntityMixin implements Fu
         at =
             @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/entity/boss/EntityWither;blockBreakCounter:I",
+                target = "Lnet/minecraft/entity/boss/WitherEntity;blockBreakCounter:I",
                 opcode = Opcodes.GETFIELD
             )
     )
@@ -94,7 +95,7 @@ public abstract class WitherEntityMixin extends MonsterEntityMixin implements Fu
     }
 
     @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE",
-               target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
+               target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"))
     private Entity onSpawnWitherSkull(final Entity entity) {
         ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this).bridge$canGrief());
         return entity;
@@ -139,7 +140,7 @@ public abstract class WitherEntityMixin extends MonsterEntityMixin implements Fu
      * @param fuseTicks Ticks until detonation
      */
     @Redirect(method = "ignite", at = @At(value = "INVOKE",
-              target = "Lnet/minecraft/entity/boss/EntityWither;setInvulTime(I)V"))
+              target = "Lnet/minecraft/entity/boss/WitherEntity;setInvulTime(I)V"))
     private void onSpawnPrime(final WitherEntity self, final int fuseTicks) {
         ((Wither) this).prime();
     }

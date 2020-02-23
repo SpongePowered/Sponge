@@ -81,6 +81,7 @@
         "entity.item.minecart.FurnaceMinecartEntityMixin",
         "entity.item.minecart.MinecartCommandBlockEntityMixin",
         "entity.item.minecart.TNTMinecartEntityMixin",
+        "entity.merchant.villager.AbstractVillagerEntityMixin",
         "entity.merchant.villager.VillagerEntityMixin",
         "entity.merchant.villager.VillagerProfessionMixin",
         "entity.monster.BlazeEntity_FireballAttackGoalMixin",

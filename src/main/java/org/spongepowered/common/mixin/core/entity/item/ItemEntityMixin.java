@@ -54,24 +54,24 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int pickupDelay;
     @Shadow private int age;
-    @Shadow public abstract ItemStack getItem();
+    @Shadow public abstract ItemStack shadow$getItem();
     /**
      * A simple cached value of the merge radius for this item.
      * Since the value is configurable, the first time searching for
      * other items, this value is cached.
      */
-    private double cachedRadius = -1;
+    private double impl$cachedRadius = -1;
 
-    private int previousPickupDelay = MAGIC_PREVIOUS;
-    private boolean infinitePickupDelay;
-    private int previousDespawnDelay = MAGIC_PREVIOUS;
-    private boolean infiniteDespawnDelay;
+    private int impl$previousPickupDelay = MAGIC_PREVIOUS;
+    private boolean impl$infinitePickupDelay;
+    private int impl$previousDespawnDelay = MAGIC_PREVIOUS;
+    private boolean impl$infiniteDespawnDelay;
 
     public float dropChance = 1.0f;
 
     @Override
     public boolean bridge$infinitePickupDelay() {
-        return this.infinitePickupDelay;
+        return this.impl$infinitePickupDelay;
     }
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
@@ -79,121 +79,121 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         if (this.world.isRemote || ((WorldBridge) this.world).bridge$isFake()) {
             return originalRadius;
         }
-        if (this.cachedRadius == -1) {
+        if (this.impl$cachedRadius == -1) {
             final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
-            this.cachedRadius = configRadius < 0 ? 0 : configRadius;
+            this.impl$cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
-        return this.cachedRadius;
+        return this.impl$cachedRadius;
     }
 
     @Override
     public int bridge$getPickupDelay() {
-        return this.infinitePickupDelay ? this.previousPickupDelay : this.pickupDelay;
+        return this.impl$infinitePickupDelay ? this.impl$previousPickupDelay : this.pickupDelay;
     }
 
     @Override
     public void bridge$setPickupDelay(final int delay, final boolean infinite) {
         this.pickupDelay = delay;
-        final boolean previous = this.infinitePickupDelay;
-        this.infinitePickupDelay = infinite;
+        final boolean previous = this.impl$infinitePickupDelay;
+        this.impl$infinitePickupDelay = infinite;
         if (infinite && !previous) {
-            this.previousPickupDelay = this.pickupDelay;
+            this.impl$previousPickupDelay = this.pickupDelay;
             this.pickupDelay = Constants.Entity.Item.MAGIC_NO_PICKUP;
         } else if (!infinite) {
-            this.previousPickupDelay = MAGIC_PREVIOUS;
+            this.impl$previousPickupDelay = MAGIC_PREVIOUS;
         }
     }
 
     @Override
     public boolean bridge$infiniteDespawnDelay() {
-        return this.infiniteDespawnDelay;
+        return this.impl$infiniteDespawnDelay;
     }
 
     @Override
     public int bridge$getDespawnDelay() {
-        return 6000 - (this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age);
+        return 6000 - (this.impl$infiniteDespawnDelay ? this.impl$previousDespawnDelay : this.age);
     }
 
     @Override
     public void bridge$setDespawnDelay(final int delay, final boolean infinite) {
         this.age = 6000 - delay;
-        final boolean previous = this.infiniteDespawnDelay;
-        this.infiniteDespawnDelay = infinite;
+        final boolean previous = this.impl$infiniteDespawnDelay;
+        this.impl$infiniteDespawnDelay = infinite;
         if (infinite && !previous) {
-            this.previousDespawnDelay = this.age;
+            this.impl$previousDespawnDelay = this.age;
             this.age = Constants.Entity.Item.MAGIC_NO_DESPAWN;
         } else if (!infinite) {
-            this.previousDespawnDelay = MAGIC_PREVIOUS;
+            this.impl$previousDespawnDelay = MAGIC_PREVIOUS;
         }
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
 
-        this.infinitePickupDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY);
+        this.impl$infinitePickupDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY);
         if (compound.contains(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
-            this.previousPickupDelay = compound.getInt(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY);
+            this.impl$previousPickupDelay = compound.getInt(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY);
         } else {
-            this.previousPickupDelay = MAGIC_PREVIOUS;
+            this.impl$previousPickupDelay = MAGIC_PREVIOUS;
         }
-        this.infiniteDespawnDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY);
+        this.impl$infiniteDespawnDelay = compound.getBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY);
         if (compound.contains(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, Constants.NBT.TAG_ANY_NUMERIC)) {
-            this.previousDespawnDelay = compound.getInt(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY);
+            this.impl$previousDespawnDelay = compound.getInt(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY);
         } else {
-            this.previousDespawnDelay = MAGIC_PREVIOUS;
+            this.impl$previousDespawnDelay = MAGIC_PREVIOUS;
         }
 
-        if (this.infinitePickupDelay) {
-            if (this.previousPickupDelay != this.pickupDelay) {
-                this.previousPickupDelay = this.pickupDelay;
+        if (this.impl$infinitePickupDelay) {
+            if (this.impl$previousPickupDelay != this.pickupDelay) {
+                this.impl$previousPickupDelay = this.pickupDelay;
             }
 
             this.pickupDelay = Constants.Entity.Item.MAGIC_NO_PICKUP;
-        } else if (this.pickupDelay == Constants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
-            this.pickupDelay = this.previousPickupDelay;
-            this.previousPickupDelay = MAGIC_PREVIOUS;
+        } else if (this.pickupDelay == Constants.Entity.Item.MAGIC_NO_PICKUP && this.impl$previousPickupDelay != MAGIC_PREVIOUS) {
+            this.pickupDelay = this.impl$previousPickupDelay;
+            this.impl$previousPickupDelay = MAGIC_PREVIOUS;
         }
 
-        if (this.infiniteDespawnDelay) {
-            if (this.previousDespawnDelay != this.age) {
-                this.previousDespawnDelay = this.age;
+        if (this.impl$infiniteDespawnDelay) {
+            if (this.impl$previousDespawnDelay != this.age) {
+                this.impl$previousDespawnDelay = this.age;
             }
 
             this.age = Constants.Entity.Item.MAGIC_NO_DESPAWN;
-        } else if (this.age == Constants.Entity.Item.MAGIC_NO_DESPAWN && this.previousDespawnDelay != MAGIC_PREVIOUS) {
-            this.age = this.previousDespawnDelay;
-            this.previousDespawnDelay = MAGIC_PREVIOUS;
+        } else if (this.age == Constants.Entity.Item.MAGIC_NO_DESPAWN && this.impl$previousDespawnDelay != MAGIC_PREVIOUS) {
+            this.age = this.impl$previousDespawnDelay;
+            this.impl$previousDespawnDelay = MAGIC_PREVIOUS;
         }
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
 
-        compound.putBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
-        compound.putShort(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
-        compound.putBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
-        compound.putShort(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
+        compound.putBoolean(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, this.impl$infinitePickupDelay);
+        compound.putShort(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, (short) this.impl$previousPickupDelay);
+        compound.putBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, this.impl$infiniteDespawnDelay);
+        compound.putShort(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, (short) this.impl$previousDespawnDelay);
     }
 
     @Inject(
-        method = "onUpdate",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"),
+        method = "tick()V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;remove()V"),
         slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;handleWaterMovement()Z"),
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;handleWaterMovement()Z"),
             to = @At("TAIL")
         )
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
-        if (!SpongeImplHooks.onServerThread() || this.getItem().isEmpty()) {
+        if (!SpongeImplHooks.onServerThread() || this.shadow$getItem().isEmpty()) {
             // In the rare case the first if block is actually at the end of the method instruction list, we don't want to 
             // erroneously be calling this twice.
             return;
         }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            final ExpireEntityEvent.TargetItem event = SpongeEventFactory.createExpireEntityEventTargetItem(frame.getCurrentCause(), (Item) this);
+            final ExpireEntityEvent event = SpongeEventFactory.createExpireEntityEvent(frame.getCurrentCause(), (Item) this);
             SpongeImpl.postEvent(event);
         }
     }

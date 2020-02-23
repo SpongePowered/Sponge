@@ -59,7 +59,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
 
     @Shadow private int minecartTNTFuse;
 
-    @Shadow public abstract void ignite();
+    @Shadow public abstract void shadow$ignite();
 
     @Nullable private Integer impl$explosionRadius = null;
     private int impl$fuseDuration = Constants.Entity.Minecart.DEFAULT_FUSE_DURATION;
@@ -98,12 +98,12 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
 
 
     @Inject(method = "attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z", at = @At("INVOKE"))
-    private void onAttack(final DamageSource damageSource, final float amount, final CallbackInfoReturnable<Boolean> ci) {
+    private void impl$onAttackSetPrimeCause(final DamageSource damageSource, final float amount, final CallbackInfoReturnable<Boolean> ci) {
         this.impl$primeCause = damageSource;
     }
 
     @Inject(method = "onActivatorRailPass(IIIZ)V", at = @At("INVOKE"))
-    private void onActivate(final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
+    private void impl$onActivateSetPrimeCauseNotifier(final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             return;
         }
@@ -113,7 +113,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
     }
 
     @Inject(method = "ignite", at = @At("INVOKE"), cancellable = true)
-    private void preIgnite(final CallbackInfo ci) {
+    private void impl$preIgnite(final CallbackInfo ci) {
         if (!this.bridge$shouldPrime()) {
             this.bridge$setFuseTicksRemaining(-1);
             ci.cancel();
@@ -121,7 +121,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
     }
 
     @Inject(method = "ignite", at = @At("RETURN"))
-    private void postSpongeIgnite(final CallbackInfo ci) {
+    private void impl$postSpongeIgnite(final CallbackInfo ci) {
         this.bridge$setFuseTicksRemaining(this.impl$fuseDuration);
         if (this.impl$primeCause != null) {
             Sponge.getCauseStackManager().pushCause(this.impl$primeCause);
@@ -151,14 +151,14 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
     }
 
     @Inject(method = "explodeCart", at = @At("RETURN"))
-    private void postExplode(final CallbackInfo ci) {
+    private void impL$postExplode(final CallbackInfo ci) {
         if (this.impl$detonationCancelled) {
             this.impl$detonationCancelled = this.isDead = false;
         }
     }
 
-    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecartTNT;explodeCart(D)V"))
-    private void onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/minecart/TNTMinecartEntity;explodeCart(D)V"))
+    private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(),

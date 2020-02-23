@@ -203,6 +203,7 @@
         "mcp.item.ItemStackMixin_API",
         "mcp.item.ItemTierMixin_API",
         "mcp.item.MerchantOfferMixin_API",
+        "mcp.item.MerchantOffersMixin_API",
         "mcp.network.play.ServerPlayNetHandlerMixin_API",
         "mcp.network.NetworkManagerMixin_API",
         "mcp.network.PacketBufferMixin_API",

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.item.minecart;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -38,12 +39,13 @@ public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntit
 
     /**
      * @author Zidane - June 2019 - 1.12.2
+     * @author i509VCB - Feb 2020 - 1.14.4
      * @reason Only have this Minecart not drop contents if we actually changed dimension
      */
     @Override
     @Nullable
-    public Entity changeDimension(int dimensionIn) {
-        final Entity entity = super.changeDimension(dimensionIn);
+    public Entity shadow$changeDimension(DimensionType dimensionIn) {
+        final Entity entity = super.shadow$changeDimension(dimensionIn);
 
         if (entity instanceof ContainerMinecartEntity) {
             // We actually teleported so...

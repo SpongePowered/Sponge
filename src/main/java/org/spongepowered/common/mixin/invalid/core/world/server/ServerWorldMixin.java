@@ -54,6 +54,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.LightType;
 import net.minecraft.world.NextTickListEntry;
@@ -528,7 +529,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         // else // Sponge - Remove unnecessary else
         // { //
 
-        final int i = this.shadow$getGameRules().getInt("randomTickSpeed");
+        final int i = this.shadow$getGameRules().getInt(GameRules.RANDOM_TICK_SPEED);
         final boolean flag = this.isRaining();
         final boolean flag1 = this.isThundering();
         this.profiler.startSection("pollingChunks");

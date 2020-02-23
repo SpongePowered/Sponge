@@ -68,8 +68,8 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
             this.impl$damage = compound.getFloat(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
             this.impl$damageSet = true;
@@ -77,8 +77,8 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
         if (this.impl$damageSet) {
             compound.putFloat(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damage);
         } else {

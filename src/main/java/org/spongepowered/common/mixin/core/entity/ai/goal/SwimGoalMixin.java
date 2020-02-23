@@ -41,7 +41,7 @@ public abstract class SwimGoalMixin {
      * @reason By default, Vanilla's swim chance is always 0.8f. I expose this.
      */
     @Overwrite
-    public void updateTask() {
+    public void tick() {
         if (this.entity.getRNG().nextFloat() < ((SwimGoal) this).getSwimChance()) {
             this.entity.getJumpController().setJumping();
         }

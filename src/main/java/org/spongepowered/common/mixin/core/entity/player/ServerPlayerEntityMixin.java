@@ -28,9 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeMap;
@@ -38,8 +37,8 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
+import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -48,10 +47,10 @@ import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CClientSettingsPacket;
-import net.minecraft.network.play.server.SAnimateHandPacket;
 import net.minecraft.network.play.server.SChangeBlockPacket;
 import net.minecraft.network.play.server.SCombatPacket;
 import net.minecraft.network.play.server.SEntityPropertiesPacket;
@@ -60,7 +59,6 @@ import net.minecraft.network.play.server.SSpawnPositionPacket;
 import net.minecraft.network.play.server.SUpdateHealthPacket;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreCriteria;
-import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -70,13 +68,14 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
-import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.server.ServerWorld;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -99,6 +98,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.util.Tristate;
@@ -116,8 +116,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.command.CommandSenderBridge;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -134,11 +132,10 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.entity.SkinPartRegistryModule;
+import org.spongepowered.common.mixin.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
@@ -157,8 +154,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, ServerPlayerEntityBridge, CommandSenderBridge,
-    CommandSourceBridge {
+public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, ServerPlayerEntityBridge {
 
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final public PlayerInteractionManager interactionManager;
@@ -167,9 +163,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
-
     @Shadow public abstract ServerWorld getServerWorld();
-
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
     private final User impl$user = this.impl$getUserObjectOnConstruction();
@@ -186,16 +180,16 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Nullable private Text impl$displayName = null;
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
         if (this.bridge$isHealthScaled()) {
             compound.putDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE, this.impl$healthScale);
         }
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         if (compound.contains(Constants.Sponge.Entity.Player.HEALTH_SCALE, Constants.NBT.TAG_DOUBLE)) {
             this.impl$healthScale = compound.getDouble(Constants.Sponge.Entity.Player.HEALTH_SCALE);
         }
@@ -212,7 +206,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public boolean bridge$keepInventory() {
         if (this.impl$keepInventory == null) {
-            return this.world.getGameRules().getBoolean(org.spongepowered.api.world.gamerule.GameRules.KEEP_INVENTORY.get());
+            return this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
         }
         return this.impl$keepInventory;
     }
@@ -220,6 +214,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     /**
      * @author blood - May 12th, 2016
      * @author gabizou - June 3rd, 2016
+     * @author gabizou - February 22nd, 2020 - Minecraft 1.14.3
      *
      * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
      */
@@ -228,6 +223,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     public void onDeath(final DamageSource cause) {
         // Sponge start
         final boolean isMainThread = SpongeImplHooks.onServerThread();
+        // TODO - Re-verify that we are handling proper drops, like wither flowers and such
         final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause, isMainThread);
         if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
@@ -246,55 +242,72 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 context.buildAndSwitch();
             }
             // Sponge end
-
-            final boolean flag = this.world.getGameRules().getBoolean(Constants.GameRule.SHOW_DEATH_MESSAGES);
-            this.connection.sendPacket(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, flag));
-
+            final boolean flag = this.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES);
             if (flag) {
-                final Team team = this.getTeam();
+                ITextComponent itextcomponent = this.getCombatTracker().getDeathMessage();
+                this.connection.sendPacket(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent), (p_212356_2_) -> {
+                    if (!p_212356_2_.isSuccess()) {
+                        int i = 256;
+                        String s = itextcomponent.getStringTruncated(256);
+                        ITextComponent itextcomponent1 = new TranslationTextComponent("death.attack.message_too_long", (new StringTextComponent(s)).applyTextStyle(TextFormatting.YELLOW));
+                        ITextComponent itextcomponent2 = (new TranslationTextComponent("death.attack.even_more_magic", this.shadow$getDisplayName())).applyTextStyle((p_212357_1_) -> {
+                            p_212357_1_.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1));
+                        });
+                        this.connection.sendPacket(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent2));
+                    }
 
+                });
+                final Team team = this.shadow$getTeam();
                 if (team != null && team.getDeathMessageVisibility() != Team.Visible.ALWAYS) {
                     if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OTHER_TEAMS) {
-                        this.server.getPlayerList()
-                            .sendMessageToAllTeamMembers((ServerPlayerEntity) (Object) this, this.getCombatTracker().getDeathMessage());
+                        this.server.getPlayerList().sendMessageToAllTeamMembers((ServerPlayerEntity) (Object) this, itextcomponent);
                     } else if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OWN_TEAM) {
-                        this.server.getPlayerList()
-                            .sendMessageToTeamOrAllPlayers((ServerPlayerEntity) (Object) this, this.getCombatTracker().getDeathMessage());
+                        this.server.getPlayerList().sendMessageToTeamOrAllPlayers((ServerPlayerEntity) (Object) this, itextcomponent);
                     }
                 } else {
-                    this.server.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
+                    this.server.getPlayerList().sendMessage(itextcomponent);
                 }
+            } else {
+                this.connection.sendPacket(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED));
             }
 
-            this.spawnShoulderEntities();
+            this.shadow$spawnShoulderEntities();
 
             // Ignore keepInventory GameRule instead use keepInventory from Event
-            if (!event.getKeepInventory() && !this.isSpectator()) {
-                this.destroyVanishingCursedItems();
+            if (!event.getKeepInventory() && !this.shadow$isSpectator()) {
+                this.shadow$destroyVanishingCursedItems();
                 this.inventory.dropAllItems();
             }
+            // Sponge Stop
 
-            for (final ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(ScoreCriteria.DEATH_COUNT)) {
-                final Score score = this.getWorldScoreboard().getOrCreateScore(this.shadow$getName(), scoreobjective);
-                score.incrementScore();
-            }
+            this.shadow$getWorldScoreboard().forAllObjectives(ScoreCriteria.DEATH_COUNT, this.shadow$getScoreboardName(), Score::incrementScore);
+            final LivingEntity livingentity = this.getAttackingEntity();
+            if (livingentity != null) {
+                this.shadow$addStat(Stats.ENTITY_KILLED_BY.get(livingentity.getType()));
+                livingentity.awardKillScore((ServerPlayerEntity) (Object) this, this.scoreValue, cause);
+                if (!this.world.isRemote && livingentity instanceof WitherEntity) {
+                    boolean flag1 = false;
+                    if (this.world.getGameRules().getBoolean(GameRules.MOB_GRIEFING)) {
+                        BlockPos blockpos = new BlockPos(this.posX, this.posY, this.posZ);
+                        BlockState blockstate = Blocks.WITHER_ROSE.getDefaultState();
+                        if (this.world.getBlockState(blockpos).isAir() && blockstate.isValidPosition(this.world, blockpos)) {
+                            this.world.setBlockState(blockpos, blockstate, 3);
+                            flag1 = true;
+                        }
+                    }
 
-            final LivingEntity entitylivingbase = this.getAttackingEntity();
-
-            if (entitylivingbase != null) {
-                final EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
-
-                if (entitylist$entityegginfo != null) {
-                    this.addStat(entitylist$entityegginfo.entityKilledByStat);
+                    if (!flag1) {
+                        ItemEntity itementity = new ItemEntity(this.world, this.posX, this.posY, this.posZ, new ItemStack(Items.WITHER_ROSE));
+                        this.world.addEntity(itementity);
+                    }
                 }
-
-                entitylivingbase.awardKillScore((ServerPlayerEntity) (Object) this, this.scoreValue, cause);
             }
 
-            this.addStat(Stats.DEATHS);
-            this.takeStat(Stats.TIME_SINCE_DEATH);
-            this.extinguish();
-            this.setFlag(0, false);
+            this.shadow$addStat(Stats.DEATHS);
+            this.shadow$takeStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
+            this.shadow$takeStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
+            this.shadow$extinguish();
+            this.shadow$setFlag(0, false);
             this.getCombatTracker().reset();
 
             this.impl$keepInventory = event.getKeepInventory();
@@ -320,12 +333,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         final DataCompoundHolder oldEntity = (DataCompoundHolder) oldPlayer;
         if (oldEntity.data$hasSpongeDataCompound()) {
             ((DataCompoundHolder) this).data$getSpongeCompound().put(Constants.Sponge.SPONGE_DATA, oldEntity.data$getSpongeDataCompound());
-            this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
+            this.impl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
         }
     }
 
-    @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean impl$useKeepFromBridge(final GameRules gameRules, final String key, final ServerPlayerEntity corpse, final boolean keepEverything) {
+    @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$RuleKey;)Z"))
+    private boolean impl$useKeepFromBridge(final GameRules gameRules, final GameRules.RuleKey key, final ServerPlayerEntity corpse, final boolean keepEverything) {
         final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
@@ -347,19 +360,19 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public User bridge$getUserObject() {
         final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
-        if (this.isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
+        if (this.impl$isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
             return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
         }
-        return service.getOrCreate((GameProfile) this.getGameProfile());
+        return service.getOrCreate((GameProfile) this.shadow$getGameProfile());
     }
 
     private User impl$getUserObjectOnConstruction() {
         final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
-        if (this.isFake || !(service instanceof SpongeUserStorageService)) {
+        if (this.impl$isFake || !(service instanceof SpongeUserStorageService)) {
             return bridge$getUserObject();
         }
         // Emnsure that the game profile is up to date.
-        return ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
+        return ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.shadow$getGameProfile());
     }
 
     @Override
@@ -412,11 +425,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
      */
     @Overwrite
     public void sendMessage(final ITextComponent component) {
-        if (this.isFake) {
+        if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             return;
         }
-        ChatUtil.sendMessage(component, MessageChannel.fixed((Player) this), (CommandSource) this.server, false);
+        ChatUtil.sendMessage(component, MessageChannel.to((Player) this), (MessageReceiver) this.server, false);
     }
 
     /**
@@ -432,11 +445,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public String bridge$getSubjectCollectionIdentifier() {
         return ((SubjectBridge) this.impl$user).bridge$getSubjectCollectionIdentifier();
-    }
-
-    @Override
-    public String bridge$getIdentifier() {
-        return this.impl$user.getIdentifier();
     }
 
     @Override
@@ -473,7 +481,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     public void bridge$initScoreboard() {
-        ((ServerScoreboardBridge) this.getWorldScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, true);
+        ((ServerScoreboardBridge) this.shadow$getWorldScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, true);
     }
 
     @Override
@@ -504,7 +512,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public MessageChannel bridge$getDeathMessageChannel() {
         final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-        if (player.world.getGameRules().getBoolean(Constants.GameRule.SHOW_DEATH_MESSAGES)) {
+        if (player.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES)) {
             @Nullable final Team team = player.getTeam();
 
             if (team != null && team.getDeathMessageVisibility() != Team.Visible.ALWAYS) {
@@ -518,28 +526,18 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             }
         }
 
-        return MessageChannel.TO_NONE;
+        return MessageChannel.toNone();
     }
 
     @Override
-    public net.minecraft.scoreboard.Scoreboard getWorldScoreboard() {
+    public net.minecraft.scoreboard.Scoreboard shadow$getWorldScoreboard() {
         return (net.minecraft.scoreboard.Scoreboard) ((Player) this).getScoreboard();
     }
 
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
-    private void onPlayerActive(final CallbackInfo ci) {
+    private void impl$onPlayerActive(final CallbackInfo ci) {
         ((ServerPlayNetHandlerBridge) this.connection).bridge$resendLatestResourcePackRequest();
-    }
-
-    @Override
-    public CommandSource bridge$asCommandSource() {
-        return (CommandSource) this;
-    }
-
-    @Override
-    public ICommandSender bridge$asICommandSender() {
-        return (ICommandSender) this;
     }
 
     @Override
@@ -577,12 +575,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
-    private void spongeImpl$onSetGameTypeThrowEvent(final GameType gameType, final CallbackInfo ci) {
+    private void impl$$onSetGameTypeThrowEvent(final GameType gameType, final CallbackInfo ci) {
         if (ShouldFire.CHANGE_GAME_MODE_EVENT_TARGET_PLAYER) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
-                final ChangeGameModeEvent.TargetPlayer event =
-                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(frame.getCurrentCause(),
+                final ChangeGameModeEvent event =
+                    SpongeEventFactory.createChangeGameModeEvent(frame.getCurrentCause(),
                         (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, (Player) this);
                 SpongeImpl.postEvent(event);
                 if (event.isCancelled()) {
@@ -596,18 +594,18 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     /**
-     * This injector must appear <b>after</b> {@link #spongeImpl$onSetGameTypeThrowEvent} since it
+     * This injector must appear <b>after</b> {@link #impl$$onSetGameTypeThrowEvent} since it
      * assigns the {@link #impl$pendingGameType} returned by the event to the actual
      * local variable in the method.
      */
     @ModifyVariable(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
-    private GameType spongeImpl$assignPendingGameType(final GameType gameType) {
+    private GameType impl$assignPendingGameType(final GameType gameType) {
         return this.impl$pendingGameType;
     }
 
     @Redirect(method = "onDeath", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z", ordinal = 0))
-    private boolean spongeImpl$SuppressDeathMessageDueToPriorEvent(final GameRules gameRules, final String gameRule) {
+            target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$RuleKey;)Z", ordinal = 0))
+    private boolean impl$SuppressDeathMessageDueToPriorEvent(final GameRules gameRules, final GameRules.RuleKey gameRule) {
         return false; // Suppress death messages since this is handled together with the event calling
     }
 
@@ -620,7 +618,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     @Nullable
     public Text bridge$getDisplayNameText() {
-        return Text.of(this.shadow$getName());
+        return Text.of(this.shadow$getScoreboardName());
     }
 
     @Override
@@ -631,52 +629,53 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public void bridge$sendBlockChange(final BlockPos pos, final BlockState state) {
         final SChangeBlockPacket packet = new SChangeBlockPacket();
-        packet.pos = pos;
-        packet.blockState = state;
+        SChangeBlockPacketAccessor accessor = (SChangeBlockPacketAccessor) packet;
+        accessor.accessor$setState(state);
+        accessor.accessor$setPos(pos);
         this.connection.sendPacket(packet);
     }
 
     /**
      * @author gabizou, April 7th, 2016
      *
-     * Technically an overwrite of {@link EntityPlayer#dropItem(boolean)}
+     * Technically an overwrite of {@link PlayerEntity#dropItem(boolean)}
      * @param dropAll
      * @return
      */
     @Override
     @Nullable
-    public ItemEntity dropItem(final boolean dropAll) {
+    public ItemEntity shadow$dropItem(final boolean dropAll) {
         final ItemStack currentItem = this.inventory.getCurrentItem();
         if (currentItem.isEmpty()) {
             return null;
         }
 
         // Add SlotTransaction to PlayerContainer
-        final org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer)
+        final org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventory)
                 .query(QueryTypes.INVENTORY_TYPE.of(Hotbar.class))
                 .getSlot(this.inventory.currentItem).get();
         final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
         final int count = dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1;
         final ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, count);
         final SlotTransaction transaction = new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem()));
-        ((TrackedInventoryBridge) this.inventoryContainer).bridge$getCapturedSlotTransactions().add(transaction);
+        ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions().add(transaction);
 
-        return this.dropItem(itemToDrop, false, true);
+        return this.shadow$dropItem(itemToDrop, false, true);
     }
 
     @Override
-    public void stopActiveHand() { // stopActiveHand
+    public void shadow$stopActiveHand() { // stopActiveHand
         // Our using item state is probably desynced from the client (e.g. from the initial air interaction of a bow being cancelled).
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).
         if (this.activeItemStack.isEmpty()) {
             ((ServerPlayerEntity) (Object) this).sendContainerToPlayer(((ServerPlayerEntity) (Object) this).container);
         }
-        super.stopActiveHand();
+        super.shadow$stopActiveHand();
     }
 
     @Inject(method = "closeContainer", at = @At("RETURN"))
-    private void onCloseContainer(final CallbackInfo ci) {
+    private void impl$captureOnCloseContainer(final CallbackInfo ci) {
         final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) this.openContainer;
         // Safety measure to avoid memory leaks as mods may call this directly
         if (mixinContainer.bridge$capturingInventory()) {
@@ -692,7 +691,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             ordinal = 1,
             shift = At.Shift.AFTER))
     private void onSetContainer(final IInventory chestInventory, final CallbackInfo ci) {
-        if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ChestContainer && this.isSpectator()) {
+        if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ChestContainer && this.shadow$isSpectator()) {
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
             ((InventoryAdapter) this.openContainer).inventoryAdapter$setSpectatorChest(true);
         }
@@ -748,19 +747,19 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
     }
 
-    @Redirect(method = "onUpdateEntity",
+    @Redirect(method = "playerTick()V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/EntityPlayerMP;getHealth()F"
+                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;getHealth()F"
             ),
             slice =  @Slice(
                     from = @At(
                             value = "FIELD",
-                            target = "Lnet/minecraft/entity/player/EntityPlayerMP;lastHealth:F"
+                            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;lastHealth:F"
                     ),
                     to = @At(
                             value = "INVOKE",
-                            target = "Lnet/minecraft/network/play/server/SPacketUpdateHealth;<init>(FIF)V"
+                            target = "Lnet/minecraft/network/play/server/SUpdateHealthPacket;<init>(FIF)V"
                     )
             )
     )
@@ -768,7 +767,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         return this.bridge$getInternalScaledHealth();
     }
 
-    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 1))
+    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;getTotalArmorValue()I", ordinal = 1))
     private void updateHealthPriorToArmor(final CallbackInfo ci) {
         this.bridge$refreshScaledHealth();
     }
@@ -800,9 +799,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         this.bridge$injectScaledHealth(dirtyInstances);
 
         // Send the new information to the client.
-        this.connection.sendPacket(new SUpdateHealthPacket(this.bridge$getInternalScaledHealth(), this.getFoodStats().getFoodLevel(),
-                this.getFoodStats().getSaturationLevel()));
-        this.connection.sendPacket(new SEntityPropertiesPacket(this.getEntityId(), dirtyInstances));
+        this.connection.sendPacket(new SUpdateHealthPacket(this.bridge$getInternalScaledHealth(), this.shadow$getFoodStats().getFoodLevel(),
+                this.shadow$getFoodStats().getSaturationLevel()));
+        this.connection.sendPacket(new SEntityPropertiesPacket(this.shadow$getEntityId(), dirtyInstances));
         // Reset the dirty instances since they've now been manually updated on the client.
         dirtyInstances.clear();
 
@@ -948,7 +947,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             return;
         }
 
-        final boolean teamPVP = super.canAttackPlayer(other);
+        final boolean teamPVP = super.shadow$canAttackPlayer(other);
         cir.setReturnValue(teamPVP);
     }
 

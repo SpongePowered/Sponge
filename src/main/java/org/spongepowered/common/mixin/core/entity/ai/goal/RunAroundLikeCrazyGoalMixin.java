@@ -29,7 +29,7 @@ import net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.animal.Horse;
+import org.spongepowered.api.entity.living.animal.horse.HorseEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
@@ -48,11 +48,12 @@ public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
 
     /**
      * @author rexbut - December 16th, 2016
+     * @author i509VCB - February 18th, 2020 - 1.14.4
      *
      * @reason - adjusted to support {@link DismountTypes}
      */
     @Overwrite
-    public void updateTask() {
+    public void tick() {
         if (this.horseHost.getRNG().nextInt(50) == 0) {
             Entity entity = this.horseHost.getPassengers().get(0);
 
@@ -65,14 +66,15 @@ public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
                 int j = this.horseHost.getMaxTemper();
 
                 if (j > 0 && this.horseHost.getRNG().nextInt(j) < i) {
+                    // Sponge start - Fire Tame Entity event
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(entity);
-                        if (SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Horse) this.horseHost))) {
+                        if (SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (HorseEntity) this.horseHost))) {
                             return;
                         }
                     }
+                    // Sponge end
                     this.horseHost.setTamedBy((PlayerEntity)entity);
-                    this.horseHost.world.setEntityState(this.horseHost, (byte)7);
                     return;
                 }
 
@@ -81,7 +83,7 @@ public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
 
             // Sponge start - Throw an event before calling entity states
             // this.horseHost.removePassengers(); // Vanilla
-            if (((EntityBridge) this.horseHost).bridge$removePassengers(DismountTypes.DERAIL)) {
+            if (((EntityBridge) this.horseHost).bridge$removePassengers(DismountTypes.DERAIL.get())) {
                 // Sponge end
                 this.horseHost.makeMad();
                 this.horseHost.world.setEntityState(this.horseHost, (byte)6);

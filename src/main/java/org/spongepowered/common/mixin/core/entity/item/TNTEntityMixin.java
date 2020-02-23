@@ -123,8 +123,8 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
     }
 
 
-    @Inject(method = "onUpdate", at = @At("RETURN"))
-    private void onSpongeUpdateTNTPushPrime(final CallbackInfo ci) {
+    @Inject(method = "tick()V", at = @At("RETURN"))
+    private void impl$updateTNTPushPrime(final CallbackInfo ci) {
         if (this.fuse == this.bridge$fuseDuration - 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (this.impl$detonator != null) {

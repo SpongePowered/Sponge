@@ -22,10 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.entity.passive;
+package org.spongepowered.common.mixin.api.mcp.item;
 
 import net.minecraft.entity.merchant.IMerchant;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.item.MerchantOffers;
 import org.spongepowered.api.item.merchant.Merchant;
@@ -37,7 +36,7 @@ import java.util.List;
 import java.util.Random;
 
 @Mixin(MerchantOffers.class)
-public interface EntityVillager_ITradeListMixin_API extends TradeOfferListMutator, VillagerEntity.ITradeList {
+public interface MerchantOffersMixin_API extends TradeOfferListMutator {
 
     @Override
     default void accept(final Merchant owner, final List<TradeOffer> tradeOffers, final Random random) {

@@ -82,7 +82,7 @@ public abstract class MonsterEntityMixin extends MobEntityMixin {
 
         if (targetEntity instanceof LivingEntity) {
             // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), ((LivingEntity) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.shadow$getHeldItemMainhand(), ((LivingEntity) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackModifier((MonsterEntity) (Object) this);
         }
@@ -90,8 +90,8 @@ public abstract class MonsterEntityMixin extends MobEntityMixin {
         // Sponge Start - Throw our event and handle appropriately
         final DamageSource damageSource = DamageSource.causeMobDamage((MonsterEntity) (Object) this);
         Sponge.getCauseStackManager().pushCause(damageSource);
-        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions,
-            (org.spongepowered.api.entity.Entity) targetEntity, knockbackModifier, originalBaseDamage);
+        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
+            originalFunctions, knockbackModifier, originalBaseDamage);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
@@ -116,7 +116,7 @@ public abstract class MonsterEntityMixin extends MobEntityMixin {
 
             if (targetEntity instanceof PlayerEntity) {
                 PlayerEntity entityplayer = (PlayerEntity) targetEntity;
-                ItemStack itemstack = this.getHeldItemMainhand();
+                ItemStack itemstack = this.shadow$getHeldItemMainhand();
                 ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : ItemStack.EMPTY;
 
                 if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof AxeItem && itemstack1.getItem() == Items.SHIELD) {
@@ -146,7 +146,7 @@ public abstract class MonsterEntityMixin extends MobEntityMixin {
     @Overwrite
     protected boolean isValidLightLevel()
     {
-        final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+        final BlockPos blockpos = new BlockPos(this.posX, this.shadow$getBoundingBox().minY, this.posZ);
         final Chunk chunk = ((AbstractChunkProviderBridge) this.world.getChunkProvider()).bridge$getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
         if (chunk == null || !((ChunkBridge) chunk).bridge$isActive()) {
             return false;

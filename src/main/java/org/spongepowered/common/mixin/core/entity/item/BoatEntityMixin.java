@@ -39,8 +39,8 @@ public abstract class BoatEntityMixin extends EntityMixin {
     private double unoccupiedDecelerationSpeed = 0.8D;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         if (compound.contains(Constants.Entity.Boat.BOAT_MAX_SPEED)) {
             this.maxSpeed = compound.getDouble(Constants.Entity.Boat.BOAT_MAX_SPEED);
         }
@@ -56,8 +56,8 @@ public abstract class BoatEntityMixin extends EntityMixin {
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
         compound.putDouble(Constants.Entity.Boat.BOAT_MAX_SPEED, this.maxSpeed);
         compound.putBoolean(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, this.moveOnLand);
         compound.putDouble(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);

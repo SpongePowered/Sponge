@@ -44,6 +44,7 @@ public abstract class SilverfishEntity_SummonSilverfishGoalMixin extends Goal {
 
     /**
      * @author gabizou - April 13th, 2018
+     * @author i509VCB - February 18th, 2020 - 1.14.4
      * @reason Forge changes the gamerule method calls, so the old injection/redirect
      * would fail in forge environments. This changes the injection to a predictable
      * place where we still can forcibly call things but still cancel as needed.
@@ -53,16 +54,16 @@ public abstract class SilverfishEntity_SummonSilverfishGoalMixin extends Goal {
      * @param dropBlock Whether to drop the block or not
      */
     @Redirect(
-        method = "updateTask",
+        method = "tick()V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;destroyBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"
         )
     )
-    private boolean onCanGrief(final World world, final BlockPos pos, final boolean dropBlock) {
+    private boolean impl$onCanGrief(final World world, final BlockPos pos, final boolean dropBlock) {
         final BlockState blockState = world.getBlockState(pos);
         return ((GrieferBridge) this.silverfish).bridge$canGrief()
                ? world.destroyBlock(pos, dropBlock)
-               : world.setBlockState(pos, blockState.get(SilverfishBlock.VARIANT).getModelBlock(), 3);
+               : world.setBlockState(pos, ((SilverfishBlock) blockState.getBlock()).getMimickedBlock().getDefaultState(), 3);
     }
 }

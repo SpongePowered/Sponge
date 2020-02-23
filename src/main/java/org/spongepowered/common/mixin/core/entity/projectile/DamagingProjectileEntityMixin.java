@@ -44,20 +44,20 @@ public abstract class DamagingProjectileEntityMixin extends EntityMixin {
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$readFromSpongeCompound(compound);
+    public void impl$readFromSpongeCompound(CompoundNBT compound) {
+        super.impl$readFromSpongeCompound(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, ((FireballEntity) this));
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(CompoundNBT compound) {
-        super.spongeImpl$writeToSpongeCompound(compound);
+    public void impl$writeToSpongeCompound(CompoundNBT compound) {
+        super.impl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, ((FireballEntity) this).getShooter(), this.shootingEntity);
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/DamagingProjectileEntity;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
     private void onProjectileImpact(DamagingProjectileEntity projectile, RayTraceResult movingObjectPosition) {
-        if (this.world.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
+        if (this.world.isRemote || movingObjectPosition.getType() == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }

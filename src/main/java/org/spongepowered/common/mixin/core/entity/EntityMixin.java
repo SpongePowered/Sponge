@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import co.aikar.timings.Timing;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -40,20 +38,23 @@ import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SDestroyEntitiesPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.util.IItemProvider;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -108,6 +109,7 @@ import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.List;
@@ -119,17 +121,6 @@ import java.util.UUID;
 public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge {
 
     // @formatter:off
-    private boolean isConstructing = true;
-    @Nullable private Text displayName;
-    @Nullable private BlockPos lastCollidedBlockPos;
-    private boolean trackedInWorld = false;
-    private boolean vanish$collision = false;
-    private boolean vanish$untargetable = false;
-    private boolean vanish$isVanished = false;
-    private boolean vanish$pendingVisibilityUpdate = false;
-    private int vanish$visibilityTicks = 0;
-    @Nullable private Cause impl$destructCause;
-
     @Shadow @Nullable private Entity ridingEntity;
     @Shadow @Final private List<Entity> passengers;
     @Shadow public net.minecraft.world.World world;
@@ -152,47 +143,59 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public int fire;
     @Shadow public int hurtResistantTime;
     @Shadow protected EntityDataManager dataManager;
-    @Shadow public int dimension;
+    @Shadow public DimensionType dimension;
     @Shadow private boolean invulnerable;
+    @Shadow @Final private EntityType<?> type;
 
-    @Shadow public abstract void setPosition(double x, double y, double z);
-    @Shadow public abstract void setDead();
-    @Shadow public abstract int getAir();
-    @Shadow public abstract void setAir(int air);
-    @Shadow public abstract float getEyeHeight();
-    @Shadow public abstract void setCustomNameTag(String name);
-    @Shadow public abstract UUID getUniqueID();
-    @Shadow public abstract AxisAlignedBB getEntityBoundingBox();
-    @Shadow public abstract void setFire(int seconds);
-    @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
+    @Shadow public abstract void shadow$remove();
+    @Shadow public abstract int shadow$getAir();
+    @Shadow public abstract void shadow$setAir(int air);
+    @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
+    @Shadow public abstract UUID shadow$getUniqueID();
+    @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
+    @Shadow public abstract void shadow$setFire(int seconds);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
-    @Shadow public abstract int getEntityId();
-    @Shadow public abstract boolean isBeingRidden();
-    @Shadow public abstract SoundCategory getSoundCategory();
-    @Shadow public abstract List<Entity> shadow$getPassengers();
+    @Shadow public abstract int shadow$getEntityId();
+    @Shadow public abstract boolean shadow$isBeingRidden();
     @Shadow public abstract Entity getRidingEntity();
-    @Shadow public abstract void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack);
-    @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
-    @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
-    @Shadow public abstract boolean isSprinting();
-    @Shadow public abstract boolean shadow$isInWater();
-    @Shadow public abstract boolean isRiding();
-    @Shadow public abstract boolean isOnSameTeam(Entity entityIn);
-    @Shadow public abstract double getDistanceSq(Entity entityIn);
+    @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
-    @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
-    @Shadow protected abstract void removePassenger(Entity passenger);
-    @Shadow protected abstract void setSize(float width, float height);
-    @Shadow protected abstract void applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);
-    @Shadow public abstract void extinguish();
-    @Shadow protected abstract void setFlag(int flag, boolean set);
-    @Shadow @Nullable public Entity changeDimension(final int dimension) { return null; } // Shadow
-    @Shadow public abstract boolean isInvisible();
-    @Shadow public abstract void setInvisible(boolean invisible);
-    @Shadow public abstract int getMaxAir();
-    @Shadow protected abstract int getFireImmuneTicks();
+    @Shadow protected abstract void shadow$removePassenger(Entity passenger);
+    @Shadow @Nullable public Entity shadow$changeDimension(DimensionType dimension) { return null; } // Shadow
+    @Shadow public abstract boolean shadow$isInvisible();
+    @Shadow public abstract void shadow$setInvisible(boolean invisible);
+    @Shadow protected abstract int shadow$getFireImmuneTicks();
+    @Shadow public abstract EntityType<?> shadow$getType();
+    @Shadow public abstract boolean shadow$isInvulnerableTo(DamageSource source);
+    @Shadow public abstract float shadow$getEyeHeight();
+    @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
+    @Shadow public abstract void shadow$extinguish();
+    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
+    @Shadow public abstract void shadow$setMotion(Vec3d motionIn);
+    @Shadow public abstract void shadow$setMotion(double x, double y, double z);
+    @Shadow public abstract boolean shadow$isSprinting();
+    @Shadow public abstract Vec3d shadow$getMotion();
+    @Shadow public abstract boolean shadow$isOnSameTeam(Entity entityIn);
+    @Shadow public abstract double shadow$getDistanceSq(Entity entityIn);
+    @Shadow @Nullable public abstract ItemEntity shadow$entityDropItem(IItemProvider itemIn, int offset);
+    @Shadow public abstract boolean shadow$isInWater();
+    @Shadow public abstract boolean shadow$isPassenger();
+    @Shadow @Nullable public abstract Team shadow$getTeam();
+    @Shadow public abstract void shadow$setPositionAndUpdate(double x, double y, double z);
+    @Shadow public abstract int shadow$getMaxAir();
 
-    private int customFireImmuneTicks = this.getFireImmuneTicks();
+    private boolean impl$isConstructing = true;
+    @Nullable private Text impl$displayName;
+    @Nullable private BlockPos impl$lastCollidedBlockPos;
+    private boolean impl$trackedInWorld = false;
+    private boolean vanish$collision = false;
+    private boolean vanish$untargetable = false;
+    private boolean vanish$isVanished = false;
+    private boolean vanish$pendingVisibilityUpdate = false;
+    @Nullable private Cause impl$destructCause;
+    private int impl$customFireImmuneTicks = this.shadow$getFireImmuneTicks();
+    private boolean impl$skipSettingCustomNameTag = false;
+    private int vanish$visibilityTicks = 0;
 
     // @formatter:on
 
@@ -203,7 +206,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         final EntityTypeBridge entityTypeBridge = (EntityTypeBridge) entityType;
         if (!entityTypeBridge.bridge$checkedDamageEntity()) {
             try {
-                final String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "damageEntity" : "func_70665_d";
+                final String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? Constants.Entity.ATTACK_ENTITY_FROM_MAPPING : Constants.Entity.ATTACK_ENTITY_FROM_OBFUSCATED;
                 final Class<?>[] argTypes = {DamageSource.class, float.class};
                 final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
                 if (!(clazz.equals(LivingEntity.class) || clazz.equals(PlayerEntity.class) || clazz.equals(ServerPlayerEntity.class))) {
@@ -219,17 +222,17 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Override
     public boolean bridge$isConstructing() {
-        return this.isConstructing;
+        return this.impl$isConstructing;
     }
 
     @Override
     public void bridge$fireConstructors() {
-        this.isConstructing = false;
+        this.impl$isConstructing = false;
     }
 
     @Override
     public boolean bridge$isWorldTracked() {
-        return this.trackedInWorld;
+        return this.impl$trackedInWorld;
     }
 
     @Override
@@ -238,10 +241,10 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         // Since this is called during removeEntity from world, we can
         // post the removal event here, basically.
         if (!tracked && this.impl$destructCause != null) {
-            final MessageChannel originalChannel = MessageChannel.TO_NONE;
+            final MessageChannel originalChannel = MessageChannel.toNone();
             SpongeImpl.postEvent(SpongeEventFactory.createDestructEntityEvent(
                     this.impl$destructCause, originalChannel, Optional.of(originalChannel),
-                    new MessageEvent.MessageFormatter(), (org.spongepowered.api.entity.Entity) this, true
+                (org.spongepowered.api.entity.Entity) this, new MessageEvent.MessageFormatter(), true
             ));
 
             this.impl$destructCause = null;
@@ -250,7 +253,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;", ordinal = 0),
             cancellable = true)
-    private void onStartRiding(final Entity vehicle, final boolean force, final CallbackInfoReturnable<Boolean> ci) {
+    private void impl$onStartRiding(final Entity vehicle, final boolean force, final CallbackInfoReturnable<Boolean> ci) {
         if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_MOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             Sponge.getCauseStackManager().pushCause(this);
             if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
@@ -266,24 +269,24 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @reason - adjusted to support {@link DismountTypes}
      */
     @Overwrite
-    public void dismountRidingEntity() {
+    public void stopRiding() {
         if (this.ridingEntity != null) {
             if (this.getRidingEntity().removed) {
-                this.spongeImpl$dismountRidingEntity(DismountTypes.DEATH);
+                this.impl$dismountRidingEntity(DismountTypes.DEATH.get());
             } else {
-                this.spongeImpl$dismountRidingEntity(DismountTypes.PLAYER);
+                this.impl$dismountRidingEntity(DismountTypes.PLAYER.get());
             }
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    private boolean spongeImpl$dismountRidingEntity(final DismountType type) {
+    private boolean impl$dismountRidingEntity(final DismountType type) {
         if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeImpl.postEvent(SpongeEventFactory.
-                    createRideEntityEventDismount(frame.getCurrentCause(), type, (org.spongepowered.api.entity.Entity) this.getRidingEntity()))) {
+                    createRideEntityEventDismount(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this.getRidingEntity()))) {
                     return false;
                 }
             }
@@ -292,7 +295,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (this.ridingEntity != null) {
             final EntityMixin entity = (EntityMixin) (Object) this.ridingEntity;
             this.ridingEntity = null;
-            entity.removePassenger((Entity) (Object) this);
+            entity.shadow$removePassenger((Entity) (Object) this);
         }
         return true;
     }
@@ -301,15 +304,15 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Override
     public boolean bridge$removePassengers(final DismountType type) {
         boolean dismount = false;
-        for (int i = this.riddenByEntities.size() - 1; i >= 0; --i) {
-            dismount = ((EntityMixin) (Object) this.riddenByEntities.get(i)).spongeImpl$dismountRidingEntity(type) || dismount;
+        for (int i = this.passengers.size() - 1; i >= 0; --i) {
+            dismount = ((EntityMixin) (Object) this.passengers.get(i)).impl$dismountRidingEntity(type) || dismount;
         }
         return dismount;
     }
 
     @Inject(method = "move", at = @At("HEAD"), cancellable = true)
-    private void spongeImpl$onSpongeMoveEntity(final MoverType type, final double x, final double y, final double z, final CallbackInfo ci) {
-        if (!this.world.isRemote && !SpongeHooks.checkEntitySpeed(((Entity) (Object) this), x, y, z)) {
+    private void impl$onSpongeMoveEntity(final MoverType type, final Vec3d vec3d, final CallbackInfo ci) {
+        if (!this.world.isRemote && !SpongeHooks.checkEntitySpeed(((Entity) (Object) this), vec3d.getX(), vec3d.getY(), vec3d.getZ())) {
             ci.cancel();
         }
     }
@@ -325,7 +328,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            final AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
+            final AxisAlignedBB bb = this.shadow$getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             final Location<World> location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getMaterial() == Material.LAVA);
             final MinecraftBlockDamageSource lava = new MinecraftBlockDamageSource("lava", location);
@@ -345,12 +348,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
         )
     )
-    private boolean onSpongeRedirectForFireDamage(final Entity entity, final DamageSource source, final float damage) {
+    private boolean impl$spongeRedirectForFireDamage(final Entity entity, final DamageSource source, final float damage) {
         if (this.world.isRemote) { // Short Circuit
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            final AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.001D, -0.001D, -0.001D);
+            final AxisAlignedBB bb = this.shadow$getBoundingBox().grow(-0.001D, -0.001D, -0.001D);
             final Location<World> location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
 
@@ -367,7 +370,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setPosition", at = @At("HEAD"))
-    private void onSetPosition(final double x, final double y, final double z, final CallbackInfo ci) {
+    private void impl$capturePlayerPosition(final double x, final double y, final double z, final CallbackInfo ci) {
         if ((Entity) (Object) this instanceof ServerPlayerEntity) {
             final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
             if (player.connection != null) {
@@ -379,7 +382,6 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     public Vector3d getPosition() {
         return new Vector3d(this.posX, this.posY, this.posZ);
     }
-
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -407,11 +409,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (this.vanish$pendingVisibilityUpdate && !this.world.isRemote) {
             // TODO - this is all done in the ChunkManager/ChunkManager.TrackEntity logic, need to redo this
             final EntityTracker entityTracker = ((ServerWorld) this.world).getChunkProvider().chunkManager
-            final EntityTrackerEntry lookup = ((EntityTrackerAccessor) entityTracker).accessor$getTrackedEntityTable().lookup(this.getEntityId());
+            final EntityTrackerEntry lookup = ((EntityTrackerAccessor) entityTracker).accessor$getTrackedEntityTable().lookup(this.shadow$getEntityId());
             if (lookup != null && this.vanish$visibilityTicks % 4 == 0) {
                 if (this.vanish$isVanished) {
                     for (final ServerPlayerEntity entityPlayerMP : ((EntityTrackerEntryAccessor) lookup).accessor$getTrackingPlayers()) {
-                        entityPlayerMP.connection.sendPacket(new SDestroyEntitiesPacket(this.getEntityId()));
+                        entityPlayerMP.connection.sendPacket(new SDestroyEntitiesPacket(this.shadow$getEntityId()));
                         if ((Entity) (Object) this instanceof ServerPlayerEntity) {
                             entityPlayerMP.connection.sendPacket(
                                     new SPlayerListItemPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER, (ServerPlayerEntity) (Object) this));
@@ -447,7 +449,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     }
 
     /**
-     * Hooks into vanilla's writeToNBT to call {@link #spongeImpl$writeToSpongeCompound}.
+     * Hooks into vanilla's writeToNBT to call {@link #impl$writeToSpongeCompound}.
      *
      * <p> This makes it easier for other entity mixins to override writeToNBT
      * without having to specify the <code>@Inject</code> annotation. </p>
@@ -456,15 +458,15 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *        to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
-    private void onSpongeWriteToNBT(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
+    @Inject(method = "writeWithoutTypeId(Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/nbt/CompoundNBT;", at = @At("HEAD"))
+    private void impl$spongeWriteToNBT(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         if (((CustomDataHolderBridge) this).bridge$hasManipulators()) {
-            this.spongeImpl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
+            this.impl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
         }
     }
 
     /**
-     * Hooks into vanilla's readFromNBT to call {@link #spongeImpl$readFromSpongeCompound}.
+     * Hooks into vanilla's readFromNBT to call {@link #impl$readFromSpongeCompound}.
      *
      * <p> This makes it easier for other entity mixins to override readSpongeNBT
      * without having to specify the <code>@Inject</code> annotation. </p>
@@ -473,12 +475,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *        from SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    private void onSpongeReadFromNBT(final CompoundNBT compound, final CallbackInfo ci) {
-        if (this.isConstructing) {
+    @Inject(method = "read(Lnet/minecraft/nbt/CompoundNBT;)V", at = @At("RETURN"))
+    private void impl$spongeReadFromNBT(final CompoundNBT compound, final CallbackInfo ci) {
+        if (this.impl$isConstructing) {
             this.bridge$fireConstructors(); // Do this early as possible
         }
-        this.spongeImpl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
+        this.impl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
     }
 
     /**
@@ -490,7 +492,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *
      * @param compound The SpongeData compound to read from
      */
-    protected void spongeImpl$readFromSpongeCompound(final CompoundNBT compound) {
+    protected void impl$readFromSpongeCompound(final CompoundNBT compound) {
         DataUtil.readCustomData(compound, ((org.spongepowered.api.entity.Entity) this));
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.contains(Constants.Sponge.Entity.CAN_GRIEF)) {
             ((GrieferBridge) this).bridge$setCanGrief(compound.getBoolean(Constants.Sponge.Entity.CAN_GRIEF));
@@ -514,7 +516,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *
      * @param compound The SpongeData compound to write to
      */
-    protected void spongeImpl$writeToSpongeCompound(final CompoundNBT compound) {
+    protected void impl$writeToSpongeCompound(final CompoundNBT compound) {
         DataUtil.writeCustomData(compound, (org.spongepowered.api.entity.Entity) this);
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && ((GrieferBridge) this).bridge$canGrief()) {
             compound.putBoolean(Constants.Sponge.Entity.CAN_GRIEF, true);
@@ -524,22 +526,20 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             compound.putBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.bridge$isUncollideable());
             compound.putBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.bridge$isUntargetable());
         }
-        if (this.isInvisible()) {
+        if (this.shadow$isInvisible()) {
             compound.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         }
     }
 
     @Override
     public void bridge$setImplVelocity(final Vector3d velocity) {
-        this.motionX = checkNotNull(velocity).getX();
-        this.motionY = velocity.getY();
-        this.motionZ = velocity.getZ();
+        this.motion = VecHelper.toVec3d(velocity);
         this.velocityChanged = true;
     }
 
     @Redirect(method = "move",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;"
                                                                         + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
-    private void spongeImpl$onEntityCollideWithBlockThrowEventSponge(final Block block, final net.minecraft.world.World world, final BlockPos pos, final Entity entity) {
+    private void impl$onEntityCollideWithBlockThrowEventSponge(final Block block, final net.minecraft.world.World world, final BlockPos pos, final Entity entity) {
         // if block can't collide, return
         if (!((BlockBridge) block).bridge$hasCollideLogic()) {
             return;
@@ -553,33 +553,36 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         final BlockState state = world.getBlockState(pos);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityWalk(world, pos, entity);
-            this.lastCollidedBlockPos = pos;
+            this.impl$lastCollidedBlockPos = pos;
         }
 
     }
 
-    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
-    private void spongeImpl$onEntityCollideWithBlockState(
-        final Block block, final net.minecraft.world.World world, final BlockPos pos, final BlockState state, final Entity entity) {
+    @Redirect(method = "doBlockCollisions",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/block/BlockState;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"
+        )
+    ) // doBlockCollisions
+    private void impl$onEntityCollideWithBlockState(BlockState blockState, net.minecraft.world.World worldIn, BlockPos pos, Entity entityIn) {
         // if block can't collide, return
-        if (!((BlockBridge) block).bridge$hasCollideWithStateLogic()) {
+        if (!((BlockBridge) blockState.getBlock()).bridge$hasCollideWithStateLogic()) {
             return;
         }
 
         if (world.isRemote) {
-            block.onEntityCollision(world, pos, state, entity);
+            blockState.onEntityCollision(world, pos, entityIn);
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
-            block.onEntityCollision(world, pos, state, entity);
-            this.lastCollidedBlockPos = pos;
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(blockState.getBlock(), world, pos, blockState, entityIn, Direction.NONE)) {
+            blockState.onEntityCollision(world, pos, entityIn);
+            this.impl$lastCollidedBlockPos = pos;
         }
 
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
-    private void spongeImpl$onBlockFallenUpon(
+    private void impl$onBlockFallenUpon(
         final Block block, final net.minecraft.world.World world, final BlockPos pos, final Entity entity, final float fallDistance) {
         if (world.isRemote) {
             block.onFallenUpon(world, pos, entity, fallDistance);
@@ -589,7 +592,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         final BlockState state = world.getBlockState(pos);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.UP)) {
             block.onFallenUpon(world, pos, entity, fallDistance);
-            this.lastCollidedBlockPos = pos;
+            this.impl$lastCollidedBlockPos = pos;
         }
 
     }
@@ -597,12 +600,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Override
     public boolean bridge$isInvisible() {
-        return this.isInvisible();
+        return this.shadow$isInvisible();
     }
 
     @Override
     public void bridge$setInvisible(final boolean invisible) {
-        this.setInvisible(invisible);
+        this.shadow$setInvisible(invisible);
         if (invisible) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             spongeData.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
@@ -663,57 +666,55 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * This prevents sounds from being sent to the server by entities that are vanished
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
-    private boolean spongeImpl$checkIsSilentOrInvis(final Entity entity) {
+    private boolean impl$checkIsSilentOrInvis(final Entity entity) {
         return entity.isSilent() || this.vanish$isVanished;
     }
 
     @Redirect(method = "applyEntityCollision", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;noClip:Z", opcode = Opcodes.GETFIELD))
-    private boolean spongeApplyEntityCollisionCheckVanish(final Entity entity) {
+    private boolean impl$applyEntityCollisionCheckVanish(final Entity entity) {
         return entity.noClip || ((VanishableBridge) entity).bridge$isVanished();
     }
 
-    @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
-    private void spawnParticle(final net.minecraft.world.World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord,
-        final double xOffset, final double yOffset, final double zOffset, final int... p_175688_14_) {
+    @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addParticle(Lnet/minecraft/particles/IParticleData;DDDDDD)V"))
+    private void impl$spawnParticle(final net.minecraft.world.World world, final IParticleData particleTypes, final double xCoord, final double yCoord, final double zCoord,
+                               final double xOffset, final double yOffset, final double zOffset) {
         if (!this.vanish$isVanished) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
-    @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
-    private void runningSpawnParticle(final net.minecraft.world.World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord,
-        final double xOffset, final double yOffset, final double zOffset, final int... p_175688_14_) {
+    @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addParticle(Lnet/minecraft/particles/IParticleData;DDDDDD)V"))
+    private void impl$runningSpawnParticle(final net.minecraft.world.World world, final IParticleData particleTypes, final double xCoord, final double yCoord, final double zCoord,
+        final double xOffset, final double yOffset, final double zOffset) {
         if (!this.vanish$isVanished) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
     @Nullable
     @Override
     public Text bridge$getDisplayNameText() {
-        return this.displayName;
+        return this.impl$displayName;
     }
-
-    private boolean skipSettingCustomNameTag = false;
 
     @Override
     public void bridge$setDisplayName(@Nullable final Text displayName) {
-        this.displayName = displayName;
+        this.impl$displayName = displayName;
 
-        this.skipSettingCustomNameTag = true;
-        if (this.displayName == null) {
-            this.setCustomNameTag("");
+        this.impl$skipSettingCustomNameTag = true;
+        if (this.impl$displayName == null) {
+            this.shadow$setCustomName(null);
         } else {
-            this.setCustomNameTag(SpongeTexts.toLegacy(this.displayName));
+            this.shadow$setCustomName(SpongeTexts.toComponent(this.impl$displayName));
         }
 
-        this.skipSettingCustomNameTag = false;
+        this.impl$skipSettingCustomNameTag = false;
     }
 
-    @Inject(method = "setCustomNameTag", at = @At("RETURN"))
-    private void impl$UpdatedisplayNameText(final String name, final CallbackInfo ci) {
-        if (!this.skipSettingCustomNameTag) {
-            this.displayName = SpongeTexts.fromLegacy(name);
+    @Inject(method = "setCustomName", at = @At("RETURN"))
+    private void impl$UpdatedisplayNameText(final ITextComponent name, final CallbackInfo ci) {
+        if (!this.impl$skipSettingCustomNameTag) {
+            this.impl$displayName = SpongeTexts.toText(name);
         }
     }
 
@@ -721,6 +722,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @author gabizou - January 30th, 2016
      * @author blood - May 12th, 2016
      * @author gabizou - June 2nd, 2016
+     *
+     * TODO from i509VCB: gabizou's remider to refactor this code here
      *
      * @reason Rewrites the method entirely for several reasons:
      * 1) If we are in a forge environment, we do NOT want forge to be capturing the item entities, because we handle them ourselves
@@ -731,6 +734,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @param offsetY
      * @return
      */
+
     @Overwrite
     @Nullable
     public ItemEntity entityDropItem(final ItemStack stack, final float offsetY) {
@@ -743,7 +747,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             } else {
                 final ItemEntity entityitem = new ItemEntity(this.world, this.posX, this.posY + (double) offsetY, this.posZ, stack);
                 entityitem.setDefaultPickupDelay();
-                this.world.addEntity0(entityitem);
+                this.world.addEntity(entityitem);
                 return entityitem;
             }
         }
@@ -754,12 +758,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Nullable
     @Override
     public BlockPos bridge$getLastCollidedBlockPos() {
-        return this.lastCollidedBlockPos;
+        return this.impl$lastCollidedBlockPos;
     }
 
     @Override
     public Timing bridge$getTimingsHandler() {
-        return this.entityType.getTimingsHandler();
+        return ((EntityTypeBridge) this.shadow$getType()).bridge$getTimings();
     }
 
     @Override
@@ -777,34 +781,34 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Override
     public boolean bridge$allowsBlockBulkCapture() {
-        return this.entityType.allowsBlockBulkCapture;
+        return this.type.allowsBlockBulkCapture;
     }
 
     @Override
     public boolean bridge$allowsEntityBulkCapture() {
-        return this.entityType.allowsEntityBulkCapture;
+        return this.type.allowsEntityBulkCapture;
     }
 
     @Override
     public boolean bridge$allowsBlockEventCreation() {
-        return this.entityType.allowsBlockEventCreation;
+        return this.type.allowsBlockEventCreation;
     }
 
     @Override
     public boolean bridge$allowsEntityEventCreation() {
-        return this.entityType.allowsEntityEventCreation;
+        return this.type.allowsEntityEventCreation;
     }
 
 
     @Redirect(method = "setFire",
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD)
     )
-    private void spongeImpl$ThrowIgniteEventForFire(final Entity entity, final int ticks) {
+    private void impl$ThrowIgniteEventForFire(final Entity entity, final int ticks) {
         if (((WorldBridge) this.world).bridge$isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
             this.fire = ticks; // Vanilla functionality
             return;
         }
-        if (this.fire < 1 && !this.spongeImpl$isImmuneToFireForIgniteEvent()) {
+        if (this.fire < 1 && !this.impl$isImmuneToFireForIgniteEvent()) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
                 frame.pushCause(((org.spongepowered.api.entity.Entity) this).getLocation().getExtent());
@@ -827,12 +831,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *
      * @return True if this entity is immune to fire.
      */
-    protected boolean spongeImpl$isImmuneToFireForIgniteEvent() { // Since normal entities don't have the concept of having game modes...
+    protected boolean impl$isImmuneToFireForIgniteEvent() { // Since normal entities don't have the concept of having game modes...
         return false;
     }
 
     @Redirect(method = "onStruckByLightning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private boolean spongeImpl$ThrowDamageEventWithLightingSource(
+    private boolean impl$ThrowDamageEventWithLightingSource(
         final Entity entity, final DamageSource source, final float damage, final LightningBoltEntity lightningBolt) {
         if (!this.world.isRemote) {
             return entity.attackEntityFrom(source, damage);
@@ -846,7 +850,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
     }
 
-    @Inject(method = "setDead", at = @At(value = "RETURN"))
+    @Inject(method = "remove()V", at = @At(value = "RETURN"))
     private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
         if (ShouldFire.DESTRUCT_ENTITY_EVENT
             && !((WorldBridge) this.world).bridge$isFake()
@@ -858,11 +862,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Inject(method = "getFireImmuneTicks", at = @At(value = "RETURN"))
     private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
-        ci.setReturnValue(this.customFireImmuneTicks);
+        ci.setReturnValue(this.impl$customFireImmuneTicks);
     }
 
     @Override
     public void bridge$setFireImmuneTicks(int ticks) {
-        this.customFireImmuneTicks = ticks;
+        this.impl$customFireImmuneTicks = ticks;
     }
 }

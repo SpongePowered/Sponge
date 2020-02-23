@@ -50,11 +50,10 @@ public abstract class BreakDoorGoalMixin extends InteractDoorGoal {
         method = "shouldExecute",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/EntityAIDoorInteract;shouldExecute()Z"
+            target = "Lnet/minecraft/entity/ai/goal/InteractDoorGoal;shouldExecute()Z"
         )
     )
     private boolean spongeShouldExecuteForGriefer(final InteractDoorGoal entityAIDoorInteract) {
         return super.shouldExecute() && ((GrieferBridge) this.entity).bridge$canGrief();
-
     }
 }

@@ -33,14 +33,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public class DamageSourceToTypeProvider implements TypeProvider<String, DamageType> {
+public class DamageSourceToTypeProvider {
 
     public static DamageSourceToTypeProvider getInstance() {
         return Holder.INSTANCE;
     }
 
-    private final Map<String, DamageType> damageSourceToTypeMappings = new HashMap<>();
+    private final Map<String, Supplier<? extends DamageType>> damageSourceToTypeMappings = new HashMap<>();
 
     DamageSourceToTypeProvider() {
 
@@ -73,13 +74,12 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
         this.damageSourceToTypeMappings.put("wither", DamageTypes.MAGIC);
     }
 
-    @Override
-    public Optional<DamageType> get(String key) {
+    public Optional<Supplier<? extends DamageType>> get(String key) {
         return Optional.ofNullable(this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH)));
     }
 
-    public DamageType getOrCustom(String key) {
-        final DamageType damageType = this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH));
+    public Supplier<? extends DamageType> getOrCustom(String key) {
+        final Supplier<? extends DamageType> damageType = this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH));
         if (damageType == null) {
             this.addCustom(key);
             return DamageTypes.CUSTOM;
@@ -87,7 +87,6 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
         return damageType;
     }
 
-    @Override
     public Optional<String> getKey(DamageType value) {
         throw new UnsupportedOperationException("We do not support this!");
     }

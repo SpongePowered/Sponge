@@ -28,6 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.phase.HoverPhase;
 import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.util.math.Vec3d;
 import org.objectweb.asm.Opcodes;
@@ -73,12 +74,12 @@ public abstract class EnderDragonEntityMixin extends MobEntityMixin {
     }
 
     /**
-     * Fixes a hidden divide-by-zero error when {@link PhaseHover} returns the
+     * Fixes a hidden divide-by-zero error when {@link HoverPhase} returns the
      * current location as the target location.
      *
      * @author JBYoshi
      */
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
+    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
     @Nullable
     private Vec3d spongeImpl$getTargetLocationOrNull(IPhase iPhase) {
         Vec3d target = iPhase.getTargetLocation();

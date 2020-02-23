@@ -32,6 +32,7 @@ import com.google.common.collect.Multimap;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.LivingEntity;
@@ -393,7 +394,7 @@ public class DamageEventHandler {
     }
 
     public static List<DamageFunction> createAttackEnchantmentFunction(
-            final net.minecraft.item.ItemStack heldItem, final EnumCreatureAttribute creatureAttribute, final float attackStrength) {
+        final net.minecraft.item.ItemStack heldItem, final CreatureAttribute creatureAttribute, final float attackStrength) {
         final Multimap<Enchantment, Integer> enchantments = LinkedHashMultimap.create();
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (!heldItem.isEmpty()) {

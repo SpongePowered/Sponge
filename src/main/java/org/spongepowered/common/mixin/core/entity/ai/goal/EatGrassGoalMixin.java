@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai.goal;
 
-import com.google.common.base.Predicate;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.EatGrassGoal;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,6 +39,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+
+import java.util.function.Predicate;
 
 @Mixin(EatGrassGoal.class)
 public abstract class EatGrassGoalMixin extends Goal {
@@ -52,16 +54,16 @@ public abstract class EatGrassGoalMixin extends Goal {
      * at the gamerule check, but this can suffice for now.
      */
     @Redirect(
-        method = "updateTask",
+        method = "tick()V",
         at = @At(
             value = "INVOKE",
-            target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z",
+            target = "Ljava/util/function/Predicate;test(Ljava/lang/Object;)Z",
             remap = false
         )
     )
     @SuppressWarnings({"unchecked", "rawtypes", "Guava"})
-    private boolean onTallGrassApplyForGriefing(final Predicate predicate, final Object object) {
-        return ((GrieferBridge) this.grassEaterEntity).bridge$canGrief() && predicate.apply(object);
+    private boolean impl$onTallGrassApplyForGriefing(final Predicate predicate, final Object object) {
+        return ((GrieferBridge) this.grassEaterEntity).bridge$canGrief() && predicate.test(object);
     }
 
     /**
@@ -71,7 +73,7 @@ public abstract class EatGrassGoalMixin extends Goal {
      * at the gamerule check, but this can suffice for now.
      */
     @Redirect(
-        method = "updateTask",
+        method = "tick()V",
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
@@ -79,16 +81,16 @@ public abstract class EatGrassGoalMixin extends Goal {
             ),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/init/Blocks;GRASS:Lnet/minecraft/block/BlockGrass;",
+                target = "Lnet/minecraft/block/Blocks;GRASS_BLOCK:Lnet/minecraft/block/Block;",
                 opcode = Opcodes.GETSTATIC
             )
         ),
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/state/IBlockState;getBlock()Lnet/minecraft/block/Block;"
+            target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"
         )
     )
-    private Block onSpongeGetBlockForgriefing(final BlockState state) {
-        return ((GrieferBridge) this.grassEaterEntity).bridge$canGrief() ? state.getBlock() : Blocks.AIR;
+    private BlockState impl$onSpongeGetBlockForGriefing(World world, BlockPos pos) {
+        return ((GrieferBridge) this.grassEaterEntity).bridge$canGrief() ? world.getBlockState(pos) : Blocks.AIR.getDefaultState();
     }
 }

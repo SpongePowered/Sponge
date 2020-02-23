@@ -72,30 +72,30 @@ import javax.annotation.Nullable;
 @Mixin(MobEntity.class)
 public abstract class MobEntityMixin extends LivingEntityMixin {
 
-    @Shadow @Final protected GoalSelector tasks;
-    @Shadow @Final protected GoalSelector targetTasks;
+    @Shadow @Final protected GoalSelector goalSelector;
+    @Shadow @Final protected GoalSelector targetSelector;
     @Shadow @Nullable private LivingEntity attackTarget;
 
     @Shadow public abstract boolean isAIDisabled();
-    @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashHolder();
-    @Shadow protected abstract void initEntityAI();
+    @Shadow @Nullable public abstract net.minecraft.entity.Entity shadow$getLeashHolder();
+    @Shadow protected abstract void shadow$registerGoals();
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
-    private void spongeImpl$initializeAI(final MobEntity this$0) {
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/MobEntity;registerGoals()V"))
+    private void impl$registerGoals(final MobEntity this$0) {
         this.initSpongeAI();
-        this.initEntityAI();
+        this.shadow$registerGoals();
     }
 
     private void initSpongeAI() {
-        if (!((GoalSelectorBridge) this.tasks).bridge$initialized()) {
-            ((GoalSelectorBridge) this.tasks).bridge$setOwner((MobEntity) (Object) this);
-            ((GoalSelectorBridge) this.tasks).bridge$setType(GoalExecutorTypes.NORMAL.get());
-            ((GoalSelectorBridge) this.tasks).bridge$setInitialized(true);
+        if (!((GoalSelectorBridge) this.goalSelector).bridge$initialized()) {
+            ((GoalSelectorBridge) this.goalSelector).bridge$setOwner((MobEntity) (Object) this);
+            ((GoalSelectorBridge) this.goalSelector).bridge$setType(GoalExecutorTypes.NORMAL.get());
+            ((GoalSelectorBridge) this.goalSelector).bridge$setInitialized(true);
         }
-        if (!((GoalSelectorBridge) this.targetTasks).bridge$initialized()) {
-            ((GoalSelectorBridge) this.targetTasks).bridge$setOwner((MobEntity) (Object) this);
-            ((GoalSelectorBridge) this.targetTasks).bridge$setType(GoalExecutorTypes.TARGET.get());
-            ((GoalSelectorBridge) this.targetTasks).bridge$setInitialized(true);
+        if (!((GoalSelectorBridge) this.targetSelector).bridge$initialized()) {
+            ((GoalSelectorBridge) this.targetSelector).bridge$setOwner((MobEntity) (Object) this);
+            ((GoalSelectorBridge) this.targetSelector).bridge$setType(GoalExecutorTypes.TARGET.get());
+            ((GoalSelectorBridge) this.targetSelector).bridge$setInitialized(true);
         }
     }
 
@@ -103,8 +103,8 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     public void bridge$fireConstructors() {
         super.bridge$fireConstructors();
         if (ShouldFire.A_I_TASK_EVENT_ADD) {
-            this.handleDelayedTaskEventFiring((GoalSelectorBridge) this.tasks);
-            this.handleDelayedTaskEventFiring((GoalSelectorBridge) this.targetTasks);
+            this.handleDelayedTaskEventFiring((GoalSelectorBridge) this.goalSelector);
+            this.handleDelayedTaskEventFiring((GoalSelectorBridge) this.targetSelector);
         }
     }
 
@@ -138,10 +138,13 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     }
 
     @Inject(method = "clearLeashed",
-        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD),
+        at = @At(value = "FIELD",
+            target = "Lnet/minecraft/entity/MobEntity;leashHolder:Lnet/minecraft/entity/Entity;",
+            opcode = Opcodes.PUTFIELD
+        ),
         cancellable = true)
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
-        final net.minecraft.entity.Entity entity = this.getLeashHolder();
+        final net.minecraft.entity.Entity entity = this.shadow$getLeashHolder();
         if (!this.world.isRemote) {
             final CauseStackManager csm = Sponge.getCauseStackManager();
             if(entity == null) {
@@ -267,8 +270,8 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      * @param thisEntity
      * @return
      */
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;canPickUpLoot()Z"))
-    private boolean onCanGrief(final MobEntity thisEntity) {
+    @Redirect(method = "livingTick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/MobEntity;canPickUpLoot()Z"))
+    private boolean impl$onCanGrief(final MobEntity thisEntity) {
         return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$canGrief();
     }
 

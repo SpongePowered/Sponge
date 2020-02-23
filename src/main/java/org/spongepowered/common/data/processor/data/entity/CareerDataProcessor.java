@@ -37,7 +37,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.merchant.villager.VillagerEntityBridge;
 
 import java.util.Optional;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
