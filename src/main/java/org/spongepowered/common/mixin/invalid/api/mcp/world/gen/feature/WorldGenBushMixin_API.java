@@ -83,7 +83,7 @@ public abstract class WorldGenBushMixin_API extends Feature implements Mushroom 
             y = this.nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() * 2);
             final BlockPos height = chunkPos.add(x, y, z);
             if (this.api$override != null) {
-                final Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(height));
+                final Location<Extent> pos2 = Location.of(extent, VecHelper.toVector3i(height));
                 type = this.api$override.apply(pos2);
             } else {
                 result = this.api$types.get(random);

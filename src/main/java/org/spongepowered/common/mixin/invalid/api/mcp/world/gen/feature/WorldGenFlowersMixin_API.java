@@ -88,7 +88,7 @@ public abstract class WorldGenFlowersMixin_API extends Feature implements Flower
             y = this.apiImpl$nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
             blockpos = chunkPos.add(x, y, z);
             if(this.api$override != null) {
-                final Location<Extent> pos = new Location<>(extent, VecHelper.toVector3i(blockpos));
+                final Location<Extent> pos = Location.of(extent, VecHelper.toVector3i(blockpos));
                 type = this.api$override.apply(pos);
             } else {
                 result = this.api$flowers.get(random);

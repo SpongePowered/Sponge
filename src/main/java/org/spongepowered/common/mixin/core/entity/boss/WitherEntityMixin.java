@@ -152,7 +152,7 @@ public abstract class WitherEntityMixin extends MonsterEntityMixin implements Fu
                                                       final boolean smoking) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .sourceExplosive((Wither) this)
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
                 .radius(this.impl$explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking)

@@ -26,8 +26,6 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -38,15 +36,16 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
-import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.network.RconConnection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -87,8 +86,6 @@ class TimingsExport extends Thread {
 
     /**
      * Builds an XML report of the timings to be uploaded for parsing.
-     *
-     * @param sender Who to report to
      */
     static void reportTimings() {
         if (requestingReport.isEmpty()) {
@@ -173,22 +170,15 @@ class TimingsExport extends Thread {
         }
 
         builder.add("idmap", JSONUtil.objectBuilder()
-                .add("groups", JSONUtil.mapArrayToObject(TimingIdentifier.GROUP_MAP.values(), (group) -> {
-                    return JSONUtil.singleObjectPair(group.id, group.name);
-                }))
+                .add("groups", JSONUtil.mapArrayToObject(TimingIdentifier.GROUP_MAP.values(), (group) -> 
+                        JSONUtil.singleObjectPair(group.id, group.name)))
                 .add("handlers", handlersBuilder)
-                .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) -> {
-                    return JSONUtil.singleObjectPair(entry.getValue(), entry.getKey());
-                }))
-                .add("tileentity", JSONUtil.mapArrayToObject(tileEntityTypeSet, (tileEntityType) -> {
-                    return JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(tileEntityType), tileEntityType.getName());
-                }))
-                .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) -> {
-                    if (entityType == EntityTypes.UNKNOWN) {
-                        return null;
-                    }
-                    return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getId());
-                })));
+                .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) -> 
+                        JSONUtil.singleObjectPair(entry.getValue(), entry.getKey())))
+                .add("tileentity", JSONUtil.mapArrayToObject(tileEntityTypeSet, (tileEntityType) -> 
+                        JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(tileEntityType), tileEntityType.getKey().toString())))
+                .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) -> 
+                        JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getKey().toString()))));
 
         // Information about loaded plugins
 
@@ -270,7 +260,7 @@ class TimingsExport extends Thread {
     public synchronized void start() {
         boolean containsRconSource = false;
         for (MessageReceiver receiver : this.listeners.getChannel().getMembers()) {
-            if (receiver instanceof RconSource) {
+            if (receiver instanceof RconConnection) {
                 containsRconSource = true;
                 break;
             }

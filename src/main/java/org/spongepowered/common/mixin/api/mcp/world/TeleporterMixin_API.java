@@ -145,17 +145,18 @@ public abstract class TeleporterMixin_API implements PortalAgent {
 
         if (closest >= 0.0D) {
             if (addToCache) {
-                this.destinationCoordinateCache.put(targetPosition, ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getGameTime()));
+                this.destinationCoordinateCache.put(targetPosition,
+                        ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getGameTime()));
             }
 
-            return Optional.of(new Location<>(searchLocation.getExtent(), VecHelper.toVector3d(portalPosition)));
+            return Optional.of(Location.of(searchLocation.getWorld(), VecHelper.toVector3d(portalPosition)));
         }
         return Optional.empty();
     }
 
 
     @Override
-    public Optional<Location<World>> createPortal(Location<World> toLocation) {
+    public Optional<Location> createPortal(Location toLocation) {
         double closest = -1.0D;
         int xNearTarget = toLocation.getBlockX();
         int yNearTarget = toLocation.getBlockY();
@@ -323,7 +324,7 @@ public abstract class TeleporterMixin_API implements PortalAgent {
             }
         }
 
-        return Optional.of(new Location<>((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
+        return Optional.of(Location.of((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
     }
 
 }

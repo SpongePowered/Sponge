@@ -111,7 +111,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
         final net.minecraft.world.World worldObj, final Entity self, final double x,
                                                       final double y, final double z, final float strength, final boolean smoking) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive((PrimedTNT) this)
                 .radius(this.bridge$explosionRadius)
                 .shouldPlaySmoke(smoking)

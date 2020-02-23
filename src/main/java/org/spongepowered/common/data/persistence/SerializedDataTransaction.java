@@ -35,7 +35,7 @@ public class SerializedDataTransaction {
     }
 
     public final ImmutableList<DataView> failedData;
-    public final ImmutableList<Mutable<?, ?>> deserializedManipulators;
+    public final ImmutableList<Mutable> deserializedManipulators;
 
     private SerializedDataTransaction(Builder builder) {
         this.failedData = builder.serializedData.build();
@@ -46,7 +46,7 @@ public class SerializedDataTransaction {
     public static final class Builder {
 
         private final ImmutableList.Builder<DataView> serializedData = ImmutableList.builder();
-        private final ImmutableList.Builder<Mutable<?, ?>> deserializedManipulators = ImmutableList.builder();
+        private final ImmutableList.Builder<Mutable> deserializedManipulators = ImmutableList.builder();
 
         Builder() {
         }
@@ -55,7 +55,7 @@ public class SerializedDataTransaction {
             this.serializedData.add(serializedData);
         }
 
-        public void successfulData(Mutable<?, ?> success) {
+        public void successfulData(Mutable success) {
             this.deserializedManipulators.add(success);
         }
 

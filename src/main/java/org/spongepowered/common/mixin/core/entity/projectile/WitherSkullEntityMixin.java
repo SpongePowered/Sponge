@@ -113,7 +113,7 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((WitherSkull) this).getShooter());
             frame.pushCause(((WitherSkull) this).getShooter());
             return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(((WitherSkull) this))
                 .radius(this.impl$explosionRadius)
                 .canCauseFire(flaming)

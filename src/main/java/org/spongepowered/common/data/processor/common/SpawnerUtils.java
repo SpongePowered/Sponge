@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedSpawnerEntity;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.spawner.AbstractSpawner;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -37,7 +38,6 @@ import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.mixin.accessor.util.WeightedRandom_ItemAccessor;
 import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
 import org.spongepowered.common.util.Constants;
@@ -48,7 +48,8 @@ public class SpawnerUtils {
     public static WeightedSerializableObject<EntityArchetype> getNextEntity(final AbstractSpawnerAccessor logic) {
         final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$getSpawnData()).accessor$getItemWeight();
 
-        final EntityType type = EntityUtil.fromNameToType(logic.accessor$getSpawnData().getNbt().getString("id")).orElse(EntityTypes.PIG);
+        String resourceLocation = logic.accessor$getSpawnData().getNbt().getString(Constants.Entity.ENTITY_TYPE_ID);
+        EntityType type = Registry.ENTITY_TYPE.getValue(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
         final CompoundNBT data = logic.accessor$getSpawnData().getNbt();
 
@@ -64,8 +65,8 @@ public class SpawnerUtils {
     public static void setNextEntity(final AbstractSpawner logic, final WeightedSerializableObject<EntityArchetype> value) {
         final CompoundNBT compound = NbtTranslator.getInstance().translateData(value.get().getEntityData());
         if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
-            final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) value.get().getType().getEntityClass());
-            compound.putString(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
+            CatalogKey key = value.get().getType().getKey();
+            compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
         }
 
         logic.setNextSpawnData(new WeightedSpawnerEntity((int) value.getWeight(), compound));
@@ -77,7 +78,8 @@ public class SpawnerUtils {
 
             final CompoundNBT nbt = weightedEntity.getNbt();
 
-            final EntityType type = EntityUtil.fromNameToType(nbt.getString(Constants.Entity.ENTITY_TYPE_ID)).orElse(EntityTypes.PIG);
+            String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
+            final EntityType type = Registry.ENTITY_TYPE.getValue(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
             final EntityArchetype archetype = EntityArchetype.builder()
                     .type(type)
@@ -101,8 +103,8 @@ public class SpawnerUtils {
 
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(object.get().getEntityData());
             if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
-                final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) object.get().getType().getEntityClass());
-                compound.putString(Constants.Entity.ENTITY_TYPE_ID, key != null ? key.toString() : "");
+                CatalogKey key = object.get().getType().getKey();
+                compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
             }
 
 

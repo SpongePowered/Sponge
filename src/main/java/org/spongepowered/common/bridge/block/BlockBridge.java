@@ -24,12 +24,10 @@
  */
 package org.spongepowered.common.bridge.block;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;

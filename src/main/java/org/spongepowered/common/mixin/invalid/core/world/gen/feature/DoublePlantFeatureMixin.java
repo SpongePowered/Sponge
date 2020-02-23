@@ -59,7 +59,7 @@ public abstract class DoublePlantFeatureMixin extends WorldGeneratorMixin implem
     private DoublePlantType impl$getType(final Vector3i position, final Random rand) {
         final Optional<Function<Location<Extent>, DoublePlantType>> override = ((DoublePlant) this).getSupplierOverride();
         if (override.isPresent() && this.impl$currentExtent != null) {
-            final Location<Extent> pos = new Location<>(this.impl$currentExtent, position);
+            final Location<Extent> pos = Location.of(this.impl$currentExtent, position);
             return override.get().apply(pos);
         }
         final List<DoublePlantType> result = ((DoublePlant) this).getPossibleTypes().get(rand);

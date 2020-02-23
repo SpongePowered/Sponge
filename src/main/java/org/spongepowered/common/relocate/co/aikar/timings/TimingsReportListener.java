@@ -26,16 +26,11 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.ConsoleSource;
-import org.spongepowered.api.command.source.RemoteSource;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public final class TimingsReportListener {
@@ -44,11 +39,8 @@ public final class TimingsReportListener {
     private String timingsURL;
     private MessageChannel combinedChannel;
 
-    public TimingsReportListener(CommandSource channels) {
-        this(channels, null);
-    }
-    public TimingsReportListener(CommandSource sender, Runnable onDone) {
-        this(Lists.newArrayList(MessageChannel.fixed(sender)), onDone);
+    public TimingsReportListener(MessageReceiver sender, Runnable onDone) {
+        this(Lists.newArrayList(MessageChannel.to(sender)), onDone);
     }
     public TimingsReportListener(List<MessageChannel> channels) {
         this(channels, null);
@@ -82,7 +74,7 @@ public final class TimingsReportListener {
         boolean hasConsole = false;
         for (MessageChannel channel: channels) {
             for (MessageReceiver receiver: channel.getMembers()) {
-                if (receiver instanceof ConsoleSource) {
+                if (receiver instanceof Server) {
                     hasConsole = true;
                     break;
                 }
@@ -90,7 +82,7 @@ public final class TimingsReportListener {
         }
 
         if (!hasConsole) {
-            channels.add(MessageChannel.TO_CONSOLE);
+            channels.add(MessageChannel.toServer());
         }
     }
 

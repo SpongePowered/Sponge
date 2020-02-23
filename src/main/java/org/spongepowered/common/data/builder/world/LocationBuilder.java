@@ -31,10 +31,12 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.world.server.ServerWorld;
+
 import java.util.Optional;
 import java.util.UUID;
 
-public class LocationBuilder extends AbstractDataBuilder<Location<World>> {
+public class LocationBuilder extends AbstractDataBuilder<Location> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public LocationBuilder() {
@@ -42,7 +44,7 @@ public class LocationBuilder extends AbstractDataBuilder<Location<World>> {
     }
 
     @Override
-    protected Optional<Location<World>> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<Location> buildContent(DataView container) throws InvalidDataException {
         if (!container.contains(Queries.WORLD_NAME, Queries.WORLD_ID, Queries.POSITION_X, Queries.POSITION_Y, Queries.POSITION_Z)) {
             return Optional.empty();
         }
@@ -51,13 +53,13 @@ public class LocationBuilder extends AbstractDataBuilder<Location<World>> {
         }
         final String worldId = container.getString(Queries.WORLD_ID).get();
         final UUID worldUuid = UUID.fromString(worldId);
-        final Optional<World> world = Sponge.getGame().getServer().getWorld(worldUuid);
+        final Optional<ServerWorld> world = Sponge.getGame().getServer().getWorldManager().getWorld(worldUuid);
         if (!world.isPresent()) {
             throw new InvalidDataException("Could not find world by UUID: " + worldId);
         }
         final double x = container.getDouble(Queries.POSITION_X).get();
         final double y = container.getDouble(Queries.POSITION_Y).get();
         final double z = container.getDouble(Queries.POSITION_Z).get();
-        return Optional.of(new Location<>(world.get(), x, y, z));
+        return Optional.of(Location.of(world.get(), x, y, z));
     }
 }

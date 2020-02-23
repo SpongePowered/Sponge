@@ -75,7 +75,7 @@ public class ForestPopulator implements Forest {
             z = random.nextInt(size.getZ());
             pos = ((net.minecraft.world.World) world).getTopSolidOrLiquidBlock(new BlockPos(min.getX() + x, min.getY(), min.getZ() + z));
             if (this.override != null) {
-                Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
+                Location<Extent> pos2 = Location.of(extent, VecHelper.toVector3i(pos));
                 type = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);

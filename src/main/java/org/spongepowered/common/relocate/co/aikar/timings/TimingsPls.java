@@ -26,9 +26,12 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import org.spongepowered.api.CatalogTypes;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
+
+import java.util.stream.Collectors;
 
 final class TimingsPls {
     private static final Object2IntMap<EntityType> ENTITY_IDS = new Object2IntOpenHashMap<>();
@@ -40,7 +43,7 @@ final class TimingsPls {
     static {
         ENTITY_IDS.defaultReturnValue(NOT_FOUND);
         int count = -1;
-        for (BlockEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
+        for (BlockEntityType tileEntityType : Sponge.getGame().getRegistry().getCatalogRegistry().getAllOf(CatalogTypes.BLOCK_ENTITY_TYPE).collect(Collectors.toList())) {
             TILE_ENTITY_IDS.put(tileEntityType, count++);
         }
     }

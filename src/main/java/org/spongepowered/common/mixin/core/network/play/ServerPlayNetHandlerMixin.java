@@ -471,7 +471,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
 
         final Location<World> from = spongeEntity.getLocation();
         final Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
-        final Location<World> to = new Location<>(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
+        final Location<World> to = Location.of(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
         final Transform<World> fromTransform = spongeEntity.getTransform().setLocation(from).setRotation(fromrot);
         final Transform<World> toTransform = spongeEntity.getTransform().setLocation(to).setRotation(torot);
         final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (Player) this.player);

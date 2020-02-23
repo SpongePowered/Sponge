@@ -77,7 +77,7 @@ public class RoofedForestPopulator implements Forest {
                 int z0 = z * 4 + 1 + random.nextInt(3);
                 BlockPos blockpos1 = world.getTopSolidOrLiquidBlock(pos.add(x0, 0, z0));
                 if (this.override != null) {
-                    Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(blockpos1));
+                    Location<Extent> pos2 = Location.of(extent, VecHelper.toVector3i(blockpos1));
                     tree = this.override.apply(pos2);
                 } else {
                     results = this.trees.get(random);

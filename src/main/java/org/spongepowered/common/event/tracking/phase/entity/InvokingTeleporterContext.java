@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -35,7 +34,7 @@ public final class InvokingTeleporterContext extends EntityContext<InvokingTelep
 
     private ServerWorld world;
     private PortalAgent agent;
-    private Transform<World> transform;
+    private Transform transform;
     private boolean didPort = false;
 
     InvokingTeleporterContext(final IPhaseState<? extends InvokingTeleporterContext> state, PhaseTracker tracker) {
@@ -69,12 +68,12 @@ public final class InvokingTeleporterContext extends EntityContext<InvokingTelep
         return this.agent;
     }
 
-    public InvokingTeleporterContext setExitTransform(final Transform<World> transform) {
+    public InvokingTeleporterContext setExitTransform(final Transform transform) {
         this.transform = transform;
         return this;
     }
 
-    public Transform<World> getExitTransform() {
+    public Transform getExitTransform() {
         return this.transform;
     }
 

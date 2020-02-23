@@ -38,6 +38,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -56,7 +57,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -69,7 +69,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
-import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
@@ -84,28 +83,21 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
-import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.FutureTask;
 import java.util.function.Predicate;
 
 /**
@@ -141,7 +133,7 @@ public class SpongeImplHooks {
     // Entity
 
     public static boolean isCreatureOfType(final Entity entity, final EntityClassification type) {
-        return type.getCreatureClass().isAssignableFrom(entity.getClass());
+        return entity.getType().getClassification() == type;
     }
 
     public static boolean isFakePlayer(final Entity entity) {
@@ -166,22 +158,6 @@ public class SpongeImplHooks {
 
     public static double getBlockReachDistance(final ServerPlayerEntity player) {
         return 5.0d;
-    }
-
-    // Entity registry
-
-    @Nullable
-    public static Class<? extends Entity> getEntityClass(final ResourceLocation name) {
-        return EntityList.REGISTRY.getOrDefault(name);
-    }
-
-    @Nullable
-    public static String getEntityTranslation(final ResourceLocation name) {
-        return EntityList.getTranslationName(name);
-    }
-
-    public static int getEntityId(final Class<? extends Entity> entityClass) {
-        return EntityList.REGISTRY.getId(entityClass);
     }
 
     // Block

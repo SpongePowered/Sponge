@@ -69,7 +69,7 @@ public class BlockStaticLiquidMixin {
             frame.pushCause(pos);
             frame.pushCause(this);
             final Vector3i target = VecHelper.toVector3i(pos);
-            final Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) world, target);
+            final Location<org.spongepowered.api.world.World> location = Location.of((org.spongepowered.api.world.World) world, target);
             final List<Location<org.spongepowered.api.world.World>> locations = Collections.singletonList(location);
             final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
             if (!SpongeImpl.postEvent(event)) {

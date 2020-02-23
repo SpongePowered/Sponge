@@ -80,7 +80,7 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((ExplosiveFireball) this).getShooter());
             frame.pushCause(((Projectile) this).getShooter());
             final Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(((ExplosiveFireball) this))
                 .radius(strength)
                 .canCauseFire(flaming && griefer)

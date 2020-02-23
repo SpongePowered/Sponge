@@ -72,7 +72,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             // The vectors should be sorted by distance from the centre of the checking region, so
             // this makes it easier to try to get close, because we can just iterate and get progressively further out.
             Optional<Vector3i> result = this.getSafeLocation(world, this.getBlockLocations(location, height, width), distanceToDrop, filters);
-            return result.map(vector3i -> new Location<>(world, vector3i.toDouble().add(0.5, 0, 0.5)));
+            return result.map(vector3i -> Location.of(world, vector3i.toDouble().add(0.5, 0, 0.5)));
         } finally {
             // Just in case some exception occurs, we want this to disable again.
             chunkProviderServer.bridge$setForceChunkRequests(previous);

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import Collection;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;
@@ -72,8 +71,8 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     @Nullable private LocatableBlock api$LocatableBlock;
 
     @Override
-    public Location<World> getLocation() {
-        return new Location<>((World) this.world, VecHelper.toVector3i(this.getPos()));
+    public Location getLocation() {
+        return Location.of((World) this.world, VecHelper.toVector3i(this.getPos()));
     }
 
     @Override
@@ -85,7 +84,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Queries.WORLD_ID, ((World) this.world).getUniqueId().toString())
+            .set(Queries.WORLD_ID, ((World) this.world).getProperties().getUniqueId().toString())
             .set(Queries.POSITION_X, this.getPos().getX())
             .set(Queries.POSITION_Y, this.getPos().getY())
             .set(Queries.POSITION_Z, this.getPos().getZ())

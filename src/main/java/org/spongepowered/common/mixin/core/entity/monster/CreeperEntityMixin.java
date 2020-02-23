@@ -143,7 +143,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
     private net.minecraft.world.Explosion onExplode(final net.minecraft.world.World world, final Entity self, final double x,
         final double y, final double z, final float strength, final boolean smoking) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(new Location<>((World) world, new Vector3d(x, y, z)))
+                .location(Location.of((World) world, new Vector3d(x, y, z)))
                 .sourceExplosive(((Creeper) this))
                 .radius(strength)
                 .shouldPlaySmoke(smoking)

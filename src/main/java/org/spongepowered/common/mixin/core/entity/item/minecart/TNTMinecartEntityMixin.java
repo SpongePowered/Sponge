@@ -142,7 +142,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
     @Nullable
     private net.minecraft.world.Explosion onSpongeExplode(final net.minecraft.world.World worldObj, final Entity self, final double x, final double y, final double z,
         final float strength, final boolean smoking) {
-        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder().location(new Location<>((World) worldObj, new Vector3d(x, y, z))).sourceExplosive((TNTMinecart) this)
+        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder().location(Location.of((World) worldObj, new Vector3d(x, y, z))).sourceExplosive((TNTMinecart) this)
                 .radius(this.impl$explosionRadius != null ? this.impl$explosionRadius : strength).shouldPlaySmoke(smoking).shouldBreakBlocks(smoking))
                         .orElseGet(() -> {
                             this.impl$detonationCancelled = true;

@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.invalid.core.world.chunk.storage;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFileCache;
@@ -67,6 +67,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Mixin(AnvilChunkLoader.class)
@@ -171,27 +172,24 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                     AbstractMinecartEntity.Type.values()[compound.getInt(Constants.Entity.Minecart.MINECART_TYPE)].getName());
             compound.remove(Constants.Entity.Minecart.MINECART_TYPE);
         }
-        final Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.getString(Constants.Entity.ENTITY_TYPE_ID)));
-        if (entityClass == null) {
-            return null;
-        }
-        final EntityType type = EntityTypeRegistryModule.getInstance().getForClass(entityClass);
-        if (type == null) {
+
+        Optional<net.minecraft.entity.EntityType<?>> type = Registry.ENTITY_TYPE.getValue(new ResourceLocation(compound.getString(Constants.Entity.ENTITY_TYPE_ID)));
+        if (!type.isPresent()) {
             return null;
         }
         final ListNBT positionList = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
         final ListNBT rotationList = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
         final Vector3d position = new Vector3d(positionList.getDouble(0), positionList.getDouble(1), positionList.getDouble(2));
         final Vector3d rotation = new Vector3d(rotationList.getFloat(0), rotationList.getFloat(1), 0);
-        final Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
+        final Transform transform = Transform.of(position, rotation);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), (EntityType) type.get(), transform, (org.spongepowered.api.world.World) world);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 return null;
             }
-            return EntityList.createEntityFromNBT(compound, world);
+            return net.minecraft.entity.EntityType.loadEntityUnchecked(compound, world).orElse(null);
         }
     }
 

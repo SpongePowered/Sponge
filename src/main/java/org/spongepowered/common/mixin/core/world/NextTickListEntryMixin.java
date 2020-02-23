@@ -50,7 +50,7 @@ public abstract class NextTickListEntryMixin implements NextTickListEntryBridge 
     @Override
     public void bridge$setWorld(World world) {
         checkState(this.impl$location == null, "World already known");
-        this.impl$location = new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(this.position));
+        this.impl$location = Location.of((org.spongepowered.api.world.World) world, VecHelper.toVector3i(this.position));
     }
 
     @Override

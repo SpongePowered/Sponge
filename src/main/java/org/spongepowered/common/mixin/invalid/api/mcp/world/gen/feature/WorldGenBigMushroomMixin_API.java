@@ -101,7 +101,7 @@ public abstract class WorldGenBigMushroomMixin_API extends Feature implements Bi
             z = random.nextInt(size.getZ());
             final BlockPos pos = world.getHeight(chunkPos.add(x, 0, z));
             if (this.api$override != null) {
-                final Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
+                final Location<Extent> pos2 = Location.of(extent, VecHelper.toVector3i(pos));
                 type = this.api$override.apply(pos2);
             } else {
                 result = this.api$types.get(random);

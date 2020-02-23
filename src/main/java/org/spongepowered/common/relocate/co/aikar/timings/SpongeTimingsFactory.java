@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.SpongeImpl;
@@ -90,7 +89,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     }
 
     @Override
-    public Timing of(Object pluginObj, String name, @Nullable Timing groupHandler) {
+    public Timing of(PluginContainer pluginObj, String name, @Nullable Timing groupHandler) {
         PluginContainer plugin = checkPlugin(pluginObj);
         return TimingsManager.getHandler(plugin.getId(), name, groupHandler, true);
     }
@@ -169,14 +168,6 @@ public class SpongeTimingsFactory implements TimingsFactory {
     @Override
     public void reset() {
         TimingsManager.reset();
-    }
-
-    @Override
-    public void generateReport(CommandSource sender) {
-        if (sender == null) {
-            sender = SpongeImpl.getGame().getServer().getConsole();
-        }
-        TimingsExport.requestingReport.add(MessageChannel.fixed(sender));
     }
 
     @Override

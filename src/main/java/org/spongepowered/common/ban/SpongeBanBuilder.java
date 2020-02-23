@@ -58,7 +58,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban.Builder profile(org.spongepowered.api.profile.GameProfile profile) {
         checkNotNull(profile, "Profile cannot be null!");
-        checkState(this.banType == BanTypes.PROFILE, "Cannot set a GameProfile if the BanType is not BanTypes.PROFILE!");
+        checkState(this.banType == BanTypes.PROFILE.get(), "Cannot set a GameProfile if the BanType is not BanTypes.PROFILE!");
         this.profile = profile;
         return this;
     }
@@ -66,7 +66,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban.Builder address(InetAddress address) {
         checkNotNull(address, "Address cannot be null!");
-        checkState(this.banType == BanTypes.IP, "Cannot set an InetAddress if the BanType is not BanTypes.IP!");
+        checkState(this.banType == BanTypes.IP.get(), "Cannot set an InetAddress if the BanType is not BanTypes.IP!");
         this.address = address;
         return this;
     }
@@ -74,7 +74,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban.Builder type(BanType type) {
         checkNotNull(type, "BanType cannot be null!");
-        if (type == BanTypes.IP) {
+        if (type == BanTypes.IP.get()) {
             this.profile = null;
         } else {
             this.address = null;
@@ -103,12 +103,6 @@ public final class SpongeBanBuilder implements Ban.Builder {
     }
 
     @Override
-    public Ban.Builder source(@Nullable CommandSource source) {
-        this.source = source == null ? null : Text.of(source.getName());
-        return this;
-    }
-
-    @Override
     public Ban.Builder source(@Nullable Text source) {
         this.source = source;
         return this;
@@ -120,7 +114,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
 
         String sourceName = this.source != null ? SpongeTexts.toLegacy(this.source) : null;
 
-        if (this.banType == BanTypes.PROFILE) {
+        if (this.banType == BanTypes.PROFILE.get()) {
             checkState(this.profile != null, "User cannot be null!");
             return (Ban) new ProfileBanEntry((GameProfile) this.profile, Date.from(this.start), sourceName, this.toDate(this.end),
                     this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
@@ -142,7 +136,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
         this.reset();
         this.banType = ban.getType();
 
-        if (this.banType.equals(BanTypes.PROFILE)) {
+        if (this.banType.equals(BanTypes.PROFILE.get())) {
             this.profile = ((Ban.Profile) ban).getProfile();
         } else {
             this.address = ((Ban.Ip) ban).getAddress();

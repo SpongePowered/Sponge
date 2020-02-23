@@ -82,7 +82,7 @@ public abstract class WorldGenTallGrassMixin_API extends Feature implements Shru
             BlockPos pos = position.add(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
             pos = world.getTopSolidOrLiquidBlock(pos).add(0, 1, 0);
             if (this.override != null) {
-                final Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
+                final Location<Extent> pos2 = Location.of(extent, VecHelper.toVector3i(pos));
                 stype = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);

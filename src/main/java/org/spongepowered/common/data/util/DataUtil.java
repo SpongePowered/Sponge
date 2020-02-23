@@ -279,15 +279,15 @@ public final class DataUtil {
         return builder.build();
     }
 
-    public static Location<World> getLocation(final DataView view, final boolean castToInt) {
+    public static Location getLocation(final DataView view, final boolean castToInt) {
         final UUID worldUuid = UUID.fromString(view.getString(Queries.WORLD_ID).orElseThrow(dataNotFound()));
         final double x = view.getDouble(Queries.POSITION_X).orElseThrow(dataNotFound());
         final double y = view.getDouble(Queries.POSITION_Y).orElseThrow(dataNotFound());
         final double z = view.getDouble(Queries.POSITION_Z).orElseThrow(dataNotFound());
         if (castToInt) {
-            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).orElseThrow(dataNotFound()), (int) x, (int) y, (int) z);
+            return Location.of(SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), (int) x, (int) y, (int) z);
         }
-        return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).orElseThrow(dataNotFound()), x, y, z);
+        return Location.of(SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), x, y, z);
     }
 
     public static Vector3i getPosition3i(final DataView view) {

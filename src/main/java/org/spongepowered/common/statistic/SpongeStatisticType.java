@@ -27,7 +27,7 @@ package org.spongepowered.common.statistic;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.statistic.Statistic;
 
-public final class SpongeStatisticType<T extends CatalogType> extends SpongeStatistic implements Statistic.ForCatalog<T> {
+public final class SpongeStatisticType<T extends CatalogType> extends SpongeStatistic implements Statistic.TypeInstance<T> {
 
     @Override
     public T getType() {

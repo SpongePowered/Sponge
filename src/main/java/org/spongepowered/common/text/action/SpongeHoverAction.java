@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.text.action;
 
-import net.minecraft.entity.EntityList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
@@ -34,6 +33,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 public class SpongeHoverAction {
@@ -65,7 +65,7 @@ public class SpongeHoverAction {
                 nbt.putString("id", entity.getUniqueId().toString());
 
                 if (entity.getType().isPresent()) {
-                    nbt.putString("type", EntityList.getKey(((SpongeEntityType) entity.getType().get()).entityClass).toString());
+                    nbt.putString("type", entity.getType().get().getKey().toString());
                 }
 
                 nbt.putString("name", entity.getName());
@@ -73,7 +73,8 @@ public class SpongeHoverAction {
                 break;
             }
             case SHOW_ITEM: {
-                ItemStack item = (ItemStack) ((ItemStackSnapshot) action.getResult()).createStack();
+
+                ItemStack item = ItemStackUtil.fromSnapshotToNative((ItemStackSnapshot) action.getResult());
                 CompoundNBT nbt = new CompoundNBT();
                 item.write(nbt);
                 component = new StringTextComponent(nbt.toString());

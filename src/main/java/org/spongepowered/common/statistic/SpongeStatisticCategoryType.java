@@ -37,7 +37,7 @@ public final class SpongeStatisticCategoryType<T extends CatalogType> extends Sp
     }
 
     @Override
-    public Statistic.ForCatalog<T> getStatistic(T catalogType) {
+    public Statistic.TypeInstance<T> getStatistic(T catalogType) {
         return null;
     }
 }

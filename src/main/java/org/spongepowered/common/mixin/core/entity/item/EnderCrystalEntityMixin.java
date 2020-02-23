@@ -85,7 +85,7 @@ public abstract class EnderCrystalEntityMixin extends EntityMixin implements Exp
                 frame.pushCause(source);
             }
             return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(new Location<>((World) world, new Vector3d(x, y, z)))
+                .location(Location.of((World) world, new Vector3d(x, y, z)))
                 .radius(this.explosionStrength)
                 .shouldPlaySmoke(smoking))
                 .orElse(null);
