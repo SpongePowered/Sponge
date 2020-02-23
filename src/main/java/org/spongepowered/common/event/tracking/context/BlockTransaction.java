@@ -163,7 +163,7 @@ public abstract class BlockTransaction {
         @Override
         void process(final Transaction<BlockSnapshot> eventTransaction, final IPhaseState phaseState, final PhaseContext<?> phaseContext,
             final int currentDepth) {
-            final Optional<ServerWorld> maybeWorld = this.addedSnapshot.getWorldServer();
+            final Optional<ServerWorld> maybeWorld = this.addedSnapshot.getServerWorld();
             if (!maybeWorld.isPresent()) {
                 // Emit a log warning about a missing world
                 final String transactionForLogging = MoreObjects.toStringHelper("Tile Added")
@@ -208,7 +208,7 @@ public abstract class BlockTransaction {
         @SuppressWarnings("unchecked")
         @Override
         Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<ServerWorldBridge>) (Optional<?>) this.addedSnapshot.getWorldServer();
+            return (Optional<ServerWorldBridge>) (Optional<?>) this.addedSnapshot.getServerWorld();
         }
 
         @Override
@@ -242,7 +242,7 @@ public abstract class BlockTransaction {
         void process(final Transaction<BlockSnapshot> eventTransaction, final IPhaseState phaseState, final PhaseContext<?> phaseContext,
             final int currentDepth) {
             final BlockPos targetPosition = this.tileSnapshot.getBlockPos();
-            final Optional<ServerWorld> maybeWorld = this.tileSnapshot.getWorldServer();
+            final Optional<ServerWorld> maybeWorld = this.tileSnapshot.getServerWorld();
             if (!maybeWorld.isPresent()) {
                 // Emit a log warning about a missing world
                 final String transactionForLogging = MoreObjects.toStringHelper("Tile Removed")
@@ -295,7 +295,7 @@ public abstract class BlockTransaction {
         @SuppressWarnings("unchecked")
         @Override
         Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<ServerWorldBridge>) (Optional<?>) this.tileSnapshot.getWorldServer();
+            return (Optional<ServerWorldBridge>) (Optional<?>) this.tileSnapshot.getServerWorld();
         }
 
     }
@@ -358,7 +358,7 @@ public abstract class BlockTransaction {
         @SuppressWarnings("unchecked")
         @Override
         Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<ServerWorldBridge>) (Optional<?>) this.removedSnapshot.getWorldServer();
+            return (Optional<ServerWorldBridge>) (Optional<?>) this.removedSnapshot.getServerWorld();
         }
 
         @Override
@@ -419,7 +419,7 @@ public abstract class BlockTransaction {
         void process(final Transaction<BlockSnapshot> eventTransaction, final IPhaseState phaseState, final PhaseContext<?> phaseContext,
             final int currentDepth) {
             final BlockPos targetPosition = this.original.getBlockPos();
-            final Optional<ServerWorld> maybeWorld = this.original.getWorldServer();
+            final Optional<ServerWorld> maybeWorld = this.original.getServerWorld();
             if (!maybeWorld.isPresent()) {
                 // Emit a log warning about a missing world
                 final String transactionForLogging = MoreObjects.toStringHelper("Transaction")
@@ -497,7 +497,7 @@ public abstract class BlockTransaction {
         @SuppressWarnings("unchecked")
         @Override
         Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<ServerWorldBridge>) (Optional<?>) this.original.getWorldServer();
+            return (Optional<ServerWorldBridge>) (Optional<?>) this.original.getServerWorld();
         }
 
         @Override

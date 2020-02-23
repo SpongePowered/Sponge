@@ -838,7 +838,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void processCancelledTransaction(final C context, final Transaction<BlockSnapshot> transaction, final BlockSnapshot original) {
         if (this.hasSpecificBlockProcess(context)) {
             context.getCapturedBlockSupplier().cancelTransaction(original);
-            ((SpongeBlockSnapshot) original).getWorldServer().ifPresent(worldServer -> {
+            ((SpongeBlockSnapshot) original).getServerWorld().ifPresent(worldServer -> {
                 final Chunk chunk = worldServer.getChunkAt(((SpongeBlockSnapshot) original).getBlockPos());
                 final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
                 if (entry != null) {

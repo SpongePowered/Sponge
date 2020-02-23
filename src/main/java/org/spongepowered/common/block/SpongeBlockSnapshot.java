@@ -28,73 +28,41 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.apache.logging.log4j.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
-import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
-import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
-import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
+import org.spongepowered.plugin.meta.util.NonnullByDefault;
+
 import java.lang.ref.WeakReference;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
 @SuppressWarnings("unchecked")
+@NonnullByDefault
 public class SpongeBlockSnapshot implements BlockSnapshot {
 
     private final BlockState blockState;
-    private final BlockState extendedState;
     private final UUID worldUniqueId;
     private final Vector3i pos;
-    private final ImmutableList<Immutable<?, ?>> extraData;
-    private ImmutableMap<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> keyValueMap;
-    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> valueSet;
-    private ImmutableList<Immutable<?, ?>> blockData;
-    private ImmutableMap<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> blockKeyValueMap;
-    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> blockValueSet;
     @Nullable final CompoundNBT compound;
-    @Nullable final UUID creatorUniqueId;
-    @Nullable final UUID notifierUniqueId;
     // Internal use only
     private final BlockPos blockPos;
     private SpongeBlockChangeFlag changeFlag;
@@ -103,24 +71,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     SpongeBlockSnapshot(final SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
-        this.extendedState = builder.extendedState;
         this.worldUniqueId = checkNotNull(builder.worldUuid, "The world UUID was null");
-        this.creatorUniqueId = builder.creatorUuid;
-        this.notifierUniqueId = builder.notifierUuid;
         this.pos = checkNotNull(builder.coords);
         this.blockPos = VecHelper.toBlockPos(this.pos);
-
-        // This avoids cross contamination of block state based values versus tile entity values.
-        // TODO - delegate this to NbtProcessors when schematics are merged.
-        final ImmutableMap.Builder<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> tileBuilder = ImmutableMap.builder();
-        this.extraData = builder.manipulators == null ? ImmutableList.<Immutable<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
-        for (final Immutable<?, ?> manipulator : this.extraData) {
-            for (final org.spongepowered.api.data.value.Value.Immutable<?> value : manipulator.getValues()) {
-                tileBuilder.put(value.getKey(), value);
-            }
-        }
-        this.keyValueMap = tileBuilder.build();
-        this.valueSet = this.keyValueMap.isEmpty() ? ImmutableSet.of() : ImmutableSet.copyOf(this.keyValueMap.values());
         this.compound = builder.compound;
         this.changeFlag = builder.flag;
     }
@@ -131,21 +84,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public BlockState getExtendedState() {
-        return this.extendedState;
-    }
-
-    @Override
     public BlockSnapshot withState(final BlockState blockState) {
         return this.createBuilder().blockState(blockState).build();
-    }
-
-    @Override
-    public BlockSnapshot withLocation(final Location<World> location) {
-        return this.createBuilder()
-            .position(location.getBlockPosition())
-            .worldId(location.getExtent().getUniqueId())
-            .build();
     }
 
     @Override
@@ -164,322 +104,44 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
+    public Optional<Location> getLocation() {
+        return Optional.empty();
+    }
+
+    @Override
+    public BlockSnapshot withLocation(final Location location) {
+        return null;
+    }
+
+    @Override
     public boolean restore(final boolean force, final BlockChangeFlag flag) {
-        final Optional<World> optionalWorld = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
-        if (!optionalWorld.isPresent()) {
-            return false;
-        }
-
-        final ServerWorld world = (ServerWorld) optionalWorld.get();
-        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) world;
-        // We need to deterministically define the context as nullable if we don't need to enter.
-        // this way we guarantee an exit.
-        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
-//        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
-            context.buildAndSwitch();
-            final BlockPos pos = VecHelper.toBlockPos(this.pos);
-            if (!((WorldAccessor) world).accessor$isValid(pos)) { // Invalid position. Inline this check
-                return false;
-            }
-            final net.minecraft.block.BlockState current = world.getBlockState(pos);
-            final net.minecraft.block.BlockState replaced = (net.minecraft.block.BlockState) this.blockState;
-            if (!force && (current.getBlock() != replaced.getBlock() || current != replaced)) {
-                return false;
-            }
-
-            // Prevent Shulker Boxes from dropping when restoring BlockSnapshot
-//            if (current.getBlock().getClass() == BlockShulkerBox.class) {
-//                world.bridge$removeTileEntity(pos);
-//            }
-            world.removeTileEntity(pos);
-            PhaseTracker.getInstance().setBlockState(mixinWorldServer, pos, replaced, BlockChangeFlagRegistryModule.andNotifyClients(flag));
-            if (this.compound != null) {
-                TileEntity te = world.getTileEntity(pos);
-                if (te != null) {
-                    te.read(this.compound);
-                }
-                if (te == null) {
-                    // Because, some mods will "unintentionally" only obey some of the rules but not all.
-                    // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.
-                    try {
-                        te = TileEntity.create(world, this.compound);
-                        if (te != null) {
-                            world.getChunkAt(pos).addTileEntity(te);
-                        }
-                    } catch (Exception e) {
-                        // Seriously? The mod should be broken then.
-                        final PrettyPrinter printer = new PrettyPrinter(60).add("Unable to restore").centre().hr()
-                            .add("A mod is not correctly deserializing a TileEntity that is being restored. ")
-                            .addWrapped(60, "Note that this is not the fault of Sponge. Sponge is understanding that "
-                                            + "a block is supposed to have a TileEntity, but the mod is breaking the contract"
-                                            + "on how to re-create the tile entity. Please open an issue with the offending mod.")
-                            .add("Here's the provided compound:");
-                        printer.add();
-                        try {
-                            printer.addWrapped(80, "%s : %s", "This compound", this.compound);
-                        } catch (Throwable error) {
-                            printer.addWrapped(80, "Unable to get the string of this compound. Printing out some of the entries to better assist");
-
-                        }
-                        printer.add()
-                            .add("Desired World: " + this.worldUniqueId)
-                            .add("Position: " + this.pos)
-                            .add("Desired BlockState: " + this.blockState);
-                        printer.add();
-                        printer.log(SpongeImpl.getLogger(), Level.ERROR);
-                        return true; // I mean, I guess. the block was set up, but not the tile entity.
-                    }
-
-                }
-
-                if (te != null) {
-                    te.markDirty();
-                }
-
-            }
-            // Finally, mark the location as being updated.
-            world.getPlayerChunkMap().markBlockForUpdate(pos);
-            return true;
-        }
+        // TODO - rewrite with the PhaseTracker being the hook or use SpongeImplHooks to do the restore.
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
 
     @Override
     public Optional<UUID> getCreator() {
-        return Optional.ofNullable(this.creatorUniqueId);
+        return Optional.empty();
     }
 
     @Override
     public Optional<UUID> getNotifier() {
-        return Optional.ofNullable(this.notifierUniqueId);
-    }
-
-    @Override
-    public Optional<Location<World>> getLocation() {
-        final Optional<World> worldOptional = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
-        if (worldOptional.isPresent()) {
-            return Optional.of(new Location<>(worldOptional.get(), this.getPosition()));
-        }
-        return Optional.empty();
-    }
-
-    public Optional<ServerWorld> getWorldServer() {
-        if (this.world == null) {
-            this.world = new WeakReference<>((ServerWorld) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).orElseThrow(() -> new IllegalStateException("WorldServer not found for UUID: " + this.worldUniqueId)));
-        }
-        return Optional.ofNullable(this.world.get());
-    }
-
-    @Override
-    public List<Immutable<?, ?>> getManipulators() {
-        return ImmutableList.<Immutable<?, ?>>builder().addAll(this.getBlockManipulators()).addAll(this.extraData).build();
-    }
-
-    @Override
-    public int getContentVersion() {
-        return 1;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Queries.WORLD_ID, this.worldUniqueId.toString())
-            .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
-                .set(Queries.POSITION_X, this.pos.getX())
-                .set(Queries.POSITION_Y, this.pos.getY())
-                .set(Queries.POSITION_Z, this.pos.getZ())
-            .getContainer()
-            .set(Constants.Block.BLOCK_STATE, this.blockState);
-
-        if (this.blockState != this.extendedState) {
-            container.set(Constants.Block.BLOCK_EXTENDED_STATE, this.extendedState);
-        }
-        if (this.compound != null) {
-            container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
-        }
-        final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.extraData);
-        if (!dataList.isEmpty()) {
-            container.set(Constants.Sponge.SNAPSHOT_TILE_DATA, dataList);
-        }
-        return container;
-    }
-
-    @Override
-    public <T extends Immutable<?, ?>> Optional<T> get(final Class<T> containerClass) {
-        final Optional<T> optional = this.blockState.get(containerClass);
-        if (optional.isPresent()) {
-            return optional;
-        }
-        for (final Immutable<?, ?> dataManipulator : this.extraData) {
-            if (containerClass.isInstance(dataManipulator)) {
-                return Optional.of(((T) dataManipulator));
-            }
-        }
         return Optional.empty();
     }
 
     @Override
-    public <T extends Immutable<?, ?>> Optional<T> getOrCreate(final Class<T> containerClass) {
-        return this.get(containerClass);
+    public Optional<BlockEntityArchetype> createArchetype() {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
 
     @Override
-    public boolean supports(final Class<? extends Immutable<?, ?>> containerClass) {
-        return this.blockState.supports(containerClass);
+    public BlockSnapshot withRawData(final DataView container) throws InvalidDataException {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
 
     @Override
-    public <E> Optional<BlockSnapshot> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <E> Optional<BlockSnapshot> with(final Key<? extends Value<E>> key, final E value) {
-        final Optional<BlockState> optional = this.blockState.with(key, value);
-        if (optional.isPresent()) {
-            return Optional.of(this.withState(optional.get()));
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public Optional<BlockSnapshot> with(final Value<?> value) {
-        return this.with((Key) value.getKey(), value.get());
-    }
-
-    @Override
-    public Optional<BlockSnapshot> with(final Immutable<?, ?> valueContainer) {
-        if (((BlockBridge) this.blockState.getType()).bridge$supports((Class<Immutable<?, ?>>) valueContainer.getClass())) {
-            final BlockState newState;
-            boolean changeState = false;
-            if (this.blockState.supports((Class<Immutable<?, ?>>) valueContainer.getClass())) {
-                newState = this.blockState.with(valueContainer).get();
-                changeState = true;
-            } else {
-                newState = this.blockState;
-            }
-            if (changeState) {
-                return Optional.of(this.createBuilder().blockState(newState).build());
-            }
-            final SpongeBlockSnapshotBuilder builder = this.createBuilder();
-            builder.add(valueContainer);
-            return Optional.of(builder.build());
-        }
-        return Optional.of(this.createBuilder().add(valueContainer).build());
-    }
-
-    @Override
-    public Optional<BlockSnapshot> with(final Iterable<Immutable<?, ?>> valueContainers) {
-        BlockSnapshot snapshot = this;
-        for (final Immutable<?, ?> manipulator : valueContainers) {
-            final Optional<BlockSnapshot> optional = snapshot.with(manipulator);
-            if (!optional.isPresent()) {
-                return Optional.empty();
-            }
-            snapshot = optional.get();
-        }
-        return Optional.of(snapshot);
-    }
-
-    @Override
-    public Optional<BlockSnapshot> without(final Class<? extends Immutable<?, ?>> containerClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public BlockSnapshot merge(final BlockSnapshot that) {
-        return this.merge(that, MergeFunction.FORCE_NOTHING);
-    }
-
-    @Override
-    public BlockSnapshot merge(final BlockSnapshot that, final MergeFunction function) {
-        BlockSnapshot merged = this;
-        merged = merged.withState(function.merge(this.blockState, that.getState()));
-        for (final Immutable<?, ?> manipulator : that.getContainers()) {
-            final Optional<BlockSnapshot> optional = merged.with(function.merge(this.get(manipulator.getClass()).orElse(null), manipulator));
-            if (optional.isPresent()) {
-                merged = optional.get();
-            }
-        }
-        return merged;
-    }
-
-    @Override
-    public List<Immutable<?, ?>> getContainers() {
-        return this.getManipulators();
-    }
-
-    @Override
-    public <E> Optional<E> get(final Key<? extends Value<E>> key) {
-        if (this.keyValueMap.containsKey(key)) {
-            return Optional.of((E) this.keyValueMap.get(key).get());
-        } else if (this.getKeyValueMap().containsKey(key)) {
-            return Optional.of((E) this.blockKeyValueMap.get(key).get());
-        }
-        return Optional.empty();
-    }
-
-    private ImmutableMap<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> getKeyValueMap() {
-        if (this.blockKeyValueMap == null) {
-            final ImmutableMap.Builder<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> mapBuilder = ImmutableMap.builder();
-            for (final org.spongepowered.api.data.value.Value.Immutable<?> value : this.blockState.getValues()) {
-                mapBuilder.put(value.getKey(), value);
-            }
-            this.blockKeyValueMap = mapBuilder.build();
-        }
-        return this.blockKeyValueMap;
-    }
-
-    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> getValueSet() {
-        if (this.blockValueSet == null) {
-            this.blockValueSet = ImmutableSet.copyOf(this.getKeyValueMap().values());
-        }
-        return this.blockValueSet;
-    }
-
-    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> getTileValueSet() {
-        if (this.valueSet == null) {
-            this.valueSet = ImmutableSet.copyOf(this.getTileMap().values());
-        }
-        return this.valueSet;
-    }
-
-    private ImmutableMap<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> getTileMap() {
-        if (this.keyValueMap == null) {
-            final ImmutableMap.Builder<Key<?>, org.spongepowered.api.data.value.Value.Immutable<?>> tileBuilder = ImmutableMap.builder();
-            for (final Immutable<?, ?> manipulator : this.extraData) {
-                for (final org.spongepowered.api.data.value.Value.Immutable<?> value : manipulator.getValues()) {
-                    tileBuilder.put(value.getKey(), value);
-                }
-            }
-            this.keyValueMap = tileBuilder.build();
-        }
-        return this.keyValueMap;
-    }
-
-
-    private ImmutableList<Immutable<?, ?>> getBlockManipulators() {
-        if (this.blockData == null) {
-            this.blockData = ImmutableList.copyOf(this.blockState.getContainers());
-        }
-        return this.blockData;
-    }
-
-    @Override
-    public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
-        if (this.keyValueMap.containsKey(key)) {
-            return Optional.of((V) this.keyValueMap.get(key).asMutable());
-        } else if (this.getKeyValueMap().containsKey(key)) {
-            return Optional.of((V) this.blockKeyValueMap.get(key).asMutable());
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(final Key<?> key) {
-        checkNotNull(key, "Key");
-        return this.keyValueMap.containsKey(key) || this.getKeyValueMap().containsKey(key);
+    public boolean validateRawData(final DataView container) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
 
     @Override
@@ -487,23 +149,70 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return this;
     }
 
-    private Set<Key<?>> keys;
     @Override
-    public Set<Key<?>> getKeys() {
-        if (this.keys == null) {
-            this.keys = ImmutableSet.<Key<?>>builder().addAll(this.getKeyValueMap().keySet()).addAll(this.getKeyValueMap().keySet()).build();
-        }
-        return this.keys;
+    public <E> Optional<BlockSnapshot> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
-    private ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> values;
 
     @Override
-    public Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues() {
-        if (this.values == null) {
-            this.values = ImmutableSet.<org.spongepowered.api.data.value.Value.Immutable<?>>builder().addAll(this.getTileValueSet()).addAll(
-                    this.getValueSet()).build();
+    public <E> Optional<BlockSnapshot> with(final Key<? extends Value<E>> key, final E value) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public Optional<BlockSnapshot> with(final Value<?> value) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public Optional<BlockSnapshot> without(final Key<?> key) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public BlockSnapshot mergeWith(final BlockSnapshot that, final MergeFunction function) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public int getContentVersion() {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public <E> Optional<E> get(final Key<? extends Value<E>> key) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public boolean supports(final Key<?> key) {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public Set<Key<?>> getKeys() {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+
+    @Override
+    public Set<Value.Immutable<?>> getValues() {
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+    }
+    public Optional<ServerWorld> getServerWorld() {
+        if (this.world == null) {
+            return Optional.empty();
         }
-        return this.values;
+        return Optional.ofNullable(this.world.get());
     }
 
     public Optional<CompoundNBT> getCompound() {
@@ -513,12 +222,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState(this.blockState)
-            .extendedState(this.extendedState)
             .position(this.pos)
             .worldId(this.worldUniqueId);
-        for (final Immutable<?, ?> manipulator : this.extraData) {
-            builder.add(manipulator);
-        }
         if (this.compound != null) {
             builder.unsafeNbt(this.compound);
         }
@@ -541,44 +246,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 .add("worldUniqueId", this.worldUniqueId)
                 .add("position", this.pos)
                 .add("blockState", this.blockState)
-                .add("extendedState", this.extendedState)
                 .toString();
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(final Class<T> propertyClass) {
-        return this.blockState.getProperty(propertyClass);
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return this.blockState.getApplicableProperties();
-    }
-
-    @Override
-    public Optional<BlockEntityArchetype> createArchetype() {
-        final BlockType type = this.blockState.getType();
-        if (!(type instanceof ITileEntityProvider)) {
-            return Optional.empty();
-        }
-        if (this.compound == null) { // We can't retrieve the TileEntityType
-            return Optional.empty();
-        }
-        final String tileId = this.compound.getString(Constants.Item.BLOCK_ENTITY_ID);
-        final Class<? extends TileEntity> tileClass = (Class<? extends TileEntity>) TileEntityTypeRegistryModule.getInstance().getById(tileId)
-            .map(BlockEntityType::getTileEntityType)
-            .orElse(null);
-        if (tileClass == null) {
-            return Optional.empty();
-        }
-        final BlockEntityType tileType = TileEntityTypeRegistryModule.getInstance().getForClass(tileClass);
-
-        final BlockEntityArchetype archetype = BlockEntityArchetype.builder()
-                .tile(tileType)
-                .state(this.blockState)
-                .tileData(NbtTranslator.getInstance().translate(this.compound))
-                .build();
-        return Optional.of(archetype);
     }
 
     @Override
@@ -591,21 +259,19 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         final SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
         return this.changeFlag == that.changeFlag &&
-               Objects.equal(this.extendedState, that.extendedState) &&
                Objects.equal(this.worldUniqueId, that.worldUniqueId) &&
                Objects.equal(this.pos, that.pos) &&
-               Objects.equal(this.extraData, that.extraData) &&
                Objects.equal(this.compound, that.compound);
     }
 
     @Override
     public int hashCode() {
         return Objects
-            .hashCode(this.extendedState,
+            .hashCode(this.blockState,
                 this.worldUniqueId,
                 this.pos,
-                this.extraData,
                 this.changeFlag,
                 this.compound);
     }
+
 }

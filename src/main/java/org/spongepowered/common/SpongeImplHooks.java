@@ -314,14 +314,9 @@ public class SpongeImplHooks {
      * @param world The world to check
      * @return True if the current phase state is restoring, or the world is restoring in forge.
      */
-    @SuppressWarnings("unused") // overridden to be used in MixinSpongeImplHooks.
+    @SuppressWarnings("unused") // overridden to be used with the PhaseTracker specific code.
     public static boolean isRestoringBlocks(final World world) {
-        if (((WorldBridge) world).bridge$isFake()) {
-            return false;
-        }
-        
-        return PhaseTracker.getInstance().getCurrentState().isRestoring();
-
+        return false;
     }
 
     public static void onTileEntityChunkUnload(final TileEntity tileEntity) {

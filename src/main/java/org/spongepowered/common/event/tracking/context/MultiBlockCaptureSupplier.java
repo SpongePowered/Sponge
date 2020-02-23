@@ -535,7 +535,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
         final SpongeBlockSnapshot snapshot = (SpongeBlockSnapshot) original;
         final BlockPos blockPos = snapshot.getBlockPos();
-        snapshot.getWorldServer().ifPresent(worldServer -> {
+        snapshot.getServerWorld().ifPresent(worldServer -> {
             for (BlockTransaction prevChange = this.tail; prevChange != null; prevChange = prevChange.previous) {
                 if (!prevChange.isCancelled) {
                     prevChange.cancel(worldServer, blockPos, ((TrackedWorldBridge) worldServer).bridge$getProxyAccess());
@@ -575,7 +575,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     public Optional<Transaction<BlockSnapshot>> createTransaction(final SpongeBlockSnapshot snapshot) {
-        final Optional<ServerWorld> maybeWorld = snapshot.getWorldServer();
+        final Optional<ServerWorld> maybeWorld = snapshot.getServerWorld();
         if (!maybeWorld.isPresent()) {
             return Optional.empty();
         }
@@ -648,7 +648,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 TrackingUtil.performTransactionProcess(transaction, phaseContext, currentDepth);
                 if (hasEvents) {
                     final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transaction.getOriginal();
-                    original.getWorldServer().ifPresent(worldServer -> {
+                    original.getServerWorld().ifPresent(worldServer -> {
                         final ServerWorldAccessor accessor = (ServerWorldAccessor) worldServer;
                         final ServerWorld.ServerBlockEventList queue = accessor.accessor$getBlockEventQueue()[accessor.getBlockEventCacheIndexForSponge()];
                         for (final BlockEventData blockEventData : scheduledEvents.get(original.getBlockPos())) {

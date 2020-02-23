@@ -50,7 +50,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -77,7 +76,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -137,7 +135,7 @@ public final class TrackingUtil {
                     }
             ;
     static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
-        (blockSnapshot) -> blockSnapshot.getWorldServer().map(worldServer -> {
+        (blockSnapshot) -> blockSnapshot.getServerWorld().map(worldServer -> {
             final BlockPos targetPos = blockSnapshot.getBlockPos();
             final SpongeBlockSnapshot replacement = ((TrackedWorldBridge) worldServer).bridge$createSnapshot(targetPos, BlockChangeFlags.NONE);
             return new Transaction<>(blockSnapshot, replacement);
@@ -659,7 +657,7 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
 
         // Handle item drops captured
-        final Optional<ServerWorld> worldServer = oldBlockSnapshot.getWorldServer();
+        final Optional<ServerWorld> worldServer = oldBlockSnapshot.getServerWorld();
         if (!worldServer.isPresent()) {
             // Emit a log warning about a missing world
             final String transactionForLogging = MoreObjects.toStringHelper("Transaction")
@@ -890,7 +888,7 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
         final Block block = ((net.minecraft.block.BlockState) spongeSnapshot.getState()).getBlock();
-        spongeSnapshot.getWorldServer()
+        spongeSnapshot.getServerWorld()
             .map(world -> world.getChunkAt(pos))
             .map(chunk -> (ChunkBridge) chunk)
             .ifPresent(spongeChunk -> {

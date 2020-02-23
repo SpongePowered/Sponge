@@ -310,20 +310,15 @@ public abstract class ServerWorldMixin_API_Old extends WorldMixin_API {
             return BlockSnapshot.empty();
         }
         if (!this.isChunkLoaded(x >> 4, z >> 4, false)) {
-            return BlockSnapshot.NONE;
+            return BlockSnapshot.empty();
         }
         final BlockPos pos = new BlockPos(x, y, z);
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        builder.worldId(this.getUniqueId())
+        builder.worldId(this.getProperties().getUniqueId())
             .position(new Vector3i(x, y, z));
-        final Chunk chunk = this.getChunk(pos);
-        final net.minecraft.block.BlockState state = chunk.getBlockState(x, y, z);
+        final Chunk chunk = this.shadow$getChunkAt(pos);
+        final net.minecraft.block.BlockState state = chunk.getBlockState(pos);
         builder.blockState(state);
-        try {
-            builder.extendedState((BlockState) state.getActualState((ServerWorld) (Object) this, pos));
-        } catch (Throwable throwable) {
-            // do nothing
-        }
         final net.minecraft.tileentity.TileEntity tile = chunk.getTileEntity(pos, Chunk.CreateEntityType.CHECK);
         if (tile != null) {
             TrackingUtil.addTileEntityToBuilder(tile, builder);

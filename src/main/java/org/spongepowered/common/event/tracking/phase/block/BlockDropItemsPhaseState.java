@@ -96,7 +96,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
         final SpongeBlockSnapshot blockSnapshot = context.getSource(SpongeBlockSnapshot.class)
             .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
-        final Optional<ServerWorldBridge> maybeWorld = blockSnapshot.getWorldServer().map(worldserver -> (ServerWorldBridge) worldserver);
+        final Optional<ServerWorldBridge> maybeWorld = blockSnapshot.getServerWorld().map(worldserver -> (ServerWorldBridge) worldserver);
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.

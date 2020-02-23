@@ -28,16 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import com.google.common.collect.Lists;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -47,24 +41,22 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
+import org.spongepowered.plugin.meta.util.NonnullByDefault;
+
+import javax.annotation.Nullable;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
+@NonnullByDefault
 public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapshot> implements BlockSnapshot.Builder {
 
     private static final Deque<SpongeBlockSnapshotBuilder> pool = new ConcurrentLinkedDeque<>();
@@ -82,7 +74,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     BlockState blockState;
-    @Nullable BlockState extendedState;
     UUID worldUuid;
     @Nullable UUID creatorUuid;
     @Nullable UUID notifierUuid;
@@ -93,7 +84,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     private final boolean pooled;
 
 
-    private SpongeBlockSnapshotBuilder(boolean pooled) {
+    private SpongeBlockSnapshotBuilder(final boolean pooled) {
         super(BlockSnapshot.class, 1);
         this.pooled = pooled;
     }
@@ -120,16 +111,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         return this;
     }
 
-    public SpongeBlockSnapshotBuilder extendedState(final BlockState extendedState) {
-        this.extendedState = checkNotNull(extendedState);
-        return this;
-    }
-
-
-    public SpongeBlockSnapshotBuilder extendedState(final net.minecraft.block.BlockState extended) {
-        this.extendedState = checkNotNull((BlockState) extended);
-        return this;
-    }
 
     @Override
     public SpongeBlockSnapshotBuilder position(final Vector3i position) {
@@ -143,27 +124,13 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public SpongeBlockSnapshotBuilder from(final Location location) {
-        this.blockState = location.getBlock();
-        this.worldUuid = location.getWorldUniqueId();
-        this.coords = location.getBlockPosition();
-        if (this.blockState.getType() instanceof ITileEntityProvider) {
-            if (location.hasBlockEntity()) {
-                this.compound = new CompoundNBT();
-                final BlockEntity te = location.getBlockEntity().get();
-                ((TileEntity) te).write(this.compound);
-                this.manipulators = ((CustomDataHolderBridge) te).bridge$getCustomManipulators().stream()
-                        .map(Mutable::asImmutable)
-                        .collect(Collectors.toList());
-            }
-        }
-        return this;
+    public BlockSnapshot.Builder from(final Location location) {
+        throw new UnsupportedOperationException("Not implemented correctly.");
     }
 
     @Override
     public SpongeBlockSnapshotBuilder creator(final UUID uuid) {
-        this.creatorUuid = uuid;
-        return this;
+        throw new UnsupportedOperationException("Not implemented correctly.");
     }
 
     @Override
@@ -186,41 +153,15 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         return this;
     }
 
-    @Override
-    public SpongeBlockSnapshotBuilder add(final Mutable<?, ?> manipulator) {
-        return add(checkNotNull(manipulator, "manipulator").asImmutable());
-    }
-
-    @Override
-    public SpongeBlockSnapshotBuilder add(final Immutable<?, ?> manipulator) {
-        checkNotNull(manipulator, "manipulator");
-        if (this.manipulators == null) {
-            this.manipulators = Lists.newArrayList();
-        }
-        for (final Iterator<Immutable<?, ?>> iterator = this.manipulators.iterator(); iterator.hasNext();) {
-            final Immutable<?, ?> existing = iterator.next();
-            if (manipulator.getClass().isInstance(existing)) {
-                iterator.remove();
-            }
-        }
-        this.manipulators.add(manipulator);
-        return this;
-    }
-
-    @Override
-    public <V> SpongeBlockSnapshotBuilder add(final Key<? extends Value<V>> key, final V value) {
-        checkNotNull(key, "key");
-        checkState(this.blockState != null);
-        this.blockState = this.blockState.with(key, value).orElse(this.blockState);
-        if(this.extendedState != null) {
-            this.extendedState = this.extendedState.with(key, value).orElse(this.extendedState);
-        }
-        return this;
-    }
 
     public SpongeBlockSnapshotBuilder flag(final BlockChangeFlag flag) {
         this.flag = (SpongeBlockChangeFlag) flag;
         return this;
+    }
+
+    @Override
+    public <V> BlockSnapshot.Builder add(final Key<? extends Value<V>> key, final V value) {
+        return null;
     }
 
     @Override
@@ -234,20 +175,12 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
             this.notifierUuid = holder.getNotifier().get();
         }
         this.coords = holder.getPosition();
-        this.manipulators = Lists.newArrayList(holder.getValues());
-        if (holder instanceof SpongeBlockSnapshot) {
-            final CompoundNBT compound = ((SpongeBlockSnapshot) holder).compound;
-            if (compound != null) {
-                this.compound = compound.copy();
-            }
-        }
         return this;
     }
 
     @Override
     public SpongeBlockSnapshotBuilder reset() {
         this.blockState = (BlockState) Blocks.AIR.getDefaultState();
-        this.extendedState = null;
         this.worldUuid = null;
         this.creatorUuid = null;
         this.notifierUuid = null;
@@ -261,9 +194,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Override
     public SpongeBlockSnapshot build() {
         checkState(this.blockState != null);
-        if (this.extendedState == null) {
-            this.extendedState = this.blockState;
-        }
         final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
         this.reset();
         if (this.pooled) {
@@ -287,31 +217,18 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
         // We now reconstruct the custom data and all extra data.
         final BlockState blockState = container.getSerializable(Constants.Block.BLOCK_STATE, BlockState.class).get();
-        BlockState extendedState = null;
-        if (container.contains(Constants.Block.BLOCK_EXTENDED_STATE)) {
-            extendedState = container.getSerializable(Constants.Block.BLOCK_EXTENDED_STATE, BlockState.class).get();
-        } else {
-            extendedState = blockState;
-        }
 
         builder.blockState(blockState)
-                .extendedState(extendedState)
                 .position(coordinate)
                 .worldId(worldUuid);
-        if (creatorUuid.isPresent()) {
-            builder.creator(UUID.fromString(creatorUuid.get()));
-        }
-        if (notifierUuid.isPresent()) {
-            builder.notifier(UUID.fromString(notifierUuid.get()));
-        }
-        final Optional<DataView> unsafeCompound = container.getView(Constants.Sponge.UNSAFE_NBT);
-        final CompoundNBT compound = unsafeCompound.isPresent() ? NbtTranslator.getInstance().translateData(unsafeCompound.get()) : null;
-        if (compound != null) {
-            builder.unsafeNbt(compound);
-        }
+        creatorUuid.ifPresent(s -> builder.creator(UUID.fromString(s)));
+        notifierUuid.ifPresent(s -> builder.notifier(UUID.fromString(s)));
+        container.getView(Constants.Sponge.UNSAFE_NBT)
+                .map(dataView -> NbtTranslator.getInstance().translateData(dataView))
+                .ifPresent(builder::unsafeNbt);
         if (container.contains(Constants.Sponge.SNAPSHOT_TILE_DATA)) {
             final List<DataView> dataViews = container.getViewList(Constants.Sponge.SNAPSHOT_TILE_DATA).get();
-            DataUtil.deserializeImmutableManipulatorList(dataViews).stream().forEach(builder::add);
+            DataUtil.deserializeImmutableManipulatorList(dataViews).forEach(builder::add);
         }
         return Optional.of(builder.build());
     }

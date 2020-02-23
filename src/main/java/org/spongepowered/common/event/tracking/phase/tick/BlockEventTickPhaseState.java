@@ -114,7 +114,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
         final BlockPos changedBlockPos = original.getBlockPos();
-        original.getWorldServer().ifPresent(worldServer -> {
+        original.getServerWorld().ifPresent(worldServer -> {
             final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunkAt(changedBlockPos);
             changedMixinChunk.bridge$getBlockOwner(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));

@@ -74,7 +74,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
             final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
             final Block block = (Block) original.getState().getType();
             final BlockPos changedBlockPos = original.getBlockPos();
-            original.getWorldServer().ifPresent(worldServer -> {
+            original.getServerWorld().ifPresent(worldServer -> {
                 final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunkAt(changedBlockPos);
                 changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
                 // and check for owner, if it's available, only if the block change was placement
