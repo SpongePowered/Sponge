@@ -43,11 +43,14 @@ import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SOpenWindowPacket;
+import net.minecraft.tileentity.JukeboxTileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
@@ -889,7 +892,7 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleCollideImpactEvent(final net.minecraft.entity.Entity projectile, @Nullable final ProjectileSource projectileSource,
             final RayTraceResult movingObjectPosition) {
-        final RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
+        final RayTraceResult.Type movingObjectType = movingObjectPosition.getType();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(projectile);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
@@ -898,19 +901,20 @@ public class SpongeCommonEventFactory {
             final Optional<User> owner = PhaseTracker.getInstance().getCurrentContext().getOwner();
             owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
 
-            final Location<World> impactPoint = new Location<>((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.hitResult));
+            final Location impactPoint = Location.of((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.getHitVec()));
             boolean cancelled = false;
 
             if (movingObjectType == RayTraceResult.Type.BLOCK) {
-                final BlockPos blockPos = movingObjectPosition.getBlockPos();
+                final BlockRayTraceResult blockMovingObjectPosition = (BlockRayTraceResult) movingObjectPosition;
+                final BlockPos blockPos = blockMovingObjectPosition.getPos();
                 if (blockPos.getY() <= 0) {
                     return false;
                 }
 
-                final BlockSnapshot targetBlock = ((World) projectile.world).createSnapshot(VecHelper.toVector3i(movingObjectPosition.getBlockPos()));
+                final BlockSnapshot targetBlock = ((World) projectile.world).createSnapshot(VecHelper.toVector3i(blockMovingObjectPosition.getPos()));
                 Direction side = Direction.NONE;
-                if (movingObjectPosition.sideHit != null) {
-                    side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
+                if (blockMovingObjectPosition.getFace() != null) {
+                    side = DirectionFacingProvider.getInstance().getKey(blockMovingObjectPosition.getFace()).get();
                 }
 
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
@@ -923,9 +927,10 @@ public class SpongeCommonEventFactory {
                     final ChunkBridge spongeChunk = (ChunkBridge) projectile.world.getChunkAt(targetPos);
                     spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
                 }
-            } else if (movingObjectPosition.entityHit != null) { // entity
+            } else if (movingObjectType == RayTraceResult.Type.ENTITY) { // entity
+                final EntityRayTraceResult entityMovingObjectPosition = (EntityRayTraceResult) movingObjectPosition;
                 final ArrayList<Entity> entityList = new ArrayList<>();
-                entityList.add((Entity) movingObjectPosition.entityHit);
+                entityList.add((Entity) entityMovingObjectPosition.getEntity());
                 final CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(frame.getCurrentCause(), entityList, impactPoint);
                         cancelled = SpongeImpl.postEvent(event);
             }
@@ -1097,13 +1102,13 @@ public class SpongeCommonEventFactory {
     @Nullable
     public static PlaySoundEvent.Broadcast callPlaySoundBroadcastEvent(final CauseStackManager.StackFrame frame, final WorldBridge bridge,
         final BlockPos pos, final int effectID) {
-        final SoundType soundType;
+        final Supplier<SoundType> soundType;
         final float volume;
         if (effectID == Constants.WorldEvents.PLAY_WITHER_SPAWN_EVENT) {
             soundType = SoundTypes.ENTITY_WITHER_SPAWN;
             volume = 1.0F;
         } else if (effectID == Constants.WorldEvents.PLAY_ENDERDRAGON_DEATH_EVENT) {
-            soundType = SoundTypes.ENTITY_ENDERDRAGON_DEATH;
+            soundType = SoundTypes.ENTITY_ENDER_DRAGON_DEATH;
             volume = 5.0F;
         } else if (effectID == Constants.WorldEvents.PLAY_BLOCK_END_PORTAL_SPAWN_EVENT) {
             soundType = SoundTypes.BLOCK_END_PORTAL_SPAWN;
@@ -1113,21 +1118,21 @@ public class SpongeCommonEventFactory {
         }
         final Location<World> location = new Location<>((World) bridge, pos.getX(), pos.getY(), pos.getZ());
         final PlaySoundEvent.Broadcast event = SpongeEventFactory.createPlaySoundEventBroadcast(frame.getCurrentCause(), location,
-            SoundCategories.HOSTILE, soundType, 1.0F, volume);
+            SoundCategories.HOSTILE.get(), soundType.get(), 1.0F, volume);
         SpongeImpl.postEvent(event);
         return event;
     }
 
-    public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final JukeboxBlock.TileEntityJukebox jukebox,
+    public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final JukeboxTileEntity jukebox,
         final MusicDisc recordType, final int data) {
         final Jukebox apiJuke = (Jukebox) jukebox;
         final Location<World> location = apiJuke.getLocation();
         final PlaySoundEvent.Record
             event =
             data == 0 ? SpongeEventFactory
-                .createPlaySoundEventRecordStart(cause, apiJuke, location, recordType, SoundCategories.RECORD, recordType.getSound(), 1.0F, 4.0F)
+                .createPlaySoundEventRecordStart(cause, apiJuke, location, recordType, SoundCategories.RECORD.get(), recordType.getSound(), 1.0F, 4.0F)
                       : SpongeEventFactory
-                .createPlaySoundEventRecordStop(cause, apiJuke, location, recordType, SoundCategories.RECORD, recordType.getSound(), 1.0F, 4.0F);
+                .createPlaySoundEventRecordStop(cause, apiJuke, location, recordType, SoundCategories.RECORD.get(), recordType.getSound(), 1.0F, 4.0F);
         SpongeImpl.postEvent(event);
         return event;
     }
@@ -1143,9 +1148,9 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static PlaySoundEvent.NoteBlock callPlaySoundNoteBLockEvent(final Cause cause, final World world, Note note, final BlockPos pos, final SoundEvent soundEvent, final InstrumentType instrument, final NotePitch notePitch, final Float pitch) {
+    public static PlaySoundEvent.NoteBlock callPlaySoundNoteBlockEvent(final Cause cause, final World world, final BlockPos pos, final SoundEvent soundEvent, final InstrumentType instrument, final NotePitch notePitch, final Float pitch) {
         final Location<World> location = new Location<>(world, pos.getX(), pos.getY(), pos.getZ());
-        final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, note, notePitch, SoundCategories.RECORD, (SoundType)soundEvent, pitch, 3.0F);
+        final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, notePitch, SoundCategories.RECORD.get(), (SoundType)soundEvent, pitch, 3.0F);
         SpongeImpl.postEvent(event);
         return event;
     }

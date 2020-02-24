@@ -158,7 +158,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
-    private void onSetDifficultyVanilla(@Nullable final Difficulty newDifficulty, final CallbackInfo ci) {
+    private void impl$onSetDifficultyVanilla(@Nullable final Difficulty newDifficulty, final CallbackInfo ci) {
         if (newDifficulty == null) {
             // This is an error from someone
             new PrettyPrinter(60).add("Null Difficulty being set!").centre().hr()

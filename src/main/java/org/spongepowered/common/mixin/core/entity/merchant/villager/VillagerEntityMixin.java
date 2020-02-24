@@ -32,8 +32,6 @@ import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.living.trader.Villager;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 

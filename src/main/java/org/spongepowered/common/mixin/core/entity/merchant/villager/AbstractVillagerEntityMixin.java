@@ -25,22 +25,15 @@
 package org.spongepowered.common.mixin.core.entity.merchant.villager;
 
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.item.MerchantOffers;
-import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.entity.living.trader.Villager;
-import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
-import org.spongepowered.common.registry.SpongeVillagerRegistry;
-
-import java.util.List;
 
 @Mixin(AbstractVillagerEntity.class)
 public abstract class AbstractVillagerEntityMixin extends AgeableEntityMixin {

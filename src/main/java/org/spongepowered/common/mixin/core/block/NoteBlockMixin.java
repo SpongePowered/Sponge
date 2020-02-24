@@ -27,17 +27,15 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.material.Material;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.state.properties.NoteBlockInstrument;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.Note;
-import org.spongepowered.api.data.property.block.InstrumentProperty;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -47,11 +45,9 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 @Mixin(NoteBlock.class)
 public abstract class NoteBlockMixin extends BlockMixin {
 
-    @Shadow protected abstract SoundEvent getInstrument(int eventId);
-
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "eventReceived(Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;II)Z",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"),
+    @Inject(method = "eventReceived(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;II)Z",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"),
             cancellable = true)
     private void impl$throwNoteBlockSoundEvent(BlockState state, World worldIn, BlockPos pos, int id, int param, CallbackInfoReturnable<Boolean> callbackInfo) {
         if (!ShouldFire.PLAY_SOUND_EVENT_NOTE_BLOCK) {
@@ -64,20 +60,15 @@ public abstract class NoteBlockMixin extends BlockMixin {
         }
 
         //InstrumentProperty doesn't return what we wan't for the noteblock directly, so we have to check the block under it.
-        InstrumentProperty instrumentProperty = ((org.spongepowered.api.world.World) worldIn).getBlock(pos.getX(), pos.getY() - 1, pos.getZ()).getProperty(InstrumentProperty.class).orElse(null);
-        if (instrumentProperty == null) {
-            return;
-        }
-
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        if (!(tileEntity instanceof Note)) {
+        InstrumentType instrumentType = ((org.spongepowered.api.world.World) worldIn).getBlock(pos.getX(), pos.getY() - 1, pos.getZ()).get(Keys.REPRESENTED_INSTRUMENT).orElse(null);
+        if (instrumentType == null) {
             return;
         }
 
         float pitch = (float) Math.pow(2.0D, (double) (param - 12) / 12.0D);
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBLockEvent(frame.getCurrentCause(), (org.spongepowered.api.world.World) worldIn, (Note) tileEntity, pos, this.getInstrument(id), instrumentProperty.getValue(), NotePitchRegistryModule.getPitch((byte) param), pitch);
+            final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(frame.getCurrentCause(), (org.spongepowered.api.world.World) worldIn, pos, NoteBlockInstrument.byState(state).getSound(), instrumentType, NotePitchRegistryModule.getPitch((byte) param), pitch);
             if (event.isCancelled()) {
                 callbackInfo.setReturnValue(true);
             }

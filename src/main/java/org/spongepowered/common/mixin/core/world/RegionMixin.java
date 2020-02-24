@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 @Mixin(Region.class)
 public abstract class RegionMixin {
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;shadow$getChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     private Chunk onConstruct(World worldIn, int chunkX, int chunkZ) {
         if (worldIn.isRemote) {
             return worldIn.getChunk(chunkX, chunkZ);

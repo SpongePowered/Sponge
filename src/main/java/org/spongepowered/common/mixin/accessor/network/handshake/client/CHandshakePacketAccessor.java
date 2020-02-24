@@ -34,4 +34,6 @@ public interface CHandshakePacketAccessor {
     @Accessor("ip") String accessor$getIp();
 
     @Accessor("ip") void accessor$setIp(String ip);
+
+    @Accessor("port") int accessor$getPort();
 }

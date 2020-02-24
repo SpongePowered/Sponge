@@ -32,6 +32,7 @@ import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.ChannelRegistrar;
@@ -53,11 +54,11 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
     }
 
     protected static SCustomPayloadPlayPacket getRegPacket(String channelName) {
-        return new SCustomPayloadPlayPacket("REGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
+        return new SCustomPayloadPlayPacket(new ResourceLocation("register"), new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 
     protected static SCustomPayloadPlayPacket getUnregPacket(String channelName) {
-        return new SCustomPayloadPlayPacket("UNREGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
+        return new SCustomPayloadPlayPacket(new ResourceLocation("unregister"), new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 
     public static ChannelBuf toChannelBuf(ByteBuf buf) {

@@ -54,9 +54,9 @@ public abstract class MerchantOfferMixin {
             return false;
         }
         MerchantOffer other = (MerchantOffer) o;
-        return ItemStackComparators.ALL.compare((ItemStack) (Object) this.shadow$getBuyingStackFirst(), (ItemStack) (Object) other.getBuyingStackFirst()) == 0
-            && ItemStackComparators.ALL.compare((ItemStack) (Object) this.shadow$getBuyingStackSecond(), (ItemStack) (Object) other.getBuyingStackSecond()) == 0
-            && ItemStackComparators.ALL.compare((ItemStack) (Object) this.shadow$getSellingStack(), (ItemStack) (Object) other.getSellingStack()) == 0
+        return ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getBuyingStackFirst(), (ItemStack) (Object) other.getBuyingStackFirst()) == 0
+            && ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getBuyingStackSecond(), (ItemStack) (Object) other.getBuyingStackSecond()) == 0
+            && ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getSellingStack(), (ItemStack) (Object) other.getSellingStack()) == 0
             && this.shadow$getUses() == other.getUses()
             && this.shadow$func_222214_i() == other.func_222214_i()
             && this.shadow$getGivenExp() == other.getGivenExp();

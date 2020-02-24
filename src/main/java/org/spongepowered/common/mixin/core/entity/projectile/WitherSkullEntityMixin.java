@@ -51,7 +51,7 @@ import javax.annotation.Nullable;
 @Mixin(WitherSkullEntity.class)
 public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMixin implements WitherSkullEntityBridge, ExplosiveBridge {
 
-    private int explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
+    private int impl$explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
     private float impl$damage = 0.0f;
     private boolean impl$damageSet = false;
 
@@ -89,12 +89,12 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
     // Explosive Impl
     @Override
     public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.of(this.explosionRadius);
+        return Optional.of(this.impl$explosionRadius);
     }
 
     @Override
     public void bridge$setExplosionRadius(final @Nullable Integer explosionRadius) {
-        this.explosionRadius = explosionRadius == null ? Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS : explosionRadius;
+        this.impl$explosionRadius = explosionRadius == null ? Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS : explosionRadius;
     }
 
     @Override
@@ -115,7 +115,7 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
             return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(((WitherSkull) this))
-                .radius(this.explosionRadius)
+                .radius(this.impl$explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking && griefer)
                 .shouldBreakBlocks(smoking && griefer))

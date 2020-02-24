@@ -34,9 +34,11 @@ public abstract class ClassInheritanceMultiMapMixin {
 
     /**
      * @author Minecrell
+     * @author i509VCB - February 23rd, 2020 - 1.14.4
+     *
      * @reason Adds support for finding values by searching for one of their interfaces.
      */
-    @Redirect(method = "initializeClassLookup",
+    @Redirect(method = "func_219790_a",
             at = @At(value = "INVOKE", target = "Ljava/lang/Class;isAssignableFrom(Ljava/lang/Class;)Z", remap = false))
     private boolean impl$isAssignableFromOrInterface(final Class<?> baseClass, final Class<?> clazz) {
         return clazz.isInterface() || baseClass.isAssignableFrom(clazz);

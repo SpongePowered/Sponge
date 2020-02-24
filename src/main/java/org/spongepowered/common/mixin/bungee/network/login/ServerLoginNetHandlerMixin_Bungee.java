@@ -51,7 +51,7 @@ public abstract class ServerLoginNetHandlerMixin_Bungee {
     @Inject(method = "processLoginStart",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/server/network/NetHandlerLoginServer;loginGameProfile:Lcom/mojang/authlib/GameProfile;",
+            target = "Lnet/minecraft/network/login/ServerLoginNetHandler;loginGameProfile:Lcom/mojang/authlib/GameProfile;",
             opcode = Opcodes.PUTFIELD,
             ordinal = 0,
             shift = At.Shift.AFTER))
