@@ -434,8 +434,10 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
             this.impl$capturedCraftPreviewTransaction = new SlotTransaction(slot, this.impl$capturedCraftPreviewTransaction.getOriginal(), repl);
         } else {
             SlotTransaction replace = new SlotTransaction(slot, orig, repl);
-            SpongeImpl.getLogger().warn("Could not merge craft preview transactions - some events may break (original {}, replace {})",
-                    this.impl$capturedCraftPreviewTransaction, replace);
+            if (SpongeImpl.getGlobalConfigAdapter().getConfig().getLogging().logTransactionMergeFailure()) {
+                SpongeImpl.getLogger().warn("Could not merge craft preview transactions - some events may break (original {}, replace {})",
+                        this.impl$capturedCraftPreviewTransaction, replace);
+            }
             this.impl$capturedCraftPreviewTransaction = replace;
         }
     }

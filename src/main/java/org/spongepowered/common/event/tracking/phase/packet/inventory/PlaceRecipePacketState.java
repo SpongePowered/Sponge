@@ -80,7 +80,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
             return;
         }
 
-        SlotTransaction previewTransaction = ((ContainerBridge) player.openContainer).bridge$getPreviewTransaction();
+        final SlotTransaction previewTransaction = ((ContainerBridge) player.openContainer).bridge$getPreviewTransaction();
         if (previewTransaction == null) {
             final CraftingOutput slot = ((CraftingInventory) craftInv).getResult();
             previewTransaction = new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(slot.peek().orElse(ItemStack.empty())));

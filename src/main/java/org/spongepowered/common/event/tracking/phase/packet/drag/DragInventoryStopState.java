@@ -65,7 +65,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
 
         Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (craftInv instanceof CraftingInventory) {
-            SlotTransaction previewTransaction = ((ContainerBridge) player.openContainer).bridge$getPreviewTransaction();
+            final SlotTransaction previewTransaction = ((ContainerBridge) player.openContainer).bridge$getPreviewTransaction();
             if (previewTransaction != null) {
                 CraftingRecipe recipe = SpongeCraftingRecipeRegistry
                         .getInstance().findMatchingRecipe(((CraftingInventory) craftInv).getCraftingGrid(), ((World) player.world)).orElse(null);
