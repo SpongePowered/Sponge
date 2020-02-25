@@ -146,11 +146,16 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 final IBlockState iblockstate = this.world.getBlockState(blockpos);
 
                                 if (iblockstate.getMaterial() != Material.AIR) {
+
+                                    // Block Explosion Resistance START
+
                                     final float f2 = this.exploder != null
                                                ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
                                             , this.world, blockpos, iblockstate)
                                                : iblockstate.getBlock().getExplosionResistance((Entity) null);
                                     f -= (f2 + 0.3F) * 0.3F;
+
+                                    // Block Explosion Resistance END
                                 }
 
                                 if (f > 0.0F && (this.exploder == null || this.exploder
