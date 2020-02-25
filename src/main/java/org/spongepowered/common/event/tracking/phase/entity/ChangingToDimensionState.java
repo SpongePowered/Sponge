@@ -47,7 +47,8 @@ final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeCon
     public boolean spawnEntityOrCapture(final DimensionChangeContext context, final Entity entity) {
         final ServerWorld worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
-        ((ServerWorldBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);
+        // This is the same "forceAddEntity" method that the TeleportCommand uses
+        worldServer.func_217460_e((net.minecraft.entity.Entity) entity);
         return true;
     }
 

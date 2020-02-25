@@ -26,16 +26,17 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SPlayerPositionLookPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
@@ -59,29 +60,32 @@ import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -90,50 +94,43 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 @Mixin(net.minecraft.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$"))
 public abstract class EntityMixin_API implements org.spongepowered.api.entity.Entity {
 
     // @formatter:off
-    protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((net.minecraft.entity.Entity) (Object) this).getClass());
 
     @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
     @Shadow public double posY;
     @Shadow public double posZ;
-    @Shadow public double motionX;
-    @Shadow public double motionY;
-    @Shadow public double motionZ;
+    @Shadow public Vec3d motion;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
-    @Shadow public boolean isDead;
-    @Shadow public float width;
-    @Shadow public float height;
+    @Shadow public boolean removed;
+    @Shadow private EntitySize size;
     @Shadow protected Random rand;
     @Shadow public int ticksExisted;
     @Shadow public int fire;
     @Shadow public DimensionType dimension;
     @Shadow protected UUID entityUniqueID;
-    @Shadow public boolean removed;
+    @Shadow @Final private net.minecraft.entity.EntityType<?> type;
+
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
-    @Shadow public abstract void shadow$setDead();
+    @Shadow public abstract void shadow$remove();
     @Shadow public abstract int shadow$getAir();
     @Shadow public abstract void shadow$setAir(int air);
     @Shadow public abstract UUID shadow$getUniqueID();
     @Shadow public abstract void shadow$setFire(int seconds);
-    @Shadow public abstract CompoundNBT shadow$writeToNBT(CompoundNBT compound);
     @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int shadow$getEntityId();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
+    @Shadow public abstract boolean shadow$writeUnlessRemoved(CompoundNBT compound);
 
     // @formatter:on
-
-    @Shadow public abstract void dismountRidingEntity();
 
     @Override
     public EntitySnapshot createSnapshot() {
@@ -151,12 +148,12 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Location<World> getLocation() {
-        return new Location<>((World) this.world, this.getPosition());
+    public Location getLocation() {
+        return Location.of((World) this.world, this.getPosition());
     }
 
     @Override
-    public boolean setLocationAndRotation(final Location<World> location, final Vector3d rotation) {
+    public boolean setLocationAndRotation(final Location location, final Vector3d rotation) {
         final boolean result = this.setLocation(location);
         if (result) {
             this.setRotation(rotation);
@@ -181,7 +178,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
             context.buildAndSwitch();
 
-            MoveEntityEvent.Teleport event;
+            final MoveEntityEvent.Teleport event;
 
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (!frame.getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
@@ -206,7 +203,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
                 boolean isTeleporting = true;
                 boolean isChangingDimension = false;
-                if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
+                if (location.getWorld().getProperties().getUniqueId() != ((World) this.world).getProperties().getUniqueId()) {
                     if ((net.minecraft.entity.Entity) (Object) this instanceof ServerPlayerEntity) {
                         // Close open containers
                         final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Object) this;
@@ -214,17 +211,17 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                             ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                         }
 
-                        EntityUtil.transferPlayerToWorld(entityPlayerMP, event, (ServerWorld) location.getExtent(),
-                            (TeleporterBridge) ((ServerWorld) location.getExtent()).getDefaultTeleporter());
+                        EntityUtil.transferPlayerToWorld(entityPlayerMP, event, (ServerWorld) location.getWorld(),
+                                (TeleporterBridge) ((ServerWorld) location.getWorld()).getDefaultTeleporter());
                     } else {
-                        EntityUtil.transferEntityToWorld((Entity) (Object) this, event, (ServerWorld) location.getExtent(),
-                            (TeleporterBridge) ((ServerWorld) location.getExtent()).getDefaultTeleporter(), false);
+                        EntityUtil.transferEntityToWorld((Entity) (Object) this, event, (ServerWorld) location.getWorld(),
+                                (TeleporterBridge) ((ServerWorld) location.getWorld()).getDefaultTeleporter(), false);
                     }
 
                     isChangingDimension = true;
                 }
 
-                double distance = location.getPosition().distance(this.getPosition());
+                final double distance = location.getPosition().distance(this.getPosition());
 
                 if (distance <= 4) {
                     isTeleporting = false;
@@ -240,12 +237,13 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                             ((Player) player).closeInventory(); // Call API method to make sure we capture it
                         }
 
-                        ((ServerWorld) location.getExtent()).getChunkProvider()
-                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                        // TODO - determine if this is right.
+                        ((ServerWorld) location.getWorld()).getChunkProvider()
+                                .forceChunk(new ChunkPos(location.getChunkPosition().getX(), location.getChunkPosition().getZ()), true);
                     }
                     player.connection
-                        .setPlayerLocation(location.getX(), location.getY(), location.getZ(), ((Entity) (Object) this).rotationYaw,
-                            ((Entity) (Object) this).rotationPitch);
+                            .setPlayerLocation(location.getX(), location.getY(), location.getZ(), ((Entity) (Object) this).rotationYaw,
+                                    ((Entity) (Object) this).rotationPitch);
                     ((ServerPlayNetHandlerBridge) player.connection).bridge$setLastMoveLocation(null); // Set last move to teleport target
                 } else {
                     this.shadow$setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
@@ -253,8 +251,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
                 if (isTeleporting || isChangingDimension) {
                     // Re-attach passengers
-                    for (net.minecraft.entity.Entity passenger : passengers) {
-                        if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
+                    for (final net.minecraft.entity.Entity passenger : passengers) {
+                        if (((World) passenger.getEntityWorld()).getProperties().getUniqueId() != ((World) this.world).getProperties().getUniqueId()) {
                             ((org.spongepowered.api.entity.Entity) passenger).setLocation(location);
                         }
                         passenger.startRiding((Entity) (Object) this, true);
@@ -270,7 +268,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @SuppressWarnings({"RedundantCast", "ConstantConditions"})
     @Override
-    public boolean setLocationAndRotation(final Location<World> location, final Vector3d rotation, final EnumSet<RelativePositions> relativePositions) {
+    public boolean setLocationAndRotation(final Location location, final Vector3d rotation, final EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;
 
         if (relativePositions.isEmpty()) {
@@ -280,7 +278,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         } else {
             if (((Entity) (Object) this) instanceof ServerPlayerEntity && ((ServerPlayerEntity) (Entity) (Object) this).connection != null) {
                 // Players use different logic, as they support real relative movement.
-                EnumSet<SPlayerPositionLookPacket.Flags> relativeFlags = EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class);
+                final EnumSet<SPlayerPositionLookPacket.Flags> relativeFlags = EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class);
 
                 if (relativePositions.contains(RelativePositions.X)) {
                     relativeFlags.add(SPlayerPositionLookPacket.Flags.X);
@@ -303,9 +301,9 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 }
 
                 ((ServerPlayerEntity) ((Entity) (Object) this)).connection.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                    .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
+                        .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
-                Location<World> resultantLocation = this.getLocation();
+                Location resultantLocation = this.getLocation();
                 Vector3d resultantRotation = this.getRotation();
 
                 if (relativePositions.contains(RelativePositions.X)) {
@@ -347,18 +345,20 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Transform<World> getTransform() {
-        return new Transform<>(this.getWorld(), this.getPosition(), this.getRotation(), this.getScale());
+    public Transform getTransform() {
+        return Transform.of(this.getPosition(), this.getRotation(), this.getScale());
     }
 
     @Override
-    public boolean setTransform(final Transform<World> transform) {
+    public boolean setTransform(final Transform transform) {
         checkNotNull(transform, "The transform cannot be null!");
-        final boolean result = setLocation(transform.getLocation());
-        if (result) {
-            this.setRotation(transform.getRotation());
-            this.setScale(transform.getScale());
-            return true;
+        final Vector3d position = transform.getPosition();
+
+        this.shadow$setPosition(position.getX(), position.getY(), position.getZ());
+        this.setRotation(transform.getRotation());
+        this.setScale(transform.getScale());
+        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.onServerThread()) {
+            ((ServerWorld) this.world).chunkCheck((Entity) (Object) this);
         }
 
         return false;
@@ -368,7 +368,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public boolean transferToWorld(final World world, final Vector3d position) {
         checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
-        return this.setLocation(new Location<>(world, position));
+        return this.setLocation(Location.of(world, position));
     }
 
     @Override
@@ -413,7 +413,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public boolean isRemoved() {
-        return this.isDead;
+        return this.removed;
     }
 
     @Override
@@ -422,9 +422,9 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         return !this.isRemoved();
     }
 
-    @Override
-    public void remove() {
-        this.setDead();
+    @Intrinsic
+    public void entity$remove() {
+        this.shadow$remove();
     }
 
     @Override
@@ -439,7 +439,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public EntityType getType() {
-        return this.entityType;
+        return (EntityType) this.type;
     }
 
     @Override
@@ -464,48 +464,36 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public DataContainer toContainer() {
-        final Transform<World> transform = this.getTransform();
+        final Transform transform = this.getTransform();
         final CompoundNBT compound = new CompoundNBT();
-        this.shadow$writeToNBT(compound);
+        this.shadow$writeUnlessRemoved(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Entity.CLASS, this.getClass().getName())
-            .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
-            .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
+                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Constants.Entity.CLASS, this.getClass().getName())
+                .set(Queries.WORLD_ID, this.getWorld().getProperties().getUniqueId().toString())
+                .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, transform.getPosition().getX())
                 .set(Queries.POSITION_Y, transform.getPosition().getY())
                 .set(Queries.POSITION_Z, transform.getPosition().getZ())
-            .getContainer()
-            .createView(Constants.Entity.ROTATION)
+                .getContainer()
+                .createView(Constants.Entity.ROTATION)
                 .set(Queries.POSITION_X, transform.getRotation().getX())
                 .set(Queries.POSITION_Y, transform.getRotation().getY())
                 .set(Queries.POSITION_Z, transform.getRotation().getZ())
-            .getContainer()
-            .createView(Constants.Entity.SCALE)
+                .getContainer()
+                .createView(Constants.Entity.SCALE)
                 .set(Queries.POSITION_X, transform.getScale().getX())
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
-            .getContainer()
-            .set(Constants.Entity.TYPE, this.entityType.getId())
-            .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
-        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
-        if (!manipulators.isEmpty()) {
-            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
-        }
+                .getContainer()
+                .set(Constants.Entity.TYPE, net.minecraft.entity.EntityType.getKey(this.type).toString())
+                .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
+        // TODO - Custom data store
         return container;
     }
 
-    @Override
-    public Collection<Mutable<?, ?>> getContainers() {
-        final List<Mutable<?, ?>> list = Lists.newArrayList();
-        this.spongeApi$supplyVanillaManipulators(list);
-        if (this instanceof CustomDataHolderBridge && ((CustomDataHolderBridge) this).bridge$hasManipulators()) {
-            list.addAll(((CustomDataHolderBridge) this).bridge$getCustomManipulators());
-        }
-        return list;
-    }
 
     @Override
     public org.spongepowered.api.entity.Entity copy() {
@@ -514,10 +502,12 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         try {
             final CompoundNBT compound = new CompoundNBT();
-            this.shadow$writeToNBT(compound);
-            final Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
-            compound.putUniqueId(Constants.UUID, entity.getUniqueID());
-            entity.read(compound);
+            this.shadow$writeUnlessRemoved(compound);
+            final Entity entity = net.minecraft.entity.EntityType.func_220335_a(compound, this.world, (createdEntity) -> {
+                compound.putUniqueId(Constants.UUID, createdEntity.getUniqueID());
+                createdEntity.read(compound);
+                return createdEntity;
+            });
             return (org.spongepowered.api.entity.Entity) entity;
         } catch (final Exception e) {
             throw new IllegalArgumentException("Could not copy the entity:", e);
