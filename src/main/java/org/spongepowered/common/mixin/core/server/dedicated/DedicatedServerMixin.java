@@ -79,32 +79,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         return propertyManager.getIntProperty(key, defaultValue);
     }
 
-    /**
-     * @author zml - March 9th, 2016
-     * @author blood - July 7th, 2016 - Add cause tracker handling for throwing pre change block checks
-     * @author gabizou - July 7th, 2016 - Update for 1.10's cause tracking changes
-     *
-     * @reason Change spawn protection to take advantage of Sponge permissions. Rather than affecting only the default world like vanilla, this
-     * will apply to any world. Additionally, fire a spawn protection event
-     */
-    @Overwrite
-    public boolean isBlockProtected(final net.minecraft.world.World worldIn, final BlockPos pos, final PlayerEntity playerIn) {
-        // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
-        final IPhaseState<?> phaseState = PhaseTracker.getInstance().getCurrentState();
-        if (!phaseState.isInteraction()) {
-            // TODO BLOCK_PROTECTED flag
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos, playerIn).isCancelled()) {
-                return true;
-            }
-        }
 
-        final BlockPos spawnPoint = worldIn.getSpawnPoint();
-        final int protectionRadius = this.getSpawnProtectionSize();
-
-        return protectionRadius > 0
-               && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius
-               && !((Player) playerIn).hasPermission("minecraft.spawn-protection.override");
-    }
 
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;save()V"))
     private void onSave(final PlayerProfileCache cache) {

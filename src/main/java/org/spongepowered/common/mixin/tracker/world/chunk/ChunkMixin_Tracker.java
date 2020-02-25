@@ -26,7 +26,9 @@ package org.spongepowered.common.mixin.tracker.world.chunk;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -34,6 +36,7 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -49,7 +52,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -57,6 +59,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -66,13 +69,15 @@ import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.util.VecHelper;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @Mixin(Chunk.class)
 public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
-
+    // @formatter:off
     @Shadow @Final public static ChunkSection EMPTY_SECTION;
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
     @Shadow @Final private ChunkSection[] sections;
@@ -82,15 +87,15 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
     @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos pos, Chunk.CreateEntityType creationMode);
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
+    // @formatter:on
 
     /**
-     * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
-     * @reason Reroute outsdie calls to chunk.setBlockState to flow through
-     *  the tracker enhanced method.
-     *
      * @param pos The position to set
      * @param state The state to set
      * @return The changed state
+     * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
+     * @reason Reroute outsdie calls to chunk.setBlockState to flow through
+     *         the tracker enhanced method.
      */
     @Nullable
     @Overwrite
@@ -102,22 +107,21 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     }
 
     /**
-     * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
-     * Technically a full overwrite for {@link Chunk#setBlockState(BlockPos, BlockState, boolean)}
-     * and due to Sponge's hijacking of {@link ServerWorld#setBlockState(BlockPos, BlockState, int)},
-     * it needs to be able to record transactions when necessary. This implementation allows for us to
-     * further specify the types of transactions and what proxies are needing to set up where.
-     *
-     *
      * @param pos The position changing
      * @param newState The new state
      * @param currentState The current state - passed in from either chunk or world
      * @return The changed block state if not null
+     * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
+     *         Technically a full overwrite for {@link Chunk#setBlockState(BlockPos, BlockState, boolean)}
+     *         and due to Sponge's hijacking of {@link ServerWorld#setBlockState(BlockPos, BlockState, int)},
+     *         it needs to be able to record transactions when necessary. This implementation allows for us to
+     *         further specify the types of transactions and what proxies are needing to set up where.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Nullable
-    public BlockState bridge$setBlockState(final BlockPos pos, final BlockState newState, final BlockState currentState, final BlockChangeFlag flag) {
+    public BlockState bridge$setBlockState(final BlockPos pos, final BlockState newState, final BlockState currentState,
+            final BlockChangeFlag flag) {
         // int i = pos.getX() & 15;
         final int xPos = pos.getX() & 15;
         // int j = pos.getY();
@@ -167,7 +171,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                 || !ShouldFire.CHANGE_BLOCK_EVENT
                 || !state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag))
                 ? null
-                : this.tracker$createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
+                : this.tracker$createSpongeBlockSnapshot(currentState, pos, flag, existing);
         final BlockTransaction.ChangeBlock transaction;
 
         // BlockState blockstate = chunksection.setBlockState(xPos, yPos & 15, zPos, newState); // Vanilla
@@ -248,8 +252,8 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             oldState.onReplaced(this.world, pos, newState, flag.isMoving());
             // Sponge End
 
-        // } else if (oldBlock != newBlock && oldBlock instanceof ITileEntityProvider) { // Vanilla
-        // Forge changes the check to blockState.hasTileEntity();
+            // } else if (oldBlock != newBlock && oldBlock instanceof ITileEntityProvider) { // Vanilla
+            // Forge changes the check to blockState.hasTileEntity();
         } else {
             // Sponge set the transaction to null
             transaction = null;
@@ -297,7 +301,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         if (!isFake) {
             if (currentState != newState) {
                 // Reset the proxy access or add to the proxy state during processing.
-                ((ServerWorldBridge) this.world).bridge$getProxyAccess().onChunkChanged(pos, newState);
+                ((TrackedWorldBridge) this.world).bridge$getProxyAccess().onChunkChanged(pos, newState);
             }
             final boolean isBulkCapturing = ShouldFire.CHANGE_BLOCK_EVENT && state != null && state.doesBulkBlockCapture(peek);
             // Ignore block activations during block placement captures unless it's
@@ -369,8 +373,8 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         return oldState;
     }
 
-    private SpongeBlockSnapshot tracker$createSpongeBlockSnapshot(
-            final BlockState state, final BlockState extended, final BlockPos pos, final BlockChangeFlag updateFlag, @Nullable final TileEntity existing) {
+    private SpongeBlockSnapshot tracker$createSpongeBlockSnapshot(final BlockState state, final BlockPos pos,
+            final BlockChangeFlag updateFlag, @Nullable final TileEntity existing) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
         builder.blockState(state)
@@ -429,4 +433,52 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         ((OwnershipTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.OWNER, ((ChunkBridge) this).bridge$getBlockOwnerUUID(pos).orElse(null));
     }
 
+
+    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At("RETURN"))
+    private void impl$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
+            final java.util.function.Predicate<? super Entity> filter, final CallbackInfo ci) {
+        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+            return;
+        }
+
+        if (listToFill.isEmpty()) {
+            return;
+        }
+
+        if (!ShouldFire.COLLIDE_ENTITY_EVENT) {
+            return;
+        }
+
+        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
+
+        if (event == null || event.isCancelled()) {
+            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
+                return;
+            }
+            listToFill.clear();
+        }
+    }
+
+    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
+    private <T extends Entity> void impl$throwCollsionEvent(final Class<? extends T> entityClass,
+            final AxisAlignedBB aabb, final List<T> listToFill, final Predicate<? super T> filter,
+            final CallbackInfo ci) {
+        if (((WorldBridge) this.world).bridge$isFake()
+                || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+            return;
+        }
+
+        if (listToFill.isEmpty()) {
+            return;
+        }
+
+        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
+
+        if (event == null || event.isCancelled()) {
+            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
+                return;
+            }
+            listToFill.clear();
+        }
+    }
 }

@@ -297,8 +297,9 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("unchecked")
     @Nullable
-    public static CollideEntityEvent callCollideEntityEvent(final net.minecraft.world.World world, @Nullable final net.minecraft.entity.Entity sourceEntity,
-            final List<net.minecraft.entity.Entity> entities) {
+    public static <T extends net.minecraft.entity.Entity> CollideEntityEvent callCollideEntityEvent(
+            final net.minecraft.world.World world, @Nullable final net.minecraft.entity.Entity sourceEntity,
+            final List<T> entities) {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseContext<?> currentContext = phaseTracker.getCurrentContext();

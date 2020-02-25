@@ -29,7 +29,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.inventory.container.Slot;
@@ -41,7 +40,6 @@ import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.IServerPlayNetHandler;
 import net.minecraft.network.play.ServerPlayNetHandler;
-import net.minecraft.network.play.client.CAnimateHandPacket;
 import net.minecraft.network.play.client.CKeepAlivePacket;
 import net.minecraft.network.play.client.CMoveVehiclePacket;
 import net.minecraft.network.play.client.CPlayerDiggingPacket;
@@ -60,12 +58,10 @@ import net.minecraft.network.play.server.SSendResourcePackPacket;
 import net.minecraft.network.play.server.SSetExperiencePacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -76,19 +72,14 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
-import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.ListValue.Mutable;
-import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
-import org.spongepowered.api.event.entity.living.AnimateHandEvent;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -110,8 +101,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
@@ -120,21 +111,16 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
-import java.lang.ref.WeakReference;
+
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nullable;
 
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerBridge {
@@ -407,7 +393,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true
     )
-    private void impl$onSpectateTeleportCallMoveEvent(CSpectatePacket packetIn, CallbackInfo ci, Entity spectatingEntity) {
+    private void impl$onSpectateTeleportCallMoveEvent(final CSpectatePacket packetIn, final CallbackInfo ci, final Entity spectatingEntity) {
         final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(
                 this.player,
                 spectatingEntity.posX,
@@ -423,12 +409,12 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
     }
 
     @Redirect(method = "handleSpectate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;world:Lnet/minecraft/world/World;", ordinal = 1))
-    private net.minecraft.world.World impl$onSpectateGetEntityWorld(Entity entity) {
+    private net.minecraft.world.World impl$onSpectateGetEntityWorld(final Entity entity) {
         return (net.minecraft.world.World) this.impl$spectatingTeleportLocation.getExtent();
     }
 
     @Inject(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getServerWorld()Lnet/minecraft/world/WorldServer;", ordinal = 1), cancellable = true)
-    private void impl$cancelIfSameWorld(CallbackInfo ci) {
+    private void impl$cancelIfSameWorld(final CallbackInfo ci) {
         //noinspection ConstantConditions
         if (this.player.getServerWorld() == (ServerWorld) this.impl$spectatingTeleportLocation.getExtent()) {
             final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
@@ -439,7 +425,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
     }
 
     @Redirect(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setLocationAndAngles(DDDFF)V"))
-    private void impl$onSpectateLocationAndAnglesUpdate(ServerPlayerEntity player, double x, double y, double z, float yaw, float pitch) {
+    private void impl$onSpectateLocationAndAnglesUpdate(final ServerPlayerEntity player, final double x, final double y, final double z, final float yaw, final float pitch) {
         //noinspection ConstantConditions
         player.dimension = ((ServerWorld) this.impl$spectatingTeleportLocation.getExtent()).dimension.getType().getId();
         final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
@@ -451,7 +437,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
     }
 
     @Redirect(method = "handleSpectate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setPositionAndUpdate(DDD)V"))
-    private void impl$onSpectatePositionUpdate(ServerPlayerEntity player, double x, double y, double z) {
+    private void impl$onSpectatePositionUpdate(final ServerPlayerEntity player, final double x, final double y, final double z) {
         //noinspection ConstantConditions
         final Vector3d position = this.impl$spectatingTeleportLocation.getPosition();
         player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
@@ -525,54 +511,6 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         ((ServerPlayerEntityBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
     }
 
-    @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
-    private ActionResultType impl$checkState(final PlayerInteractionManager interactionManager, final PlayerEntity player, final net.minecraft.world.World worldIn, @Nullable final ItemStack stack, final Hand hand, final BlockPos pos, final Direction facing, final float hitX, final float hitY, final float hitZ) {
-        final ActionResultType actionResult = interactionManager.processRightClickBlock(this.player, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
-        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
-            return actionResult;
-        }
-        final PacketContext<?> context = ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext());
-
-        // If a plugin or mod has changed the item, avoid restoring
-        if (!context.getInteractItemChanged()) {
-            final ItemStack itemStack = ItemStackUtil.toNative(context.getItemUsed());
-
-            // Only do a restore if something actually changed. The client does an identity check ('==')
-            // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
-            // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$isInteractBlockRightClickCancelled()) {
-                PacketPhaseUtil.handlePlayerSlotRestore((ServerPlayerEntity) player, itemStack, hand);
-            }
-        }
-        context.interactItemChanged(false);
-        ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$setInteractBlockRightClickCancelled(false);
-        return actionResult;
-    }
-
-    @Redirect(method = "processTryUseItem",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClick(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;)Lnet/minecraft/util/EnumActionResult;"))
-    private ActionResultType impl$checkStateAfter(final PlayerInteractionManager interactionManager, final PlayerEntity player, final net.minecraft.world.World worldIn, @Nullable final ItemStack stack, final Hand hand) {
-        final ActionResultType actionResult = interactionManager.processRightClick(this.player, worldIn, stack, hand);
-        // If a plugin or mod has changed the item, avoid restoring
-        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
-            return actionResult;
-        }
-        final PacketContext<?> packetContext = (PacketContext<?>) PhaseTracker.getInstance().getCurrentContext();
-        if (!packetContext.getInteractItemChanged()) {
-            final ItemStack itemStack = ItemStackUtil.toNative(packetContext.getItemUsed());
-
-            // Only do a restore if something actually changed. The client does an identity check ('==')
-            // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
-            // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand))  && ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$isInteractBlockRightClickCancelled()) {
-                PacketPhaseUtil.handlePlayerSlotRestore((ServerPlayerEntity) player, itemStack, hand);
-            }
-        }
-        packetContext.interactItemChanged(false);
-        ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$setInteractBlockRightClickCancelled(false);
-        return actionResult;
-    }
 
     @Nullable
     @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
@@ -594,36 +532,9 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         return item;
     }
 
-    @Inject(method = "handleAnimation",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;markPlayerActive()V"), cancellable = true)
-    private void impl$throwAnimationEvent(final CAnimateHandPacket packetIn, final CallbackInfo ci) {
-        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
-            return;
-        }
-        SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
-        SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
-        if (ShouldFire.ANIMATE_HAND_EVENT) {
-            final HandType handType = (HandType) (Object) packetIn.getHand();
-            final ItemStack heldItem = this.player.getHeldItem(packetIn.getHand());
-            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_HAND, handType);
-            final AnimateHandEvent event =
-                SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) this.player);
-            if (SpongeImpl.postEvent(event)) {
-                ci.cancel();
-            }
-        }
-    }
 
-    @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
-    private void impl$updateLastPrimaryPacket(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
-        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
-            return;
-        }
-        SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
-    }
 
-    @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
+    @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayer;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
     private void onProcessPlayerDiggingDropItem(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
         final ItemStack stack = this.player.getHeldItemMainhand();
         if (!stack.isEmpty()) {

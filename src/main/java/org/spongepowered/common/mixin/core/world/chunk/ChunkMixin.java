@@ -25,74 +25,43 @@
 package org.spongepowered.common.mixin.core.world.chunk;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.provider.BiomeProvider;
-import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.volume.entity.ReadableEntityVolume;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3d;
-import org.spongepowered.math.vector.Vector3i;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -103,11 +72,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
+    // @formatter:off
     @Shadow @Final private World world;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
@@ -128,9 +96,9 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Shadow public abstract Biome getBiome(BlockPos pos, BiomeProvider chunkManager);
     @Shadow private void propagateSkylightOcclusion(final int x, final int z) { }
     @Shadow private void relightBlock(final int x, final int y, final int z) { }
-    // @formatter:on
-
     @Shadow protected abstract void populate(ChunkGenerator generator);
+
+    // @formatter:on
 
     private long impl$scheduledForUnload = -1; // delay chunk unloads
     private boolean impl$persistedChunk = false;
@@ -138,8 +106,9 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     private final net.minecraft.world.chunk.Chunk[] impl$neighbors = new net.minecraft.world.chunk.Chunk[4];
     private long impl$cacheKey;
 
-    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
-    private void impl$onConstruct(final World worldIn, final int x, final int z, final CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/ChunkPos;[Lnet/minecraft/world/biome/Biome;)V",
+            at = @At("RETURN"))
+    private void impl$onConstruct(World worldIn, ChunkPos p_i49945_2_, Biome[] p_i49945_3_, CallbackInfo ci) {
         this.impl$cacheKey = ChunkPos.asLong(x, z);
     }
 
@@ -192,157 +161,69 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(this);
     }
 
-
-
     @Inject(method = "removeEntityAtIndex", at = @At("RETURN"))
     private void impl$ResetEntityActiveChunk(final Entity entityIn, final int index, final CallbackInfo ci) {
         ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(null);
     }
 
-    @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;invalidate()V"))
+    @Redirect(method = "removeTileEntity",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;remove()V"))
     private void impl$resetTileEntityActiveChunk(final TileEntity tileEntityIn) {
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(null);
         tileEntityIn.remove();
     }
 
-    @Inject(method = "onLoad", at = @At("HEAD"), cancellable = true)
-    private void impl$IgnoreOnLoadDuringRegeneration(final CallbackInfo ci) {
-        if (!this.world.isRemote) {
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
-                // If we are loading an existing chunk for the sole purpose of
-                // regenerating, we can skip loading TE's and Entities into the world
-                ci.cancel();
-            }
-        }
-    }
-
-    @Inject(method = "onLoad", at = @At("RETURN"))
-    private void impl$UpdateNeighborsOnLoad(final CallbackInfo ci) {
-        for (final Direction direction : Constants.Chunk.CARDINAL_DIRECTIONS) {
-            final Vector3i neighborPosition = ((Chunk) this).getPosition().add(direction.asBlockOffset());
-            final AbstractChunkProviderBridge spongeChunkProvider = (AbstractChunkProviderBridge) this.world.getChunkProvider();
-            final net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive
-                    (neighborPosition.getX(), neighborPosition.getZ());
-            if (neighbor != null) {
-                final int neighborIndex = SpongeImpl.directionToIndex(direction);
-                final int oppositeNeighborIndex = SpongeImpl.directionToIndex(direction.getOpposite());
-                this.bridge$setNeighborChunk(neighborIndex, neighbor);
-                ((ChunkBridge) neighbor).bridge$setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk) (Object) this);
-            }
-        }
-
-        if (ShouldFire.LOAD_CHUNK_EVENT) {
-            SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
-        }
-        if (!this.world.isRemote) {
-            SpongeHooks.logChunkLoad(this.world, ((Chunk) this).getPosition());
-        }
-    }
-
-    @Inject(method = "onUnload", at = @At("RETURN"))
-    private void impl$UpdateNeighborsOnUnload(final CallbackInfo ci) {
-        for (final Direction direction : Constants.Chunk.CARDINAL_DIRECTIONS) {
-            final Vector3i neighborPosition = ((Chunk) this).getPosition().add(direction.asBlockOffset());
-            final AbstractChunkProviderBridge spongeChunkProvider = (AbstractChunkProviderBridge) this.world.getChunkProvider();
-            final net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.bridge$getLoadedChunkWithoutMarkingActive
-                    (neighborPosition.getX(), neighborPosition.getZ());
-            if (neighbor != null) {
-                final int neighborIndex = SpongeImpl.directionToIndex(direction);
-                final int oppositeNeighborIndex = SpongeImpl.directionToIndex(direction.getOpposite());
-                this.bridge$setNeighborChunk(neighborIndex, null);
-                ((ChunkBridge) neighbor).bridge$setNeighborChunk(oppositeNeighborIndex, null);
-            }
-        }
-
-        if (!this.world.isRemote) {
-            SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
-            SpongeHooks.logChunkUnload(this.world, ((Chunk) this).getPosition());
-        }
-    }
-
-
-    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At("RETURN"))
-    private void impl$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
-        @SuppressWarnings("Guava") final Predicate<Entity> p_177414_4_, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
-            return;
-        }
-
-        if (listToFill.isEmpty()) {
-            return;
-        }
-
-        if (!ShouldFire.COLLIDE_ENTITY_EVENT) {
-            return;
-        }
-
-        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
-
-        if (event == null || event.isCancelled()) {
-            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
-                return;
-            }
-            listToFill.clear();
-        }
-    }
-
-    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
-    private void impl$throwCollsionEvent(final Class<? extends Entity> entityClass, final AxisAlignedBB aabb, final List<Entity> listToFill,
-        @SuppressWarnings("Guava") final Predicate<Entity> p_177430_4_, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
-            return;
-        }
-
-        if (listToFill.isEmpty()) {
-            return;
-        }
-
-        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
-
-        if (event == null || event.isCancelled()) {
-            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
-                return;
-            }
-            listToFill.clear();
-        }
-    }
-
-
-
     // These methods are enabled in ChunkMixin_OwnershipTracked as a Mixin plugin
 
     @Override
-    public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) { }
+    public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
+    }
 
     @Override
-    public Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions() { return Collections.emptyMap(); }
+    public Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions() {
+        return Collections.emptyMap();
+    }
 
     @Override
-    public Map<Short, PlayerTracker> bridge$getTrackedShortPlayerPositions() { return Collections.emptyMap(); }
+    public Map<Short, PlayerTracker> bridge$getTrackedShortPlayerPositions() {
+        return Collections.emptyMap();
+    }
 
     @Override
-    public Optional<User> bridge$getBlockOwner(final BlockPos pos) { return Optional.empty(); }
+    public Optional<User> bridge$getBlockOwner(final BlockPos pos) {
+        return Optional.empty();
+    }
 
     @Override
-    public Optional<UUID> bridge$getBlockOwnerUUID(final BlockPos pos) { return Optional.empty(); }
+    public Optional<UUID> bridge$getBlockOwnerUUID(final BlockPos pos) {
+        return Optional.empty();
+    }
 
     @Override
-    public Optional<User> bridge$getBlockNotifier(final BlockPos pos) { return Optional.empty(); }
+    public Optional<User> bridge$getBlockNotifier(final BlockPos pos) {
+        return Optional.empty();
+    }
 
     @Override
-    public Optional<UUID> bridge$getBlockNotifierUUID(final BlockPos pos) { return Optional.empty(); }
+    public Optional<UUID> bridge$getBlockNotifierUUID(final BlockPos pos) {
+        return Optional.empty();
+    }
 
     @Override
-    public void bridge$setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) { }
+    public void bridge$setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) {
+    }
 
     @Override
-    public void bridge$setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) { }
+    public void bridge$setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) {
+    }
 
     @Override
-    public void bridge$setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) { }
+    public void bridge$setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) {
+    }
 
     @Override
-    public void bridge$setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) { }
+    public void bridge$setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) {
+    }
 
 
     // Fast neighbor methods for internal use
@@ -396,8 +277,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public void bridge$getIntersectingEntities(final Vector3d start, final Vector3d direction, final double distance,
-        final java.util.function.Predicate<? super ReadableEntityVolume.EntityHit> filter, final double entryY, final double exitY,
-        final Set<? super ReadableEntityVolume.EntityHit> intersections) {
+            final java.util.function.Predicate<? super ReadableEntityVolume.EntityHit> filter, final double entryY, final double exitY,
+            final Set<? super ReadableEntityVolume.EntityHit> intersections) {
         // Order the entry and exit y coordinates by magnitude
         final double yMin = Math.min(entryY, exitY);
         final double yMax = Math.max(entryY, exitY);
@@ -411,8 +292,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     private void impl$getIntersectingEntities(final Collection<? extends Entity> entities, final Vector3d start, final Vector3d direction,
-        final double distance, final java.util.function.Predicate<? super ReadableEntityVolume.EntityHit> filter,
-        final Set<? super ReadableEntityVolume.EntityHit> intersections) {
+            final double distance, final java.util.function.Predicate<? super ReadableEntityVolume.EntityHit> filter,
+            final Set<? super ReadableEntityVolume.EntityHit> intersections) {
         // Check each entity in the list
         for (final net.minecraft.entity.Entity entity : entities) {
             final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
@@ -474,8 +355,8 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Redirect(
-        method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;invalidate()V"))
+            method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;invalidate()V"))
     private void redirectInvalidate(final TileEntity te) {
         SpongeImplHooks.onTileEntityInvalidate(te);
     }
