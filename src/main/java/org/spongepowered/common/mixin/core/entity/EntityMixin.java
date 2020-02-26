@@ -43,10 +43,8 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SDestroyEntitiesPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.particles.IParticleData;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.IItemProvider;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -69,7 +67,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -101,6 +98,8 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.mixin.accessor.world.server.ChunkManagerAccessor;
+import org.spongepowered.common.mixin.accessor.world.server.EntityTrackerAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
@@ -110,7 +109,6 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge {
@@ -127,34 +125,25 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public float rotationPitch;
     @Shadow public boolean velocityChanged;
     @Shadow public boolean onGround;
-    @Shadow public boolean isDead;
-    @Shadow public float width;
-    @Shadow public float height;
+    @Shadow public boolean removed;
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
     @Shadow public float fallDistance;
-    @Shadow protected Random rand;
-    @Shadow public int ticksExisted;
-    @Shadow public int fire;
+    @Shadow @Final protected Random rand;
+    @Shadow private int fire;
     @Shadow public int hurtResistantTime;
-    @Shadow protected EntityDataManager dataManager;
+    @Shadow @Final protected EntityDataManager dataManager;
     @Shadow public DimensionType dimension;
     @Shadow private boolean invulnerable;
-    @Shadow @Final private EntityType<?> type;
 
     @Shadow public abstract void shadow$remove();
-    @Shadow public abstract int shadow$getAir();
-    @Shadow public abstract void shadow$setAir(int air);
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
-    @Shadow public abstract UUID shadow$getUniqueID();
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
-    @Shadow public abstract void shadow$setFire(int seconds);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int shadow$getEntityId();
     @Shadow public abstract boolean shadow$isBeingRidden();
     @Shadow public abstract Entity getRidingEntity();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
-    @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
     @Shadow protected abstract void shadow$removePassenger(Entity passenger);
     @Shadow @Nullable public Entity shadow$changeDimension(final DimensionType dimension) { return null; } // Shadow
     @Shadow public abstract boolean shadow$isInvisible();
@@ -162,20 +151,13 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow protected abstract int shadow$getFireImmuneTicks();
     @Shadow public abstract EntityType<?> shadow$getType();
     @Shadow public abstract boolean shadow$isInvulnerableTo(DamageSource source);
-    @Shadow public abstract float shadow$getEyeHeight();
-    @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
-    @Shadow public abstract void shadow$extinguish();
-    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
     @Shadow public abstract void shadow$setMotion(Vec3d motionIn);
-    @Shadow public abstract void shadow$setMotion(double x, double y, double z);
     @Shadow public abstract boolean shadow$isSprinting();
     @Shadow public abstract Vec3d shadow$getMotion();
     @Shadow public abstract boolean shadow$isOnSameTeam(Entity entityIn);
     @Shadow public abstract double shadow$getDistanceSq(Entity entityIn);
-    @Shadow @Nullable public abstract ItemEntity shadow$entityDropItem(IItemProvider itemIn, int offset);
     @Shadow public abstract boolean shadow$isInWater();
     @Shadow public abstract boolean shadow$isPassenger();
-    @Shadow @Nullable public abstract Team shadow$getTeam();
     @Shadow public abstract void shadow$setPositionAndUpdate(double x, double y, double z);
     @Shadow public abstract int shadow$getMaxAir();
 
@@ -310,11 +292,10 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
         try {
             final AxisAlignedBB bb = this.shadow$getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
-            final Location<World> location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
+            final Location location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getMaterial() == Material.LAVA);
             final MinecraftBlockDamageSource lava = new MinecraftBlockDamageSource("lava", location);
-            lava.impl$setFireDamage();
-            ((DamageSourceBridge) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
+            ((DamageSourceBridge) (Object) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
             return entity.attackEntityFrom(DamageSource.LAVA, damage);
         } finally {
             // Since "source" is already the DamageSource.LAVA object, we can simply re-use it here.
@@ -334,13 +315,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            final AxisAlignedBB bb = this.shadow$getBoundingBox().grow(-0.001D, -0.001D, -0.001D);
-            final Location<World> location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
-                block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
+            final AxisAlignedBB bb = this.shadow$getBoundingBox().shrink(-0.001D);
+            final Location location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
+                block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.LAVA);
 
             final MinecraftBlockDamageSource fire = new MinecraftBlockDamageSource("inFire", location);
-            fire.impl$setFireDamage();
-            ((DamageSourceBridge) fire).bridge$setFireSource();
+            ((DamageSourceBridge) (Object) fire).bridge$setFireSource();
             return entity.attackEntityFrom(DamageSource.IN_FIRE, damage);
         } finally {
             // Since "source" is already the DamageSource.IN_FIRE object, we can re-use it to re-assign.
@@ -361,16 +341,14 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     }
 
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Inject(method = "tick", at = @At("RETURN"))
     private void impl$updateVanishState(final CallbackInfo callbackInfo) {
         if (this.vanish$pendingVisibilityUpdate && !this.world.isRemote) {
-            // TODO - this is all done in the ChunkManager/ChunkManager.TrackEntity logic, need to redo this
-            final EntityTracker entityTracker = ((ServerWorld) this.world).getChunkProvider().chunkManager
-            final EntityTrackerEntry lookup = ((EntityTrackerAccessor) entityTracker).accessor$getTrackedEntityTable().lookup(this.shadow$getEntityId());
-            if (lookup != null && this.vanish$visibilityTicks % 4 == 0) {
+            final EntityTrackerAccessor trackerAccessor = ((ChunkManagerAccessor) ((ServerWorld) this.world).getChunkProvider().chunkManager).accessor$getEntityTrackers().get(this.shadow$getEntityId());
+            if (trackerAccessor != null && this.vanish$visibilityTicks % 4 == 0) {
                 if (this.vanish$isVanished) {
-                    for (final ServerPlayerEntity entityPlayerMP : ((EntityTrackerEntryAccessor) lookup).accessor$getTrackingPlayers()) {
+                    for (final ServerPlayerEntity entityPlayerMP : trackerAccessor.accessor$getTrackingPlayers()) {
                         entityPlayerMP.connection.sendPacket(new SDestroyEntitiesPacket(this.shadow$getEntityId()));
                         if ((Entity) (Object) this instanceof ServerPlayerEntity) {
                             entityPlayerMP.connection.sendPacket(
@@ -388,8 +366,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                             final IPacket<?> packet = new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, (ServerPlayerEntity) (Object) this);
                             entityPlayerMP.connection.sendPacket(packet);
                         }
-                        final IPacket<?> newPacket = ((EntityTrackerEntryAccessor) lookup).accessor$createSpawnPacket();
-                        entityPlayerMP.connection.sendPacket(newPacket);
+                        trackerAccessor.accessor$getEntry().sendSpawnPackets(entityPlayerMP.connection::sendPacket);
                     }
                 }
             }
@@ -706,6 +683,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @return
      */
 
+    @javax.annotation.Nullable
     @Overwrite
     @Nullable
     public ItemEntity entityDropItem(final ItemStack stack, final float offsetY) {

@@ -334,7 +334,7 @@ public class DamageEventHandler {
         return Optional.empty();
     }
 
-    public static Location<World> findFirstMatchingBlock(final Entity entity, final AxisAlignedBB bb, final Predicate<BlockState> predicate) {
+    public static Location findFirstMatchingBlock(final Entity entity, final AxisAlignedBB bb, final Predicate<BlockState> predicate) {
         final int i = MathHelper.floor(bb.minX);
         final int j = MathHelper.floor(bb.maxX + 1.0D);
         final int k = MathHelper.floor(bb.minY);
@@ -351,7 +351,7 @@ public class DamageEventHandler {
                         continue;
                     }
                     if (predicate.test(chunk.getBlockState(blockPos))) {
-                        return new Location<>((World) entity.world, k1, l1, i2);
+                        return Location.of((World) entity.world, k1, l1, i2);
                     }
                 }
             }

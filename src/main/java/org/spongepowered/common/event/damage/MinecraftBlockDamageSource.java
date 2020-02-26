@@ -89,6 +89,11 @@ public final class MinecraftBlockDamageSource extends DamageSource implements Bl
     }
 
     @Override
+    public boolean isFire() {
+        return this.isFireDamage();
+    }
+
+    @Override
     public double getExhaustion() {
         return this.getExhaustion();
     }
