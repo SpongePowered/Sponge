@@ -22,46 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.meta;
+package org.spongepowered.common.mixin.accessor.network.play.client;
 
-import org.spongepowered.api.data.meta.BannerPatternLayer;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.data.type.BannerPatternShape;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.util.Constants;
+import net.minecraft.network.play.client.CClientSettingsPacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public class SpongePatternLayer implements BannerPatternLayer {
+@Mixin(CClientSettingsPacket.class)
+public interface CClientSettingsPacketAccessor {
 
-    private final BannerPatternShape id;
-    private final DyeColor color;
-
-    public SpongePatternLayer(BannerPatternShape id, DyeColor color) {
-        this.id = id;
-        this.color = color;
-    }
-
-    @Override
-    public BannerPatternShape getShape() {
-        return this.id;
-    }
-
-    @Override
-    public DyeColor getColor() {
-        return this.color;
-    }
-
-    @Override
-    public int getContentVersion() {
-        return 1;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.TileEntity.Banner.SHAPE, this.id.getKey())
-            .set(Constants.TileEntity.Banner.COLOR, this.color.getKey());
-    }
-
+    @Accessor("view") int accessor$getView();
 }

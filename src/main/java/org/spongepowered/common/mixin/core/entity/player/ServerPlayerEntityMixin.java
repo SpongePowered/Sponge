@@ -28,16 +28,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
-import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.player.PlayerEntity;
@@ -47,30 +44,21 @@ import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CClientSettingsPacket;
 import net.minecraft.network.play.server.SChangeBlockPacket;
-import net.minecraft.network.play.server.SCombatPacket;
 import net.minecraft.network.play.server.SEntityPropertiesPacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.network.play.server.SSpawnPositionPacket;
 import net.minecraft.network.play.server.SUpdateHealthPacket;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.stats.Stats;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.server.ServerWorld;
@@ -80,11 +68,9 @@ import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -115,13 +101,11 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
@@ -129,12 +113,9 @@ import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.mixin.accessor.network.play.client.CClientSettingsPacketAccessor;
 import org.spongepowered.common.mixin.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
@@ -145,13 +126,13 @@ import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.math.vector.Vector3d;
+
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, ServerPlayerEntityBridge {
@@ -203,125 +184,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
     }
 
-    @Override
-    public boolean bridge$keepInventory() {
-        if (this.impl$keepInventory == null) {
-            return this.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
-        }
-        return this.impl$keepInventory;
-    }
-
-    /**
-     * @author blood - May 12th, 2016
-     * @author gabizou - June 3rd, 2016
-     * @author gabizou - February 22nd, 2020 - Minecraft 1.14.3
-     *
-     * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
-     */
-    @Override
-    @Overwrite
-    public void onDeath(final DamageSource cause) {
-        // Sponge start
-        final boolean isMainThread = SpongeImplHooks.onServerThread();
-        // TODO - Re-verify that we are handling proper drops, like wither flowers and such
-        final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause, isMainThread);
-        if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
-            return;
-        }
-        final DestructEntityEvent.Death event = optEvent.get();
-
-        // Double check that the PhaseTracker is already capturing the Death phase
-        final boolean tracksEntityDeaths;
-        if (isMainThread && !this.world.isRemote) {
-            tracksEntityDeaths = PhaseTracker.getInstance().getCurrentState().tracksEntityDeaths();
-        } else {
-            tracksEntityDeaths = false;
-        }
-        try (final PhaseContext<?> context = this.impl$createDeathContext(cause, tracksEntityDeaths)) {
-            if (context != null) {
-                context.buildAndSwitch();
-            }
-            // Sponge end
-            final boolean flag = this.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES);
-            if (flag) {
-                ITextComponent itextcomponent = this.getCombatTracker().getDeathMessage();
-                this.connection.sendPacket(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent), (p_212356_2_) -> {
-                    if (!p_212356_2_.isSuccess()) {
-                        int i = 256;
-                        String s = itextcomponent.getStringTruncated(256);
-                        ITextComponent itextcomponent1 = new TranslationTextComponent("death.attack.message_too_long", (new StringTextComponent(s)).applyTextStyle(TextFormatting.YELLOW));
-                        ITextComponent itextcomponent2 = (new TranslationTextComponent("death.attack.even_more_magic", this.shadow$getDisplayName())).applyTextStyle((p_212357_1_) -> {
-                            p_212357_1_.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1));
-                        });
-                        this.connection.sendPacket(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent2));
-                    }
-
-                });
-                final Team team = this.shadow$getTeam();
-                if (team != null && team.getDeathMessageVisibility() != Team.Visible.ALWAYS) {
-                    if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OTHER_TEAMS) {
-                        this.server.getPlayerList().sendMessageToAllTeamMembers((ServerPlayerEntity) (Object) this, itextcomponent);
-                    } else if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OWN_TEAM) {
-                        this.server.getPlayerList().sendMessageToTeamOrAllPlayers((ServerPlayerEntity) (Object) this, itextcomponent);
-                    }
-                } else {
-                    this.server.getPlayerList().sendMessage(itextcomponent);
-                }
-            } else {
-                this.connection.sendPacket(new SCombatPacket(this.getCombatTracker(), SCombatPacket.Event.ENTITY_DIED));
-            }
-
-            this.shadow$spawnShoulderEntities();
-
-            // Ignore keepInventory GameRule instead use keepInventory from Event
-            if (!event.getKeepInventory() && !this.shadow$isSpectator()) {
-                this.shadow$destroyVanishingCursedItems();
-                this.inventory.dropAllItems();
-            }
-            // Sponge Stop
-
-            this.shadow$getWorldScoreboard().forAllObjectives(ScoreCriteria.DEATH_COUNT, this.shadow$getScoreboardName(), Score::incrementScore);
-            final LivingEntity livingentity = this.getAttackingEntity();
-            if (livingentity != null) {
-                this.shadow$addStat(Stats.ENTITY_KILLED_BY.get(livingentity.getType()));
-                livingentity.awardKillScore((ServerPlayerEntity) (Object) this, this.scoreValue, cause);
-                if (!this.world.isRemote && livingentity instanceof WitherEntity) {
-                    boolean flag1 = false;
-                    if (this.world.getGameRules().getBoolean(GameRules.MOB_GRIEFING)) {
-                        BlockPos blockpos = new BlockPos(this.posX, this.posY, this.posZ);
-                        BlockState blockstate = Blocks.WITHER_ROSE.getDefaultState();
-                        if (this.world.getBlockState(blockpos).isAir() && blockstate.isValidPosition(this.world, blockpos)) {
-                            this.world.setBlockState(blockpos, blockstate, 3);
-                            flag1 = true;
-                        }
-                    }
-
-                    if (!flag1) {
-                        ItemEntity itementity = new ItemEntity(this.world, this.posX, this.posY, this.posZ, new ItemStack(Items.WITHER_ROSE));
-                        this.world.addEntity(itementity);
-                    }
-                }
-            }
-
-            this.shadow$addStat(Stats.DEATHS);
-            this.shadow$takeStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
-            this.shadow$takeStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
-            this.shadow$extinguish();
-            this.shadow$setFlag(0, false);
-            this.getCombatTracker().reset();
-
-            this.impl$keepInventory = event.getKeepInventory();
-        } // Sponge - brackets
-    }
-
-    @Nullable
-    private PhaseContext<?> impl$createDeathContext(final DamageSource cause, final boolean tracksEntityDeaths) {
-        return !tracksEntityDeaths
-               ? EntityPhase.State.DEATH.createPhaseContext(PhaseTracker.SERVER)
-                   .source(this)
-                   .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
-               : null;
-    }
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
     private void impl$copySpongeDataOnRespawn(final ServerPlayerEntity oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
@@ -336,20 +198,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             this.impl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
         }
     }
-
-    @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$RuleKey;)Z"))
-    private boolean impl$useKeepFromBridge(final GameRules gameRules, final GameRules.RuleKey key, final ServerPlayerEntity corpse, final boolean keepEverything) {
-        final boolean keep = ((PlayerEntityBridge) corpse).bridge$keepInventory(); // Override Keep Inventory GameRule?
-        if (!keep) {
-            // Copy corpse inventory to respawned player
-            this.inventory.copyInventory(corpse.inventory);
-            // Clear corpse so that mods do not copy from it again
-            corpse.inventory.clear();
-        }
-        return keep;
-    }
-
-
 
     @Override
     public Optional<User> bridge$getBackingUser() {
@@ -389,14 +237,14 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             csm.pushCause(this);
             try {
                 final Cause cause = csm.getCurrentCause();
-                final ImmutableSet<SkinPart> skinParts = SkinPartRegistryModule.getInstance().getAll().stream()
+                final ImmutableSet<SkinPart> skinParts = Sponge.getRegistry().getCatalogRegistry().getAllOf(SkinPart.class)
                     .map(part -> (SpongeSkinPart) part)
                     .filter(part -> part.test(packet.getModelPartFlags()))
                     .collect(ImmutableSet.toImmutableSet());
                 final Locale locale = LocaleCache.getLocale(packet.getLang());
                 final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
                 final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(cause, visibility, skinParts,
-                    locale, (Player) this, packet.isColorsEnabled(), packet.view);
+                    locale, (Player) this, packet.isColorsEnabled(), ((CClientSettingsPacketAccessor) packet).accessor$getView());
                 SpongeImpl.postEvent(event);
             } finally {
                 csm.popCause();
@@ -407,11 +255,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @SuppressWarnings("UnstableApiUsage")
     @Inject(method = "handleClientSettings", at = @At("RETURN"))
     private void impl$updateSkinFromPacket(final CClientSettingsPacket packet, final CallbackInfo ci) {
-        this.impl$skinParts = SkinPartRegistryModule.getInstance().getAll().stream()
+        this.impl$skinParts = Sponge.getRegistry().getCatalogRegistry().getAllOf(SkinPart.class)
             .map(part -> (SpongeSkinPart) part)
             .filter(part -> part.test(packet.getModelPartFlags()))
             .collect(ImmutableSet.toImmutableSet()); // Returned set is immutable
-        this.impl$viewDistance = packet.view;
+        this.impl$viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$getView();
     }
 
     /**

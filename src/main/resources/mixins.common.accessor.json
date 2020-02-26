@@ -70,6 +70,7 @@
         "network.NetworkManagerAccessor",
         "network.datasync.EntityDataManagerAccessor",
         "network.handshake.client.CHandshakePacketAccessor",
+        "network.play.client.CClientSettingsPacketAccessor",
         "network.play.client.CPlayerPacketAccessor",
         "network.play.client.CResourcePackStatusPacketAccessor",
         "network.play.server.SChangeBlockPacketAccessor",

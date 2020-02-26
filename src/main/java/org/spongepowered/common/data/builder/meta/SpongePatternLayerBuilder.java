@@ -27,54 +27,46 @@ package org.spongepowered.common.data.builder.meta;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
 /**
- * The de-facto builder for a {@link PatternLayer}.
+ * The de-facto builder for a {@link BannerPatternLayer}.
  */
-public class SpongePatternLayerBuilder extends AbstractDataBuilder<PatternLayer> implements PatternLayer.Builder, DataBuilder<PatternLayer> {
+public class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerPatternLayer> implements BannerPatternLayer.Builder, DataBuilder<BannerPatternLayer> {
 
 
     private DyeColor color;
     private BannerPatternShape shape;
 
     public SpongePatternLayerBuilder() {
-        super(PatternLayer.class, 1);
+        super(BannerPatternLayer.class, 1);
     }
 
     @Override
-    protected Optional<PatternLayer> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<BannerPatternLayer> buildContent(final DataView container) throws InvalidDataException {
         checkNotNull(container);
         if (!container.contains(Constants.TileEntity.Banner.SHAPE) || !container.contains(Constants.TileEntity.Banner.COLOR)) {
             return Optional.empty();
         }
-        String id = container.getString(Constants.TileEntity.Banner.SHAPE).get();
+        final BannerPatternShape shape = container.getCatalogType(Constants.TileEntity.Banner.SHAPE, BannerPatternShape.class)
+                .orElseThrow(() -> new InvalidDataException("The provided container has an invalid banner pattern shape entry!"));
 
-        // We can get these pattern shapes from the game registry willy nilly, however, we still need to validate
-        // that the pattern exists, if it doesn't, well, thow an InvalidDataException!
-        Optional<BannerPatternShape> shapeOptional = Sponge.getRegistry().getType(BannerPatternShape.class, id);
-        if (!shapeOptional.isPresent()) {
-            throw new InvalidDataException("The provided container has an invalid banner pattern shape entry!");
-        }
 
         // Now we need to validate the dye color of course...
-        String dyeColorId = container.getString(Constants.TileEntity.Banner.COLOR).get();
-        Optional<DyeColor> colorOptional = Sponge.getRegistry().getType(DyeColor.class, dyeColorId);
-        if (!colorOptional.isPresent()) {
-            throw new InvalidDataException("The provided container has an invalid dye color entry!");
-        }
-        return Optional.of(new SpongePatternLayer(shapeOptional.get(), colorOptional.get()));
+        final DyeColor color = container.getCatalogType(Constants.TileEntity.Banner.COLOR, DyeColor.class)
+                .orElseThrow(() -> new InvalidDataException("The provided container has an invalid dye color entry!"));
+
+        return Optional.of(new SpongePatternLayer(shape, color));
     }
 
     @Override
@@ -85,19 +77,26 @@ public class SpongePatternLayerBuilder extends AbstractDataBuilder<PatternLayer>
     }
 
     @Override
-    public PatternLayer.Builder pattern(BannerPatternShape shape) {
+    public BannerPatternLayer.Builder pattern(final BannerPatternShape shape) {
         this.shape = checkNotNull(shape);
         return this;
     }
 
     @Override
-    public PatternLayer.Builder color(DyeColor color) {
+    public BannerPatternLayer.Builder color(final DyeColor color) {
         this.color = checkNotNull(color);
         return this;
     }
 
     @Override
-    public PatternLayer build() {
+    public BannerPatternLayer.Builder from(final BannerPatternLayer value) {
+        this.shape = value.getShape();
+        this.color = value.getColor();
+        return this;
+    }
+
+    @Override
+    public BannerPatternLayer build() {
         checkState(this.shape != null);
         checkState(this.color != null);
         return new SpongePatternLayer(this.shape, this.color);

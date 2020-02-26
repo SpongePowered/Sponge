@@ -104,6 +104,7 @@ import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.item.FireworkShape;
@@ -124,6 +125,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.registry.builtin.stream.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.BodyPartStreamGenerator;
+import org.spongepowered.common.registry.builtin.stream.DamageTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.DismountTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.DisplaySlotStreamGenerator;
 import org.spongepowered.common.registry.builtin.stream.DragonPhaseTypeStreamGenerator;
@@ -410,6 +412,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(Visibility.class, CatalogKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true)
             .generateRegistry(SpawnType.class, CatalogKey.sponge("spawn_type"), SpawnTypeSupplier.stream(), true)
             .generateRegistry(EventContextKey.class, CatalogKey.sponge("event_context_key"), EventContextKeySupplier.stream(), true)
+            .generateRegistry(DamageType.class, CatalogKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true)
         ;
 
         this

@@ -56,6 +56,7 @@ import javax.annotation.Nullable;
 @Mixin(DamageSource.class)
 public abstract class DamageSourceMixin implements DamageSourceBridge {
 
+    // @formatter:off
     @Shadow @Final @Mutable public static DamageSource LAVA;
     @Shadow @Final @Mutable public static DamageSource IN_FIRE;
     @Shadow @Final @Mutable public static DamageSource LIGHTNING_BOLT;
@@ -65,27 +66,31 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Shadow @Final @Mutable public static DamageSource FALLING_BLOCK;
     @Shadow @Final @Mutable public static DamageSource CACTUS;
 
-    @Shadow public String damageType;
+    @Shadow @Final public String damageType;
 
     @Shadow @Nullable public abstract Entity shadow$getTrueSource();
+    // @formatter:on
 
     DamageType impl$damageType;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setDamageTypeOnConstruction(String damageType, CallbackInfo ci) {
+    private void impl$setDamageTypeOnConstruction(final String damageType, final CallbackInfo ci) {
         this.bridge$resetDamageType();
     }
 
     @Inject(method = "getDeathMessage", cancellable = true, at = @At(value = "RETURN"))
-    private void beforeGetDeathMessageReturn(LivingEntity livingEntity, final CallbackInfoReturnable<ITextComponent> cir) {
+    private void beforeGetDeathMessageReturn(final LivingEntity livingEntity, final CallbackInfoReturnable<ITextComponent> cir) {
         // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
         if (cir.getReturnValue().getString().equals("death.attack." + this.damageType)) {
             cir.setReturnValue(new TranslationTextComponent("death.attack.generic", livingEntity.getDisplayName()));
         }
     }
 
-    @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
-    private static void onSetExplosionSource(@Nullable Explosion explosion, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
+    @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;",
+            at = @At("HEAD"),
+            cancellable = true)
+    private static void onSetExplosionSource(@Nullable final Explosion explosion,
+            final CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
         if (explosion != null) {
             final Entity entity = ((ExplosionAccessor) explosion).accessor$getExploder();
             if (entity != null && !((WorldBridge) ((ExplosionAccessor) explosion).accessor$getWorld()).bridge$isFake()) {
@@ -93,13 +98,13 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
                     // check creator
                     final OwnershipTrackedBridge ownerTrackedBridge = (OwnershipTrackedBridge) entity;
                     ownerTrackedBridge.tracked$getOwnerReference()
-                        .filter(user -> user instanceof PlayerEntity)
-                        .map(user -> (PlayerEntity) user)
-                        .ifPresent(player -> {
-                            final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, player);
-                            damageSource.setDifficultyScaled().setExplosion();
-                            cir.setReturnValue(damageSource);
-                        });
+                            .filter(user -> user instanceof PlayerEntity)
+                            .map(user -> (PlayerEntity) user)
+                            .ifPresent(player -> {
+                                final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, player);
+                                damageSource.setDifficultyScaled().setExplosion();
+                                cir.setReturnValue(damageSource);
+                            });
                 }
             }
         }
@@ -113,7 +118,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Override
     public void bridge$resetDamageType() {
         if (!this.damageType.contains(":")) {
-            this.impl$damageType = DamageSourceToTypeProvider.getInstance().getOrCustom(this.damageType);
+            this.impl$damageType = DamageSourceToTypeProvider.getInstance().getOrCustom(this.damageType).get();
         } else {
             this.impl$damageType = Sponge.getRegistry().getCatalogRegistry().get(DamageType.class, CatalogKey.resolve(this.damageType)).orElseGet(DamageTypes.CUSTOM);
         }
@@ -162,8 +167,8 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("DamageSource")
-            .add("Name", this.damageType)
-            .add("Key", this.impl$damageType.getKey().toString())
-            .toString();
+                .add("Name", this.damageType)
+                .add("Key", this.impl$damageType.getKey().toString())
+                .toString();
     }
 }

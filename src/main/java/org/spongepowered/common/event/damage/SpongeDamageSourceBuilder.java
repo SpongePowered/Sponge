@@ -26,6 +26,9 @@ package org.spongepowered.common.event.damage;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
@@ -36,23 +39,120 @@ import net.minecraft.entity.LivingEntity;
 
 public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<DamageSource, DamageSource.Builder> implements DamageSource.Builder {
 
-    private static final Function<String, net.minecraft.util.DamageSource> DAMAGE_SOURCE_CTOR;
-
-    static {
-        DAMAGE_SOURCE_CTOR = (id) -> {
-            final net.minecraft.util.DamageSource source = net.minecraft.util.DamageSource.causeExplosionDamage((LivingEntity) null);
-            ((DamageSourceAccessor) source).accessor$setDamageType(id);
-            ((DamageSourceBridge) source).bridge$resetDamageType();
-            return source;
-        };
-    }
-
     @SuppressWarnings("ConstantConditions")
     @Override
     public DamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "DamageType was null!");
-        final net.minecraft.util.DamageSource source = DAMAGE_SOURCE_CTOR.apply(this.damageType.toString());
+        final net.minecraft.util.DamageSource source = DamageSourceAccessor.accessor$createDamageSource(this.damageType.toString());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) source;
+        if (!this.scales
+                && this.bypasses
+                && !this.explosion
+                && !this.absolute
+                && !this.magical
+                && !this.creative
+                && !this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.DROWN)
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.DROWN;
+        }
+        if (!this.scales
+                && !this.bypasses
+                && !this.explosion
+                && !this.absolute
+                && !this.magical
+                && !this.creative
+                && !this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.DRYOUT.get())
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.DRYOUT;
+        }
+        if (!this.scales
+                && !this.bypasses
+                && !this.explosion
+                && !this.absolute
+                && !this.magical
+                && !this.creative
+                && !this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.FALL.get())
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.FALL;
+        }
+        if (!this.scales
+                && !this.bypasses
+                && !this.explosion
+                && !this.absolute
+                && !this.magical
+                && !this.creative
+                && this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.FIRE.get())
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.ON_FIRE;
+        }
+        if (!this.scales
+                && this.bypasses
+                && !this.explosion
+                && !this.absolute
+                && !this.magical
+                && !this.creative
+                && !this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.GENERIC.get())
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.GENERIC;
+        }
+        if (!this.scales
+                && this.bypasses
+                && !this.explosion
+                && !this.absolute
+                && this.magical
+                && !this.creative
+                && !this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.MAGIC.get())
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.MAGIC;
+        }
+        if (!this.scales
+                && this.bypasses
+                && !this.explosion
+                && this.absolute
+                && !this.magical
+                && !this.creative
+                && !this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.HUNGER.get())
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.STARVE;
+        }
+        if (!this.scales
+                && this.bypasses
+                && !this.explosion
+                && !this.absolute
+                && !this.magical
+                && this.creative
+                && !this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.VOID.get())
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.OUT_OF_WORLD;
+        }
+        if (!this.scales
+                && !this.bypasses
+                && !this.explosion
+                && !this.absolute
+                && this.magical
+                && !this.creative
+                && !this.fire
+                && this.exhaustion == null
+                && this.damageType.equals(DamageTypes.MAGIC.get())
+        ) {
+            return (DamageSource) net.minecraft.util.DamageSource.WITHER;
+        }
         if (this.absolute) {
             accessor.accessor$setDamageIsAbsolute();
         }
@@ -73,6 +173,9 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
         }
         if (this.exhaustion != null) {
             accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
+        }
+        if (this.fire) {
+            accessor.accessor$setFireDamage();
         }
         return (DamageSource) source;
     }

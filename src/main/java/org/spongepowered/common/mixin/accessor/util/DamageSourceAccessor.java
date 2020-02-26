@@ -32,6 +32,11 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(DamageSource.class)
 public interface DamageSourceAccessor {
 
+    @SuppressWarnings("PublicStaticMixinMember") // MCDev Plugin needs an update.
+    @Invoker("<init>") static DamageSource accessor$createDamageSource(String id) {
+        throw new UnsupportedOperationException("Untransformed Accessor!");
+    }
+
     @Accessor("hungerDamage") void accessor$setHungerDamage(float damage);
 
     @Accessor("damageType") void accessor$setDamageType(String id);

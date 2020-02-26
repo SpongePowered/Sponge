@@ -112,6 +112,7 @@ import javax.annotation.Nullable;
 @Mixin(value = LivingEntity.class, priority = 999)
 public abstract class LivingEntityMixin extends EntityMixin implements LivingEntityBridge {
 
+    // @formatter:off
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
     @Shadow public int maxHurtTime;
@@ -171,10 +172,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     @Shadow protected abstract void shadow$spawnDrops(DamageSource damageSourceIn);
+    // @formatter:on
 
-    private int impl$deathEventsPosted;
     private int impl$maxAir = this.shadow$getMaxAir();
-    @Nullable private ItemStack impl$activeItemStackCopy;
+    @Nullable
+    private ItemStack impl$activeItemStackCopy;
 
     @Override
     public int bridge$getMaxAir() {
@@ -211,101 +213,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     /**
-     * @author blood - May 12th, 2016
-     * @author gabizou - June 4th, 2016 - Update for 1.9.4 and Cause Tracker changes
-     *
-     * @reason SpongeForge requires an overwrite so we do it here instead. This handles all living entity death events
-     * (except players). Note should be taken that normally, there are lists for drops captured, however, the drops
-     * are retroactively captured by the PhaseTracker and associated through the different phases, depending on
-     * how they are handled, so no lists and flags on the entities themselves are needed as they are tracked through
-     * the {@link PhaseContext} of the current {@link IPhaseState} at which this method is called. The compatibility
-     * for Forge's events to throw are handled specially in SpongeForge.
-     */
-    @SuppressWarnings("ConstantConditions")
-    @Overwrite
-    public void onDeath(final DamageSource cause) {
-        // Sponge Start - Call our event, and forge's event
-        // This will transitively call the forge event
-        final boolean isMainThread = !((WorldBridge) this.world).bridge$isFake() || Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
-        if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
-            if (isMainThread && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
-                // ignore because some moron is not resetting the entity.
-                this.impl$deathEventsPosted++;
-                if (SpongeCommonEventFactory.callDestructEntityEventDeath((LivingEntity) (Object) this, cause, isMainThread).map(Cancellable::isCancelled).orElse(true)) {
-                    // Since the forge event is cancellable
-                    return;
-                }
-            }
-        } else {
-            this.impl$deathEventsPosted = 0;
-        }
-
-        // Double check that the PhaseTracker is already capturing the Death phase
-        try (final EntityDeathContext context = this.createOrNullDeathPhase(isMainThread, cause)) {
-            // We re-enter the state only if we aren't already in the death state. This can usually happen when
-            // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
-            // but then again, mods....
-            if (context != null) {
-                context.buildAndSwitch();
-            }
-            // Sponge End
-            if (this.dead) {
-                return;
-            }
-
-            final Entity entity = cause.getTrueSource();
-            final LivingEntity entitylivingbase = this.getAttackingEntity();
-
-            if (this.scoreValue >= 0 && entitylivingbase != null) {
-                entitylivingbase.awardKillScore((LivingEntity) (Object) this, this.scoreValue, cause);
-            }
-
-            if (entity != null) {
-                entity.onKillEntity((LivingEntity) (Object) this);
-            }
-
-            this.dead = true;
-            this.getCombatTracker().reset();
-
-            if (!this.world.isRemote) {
-                int i = 0;
-
-                if (entity instanceof PlayerEntity) {
-                    // Sponge Start - use Forge hooks for the looting modifier.
-                    //i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
-                    i = SpongeImplHooks.getLootingEnchantmentModifier((LivingEntity) (Object) this, (LivingEntity) entity, cause);
-                }
-
-                if (this.canDropLoot() && this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
-                    final boolean flag = this.recentlyHit > 0;
-                    this.dropLoot(flag, i, cause);
-                }
-
-            }
-
-            // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
-            if (!((LivingEntity) (Object) this instanceof HumanEntity)) {
-                this.world.setEntityState((LivingEntity) (Object) this, (byte) 3);
-            }
-
-        }
-
-        // Sponge End
-    }
-
-    @Override
-    public void bridge$resetDeathEventsPosted() {
-        this.impl$deathEventsPosted = 0;
-    }
-
-    /**
-     * @author gabizou - April 29th, 2018
-     * @reason Due to cancelling death events, "healing" the entity is the only way to cancel the
-     * death, but we still want to reset the death event counter. This is the simplest way to get it working
-     * with forge mods who do not have access to Sponge's API.
-     *
      * @param health The health
      * @param info The callback
+     * @author gabizou - April 29th, 2018
+     * @reason Due to cancelling death events, "healing" the entity is the only way to cancel the
+     *         death, but we still want to reset the death event counter. This is the simplest way to get it working
+     *         with forge mods who do not have access to Sponge's API.
      */
     @Inject(method = "setHealth", at = @At("HEAD"))
     private void onSetHealthResetEvents(final float health, final CallbackInfo info) {
@@ -324,8 +237,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
         if (tracksEntityDeaths) {
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext(PhaseTracker.SERVER)
-                .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
-                .source(this);
+                    .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
+                    .source(this);
             if (this instanceof OwnershipTrackedBridge) {
                 ((OwnershipTrackedBridge) this).tracked$getNotifierReference().ifPresent(context::notifier);
                 ((OwnershipTrackedBridge) this).tracked$getOwnerReference().ifPresent(context::owner);
@@ -335,19 +248,20 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         return null;
     }
 
-    @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isPotionActive(Lnet/minecraft/potion/Effect;)Z") )
+    @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/LivingEntity;isPotionActive(Lnet/minecraft/potion/Effect;)Z"))
     private boolean impl$onIsPotionActive(final LivingEntity entityIn, final Effect potion) {
         return false; // handled in our bridge$damageEntityHook
     }
 
     /**
-     * @author blood - Some time ago in 2015?
-     * @reason Our damage hook handles armor modifiers and "replaying" damage to armor.
-     *
      * @param entityIn The entity being damaged
      * @param damage The damage to deal
+     * @author blood - Some time ago in 2015?
+     * @reason Our damage hook handles armor modifiers and "replaying" damage to armor.
      */
-    @Redirect(method = "applyArmorCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;damageArmor(F)V") )
+    @Redirect(method = "applyArmorCalculations",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;damageArmor(F)V"))
     private void onDamageArmor(final LivingEntity entityIn, final float damage) {
         // do nothing as this is handled in our bridge$damageEntityHook
     }
@@ -365,7 +279,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
      * @author bloodmc - November 22, 2015
      * @author gabizou - Updated April 11th, 2016 - Update for 1.9 changes
      * @author Aaron1011 - Updated Nov 11th, 2016 - Update for 1.11 changes
-     *
      * @reason Reroute damageEntity calls to our hook in order to prevent damage.
      */
     @SuppressWarnings("ConstantConditions")
@@ -376,13 +289,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         this.lastDamageSource = source;
         if (source == null) {
             new PrettyPrinter(60).centre().add("Null DamageSource").hr()
-                .addWrapped("Sponge has found a null damage source! This should NEVER happen "
+                    .addWrapped("Sponge has found a null damage source! This should NEVER happen "
                             + "as the DamageSource is used for all sorts of calculations. Usually"
                             + " this can be considered developer error. Please report the following"
                             + " stacktrace to the most appropriate mod/plugin available.")
-                .add()
-                .add(new IllegalArgumentException("Null DamageSource"))
-                .log(SpongeImpl.getLogger(), Level.WARN);
+                    .add()
+                    .add(new IllegalArgumentException("Null DamageSource"))
+                    .log(SpongeImpl.getLogger(), Level.WARN);
             return false;
         }
         // Sponge - This hook is for forge use mainly
@@ -492,7 +405,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     this.attackingPlayer = (PlayerEntity) entity;
                 } else if (entity instanceof TameableEntity) {
 
-                    final TameableEntity entitywolf = (TameableEntity)entity;
+                    final TameableEntity entitywolf = (TameableEntity) entity;
 
                     if (entitywolf.isTamed()) {
                         this.recentlyHit = 100;
@@ -582,11 +495,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     /**
      * @author gabizou - January 4th, 2016
-     * This is necessary for invisibility checks so that vanish players don't actually send the particle stuffs.
+     *         This is necessary for invisibility checks so that vanish players don't actually send the particle stuffs.
      */
-    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
+    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
     private void spawnItemParticle(final World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord, final double xOffset,
-            final double yOffset, final double zOffset, final int ... p_175688_14_) {
+            final double yOffset, final double zOffset, final int... p_175688_14_) {
         if (!this.bridge$isVanished()) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
@@ -606,17 +520,17 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
             final List<DamageFunction> originalFunctions = new ArrayList<>();
             final Optional<DamageFunction> hardHatFunction =
-                DamageEventHandler.createHardHatModifier((LivingEntity) (Object) this, damageSource);
+                    DamageEventHandler.createHardHatModifier((LivingEntity) (Object) this, damageSource);
             final Optional<List<DamageFunction>> armorFunction =
                     this.bridge$provideArmorModifiers((LivingEntity) (Object) this, damageSource, damage);
             final Optional<DamageFunction> resistanceFunction =
-                DamageEventHandler.createResistanceModifier((LivingEntity) (Object) this, damageSource);
+                    DamageEventHandler.createResistanceModifier((LivingEntity) (Object) this, damageSource);
             final Optional<List<DamageFunction>> armorEnchantments =
-                DamageEventHandler.createEnchantmentModifiers((LivingEntity) (Object) this, damageSource);
+                    DamageEventHandler.createEnchantmentModifiers((LivingEntity) (Object) this, damageSource);
             final Optional<DamageFunction> absorptionFunction =
-                DamageEventHandler.createAbsorptionModifier((LivingEntity) (Object) this, damageSource);
+                    DamageEventHandler.createAbsorptionModifier((LivingEntity) (Object) this, damageSource);
             final Optional<DamageFunction> shieldFunction =
-                DamageEventHandler.createShieldFunction((LivingEntity) (Object) this, damageSource, damage);
+                    DamageEventHandler.createShieldFunction((LivingEntity) (Object) this, damageSource, damage);
 
             hardHatFunction.ifPresent(originalFunctions::add);
 
@@ -754,7 +668,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 }
                 // Sponge end
 
-                if ((world.areCollisionShapesEmpty((Entity) (Object) this) && !world.containsAnyLiquid(this.shadow$getBoundingBox())) {
+                if ((world.areCollisionShapesEmpty((Entity) (Object) this) && !world.containsAnyLiquid(this.shadow$getBoundingBox()))
+                {
                     flag = true;
                 }
             }
@@ -798,13 +713,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Override
     public Optional<List<DamageFunction>> bridge$provideArmorModifiers(final LivingEntity entityLivingBase,
-        final DamageSource source, final double damage) {
+            final DamageSource source, final double damage) {
         return DamageEventHandler.createArmorModifiers(entityLivingBase, source, damage);
     }
 
     @Override
     public void bridge$applyArmorDamage(
-        final LivingEntity entityLivingBase, final DamageSource source, final DamageEntityEvent entityEvent, final DamageModifier modifier) {
+            final LivingEntity entityLivingBase, final DamageSource source, final DamageEntityEvent entityEvent, final DamageModifier modifier) {
         final Optional<DamageObject> optional = modifier.getCause().first(DamageObject.class);
         if (optional.isPresent()) {
             DamageEventHandler.acceptArmorModifier((LivingEntity) (Object) this, source, modifier, entityEvent.getDamage(modifier));
@@ -831,25 +746,16 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         return !(this.bridge$isVanished() && this.bridge$isUncollideable()) && !this.isDead;
     }
 
-    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;spawnParticle(Lnet/minecraft/particles/IParticleData;DDDIDDDD)I"))
+    @Redirect(method = "updateFallState", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/server/ServerWorld;spawnParticle(Lnet/minecraft/particles/IParticleData;DDDIDDDD)I"))
     private int impl$vanishSpawnParticleForFallState(
-        final ServerWorld serverWorld, final IParticleData particleTypes, final double xCoord, final double yCoord,
-        final double zCoord, final int numberOfParticles, final double xOffset, final double yOffset, final double zOffset, final double particleSpeed) {
+            final ServerWorld serverWorld, final IParticleData particleTypes, final double xCoord, final double yCoord,
+            final double zCoord, final int numberOfParticles, final double xOffset, final double yOffset, final double zOffset, final double particleSpeed) {
         if (!this.bridge$isVanished()) {
             serverWorld.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed);
         }
 
         return 0; // TODO: Is this correct to return 0?
-    }
-
-    @Redirect(method = "onDeathUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getExperiencePoints(Lnet/minecraft/entity/player/PlayerEntity;)I"))
-    private int impl$modifyExperiencePointsOnDeath(final LivingEntity entity, final PlayerEntity attackingPlayer) {
-        if (entity instanceof PlayerEntityBridge) {
-            if (((PlayerEntityBridge) entity).bridge$keepInventory()) {
-                return 0;
-            }
-        }
-        return this.getExperiencePoints(attackingPlayer);
     }
 
     @Inject(method = "onItemPickup", at = @At("HEAD"))
@@ -859,7 +765,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Inject(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;resetActiveHand()V"))
+    @Inject(method = "onItemUseFinish",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;resetActiveHand()V"))
     private void impl$updateHealthForUseFinish(final CallbackInfo ci) {
         if (this instanceof ServerPlayerEntityBridge) {
             ((ServerPlayerEntityBridge) this).bridge$refreshScaledHealth();
@@ -871,7 +778,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     // Start implementation of UseItemstackEvent
 
     @Inject(method = "setActiveHand", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;activeItemStack:Lnet/minecraft/item/ItemStack;"))
+            at = @At(value = "FIELD",
+                    target = "Lnet/minecraft/entity/LivingEntity;activeItemStack:Lnet/minecraft/item/ItemStack;"))
     private void impl$onSetActiveItemStack(final Hand hand, final CallbackInfo ci, final ItemStack stack) {
         if (this.world.isRemote) {
             return;
@@ -893,7 +801,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "setActiveHand", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;activeItemStackUseCount:I"))
+    @Redirect(method = "setActiveHand",
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;activeItemStackUseCount:I"))
     private void impl$getItemDuration(final LivingEntity this$0, final int count) {
         if (this.world.isRemote) {
             this.activeItemStackUseCount = count;
@@ -952,7 +861,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "onItemUseFinish", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;updateItemUse(Lnet/minecraft/item/ItemStack;I)V"))
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/entity/LivingEntity;updateItemUse(Lnet/minecraft/item/ItemStack;I)V"))
     private void impl$onUpdateItemUse(final CallbackInfo ci) {
         if (this.world.isRemote) {
             return;
@@ -979,7 +889,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setHeldItem(Lnet/minecraft/util/Hand;Lnet/minecraft/item/ItemStack;)V"))
+    @Redirect(method = "onItemUseFinish", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/LivingEntity;setHeldItem(Lnet/minecraft/util/Hand;Lnet/minecraft/item/ItemStack;)V"))
     private void impl$onSetHeldItem(final LivingEntity self, final Hand hand, final ItemStack stack) {
         if (this.world.isRemote) {
             self.setHeldItem(hand, stack);
@@ -1020,7 +931,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Redirect(method = "stopActiveHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;onPlayerStoppedUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;I)V")) // stopActiveHand
+    @Redirect(method = "stopActiveHand", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/item/ItemStack;onPlayerStoppedUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;I)V"))
+    // stopActiveHand
     private void impl$onStopPlayerUsing(final ItemStack stack, final World world, final LivingEntity self, final int duration) {
         if (this.world.isRemote) {
             stack.onPlayerStoppedUsing(world, self, duration);

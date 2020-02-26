@@ -41,7 +41,7 @@ import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -224,7 +224,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(AttackLivingGoal.Builder.class, SpongeAttackLivingGoalBuilder::new)
             .register(RangedAttackAgainstAgentGoal.Builder.class, SpongeRangedAttackAgainstAgentGoalBuilder::new)
             .register(LookRandomlyGoal.Builder.class, SpongeLookRandomlyGoalBuilder::new)
-            .register(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
+            .register(BannerPatternLayer.Builder.class, SpongePatternLayerBuilder::new)
             .register(Task.Builder.class, SpongeTaskBuilder::new)
             .register(Ban.Builder.class, SpongeBanBuilder::new)
             .register(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
