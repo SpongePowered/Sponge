@@ -126,6 +126,22 @@ public class SpongeLaunch {
     public static void setupMixinEnvironment() {
         MixinBootstrap.init();
 
+        final VersionNumber environment = VersionNumber.parse(MixinEnvironment.getCurrentEnvironment().getVersion());
+        final VersionNumber required = VersionNumber.parse("0.8");
+        if (required.compareTo(environment) > 0) {
+            new PrettyPrinter(60).add("Old Mixin Version Loaded!").centre().hr()
+                    .add("Hey, sorry, but Sponge requires a newer version of Mixin being loaded, and unfortunately")
+                    .add("with an older version, nothing will work as it should. Please rename the sponge jar to load")
+                    .add("earlier than other coremods, so that Sponge's Mixin version will be loaded (they're backwards")
+                    .add("compatible, but not forwards compatible). We suggest doing this by prefixing the Sponge jar")
+                    .add("filename with \"aaa\". We're sorry for the inconvenience, but this is all that we can do.")
+                    .add()
+                    .add("%s : %s", "Current Loaded Mixin", environment.toString())
+                    .add("%s : %s", "Required Mixin Version", required.toString())
+                    .log(SpongeImpl.getLogger(), Level.FATAL);
+            TerminateVM.terminate("net.minecraftforge.fml", -1);
+        }
+
         // Register common mixin configurations
         Mixins.addConfiguration("mixins.common.api.json");
         Mixins.addConfiguration("mixins.common.bungeecord.json");
@@ -141,21 +157,6 @@ public class SpongeLaunch {
         Mixins.addConfiguration("mixins.common.tileentityactivation.json");
         Mixins.addConfiguration("mixins.common.tracking.json");
         Mixins.addConfiguration("mixins.common.vanilla-command.json");
-        final VersionNumber environment = VersionNumber.parse(MixinEnvironment.getCurrentEnvironment().getVersion());
-        final VersionNumber required = VersionNumber.parse("0.8");
-        if (required.compareTo(environment) > 0) {
-            new PrettyPrinter(60).add("Old Mixin Version Loaded!").centre().hr()
-                .add("Hey, sorry, but Sponge requires a newer version of Mixin being loaded, and unfortunately\n"
-                     + "with an older version, nothing will work as it should. Please rename the sponge jar to load\n"
-                     + "earlier than other coremods, so that Sponge's Mixin version will be loaded (they're backwards\n"
-                     + "compatible, but not forwards compatible). We suggest doing this by prefixing the Sponge jar\n"
-                     + "filename with \"aaa\". We're sorry for the inconvenience, but this is all that we can do.")
-                .add()
-                .add("%s : %s", "Current Loaded Mixin", environment.toString())
-                .add("%s : %s", "Required Mixin Version", required.toString())
-                .log(SpongeImpl.getLogger(), Level.FATAL);
-            TerminateVM.terminate("org.spongepowered.core", -1);
-        }
     }
 
     public static void setupSuperClassTransformer() {
