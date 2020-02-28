@@ -30,7 +30,6 @@ import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -69,15 +68,6 @@ public interface ViewableInventoryMixin_API extends ViewableInventory {
         }
         // TODO other impl possible?
         return true;
-    }
-
-    @Override
-    default ContainerType getType() {
-        if (this instanceof ViewableInventoryBridge) {
-            return ((ViewableInventoryBridge) this).viewableBridge$getType();
-        }
-        // TODO better?
-        return null;
     }
 
     @Override

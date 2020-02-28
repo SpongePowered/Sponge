@@ -23,6 +23,7 @@
         "api.carrier.SingleBlockCarrierMixin_API",
         "api.carrier.WorkbenchContainerMixin_API",
         "api.container.ContainerMixin_API",
+        "api.container.ContainerTypeMixin_API",
         "api.container.SlotMixin_API",
         "api.equipable.ArmorEquippableMixin_API",
         "api.equipable.EquippableMixin_API",

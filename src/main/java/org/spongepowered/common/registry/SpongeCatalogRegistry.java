@@ -141,6 +141,7 @@ import org.spongepowered.common.registry.builtin.stream.ParrotTypeStreamGenerato
 import org.spongepowered.common.registry.builtin.stream.RabbitTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.supplier.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.stream.CatTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.supplier.ContainerTypeSupplier;
 import org.spongepowered.common.registry.builtin.supplier.CriteriaTriggersSupplier;
 import org.spongepowered.common.registry.builtin.supplier.DimensionTypeSupplier;
 import org.spongepowered.common.registry.builtin.supplier.EffectSupplier;
@@ -438,7 +439,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         // Class based/Likely for mods to override
         BiomeSupplier.registerSuppliers(this);
-        BiomeSupplier.registerSuppliers(this);
         CriteriaTriggersSupplier.registerSuppliers(this);
         DimensionTypeSupplier.registerSuppliers(this);
         EffectSupplier.registerSuppliers(this);
@@ -451,6 +451,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         SoundEventSupplier.registerSuppliers(this);
         TileEntityTypeSupplier.registerSuppliers(this);
         VillagerProfessionSupplier.registerSuppliers(this);
+
+        ContainerTypeSupplier.registerSuppliers(this);
     }
 
     private <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(Class<T> catalogClass, CatalogKey key, Stream<E> valueStream, boolean generateSuppliers) {

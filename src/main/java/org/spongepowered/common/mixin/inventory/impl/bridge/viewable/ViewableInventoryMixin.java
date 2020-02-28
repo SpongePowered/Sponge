@@ -33,12 +33,10 @@ import net.minecraft.tileentity.BeaconTileEntity;
 import net.minecraft.tileentity.LecternTileEntity;
 import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
-import org.spongepowered.common.registry.type.item.ContainerTypeRegistryModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,10 +86,5 @@ public abstract class ViewableInventoryMixin implements ViewableInventoryBridge 
     @Override
     public boolean viewableBridge$hasViewers() {
         return this.impl$getPlayerStream().findAny().isPresent();
-    }
-
-    @Override
-    public ContainerType viewableBridge$getType() {
-        return ContainerTypeRegistryModule.getInstance().getTypeFor(this);
     }
 }

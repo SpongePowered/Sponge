@@ -33,7 +33,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
@@ -80,13 +79,8 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public ContainerType getType() {
-        return this.inventory.getType();
-    }
-
-    @Override
     public void setCurrentInventory(ViewableInventory inventory) {
-        if (this.getType().equals(inventory.getType())) {
+        if (inventory.getClass().equals(this.inventory.getClass())) {
             // ideally we would just swap out the IInventory from existing slots
             // TODO handle container changes
             this.reopen(); // if not possible reopen
@@ -203,17 +197,17 @@ public class SpongeInventoryMenu implements InventoryMenu {
                         if (dragType >= 0 && dragType < 9) {
                             Optional<org.spongepowered.api.item.inventory.Slot> slot2 = container.getSlot(dragType);
                             if (slot2.isPresent() && this.keySwapHandler != null) {
-                                return this.keySwapHandler.handle(cause, container, slot.get(), slotId, ClickTypes.KEY_SWAP, slot2.get());
+                                return this.keySwapHandler.handle(cause, container, slot.get(), slotId, ClickTypes.KEY_SWAP.get(), slot2.get());
                             }
                         }
                         return true;
                     case CLONE:
                         if (this.slotClickHandler != null) {
-                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.CLICK_MIDDLE);
+                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.CLICK_MIDDLE.get());
                         }
                     case PICKUP_ALL:
                         if (this.slotClickHandler != null) {
-                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DOUBLE_CLICK);
+                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DOUBLE_CLICK.get());
                         }
                     default:
                         if (this.slotClickHandler != null) {
@@ -231,8 +225,8 @@ public class SpongeInventoryMenu implements InventoryMenu {
             switch (clickTypeIn) {
                 case PICKUP:
                     if (slotId == -999 && this.clickHandler != null) {
-                        if (dragType == 0) {return this.clickHandler.handle(cause, container, ClickTypes.CLICK_LEFT_OUTSIDE);
-                        } else if (dragType == 1) {  return this.clickHandler.handle(cause, container, ClickTypes.CLICK_RIGHT_OUTSIDE);
+                        if (dragType == 0) {return this.clickHandler.handle(cause, container, ClickTypes.CLICK_LEFT_OUTSIDE.get());
+                        } else if (dragType == 1) {  return this.clickHandler.handle(cause, container, ClickTypes.CLICK_RIGHT_OUTSIDE.get());
                         } }  // else unknown slotId/drag-type
                     break;
                 case THROW:
@@ -264,24 +258,24 @@ public class SpongeInventoryMenu implements InventoryMenu {
         switch (dragEvent) {
             case 0: // start drag
                 if (this.clickHandler != null) {
-                    return this.clickHandler.handle(cause, container, ClickTypes.DRAG_START);
+                    return this.clickHandler.handle(cause, container, ClickTypes.DRAG_START.get());
                 }
             case 1: // add drag
                 Optional<org.spongepowered.api.item.inventory.Slot> slot = container.getSlot(slotId);
                 if (slot.isPresent() && this.slotClickHandler != null) {
                     switch (dragMode) {
                         case 0:
-                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DRAG_LEFT_ADD);
+                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DRAG_LEFT_ADD.get());
                         case 1:
-                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DRAG_RIGHT_ADD);
+                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DRAG_RIGHT_ADD.get());
                         case 2:
-                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DRAG_MIDDLE_ADD);
+                            return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DRAG_MIDDLE_ADD.get());
                     }
                 }
                 break;
             case 2: // end drag
                 if (this.clickHandler != null) {
-                    return this.clickHandler.handle(cause, container, ClickTypes.DRAG_END);
+                    return this.clickHandler.handle(cause, container, ClickTypes.DRAG_END.get());
                 }
         }
         return true;
@@ -291,12 +285,12 @@ public class SpongeInventoryMenu implements InventoryMenu {
                                  int idx, org.spongepowered.api.item.inventory.Slot slot) {
         switch (clickTypeIn) {
             case PICKUP:
-                return handler.handle(cause, container, slot, idx, ClickTypes.CLICK_RIGHT);
+                return handler.handle(cause, container, slot, idx, ClickTypes.CLICK_RIGHT.get());
             case QUICK_MOVE:
-                return handler.handle(cause, container, slot, idx, ClickTypes.SHIFT_CLICK_RIGHT);
+                return handler.handle(cause, container, slot, idx, ClickTypes.SHIFT_CLICK_RIGHT.get());
             case THROW:
                 // TODO empty cursor check?
-                return handler.handle(cause, container, slot, idx, ClickTypes.KEY_THROW_ALL);
+                return handler.handle(cause, container, slot, idx, ClickTypes.KEY_THROW_ALL.get());
 
         }
         return true;
@@ -306,12 +300,12 @@ public class SpongeInventoryMenu implements InventoryMenu {
                                 int idx, org.spongepowered.api.item.inventory.Slot slot) {
         switch (clickTypeIn) {
             case PICKUP:
-                return handler.handle(cause, container, slot, idx, ClickTypes.CLICK_LEFT);
+                return handler.handle(cause, container, slot, idx, ClickTypes.CLICK_LEFT.get());
             case QUICK_MOVE:
-                return handler.handle(cause, container, slot, idx, ClickTypes.SHIFT_CLICK_LEFT);
+                return handler.handle(cause, container, slot, idx, ClickTypes.SHIFT_CLICK_LEFT.get());
             case THROW:
                 // TODO empty cursor check?
-                return handler.handle(cause, container, slot, idx, ClickTypes.KEY_THROW_ONE);
+                return handler.handle(cause, container, slot, idx, ClickTypes.KEY_THROW_ONE.get());
         }
         return true;
     }

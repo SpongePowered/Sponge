@@ -32,6 +32,7 @@ import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,10 +47,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 @Mixin(value = Container.class, priority = 998)
 public abstract class ContainerMixin_API implements org.spongepowered.api.item.inventory.Container {
 
     @Final @Shadow private List<IContainerListener> listeners;
+    @Shadow @Final @Nullable private net.minecraft.inventory.container.ContainerType<?> containerType;
 
     @Override
     public boolean isViewedSlot(final org.spongepowered.api.item.inventory.Slot slot) {
@@ -108,6 +112,11 @@ public abstract class ContainerMixin_API implements org.spongepowered.api.item.i
     public boolean isOpen() {
         org.spongepowered.api.item.inventory.Container thisContainer = this;
         return this.getViewer().getOpenInventory().map(c -> c == thisContainer).orElse(false);
+    }
+
+    @Override
+    public ContainerType getType() {
+        return ((ContainerType) this.containerType);
     }
 
     private List<ServerPlayerEntity> listeners() {

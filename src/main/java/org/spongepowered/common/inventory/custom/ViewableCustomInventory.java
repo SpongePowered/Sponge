@@ -28,12 +28,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.util.IntArray;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.SpongeContainerType;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
@@ -44,16 +44,21 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+// TODO how to do ticking for "fake" furnace type inventories?
 public class ViewableCustomInventory extends CustomInventory implements INamedContainerProvider {
 
     private ContainerType type;
+    private SpongeViewableInventoryBuilder.ContainerTypeInfo info;
     private boolean vanilla = false;
 
     private Set<PlayerEntity> viewers = new HashSet<>();
+    private final IntArray data;
 
-    public ViewableCustomInventory(ContainerType type, int size, Lens lens, SlotLensProvider provider, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
+    public ViewableCustomInventory(ContainerType type, SpongeViewableInventoryBuilder.ContainerTypeInfo info, int size, Lens lens, SlotLensProvider provider, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
         super(size, lens, provider, inventories, identity, carrier);
         this.type = type;
+        this.info = info;
+        this.data = this.info.dataProvider.get();
     }
 
     public ViewableCustomInventory vanilla() {
@@ -78,9 +83,13 @@ public class ViewableCustomInventory extends CustomInventory implements INamedCo
     @Nullable
     public Container createMenu(int id, PlayerInventory playerInv, PlayerEntity player) {
         if (this.vanilla) {
-            return ((SpongeContainerType) this.type).provideContainer(id, this, player);
+            return this.info.containerProvider.createMenu(id, playerInv, player, this);
         }
         return new CustomContainer(id, player, this);
+    }
+
+    public IntArray getData() {
+        return this.data;
     }
 
     @Override
