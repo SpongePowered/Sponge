@@ -22,46 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.block;
+package org.spongepowered.common.mixin.api.mcp.fluid;
 
-import net.minecraft.block.Block;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.fluid.FluidState;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.mcp.state.StateHolderMixin_API;
-import org.spongepowered.common.util.Constants;
 
-@Mixin(net.minecraft.block.BlockState.class)
-public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockState, net.minecraft.block.BlockState> implements BlockState {
+@Mixin(IFluidState.class)
+@Implements(@Interface(iface = FluidState.class, prefix = "api$"))
+public interface IFluidStateMixin_API extends FluidState {
 
-    @Shadow public abstract Block shadow$getBlock();
-    @Shadow public abstract IFluidState shadow$getFluidState();
+    @Shadow Fluid shadow$getFluid();
+    @Shadow net.minecraft.block.BlockState getBlockState();
+    @Shadow boolean shadow$isEmpty();
 
     @Override
-    public BlockType getType() {
-        return (BlockType) this.shadow$getBlock();
+    default FluidType getType() {
+        return (FluidType) this.shadow$getFluid();
     }
 
     @Override
-    public FluidState getFluidState() {
-        return (FluidState) this.shadow$getFluidState();
+    default BlockState getBlock() {
+        return (BlockState) this.getBlockState();
     }
 
-    @Override
-    public int getContentVersion() {
-        return Constants.Sponge.BlockState.STATE_AS_CATALOG_ID;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Block.BLOCK_STATE, this.getId());
+    @Intrinsic
+    default boolean api$isEmpty() {
+        return this.shadow$isEmpty();
     }
 }

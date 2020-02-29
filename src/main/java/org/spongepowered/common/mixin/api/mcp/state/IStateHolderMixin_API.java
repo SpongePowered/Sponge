@@ -22,46 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.block;
+package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.block.Block;
-import net.minecraft.fluid.IFluidState;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.fluid.FluidState;
-import org.spongepowered.asm.mixin.Intrinsic;
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.state.IProperty;
+import net.minecraft.state.IStateHolder;
+import org.spongepowered.api.state.State;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.mcp.state.StateHolderMixin_API;
-import org.spongepowered.common.util.Constants;
 
-@Mixin(net.minecraft.block.BlockState.class)
-public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockState, net.minecraft.block.BlockState> implements BlockState {
+import java.util.Collection;
+import java.util.Map;
 
-    @Shadow public abstract Block shadow$getBlock();
-    @Shadow public abstract IFluidState shadow$getFluidState();
+@Mixin(IStateHolder.class)
+public interface IStateHolderMixin_API<S extends State<S>> extends State<S> {
+
+    @Shadow <T extends Comparable<T>> T shadow$get(IProperty<T> property);
+    @Shadow ImmutableMap<IProperty<?>, Comparable<?>> shadow$getValues();
 
     @Override
-    public BlockType getType() {
-        return (BlockType) this.shadow$getBlock();
+    default Collection<StateProperty<?>> getStateProperties() {
+        return (Collection) this.shadow$getValues().keySet();
     }
 
     @Override
-    public FluidState getFluidState() {
-        return (FluidState) this.shadow$getFluidState();
+    default Collection<?> getStatePropertyValues() {
+        return this.shadow$getValues().values();
     }
 
     @Override
-    public int getContentVersion() {
-        return Constants.Sponge.BlockState.STATE_AS_CATALOG_ID;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Block.BLOCK_STATE, this.getId());
+    default Map<StateProperty<?>, ?> getStatePropertyMap() {
+        return (Map) this.shadow$getValues();
     }
 }
