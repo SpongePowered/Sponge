@@ -1484,6 +1484,9 @@ public class SpongeCommonEventFactory {
         final CraftItemEvent.Preview event = SpongeEventFactory
                 .createCraftItemEventPreview(Sponge.getCauseStackManager().getCurrentCause(), inventory, previewTransaction, Optional.ofNullable(recipe), ((Inventory) container), transactions);
         SpongeImpl.postEvent(event);
+        // capture crafting grid changes for the normal inventory event that were not captured yet (e.g. NumberPress)
+        ((ContainerBridge) container).bridge$detectAndSendChanges(true);
+        // because the slot-restore intentionally wont capture inventory changes
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
         if (player instanceof EntityPlayerMP) {
             if (event.getPreview().getCustom().isPresent() || event.isCancelled() || !event.getPreview().isValid()) {
