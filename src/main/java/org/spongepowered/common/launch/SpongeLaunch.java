@@ -129,15 +129,24 @@ public class SpongeLaunch {
         final VersionNumber environment = VersionNumber.parse(MixinEnvironment.getCurrentEnvironment().getVersion());
         final VersionNumber required = VersionNumber.parse("0.8");
         if (required.compareTo(environment) > 0) {
-            new PrettyPrinter(60).add("Old Mixin Version Loaded!").centre().hr()
-                    .add("Hey, sorry, but Sponge requires a newer version of Mixin being loaded, and unfortunately")
-                    .add("with an older version, nothing will work as it should. Please rename the sponge jar to load")
-                    .add("earlier than other coremods, so that Sponge's Mixin version will be loaded (they're backwards")
-                    .add("compatible, but not forwards compatible). We suggest doing this by prefixing the Sponge jar")
-                    .add("filename with \"aaa\". We're sorry for the inconvenience, but this is all that we can do.")
+            new PrettyPrinter(80)
                     .add()
-                    .add("%s : %s", "Current Loaded Mixin", environment.toString())
-                    .add("%s : %s", "Required Mixin Version", required.toString())
+                    .add("Oh dear. Another mod loaded an older version of Mixin that Sponge cannot use!")
+                    .add()
+                    .hr('-')
+                    .add()
+                    .add("One of your mods that loaded before Sponge bundles an older version of Mixin.")
+                    .add("This prevents Sponge from loading its own version, which is newer than the")
+                    .add("currently loaded version.")
+                    .add()
+                    .add("Rename your Sponge jar file so that the filename starts with \"__aaa\". This")
+                    .add("will cause Sponge and its bundled Mixin version to load first.")
+                    .add()
+                    .hr('-')
+                    .add()
+                    .add("The minimum version of Mixin Sponge requires is: %s", required.toString())
+                    .add("but the currently loaded version is:             %s", environment.toString())
+                    .add()
                     .log(SpongeImpl.getLogger(), Level.FATAL);
             TerminateVM.terminate("net.minecraftforge.fml", -1);
         }
