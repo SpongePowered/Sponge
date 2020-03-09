@@ -59,11 +59,11 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), new ArrayList<>(),
-                (Entity) this, Math.max(1000, this.getHealth()));
+                (Entity) this, Math.max(1000, this.shadow$getHealth()));
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(false);
             }
-            if (event.getFinalDamage() < this.getHealth()) {
+            if (event.getFinalDamage() < this.shadow$getHealth()) {
                 this.shadow$func_213817_e(source, (float) event.getFinalDamage());
                 cir.setReturnValue(false);
             }

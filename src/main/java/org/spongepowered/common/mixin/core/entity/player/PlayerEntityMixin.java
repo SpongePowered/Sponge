@@ -437,7 +437,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     /**
      * @author dualspiral - October 7th, 2016
      *
-     * @reason When setting {@link SpongeHealthData#setHealth(double)} to 0, {@link #onDeath(DamageSource)} was
+     * @reason When setting {@link SpongeHealthData#setHealth(double)} to 0, {@link #shadow$onDeath(DamageSource)} was
      * not being called. This check bypasses some of the checks that prevent the superclass method being called
      * when the {@link DamageSourceRegistryModule#IGNORED_DAMAGE_SOURCE} is being used.
      */
@@ -546,7 +546,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                         isSprintingAttack = true;
                     }
 
-                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.shadow$isInWater() && !this.isPotionActive(Effects.BLINDNESS) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
+                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.shadow$isInWater() && !this.shadow$isPotionActive(Effects.BLINDNESS) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
                     isCriticalAttack = isCriticalAttack && !this.shadow$isSprinting();
 
                     if (isCriticalAttack) {

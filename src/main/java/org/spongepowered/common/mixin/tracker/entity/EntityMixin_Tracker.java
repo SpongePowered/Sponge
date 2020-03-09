@@ -67,7 +67,10 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
                     entityTypeBridge.bridge$setOverridesDamageEntity(true);
                 }
             } catch (final Throwable ex) {
-                // ignore
+                // In some rare cases, we just want to ignore class errors or
+                // reflection errors and can "Safely" ignore our tracking because the alternative
+                // is to silently ignore the mod's custom handling if it's there.
+                entityTypeBridge.bridge$setOverridesDamageEntity(true);
             } finally {
                 entityTypeBridge.bridge$setCheckedDamageEntity(true);
             }

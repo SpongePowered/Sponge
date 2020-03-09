@@ -24,13 +24,17 @@
  */
 package org.spongepowered.common.registry.builtin.stream;
 
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.common.event.damage.SpongeDamageType;
+import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
 
 import java.util.stream.Stream;
 
 public final class DamageTypeStreamGenerator {
+
+    public static final DamageSource IGNORED_DAMAGE_SOURCE = DamageSourceAccessor.accessor$createDamageSource("sponge:ignored");
 
     private DamageTypeStreamGenerator() {}
 

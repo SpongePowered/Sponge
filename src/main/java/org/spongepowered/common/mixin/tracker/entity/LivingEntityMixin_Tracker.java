@@ -66,6 +66,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
     @Shadow protected abstract void shadow$dropLoot(DamageSource damageSourceIn, boolean p_213354_2_);
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
     @Shadow @Nullable public abstract LivingEntity shadow$getAttackingEntity();
+    @Shadow public abstract void shadow$onDeath(DamageSource cause);
     // @formatter:on
     private int tracker$deathEventsPosted;
 
@@ -102,12 +103,34 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
      * @return
      */
     @Redirect(method = "onDeathUpdate",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/LivingEntity;getExperiencePoints(Lnet/minecraft/entity/player/PlayerEntity;)I"))
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/LivingEntity;getExperiencePoints(Lnet/minecraft/entity/player/PlayerEntity;)I"))
     protected int tracker$modifyExperiencePointsOnDeath(final LivingEntity entity, final PlayerEntity attackingPlayer) {
         return this.shadow$getExperiencePoints(attackingPlayer);
     }
 
+    /**
+     * @author gabizou - March 8th, 2020 - Minecraft 1.14.3
+     * @reason Instead of inlining the onDeath method with the main mixin, we can "toggle"
+     * the usage of the death state control in the tracker mixin.
+     * @param thisEntity
+     * @param cause
+     */
+    @Redirect(method = "attackEntityFrom",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/LivingEntity;onDeath(Lnet/minecraft/util/DamageSource;)V"
+        )
+    )
+    private void tracker$wrapOnDeathWithState(final LivingEntity thisEntity, final DamageSource cause) {
+        // Sponge Start - notify the cause tracker
+        try (final EntityDeathContext context = this.tracker$createOrNullDeathPhase(true, cause)) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
+            this.shadow$onDeath(cause);
+        }
+        // Sponge End
+    }
 
     /**
      * @author blood - May 12th, 2016

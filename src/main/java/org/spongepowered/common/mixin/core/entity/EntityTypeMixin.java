@@ -70,7 +70,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
      */
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "RedundantCast", "rawtypes"})
     @Inject(method = "getTrackingRange", at = @At("HEAD"), cancellable = true)
-    private void impl$getHumanTrackingRange(CallbackInfoReturnable<Integer> cir) {
+    private void impl$getHumanTrackingRange(final CallbackInfoReturnable<Integer> cir) {
         if (((EntityType) (Object) this) == EntityTypes.HUMAN.get()) {
             cir.setReturnValue(Constants.Entity.Player.TRACKING_RANGE);
         }
@@ -82,7 +82,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public void bridge$setKey(CatalogKey key) {
+    public void bridge$setKey(final CatalogKey key) {
         this.impl$key = key;
     }
 
@@ -92,7 +92,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public void bridge$setAllowsBlockBulkCaptures(boolean allowsBlockBulkCaptures) {
+    public void bridge$setAllowsBlockBulkCaptures(final boolean allowsBlockBulkCaptures) {
         this.impl$allowsBlockBulkCaptures = allowsBlockBulkCaptures;
     }
 
@@ -102,7 +102,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public void bridge$setAllowsBlockEventCreation(boolean allowsBlockEventCreation) {
+    public void bridge$setAllowsBlockEventCreation(final boolean allowsBlockEventCreation) {
         this.impl$allowsBlockEventCreation = allowsBlockEventCreation;
     }
 
@@ -112,7 +112,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public void bridge$setAllowsEntityBulkCaptures(boolean allowsEntityBulkCaptures) {
+    public void bridge$setAllowsEntityBulkCaptures(final boolean allowsEntityBulkCaptures) {
         this.impl$allowsEntityBulkCaptures = allowsEntityBulkCaptures;
     }
 
@@ -122,7 +122,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public void bridge$setAllowsEntityEventCreation(boolean allowsEntityEventCreation) {
+    public void bridge$setAllowsEntityEventCreation(final boolean allowsEntityEventCreation) {
         this.impl$allowsEntityEventCreation = allowsEntityEventCreation;
     }
 
@@ -132,7 +132,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public void bridge$setActivationRangeInitialized(boolean activationRangeInitialized) {
+    public void bridge$setActivationRangeInitialized(final boolean activationRangeInitialized) {
         this.impl$isActivationRangeInitialized = activationRangeInitialized;
     }
 
@@ -142,7 +142,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public void bridge$setCheckedDamageEntity(boolean checkedDamageEntity) {
+    public void bridge$setCheckedDamageEntity(final boolean checkedDamageEntity) {
         this.impl$hasCheckedDamageEntity = checkedDamageEntity;
     }
 
@@ -152,7 +152,7 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public void bridge$setOverridesDamageEntity(boolean damagesEntity) {
+    public void bridge$setOverridesDamageEntity(final boolean damagesEntity) {
         this.impl$overridesDamageEntity = damagesEntity;
     }
 

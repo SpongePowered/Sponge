@@ -701,7 +701,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public float bridge$getInternalScaledHealth() {
         if (!this.bridge$isHealthScaled()) {
-            return this.getHealth();
+            return this.shadow$getHealth();
         }
         if (this.impl$cachedModifiedHealth == -1) {
             // Because attribute modifiers from mods can add onto health and multiply health, we
@@ -724,7 +724,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
             this.impl$cachedModifiedHealth = (float) modifiedScale;
         }
-        return (this.getHealth() / this.getMaxHealth()) * this.impl$cachedModifiedHealth;
+        return (this.shadow$getHealth() / this.shadow$getMaxHealth()) * this.impl$cachedModifiedHealth;
     }
 
     @Override
