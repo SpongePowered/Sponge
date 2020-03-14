@@ -679,6 +679,6 @@ public class SpongeImplHooks {
     }
 
     public static TileEntity createTileEntity(final BlockState newState, final World world) {
-        return ((ITileEntityProvider) newState).createNewTileEntity(world);
+        return ((ITileEntityProvider) newState.getBlock()).createNewTileEntity(world);
     }
 }

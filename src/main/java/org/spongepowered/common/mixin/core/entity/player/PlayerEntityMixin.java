@@ -130,18 +130,18 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow public abstract float shadow$getCooledAttackStrength(float adjustTicks);
     @Shadow public abstract float shadow$getAIMoveSpeed();
     @Shadow public abstract void shadow$onCriticalHit(net.minecraft.entity.Entity entityHit);
-    @Shadow public abstract void shadow$onEnchantmentCritical(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
+    @Shadow public abstract void shadow$onEnchantmentCritical(net.minecraft.entity.Entity entityHit);
     @Shadow public abstract void shadow$addExhaustion(float p_71020_1_);
     @Shadow public abstract void shadow$addStat(ResourceLocation stat, int amount);
     @Shadow public abstract void shadow$addStat(@Nullable Stat stat, int amount);
     @Shadow public abstract void shadow$addStat(ResourceLocation stat);
     @Shadow public abstract void shadow$addStat(Stat<?> stat);
     @Shadow public abstract void shadow$resetCooldown();
-    @Shadow public abstract void shadow$spawnSweepParticles(); //spawnSweepParticles()
+    @Shadow public abstract void shadow$spawnSweepParticles();
     @Shadow public abstract void shadow$takeStat(Stat stat);
     @Shadow protected abstract void shadow$destroyVanishingCursedItems(); // Filter vanishing curse enchanted items
     @Shadow public void shadow$wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {};
-    @Shadow @Nullable public abstract ItemEntity shadow$dropItem(boolean dropAll); // Overridden in EntityPlayerMPMixin for tracking
+    @Shadow @Nullable public abstract ItemEntity shadow$dropItem(boolean dropAll); // Overridden in ServerPlayerEntityMixin_Tracker for tracking
     @Shadow @Nullable public abstract ItemEntity shadow$dropItem(final ItemStack droppedItem, final boolean dropAround, final boolean traceItem);
     @Shadow public abstract FoodStats shadow$getFoodStats();
     @Shadow public abstract GameProfile shadow$getGameProfile();

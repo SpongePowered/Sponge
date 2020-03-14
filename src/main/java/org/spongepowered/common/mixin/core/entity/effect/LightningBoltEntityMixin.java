@@ -53,12 +53,13 @@ import java.util.List;
 @Mixin(LightningBoltEntity.class)
 public abstract class LightningBoltEntityMixin extends EntityMixin {
 
-    private final List<Entity> struckEntities = Lists.newArrayList();
-    private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();
-    private boolean effect = false;
+    private final List<Entity> impl$struckEntities = Lists.newArrayList();
+    private final List<Transaction<BlockSnapshot>> impl$struckBlocks = Lists.newArrayList();
+    private boolean impl$effect = false;
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
+    @Redirect(method = "igniteBlocks",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)Z"))
     private boolean impl$throwEventForChangingBlocks(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
         return this.impl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
@@ -70,7 +71,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
     }
 
     private boolean impl$strikeBlockAndAddSnapshot(final net.minecraft.world.World world, final BlockPos pos, final BlockState blockState) {
-        if (!this.effect && ((World) world).containsBlock(pos.getX(), pos.getY(), pos.getZ())) {
+        if (!this.impl$effect && ((World) world).containsBlock(pos.getX(), pos.getY(), pos.getZ())) {
             final Vector3i pos3i = VecHelper.toVector3i(pos);
             final Transaction<BlockSnapshot> transaction = new Transaction<>(
                 SpongeBlockSnapshotBuilder.pooled()
@@ -83,8 +84,8 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
                     .world(((World) world).getProperties())
                     .position(pos3i)
                     .build());
-            if (!this.struckBlocks.contains(transaction)) {
-                this.struckBlocks.add(transaction);
+            if (!this.impl$struckBlocks.contains(transaction)) {
+                this.impl$struckBlocks.add(transaction);
             }
             return true;
         }
@@ -94,10 +95,10 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
     @Redirect(method = "tick()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/Entity;onStruckByLightning(Lnet/minecraft/entity/effect/LightningBoltEntity;)V"))
     private void impl$AddEntityToListForEvent(final net.minecraft.entity.Entity mcEntity, final LightningBoltEntity lightningBolt) {
-        if (!this.effect) {
+        if (!this.impl$effect) {
             final Entity entity = (Entity) mcEntity;
-            if (!this.struckEntities.contains(entity)) {
-                this.struckEntities.add(entity);
+            if (!this.impl$struckEntities.contains(entity)) {
+                this.impl$struckEntities.add(entity);
             }
         }
     }
@@ -112,7 +113,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
             final LightningEvent.Strike
                 strike =
                 SpongeEventFactory
-                    .createLightningEventStrike(frame.getCurrentCause(), this.struckEntities, this.struckBlocks);
+                    .createLightningEventStrike(frame.getCurrentCause(), this.impl$struckEntities, this.impl$struckBlocks);
             Sponge.getEventManager().post(strike);
 
             if (!strike.isCancelled()) {
@@ -134,14 +135,14 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
     public void impl$readFromSpongeCompound(final CompoundNBT compound) {
         super.impl$readFromSpongeCompound(compound);
         if (compound.contains(Constants.Entity.LIGHTNING_EFFECT)) {
-            this.effect = compound.getBoolean(Constants.Entity.LIGHTNING_EFFECT);
+            this.impl$effect = compound.getBoolean(Constants.Entity.LIGHTNING_EFFECT);
         }
     }
 
     @Override
     public void impl$writeToSpongeCompound(final CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
-        compound.putBoolean(Constants.Entity.LIGHTNING_EFFECT, this.effect);
+        compound.putBoolean(Constants.Entity.LIGHTNING_EFFECT, this.impl$effect);
     }
 
 }

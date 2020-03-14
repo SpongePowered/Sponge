@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.resourcepack.ResourcePackFactory;
 import org.spongepowered.common.SpongeImpl;
 
 import java.io.FileNotFoundException;
@@ -38,7 +37,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 
-public final class SpongeResourcePackFactory implements ResourcePackFactory {
+public final class SpongeResourcePackFactory implements ResourcePack.Factory {
 
     @Override
     public ResourcePack fromUri(URI uri) throws FileNotFoundException {

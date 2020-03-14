@@ -54,12 +54,12 @@ public abstract class EnderDragonEntityMixin extends MobEntityMixin {
         method = "destroyBlocksInAABB",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/state/IBlockState;getBlock()Lnet/minecraft/block/Block;"
+            target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"
+                target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"
             ),
             to = @At(
                 value = "FIELD",
@@ -69,7 +69,7 @@ public abstract class EnderDragonEntityMixin extends MobEntityMixin {
         ),
         require = 0 // Forge rewrites the material request to block.isAir
     )
-    private Block spongeImpl$onCanGrief(BlockState state) {
+    private Block impl$onCanGrief(BlockState state) {
         return ((GrieferBridge) this).bridge$canGrief() ? state.getBlock() : Blocks.AIR;
     }
 
@@ -81,7 +81,7 @@ public abstract class EnderDragonEntityMixin extends MobEntityMixin {
      */
     @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
     @Nullable
-    private Vec3d spongeImpl$getTargetLocationOrNull(IPhase iPhase) {
+    private Vec3d impl$getTargetLocationOrNull(IPhase iPhase) {
         Vec3d target = iPhase.getTargetLocation();
         if (target != null && target.x == this.posX && target.z == this.posZ) {
             return null; // Skips the movement code

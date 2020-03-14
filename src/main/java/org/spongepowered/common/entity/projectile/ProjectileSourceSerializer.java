@@ -25,8 +25,8 @@
 package org.spongepowered.common.entity.projectile;
 
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.LongNBT;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -44,7 +44,7 @@ public class ProjectileSourceSerializer {
     // TODO Revisit when persistent containers are implemented.
     // Note: ProjectileSource itself does not extend DataContainer
 
-    public static NBTBase toNbt(ProjectileSource projectileSource) {
+    public static INBT toNbt(ProjectileSource projectileSource) {
         if (projectileSource instanceof Entity) {
             return new StringNBT(((Entity) projectileSource).getUniqueId().toString());
         }
@@ -54,7 +54,7 @@ public class ProjectileSourceSerializer {
         return null;
     }
 
-    public static ProjectileSource fromNbt(World worldObj, NBTBase tag) {
+    public static ProjectileSource fromNbt(World worldObj, INBT tag) {
         if (tag instanceof StringNBT) {
             Entity entity =
                     ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((StringNBT) tag).getString())).orElse(null);
@@ -78,7 +78,7 @@ public class ProjectileSourceSerializer {
         if (projectileSource == null && potentialEntity instanceof ProjectileSource) {
             projectileSource = (ProjectileSource) potentialEntity;
         }
-        NBTBase projectileNbt = toNbt(projectileSource);
+        INBT projectileNbt = toNbt(projectileSource);
         if (projectileNbt != null) {
             compound.put("projectileSource", projectileNbt);
         }

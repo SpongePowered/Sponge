@@ -35,29 +35,29 @@ import org.spongepowered.common.util.Constants;
 @Mixin(SnowballEntity.class)
 public abstract class SnowballEntityMixin extends ThrowableEntityMixin implements Snowball {
 
-    private double damageAmount = 0;
-    private boolean damageSet = false;
+    private double impl$damageAmount = 0;
+    private boolean impl$damageSet = false;
 
     @ModifyArg(method = "onImpact", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onAttackEntityFrom(float damage) {
-        return this.damageSet ? (float) this.damageAmount : damage;
+    private float impl$onAttackEntityFromUseCustomDamage(float damage) {
+        return this.impl$damageSet ? (float) this.impl$damageAmount : damage;
     }
 
     @Override
     public void impl$readFromSpongeCompound(CompoundNBT compound) {
         super.impl$readFromSpongeCompound(compound);
         if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
-            this.damageSet = true;
+            this.impl$damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
+            this.impl$damageSet = true;
         }
     }
 
     @Override
     public void impl$writeToSpongeCompound(CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
-        if (this.damageSet) {
-            compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
+        if (this.impl$damageSet) {
+            compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damageAmount);
         } else {
             compound.remove(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
         }

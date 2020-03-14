@@ -57,10 +57,11 @@ import org.spongepowered.math.vector.Vector3d;
 import javax.annotation.Nullable;
 
 @Mixin(EnderEyeItem.class)
-public abstract class EnderEyeItemMixin extends Item {
+public abstract class EnderEyeItemMixin extends ItemMixin {
 
     /**
      * @author gabizou - June 10th, 2019 - 1.12.2
+     * @author i509VCB - February 23rd, 2020 - 1.14.4
      * @reason We can throw a construct pre event here before the
      * entity is actually constructed, and if the event is cancelled,
      * we can still return the correct itemstack. If the event is
@@ -81,20 +82,20 @@ public abstract class EnderEyeItemMixin extends Item {
         method = "onItemRightClick",
         at = @At(
             value = "NEW",
-            target = "net/minecraft/entity/item/EntityEnderEye"
+            target = "net/minecraft/entity/item/EyeOfEnderEntity"
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         require = 1,
         cancellable = true
     )
-    private void implThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
+    private void impl$ThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, final RayTraceResult rayTraceResult, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
+            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                EntityTypes.EYE_OF_ENDER, targetTransform);
+                EntityTypes.EYE_OF_ENDER.get(), targetTransform, (org.spongepowered.api.world.World) worldIn);
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }
@@ -113,14 +114,14 @@ public abstract class EnderEyeItemMixin extends Item {
      */
     @SuppressWarnings("Duplicates")
     @Surrogate
-    private void implThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
+    private void impl$ThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
+            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ);
             final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                EntityTypes.EYE_OF_ENDER, targetTransform);
+                EntityTypes.EYE_OF_ENDER.get(), targetTransform, (org.spongepowered.api.world.World) worldIn);
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }
@@ -148,22 +149,22 @@ public abstract class EnderEyeItemMixin extends Item {
     @Inject(method = "onItemRightClick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"
+            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/item/EntityEnderEye;moveTowards(Lnet/minecraft/util/math/BlockPos;)V"
+                target = "Lnet/minecraft/entity/item/EyeOfEnderEntity;moveTowards(Lnet/minecraft/util/math/BlockPos;)V"
             ),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/advancements/CriteriaTriggers;USED_ENDER_EYE:Lnet/minecraft/advancements/critereon/UsedEnderEyeTrigger;",
+                target = "Lnet/minecraft/advancements/CriteriaTriggers;USED_ENDER_EYE:Lnet/minecraft/advancements/criterion/UsedEnderEyeTrigger;",
                 opcode = Opcodes.GETSTATIC
             )
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT
     )
-    private void implSetShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
+    private void impl$setShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack, final RayTraceResult result,
         final BlockPos targetPos, final EyeOfEnderEntity enderEye) {
         if (((WorldBridge) worldIn).bridge$isFake()) {

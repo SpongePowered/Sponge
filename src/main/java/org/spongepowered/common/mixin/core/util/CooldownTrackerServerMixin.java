@@ -53,7 +53,7 @@ public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
         }
         final OptionalInt beforeCooldown = ((CooldownTracker) this).getCooldown(type);
         final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(Sponge.getCauseStackManager().getCurrentCause(),
-                ticks, ticks, type, beforeCooldown, (Player) this.player);
+                ticks, ticks, type, (Player) this.player, beforeCooldown);
 
         if (Sponge.getEventManager().post(event)) {
             this.notifyOnSet((Item) type, beforeCooldown.orElse(0));

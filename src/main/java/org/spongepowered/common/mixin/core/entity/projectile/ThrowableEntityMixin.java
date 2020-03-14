@@ -47,8 +47,7 @@ public abstract class ThrowableEntityMixin extends EntityMixin {
     @Shadow protected LivingEntity owner;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
-    @Nullable
-    public ProjectileSource projectileSource;
+    @Nullable protected ProjectileSource impl$projectileSource;
 
     @Override
     public void impl$readFromSpongeCompound(final CompoundNBT compound) {
@@ -59,7 +58,7 @@ public abstract class ThrowableEntityMixin extends EntityMixin {
     @Override
     public void impl$writeToSpongeCompound(CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Projectile) this).getShooter(), this.owner);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Projectile) this).shooter().get(), this.owner);
     }
 
     @Redirect(method = "tick()V",
@@ -73,7 +72,7 @@ public abstract class ThrowableEntityMixin extends EntityMixin {
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((Projectile) this).getShooter(), movingObjectPosition)) {
+        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((Projectile) this).shooter().get(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
     }

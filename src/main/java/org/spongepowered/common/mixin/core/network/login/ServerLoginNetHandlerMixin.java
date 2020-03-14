@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.network.login;
 
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.login.ServerLoginNetHandler;
-import net.minecraft.network.login.server.SPacketDisconnect;
+import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -67,15 +67,15 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
     @Redirect(method = "tryAcceptPlayer",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;allowUserToConnect(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Ljava/lang/String;"))
-    private String impl$ignoreConnections(final PlayerList confMgr, final SocketAddress address, final com.mojang.authlib.GameProfile profile) {
+            target = "Lnet/minecraft/server/management/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent impl$ignoreConnections(final PlayerList confMgr, final SocketAddress address, final com.mojang.authlib.GameProfile profile) {
         return null; // We handle disconnecting
     }
 
     private void impl$closeConnection(final ITextComponent reason) {
         try {
-            LOGGER.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedText());
-            this.networkManager.sendPacket(new SPacketDisconnect(reason));
+            LOGGER.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedComponentText());
+            this.networkManager.sendPacket(new SDisconnectPacket(reason));
             this.networkManager.closeChannel(reason);
         } catch (Exception exception) {
             LOGGER.error("Error whilst disconnecting player", exception);
@@ -111,7 +111,7 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
     @Inject(method = "processLoginStart",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/server/network/NetHandlerLoginServer;currentLoginState:Lnet/minecraft/server/network/NetHandlerLoginServer$LoginState;",
+            target = "Lnet/minecraft/network/login/ServerLoginNetHandler;currentLoginState:Lnet/minecraft/network/login/ServerLoginNetHandler$State;",
             opcode = Opcodes.PUTFIELD,
             ordinal = 1),
         cancellable = true)
