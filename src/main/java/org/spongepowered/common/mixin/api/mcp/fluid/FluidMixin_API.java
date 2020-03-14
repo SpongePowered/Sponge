@@ -22,46 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.block;
+package org.spongepowered.common.mixin.api.mcp.fluid;
 
-import net.minecraft.block.Block;
+import com.google.common.collect.ImmutableList;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.fluid.FluidState;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.mcp.state.StateHolderMixin_API;
-import org.spongepowered.common.util.Constants;
 
-@Mixin(net.minecraft.block.BlockState.class)
-public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockState, net.minecraft.block.BlockState> implements BlockState {
+import java.util.Collection;
+import java.util.Optional;
 
-    @Shadow public abstract Block shadow$getBlock();
-    @Shadow public abstract IFluidState shadow$getFluidState();
+@Mixin(Fluid.class)
+public abstract class FluidMixin_API implements FluidType {
+
+    @Shadow public abstract net.minecraft.state.StateContainer<Fluid, IFluidState> shadow$getStateContainer();
+    @Shadow public abstract net.minecraft.fluid.IFluidState shadow$getDefaultState();
 
     @Override
-    public BlockType getType() {
-        return (BlockType) this.shadow$getBlock();
+    public ImmutableList<FluidState> getValidStates() {
+        return (ImmutableList) this.shadow$getStateContainer().getValidStates();
     }
 
     @Override
-    public FluidState getFluidState() {
-        return (FluidState) this.shadow$getFluidState();
+    public FluidState getDefaultState() {
+        return (FluidState) this.shadow$getDefaultState();
     }
 
     @Override
-    public int getContentVersion() {
-        return Constants.Sponge.BlockState.STATE_AS_CATALOG_ID;
+    public Collection<StateProperty<?>> getStateProperties() {
+        return (Collection) this.shadow$getStateContainer().getProperties();
     }
 
     @Override
-    public DataContainer toContainer() {
-        return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Block.BLOCK_STATE, this.getId());
+    public Optional<StateProperty<?>> getStatePropertyByName(String name) {
+        return Optional.ofNullable((StateProperty) this.shadow$getStateContainer().getProperty(name));
     }
 }
