@@ -179,7 +179,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -197,14 +196,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 public class SpongeCommonEventFactory {
-
-    // Set if any of the events fired during interaction with a block (open
-
-    public static int lastAnimationPacketTick = 0;
-    // For animation packet
-    public static int lastSecondaryPacketTick = 0;
-    public static int lastPrimaryPacketTick = 0;
-    @Nullable public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
 
     public static void callDropItemDispense(final List<EntityItem> items, final PhaseContext<?> context) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

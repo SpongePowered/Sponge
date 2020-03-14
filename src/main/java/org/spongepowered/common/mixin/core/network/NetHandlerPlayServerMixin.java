@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.network;
 
 import com.flowpowered.math.vector.Vector3d;
 import io.netty.util.collection.LongObjectHashMap;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -78,6 +77,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.type.HandType;
@@ -108,7 +108,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -133,11 +132,11 @@ import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.network.play.client.CPacketPlayerAccessor;
+import org.spongepowered.common.mixin.core.server.management.PlayerInteractionManagerAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
-import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -698,16 +697,16 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
     @Inject(method = "handleAnimation",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;markPlayerActive()V"), cancellable = true)
-    private void impl$throwAnimationEvent(final CPacketAnimation packetIn, final CallbackInfo ci) {
+    private void impl$throwAnimationAndInteractEvents(final CPacketAnimation packetIn, final CallbackInfo ci) {
         if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
             return;
         }
-        SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
-        SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
+
+        final EnumHand hand = packetIn.getHand();
+
         if (ShouldFire.ANIMATE_HAND_EVENT) {
-            final HandType handType = (HandType) (Object) packetIn.getHand();
-            final ItemStack heldItem = this.player.getHeldItem(packetIn.getHand());
-            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+            final HandType handType = (HandType) (Object) hand;
+            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(this.player.getHeldItem(hand)));
             Sponge.getCauseStackManager().addContext(EventContextKeys.USED_HAND, handType);
             final AnimateHandEvent event =
                 SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) this.player);
@@ -715,14 +714,28 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                 ci.cancel();
             }
         }
-    }
 
-    @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
-    private void impl$updateLastPrimaryPacket(final CPacketPlayerDigging packetIn, final CallbackInfo ci) {
-        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
+        /*
+        Performance note:
+        handleAnimation() is called each tick when the player is mining.
+        This little condition avoids a lot of useless raytracing.
+         */
+        if (((PlayerInteractionManagerAccessor) this.player.interactionManager).accessor$isDestroyingBlock()) {
             return;
         }
-        SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
+
+        final RayTraceResult result = SpongeImplHooks.rayTraceEyes(this.player, SpongeImplHooks.getBlockReachDistance(this.player));
+        // The player is interacting a non-air block, the events are already fired elsewhere.
+        if (result != null && result.getBlockPos() != null) {
+            return;
+        }
+
+        ItemStack stack = this.player.getHeldItem(hand);
+        if (!stack.isEmpty() && SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, stack, hand, null, BlockSnapshot.NONE).isCancelled()) {
+            return;
+        }
+
+        SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, stack, hand, null);
     }
 
     @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
@@ -735,7 +748,6 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
     @Inject(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"), cancellable = true)
     private void onProcessTryUseItem(final CPacketPlayerTryUseItem packetIn, final CallbackInfo ci) {
-        SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
         final long packetDiff = System.currentTimeMillis() - this.impl$lastTryBlockPacketTimeStamp;
         // If the time between packets is small enough, use the last result.
         if (packetDiff < 100) {
@@ -751,8 +763,6 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         // InteractItemEvent on block must be handled in PlayerInteractionManager to support item/block results.
         // Only track the timestamps to support our block animation events
         this.impl$lastTryBlockPacketTimeStamp = System.currentTimeMillis();
-        SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
-
     }
 
     /**
@@ -810,8 +820,6 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                         final EnumHand hand = packetIn.getHand();
                         final ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
 
-                        SpongeCommonEventFactory.lastSecondaryPacketTick = this.server.getTickCounter();
-
                         // Is interaction allowed with item in hand
                         if (SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, itemstack,
                             entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
@@ -855,7 +863,6 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
                     // Sponge start - Call interact event
                     final EnumHand hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
                     final ItemStack itemstack = this.player.getHeldItem(hand);
-                    SpongeCommonEventFactory.lastPrimaryPacketTick = this.server.getTickCounter();
 
                     Vector3d hitVec = null;
 

@@ -374,6 +374,7 @@
         "server.management.PlayerChunkMapEntryAccessor",
         "server.management.PlayerChunkMapEntryMixin",
         "server.management.PlayerChunkMapMixin",
+        "server.management.PlayerInteractionManagerAccessor",
         "server.management.PlayerInteractionManagerMixin",
         "server.management.PlayerProfileCacheMixin",
         "server.management.PlayerProfileCache_ProfileEntryAccessor",
