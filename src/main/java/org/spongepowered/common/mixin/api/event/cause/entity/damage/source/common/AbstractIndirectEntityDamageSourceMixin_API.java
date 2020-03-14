@@ -29,7 +29,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDama
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -51,15 +50,13 @@ import org.spongepowered.common.mixin.accessor.util.IndirectEntityDamageSourceAc
 @Mixin(AbstractIndirectEntityDamageSource.class)
 public abstract class AbstractIndirectEntityDamageSourceMixin_API implements IndirectEntityDamageSource {
 
-	@Shadow public abstract org.spongepowered.api.entity.Entity getIndirectSource();
-
-	@SuppressWarnings("ConstantConditions")
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
         final SpongeCommonIndirectEntityDamageSource commonIndirect = (SpongeCommonIndirectEntityDamageSource) (Object) this;
-	    ((DamageSourceAccessor) commonIndirect).accessor$setDamageType(this.getType().getKey().getFormatted());
-	    ((EntityDamageSourceAccessor) commonIndirect).accessor$setDamageSourceEntity((Entity) this.getSource());
-	    ((IndirectEntityDamageSourceAccessor) commonIndirect).accessor$setIndirectEntity((Entity) this.getIndirectSource());
+        ((DamageSourceAccessor) commonIndirect).accessor$setDamageType(this.getType().getKey().getFormatted());
+        ((EntityDamageSourceAccessor) commonIndirect).accessor$setDamageSourceEntity((Entity) this.getSource());
+        ((IndirectEntityDamageSourceAccessor) commonIndirect).accessor$setIndirectEntity((Entity) this.getIndirectSource());
 
         if (this.isAbsolute()) {
             commonIndirect.bridge$setDamageIsAbsolute();
