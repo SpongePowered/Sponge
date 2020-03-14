@@ -32,6 +32,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.damage.SpongeCommonEntityDamageSource;
+import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.mixin.accessor.util.EntityDamageSourceAccessor;
 
 /*
  * @author gabizou
@@ -49,8 +51,9 @@ public abstract class AbstractEntityDamageSourceMixin_API implements EntityDamag
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$bridgeApiToImplConstruction(final CallbackInfo callbackInfo) {
         final SpongeCommonEntityDamageSource commonSource = (SpongeCommonEntityDamageSource) (Object) this;
-        commonSource.setDamageType(this.getType().getId());
-        commonSource.setEntitySource((Entity) this.getSource());
+	    ((DamageSourceAccessor) commonSource).accessor$setDamageType(this.getType().getKey().getFormatted());
+        ((EntityDamageSourceAccessor) commonSource).accessor$setDamageSourceEntity((Entity) this.getSource());
+
         if (this.isAbsolute()) {
             commonSource.bridge$setDamageIsAbsolute();
         }

@@ -101,6 +101,7 @@
         "util.CombatTrackerAccessor",
         "util.CooldownTracker_CooldownAccessor",
         "util.DamageSourceAccessor",
+        "util.EntityDamageSourceAccessor",
         "util.FoodStatsAccessor",
         "util.IndirectEntityDamageSourceAccessor",
         "util.WeightedRandom_ItemAccessor",

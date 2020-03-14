@@ -26,14 +26,20 @@ package org.spongepowered.common.mixin.api.event.cause.entity.damage.source.comm
 
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.damage.SpongeCommonDamageSource;
 import org.spongepowered.common.event.damage.SpongeCommonIndirectEntityDamageSource;
+import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.mixin.accessor.util.EntityDamageSourceAccessor;
+import org.spongepowered.common.mixin.accessor.util.IndirectEntityDamageSourceAccessor;
 
-/*
+/**
  * @author gabizou
  *
  * This is absolutely required for the abstract damage sources to have the correct
@@ -45,13 +51,16 @@ import org.spongepowered.common.event.damage.SpongeCommonIndirectEntityDamageSou
 @Mixin(AbstractIndirectEntityDamageSource.class)
 public abstract class AbstractIndirectEntityDamageSourceMixin_API implements IndirectEntityDamageSource {
 
-    @SuppressWarnings("ConstantConditions")
+	@Shadow public abstract org.spongepowered.api.entity.Entity getIndirectSource();
+
+	@SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
         final SpongeCommonIndirectEntityDamageSource commonIndirect = (SpongeCommonIndirectEntityDamageSource) (Object) this;
-        commonIndirect.setDamageType(this.getType().getId());
-        commonIndirect.setEntitySource((Entity) this.getSource());
-        commonIndirect.setIndirectSource((Entity) this.getIndirectSource());
+	    ((DamageSourceAccessor) commonIndirect).accessor$setDamageType(this.getType().getKey().getFormatted());
+	    ((EntityDamageSourceAccessor) commonIndirect).accessor$setDamageSourceEntity((Entity) this.getSource());
+	    ((IndirectEntityDamageSourceAccessor) commonIndirect).accessor$setIndirectEntity((Entity) this.getIndirectSource());
+
         if (this.isAbsolute()) {
             commonIndirect.bridge$setDamageIsAbsolute();
         }

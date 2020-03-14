@@ -24,13 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.event.cause.entity.damage.source.common;
 
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.damage.SpongeCommonDamageSource;
+import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
 
 /*
  * @author gabizou
@@ -44,11 +47,14 @@ import org.spongepowered.common.event.damage.SpongeCommonDamageSource;
 @Mixin(AbstractDamageSource.class)
 public abstract class AbstractDamageSourceMixin_API implements DamageSource {
 
-    @SuppressWarnings("ConstantConditions")
+	@Shadow public abstract DamageType getType();
+
+	@SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
         final SpongeCommonDamageSource commonSource = (SpongeCommonDamageSource) (Object) this;
-        commonSource.setDamageType(this.getType().getId());
+	    ((DamageSourceAccessor) commonSource).accessor$setDamageType(this.getType().getKey().getFormatted());
+
         if (this.isAbsolute()) {
             commonSource.bridge$setDamageIsAbsolute();
         }
