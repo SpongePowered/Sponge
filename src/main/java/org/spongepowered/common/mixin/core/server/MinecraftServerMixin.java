@@ -24,18 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.crash.CrashReport;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
@@ -46,7 +45,6 @@ import net.minecraft.world.WorldType;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.TabCompleteEvent;
@@ -82,7 +80,6 @@ import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -98,7 +95,6 @@ import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
-import javax.annotation.Nullable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +102,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements SubjectBridge, CommandSourceBridge, CommandSenderBridge,
@@ -318,35 +314,8 @@ public abstract class MinecraftServerMixin implements SubjectBridge, CommandSour
     }
 
     @Inject(method = "tick", at = @At(value = "RETURN"))
-    private void impl$copmleteTickCheckAnimationAndPhaseTracker(final CallbackInfo ci) {
-        final int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
-        final int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
-        final int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
-        if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
-            final EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer.get();
-            if (player != null && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
-                final BlockSnapshot blockSnapshot = BlockSnapshot.NONE;
-
-                final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player) + 1);
-                // Hit non-air block
-                if (result != null && result.getBlockPos() != null) {
-                    return;
-                }
-
-                if (!player.getHeldItemMainhand().isEmpty() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
-                    SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-                    SpongeCommonEventFactory.lastAnimationPlayer = null;
-                    return;
-                }
-
-                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, null);
-            }
-            SpongeCommonEventFactory.lastAnimationPlayer = null;
-        }
-        SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-
+    private void impl$completePhaseTracker(final CallbackInfo ci) {
         PhaseTracker.getInstance().ensureEmpty();
-
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 
