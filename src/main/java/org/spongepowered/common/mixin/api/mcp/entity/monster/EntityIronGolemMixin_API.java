@@ -25,10 +25,19 @@
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.EntityIronGolem;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.PlayerCreatedData;
 import org.spongepowered.api.entity.living.golem.IronGolem;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Collection;
 
 @Mixin(EntityIronGolem.class)
 public abstract class EntityIronGolemMixin_API extends EntityGolemMixin_API implements IronGolem {
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        this.get(PlayerCreatedData.class).ifPresent(manipulators::add);
+    }
 }

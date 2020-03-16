@@ -25,8 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.EntityTameable;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Collection;
 
 @Mixin(EntityTameable.class)
 public abstract class EntityTameableMixin_API extends EntityAnimalMixin_API {
@@ -34,4 +39,10 @@ public abstract class EntityTameableMixin_API extends EntityAnimalMixin_API {
     @Shadow public abstract boolean shadow$isTamed();
     @Shadow public abstract boolean shadow$isSitting();
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        this.get(SittingData.class).ifPresent(manipulators::add);
+        this.get(TameableData.class).ifPresent(manipulators::add);
+    }
 }

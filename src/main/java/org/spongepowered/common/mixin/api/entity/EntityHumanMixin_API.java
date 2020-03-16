@@ -25,11 +25,15 @@
 package org.spongepowered.common.mixin.api.entity;
 
 import com.mojang.authlib.GameProfile;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityCreatureMixin_API;
+
+import java.util.Collection;
 
 @Mixin(value = EntityHuman.class, remap = false)
 public abstract class EntityHumanMixin_API extends EntityCreatureMixin_API implements Human {
@@ -41,4 +45,9 @@ public abstract class EntityHumanMixin_API extends EntityCreatureMixin_API imple
         return this.fakeProfile.getName();
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        this.get(SkinData.class).ifPresent(manipulators::add);
+    }
 }

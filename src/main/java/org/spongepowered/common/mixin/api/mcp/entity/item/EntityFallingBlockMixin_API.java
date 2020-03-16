@@ -25,11 +25,19 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.EntityFallingBlock;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
+import java.util.Collection;
+
 @Mixin(EntityFallingBlock.class)
 public abstract class EntityFallingBlockMixin_API extends EntityMixin_API implements FallingBlock {
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getFallingBlockData());
+    }
 }

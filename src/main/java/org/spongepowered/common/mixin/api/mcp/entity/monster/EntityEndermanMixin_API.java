@@ -36,9 +36,9 @@ import java.util.Collection;
 public abstract class EntityEndermanMixin_API extends EntityMobMixin_API implements Enderman {
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(get(ScreamingData.class).get());
+        this.get(ScreamingData.class).ifPresent(manipulators::add);
     }
 
 }

@@ -51,7 +51,7 @@ public abstract class EntityBoatMixin_API extends EntityMixin_API implements Boa
     private double unoccupiedDecelerationSpeed = 0.8D;
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         final EntityBoat.Type boatType = this.getBoatType();
         if (boatType == EntityBoat.Type.OAK) {

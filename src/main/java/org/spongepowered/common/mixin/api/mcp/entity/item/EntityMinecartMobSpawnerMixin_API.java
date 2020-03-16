@@ -59,8 +59,8 @@ public abstract class EntityMinecartMobSpawnerMixin_API extends EntityMinecartMi
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getSpawnerData());
+        manipulators.add(this.getSpawnerData());
     }
 }

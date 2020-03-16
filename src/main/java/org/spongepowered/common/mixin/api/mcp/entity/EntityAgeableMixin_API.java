@@ -26,7 +26,9 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.BreedableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Ageable;
@@ -36,6 +38,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableDat
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
+
+import java.util.Collection;
 
 @Mixin(EntityAgeable.class)
 public abstract class EntityAgeableMixin_API extends EntityCreatureMixin_API implements Ageable {
@@ -69,5 +73,12 @@ public abstract class EntityAgeableMixin_API extends EntityCreatureMixin_API imp
     @Override
     public Value<Boolean> adult() {
         return new SpongeValue<>(Keys.IS_ADULT, true,  this.shadow$isChild());
+    }
+
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getAgeData());
+        this.get(BreedableData.class).ifPresent(manipulators::add);
     }
 }

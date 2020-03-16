@@ -29,6 +29,8 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
+import org.spongepowered.api.data.manipulator.mutable.entity.PickupDelayData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.item.ItemType;
@@ -69,8 +71,10 @@ public abstract class EntityItemMixin_API extends EntityMixin_API implements Ite
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getItemData());
+        manipulators.add(this.getItemData());
+        this.get(DespawnDelayData.class).ifPresent(manipulators::add);
+        this.get(PickupDelayData.class).ifPresent(manipulators::add);
     }
 }

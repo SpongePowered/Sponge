@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 import net.minecraft.entity.monster.EntityBlaze;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.FlammableData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.monster.Blaze;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlammableData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Collection;
@@ -47,8 +47,8 @@ public abstract class EntityBlazeMixin_API extends EntityMobMixin_API implements
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeFlammableData(this.isBurning()));
+        this.get(FlammableData.class).ifPresent(manipulators::add);
     }
 }

@@ -35,7 +35,6 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -59,10 +58,9 @@ public abstract class EntityOcelotMixin_API extends EntityTameableMixin_API impl
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
-        manipulators.add(getOcelotData());
+        manipulators.add(this.getOcelotData());
     }
 
     @Override

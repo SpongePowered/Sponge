@@ -25,10 +25,21 @@
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityPotion;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
+import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.entity.projectile.ThrownPotion;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Collection;
 
 @Mixin(EntityPotion.class)
 public abstract class EntityPotionMixin_API extends EntityThrowableMixin_API implements ThrownPotion {
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        this.get(PotionEffectData.class).ifPresent(manipulators::add);
+        this.get(RepresentedItemData.class).ifPresent(manipulators::add);
+    }
 }

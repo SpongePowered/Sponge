@@ -48,8 +48,22 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
+import org.spongepowered.api.data.manipulator.mutable.entity.CustomNameVisibleData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.GlowingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.GravityData;
+import org.spongepowered.api.data.manipulator.mutable.entity.GriefingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
+import org.spongepowered.api.data.manipulator.mutable.entity.InvulnerabilityData;
+import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
+import org.spongepowered.api.data.manipulator.mutable.entity.SilentData;
+import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.SprintData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
+import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -77,7 +91,6 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.EntityUtil;
@@ -652,11 +665,22 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        this.get(CustomNameVisibleData.class).ifPresent(manipulators::add);
+        this.get(DisplayNameData.class).ifPresent(manipulators::add);
+        this.get(FlyingData.class).ifPresent(manipulators::add);
+        this.get(GlowingData.class).ifPresent(manipulators::add);
+        this.get(GravityData.class).ifPresent(manipulators::add);
+        this.get(GriefingData.class).ifPresent(manipulators::add);
+        this.get(IgniteableData.class).ifPresent(manipulators::add);
+        this.get(InvisibilityData.class).ifPresent(manipulators::add);
+        this.get(InvulnerabilityData.class).ifPresent(manipulators::add);
+        this.get(PassengerData.class).ifPresent(manipulators::add);
+        this.get(SilentData.class).ifPresent(manipulators::add);
+        this.get(SneakingData.class).ifPresent(manipulators::add);
+        this.get(SprintData.class).ifPresent(manipulators::add);
+        this.get(TargetedLocationData.class).ifPresent(manipulators::add);
         this.get(VehicleData.class).ifPresent(manipulators::add);
-        if (this.fire > 0) {
-            manipulators.add(this.get(IgniteableData.class).get());
-        }
-        manipulators.add(new SpongeGravityData(!this.hasNoGravity()));
+        this.get(VelocityData.class).ifPresent(manipulators::add);
     }
 
 }

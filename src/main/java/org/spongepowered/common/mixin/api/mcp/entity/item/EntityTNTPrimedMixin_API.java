@@ -32,6 +32,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -42,6 +43,7 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -94,6 +96,12 @@ public abstract class EntityTNTPrimedMixin_API extends EntityMixin_API implement
         explode();
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getExplosionRadiusData());
+        manipulators.add(this.getFuseData());
+    }
 
 
 }

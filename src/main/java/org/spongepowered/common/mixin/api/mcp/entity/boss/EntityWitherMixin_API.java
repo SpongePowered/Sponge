@@ -31,6 +31,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.world.BossInfoServer;
 import org.spongepowered.api.boss.ServerBossBar;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.asm.mixin.Final;
@@ -40,6 +41,7 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.api.mcp.entity.monster.EntityMobMixin_API;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(value = EntityWither.class)
@@ -106,4 +108,10 @@ public abstract class EntityWitherMixin_API extends EntityMobMixin_API implement
         return ((FusedExplosiveBridge) this).bridge$getFuseTicksRemaining() > 0;
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getExplosionRadiusData());
+        manipulators.add(this.getFuseData());
+    }
 }

@@ -76,9 +76,9 @@ public abstract class EntityShulkerMixin_API extends EntityGolemMixin_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getDyeData());
-        manipulators.add(getDirectionalData());
+        manipulators.add(this.getDirectionalData());
+        manipulators.add(this.getDyeData());
     }
 }
