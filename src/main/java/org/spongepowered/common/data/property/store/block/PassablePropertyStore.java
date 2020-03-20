@@ -46,14 +46,14 @@ public class PassablePropertyStore extends AbstractBlockPropertyStore<PassablePr
     }
 
     @Override
-    protected Optional<PassableProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
+    protected Optional<PassableProperty> getForBlock(@Nullable Location location, BlockState block) {
         return Optional.of(block.getMaterial().blocksMovement() ? FALSE : TRUE);
     }
 
     @Override
-    public Optional<PassableProperty> getFor(Location<World> location) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final Block block = (Block) location.getBlockType();
+    public Optional<PassableProperty> getFor(Location location) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
+        final Block block = (Block) location.getBlock().getType();
         return Optional.of(block.isPassable(world, VecHelper.toBlockPos(location)) ? TRUE : FALSE);
     }
 

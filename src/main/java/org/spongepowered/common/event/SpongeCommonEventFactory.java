@@ -1127,7 +1127,7 @@ public class SpongeCommonEventFactory {
     public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final JukeboxTileEntity jukebox,
         final MusicDisc recordType, final int data) {
         final Jukebox apiJuke = (Jukebox) jukebox;
-        final Location<World> location = apiJuke.getLocation();
+        final Location location = apiJuke.getLocation();
         final PlaySoundEvent.Record
             event =
             data == 0 ? SpongeEventFactory

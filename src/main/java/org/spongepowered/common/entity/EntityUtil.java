@@ -563,7 +563,7 @@ public final class EntityUtil {
         }
 
         fromWorld.profiler.startSection("reposition");
-        final Transform<World> toTransform = getPortalExitTransform(entity, fromWorld, toWorld);
+        final Transform toTransform = getPortalExitTransform(entity, fromWorld, toWorld);
         fromWorld.profiler.endSection();
 
         // Portals create blocks and the PhaseTracker is known to capture blocks..
@@ -651,7 +651,7 @@ public final class EntityUtil {
             z = (double) MathHelper.clamp((int) z, -29999872, 29999872);
         }
 
-        transform = new Transform<>((World) toWorld, new Vector3d(x, y, z), new Vector3d(entity.rotationPitch, entity.rotationYaw, 0f));
+        transform = Transform.of(new Vector3d(x, y, z), new Vector3d(entity.rotationPitch, entity.rotationYaw, 0f));
 
         return transform;
     }
@@ -664,27 +664,27 @@ public final class EntityUtil {
         return entity.removed;
     }
 
-    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final Location<World> location) {
-        final Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
-        final Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final Location location) {
+        final Transform fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
+        final Transform toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final double posX, final double posY, final double posZ, final float yaw, final float pitch) {
-        final Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
-        final Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
+        final Transform fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
+        final Transform toTransform = fromTransform.withPosition(new Vector3d(posX, posY, posZ)).withRotation(new Vector3d(pitch, yaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(
-        final Entity entityIn, final Transform<World> fromTransform, final Transform<World> toTransform) {
+        final Entity entityIn, final Transform fromTransform, final Transform toTransform) {
 
         // Use origin world to get correct cause
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entityIn);
 
             final MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(),
-                fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn, false);
+                fromTransform, toTransform, fromWorld, toWorld, (org.spongepowered.api.entity.Entity) entityIn, false);
             SpongeImpl.postEvent(event);
             return event;
         }

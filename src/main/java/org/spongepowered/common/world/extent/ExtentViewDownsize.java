@@ -414,7 +414,7 @@ public class ExtentViewDownsize implements DefaultedExtent {
     @Override
     public boolean spawnEntity(Entity entity) {
         checkNotNull(entity, "The entity cannot be null!");
-        final Location<World> location = entity.getLocation();
+        final Location location = entity.getLocation();
         this.checkBlockRange(location.getX(), location.getY(), location.getZ());
         return this.extent.spawnEntity(entity);
     }

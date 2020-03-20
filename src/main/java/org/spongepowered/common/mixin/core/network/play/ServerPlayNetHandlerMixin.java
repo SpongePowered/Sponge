@@ -141,11 +141,11 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
 
     private boolean impl$justTeleported = false;
     private long impl$lastTryBlockPacketTimeStamp = 0;
-    @Nullable private Location<World> impl$lastMoveLocation = null;
+    @Nullable private Location impl$lastMoveLocation = null;
     @Nullable private ResourcePack impl$lastReceivedPack, lastAcceptedPack;
     private final AtomicInteger impl$numResourcePacksInTransit = new AtomicInteger();
     private final LongObjectHashMap<Runnable> impl$customKeepAliveCallbacks = new LongObjectHashMap<>();
-    @Nullable private Transform<World> impl$spectatingTeleportLocation;
+    @Nullable private Transform impl$spectatingTeleportLocation;
 
     @Override
     public void bridge$captureCurrentPlayerPosition() {
@@ -469,11 +469,11 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) ridingEntity;
         final Vector3d fromrot = spongeEntity.getRotation();
 
-        final Location<World> from = spongeEntity.getLocation();
+        final Location from = spongeEntity.getLocation();
         final Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
-        final Location<World> to = Location.of(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
-        final Transform<World> fromTransform = spongeEntity.getTransform().setLocation(from).setRotation(fromrot);
-        final Transform<World> toTransform = spongeEntity.getTransform().setLocation(to).setRotation(torot);
+        final Location to = Location.of(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
+        final Transform fromTransform = spongeEntity.getTransform().withPosition(from.getPosition()).withRotation(fromrot);
+        final Transform toTransform = spongeEntity.getTransform().withPosition(to.getPosition()).withRotation(torot);
         final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (Player) this.player);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
@@ -700,7 +700,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
     }
 
     @Override
-    public void bridge$setLastMoveLocation(final Location<World> location) {
+    public void bridge$setLastMoveLocation(final Location location) {
         this.impl$lastMoveLocation = location;
     }
 

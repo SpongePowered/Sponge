@@ -64,20 +64,18 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
     }
 
     @Override
-    public void apply(Location<World> location, BlockChangeFlag changeFlag) {
+    public void apply(Location location, BlockChangeFlag changeFlag) {
         super.apply(location, changeFlag);
         if (this.biomes != null) {
             this.biomes.getBiomeWorker().iterate((v, x, y, z) -> {
-                location.getExtent().setBiome(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBiome(x, y, z));
+                location.getWorld().setBiome(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBiome(x, y, z));
             });
         }
     }
 
     @Override
-    public org.spongepowered.api.world.schematic.BlockPalette getPalette() {
-        return (org.spongepowered.api.world.schematic.BlockPalette) (this.overriddenBlockPalette == null
-                                                                     ? super.getPalette()
-                                                                     : this.overriddenBlockPalette);
+    public Palette<BlockState>  getPalette() {
+        return this.overriddenBlockPalette == null ? super.getPalette() : this.overriddenBlockPalette;
     }
 
     @Override

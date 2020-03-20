@@ -57,41 +57,41 @@ public class FurnaceSmeltTest implements LoadableModule {
 
         @Listener
         public void onSmeltStart(SmeltEvent.Start event) {
-            Location<World> loc = event.getTargetTile().getLocation();
-            loc.getExtent().playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, loc.getPosition(), 1);
+            Location loc = event.getTargetTile().getLocation();
+            loc.getWorld().playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, loc.getPosition(), 1);
         }
 
         @Listener
         public void onSmeltConsumeFuel(SmeltEvent.ConsumeFuel event) {
-            Location<World> loc = event.getTargetTile().getLocation();
-            loc.getExtent().playSound(SoundTypes.ENTITY_SHULKER_TELEPORT, loc.getPosition(), 1);
+            Location loc = event.getTargetTile().getLocation();
+            loc.getWorld().playSound(SoundTypes.ENTITY_SHULKER_TELEPORT, loc.getPosition(), 1);
         }
 
         @Listener
         public void onSmeltTick(SmeltEvent.Tick event) {
-            Location<World> loc = event.getTargetTile().getLocation();
+            Location loc = event.getTargetTile().getLocation();
             MutableBoundedValue<Integer> passedBurnTime = event.getTargetTile().getFurnaceData().passedBurnTime();
             if (passedBurnTime.get() >= passedBurnTime.getMaxValue()) {
-                loc.getExtent().spawnParticles(this.smokingEffect, loc.getPosition().add(0.5, 1, 0.5));
+                loc.getWorld().spawnParticles(this.smokingEffect, loc.getPosition().add(0.5, 1, 0.5));
             } else {
-                loc.getExtent().spawnParticles(this.smokingEffect, loc.getPosition().add(0.5, 1, 0.5));
-                loc.getExtent().spawnParticles(this.smokingEffect, loc.getPosition().add(0.25, 1, 0.25));
-                loc.getExtent().spawnParticles(this.smokingEffect, loc.getPosition().add(0.25, 1, 0.75));
-                loc.getExtent().spawnParticles(this.smokingEffect, loc.getPosition().add(0.75, 1, 0.25));
-                loc.getExtent().spawnParticles(this.smokingEffect, loc.getPosition().add(0.75, 1, 0.75));
+                loc.getWorld().spawnParticles(this.smokingEffect, loc.getPosition().add(0.5, 1, 0.5));
+                loc.getWorld().spawnParticles(this.smokingEffect, loc.getPosition().add(0.25, 1, 0.25));
+                loc.getWorld().spawnParticles(this.smokingEffect, loc.getPosition().add(0.25, 1, 0.75));
+                loc.getWorld().spawnParticles(this.smokingEffect, loc.getPosition().add(0.75, 1, 0.25));
+                loc.getWorld().spawnParticles(this.smokingEffect, loc.getPosition().add(0.75, 1, 0.75));
             }
         }
 
         @Listener
         public void onSmeltInterupt(SmeltEvent.Interrupt event) {
-            Location<World> loc = event.getTargetTile().getLocation();
-            loc.getExtent().playSound(SoundTypes.BLOCK_STONE_BUTTON_CLICK_OFF, loc.getPosition(), 1);
+            Location loc = event.getTargetTile().getLocation();
+            loc.getWorld().playSound(SoundTypes.BLOCK_STONE_BUTTON_CLICK_OFF, loc.getPosition(), 1);
         }
 
         @Listener
         public void onSmeltFinish(SmeltEvent.Finish event) {
-            Location<World> loc = event.getTargetTile().getLocation();
-            loc.getExtent().playSound(SoundTypes.ENTITY_PLAYER_LEVELUP, loc.getPosition(), 1);
+            Location loc = event.getTargetTile().getLocation();
+            loc.getWorld().playSound(SoundTypes.ENTITY_PLAYER_LEVELUP, loc.getPosition(), 1);
         }
     }
 }

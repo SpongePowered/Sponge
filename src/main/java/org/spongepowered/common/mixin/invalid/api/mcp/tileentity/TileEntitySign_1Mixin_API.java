@@ -61,7 +61,7 @@ public abstract class TileEntitySign_1Mixin_API implements SignSource {
     }
 
     @Override
-    public Location<World> getLocation() {
+    public Location getLocation() {
         return ((Sign) this.field_174795_a).getLocation();
     }
 }

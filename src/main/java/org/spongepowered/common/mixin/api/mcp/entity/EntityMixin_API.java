@@ -190,7 +190,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                     return false;
                 }
 
-                location = event.getToTransform().getLocation();
+                location = Location.of(event.getToWorld(), event.getToTransform().getPosition());
                 this.rotationPitch = (float) event.getToTransform().getPitch();
                 this.rotationYaw = (float) event.getToTransform().getYaw();
             }

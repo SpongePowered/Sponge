@@ -24,16 +24,16 @@
  */
 package org.spongepowered.test.myhomes.data.home.impl;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.World;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.test.myhomes.data.home.Home;
 
 import java.util.UUID;
@@ -59,20 +59,20 @@ public class HomeTranslator implements DataTranslator<Home> {
             throw new InvalidDataException("Incomplete data");
         }
 
-        World world = Sponge.getServer().getWorld(content.getObject(Home.WORLD_QUERY, UUID.class).get())
+        World world = Sponge.getServer().getWorldManager().getWorld(content.getObject(Home.WORLD_QUERY, UUID.class).get())
                 .orElseThrow(InvalidDataException::new);
         Vector3d position = content.getObject(Home.POSITION_QUERY, Vector3d.class).get();
         Vector3d rotation = content.getObject(Home.ROTATION_QUERY, Vector3d.class).get();
         String name = content.getString(Home.NAME_QUERY).get();
 
-        Transform<World> transform = new Transform<>(world, position, rotation);
-        return new Home(transform, name);
+        Transform transform = Transform.of(position, rotation);
+        return new Home(world, transform, name);
     }
 
     @Override
     public DataContainer translate(Home home) throws InvalidDataException {
         return DataContainer.createNew()
-                .set(Home.WORLD_QUERY, home.getTransform().getExtent().getUniqueId())
+                .set(Home.WORLD_QUERY, home.getWorld().getProperties().getUniqueId())
                 .set(Home.POSITION_QUERY, home.getTransform().getPosition())
                 .set(Home.ROTATION_QUERY, home.getTransform().getRotation())
                 .set(Home.NAME_QUERY, home.getName())

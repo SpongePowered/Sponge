@@ -46,12 +46,12 @@ public abstract class AbstractItemStackPropertyStore<T extends Property<?, ?>> e
     }
 
     @Override
-    public final Optional<T> getFor(Location<World> location) {
+    public final Optional<T> getFor(Location location) {
         return Optional.empty();
     }
 
     @Override
-    public final Optional<T> getFor(Location<World> location, Direction direction) {
+    public final Optional<T> getFor(Location location, Direction direction) {
         return Optional.empty();
     }
 }

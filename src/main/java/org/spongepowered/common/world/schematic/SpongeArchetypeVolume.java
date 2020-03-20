@@ -125,9 +125,9 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     }
 
     @Override
-    public void apply(Location<World> location, BlockChangeFlag changeFlag) {
+    public void apply(Location location, BlockChangeFlag changeFlag) {
         this.backing.getBlockWorker().iterate((v, x, y, z) -> {
-            location.getExtent().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag);
+            location.getWorld().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag);
         });
         for (Vector3i pos : this.tiles.keySet()) {
             BlockEntityArchetype archetype = this.tiles.get(pos);
@@ -138,7 +138,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
                 for (EntityArchetype entity : this.entities) {
                     final Vector3d vector3d = ((SpongeEntityArchetype) entity).getPosition().get();
-                    final Location<World> target = location.add(vector3d);
+                    final Location target = location.add(vector3d);
                     entity.apply(target);
                 }
             }

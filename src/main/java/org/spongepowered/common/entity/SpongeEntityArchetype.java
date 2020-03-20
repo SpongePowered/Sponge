@@ -102,13 +102,13 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> apply(Location<World> location) {
+    public Optional<org.spongepowered.api.entity.Entity> apply(Location location) {
         final Vector3d position = location.getPosition();
         final double x = position.getX();
         final double y = position.getY();
         final double z = position.getZ();
         final BlockPos blockPos = new BlockPos(x, y, z);
-        final World world = location.getExtent();
+        final World world = location.getWorld();
         final ServerWorld worldServer = (ServerWorld) world;
 
         Entity entity = null;
@@ -127,7 +127,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         }
 
         this.data.put("Pos", Constants.NBT.newDoubleNBTList(x, y, z));
-        this.data.putInt("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
+        this.data.putInt("Dimension", ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId());
         final boolean requiresInitialSpawn;
         if (this.data.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
             requiresInitialSpawn = !this.data.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
@@ -162,15 +162,15 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
-    public EntitySnapshot toSnapshot(Location<World> location) {
+    public EntitySnapshot toSnapshot(Location location) {
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
         CompoundNBT newCompound = this.data.copy();
         newCompound.put("Pos", Constants.NBT
                 .newDoubleNBTList(new double[] { location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ() }));
-        newCompound.putInt("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
+        newCompound.putInt("Dimension", ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId());
         builder.compound = newCompound;
-        builder.worldId = location.getExtent().getUniqueId();
+        builder.worldId = location.getWorld().getProperties().getUniqueId();
         builder.position = location.getPosition();
         return builder.build();
     }

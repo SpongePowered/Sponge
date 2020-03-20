@@ -72,7 +72,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
      */
     @Overwrite
     public void placeInPortal(Entity entityIn, float rotationYaw) {
-        Location<World> targetLocation = ((org.spongepowered.api.entity.Entity) entityIn).getLocation();
+        Location targetLocation = ((org.spongepowered.api.entity.Entity) entityIn).getLocation();
         // Sponge - remove hardcode to support any world using end or nether providers
         if (this.impl$createNetherPortal) {
             if (!this.placeInExistingPortal(entityIn, rotationYaw)) {
@@ -105,7 +105,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         }
     }
 
-    private void createEndPortal(Location<World> targetLocation) {
+    private void createEndPortal(Location targetLocation) {
         int xTarget = targetLocation.getBlockX();
         int yTarget = targetLocation.getBlockY() - 1;
         int zTarget = targetLocation.getBlockZ();
@@ -137,7 +137,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
     @Overwrite
     public boolean placeInExistingPortal(Entity entityIn, float rotationYaw) {
         org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entityIn;
-        Optional<Location<World>> location = ((PortalAgent) this).findPortal(spongeEntity.getLocation());
+        Optional<Location> location = ((PortalAgent) this).findPortal(spongeEntity.getLocation());
         if (location.isPresent()) {
             // last minute adjustments for portal exit
             this.impl$handleEntityPortalExit(entityIn, location.get(), rotationYaw);
@@ -147,7 +147,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         return false;
     }
 
-    private void impl$handleEntityPortalExit(Entity entityIn, Location<World> portalLocation, float rotationYaw) {
+    private void impl$handleEntityPortalExit(Entity entityIn, Location portalLocation, float rotationYaw) {
         BlockPos blockPos = VecHelper.toBlockPos(portalLocation);
         double xTarget = portalLocation.getX() + 0.5D;
         double yTarget;

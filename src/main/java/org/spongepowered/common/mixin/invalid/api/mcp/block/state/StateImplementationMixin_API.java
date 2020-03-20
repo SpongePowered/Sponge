@@ -109,13 +109,13 @@ public abstract class StateImplementationMixin_API extends BlockStateBase implem
     }
 
     @Override
-    public BlockSnapshot snapshotFor(final Location<World> location) {
+    public BlockSnapshot snapshotFor(final Location location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
             .blockState((net.minecraft.block.BlockState) (Object) this)
             .position(location.getBlockPosition())
-            .worldId(location.getExtent().getUniqueId());
-        if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
-            final BlockEntity tileEntity = location.getTileEntity()
+            .worldId(location.getWorld().getProperties().getUniqueId());
+        if (this.block.hasTileEntity() && location.getBlock().getType().equals(this.block)) {
+            final BlockEntity tileEntity = location.getBlockEntity()
                 .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
             for (final Mutable<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
                 builder.add(manipulator);

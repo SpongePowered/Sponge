@@ -30,7 +30,6 @@ import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.SkyLuminanceProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -40,23 +39,23 @@ public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLu
 
     @Override
     public Optional<SkyLuminanceProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof Chunk) {
-            final Chunk chunk = (Chunk) ((Location<?>) propertyHolder).getExtent();
-            final float light = chunk.getLightFor(LightType.SKY, VecHelper.toBlockPos((Location<?>) propertyHolder));
+        if (propertyHolder instanceof Location && ((Location) propertyHolder).getWorld() instanceof Chunk) {
+            final Chunk chunk = (Chunk) ((Location) propertyHolder).getWorld();
+            final float light = chunk.getLightFor(LightType.SKY, VecHelper.toBlockPos((Location) propertyHolder));
             return Optional.of(new SkyLuminanceProperty(light));
         }
         return super.getFor(propertyHolder);
     }
 
     @Override
-    public Optional<SkyLuminanceProperty> getFor(Location<World> location) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+    public Optional<SkyLuminanceProperty> getFor(Location location) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
         final float light = world.getLightFor(LightType.SKY, VecHelper.toBlockPos(location));
         return Optional.of(new SkyLuminanceProperty(light));
     }
 
     @Override
-    public Optional<SkyLuminanceProperty> getFor(Location<World> location, Direction direction) {
+    public Optional<SkyLuminanceProperty> getFor(Location location, Direction direction) {
         // TODO gabziou fix this
         return Optional.empty();
     }

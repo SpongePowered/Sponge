@@ -30,7 +30,6 @@ import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.provider.PropertyProvider;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
@@ -54,7 +53,7 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
     }
 
     @Override
-    public Optional<T> getFor(Location<World> location) {
+    public Optional<T> getFor(Location location) {
         for (PropertyProvider<T> propertyStore : this.propertyStores) {
             final Optional<T> optional = propertyStore.getFor(location);
             if (optional.isPresent()) {
@@ -65,7 +64,7 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
     }
 
     @Override
-    public Optional<T> getFor(Location<World> location, Direction direction) {
+    public Optional<T> getFor(Location location, Direction direction) {
         for (PropertyProvider<T> propertyStore : this.propertyStores) {
             final Optional<T> optional = propertyStore.getFor(location, direction);
             if (optional.isPresent()) {

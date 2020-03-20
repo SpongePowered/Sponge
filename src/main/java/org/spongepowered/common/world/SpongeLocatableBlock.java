@@ -57,7 +57,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     private final Vector3i position;
     private final UUID worldId;
     private final WeakReference<World> worldReference;
-    @Nullable private Location<World> location;
+    @Nullable private Location location;
 
     SpongeLocatableBlock(SpongeLocatableBlockBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "blockstate");
@@ -72,9 +72,9 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public Location<World> getLocation() {
+    public Location getLocation() {
         if (this.location == null) {
-            this.location = new Location<World>(this.worldReference.get(), this.position);
+            this.location = Location.of(this.worldReference.get(), this.position);
         }
         return this.location;
     }

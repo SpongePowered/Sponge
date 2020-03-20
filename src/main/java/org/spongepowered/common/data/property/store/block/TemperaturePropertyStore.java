@@ -37,14 +37,14 @@ import java.util.Optional;
 public class TemperaturePropertyStore extends AbstractSpongePropertyStore<TemperatureProperty> {
 
     @Override
-    public Optional<TemperatureProperty> getFor(Location<World> location) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+    public Optional<TemperatureProperty> getFor(Location location) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
         final Biome biome = world.getBiome(VecHelper.toBlockPos(location));
         return Optional.of(new TemperatureProperty(biome.getDefaultTemperature())); // TODO: do we want to use pos-sensitive?
     }
 
     @Override
-    public Optional<TemperatureProperty> getFor(Location<World> location, Direction direction) {
+    public Optional<TemperatureProperty> getFor(Location location, Direction direction) {
         // TODO gabziou fix this
         return Optional.empty();
     }

@@ -190,7 +190,7 @@ public final class DataRegistrar {
         dataManager.registerBuilder(VariableAmount.Fixed.class, new FixedBuilder());
         dataManager.registerBuilder(VariableAmount.OptionalAmount.class, new OptionalVarianceBuilder());
 
-        dataManager.registerBuilder((Class<Location<World>>) (Class<?>) Location.class, new LocationBuilder());
+        dataManager.registerBuilder(Location.class, new LocationBuilder());
         dataManager.registerBuilder(SpongePlayerData.class, new SpongePlayerData.Builder());
 
         dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());

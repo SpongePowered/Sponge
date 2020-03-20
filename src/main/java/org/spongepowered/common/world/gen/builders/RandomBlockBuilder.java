@@ -43,7 +43,7 @@ public class RandomBlockBuilder implements RandomBlock.Builder {
     private BlockState block;
     private VariableAmount count;
     private VariableAmount height;
-    private Predicate<Location<World>> target;
+    private Predicate<Location> target;
 
     public RandomBlockBuilder() {
         this.reset();
@@ -62,7 +62,7 @@ public class RandomBlockBuilder implements RandomBlock.Builder {
     }
 
     @Override
-    public Builder placementTarget(Predicate<Location<World>> target) {
+    public Builder placementTarget(Predicate<Location> target) {
         this.target = checkNotNull(target, "target");
         return this;
     }

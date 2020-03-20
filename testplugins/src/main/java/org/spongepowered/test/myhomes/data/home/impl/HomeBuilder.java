@@ -24,14 +24,14 @@
  */
 package org.spongepowered.test.myhomes.data.home.impl;
 
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.util.Transform;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.test.myhomes.data.home.Home;
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 
@@ -52,13 +52,13 @@ public class HomeBuilder extends AbstractDataBuilder<Home> {
             return Optional.empty();
         }
 
-        World world = Sponge.getServer().getWorld(content.getObject(Home.WORLD_QUERY, UUID.class).get()).orElseThrow(InvalidDataException::new);
+        World world = Sponge.getServer().getWorldManager().getWorld(content.getObject(Home.WORLD_QUERY, UUID.class).get()).orElseThrow(InvalidDataException::new);
         Vector3d position = content.getObject(Home.POSITION_QUERY, Vector3d.class).get();
         Vector3d rotation = content.getObject(Home.ROTATION_QUERY, Vector3d.class).get();
         String name = content.getString(Home.NAME_QUERY).get();
 
-        Transform<World> transform = new Transform<>(world, position, rotation);
-        return Optional.of(new Home(transform, name));
+        Transform transform = Transform.of(position, rotation);
+        return Optional.of(new Home(world, transform, name));
     }
 
     public static class NameUpdater implements DataContentUpdater {
@@ -79,7 +79,7 @@ public class HomeBuilder extends AbstractDataBuilder<Home> {
             }
             UUID uuid = content.getObject(Home.WORLD_QUERY, UUID.class).get();
             Vector3d pos = content.getObject(Home.POSITION_QUERY, Vector3d.class).get();
-            String name = Sponge.getServer().getWorldProperties(uuid)
+            String name = Sponge.getServer().getWorldManager().getProperties(uuid)
                     .map(WorldProperties::getName)
                     .orElse(uuid.toString().substring(0, 9));
 

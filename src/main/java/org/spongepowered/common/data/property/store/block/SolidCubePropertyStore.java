@@ -47,7 +47,7 @@ public class SolidCubePropertyStore extends AbstractBlockPropertyStore<SolidCube
     }
 
     @Override
-    protected Optional<SolidCubeProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
+    protected Optional<SolidCubeProperty> getForBlock(@Nullable Location location, BlockState block) {
         return Optional.of(block.getMaterial().isSolid() ? TRUE : FALSE);
     }
 

@@ -87,8 +87,8 @@ public abstract class TeleporterMixin_API implements PortalAgent {
     }
 
     @Override
-    public Optional<Location<World>> findOrCreatePortal(Location<World> targetLocation) {
-        Optional<Location<World>> foundTeleporter = this.findPortal(targetLocation);
+    public Optional<Location> findOrCreatePortal(Location targetLocation) {
+        Optional<Location> foundTeleporter = this.findPortal(targetLocation);
         if (!foundTeleporter.isPresent()) {
             if (this.createPortal(targetLocation).isPresent()) {
                 return this.findPortal(targetLocation);
@@ -100,7 +100,7 @@ public abstract class TeleporterMixin_API implements PortalAgent {
     }
 
     @Override
-    public Optional<Location<World>> findPortal(Location<World> searchLocation) {
+    public Optional<Location> findPortal(Location searchLocation) {
         double closest = -1.0D;
         boolean addToCache = true;
         BlockPos portalPosition = BlockPos.ZERO;

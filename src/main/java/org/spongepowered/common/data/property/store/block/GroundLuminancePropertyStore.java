@@ -30,7 +30,6 @@ import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -41,9 +40,9 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
     @Override
     public Optional<GroundLuminanceProperty> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
-            final Location<?> location = (Location<?>) propertyHolder;
-            if (location.getExtent() instanceof Chunk) {
-                final Chunk chunk = (Chunk) location.getExtent();
+            final Location location = (Location) propertyHolder;
+            if (location.getWorld() instanceof Chunk) {
+                final Chunk chunk = (Chunk) location.getWorld();
                 final float light = chunk.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(location));
                 return Optional.of(new GroundLuminanceProperty(light));
             }
@@ -52,14 +51,14 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
     }
 
     @Override
-    public Optional<GroundLuminanceProperty> getFor(Location<World> location) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+    public Optional<GroundLuminanceProperty> getFor(Location location) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
         final float light = world.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(location));
         return Optional.of(new GroundLuminanceProperty(light));
     }
 
     @Override
-    public Optional<GroundLuminanceProperty> getFor(Location<World> location, Direction direction) {
+    public Optional<GroundLuminanceProperty> getFor(Location location, Direction direction) {
         // TODO gabizou fix this
         return Optional.empty();
     }

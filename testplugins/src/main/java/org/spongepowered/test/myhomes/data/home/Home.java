@@ -24,11 +24,11 @@
  */
 package org.spongepowered.test.myhomes.data.home;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataSerializable;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.World;
 import org.spongepowered.test.myhomes.data.home.impl.HomeBuilder;
 
@@ -38,12 +38,14 @@ public class Home implements DataSerializable {
     public static final DataQuery POSITION_QUERY = DataQuery.of("Position");
     public static final DataQuery ROTATION_QUERY = DataQuery.of("Rotation");
     public static final DataQuery NAME_QUERY = DataQuery.of("Name");
+    private final World world;
 
-    private Transform<World> transform;
+    private Transform transform;
 
     private String name;
 
-    public Home(Transform<World> transform, String name) {
+    public Home(World world, Transform transform, String name) {
+        this.world = world;
         this.transform = transform;
         this.name = name;
     }
@@ -53,7 +55,11 @@ public class Home implements DataSerializable {
         return HomeBuilder.CONTENT_VERSION;
     }
 
-    public Transform<World> getTransform() {
+    public World getWorld() {
+        return this.world;
+    }
+
+    public Transform getTransform() {
         return this.transform;
     }
 
@@ -64,11 +70,10 @@ public class Home implements DataSerializable {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(WORLD_QUERY, this.transform.getExtent().getUniqueId())
+                .set(WORLD_QUERY, this.world.getProperties().getUniqueId())
                 .set(POSITION_QUERY, this.transform.getPosition())
                 .set(ROTATION_QUERY, this.transform.getRotation())
                 .set(NAME_QUERY, this.name)
                 .set(Queries.CONTENT_VERSION, HomeBuilder.CONTENT_VERSION);
     }
-
 }

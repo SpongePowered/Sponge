@@ -41,8 +41,8 @@ public abstract class AbstractSpongePropertyStore<T extends Property<?, ?>> impl
     @SuppressWarnings("unchecked")
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof World) {
-            return this.getFor((Location<World>) propertyHolder);
+        if (propertyHolder instanceof Location && ((Location) propertyHolder).getWorld() instanceof World) {
+            return this.getFor((Location) propertyHolder);
         }
         return Optional.empty();
     }

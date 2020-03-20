@@ -46,7 +46,7 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
         if (!(source instanceof Entity)) {
             return Optional.empty();
         }
-        Location<World> loc = ((Entity) source).getLocation().add(0, ((net.minecraft.entity.Entity) source).height / 2, 0);
+        Location loc = ((Entity) source).getLocation().add(0, ((net.minecraft.entity.Entity) source).height / 2, 0);
         Optional<P> projectile;
         if (source instanceof LivingEntity) {
             projectile = this.createProjectile((LivingEntity) source, loc);
@@ -56,7 +56,7 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
         return projectile;
     }
 
-    protected Optional<P> createProjectile(LivingEntity source, Location<?> loc) {
+    protected Optional<P> createProjectile(LivingEntity source, Location loc) {
         return this.createProjectile((ProjectileSource) source, this.projectileClass, loc);
     }
 }

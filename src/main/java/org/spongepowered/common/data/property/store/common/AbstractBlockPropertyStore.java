@@ -56,7 +56,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
      * @param block The block
      * @return The property, if available
      */
-    protected abstract Optional<T> getForBlock(@Nullable Location<?> location, BlockState block);
+    protected abstract Optional<T> getForBlock(@Nullable Location location, BlockState block);
 
     /**
      * This is intended for properties that are intentionally for directional
@@ -77,7 +77,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
-            final Location<?> location = (Location<?>) propertyHolder;
+            final Location location = (Location) propertyHolder;
             final BlockState block = (BlockState) location.getBlock();
             return this.getForBlock(location, block);
         } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
@@ -97,14 +97,14 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     }
 
     @Override
-    public Optional<T> getFor(Location<World> location) {
+    public Optional<T> getFor(Location location) {
         return this.getForBlock(location, (BlockState) location.getBlock());
     }
 
     @Override
-    public Optional<T> getFor(Location<World> location, Direction direction) {
+    public Optional<T> getFor(Location location, Direction direction) {
         return this
-                .getForDirection(((net.minecraft.world.World) location.getExtent()), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                .getForDirection(((net.minecraft.world.World) location.getWorld()), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
                 toEnumFacing(direction));
     }
 }

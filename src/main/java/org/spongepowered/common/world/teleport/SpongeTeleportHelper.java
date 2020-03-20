@@ -52,15 +52,15 @@ import java.util.stream.Stream;
 public class SpongeTeleportHelper implements TeleportHelper {
 
     @Override
-    public Optional<Location<World>> getSafeLocation(Location<World> location, int height, int width, int distanceToDrop,
+    public Optional<Location> getSafeLocation(Location location, int height, int width, int distanceToDrop,
             TeleportHelperFilter filter, TeleportHelperFilter... additionalFilters) {
-        final World world = location.getExtent();
+        final World world = location.getWorld();
         final Set<TeleportHelperFilter> filters = Sets.newHashSet(additionalFilters);
         filters.add(filter);
 
         if (SpongeImpl.getGlobalConfigAdapter().getConfig().getTeleportHelper().isForceBlacklistOn()) {
             // Always force this into the set if the user has requested it.
-            filters.add(TeleportHelperFilters.CONFIG);
+            filters.add(TeleportHelperFilters.CONFIG.get());
         }
 
         final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge)((net.minecraft.world.server.ServerWorld) world).getChunkProvider();
@@ -80,16 +80,16 @@ public class SpongeTeleportHelper implements TeleportHelper {
 
     }
 
-    private Stream<Vector3i> getBlockLocations(Location<World> worldLocation, int height, int width) {
+    private Stream<Vector3i> getBlockLocations(Location worldLocation, int height, int width) {
         // We don't want to warp outside of the world border, so we want to check that we're within it.
-        WorldBorder worldBorder = (WorldBorder) worldLocation.getExtent().getWorldBorder();
+        WorldBorder worldBorder = (WorldBorder) worldLocation.getWorld().getProperties().getWorldBorder();
         int worldBorderMinX = GenericMath.floor(worldBorder.minX());
         int worldBorderMinZ = GenericMath.floor(worldBorder.minZ());
         int worldBorderMaxX = GenericMath.floor(worldBorder.maxX());
         int worldBorderMaxZ = GenericMath.floor(worldBorder.maxZ());
 
         // Get the World and get the maximum Y value.
-        int worldMaxY = worldLocation.getExtent().getBlockMax().getY();
+        int worldMaxY = worldLocation.getWorld().getBlockMax().getY();
 
         Vector3i vectorLocation = worldLocation.getBlockPosition();
 

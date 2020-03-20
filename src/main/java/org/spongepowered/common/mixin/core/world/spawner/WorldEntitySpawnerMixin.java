@@ -236,14 +236,12 @@ public abstract class WorldEntitySpawnerMixin {
                                         final EntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(spawnListEntry.entityClass);
                                         if (entityType != null) {
                                             final Vector3d vector3d = new Vector3d(spawnX, spawnY, spawnZ);
-                                            final Transform<org.spongepowered.api.world.World>
-                                                transform =
-                                                new Transform<>((org.spongepowered.api.world.World) world, vector3d);
+                                            final Transform transform = Transform.of(vector3d);
                                             final ConstructEntityEvent.Pre
                                                 event =
                                                 SpongeEventFactory
                                                     .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType,
-                                                        transform);
+                                                        transform, (org.spongepowered.api.world.World) world);
                                             if (SpongeImpl.postEvent(event)) {
                                                 continue;
                                             }
@@ -390,9 +388,9 @@ public abstract class WorldEntitySpawnerMixin {
             return true; // Basically, we can't throw our own event.
         }
         final Vector3d vector3d = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
-        final Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, vector3d);
+        final Transform transform = Transform.of(vector3d);
         Sponge.getCauseStackManager().pushCause(world);
-        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType, transform);
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType, transform, (org.spongepowered.api.world.World) world);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         return !event.isCancelled();

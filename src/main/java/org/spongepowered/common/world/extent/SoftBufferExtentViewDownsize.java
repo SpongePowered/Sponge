@@ -390,7 +390,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
         final Collection<BlockEntity> tileEntities = this.extent.getTileEntities();
         for (Iterator<BlockEntity> iterator = tileEntities.iterator(); iterator.hasNext(); ) {
             final BlockEntity tileEntity = iterator.next();
-            final Location<World> block = tileEntity.getLocation();
+            final Location block = tileEntity.getLocation();
             if (!VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax)) {
                 iterator.remove();
             }
@@ -402,7 +402,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     public Collection<BlockEntity> getTileEntities(Predicate<BlockEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         return this.extent.getTileEntities(Functional.predicateAnd(input -> {
-            final Location<World> block = input.getLocation();
+            final Location block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax);
         }, filter));
     }
@@ -416,7 +416,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     @Override
     public boolean spawnEntity(Entity entity) {
         checkNotNull(entity, "The entity cannot be null!");
-        final Location<World> location = entity.getLocation();
+        final Location location = entity.getLocation();
         this.checkBlockRange(location.getX(), location.getY(), location.getZ());
         return this.extent.spawnEntity(entity);
     }
@@ -461,7 +461,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
         final Collection<Entity> entities = this.extent.getEntities();
         for (Iterator<Entity> iterator = entities.iterator(); iterator.hasNext(); ) {
             final Entity tileEntity = iterator.next();
-            final Location<World> block = tileEntity.getLocation();
+            final Location block = tileEntity.getLocation();
             if (!VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax)) {
                 iterator.remove();
             }
@@ -473,7 +473,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         return this.extent.getEntities(Functional.predicateAnd(input -> {
-            final Location<World> block = input.getLocation();
+            final Location block = input.getLocation();
             return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax);
         }, filter));
     }

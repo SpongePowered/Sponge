@@ -131,53 +131,53 @@ public final class WorldGenConstants {
     };
 
     public static final Predicate<BlockState> DIRT_OR_GRASS = (input) -> {
-        return input.getType().equals(BlockTypes.DIRT) || input.getType().equals(BlockTypes.GRASS);
+        return input.getType().equals(BlockTypes.DIRT.get()) || input.getType().equals(BlockTypes.GRASS.get());
     };
 
     public static final Predicate<BlockState> DIRT = (input) -> {
-        return input.getType().equals(BlockTypes.DIRT);
+        return input.getType().equals(BlockTypes.DIRT.get());
     };
 
     public static final Predicate<BlockState> STONE = (input) -> {
-        return input.getType().equals(BlockTypes.STONE);
+        return input.getType().equals(BlockTypes.STONE.get());
     };
 
-    public static final Predicate<Location<World>> STONE_LOCATION = (input) -> {
-        return input.getBlock().getType().equals(BlockTypes.STONE);
+    public static final Predicate<Location> STONE_LOCATION = (input) -> {
+        return input.getBlock().getType().equals(BlockTypes.STONE.get());
     };
 
-    public static final Predicate<Location<World>> CAVE_LIQUIDS = (input) -> {
+    public static final Predicate<Location> CAVE_LIQUIDS = (input) -> {
         if (input.getBlockY() <= 0 || input.getBlockY() >= 255) {
             return false;
         }
-        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.STONE || input.add(0, -1, 0).getBlock().getType() != BlockTypes.STONE
-                || (input.getBlock().getType() != BlockTypes.STONE && input.getBlock().getType() != BlockTypes.AIR)) {
+        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.STONE.get() || input.add(0, -1, 0).getBlock().getType() != BlockTypes.STONE.get()
+                || (input.getBlock().getType() != BlockTypes.STONE.get() && input.getBlock().getType() != BlockTypes.AIR.get())) {
             return false;
         }
         int air = 0;
         int stone = 0;
-        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.STONE) {
+        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.STONE.get()) {
             stone++;
         }
-        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.STONE) {
+        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.STONE.get()) {
             stone++;
         }
-        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.STONE) {
+        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.STONE.get()) {
             stone++;
         }
-        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.STONE) {
+        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.STONE.get()) {
             stone++;
         }
-        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.AIR) {
+        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.AIR.get()) {
             air++;
         }
-        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.AIR) {
+        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.AIR.get()) {
             air++;
         }
-        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.AIR) {
+        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.AIR.get()) {
             air++;
         }
-        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.AIR) {
+        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.AIR.get()) {
             air++;
         }
         if (air == 1 && stone == 3) {
@@ -186,53 +186,53 @@ public final class WorldGenConstants {
         return false;
     };
 
-    public static final Predicate<Location<World>> HELL_LAVA = (input) -> {
-        if (input.add(0, 1, 0).getBlockType() != BlockTypes.NETHERRACK) {
+    public static final Predicate<Location> HELL_LAVA = (input) -> {
+        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.NETHERRACK.get()) {
             return false;
-        } else if (input.getBlockType() != BlockTypes.AIR && input.getBlockType() != BlockTypes.NETHERRACK) {
+        } else if (input.getBlock().getType() != BlockTypes.AIR && input.getBlock().getType() != BlockTypes.NETHERRACK.get()) {
             return false;
         }
         int i = 0;
 
-        if (input.add(-1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
-        if (input.add(1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
-        if (input.add(0, 0, -1).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
-        if (input.add(0, 0, 1).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
-        if (input.add(0, -1, 0).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(0, -1, 0).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
         int j = 0;
 
-        if (input.add(-1, 0, 0).getBlockType() == BlockTypes.AIR) {
+        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.AIR.get()) {
             ++j;
         }
 
-        if (input.add(1, 0, 0).getBlockType() == BlockTypes.AIR) {
+        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.AIR.get()) {
             ++j;
         }
 
-        if (input.add(0, 0, -1).getBlockType() == BlockTypes.AIR) {
+        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.AIR.get()) {
             ++j;
         }
 
-        if (input.add(0, 0, 1).getBlockType() == BlockTypes.AIR) {
+        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.AIR.get()) {
             ++j;
         }
 
-        if (input.add(0, -1, 0).getBlockType() == BlockTypes.AIR) {
+        if (input.add(0, -1, 0).getBlock().getType() == BlockTypes.AIR.get()) {
             ++j;
         }
 
@@ -243,31 +243,31 @@ public final class WorldGenConstants {
         return false;
     };
 
-    public static final Predicate<Location<World>> HELL_LAVA_ENCLOSED = (input) -> {
-        if (input.add(0, 1, 0).getBlockType() != BlockTypes.NETHERRACK) {
+    public static final Predicate<Location> HELL_LAVA_ENCLOSED = (input) -> {
+        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.NETHERRACK.get()) {
             return false;
-        } else if (input.getBlockType() != BlockTypes.AIR && input.getBlockType() != BlockTypes.NETHERRACK) {
+        } else if (input.getBlock().getType() != BlockTypes.AIR && input.getBlock().getType() != BlockTypes.NETHERRACK.get()) {
             return false;
         }
         int i = 0;
 
-        if (input.add(-1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
-        if (input.add(1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
-        if (input.add(0, 0, -1).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
-        if (input.add(0, 0, 1).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 
-        if (input.add(0, -1, 0).getBlockType() == BlockTypes.NETHERRACK) {
+        if (input.add(0, -1, 0).getBlock().getType() == BlockTypes.NETHERRACK.get()) {
             ++i;
         }
 

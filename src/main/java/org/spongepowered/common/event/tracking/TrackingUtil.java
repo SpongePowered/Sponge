@@ -812,8 +812,8 @@ public final class TrackingUtil {
                 return;
             }
         }
-        final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
-        final World world = worldLocation.getExtent();
+        final Location worldLocation = oldBlockSnapshot.getLocation().get();
+        final World world = worldLocation.getWorld();
         final ServerWorld worldServer = (ServerWorld) world;
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = itemStacks.stream().map(itemStack -> {

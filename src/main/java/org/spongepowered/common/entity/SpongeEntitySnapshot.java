@@ -132,13 +132,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     }
 
     @Override
-    public Optional<Transform<World>> getTransform() {
-        Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
-        if (optional.isPresent()) {
-            final Transform<World> transform = new Transform<>(optional.get(), this.position, this.rotation);
-            return Optional.of(transform);
-        }
-        return Optional.empty();
+    public Optional<Transform> getTransform() {
+        final Transform transform = Transform.of(this.position, this.rotation);
+        return Optional.of(transform);
     }
 
     @Override
@@ -375,13 +371,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     }
 
     @Override
-    public EntitySnapshot withLocation(Location<World> location) {
+    public EntitySnapshot withLocation(Location location) {
         checkNotNull(location, "location");
         final SpongeEntitySnapshotBuilder builder = this.createBuilder();
         builder.position = location.getPosition();
-        builder.worldId = location.getExtent().getUniqueId();
+        builder.worldId = location.getWorld().getProperties().getUniqueId();
         CompoundNBT newCompound = this.compound.copy();
-        newCompound.putInt("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).bridge$getDimensionId());
+        newCompound.putInt("Dimension", ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId());
         builder.compound = newCompound;
         return builder.build();
     }

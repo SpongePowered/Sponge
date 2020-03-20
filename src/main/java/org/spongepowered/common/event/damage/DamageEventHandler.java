@@ -386,7 +386,7 @@ public class DamageEventHandler {
         } else if (damageSource instanceof BlockDamageSource) {
             final Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             final BlockPos blockPos = VecHelper.toBlockPos(location);
-            final ChunkBridge mixinChunk = (ChunkBridge) ((net.minecraft.world.World) location.getExtent()).getChunkAt(blockPos);
+            final ChunkBridge mixinChunk = (ChunkBridge) ((net.minecraft.world.World) location.getWorld()).getChunkAt(blockPos);
             mixinChunk.bridge$getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             mixinChunk.bridge$getBlockOwner(blockPos).ifPresent(owner -> frame.addContext(EventContextKeys.CREATOR, owner));
         }

@@ -40,7 +40,7 @@ public class LightEmissionPropertyStore extends AbstractBlockPropertyStore<Light
     }
 
     @Override
-    protected Optional<LightEmissionProperty> getForBlock(@Nullable Location<?> location, BlockState block) {
+    protected Optional<LightEmissionProperty> getForBlock(@Nullable Location location, BlockState block) {
         return Optional.of(new LightEmissionProperty(block.getLightValue()));
     }
 

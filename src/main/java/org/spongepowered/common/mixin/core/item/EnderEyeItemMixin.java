@@ -92,8 +92,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, final RayTraceResult rayTraceResult, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ);
-            final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
-                targetPosition);
+            final Transform targetTransform = Transform.of(targetPosition);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 EntityTypes.EYE_OF_ENDER.get(), targetTransform, (org.spongepowered.api.world.World) worldIn);
             if (SpongeImpl.postEvent(event)) {
@@ -118,8 +117,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ);
-            final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
-                targetPosition);
+            final Transform targetTransform = Transform.of(targetPosition);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 EntityTypes.EYE_OF_ENDER.get(), targetTransform, (org.spongepowered.api.world.World) worldIn);
             if (SpongeImpl.postEvent(event)) {

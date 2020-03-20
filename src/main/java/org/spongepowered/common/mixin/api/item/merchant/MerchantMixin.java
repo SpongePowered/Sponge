@@ -80,7 +80,7 @@ public interface MerchantMixin extends Merchant {
     }
 
     default World imerchant$getWorld() {
-        return ((World) this.getLocation().getExtent());
+        return ((World) this.getLocation().getWorld());
     }
 
     default BlockPos imerchant$getPos() {

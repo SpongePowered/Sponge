@@ -57,14 +57,14 @@ public abstract class FallingBlockMixin {
         if (world.isAreaLoaded(pos, to) && !((WorldBridge) world).bridge$isFake()) {
 
             final BlockPos actualPos = pos.add(32, 32, 32);
-            final EntityType fallingBlock = EntityTypes.FALLING_BLOCK;
+            final EntityType fallingBlock = EntityTypes.FALLING_BLOCK.get();
             final Vector3d position = new Vector3d(actualPos.getX() + 0.5D, actualPos.getY(), actualPos.getZ() + 0.5D);
             final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(snapshot);
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
-                final Transform<org.spongepowered.api.world.World> worldTransform = new Transform<>((org.spongepowered.api.world.World) world, position);
-                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), fallingBlock, worldTransform);
+                final Transform worldTransform =Transform.of(position);
+                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), fallingBlock, worldTransform, (org.spongepowered.api.world.World) world);
                 SpongeImpl.postEvent(event);
                 return !event.isCancelled();
             }

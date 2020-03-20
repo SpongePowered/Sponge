@@ -48,7 +48,7 @@ public class RandomBlockPopulator implements RandomBlock {
 
     private VariableAmount count;
     private VariableAmount height;
-    private Predicate<Location<World>> check;
+    private Predicate<Location> check;
     private BlockState state;
 
     public RandomBlockPopulator(final BlockState block, final VariableAmount count, final VariableAmount height) {
@@ -58,7 +58,7 @@ public class RandomBlockPopulator implements RandomBlock {
         this.check = (t) -> true;
     }
 
-    public RandomBlockPopulator(final BlockState block, final VariableAmount count, final VariableAmount height, final Predicate<Location<World>> check) {
+    public RandomBlockPopulator(final BlockState block, final VariableAmount count, final VariableAmount height, final Predicate<Location> check) {
         this.count = checkNotNull(count);
         this.state = checkNotNull(block);
         this.height = checkNotNull(height);
@@ -75,10 +75,10 @@ public class RandomBlockPopulator implements RandomBlock {
         final Vector3i min = extent.getBlockMin();
         final Vector3i size = extent.getBlockSize();
         final int n = this.count.getFlooredAmount(random);
-        final Location<World> chunkMin = new Location<World>(world, min.getX(), min.getY(),
+        final Location chunkMin = Location.of(world, min.getX(), min.getY(),
                 min.getZ());
         for (int i = 0; i < n; i++) {
-            final Location<World> pos = chunkMin.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getZ()));
+            final Location pos = chunkMin.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getZ()));
             if (this.check.test(pos)) {
                 if (((WorldBridge) world).bridge$isFake()) {
                     world.setBlock(pos.getBlockPosition(), this.state, BlockChangeFlags.PHYSICS_OBSERVER);
@@ -116,12 +116,12 @@ public class RandomBlockPopulator implements RandomBlock {
     }
 
     @Override
-    public Predicate<Location<World>> getPlacementTarget() {
+    public Predicate<Location> getPlacementTarget() {
         return this.check;
     }
 
     @Override
-    public void getPlacementTarget(final Predicate<Location<World>> target) {
+    public void getPlacementTarget(final Predicate<Location> target) {
         this.check = checkNotNull(target);
     }
 
