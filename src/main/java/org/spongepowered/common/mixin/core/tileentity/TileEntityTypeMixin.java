@@ -51,9 +51,17 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
     private boolean impl$allowsEntityEventCreation = true;
     private boolean impl$canTick;
 
-    @Redirect(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
-    private static Object impl$setKeyAndInitializeTrackerState(Registry<Object> registry, String key, Object tileEntityType) {
+    @Redirect(method = "register",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"
+        )
+    )
+    private static Object impl$setKeyAndInitializeTrackerState(final Registry<Object> registry, final String key, final Object tileEntityType) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+
+        Registry.register(registry, key, tileEntityType);
+
         final CatalogKeyBridge catalogKeyBridge = (CatalogKeyBridge) tileEntityType;
         catalogKeyBridge.bridge$setKey(container.createCatalogKey(key));
 
@@ -98,7 +106,7 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
     }
 
     @Override
-    public void bridge$setKey(CatalogKey key) {
+    public void bridge$setKey(final CatalogKey key) {
         this.impl$key = key;
     }
 
@@ -108,7 +116,7 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
     }
 
     @Override
-    public void bridge$setAllowsBlockBulkCaptures(boolean allowsBlockBulkCaptures) {
+    public void bridge$setAllowsBlockBulkCaptures(final boolean allowsBlockBulkCaptures) {
         this.impl$allowsBlockBulkCaptures = allowsBlockBulkCaptures;
     }
 
@@ -118,7 +126,7 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
     }
 
     @Override
-    public void bridge$setAllowsBlockEventCreation(boolean allowsBlockEventCreation) {
+    public void bridge$setAllowsBlockEventCreation(final boolean allowsBlockEventCreation) {
         this.impl$allowsBlockEventCreation = allowsBlockEventCreation;
     }
 
@@ -128,7 +136,7 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
     }
 
     @Override
-    public void bridge$setAllowsEntityBulkCaptures(boolean allowsEntityBulkCaptures) {
+    public void bridge$setAllowsEntityBulkCaptures(final boolean allowsEntityBulkCaptures) {
         this.impl$allowsEntityBulkCaptures = allowsEntityBulkCaptures;
     }
 
@@ -138,7 +146,7 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
     }
 
     @Override
-    public void bridge$setAllowsEntityEventCreation(boolean allowsEntityEventCreation) {
+    public void bridge$setAllowsEntityEventCreation(final boolean allowsEntityEventCreation) {
         this.impl$allowsEntityEventCreation = allowsEntityEventCreation;
     }
 
@@ -148,7 +156,7 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
     }
 
     @Override
-    public boolean bridge$setCanTick(boolean canTick) {
+    public boolean bridge$setCanTick(final boolean canTick) {
         return this.impl$canTick = canTick;
     }
 }

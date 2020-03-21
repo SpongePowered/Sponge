@@ -37,10 +37,13 @@ public abstract class PaintingTypeMixin implements CatalogKeyBridge {
 
     private CatalogKey impl$key;
 
-    @Redirect(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
-    private static Object impl$setKey(Registry<Object> registry, String resourcePath, Object paintingType) {
-        ((CatalogKeyBridge) registry).bridge$setKey(CatalogKey.resolve(resourcePath));
-        return registry;
+    @Redirect(method = "register",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
+    private static Object impl$setKey(final Registry<Object> registry, final String resourcePath,
+        final Object paintingType) {
+        ((CatalogKeyBridge) paintingType).bridge$setKey(CatalogKey.resolve(resourcePath));
+        return Registry.register(registry, resourcePath, paintingType);
     }
 
     @Override
@@ -49,7 +52,7 @@ public abstract class PaintingTypeMixin implements CatalogKeyBridge {
     }
 
     @Override
-    public void bridge$setKey(CatalogKey key) {
+    public void bridge$setKey(final CatalogKey key) {
         this.impl$key = key;
     }
 }

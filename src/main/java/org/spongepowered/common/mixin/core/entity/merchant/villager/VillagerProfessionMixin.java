@@ -38,11 +38,16 @@ public abstract class VillagerProfessionMixin implements CatalogKeyBridge {
 
     private CatalogKey impl$key;
 
-    @Redirect(method = "register(Ljava/lang/String;Lnet/minecraft/village/PointOfInterestType;Lcom/google/common/collect/ImmutableSet;"
-        + "Lcom/google/common/collect/ImmutableSet;)Lnet/minecraft/entity/merchant/villager/VillagerProfession;", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Lnet/minecraft/util/ResourceLocation;Ljava/lang/Object;)Ljava/lang/Object;"))
-    private static Object impl$setKey(Registry<Object> p_218322_0_, ResourceLocation p_218322_1_, Object p_218322_2_) {
-        ((CatalogKeyBridge) p_218322_2_).bridge$setKey((CatalogKey) (Object) p_218322_1_);
-        return p_218322_2_;
+    @Redirect(
+        method = "register(Ljava/lang/String;Lnet/minecraft/village/PointOfInterestType;Lcom/google/common/collect/ImmutableSet;Lcom/google/common/collect/ImmutableSet;)Lnet/minecraft/entity/merchant/villager/VillagerProfession;",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Lnet/minecraft/util/ResourceLocation;Ljava/lang/Object;)Ljava/lang/Object;"
+        )
+    )
+    private static Object impl$setKey(final Registry<Object> registry, final ResourceLocation key, final Object profession) {
+        ((CatalogKeyBridge) profession).bridge$setKey((CatalogKey) (Object) key);
+        return Registry.register(registry, key, profession);
     }
 
     @Override
@@ -51,7 +56,7 @@ public abstract class VillagerProfessionMixin implements CatalogKeyBridge {
     }
 
     @Override
-    public void bridge$setKey(CatalogKey key) {
+    public void bridge$setKey(final CatalogKey key) {
         this.impl$key = key;
     }
 }
