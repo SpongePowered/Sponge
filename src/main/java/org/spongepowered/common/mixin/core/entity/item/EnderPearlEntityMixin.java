@@ -55,13 +55,15 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
     private double impl$damageAmount;
 
     @ModifyArg(method = "onImpact",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+            at = @At(value = "INVOKE",
+                target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private float impl$onAttackEntityFromWithDamage(final float damage) {
         return (float) this.impl$damageAmount;
     }
 
-    @SuppressWarnings("deprecation")
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isSleeping()Z"))
+    @Redirect(method = "onImpact",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isSleeping()Z"))
     private boolean impl$onEnderPearlImpact(final ServerPlayerEntity player) {
         if (player.isSleeping()) {
             return true;
@@ -70,7 +72,6 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (Player) player);
-            frame.addContext(EventContextKeys.THROWER, (Player) player); // TODO - remove in API 8/1.13
 
             final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, ((org.spongepowered.api.entity.Entity) this).getLocation());
             if (event.isCancelled()) {
@@ -102,7 +103,7 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
      */
     @Override
     @Nullable
-    public Entity shadow$changeDimension(DimensionType dimensionIn) {
+    public Entity shadow$changeDimension(final DimensionType dimensionIn) {
         final Entity entity = super.shadow$changeDimension(dimensionIn);
 
         if (entity instanceof EnderPearlEntity) {

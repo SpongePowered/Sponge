@@ -67,14 +67,12 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     private int impl$previousDespawnDelay = MAGIC_PREVIOUS;
     private boolean impl$infiniteDespawnDelay;
 
-    public float dropChance = 1.0f;
-
     @Override
     public boolean bridge$infinitePickupDelay() {
         return this.impl$infinitePickupDelay;
     }
 
-    @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
+    @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = Constants.Entity.Item.DEFAULT_ITEM_MERGE_RADIUS))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
         if (this.world.isRemote || ((WorldBridge) this.world).bridge$isFake()) {
             return originalRadius;

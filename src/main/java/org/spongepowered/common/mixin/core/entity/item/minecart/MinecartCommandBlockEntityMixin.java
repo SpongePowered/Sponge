@@ -24,22 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.item.minecart;
 
-import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
-import net.minecraft.tileentity.CommandBlockLogic;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
 
 @Mixin(MinecartCommandBlockEntity.class)
-public abstract class MinecartCommandBlockEntityMixin extends AbstractMinecartEntityMixin implements CommandSourceBridge {
+public abstract class MinecartCommandBlockEntityMixin extends AbstractMinecartEntityMixin {
 
-    @Shadow @Final private CommandBlockLogic commandBlockLogic;
-
-    @Override
-    public ICommandSender bridge$asICommandSender() {
-        return this.commandBlockLogic;
-    }
 
 }

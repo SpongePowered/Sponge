@@ -36,15 +36,16 @@ public abstract class EggEntityMixin extends ThrowableEntityMixin {
 
     public double impl$damageAmount;
 
-    @ModifyArg(method = "onImpact", at =
-            @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
-        )
-    private float onAttackEntityFromUseDamage(float damage) {
+    @ModifyArg(method = "onImpact",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
+    )
+    private float onAttackEntityFromUseDamage(final float damage) {
         return (float) this.impl$damageAmount;
     }
 
     @Override
-    public void impl$readFromSpongeCompound(CompoundNBT compound) {
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
         super.impl$readFromSpongeCompound(compound);
         if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT)) {
             this.impl$damageAmount = compound.getDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT);
@@ -52,7 +53,7 @@ public abstract class EggEntityMixin extends ThrowableEntityMixin {
     }
 
     @Override
-    public void impl$writeToSpongeCompound(CompoundNBT compound) {
+    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
         compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damageAmount);
     }

@@ -135,6 +135,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow @Final protected EntityDataManager dataManager;
     @Shadow public DimensionType dimension;
     @Shadow private boolean invulnerable;
+    @Shadow public float prevRotationYaw;
 
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);

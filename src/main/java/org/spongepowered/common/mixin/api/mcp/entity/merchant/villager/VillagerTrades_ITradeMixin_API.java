@@ -42,7 +42,7 @@ public abstract class VillagerTrades_ITradeMixin_API implements TradeOfferGenera
     @Shadow @Nullable public abstract MerchantOffer shadow$getOffer(Entity entity, Random random);
 
     @Override
-    public TradeOffer apply(Random random, Merchant merchant) {
+    public TradeOffer apply(final Random random, final Merchant merchant) {
         return (TradeOffer) this.shadow$getOffer((Entity) merchant, random);
     }
 

@@ -47,6 +47,7 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
+import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -63,7 +64,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
 
     @Shadow public abstract void shadow$tick();
 
-    private ProjectileSource impl$projectileSource = ProjectileSource.UNKNOWN;
+    private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;
     private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
 
@@ -121,8 +122,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
             // post an event regardless and if the radius is zero the explosion
             // won't be triggered (the default behavior).
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, ((FireworkRocket) this).getShooter()); // TODO - Remove in 1.13/API 8
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((FireworkRocket) this).getShooter());
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$projectileSource);
             SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .sourceExplosive(((FireworkRocket) this))
                 .location(((FireworkRocket) this).getLocation())
@@ -137,8 +137,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
-                frame.addContext(EventContextKeys.THROWER, ((FireworkRocket) this).getShooter()); // TODO - Remove in 1.13/API 8
-                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((FireworkRocket) this).getShooter());
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$projectileSource);
                 this.bridge$postPrime();
             }
         }

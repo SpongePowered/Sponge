@@ -48,45 +48,47 @@ import javax.annotation.Nullable;
 @Mixin(EnderCrystalEntity.class)
 public abstract class EnderCrystalEntityMixin extends EntityMixin implements ExplosiveBridge, EnderCrystalEntityBridge {
 
-    private int explosionStrength = Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;
+    private int impl$explosionStrength = Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;
 
     // Explosive Impl
 
     @Override
     public Optional<Integer> bridge$getExplosionRadius() {
-        return Optional.of(this.explosionStrength);
+        return Optional.of(this.impl$explosionStrength);
     }
 
     @Override
-    public void bridge$setExplosionRadius(@Nullable Integer radius) {
-        this.explosionStrength = radius == null ? Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH : radius;
+    public void bridge$setExplosionRadius(@Nullable final Integer radius) {
+        this.impl$explosionStrength = radius == null ? Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH : radius;
     }
 
     @Redirect(method = "attackEntityFrom",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;"
+            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
         )
     )
     @Nullable
-    private net.minecraft.world.Explosion impl$throwEventWithEntity(net.minecraft.world.World world, @Nullable Entity nil, double x,
-                                                    double y, double z, float strength, boolean smoking, DamageSource source, float damage) {
-        return this.bridge$ThrowEventWithDetonation(world, nil, x, y, z, smoking, source);
+    private net.minecraft.world.Explosion impl$throwEventWithEntity(final net.minecraft.world.World world,
+        final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
+        final net.minecraft.world.Explosion.Mode modeIn, final DamageSource source, final float damage) {
+        return this.bridge$ThrowEventWithDetonation(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(net.minecraft.world.Explosion.Mode.DESTROY) <= 0, source);
     }
 
     @Nullable
     @Override
-    public net.minecraft.world.Explosion bridge$ThrowEventWithDetonation(net.minecraft.world.World world, @Nullable Entity nil, double x,
-        double y, double z, boolean smoking, @Nullable DamageSource source) {
+    public net.minecraft.world.Explosion bridge$ThrowEventWithDetonation(final net.minecraft.world.World world,
+        @Nullable final Entity nil, final double x, final double y, final double z, final boolean smoking,
+        @Nullable final DamageSource source) {
         final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
-        try (CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()){
+        try (final CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()){
             frame.pushCause(this);
             if (source != null) {
                 frame.pushCause(source);
             }
             return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(Location.of((World) world, new Vector3d(x, y, z)))
-                .radius(this.explosionStrength)
+                .radius(this.impl$explosionStrength)
                 .shouldPlaySmoke(smoking))
                 .orElse(null);
         }

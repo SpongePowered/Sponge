@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.merchant.villager;
 
+import net.minecraft.entity.merchant.villager.VillagerData;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.item.MerchantOffer;
@@ -32,6 +33,7 @@ import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.living.trader.Villager;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
@@ -40,6 +42,9 @@ import java.util.List;
 
 @Mixin(VillagerEntity.class)
 public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
+
+    @Shadow public abstract VillagerData shadow$getVillagerData();
+
     private List<MerchantOffer> impl$newOffers = new ArrayList<>();
 
     /**
@@ -52,9 +57,12 @@ public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
      * @param ci CallbackInfo.
      */
     @Override
-    protected void impl$addAndApplyTradeMutators(MerchantOffers givenMerchantOffers, VillagerTrades.ITrade[] newTrades, int maxNumbers, CallbackInfo ci) {
-        VillagerEntity villager = (VillagerEntity) (Object) this;
-        SpongeVillagerRegistry.getInstance().populateOffers((Villager) this, (List<TradeOffer>) (List<?>) impl$newOffers, (Profession) villager.getVillagerData().getProfession(), villager.getVillagerData().getLevel(), this.rand);
+    protected void impl$addAndApplyTradeMutators(final MerchantOffers givenMerchantOffers,
+        final VillagerTrades.ITrade[] newTrades, final int maxNumbers, final CallbackInfo ci) {
+        SpongeVillagerRegistry.getInstance().populateOffers((Villager) this,
+            this.impl$newOffers,
+            this.shadow$getVillagerData(),
+            this.rand);
         givenMerchantOffers.addAll(this.impl$newOffers); // Finally add the mutated offers to the trade offer map.
         this.impl$newOffers.clear(); // And clean up our temp values
     }
@@ -68,7 +76,7 @@ public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
      * @return true
      */
     @Override
-    protected boolean impl$addNewOfferToTempMap(MerchantOffers merchantOffers, MerchantOffer offer) {
+    protected boolean impl$addNewOfferToTempMap(final MerchantOffers merchantOffers, final MerchantOffer offer) {
         return this.impl$newOffers.add(offer);
     }
 }

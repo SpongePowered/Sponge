@@ -31,10 +31,12 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.BlockProjectileSource;
 import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.UUID;
@@ -44,7 +46,7 @@ public class ProjectileSourceSerializer {
     // TODO Revisit when persistent containers are implemented.
     // Note: ProjectileSource itself does not extend DataContainer
 
-    public static INBT toNbt(ProjectileSource projectileSource) {
+    public static INBT toNbt(final ProjectileSource projectileSource) {
         if (projectileSource instanceof Entity) {
             return new StringNBT(((Entity) projectileSource).getUniqueId().toString());
         }
@@ -54,39 +56,39 @@ public class ProjectileSourceSerializer {
         return null;
     }
 
-    public static ProjectileSource fromNbt(World worldObj, INBT tag) {
+    public static ProjectileSource fromNbt(final World worldObj, final INBT tag) {
         if (tag instanceof StringNBT) {
-            Entity entity =
+            final Entity entity =
                     ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((StringNBT) tag).getString())).orElse(null);
             if (entity instanceof ProjectileSource) {
                 return (ProjectileSource) entity;
             }
         }
         if (tag instanceof LongNBT) {
-            BlockPos pos = BlockPos.fromLong(((LongNBT) tag).getLong());
+            final BlockPos pos = BlockPos.fromLong(((LongNBT) tag).getLong());
             if (worldObj.isBlockLoaded(pos)) {
-                TileEntity tileEntity = worldObj.getTileEntity(pos);
+                final TileEntity tileEntity = worldObj.getTileEntity(pos);
                 if (tileEntity instanceof ProjectileSource) {
                     return (ProjectileSource) tileEntity;
                 }
             }
         }
-        return ProjectileSource.UNKNOWN;
+        return UnknownProjectileSource.UNKNOWN;
     }
 
-    public static void writeSourceToNbt(CompoundNBT compound, ProjectileSource projectileSource, net.minecraft.entity.Entity potentialEntity) {
+    public static void writeSourceToNbt(final CompoundNBT compound, ProjectileSource projectileSource, final net.minecraft.entity.Entity potentialEntity) {
         if (projectileSource == null && potentialEntity instanceof ProjectileSource) {
             projectileSource = (ProjectileSource) potentialEntity;
         }
-        INBT projectileNbt = toNbt(projectileSource);
+        final INBT projectileNbt = toNbt(projectileSource);
         if (projectileNbt != null) {
-            compound.put("projectileSource", projectileNbt);
+            compound.put(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE, projectileNbt);
         }
     }
 
-    public static void readSourceFromNbt(CompoundNBT compound, Projectile projectile) {
-        if (compound.contains("projectileSource")) {
-            projectile.setShooter(fromNbt((World) projectile.getWorld(), compound.get("projectileSource")));
+    public static void readSourceFromNbt(final CompoundNBT compound, final Projectile projectile) {
+        if (compound.contains(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE)) {
+            projectile.offer(Keys.SHOOTER, fromNbt((World) projectile.getWorld(), compound.get(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE)));
         }
     }
 }

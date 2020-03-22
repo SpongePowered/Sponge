@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
+import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -41,7 +42,7 @@ public abstract class EyeOfEnderEntityMixin extends EntityMixin implements Locat
     @Shadow private double targetX;
     @Shadow private double targetY;
     @Shadow private double targetZ;
-    private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
+    private ProjectileSource projectileSource = UnknownProjectileSource.UNKNOWN;
 
     @Override
     public void impl$readFromSpongeCompound(CompoundNBT compound) {

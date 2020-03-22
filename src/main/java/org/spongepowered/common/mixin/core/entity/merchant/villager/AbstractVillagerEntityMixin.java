@@ -46,10 +46,14 @@ public abstract class AbstractVillagerEntityMixin extends AgeableEntityMixin {
      * @param offer The merchant offer to add.
      * @return true.
      */
-    @Redirect(method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/item/MerchantOffers;add(Lnet/minecraft/item/MerchantOffer;)Z")
+    @Redirect(
+        method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/item/MerchantOffers;add(Lnet/minecraft/item/MerchantOffer;)Z"
+        )
     )
-    protected boolean impl$addNewOfferToTempMap(MerchantOffers merchantOffers, MerchantOffer offer) {
+    protected boolean impl$addNewOfferToTempMap(final MerchantOffers merchantOffers, final MerchantOffer offer) {
         return merchantOffers.add(offer);
     }
 
@@ -62,9 +66,11 @@ public abstract class AbstractVillagerEntityMixin extends AgeableEntityMixin {
      * @param maxNumbers
      * @param ci
      */
-    @Inject(method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
+    @Inject(
+        method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
         at = @At("TAIL"))
-    protected void impl$addAndApplyTradeMutators(MerchantOffers givenMerchantOffers, VillagerTrades.ITrade[] newTrades, int maxNumbers, CallbackInfo ci) {
+    protected void impl$addAndApplyTradeMutators(final MerchantOffers givenMerchantOffers,
+        final VillagerTrades.ITrade[] newTrades, final int maxNumbers, final CallbackInfo ci) {
         // Do nothing, this is overriden by the Villager/WanderingTraderEntity
     }
 

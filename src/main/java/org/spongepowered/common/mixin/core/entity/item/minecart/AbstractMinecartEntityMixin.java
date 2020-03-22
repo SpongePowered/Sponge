@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.item.minecart;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.api.event.CauseStackManager;
@@ -39,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
@@ -46,12 +48,13 @@ import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VectorSerializer;
 import org.spongepowered.math.vector.Vector3d;
+
 import java.util.ArrayList;
 
 @Mixin(AbstractMinecartEntity.class)
 public abstract class AbstractMinecartEntityMixin extends EntityMixin implements MinecartEntityBridge {
 
-    private double impl$maxSpeed = Constants.Entity.Minecart.DEFAULT_MAX_SPEED;
+    protected double impl$maxSpeed = Constants.Entity.Minecart.DEFAULT_MAX_SPEED;
     private boolean impl$slowWhenEmpty = true;
     private Vector3d impl$airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
         Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD,
@@ -70,24 +73,39 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
         return this.impl$maxSpeed;
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 0))
-    private double onDecelerateX(final double defaultValue) {
-        return this.impl$derailedMod.getX();
+    @Redirect(method = "moveDerailedMinecart",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/util/math/Vec3d;scale(D)Lnet/minecraft/util/math/Vec3d;"
+        ),
+        slice = @Slice(
+            from = @At(value = "FIELD", target = "Lnet/minecraft/util/math/Vec3d;z:D"),
+            to = @At(value = "FIELD", target = "Lnet/minecraft/entity/MoverType;SELF:Lnet/minecraft/entity/MoverType;")
+        ),
+        expect = 1,
+        require = 1
+    )
+    private Vec3d impl$applyDerailedModifierOnGround(final Vec3d vec3d, final double factor) {
+        return vec3d.mul(this.impl$derailedMod.getX(), this.impl$derailedMod.getY(), this.impl$derailedMod.getZ());
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 1))
-    private double onDecelerateY(final double defaultValue) {
-        return this.impl$derailedMod.getY();
-    }
-
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 2))
-    private double onDecelerateZ(final double defaultValue) {
-        return this.impl$derailedMod.getZ();
+    @Redirect(method = "moveDerailedMinecart",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/util/math/Vec3d;scale(D)Lnet/minecraft/util/math/Vec3d;"
+        ),
+        slice = @Slice(
+            from = @At(value = "FIELD", target = "Lnet/minecraft/entity/MoverType;SELF:Lnet/minecraft/entity/MoverType;"),
+            to = @At(value = "TAIL")
+        ),
+        expect = 1,
+        require = 1
+    )
+    private Vec3d impl$applyDerailedModifierInAir(final Vec3d vec3d, final double factor) {
+        return vec3d.mul(this.impl$airborneMod.getX(), this.impl$airborneMod.getY(), this.impl$airborneMod.getZ());
     }
 
     @Redirect(method = "applyDrag",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/item/AbstractMinecartEntity;isBeingRidden()Z"
+            target = "Lnet/minecraft/entity/item/minecart/AbstractMinecartEntity;isBeingRidden()Z"
         )
     )
     private boolean impl$applyDragIfEmpty(final AbstractMinecartEntity self) {
@@ -96,13 +114,14 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
 
     @Inject(method = "attackEntityFrom",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/item/AbstractMinecartEntity;removePassengers()V"
+            target = "Lnet/minecraft/entity/item/minecart/AbstractMinecartEntity;removePassengers()V"
         ),
         cancellable = true)
     private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
             frame.pushCause(source);
-            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), (Minecart) this, 0, amount);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), (Minecart) this, new ArrayList<>(), 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);

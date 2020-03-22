@@ -29,7 +29,6 @@ import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
-import net.minecraft.block.LeverBlock;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.nbt.CompoundNBT;
@@ -53,10 +52,10 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandPreferences;
-import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.ParrotType;
@@ -78,7 +77,6 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
-import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -245,6 +243,7 @@ public final class Constants {
             public static final class Projectile {
 
                 public static final String PROJECTILE_DAMAGE_AMOUNT = "damageAmount";
+                public static final String PROJECTILE_SOURCE = "projectileSource";
             }
 
             public static final class Player {
@@ -781,6 +780,10 @@ public final class Constants {
             public static final String BOAT_MOVE_ON_LAND = "moveOnLand";
             public static final String BOAT_OCCUPIED_DECELERATION_SPEED = "occupiedDecelerationSpeed";
             public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
+            public static final float DEFAULT_MAX_SPEED = 0.9f;
+            public static final double OCCUPIED_DECELERATION_SPEED = 0D;
+            public static final double UNOCCUPIED_DECELERATION_SPEED = 0.8D;
+            public static final boolean MOVE_ON_LAND = false;
         }
 
         public static final class Creeper {
@@ -831,6 +834,7 @@ public final class Constants {
             public static final int MIN_PICKUP_DELAY = Short.MIN_VALUE;
             public static final int MAX_PICKUP_DELAY = Short.MAX_VALUE;
             public static final int DEFAULT_PICKUP_DELAY = 0;
+            public static final double DEFAULT_ITEM_MERGE_RADIUS = 0.5D;
             public static final int MIN_DESPAWN_DELAY = Short.MIN_VALUE;
             public static final int MAX_DESPAWN_DELAY = Short.MAX_VALUE;
             public static final int DEFAULT_DESPAWN_DELAY = 0;
@@ -859,6 +863,7 @@ public final class Constants {
             public static final double DEFAULT_DERAILED_MOD = 0.5D;
             public static final String MINECART_TYPE = "Type";
             public static final double DEFAULT_MAX_SPEED = 0.4D;
+            public static final double DEFAULT_FURNACE_MAX_SPEED = 0.2D;
             public static final String MAX_SPEED = "maxSpeed";
             public static final String SLOW_WHEN_EMPTY = "slowWhenEmpty";
             public static final String AIRBORNE_MODIFIER = "airborneModifier";
@@ -1259,16 +1264,11 @@ public final class Constants {
             (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
         public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR =
             (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
-        public static final Comparator<PropertyProvider<?>> PROPERTY_STORE_COMPARATOR =
-            (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
         public static final Comparator<DataContentUpdater> DATA_CONTENT_UPDATER_COMPARATOR =
             (o1, o2) -> ComparisonChain.start()
                 .compare(o2.getInputVersion(), o1.getInputVersion())
                 .compare(o2.getOutputVersion(), o1.getOutputVersion())
                 .result();
-        public static final Comparator<? super NbtDataProcessor<?, ?>>
-            NBT_PROCESSOR_COMPARATOR =
-            (o1, o2) -> ComparisonChain.start().compare(o2.getPriority(), o1.getPriority()).result();
 
         public static Comparator<Integer> intComparator() {
             return Integer::compareTo;
@@ -1335,47 +1335,6 @@ public final class Constants {
             }
         }
 
-        public static Direction getFor(final LeverBlock.EnumOrientation orientation) {
-            switch (orientation) {
-                case DOWN_X:
-                    return Direction.DOWN;
-                case EAST:
-                    return Direction.EAST;
-                case WEST:
-                    return Direction.WEST;
-                case SOUTH:
-                    return Direction.SOUTH;
-                case NORTH:
-                    return Direction.NORTH;
-                case UP_Z:
-                    return Direction.UP;
-                case UP_X:
-                    return Direction.UP;
-                case DOWN_Z:
-                    return Direction.DOWN;
-                default:
-                    return Direction.NORTH;
-            }
-        }
-
-        public static LeverBlock.EnumOrientation getAsOrientation(final Direction direction, final Axis axis) {
-            switch (direction) {
-                case DOWN:
-                    return axis == Axis.Z ? LeverBlock.EnumOrientation.DOWN_Z : LeverBlock.EnumOrientation.DOWN_X;
-                case EAST:
-                    return LeverBlock.EnumOrientation.EAST;
-                case WEST:
-                    return LeverBlock.EnumOrientation.WEST;
-                case SOUTH:
-                    return LeverBlock.EnumOrientation.SOUTH;
-                case NORTH:
-                    return LeverBlock.EnumOrientation.NORTH;
-                case UP:
-                    return axis == Axis.Z ? LeverBlock.EnumOrientation.UP_Z : LeverBlock.EnumOrientation.UP_X;
-                default:
-                    return LeverBlock.EnumOrientation.NORTH;
-            }
-        }
 
         public static Direction checkDirectionToHorizontal(final Direction dir) {
             switch (dir) {

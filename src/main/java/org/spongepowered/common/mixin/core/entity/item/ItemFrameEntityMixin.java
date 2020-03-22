@@ -48,11 +48,18 @@ public abstract class ItemFrameEntityMixin extends HangingEntityMixin {
 
     @Shadow public abstract void shadow$setDisplayedItem(@Nullable net.minecraft.item.ItemStack p_82334_1_);
 
-    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemFrameEntity;dropItemOrSelf(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
-    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    @Inject(method = "attackEntityFrom",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/item/ItemFrameEntity;dropItemOrSelf(Lnet/minecraft/entity/Entity;Z)V"
+        ),
+        cancellable = true)
+    private void onAttackEntityFrom(final DamageSource source, final float amount,
+        final CallbackInfoReturnable<Boolean> cir) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), (ItemFrame) this, 0, amount);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(),
+                (ItemFrame) this, new ArrayList<>(), 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
@@ -70,14 +77,14 @@ public abstract class ItemFrameEntityMixin extends HangingEntityMixin {
      * @param ci The callback info
      */
     @Inject(
-        method ="removeItem",
+        method = "removeItem",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/ItemFrameEntity;)V",
             shift = At.Shift.AFTER
         )
     )
-    private void impl$postOnSetItemFrame(CallbackInfo ci) {
+    private void impl$postOnSetItemFrame(final CallbackInfo ci) {
         this.shadow$setDisplayedItem(net.minecraft.item.ItemStack.EMPTY);
     }
 

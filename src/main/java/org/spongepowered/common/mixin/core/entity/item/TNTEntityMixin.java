@@ -28,6 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.TNTEntity;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.Location;
@@ -66,7 +67,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
 
     @Override
     public boolean bridge$isExploding() {
-        return this.isDead && this.fuse <= 0;
+        return this.removed && this.fuse <= 0;
     }
 
     @Override
@@ -104,22 +105,22 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
         method = "explode",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;"
+            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
         )
     )
-    private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosionInstead(
-        final net.minecraft.world.World worldObj, final Entity self, final double x,
-                                                      final double y, final double z, final float strength, final boolean smoking) {
+    private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosionInstead(final net.minecraft.world.World world,
+        final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
+        final net.minecraft.world.Explosion.Mode modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
-                .sourceExplosive((PrimedTNT) this)
-                .radius(this.bridge$explosionRadius)
-                .shouldPlaySmoke(smoking)
-                .shouldBreakBlocks(smoking))
-                .orElseGet(() -> {
-                    ((PrimedTNT) this).defuse();
-                    return null;
-                });
+            .location(Location.of((World) world, new Vector3d(xIn, yIn, zIn)))
+            .sourceExplosive((PrimedTNT) this)
+            .radius(this.bridge$explosionRadius)
+            .shouldPlaySmoke(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal())
+            .shouldBreakBlocks(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal()))
+            .orElseGet(() -> {
+                ((PrimedTNT) this).offer(Keys.IS_PRIMED, false);
+                return null;
+            });
     }
 
 

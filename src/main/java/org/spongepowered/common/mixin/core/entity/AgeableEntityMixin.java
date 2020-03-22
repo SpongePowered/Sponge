@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.BreedingEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,7 +36,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 
-import java.util.Optional;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 
@@ -43,18 +43,13 @@ import net.minecraft.entity.passive.AnimalEntity;
 public abstract class AgeableEntityMixin extends EntityMixin {
 
     @Inject(method = "setGrowingAge", at = @At("RETURN"))
-    private void callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {
+    private void impl$callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {
         if (age == 0) {
-            this.callReadyToMateEvent();
+            if (!((WorldBridge) this.world).bridge$isFake() && ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((AgeableEntity) (Object) this) instanceof AnimalEntity) {
+                final BreedingEvent.ReadyToMate event = SpongeEventFactory.createBreedingEventReadyToMate(Sponge.getCauseStackManager().getCurrentCause(), (Animal) this);
+                SpongeImpl.postEvent(event);
+            }
         }
     }
 
-    @SuppressWarnings("deprecation")
-    private void callReadyToMateEvent() {
-        if (!((WorldBridge) this.world).bridge$isFake() && ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((AgeableEntity) (Object) this) instanceof AnimalEntity) {
-            final org.spongepowered.api.event.entity.BreedingEvent.ReadyToMate event =
-                SpongeEventFactory.createBreedingEventReadyToMate(Sponge.getCauseStackManager().getCurrentCause(), (Animal) this);
-            SpongeImpl.postEvent(event);
-        }
-    }
 }

@@ -58,8 +58,8 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
     private void fireDestroyDamageEvent(final DamageSource source, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
-            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), new ArrayList<>(),
-                (Entity) this, Math.max(1000, this.shadow$getHealth()));
+            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
+                (Entity) this, new ArrayList<>(), Math.max(1000, this.shadow$getHealth()));
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(false);
             }
@@ -93,8 +93,8 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
     private void impl$fireDamageEventDamage(final ArmorStandEntity self, final DamageSource source, final float amount) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
-            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
-                (Entity) this, amount);
+            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
+                (Entity) this, new ArrayList<>(), amount);
             if (!SpongeImpl.postEvent(event)) {
                 this.shadow$func_213817_e(source, (float) event.getFinalDamage());
             }
@@ -117,8 +117,8 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
         // like damage in other respects, so fire an event.
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
-            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
-                (Entity) this, 0);
+            final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
+                (Entity) this, new ArrayList<>(), 0);
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(false);
             }
@@ -138,8 +138,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
      * @author JBYoshi
      * @reason EntityArmorStand "simplifies" this method to simply call {@link
      * #shadow$remove()}. However, this ignores our custom event. Instead, delegate
-     * to the superclass and use {@link
-     * EntityArmorStand#attackEntityFrom(DamageSource, float)}.
+     * to the superclass and use {@link ArmorStandEntity#attackEntityFrom(DamageSource, float)}.
      */
     @Overwrite
     @Override

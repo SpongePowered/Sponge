@@ -54,7 +54,7 @@ import javax.annotation.Nullable;
 @Mixin(HangingEntity.class)
 public abstract class HangingEntityMixin extends EntityMixin {
 
-    @Shadow @Nullable public Direction facingDirection;
+    @Shadow private Direction facingDirection;
     @Shadow public abstract boolean shadow$onValidSurface();
 
     private boolean impl$ignorePhysics = false;
@@ -62,19 +62,21 @@ public abstract class HangingEntityMixin extends EntityMixin {
     /**
      * Called to update the entity's position/logic.
      */
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/HangingEntity;onValidSurface()Z"))
-    private boolean impl$checkIfOnValidSurfaceAndIgnoresPhysics(HangingEntity entityHanging) {
+    @Redirect(method = "tick()V",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/item/HangingEntity;onValidSurface()Z"))
+    private boolean impl$checkIfOnValidSurfaceAndIgnoresPhysics(final HangingEntity entityHanging) {
         return this.shadow$onValidSurface() && !this.impl$ignorePhysics;
     }
 
     @Override
-    public void impl$writeToSpongeCompound(CompoundNBT compound) {
+    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
         compound.putBoolean("ignorePhysics", this.impl$ignorePhysics);
     }
 
     @Override
-    public void impl$readFromSpongeCompound(CompoundNBT compound) {
+    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
         super.impl$readFromSpongeCompound(compound);
         if (compound.contains("ignorePhysics")) {
             this.impl$ignorePhysics = compound.getBoolean("ignorePhysics");
@@ -87,10 +89,12 @@ public abstract class HangingEntityMixin extends EntityMixin {
         ),
         cancellable = true
     )
-    private void impl$postEventOnAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    private void impl$postEventOnAttackEntityFrom(final DamageSource source, final float amount,
+        final CallbackInfoReturnable<Boolean> cir) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), (Entity) this, 0, amount);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(),
+                (Entity) this, new ArrayList<>(), 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
@@ -105,13 +109,13 @@ public abstract class HangingEntityMixin extends EntityMixin {
      */
     @Override
     @Overwrite
-    public ItemEntity entityDropItem(ItemStack stack, float offsetY) {
+    public ItemEntity entityDropItem(final ItemStack stack, final float offsetY) {
         // Sponge Start - Check for client worlds,, don't care about them really. If it's server world, then we care.
         final double xOffset = ((float) this.facingDirection.getXOffset() * 0.15F);
         final double zOffset = ((float) this.facingDirection.getZOffset() * 0.15F);
         if (((WorldBridge) this.world).bridge$isFake()) {
             // Sponge End
-            ItemEntity entityitem = new ItemEntity(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
+            final ItemEntity entityitem = new ItemEntity(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
             entityitem.setDefaultPickupDelay();
             this.world.addEntity(entityitem);
             return entityitem;
