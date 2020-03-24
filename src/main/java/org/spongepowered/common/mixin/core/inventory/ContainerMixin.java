@@ -124,6 +124,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     private List<SlotTransaction> impl$capturedCurrentCraftShiftTransactions = new ArrayList<>();
     private List<SlotTransaction> impl$capturedCraftShiftTransactions = new ArrayList<>();
     @Nullable private SlotTransaction impl$capturedCraftPreviewTransaction;
+    private static int impl$numTransactionErrorsLogged = 0;
     private boolean impl$isLensInitialized;
     @Nullable private Int2ObjectMap<SlotAdapter> impl$adapters;
     @Nullable private InventoryArchetype impl$archetype;
@@ -434,9 +435,15 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
             this.impl$capturedCraftPreviewTransaction = new SlotTransaction(slot, this.impl$capturedCraftPreviewTransaction.getOriginal(), repl);
         } else {
             SlotTransaction replace = new SlotTransaction(slot, orig, repl);
-            if (SpongeImpl.getGlobalConfigAdapter().getConfig().getLogging().logTransactionMergeFailure()) {
+            ContainerMixin.impl$numTransactionErrorsLogged++;
+            int maxLogs = SpongeImpl.getGlobalConfigAdapter().getConfig().getLogging().logTransactionMergeFailure();
+            if (maxLogs <= 0 || ContainerMixin.impl$numTransactionErrorsLogged <= maxLogs) {
                 SpongeImpl.getLogger().warn("Could not merge craft preview transactions - some events may break (original {}, replace {})",
                         this.impl$capturedCraftPreviewTransaction, replace);
+                if (ContainerMixin.impl$numTransactionErrorsLogged == maxLogs) {
+                    SpongeImpl.getLogger().warn("Further warnings about this will be suppressed. Change transaction-merge-fail in global.conf to "
+                            + "show more.");
+                }
             }
             this.impl$capturedCraftPreviewTransaction = replace;
         }
