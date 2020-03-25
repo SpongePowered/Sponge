@@ -38,6 +38,7 @@ import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.mixin.accessor.server.management.IPBanListAccessor;
 import org.spongepowered.common.mixin.accessor.server.management.UserListAccessor;
 import org.spongepowered.common.util.UserListUtils;
 
@@ -100,7 +101,7 @@ public class SpongeBanService implements BanService {
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
 
         accessor.accessor$removeExpired();
-        return Optional.ofNullable((Ban.Ip) accessor.accessor$getValues().get(accessor.accessor$getObjectKey(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0)))));
+        return Optional.ofNullable((Ban.Ip) (accessor.accessor$getValues().get(accessor.accessor$getObjectKey(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0)))));
     }
 
     @SuppressWarnings("unchecked")
@@ -156,7 +157,7 @@ public class SpongeBanService implements BanService {
             Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
 
             final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.Ip) ban).getAddress(), 0);
-            UserListUtils.removeEntry(this.getIPBanList(), this.getIPBanList().addressToString(inetSocketAddress));
+            UserListUtils.removeEntry(this.getIPBanList(), ((IPBanListAccessor) this.getIPBanList()).accessor$addressToString(inetSocketAddress));
             return true;
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));

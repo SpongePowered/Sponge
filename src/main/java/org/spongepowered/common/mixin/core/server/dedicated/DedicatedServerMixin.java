@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.server.dedicated;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.PropertyManager;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,22 +36,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
-    @Shadow private boolean guiIsEnabled;
-
     @Shadow public abstract int getSpawnProtectionSize();
 
     /**
      * @author Zidane - April 20th, 2015
+     * @author i509VCB - March 25th, 2020 - 1.14.4
      * @reason At the time of writing, this turns off the default Minecraft Server GUI that exists in non-headless environment.
      * Reasoning: The GUI console can easily consume a sizable chunk of each CPU core (20% or more is common) on the computer being ran on and has
      * been proven to cause quite a bit of latency issues.
@@ -62,7 +54,6 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
     @Overwrite
     public void setGuiEnabled() {
         //MinecraftServerGui.createServerGui(this);
-        this.guiIsEnabled = false;
     }
 
     @Inject(method = "systemExitNow", at = @At("HEAD"))
@@ -79,14 +70,11 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         return propertyManager.getIntProperty(key, defaultValue);
     }
 
-
-
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;save()V"))
-    private void onSave(final PlayerProfileCache cache) {
-        ((PlayerProfileCacheBridge) this.getPlayerProfileCache()).bridge$setCanSave(true);
-        this.getPlayerProfileCache().save();
-        ((PlayerProfileCacheBridge) this.getPlayerProfileCache()).bridge$setCanSave(false);
+    private void impl$savePlayerProfileCache(final PlayerProfileCache cache) {
+        ((PlayerProfileCacheBridge) this.shadow$getPlayerProfileCache()).bridge$setCanSave(true);
+        this.shadow$getPlayerProfileCache().save();
+        ((PlayerProfileCacheBridge) this.shadow$getPlayerProfileCache()).bridge$setCanSave(false);
     }
-
 
 }

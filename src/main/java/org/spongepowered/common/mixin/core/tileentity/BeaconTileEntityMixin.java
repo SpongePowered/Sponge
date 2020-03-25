@@ -33,10 +33,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import javax.annotation.Nullable;
 
 @Mixin(BeaconTileEntity.class)
-public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin {
+public abstract class BeaconTileEntityMixin extends TileEntityMixin {
 
     /**
      * @author gabizou - June 11th, 2019 - 1.12.2
+     * @author i509VCB - March 24th, 2020 - 1.14.4
      * @reason We want to avoid validating the potion type and just set the
      * potion anyways. This allows for plugins to set custom potions on beacons
      * that will persist.
@@ -44,8 +45,8 @@ public abstract class BeaconTileEntityMixin extends LockableTileEntityMixin {
      * @param id The id
      * @return The potion by id, no validation
      */
-    @Redirect(method = "readFromNBT",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;")
+    @Redirect(method = "read",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/BeaconTileEntity;isBeaconEffect(I)Lnet/minecraft/potion/Effect;")
     )
     @Nullable
     private Effect impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {

@@ -45,7 +45,7 @@ public abstract class EnderChestTileEntityMixin extends TileEntityMixin {
      *
      * @reason Overwritten in case ender chests ever attempt to tick
      */
-    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "tick()V", at = @At("HEAD"), cancellable = true)
     private void impl$IgnoreTicking(CallbackInfo ci) {
         if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server

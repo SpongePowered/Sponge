@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
@@ -56,7 +57,7 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
     @Shadow private net.minecraft.item.DyeColor baseColor;
     @Shadow private ListNBT patterns;
 
-    private List<PatternLayer> impl$patternLayers = Lists.newArrayList();
+    private List<BannerPatternLayer> impl$patternLayers = Lists.newArrayList();
 
     @Inject(method = "setItemValues", at = @At("RETURN"))
     private void onSetItemValues(final CallbackInfo ci) {
@@ -85,7 +86,7 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
         this.impl$patternLayers.clear();
         if (this.patterns != null) {
             final SpongeGameRegistry registry = SpongeImpl.getRegistry();
-            for (int i = 0; i < this.patterns.tagCount(); i++) {
+            for (int i = 0; i < this.patterns.size(); i++) {
                 final CompoundNBT tagCompound = this.patterns.getCompound(i);
                 final String patternId = tagCompound.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID);
                 final int patternColor = tagCompound.getInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR);
@@ -98,16 +99,16 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
     }
 
     @Override
-    public List<PatternLayer> bridge$getLayers() {
+    public List<BannerPatternLayer> bridge$getLayers() {
         return new ArrayList<>(this.impl$patternLayers);
     }
 
     @Override
-    public void bridge$setLayers(final List<PatternLayer> layers) {
+    public void bridge$setLayers(final List<BannerPatternLayer> layers) {
         this.impl$patternLayers = new NonNullArrayList<>();
         this.impl$patternLayers.addAll(layers);
         this.patterns = new ListNBT();
-        for (final PatternLayer layer : this.impl$patternLayers) {
+        for (final BannerPatternLayer layer : this.impl$patternLayers) {
             final CompoundNBT compound = new CompoundNBT();
             compound.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, layer.getShape().getName());
             compound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).getDyeDamage());

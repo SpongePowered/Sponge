@@ -59,7 +59,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 @NonnullByDefault
-public class SpongeSelectorFactory implements SelectorFactory {
+public class SpongeSelectorFactory implements Selector.Factory {
 
     public static final SpongeSelectorFactory INSTANCE = new SpongeSelectorFactory();
 

@@ -39,7 +39,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 public final class VecHelper {
 
-    // === Flow Vector3d --> BlockPos ===
+    // === Sponge Vector3d --> BlockPos ===
 
     public static BlockPos toBlockPos(Vector3d vector) {
         if (vector == null) {
@@ -48,7 +48,7 @@ public final class VecHelper {
         return new BlockPos(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    // === Flow Vector3i --> BlockPos ===
+    // === Sponge Vector3i --> BlockPos ===
 
     public static BlockPos toBlockPos(Vector3i vector) {
         if (vector == null) {
@@ -65,7 +65,7 @@ public final class VecHelper {
         }
         return ((LocationBridge) (Object) location).bridge$getBlockPos();
     }
-    // === MC BlockPos --> Flow Vector3i ==
+    // === MC BlockPos --> Sponge Vector3i ==
 
     public static Vector3i toVector3i(BlockPos pos) {
         if (pos == null) {
@@ -74,7 +74,7 @@ public final class VecHelper {
         return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    // === MC BlockPos --> Flow Vector3d ==
+    // === MC BlockPos --> Sponge Vector3d ==
 
     public static Vector3d toVector3d(BlockPos pos) {
         if (pos == null) {
@@ -83,7 +83,7 @@ public final class VecHelper {
         return new Vector3d(pos.getX(), pos.getY(), pos.getZ());
     }
     
-    // === Rotations --> Flow Vector ===
+    // === Rotations --> Sponge Vector ===
 
     public static Vector3d toVector3d(Rotations rotation) {
         if (rotation == null) {
@@ -92,7 +92,7 @@ public final class VecHelper {
         return new Vector3d(rotation.getX(), rotation.getY(), rotation.getZ());
     }
 
-    // === MC Vec3i --> Flow Vector3i ===
+    // === MC Vec3i --> Sponge Vector3i ===
 
     public static Vector3i toVector3i(Vec3i vector) {
         if (vector == null) {
@@ -101,7 +101,7 @@ public final class VecHelper {
         return new Vector3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    // === Flow Vector3i --> MC Vec3i ===
+    // === Sponge Vector3i --> MC Vec3i ===
 
     public static Vec3i toVec3i(Vector3i vector) {
         if (vector == null) {
@@ -110,7 +110,7 @@ public final class VecHelper {
         return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    // === Flow Vector3d --> MC Vec3d ===
+    // === Sponge Vector3d --> MC Vec3d ===
 
     public static Vec3d toVec3d(Vector3d vector) {
         if (vector == null) {
@@ -128,7 +128,7 @@ public final class VecHelper {
         return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    // === MC ChunkCoordIntPair ---> Flow Vector3i ===
+    // === MC ChunkCoordIntPair ---> Sponge Vector3i ===
 
     public static Vector3i toVec3i(ChunkPos pos) {
         if (pos == null) {
@@ -137,7 +137,7 @@ public final class VecHelper {
         return new Vector3i(pos.x, 0, pos.z);
     }
 
-    // === Flow Vector3i --> MC ChunkCoordIntPair ===
+    // === Sponge Vector3i --> MC ChunkCoordIntPair ===
 
     public static ChunkPos toChunkPos(Vector3i vector) {
         if (vector == null) {
@@ -146,7 +146,7 @@ public final class VecHelper {
         return new ChunkPos(vector.getX(), vector.getZ());
     }
 
-    // === MC Vec3 --> flow Vector3d ==
+    // === MC Vec3 --> Sponge Vector3d ==
 
     public static Vector3d toVector3d(Vec3d vector) {
         if (vector == null) {
@@ -155,7 +155,7 @@ public final class VecHelper {
         return new Vector3d(vector.x, vector.y, vector.z);
     }
 
-    // === Flow Vector3d --> MC Vec3 ==
+    // === Sponge Vector3d --> MC Vec3 ==
 
     public static Vec3i toVec3i(Vector3d vector) {
         if (vector == null) {
@@ -164,7 +164,7 @@ public final class VecHelper {
         return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    // === Flow Vector --> Rotations ===
+    // === Sponge Vector --> Rotations ===
     public static Rotations toRotation(Vector3d vector) {
         if (vector == null) {
             return null;

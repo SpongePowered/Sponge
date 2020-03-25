@@ -41,7 +41,7 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
     @Shadow private String author;
     @Shadow private BlockPos position;
     @Shadow private BlockPos size = BlockPos.ZERO;
-    @Shadow private StructureBlockTileEntity.Mode mode;
+    @Shadow private net.minecraft.state.properties.StructureMode mode;
     @Shadow private boolean ignoreEntities;
     @Shadow private boolean showAir;
     @Shadow private boolean showBoundingBox;
@@ -74,7 +74,7 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
 
     @Override
     public void bridge$setMode(StructureMode mode) {
-        this.mode = (StructureBlockTileEntity.Mode) (Object) checkNotNull(mode, "mode");
+        this.mode = (net.minecraft.state.properties.StructureMode) (Object) checkNotNull(mode, "mode");
     }
 
     @Override

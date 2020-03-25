@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.FishingRodItem;
@@ -48,27 +49,36 @@ import javax.annotation.Nullable;
 @Mixin(FishingRodItem.class)
 public abstract class FishingRodItemMixin extends Item {
 
+    public FishingRodItemMixin() {
+        super(null);
+    }
+
     @Nullable private FishingBobberEntity fishHook;
 
     @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-            target = "Lnet/minecraft/entity/projectile/EntityFishHook;handleHookRetraction()I"), cancellable = true)
-    private void cancelHookRetraction(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
+            target = "Lnet/minecraft/entity/projectile/FishingBobberEntity;handleHookRetraction(Lnet/minecraft/item/ItemStack;)I"), cancellable = true)
+    private void impl$cancelHookRetraction(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
         if (player.fishingBobber != null) {
             // Event was cancelled
             cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand)));
         }
     }
 
-    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound"
-            + "(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", ordinal = 1),
-            cancellable = true)
-    private void onThrowEvent(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
+    @Inject(method = "onItemRightClick",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V",
+            ordinal = 1),
+        cancellable = true)
+    private void impl$onThrowEvent(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult<ItemStack>> cir) {
         if (world.isRemote) {
             // Only fire event on server-side to avoid crash on client
             return;
         }
 
-        FishingBobberEntity fishHook = new FishingBobberEntity(world, player);
+        ItemStack handStack = player.getHeldItem(hand);
+        int fishingSpeedBonus = EnchantmentHelper.getFishingSpeedBonus(handStack);
+        int fishingLuckBonus = EnchantmentHelper.getFishingLuckBonus(handStack);
+        FishingBobberEntity fishHook = new FishingBobberEntity(player, world, fishingSpeedBonus, fishingLuckBonus);
         Sponge.getCauseStackManager().pushCause(player);
         if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
             fishHook.remove(); // Bye
@@ -79,8 +89,8 @@ public abstract class FishingRodItemMixin extends Item {
         Sponge.getCauseStackManager().popCause();
     }
 
-    @Redirect(method = "onItemRightClick", at = @At(value = "NEW", target = "net/minecraft/entity/projectile/EntityFishHook"))
-    private FishingBobberEntity onNewEntityFishHook(World world, PlayerEntity player) {
+    @Redirect(method = "onItemRightClick", at = @At(value = "NEW", target = "net/minecraft/entity/projectile/FishingBobberEntity"))
+    private FishingBobberEntity impl$onNewEntityFishHook(World world, PlayerEntity player) {
         // Use the fish hook we created for the event
         FishingBobberEntity fishHook = this.fishHook;
         this.fishHook = null;

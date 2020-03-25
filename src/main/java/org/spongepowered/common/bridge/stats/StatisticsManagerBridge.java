@@ -26,7 +26,9 @@ package org.spongepowered.common.bridge.stats;
 
 import net.minecraft.stats.Stat;
 
+import java.util.Map;
+
 public interface StatisticsManagerBridge {
 
-    Map<Stat, TupleIntJsonSerializable> bridge$getStatsData();
+    Map<Stat<?>, Integer> bridge$getStatsData();
 }

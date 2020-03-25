@@ -45,7 +45,7 @@ import java.util.Objects;
 public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
 
     @SuppressWarnings("ConstantConditions")
-    private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
+    private static final BlockState AIR = BlockTypes.AIR.get().getDefaultState();
 
     private final Palette<BlockState> palette;
     private final BackingData data;

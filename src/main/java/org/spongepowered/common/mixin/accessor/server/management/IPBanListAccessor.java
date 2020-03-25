@@ -22,21 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.mixin.accessor.server.management;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.Vec3i;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.server.management.IPBanList;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(Direction.class)
-public abstract class DirectionMixin implements EnumFacingBridge {
+import java.net.SocketAddress;
 
-    @Shadow @Final private Vec3i directionVec;
-
-    @Override
-    public Vec3i bridge$getDirectionVec() {
-        return this.directionVec;
-    }
+@Mixin(IPBanList.class)
+public interface IPBanListAccessor {
+    @Invoker("addressToString") String accessor$addressToString(SocketAddress address);
 }

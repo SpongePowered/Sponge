@@ -183,7 +183,6 @@
         "util.CooldownTrackerMixin",
         "util.CooldownTrackerServerMixin",
         "util.DamageSourceMixin",
-        "util.DirectionMixin",
         "util.EntityDamageSourceMixin",
         "util.EntityPredicatesMixin",
         "util.IndirectEntityDamageSourceMixin",

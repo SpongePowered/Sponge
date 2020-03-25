@@ -27,7 +27,9 @@ package org.spongepowered.common.item.merchant;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.entity.Entity;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
+import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -59,7 +61,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     }
 
     @Override
-    public TradeOffer apply(Random random) {
+    public TradeOffer apply(Random random, Merchant merchant) {
         checkNotNull(random, "Random cannot be null!");
         final TradeOffer.Builder builder = TradeOffer.builder();
         builder.firstBuyingItem(this.firstItemGenerator.apply(random));

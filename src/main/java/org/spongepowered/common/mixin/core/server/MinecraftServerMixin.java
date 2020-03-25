@@ -29,6 +29,7 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Unit;
 import net.minecraft.util.Util;
@@ -98,6 +99,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isServerRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
+    @Shadow public abstract PlayerProfileCache shadow$getPlayerProfileCache();
 
     @Nullable private ResourcePack impl$resourcePack;
     private boolean impl$enableSaving = true;

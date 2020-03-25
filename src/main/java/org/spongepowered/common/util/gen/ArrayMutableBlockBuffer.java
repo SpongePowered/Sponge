@@ -57,7 +57,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     private static final int SMALL_AREA_THRESHOLD = 256;
 
     @SuppressWarnings("ConstantConditions")
-    private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
+    private static final BlockState AIR = BlockTypes.AIR.get().getDefaultState();
 
     private Palette<BlockState> palette;
     private BackingData data;

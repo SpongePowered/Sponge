@@ -124,8 +124,8 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     }
 
     @Inject(method = "processInitialInteract", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashHolder(Lnet/minecraft/entity/Entity;Z)V"))
-    private void callLeashEvent(final PlayerEntity playerIn, final Hand hand, final CallbackInfoReturnable<Boolean> ci) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/MobEntity;setLeashHolder(Lnet/minecraft/entity/Entity;Z)V"))
+    private void impl$callLeashEvent(final PlayerEntity playerIn, final Hand hand, final CallbackInfoReturnable<Boolean> ci) {
         if (!playerIn.world.isRemote) {
             Sponge.getCauseStackManager().pushCause(playerIn);
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (Living) this);
@@ -219,21 +219,21 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      * This is to instill the check that if the entity is vanish, check whether they're untargetable
      * as well.
      *
-     * @param entitylivingbaseIn The entity living base coming in
+     * @param livingEntity The living entity being targetted
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
-    private void onSetAttackTarget(@Nullable final LivingEntity entitylivingbaseIn, final CallbackInfo ci) {
-        if (this.world.isRemote || entitylivingbaseIn == null) {
+    private void impl$onSetAttackTarget(@Nullable final LivingEntity livingEntity, final CallbackInfo ci) {
+        if (this.world.isRemote || livingEntity == null) {
             return;
         }
         //noinspection ConstantConditions
-        if (EntityUtil.isUntargetable((net.minecraft.entity.Entity) (Object) this, entitylivingbaseIn)) {
+        if (EntityUtil.isUntargetable((net.minecraft.entity.Entity) (Object) this, livingEntity)) {
             this.attackTarget = null;
             ci.cancel();
             return;
         }
         if (ShouldFire.SET_A_I_TARGET_EVENT) {
-            final SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, (Agent) this);
+            final SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) livingEntity, (Agent) this);
             if (event.isCancelled()) {
                 ci.cancel();
             } else {

@@ -61,6 +61,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockReader;
@@ -352,7 +353,7 @@ public class SpongeImplHooks {
     }
 
     public static Text getAdditionalCommandDescriptions() {
-        return Text.EMPTY;
+        return Text.empty();
     }
 
     public static void registerAdditionalCommands(final ChildCommandElementExecutor flagChildren, final ChildCommandElementExecutor nonFlagChildren) {
@@ -402,7 +403,7 @@ public class SpongeImplHooks {
     }
 
     public static void onTileEntityInvalidate(final TileEntity tileEntity) {
-        te.remove();
+        tileEntity.remove();
     }
 
     public static void capturePerEntityItemDrop(final PhaseContext<?> phaseContext, final Entity owner, final ItemEntity item) {
@@ -600,7 +601,7 @@ public class SpongeImplHooks {
      */
     @Nullable
     public static ResourceLocation getItemResourceLocation(final Item item) {
-        return Item.REGISTRY.getKey(mixinItem_api);
+        return Registry.ITEM.getKey(item);
     }
 
     public static void registerItemForSpongeRegistry(final int id, final ResourceLocation textualID, final Item item) {

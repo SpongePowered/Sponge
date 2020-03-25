@@ -49,7 +49,7 @@ public abstract class HopperTileEntityMixin extends LockableLootTileEntityMixin 
                 if (inventory instanceof ActiveChunkReferantBridge && inventory instanceof TileEntity) {
                     final TileEntity te = (TileEntity) inventory;
                     final ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) inventory).bridge$getActiveChunk();
-                    spongeChunk.bridge$addTrackedBlockPosition(te.getBlockType(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
+                    spongeChunk.bridge$addTrackedBlockPosition(te.getBlockState().getBlock(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
                 }
             });
         }

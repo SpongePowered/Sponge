@@ -128,6 +128,7 @@
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",
+        "server.management.IPBanListAccessor",
         "server.management.PlayerListAccessor",
         "server.management.UserListAccessor",
         "server.management.UserListEntryAccessor"

@@ -38,13 +38,21 @@ import javax.annotation.Nullable;
 @Mixin(FilledMapItem.class)
 public abstract class FilledMapItemMixin extends AbstractMapItem {
 
+    public FilledMapItemMixin() {
+        super(null);
+    }
 
-    @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
-    private static int onCreateMap(World world, String key) {
+    /**
+     * @author Unknown
+     * @author i509VCB - March 25th, 2020 - 1.14.4
+     * @reason Use default world in world manager for getting next map id
+     */
+    @Redirect(method = "createMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getNextMapId()I"))
+    private static int impl$onCreateMap(World world) {
         if (world.isRemote()) {
-            return world.getUniqueDataId(key);
+            return world.getNextMapId();
         }
-        return SpongeImpl.getWorldManager().getDefaultWorld().getUniqueDataId(key);
+        return SpongeImpl.getWorldManager().getDefaultWorld().getNextMapId();
     }
 
     @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
@@ -58,13 +66,12 @@ public abstract class FilledMapItemMixin extends AbstractMapItem {
     }
 
     @Nullable
-    @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-        + "loadData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/storage/WorldSavedData;"))
-    private WorldSavedData loadOverworldMapData(World world, Class<? extends WorldSavedData> clazz, String dataId) {
+    @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;loadData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/storage/WorldSavedData;"))
+    private WorldSavedData impl$loadOverworldMapData(World world, String mapName) {
         if (world.isRemote()) {
-            return world.loadData(clazz, dataId);
+            return world.getMapData(mapName);
         }
-        return SpongeImpl.getWorldManager().getDefaultWorld().loadData(clazz, dataId);
+        return SpongeImpl.getWorldManager().getDefaultWorld().getMapData(mapName);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
