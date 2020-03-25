@@ -22,26 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.vanilla;
 
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
+import net.minecraft.fluid.Fluids;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+public final class FluidSupplier {
 
-    private boolean isForced = false;
-
-    public SpongeSpawnType(CatalogKey key) {
-        super(key);
+    private FluidSupplier() {
     }
 
-    public SpongeSpawnType forced() {
-        this.isForced = true;
-        return this;
-    }
-
-    public boolean isForced() {
-        return this.isForced;
+    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+        registry
+            .registerSupplier(FluidType.class, "empty", () -> (FluidType) Fluids.EMPTY)
+            .registerSupplier(FluidType.class, "flowing_water", () -> (FluidType) Fluids.FLOWING_WATER)
+            .registerSupplier(FluidType.class, "water", () -> (FluidType) Fluids.WATER)
+            .registerSupplier(FluidType.class, "flowing_lava", () -> (FluidType) Fluids.FLOWING_LAVA)
+            .registerSupplier(FluidType.class, "lava", () -> (FluidType) Fluids.LAVA)
+        ;
     }
 }

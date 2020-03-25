@@ -22,26 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.data.type.BodyPart;
+import org.spongepowered.common.data.type.SpongeBodyPart;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+import java.util.stream.Stream;
 
-    private boolean isForced = false;
+public final class BodyPartStreamGenerator {
 
-    public SpongeSpawnType(CatalogKey key) {
-        super(key);
+    private BodyPartStreamGenerator() {
     }
 
-    public SpongeSpawnType forced() {
-        this.isForced = true;
-        return this;
-    }
-
-    public boolean isForced() {
-        return this.isForced;
+    public static Stream<BodyPart> stream() {
+        return Stream.of(
+            new SpongeBodyPart(CatalogKey.minecraft("head")),
+            new SpongeBodyPart(CatalogKey.minecraft("body")),
+            new SpongeBodyPart(CatalogKey.minecraft("left_arm")),
+            new SpongeBodyPart(CatalogKey.minecraft("right_arm")),
+            new SpongeBodyPart(CatalogKey.minecraft("left_leg")),
+            new SpongeBodyPart(CatalogKey.minecraft("right_leg"))
+        );
     }
 }

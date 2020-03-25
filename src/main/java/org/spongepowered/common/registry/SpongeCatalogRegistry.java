@@ -123,42 +123,42 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
-import org.spongepowered.common.registry.builtin.stream.BanTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.BodyPartStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.DamageTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.DismountTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.DisplaySlotStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.DragonPhaseTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.FireworkShapeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.GoalExecutorTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.GoalTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.HorseColorStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.HorseStyleStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.LlamaTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.MusicDiscStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.NotePitchStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.ParrotTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.RabbitTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.supplier.BiomeSupplier;
-import org.spongepowered.common.registry.builtin.stream.CatTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.supplier.ContainerTypeSupplier;
-import org.spongepowered.common.registry.builtin.supplier.CriteriaTriggersSupplier;
-import org.spongepowered.common.registry.builtin.supplier.DimensionTypeSupplier;
-import org.spongepowered.common.registry.builtin.supplier.EffectSupplier;
-import org.spongepowered.common.registry.builtin.supplier.EnchantmentSupplier;
-import org.spongepowered.common.registry.builtin.supplier.EntityTypeSupplier;
-import org.spongepowered.common.registry.builtin.supplier.EventContextKeySupplier;
-import org.spongepowered.common.registry.builtin.supplier.FluidSupplier;
-import org.spongepowered.common.registry.builtin.supplier.ItemSupplier;
-import org.spongepowered.common.registry.builtin.supplier.PaintingTypeSupplier;
-import org.spongepowered.common.registry.builtin.supplier.ParticleTypeSupplier;
-import org.spongepowered.common.registry.builtin.supplier.SoundEventSupplier;
-import org.spongepowered.common.registry.builtin.stream.TextColorStreamGenerator;
-import org.spongepowered.common.registry.builtin.stream.TextStyleTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.supplier.SpawnTypeSupplier;
-import org.spongepowered.common.registry.builtin.supplier.TileEntityTypeSupplier;
-import org.spongepowered.common.registry.builtin.stream.WoodTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.supplier.VillagerProfessionSupplier;
+import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.DragonPhaseTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.FireworkShapeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.GoalExecutorTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.GoalTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.HorseColorStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.HorseStyleStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.LlamaTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
+import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.CriteriaTriggersSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.DimensionTypeSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.EffectSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.EnchantmentSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.EntityTypeSupplier;
+import org.spongepowered.common.registry.builtin.sponge.EventContextKeyStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.FluidSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.ItemSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.PaintingTypeSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.ParticleTypeSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.SoundEventSupplier;
+import org.spongepowered.common.registry.builtin.sponge.TextColorStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.TextStyleTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.TileEntityTypeSupplier;
+import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.VillagerProfessionSupplier;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -380,7 +380,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(ChestAttachmentType.class, CatalogKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true)
             .generateRegistry(CollisionRule.class, CatalogKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
             .generateRegistry(ComparatorMode.class, CatalogKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true)
-            .registerRegistry(Currency.class, CatalogKey.sponge("currency"))
             .generateRegistry(Difficulty.class, CatalogKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true)
             .generateRegistry(DismountType.class, CatalogKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true)
             .generateRegistry(DisplaySlot.class, CatalogKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true)
@@ -411,9 +410,10 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(WireAttachmentType.class, CatalogKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true)
             .generateRegistry(WoodType.class, CatalogKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true)
             .generateRegistry(Visibility.class, CatalogKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true)
-            .generateRegistry(SpawnType.class, CatalogKey.sponge("spawn_type"), SpawnTypeSupplier.stream(), true)
-            .generateRegistry(EventContextKey.class, CatalogKey.sponge("event_context_key"), EventContextKeySupplier.stream(), true)
+            .generateRegistry(SpawnType.class, CatalogKey.sponge("spawn_type"), SpawnTypeStreamGenerator.stream(), true)
+            .generateRegistry(EventContextKey.class, CatalogKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true)
             .generateRegistry(DamageType.class, CatalogKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true)
+            .registerRegistry(Currency.class, CatalogKey.sponge("currency"))
         ;
 
         this
@@ -439,6 +439,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         // Class based/Likely for mods to override
         BiomeSupplier.registerSuppliers(this);
+        ContainerTypeSupplier.registerSuppliers(this);
         CriteriaTriggersSupplier.registerSuppliers(this);
         DimensionTypeSupplier.registerSuppliers(this);
         EffectSupplier.registerSuppliers(this);
@@ -451,8 +452,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         SoundEventSupplier.registerSuppliers(this);
         TileEntityTypeSupplier.registerSuppliers(this);
         VillagerProfessionSupplier.registerSuppliers(this);
-
-        ContainerTypeSupplier.registerSuppliers(this);
     }
 
     private <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(Class<T> catalogClass, CatalogKey key, Stream<E> valueStream, boolean generateSuppliers) {

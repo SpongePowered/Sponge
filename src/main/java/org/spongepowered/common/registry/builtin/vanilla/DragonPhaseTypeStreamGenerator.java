@@ -22,26 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.vanilla;
 
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
+import net.minecraft.entity.boss.dragon.phase.PhaseType;
+import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+import java.util.stream.Stream;
 
-    private boolean isForced = false;
+public final class DragonPhaseTypeStreamGenerator {
 
-    public SpongeSpawnType(CatalogKey key) {
-        super(key);
+    private DragonPhaseTypeStreamGenerator() {
     }
 
-    public SpongeSpawnType forced() {
-        this.isForced = true;
-        return this;
-    }
-
-    public boolean isForced() {
-        return this.isForced;
+    public static Stream<DragonPhaseType> stream() {
+        return Stream.of(
+            (DragonPhaseType) PhaseType.HOLDING_PATTERN,
+            (DragonPhaseType) PhaseType.STRAFE_PLAYER,
+            (DragonPhaseType) PhaseType.LANDING_APPROACH,
+            (DragonPhaseType) PhaseType.LANDING,
+            (DragonPhaseType) PhaseType.TAKEOFF,
+            (DragonPhaseType) PhaseType.SITTING_FLAMING,
+            (DragonPhaseType) PhaseType.SITTING_SCANNING,
+            (DragonPhaseType) PhaseType.SITTING_ATTACKING,
+            (DragonPhaseType) PhaseType.CHARGING_PLAYER,
+            (DragonPhaseType) PhaseType.DYING,
+            (DragonPhaseType) PhaseType.HOVER
+        );
     }
 }

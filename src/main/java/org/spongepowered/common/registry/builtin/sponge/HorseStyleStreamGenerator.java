@@ -22,26 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.data.type.SpongeHorseStyle;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+import java.util.stream.Stream;
 
-    private boolean isForced = false;
+public final class HorseStyleStreamGenerator {
 
-    public SpongeSpawnType(CatalogKey key) {
-        super(key);
+    private HorseStyleStreamGenerator() {
     }
 
-    public SpongeSpawnType forced() {
-        this.isForced = true;
-        return this;
-    }
-
-    public boolean isForced() {
-        return this.isForced;
+    public static Stream<Tuple<HorseStyle, Integer>> stream() {
+        return Stream.of(
+            Tuple.of(new SpongeHorseStyle(CatalogKey.minecraft("none"), 0), 0),
+            Tuple.of(new SpongeHorseStyle(CatalogKey.minecraft("white_style"), 1), 1),
+            Tuple.of(new SpongeHorseStyle(CatalogKey.minecraft("whitefield"), 2), 2),
+            Tuple.of(new SpongeHorseStyle(CatalogKey.minecraft("white_dots"), 3), 3),
+            Tuple.of(new SpongeHorseStyle(CatalogKey.minecraft("black_dots"), 4), 4)
+        );
     }
 }

@@ -26,25 +26,15 @@ package org.spongepowered.common.mixin.core.entity;
 
 import co.aikar.timings.Timing;
 import net.minecraft.entity.EntityType;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.CatalogKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.EntityTrackerCategory;
-import org.spongepowered.common.config.category.EntityTrackerModCategory;
-import org.spongepowered.common.config.type.TrackerConfig;
-import org.spongepowered.common.registry.builtin.supplier.EntityTypeSupplier;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.util.Constants;
 

@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.data.type.SpongeHorseColor;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+import java.util.stream.Stream;
 
-    private boolean isForced = false;
+public final class HorseColorStreamGenerator {
 
-    public SpongeSpawnType(CatalogKey key) {
-        super(key);
+    private HorseColorStreamGenerator() {
     }
 
-    public SpongeSpawnType forced() {
-        this.isForced = true;
-        return this;
-    }
-
-    public boolean isForced() {
-        return this.isForced;
+    public static Stream<Tuple<HorseColor, Integer>> stream() {
+        return Stream.of(
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("white"), 0), 0),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("creamy"), 1), 1),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("chestnut"), 2), 2),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("brown"), 3), 3),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("black"), 4), 4),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("gravy"), 5), 5),
+            Tuple.of(new SpongeHorseColor(CatalogKey.minecraft("dark_brown"), 6), 6)
+        );
     }
 }

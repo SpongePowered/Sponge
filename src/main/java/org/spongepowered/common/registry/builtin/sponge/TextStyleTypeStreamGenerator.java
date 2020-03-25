@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.sponge;
 
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.text.format.TextStyle;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.text.format.SpongeTextStyleType;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+import java.util.stream.Stream;
 
-    private boolean isForced = false;
+public final class TextStyleTypeStreamGenerator {
 
-    public SpongeSpawnType(CatalogKey key) {
-        super(key);
+    private TextStyleTypeStreamGenerator() {
     }
 
-    public SpongeSpawnType forced() {
-        this.isForced = true;
-        return this;
-    }
-
-    public boolean isForced() {
-        return this.isForced;
+    public static Stream<Tuple<TextStyle.Type, TextFormatting>> stream() {
+        return Stream.of(
+            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("bold"), TextFormatting.BOLD), TextFormatting.BOLD),
+            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("italic"), TextFormatting.ITALIC), TextFormatting.ITALIC),
+            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("obfuscated"), TextFormatting.OBFUSCATED), TextFormatting.OBFUSCATED),
+            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("reset"), TextFormatting.RESET), TextFormatting.RESET),
+            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("strikethrough"), TextFormatting.STRIKETHROUGH), TextFormatting.STRIKETHROUGH),
+            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("underline"), TextFormatting.UNDERLINE), TextFormatting.UNDERLINE)
+        );
     }
 }

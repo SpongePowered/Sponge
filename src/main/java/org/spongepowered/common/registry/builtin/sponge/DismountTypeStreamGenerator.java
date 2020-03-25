@@ -22,26 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.common.event.cause.entity.dismount.SpongeDismountType;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+import java.util.stream.Stream;
 
-    private boolean isForced = false;
+public final class DismountTypeStreamGenerator {
 
-    public SpongeSpawnType(CatalogKey key) {
-        super(key);
+    private DismountTypeStreamGenerator() {
     }
 
-    public SpongeSpawnType forced() {
-        this.isForced = true;
-        return this;
-    }
-
-    public boolean isForced() {
-        return this.isForced;
+    public static Stream<DismountType> stream() {
+        return Stream.of(
+            new SpongeDismountType(CatalogKey.minecraft("player")),
+            new SpongeDismountType(CatalogKey.minecraft("derail")),
+            new SpongeDismountType(CatalogKey.minecraft("death"))
+        );
     }
 }

@@ -34,23 +34,23 @@ import org.spongepowered.api.event.cause.EventContextKey;
 @SuppressWarnings("UnstableApiUsage")
 public final class SpongeEventContextKey<T> implements EventContextKey<T> {
 
-    private final CatalogKey id;
+    private final CatalogKey key;
     private final TypeToken<T> allowed;
 
     SpongeEventContextKey(SpongeEventContextKeyBuilder<T> builder) {
-        this.id = builder.key;
+        this.key = builder.key;
         this.allowed = builder.typeClass;
     }
 
-    public SpongeEventContextKey(CatalogKey id, TypeToken<T> allowed) {
-        this.id = checkNotNull(id, "Id");
+    public SpongeEventContextKey(CatalogKey key, TypeToken<T> allowed) {
+        this.key = checkNotNull(key, "key");
         this.allowed = checkNotNull(allowed, "Allowed");
     }
 
 
     @Override
     public CatalogKey getKey() {
-        return this.id;
+        return this.key;
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("id", this.id)
+            .add("key", this.key)
             .toString();
     }
 
@@ -73,11 +73,11 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
         if (!(o instanceof EventContextKey)) {
             return false;
         }
-        return this.id.equals(((EventContextKey<?>) o).getKey());
+        return this.key.equals(((EventContextKey<?>) o).getKey());
     }
 
     @Override
     public int hashCode() {
-        return this.id.hashCode();
+        return this.key.hashCode();
     }
 }

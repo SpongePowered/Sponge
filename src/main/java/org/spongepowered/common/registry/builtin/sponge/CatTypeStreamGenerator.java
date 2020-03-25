@@ -22,26 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.sponge;
 
+import net.minecraft.entity.passive.CatEntity;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.data.type.CatType;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.data.type.SpongeCatType;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+import java.util.stream.Stream;
 
-    private boolean isForced = false;
+public final class CatTypeStreamGenerator {
 
-    public SpongeSpawnType(CatalogKey key) {
-        super(key);
+    private CatTypeStreamGenerator() {
     }
 
-    public SpongeSpawnType forced() {
-        this.isForced = true;
-        return this;
-    }
+    public static Stream<Tuple<CatType, Integer>> stream() {
+        // Meowzers
+        return CatEntity.field_213425_bD.entrySet()
+            .stream()
+            .map(kv -> {
+                final String value = kv.getValue().getPath();
 
-    public boolean isForced() {
-        return this.isForced;
+                return Tuple.of(new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)),
+                    kv.getKey()), kv.getKey());
+            });
     }
 }
