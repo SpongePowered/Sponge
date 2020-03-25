@@ -26,7 +26,7 @@ package org.spongepowered.common.entity;
 
 import org.spongepowered.common.util.Constants;
 
-public class PlayerTracker {
+public final class PlayerTracker {
 
     public enum Type {
         OWNER(Constants.Sponge.SPONGE_ENTITY_CREATOR),

@@ -42,5 +42,4 @@ public final class SpongeBanType extends SpongeCatalogType implements BanType {
     public Class<? extends Ban> getBanClass() {
         return this.banClass;
     }
-
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.effect.particle;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -32,22 +33,20 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongeParticleOption<V> extends SpongeCatalogType implements ParticleOption<V> {
+public final class SpongeParticleOption<V> extends SpongeCatalogType implements ParticleOption<V> {
 
-    private final String name;
     private final Class<V> valueType;
     @Nullable private final Function<V, IllegalArgumentException> valueValidator;
 
-    public SpongeParticleOption(String id, String name, Class<V> valueType,
+    public SpongeParticleOption(CatalogKey key, Class<V> valueType,
             @Nullable Function<V, IllegalArgumentException> valueValidator) {
-        super(id);
+        super(key);
         this.valueValidator = valueValidator;
         this.valueType = valueType;
-        this.name = name;
     }
 
-    public SpongeParticleOption(String id, String name, Class<V> valueType) {
-        this(id, name, valueType, null);
+    public SpongeParticleOption(CatalogKey key, Class<V> valueType) {
+        this(key, valueType, null);
     }
 
     @Nullable
@@ -61,11 +60,6 @@ public class SpongeParticleOption<V> extends SpongeCatalogType implements Partic
     @Override
     public Class<V> getValueType() {
         return this.valueType;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @Override

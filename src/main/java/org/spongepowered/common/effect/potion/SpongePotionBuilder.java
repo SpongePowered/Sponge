@@ -40,7 +40,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import net.minecraft.potion.Effect;
 
-public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> implements PotionEffect.Builder {
+public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> implements PotionEffect.Builder {
 
     private PotionEffectType potionType;
     private int duration;

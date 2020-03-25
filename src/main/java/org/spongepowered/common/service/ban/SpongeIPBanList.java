@@ -46,13 +46,13 @@ import net.minecraft.server.management.IPBanList;
 /**
  * Redirects all calls to the {@link BanService}.
  */
-public class SpongeIPBanList extends IPBanList {
+public final class SpongeIPBanList extends IPBanList {
 
     public SpongeIPBanList(File bansFile) {
         super(bansFile);
     }
 
-    private static BanService getService() {
+    private BanService getService() {
         return Sponge.getServiceManager().provideUnchecked(BanService.class);
     }
 
@@ -63,7 +63,7 @@ public class SpongeIPBanList extends IPBanList {
         }
 
         try {
-            return getService().isBanned(InetAddress.getByName(entry));
+            return this.getService().isBanned(InetAddress.getByName(entry));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -77,7 +77,7 @@ public class SpongeIPBanList extends IPBanList {
         }
 
         try {
-            return (IPBanEntry) getService().getBanFor(InetAddress.getByName(obj)).orElse(null);
+            return (IPBanEntry) this.getService().getBanFor(InetAddress.getByName(obj)).orElse(null);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -90,7 +90,7 @@ public class SpongeIPBanList extends IPBanList {
         }
 
         try {
-            getService().pardon(InetAddress.getByName(entry));
+            this.getService().pardon(InetAddress.getByName(entry));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -102,7 +102,7 @@ public class SpongeIPBanList extends IPBanList {
         for (Ban.Ip ban : getService().getIpBans()) {
             ips.add(this.addressToString(new InetSocketAddress(ban.getAddress(), 0)));
         }
-        return ips.toArray(new String[ips.size()]);
+        return ips.toArray(new String[0]);
     }
 
     @Override
@@ -124,5 +124,4 @@ public class SpongeIPBanList extends IPBanList {
     public String addressToString(SocketAddress address) {
         return NetworkUtil.getHostString(address);
     }
-
 }

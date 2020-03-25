@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.effect.sound;
 
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
+import net.minecraft.network.play.server.SStopSoundPacket;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 
@@ -34,11 +33,8 @@ import javax.annotation.Nullable;
 
 public final class SoundEffectHelper {
 
-    public static SCustomPayloadPlayPacket createStopSoundPacket(@Nullable SoundType sound, @Nullable SoundCategory category) {
-        final PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
-        buffer.writeString(category == null ? "" : category.getName());
-        buffer.writeString(sound == null ? "" : sound.getId());
-        return new SCustomPayloadPlayPacket("MC|StopSound", buffer);
+    public static SStopSoundPacket createStopSoundPacket(@Nullable SoundType sound, @Nullable SoundCategory category) {
+        return new SStopSoundPacket((ResourceLocation) (Object) sound.getKey(), (net.minecraft.util.SoundCategory) (Object) category);
     }
 
     private SoundEffectHelper() {

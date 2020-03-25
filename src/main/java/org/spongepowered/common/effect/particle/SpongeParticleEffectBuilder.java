@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
-public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEffect> implements ParticleEffect.Builder {
+public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEffect> implements ParticleEffect.Builder {
 
     private SpongeParticleType type;
     private Map<ParticleOption<?>, Object> options;
@@ -88,7 +88,6 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
 
     @Override
     public ParticleEffect.Builder reset() {
-        super.reset();
         this.type = null;
         this.options = new HashMap<>();
         return this;
