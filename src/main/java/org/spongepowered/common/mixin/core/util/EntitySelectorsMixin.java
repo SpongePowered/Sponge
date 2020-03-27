@@ -37,18 +37,28 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 @Mixin(EntitySelectors.class)
 public class EntitySelectorsMixin {
 
-    @Shadow @Final @Mutable public static Predicate<Entity> NOT_SPECTATING = entity ->
-        !(entity instanceof VanishableBridge)
-        || !((VanishableBridge) entity).bridge$isVanished()
-        || !(entity instanceof EntityPlayer)
-        || !((EntityPlayer) entity).isSpectator();
+    @Shadow @Final @Mutable public static Predicate<Entity> NOT_SPECTATING = entity -> {
+        if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$isVanished()) {
+            // Sponge: Count vanished entities as spectating
+            return false;
+        }
+        if (entity instanceof EntityPlayer && ((EntityPlayer) entity).isSpectator()) {
+            return false;
+        }
+        return true;
+    };
 
-    @Shadow @Final @Mutable public static Predicate<Entity> CAN_AI_TARGET = entity ->
-        !(entity instanceof VanishableBridge)
-        || !(((VanishableBridge) entity).bridge$isVanished() && ((VanishableBridge) entity).bridge$isUntargetable())
-        || !(entity instanceof EntityPlayer)
-        || !((EntityPlayer) entity).isSpectator()
-           && !((EntityPlayer)entity).isCreative();
+    @Shadow @Final @Mutable public static Predicate<Entity> CAN_AI_TARGET = entity -> {
+        if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$isVanished() && ((VanishableBridge) entity)
+                .bridge$isUntargetable()) {
+            // Sponge: Take into account untargetability from vanishing
+            return false;
+        }
+        if (entity instanceof EntityPlayer && (((EntityPlayer) entity).isSpectator() || ((EntityPlayer) entity).isCreative())) {
+            return false;
+        }
+        return true;
+    };
 
 
 }
