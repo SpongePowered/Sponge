@@ -38,6 +38,7 @@ import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 import net.minecraft.entity.monster.BlazeEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.EndermanEntity;
+import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.SheepEntity;
@@ -49,20 +50,22 @@ import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
-import org.spongepowered.common.data.provider.util.FireworkUtils;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
 import org.spongepowered.common.data.provider.commandblock.CommandBlockLogicDataProviders;
@@ -107,13 +110,17 @@ import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntity
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishPreventsTargetingProvider;
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityVanishProvider;
 import org.spongepowered.common.data.provider.entity.wolf.WolfEntityIsWetProvider;
+import org.spongepowered.common.data.provider.util.FireworkUtils;
+import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.data.util.PotionEffectHelper;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.ExperienceOrbEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.HangingEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.BlazeEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.CreeperEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.EndermanEntityAccessor;
@@ -163,6 +170,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         registerZombiePigmanEntityData();
         registerWolfEntityData();
         registerEndermanEntityData();
+        registerEndermiteEntityData();
         registerCreeperEntityData();
         registerPlayerEntityData();
         registerUserData();
@@ -176,6 +184,17 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         registerAgentEntityData();
         registerLivingEntityData();
         registerEntityData();
+
+        register(ExperienceOrbEntityAccessor.class, Keys.EXPERIENCE, ExperienceOrbEntityAccessor::accessor$getXpValue, ExperienceOrbEntityAccessor::accessor$setXpValue);
+        register(HangingEntityAccessor.class, Keys.DIRECTION,
+                e -> e.accessor$facingDirection() == null ? Direction.NONE : Constants.DirectionFunctions.getFor(e.accessor$facingDirection()),
+                (e, v) -> e.accessor$updateFacingWithBoundingBox(Constants.DirectionFunctions.getFor(v)));
+        register(CatEntity.class, Keys.CAT_TYPE, e -> {
+            int type = e.getCatType();
+            return Sponge.getRegistry().getCatalogRegistry().getAllOf(CatType.class)
+                    .filter(t -> ((SpongeCatType)t).getMetadata() == type)
+                    .findFirst().orElse(null);
+        }, (e, v) -> e.setCatType(((SpongeCatType)v).getMetadata()));
     }
 
     private void registerFireworkRocketEntityData() {
@@ -224,6 +243,10 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(EndermanEntity.class, Keys.IS_SCREAMING,
                 EndermanEntity::isScreaming,
                 (accessor, value) -> accessor.getDataManager().set(EndermanEntityAccessor.accessor$getScreaming(), value));
+    }
+
+    private void registerEndermiteEntityData() {
+        register(new EndermiteExpirationDelayProvider());
     }
 
     private void registerCreeperEntityData() {
