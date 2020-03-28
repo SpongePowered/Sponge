@@ -37,6 +37,9 @@ import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 
+// TODO this is currently inactive - No phase states for blocks override
+// isCollision, and CollideBlockEvent is handled with entities iterating
+// through blocks, not blocks iterating through entities
 @Mixin(Block.class)
 public abstract class BlockMixin_Collisions implements CollisionsCapability {
 

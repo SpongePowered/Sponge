@@ -36,6 +36,7 @@ public final class EntityPhase {
         public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
         public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
         public static final IPhaseState<BasicEntityContext> ENTITY_DROP_ITEMS = new EntityDropPhaseState();
+        public static final IPhaseState<BasicEntityContext> COLLISION = new EntityCollisionState();
 
         private State() {
         }

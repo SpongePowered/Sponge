@@ -275,7 +275,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At("RETURN"))
     private void impl$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         @SuppressWarnings("Guava") final Predicate<Entity> p_177414_4_, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+        if (((WorldBridge) this.world).bridge$isFake() || !PhaseTracker.getInstance().getCurrentState().isCollision()) {
             return;
         }
 
@@ -300,7 +300,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
     private void impl$throwCollsionEvent(final Class<? extends Entity> entityClass, final AxisAlignedBB aabb, final List<Entity> listToFill,
         @SuppressWarnings("Guava") final Predicate<Entity> p_177430_4_, final CallbackInfo ci) {
-        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+        if (((WorldBridge) this.world).bridge$isFake() || !PhaseTracker.getInstance().getCurrentState().isCollision()) {
             return;
         }
 

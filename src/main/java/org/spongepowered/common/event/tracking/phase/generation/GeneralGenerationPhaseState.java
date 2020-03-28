@@ -101,11 +101,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
     }
 
     @Override
-    public boolean ignoresEntityCollisions() {
-        return true;
-    }
-
-    @Override
     public boolean doesBulkBlockCapture(final G context) {
         return false;
     }

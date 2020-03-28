@@ -22,28 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entitycollisions.interfaces;
+package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.world.World;
+public final class EntityCollisionState extends EntityPhaseState<BasicEntityContext> {
 
-public interface CollisionsCapability {
+    @Override
+    protected BasicEntityContext createNewContext() {
+        return new BasicEntityContext(this);
+    }
 
-    int collision$getMaxCollisions();
-
-    void collision$setMaxCollisions(int max);
-
-    void collision$initializeCollisionState(World worldIn);
-
-    void collision$requiresCollisionsCacheRefresh(boolean flag);
-
-    boolean collision$requiresCollisionsCacheRefresh();
-
-    String collision$getModDataName();
-
-    void collision$setModDataName(String name);
-
-    String collision$getModDataId();
-
-    void collision$setModDataId(String id);
-
+    @Override
+    public boolean isCollision() {
+        return true;
+    }
 }

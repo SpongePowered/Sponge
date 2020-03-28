@@ -179,6 +179,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Shadow private boolean checkTotemDeathProtection(final DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
+    @Shadow protected abstract void collideWithNearbyEntities();
 
     private int impl$deathEventsPosted;
     private int impl$maxAir = Constants.Sponge.Entity.DEFAULT_MAX_AIR;
@@ -1169,5 +1170,13 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     }
 
     // End implementation of UseItemStackEvent
+
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
+    private void collisions$runCollisions(EntityLivingBase self) {
+        try (PhaseContext<?> ignored = EntityPhase.State.COLLISION.createPhaseContext()
+                .source(this).buildAndSwitch()) {
+            this.collideWithNearbyEntities();
+        }
+    }
 
 }
