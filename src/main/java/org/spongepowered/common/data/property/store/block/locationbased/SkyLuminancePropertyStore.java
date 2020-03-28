@@ -22,39 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.block;
+package org.spongepowered.common.data.property.store.block.locationbased;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import org.spongepowered.api.data.property.block.PassableProperty;
+import net.minecraft.world.LightType;
+import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.api.data.property.block.SkyLuminanceProperty;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
+import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLuminanceProperty> {
 
-public class PassablePropertyStore extends AbstractBlockPropertyStore<PassableProperty> {
-
-    private static final PassableProperty TRUE = new PassableProperty(true);
-    private static final PassableProperty FALSE = new PassableProperty(false);
-
-    public PassablePropertyStore() {
-        super(false);
+    @Override
+    public Optional<SkyLuminanceProperty> getFor(PropertyHolder propertyHolder) {
+        if (propertyHolder instanceof Location && ((Location) propertyHolder).getWorld() instanceof Chunk) {
+            final Chunk chunk = (Chunk) ((Location) propertyHolder).getWorld();
+            final float light = chunk.getLightFor(LightType.SKY, VecHelper.toBlockPos((Location) propertyHolder));
+            return Optional.of(new SkyLuminanceProperty(light));
+        }
+        return super.getFor(propertyHolder);
     }
 
     @Override
-    protected Optional<PassableProperty> getForBlock(@Nullable Location location, BlockState block) {
-        return Optional.of(block.getMaterial().blocksMovement() ? FALSE : TRUE);
-    }
-
-    @Override
-    public Optional<PassableProperty> getFor(Location location) {
+    public Optional<SkyLuminanceProperty> getFor(Location location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
-        final Block block = (Block) location.getBlock().getType();
-        return Optional.of(block.isPassable(world, VecHelper.toBlockPos(location)) ? TRUE : FALSE);
+        final float light = world.getLightFor(LightType.SKY, VecHelper.toBlockPos(location));
+        return Optional.of(new SkyLuminanceProperty(light));
     }
 
+    @Override
+    public Optional<SkyLuminanceProperty> getFor(Location location, Direction direction) {
+        // TODO gabziou fix this
+        return Optional.empty();
+    }
 }

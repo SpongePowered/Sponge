@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.block;
+package org.spongepowered.common.data.property.store.block.locationbased;
 
 import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.block.SkyLuminanceProperty;
+import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
@@ -35,28 +35,31 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLuminanceProperty> {
+public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<GroundLuminanceProperty> {
 
     @Override
-    public Optional<SkyLuminanceProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location && ((Location) propertyHolder).getWorld() instanceof Chunk) {
-            final Chunk chunk = (Chunk) ((Location) propertyHolder).getWorld();
-            final float light = chunk.getLightFor(LightType.SKY, VecHelper.toBlockPos((Location) propertyHolder));
-            return Optional.of(new SkyLuminanceProperty(light));
+    public Optional<GroundLuminanceProperty> getFor(PropertyHolder propertyHolder) {
+        if (propertyHolder instanceof Location) {
+            final Location location = (Location) propertyHolder;
+            if (location.getWorld() instanceof Chunk) {
+                final Chunk chunk = (Chunk) location.getWorld();
+                final float light = chunk.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(location));
+                return Optional.of(new GroundLuminanceProperty(light));
+            }
         }
         return super.getFor(propertyHolder);
     }
 
     @Override
-    public Optional<SkyLuminanceProperty> getFor(Location location) {
+    public Optional<GroundLuminanceProperty> getFor(Location location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
-        final float light = world.getLightFor(LightType.SKY, VecHelper.toBlockPos(location));
-        return Optional.of(new SkyLuminanceProperty(light));
+        final float light = world.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(location));
+        return Optional.of(new GroundLuminanceProperty(light));
     }
 
     @Override
-    public Optional<SkyLuminanceProperty> getFor(Location location, Direction direction) {
-        // TODO gabziou fix this
+    public Optional<GroundLuminanceProperty> getFor(Location location, Direction direction) {
+        // TODO gabizou fix this
         return Optional.empty();
     }
 }

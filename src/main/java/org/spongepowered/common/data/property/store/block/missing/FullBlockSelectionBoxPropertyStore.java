@@ -22,24 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.item;
+package org.spongepowered.common.data.property.store.block.missing;
 
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.DamageAbsorptionProperty;
-import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+import org.spongepowered.api.data.property.block.FullBlockSelectionBoxProperty;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
 
-public class DamageAbsorptionPropertyStore extends AbstractItemStackPropertyStore<DamageAbsorptionProperty> {
+import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
+
+public class FullBlockSelectionBoxPropertyStore extends AbstractBlockPropertyStore<FullBlockSelectionBoxProperty> {
+
+    protected static final Optional<FullBlockSelectionBoxProperty> TRUE = Optional.of(new FullBlockSelectionBoxProperty(true));
+    protected static final Optional<FullBlockSelectionBoxProperty> FALSE = Optional.of(new FullBlockSelectionBoxProperty(false));
+
+    public FullBlockSelectionBoxPropertyStore() {
+        super(true);
+    }
 
     @Override
-    protected Optional<DamageAbsorptionProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ArmorItem) {
-            final ArmorItem armor = (ArmorItem) itemStack.getItem();
-            final int reduction = armor.damageReduceAmount;
-            return Optional.of(new DamageAbsorptionProperty(reduction));
-        }
-        return Optional.empty();
+    protected Optional<FullBlockSelectionBoxProperty> getForBlock(@Nullable Location location, BlockState block) {
+        return block.isFullCube() ? TRUE : FALSE;
     }
+
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.block;
+package org.spongepowered.common.data.property.store.block.locationbased;
 
 import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
 import org.spongepowered.api.util.Direction;

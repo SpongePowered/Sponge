@@ -22,23 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.item;
+package org.spongepowered.common.data.property.store.block.missing;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.FurnaceTileEntity;
-import org.spongepowered.api.data.property.item.BurningFuelProperty;
-import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+import org.spongepowered.api.data.property.block.StatisticsTrackedProperty;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
 
-public class BurningFuelPropertyStore extends AbstractItemStackPropertyStore<BurningFuelProperty> {
+import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
+
+public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<StatisticsTrackedProperty> {
+
+    private static final StatisticsTrackedProperty TRUE = new StatisticsTrackedProperty(true);
+    private static final StatisticsTrackedProperty FALSE = new StatisticsTrackedProperty(false);
+
+    public StatisticsTrackedPropertyStore() {
+        super(true);
+    }
 
     @Override
-    protected Optional<BurningFuelProperty> getFor(ItemStack itemStack) {
-        final int burnTime = FurnaceTileEntity.getItemBurnTime(itemStack);
-        if (burnTime > 0) {
-            return Optional.of(new BurningFuelProperty(burnTime));
-        }
-        return Optional.empty();
+    protected Optional<StatisticsTrackedProperty> getForBlock(@Nullable Location location, BlockState block) {
+        return Optional.of(block.getBlock().getEnableStats() ? TRUE : FALSE);
     }
+
 }

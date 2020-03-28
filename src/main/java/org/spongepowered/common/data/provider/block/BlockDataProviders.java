@@ -94,6 +94,7 @@ import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.data.provider.BlockStateBooleanDataProvider;
 import org.spongepowered.common.data.provider.BlockStateBoundedIntDataProvider;
 import org.spongepowered.common.data.provider.BlockStateDirectionDataProvider;
@@ -178,7 +179,13 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         register(Keys.IS_PASSABLE, state -> !state.getMaterial().blocksMovement());
         register(Keys.IS_UNBREAKABLE, state -> ((BlockAccessor) state.getBlock()).accessor$getBlockHardness() < 0);
         register(Keys.IS_FLAMMABLE, state -> ((FireBlockAccessor) Blocks.FIRE).accessor$func_220274_q(state) > 0);
+        register(Keys.IS_SOLID, state -> state.getMaterial().isSolid());
+        register(Keys.IS_REPLACEABLE, state -> state.getMaterial().isReplaceable());
+        register(Keys.IS_SURROGATE_BLOCK, state -> ((BlockBridge) state.getBlock()).bridge$isDummy());
+
         register(new BlockMatterProvider());
+        register(new HeldItemProvider());
+        register(new LightEmissionProvider());
 
         // AbstractBannerBlock
         register(new AbstractBannerBlockAttachedProvider());

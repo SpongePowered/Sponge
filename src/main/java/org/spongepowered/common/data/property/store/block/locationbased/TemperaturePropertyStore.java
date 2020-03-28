@@ -22,23 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.item;
+package org.spongepowered.common.data.property.store.block.locationbased;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.RecordProperty;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
-import org.spongepowered.common.registry.type.effect.RecordTypeRegistryModule;
+import net.minecraft.world.biome.Biome;
+import org.spongepowered.api.data.property.block.TemperatureProperty;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class RecordPropertyStore extends AbstractItemStackPropertyStore<RecordProperty> {
+public class TemperaturePropertyStore extends AbstractSpongePropertyStore<TemperatureProperty> {
 
     @Override
-    protected Optional<RecordProperty> getFor(ItemStack itemStack) {
-        return RecordTypeRegistryModule.getInstance()
-                .getByItem(itemStack.getItem())
-                .map(RecordProperty::new);
+    public Optional<TemperatureProperty> getFor(Location location) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
+        final Biome biome = world.getBiome(VecHelper.toBlockPos(location));
+        return Optional.of(new TemperatureProperty(biome.getDefaultTemperature())); // TODO: do we want to use pos-sensitive?
+    }
+
+    @Override
+    public Optional<TemperatureProperty> getFor(Location location, Direction direction) {
+        // TODO gabziou fix this
+        return Optional.empty();
     }
 }
