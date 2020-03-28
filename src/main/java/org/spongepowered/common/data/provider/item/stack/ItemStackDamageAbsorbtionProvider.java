@@ -1,6 +1,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
@@ -21,5 +22,11 @@ public class ItemStackDamageAbsorbtionProvider extends ItemStackDataProvider<Int
             return Optional.of(reduction);
         }
         return Optional.empty();
+    }
+
+
+    @Override
+    protected boolean supports(Item item) {
+        return item instanceof ArmorItem;
     }
 }

@@ -27,18 +27,17 @@ package org.spongepowered.common.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.Archetype;
 import org.spongepowered.api.world.LocatableSnapshot;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
@@ -48,7 +47,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.nbt.CompoundNBT;
 
 public abstract class AbstractArchetype<C extends CatalogType, S extends LocatableSnapshot<S>, E> implements Archetype<S, E> {
 
@@ -75,17 +73,6 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
         final CompoundNBT copy = NbtTranslator.getInstance().translateData(container);
         DataUtil.getValidators(this.getValidationType()).validate(copy);
         this.data = copy;
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(final Class<T> propertyClass) {
-        return SpongeImpl.getPropertyRegistry().getStore(propertyClass)
-                .flatMap(store -> store.getFor(this));
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
     }
 
     @SuppressWarnings("unchecked")

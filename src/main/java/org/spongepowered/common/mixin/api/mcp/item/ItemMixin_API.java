@@ -27,17 +27,14 @@ package org.spongepowered.common.mixin.api.mcp.item;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
@@ -55,23 +52,10 @@ public abstract class ItemMixin_API implements ItemType {
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
 
     @Override
-    public final String getId() {
+    public CatalogKey getKey() {
         final ResourceLocation resourceLocation = SpongeImplHooks.getItemResourceLocation((Item) (Object) this);
         checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
-        return resourceLocation.toString();
-    }
-
-    @Override
-    public String getName() {
-        return this.getId();
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getDefaultProperty(Class<T> propertyClass) {
-        if (this.propertyItemStack == null) {
-            this.propertyItemStack = ItemStackUtil.fromNative(new ItemStack((Item) (Object) this));
-        }
-        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(store -> store.getFor(this.propertyItemStack));
+        return (CatalogKey) (Object) resourceLocation;
     }
 
     @Override
@@ -87,11 +71,6 @@ public abstract class ItemMixin_API implements ItemType {
     @Override
     public Optional<BlockType> getBlock() {
         return Optional.ofNullable(this.blockType);
-    }
-
-    @Override
-    public Optional<ItemType> getContainer() {
-        return Optional.ofNullable((ItemType) this.containerItem);
     }
 
 }

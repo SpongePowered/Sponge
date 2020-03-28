@@ -21,4 +21,9 @@ public class ItemStackUseLimitProvider extends ItemStackDataProvider<Integer> {
         }
         return Optional.empty();
     }
+
+    @Override
+    protected boolean supports(Item item) {
+        return item.isDamageable();
+    }
 }

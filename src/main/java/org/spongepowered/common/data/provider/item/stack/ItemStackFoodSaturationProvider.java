@@ -1,6 +1,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.item.Food;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Keys;
@@ -27,5 +28,10 @@ public class ItemStackFoodSaturationProvider extends ItemStackDataProvider<Doubl
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    protected boolean supports(Item item) {
+        return item.isFood();
     }
 }

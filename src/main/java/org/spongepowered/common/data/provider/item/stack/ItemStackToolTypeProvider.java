@@ -27,4 +27,9 @@ public class ItemStackToolTypeProvider extends ItemStackDataProvider<ToolType> {
         }
         return Optional.empty();
     }
+
+    @Override
+    protected boolean supports(Item item) {
+        return item instanceof TieredItem;
+    }
 }

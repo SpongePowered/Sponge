@@ -172,6 +172,8 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         //  powered, power, etc. Less common ones will still need to be done manually.
         //  This improves interop with modded blocks.
 
+        // TODO other DataHolders: Location/BlockType
+
         register(Keys.HARDNESS, state -> (double) ((BlockAccessor) state.getBlock()).accessor$getBlockHardness());
         register(Keys.BLAST_RESISTANCE, state -> (double) ((BlockAccessor) state.getBlock()).accessor$getBlockResistance());
         register(Keys.IS_GRAVITY_AFFECTED, state -> state.getBlock() instanceof FallingBlock);
@@ -179,13 +181,13 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         register(Keys.IS_PASSABLE, state -> !state.getMaterial().blocksMovement());
         register(Keys.IS_UNBREAKABLE, state -> ((BlockAccessor) state.getBlock()).accessor$getBlockHardness() < 0);
         register(Keys.IS_FLAMMABLE, state -> ((FireBlockAccessor) Blocks.FIRE).accessor$func_220274_q(state) > 0);
-        register(Keys.IS_SOLID, state -> state.getMaterial().isSolid());
+        register(Keys.IS_SOLID, state -> state.getMaterial().isSolid()); // TODO also for ItemStack
         register(Keys.IS_REPLACEABLE, state -> state.getMaterial().isReplaceable());
         register(Keys.IS_SURROGATE_BLOCK, state -> ((BlockBridge) state.getBlock()).bridge$isDummy());
 
         register(new BlockMatterProvider());
-        register(new HeldItemProvider());
-        register(new LightEmissionProvider());
+        register(new HeldItemProvider()); // TODO also for ItemStack???
+        register(new LightEmissionProvider()); // TODO also for ItemStack
 
         // AbstractBannerBlock
         register(new AbstractBannerBlockAttachedProvider());

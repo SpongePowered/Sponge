@@ -28,4 +28,11 @@ public class ItemStackArmorTypeProvider extends ItemStackDataProvider<ArmorType>
         }
         return Optional.empty();
     }
+
+
+    @Override
+    protected boolean supports(Item item) {
+        return item instanceof ArmorItem;
+    }
+
 }

@@ -110,7 +110,7 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
 
         register(new ItemStackSignLinesProvider());
 
-        // Properties
+        // TODO ItemType Data? a bunch of the providers here actually operate on the ItemType instead of Stack
         register(new ItemStackFuelBurnTimeProvider());
         register(new ItemStackEfficiencyProvider());
         register(new ItemStackFoodRestorationProvider());
@@ -121,6 +121,7 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
         register(new ItemStackArmorTypeProvider());
         register(new ItemStackEquipmentTypeProvider());
         register(new ItemStackDamageAbsorbtionProvider());
+        register(new ItemStackContainerProvider());
 
     }
 }

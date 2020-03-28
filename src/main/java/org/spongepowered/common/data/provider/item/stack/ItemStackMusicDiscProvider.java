@@ -1,5 +1,6 @@
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
@@ -19,5 +20,10 @@ public class ItemStackMusicDiscProvider extends ItemStackDataProvider<MusicDisc>
             return Optional.of((MusicDisc) dataHolder.getItem());
         }
         return Optional.empty();
+    }
+
+    @Override
+    protected boolean supports(Item item) {
+        return item instanceof MusicDisc;
     }
 }

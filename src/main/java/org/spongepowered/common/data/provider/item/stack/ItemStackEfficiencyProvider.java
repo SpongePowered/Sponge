@@ -1,5 +1,6 @@
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import org.spongepowered.api.data.Keys;
@@ -21,5 +22,11 @@ public class ItemStackEfficiencyProvider extends ItemStackDataProvider<Float> {
             return Optional.of(efficiency);
         }
         return Optional.empty();
+    }
+
+
+    @Override
+    protected boolean supports(Item item) {
+        return item instanceof ToolItemAccessor;
     }
 }

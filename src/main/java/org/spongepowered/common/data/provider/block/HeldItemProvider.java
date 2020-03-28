@@ -24,4 +24,8 @@ public class HeldItemProvider extends GenericMutableDataProvider<BlockState, Ite
         return Optional.empty();
     }
 
+    @Override
+    protected boolean supports(BlockState dataHolder) {
+        return dataHolder.getBlock().asItem() instanceof BlockItem;
+    }
 }
