@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.boss;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import net.minecraft.world.BossInfo;
 import net.minecraft.world.ServerBossInfo;
 import org.spongepowered.api.boss.BossBarColor;
@@ -33,10 +37,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.text.SpongeTexts;
 
 import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 public final class ServerBossBarBuilder implements ServerBossBar.Builder {
 
@@ -50,56 +50,56 @@ public final class ServerBossBarBuilder implements ServerBossBar.Builder {
     private boolean visible = true;
 
     @Override
-    public ServerBossBar.Builder name(Text name) {
+    public ServerBossBar.Builder name(final Text name) {
         this.name = name;
         return this;
     }
 
     @Override
-    public ServerBossBar.Builder percent(float percent) {
+    public ServerBossBar.Builder percent(final float percent) {
         checkArgument(percent >= 0.0 && percent <= 1.0, "percent must be between 0.0f and 1.0f (was %s)", percent);
         this.percent = percent;
         return this;
     }
 
     @Override
-    public ServerBossBar.Builder color(BossBarColor color) {
+    public ServerBossBar.Builder color(final BossBarColor color) {
         this.color = checkNotNull(color, "color");
         return this;
     }
 
     @Override
-    public ServerBossBar.Builder overlay(BossBarOverlay overlay) {
+    public ServerBossBar.Builder overlay(final BossBarOverlay overlay) {
         this.overlay = checkNotNull(overlay, "overlay");
         return this;
     }
 
     @Override
-    public ServerBossBar.Builder darkenSky(boolean darkenSky) {
+    public ServerBossBar.Builder darkenSky(final boolean darkenSky) {
         this.darkenSky = darkenSky;
         return this;
     }
 
     @Override
-    public ServerBossBar.Builder playEndBossMusic(boolean playEndBossMusic) {
+    public ServerBossBar.Builder playEndBossMusic(final boolean playEndBossMusic) {
         this.playEndBossMusic = playEndBossMusic;
         return this;
     }
 
     @Override
-    public ServerBossBar.Builder createFog(boolean createFog) {
+    public ServerBossBar.Builder createFog(final boolean createFog) {
         this.createFog = createFog;
         return this;
     }
 
     @Override
-    public ServerBossBar.Builder visible(boolean visible) {
+    public ServerBossBar.Builder visible(final boolean visible) {
         this.visible = visible;
         return this;
     }
 
     @Override
-    public ServerBossBar.Builder from(ServerBossBar value) {
+    public ServerBossBar.Builder from(final ServerBossBar value) {
         this.name = value.getName();
         this.percent = value.getPercent();
         this.color = value.getColor();
@@ -130,7 +130,7 @@ public final class ServerBossBarBuilder implements ServerBossBar.Builder {
         checkState(this.color != null, "color must be set");
         checkState(this.overlay != null, "overlay must be set");
 
-        ServerBossInfo bar = new ServerBossInfo(
+        final ServerBossInfo bar = new ServerBossInfo(
             SpongeTexts.toComponent(this.name),
             (BossInfo.Color) (Object) this.color,
             (BossInfo.Overlay) (Object) this.overlay

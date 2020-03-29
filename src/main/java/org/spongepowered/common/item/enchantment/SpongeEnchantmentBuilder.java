@@ -29,17 +29,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.common.data.util.DataUtil;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantment> implements Enchantment.Builder {
 
@@ -94,7 +93,7 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
         }
         final String id = DataUtil.getData(container, Queries.ENCHANTMENT_ID, String.class);
         final int level = DataUtil.getData(container, Queries.LEVEL, Integer.class);
-        final Optional<EnchantmentType> enchantmentType = Sponge.getRegistry().getType(EnchantmentType.class, id);
+        final Optional<EnchantmentType> enchantmentType = Sponge.getRegistry().getCatalogRegistry().get(EnchantmentType.class, id);
         return enchantmentType.map(t -> Enchantment.builder().type(t).level(level).build());
     }
 

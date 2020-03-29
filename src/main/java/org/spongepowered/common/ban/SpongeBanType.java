@@ -33,7 +33,7 @@ public final class SpongeBanType extends SpongeCatalogType implements BanType {
 
     private Class<? extends Ban> banClass;
 
-    public SpongeBanType(CatalogKey key, Class<? extends Ban> banClass) {
+    public SpongeBanType(final CatalogKey key, final Class<? extends Ban> banClass) {
         super(key);
         this.banClass = banClass;
     }

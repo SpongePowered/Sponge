@@ -39,79 +39,79 @@ public enum BlockChange {
 
     BREAK() {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions);
         }
 
         @Override
         public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.BREAK_EVENT;
+            return EventContextKeys.BREAK_EVENT.get();
         }
 
         @Override
-        public boolean allowsLogging(LoggingCategory category) {
+        public boolean allowsLogging(final LoggingCategory category) {
             return category.blockBreakLogging();
         }
     },
     DECAY() {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventDecay(cause, transactions);
         }
 
         @Override
         public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.DECAY_EVENT;
+            return EventContextKeys.DECAY_EVENT.get();
         }
     },
     MODIFY() {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventModify(cause, transactions);
         }
 
         @Override
         public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.MODIFY_EVENT;
+            return EventContextKeys.MODIFY_EVENT.get();
         }
 
         @Override
-        public boolean allowsLogging(LoggingCategory category) {
+        public boolean allowsLogging(final LoggingCategory category) {
             return category.blockModifyLogging();
         }
     },
     PLACE() {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventPlace(cause, transactions);
         }
 
         @Override
         public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.PLACE_EVENT;
+            return EventContextKeys.PLACE_EVENT.get();
         }
 
         @Override
-        public boolean allowsLogging(LoggingCategory category) {
+        public boolean allowsLogging(final LoggingCategory category) {
             return category.blockPlaceLogging();
         }
     },
     GROW() {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventGrow(cause, transactions);
         }
 
         @Override
         public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.GROW_EVENT;
+            return EventContextKeys.GROW_EVENT.get();
         }
     };
 
     BlockChange() { }
 
 
-    public boolean allowsLogging(LoggingCategory category) {
+    public boolean allowsLogging(final LoggingCategory category) {
         return false;
     }
 

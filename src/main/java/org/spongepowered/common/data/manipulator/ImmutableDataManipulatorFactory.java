@@ -45,13 +45,13 @@ public class ImmutableDataManipulatorFactory implements DataManipulator.Immutabl
     }
 
     @Override
-    public DataManipulator.Immutable of(Iterable<? extends Value<?>> values) {
+    public DataManipulator.Immutable of(final Iterable<? extends Value<?>> values) {
         final Map<Key<?>, Object> mappedValues = MutableDataManipulatorFactory.mapValues(values);
         return new ImmutableDataManipulator(Collections.unmodifiableMap(mappedValues));
     }
 
     @Override
-    public DataManipulator.Immutable of(ValueContainer valueContainer) {
+    public DataManipulator.Immutable of(final ValueContainer valueContainer) {
         checkNotNull(valueContainer, "valueContainer");
         if (valueContainer instanceof DataManipulator.Immutable) {
             return (DataManipulator.Immutable) valueContainer;

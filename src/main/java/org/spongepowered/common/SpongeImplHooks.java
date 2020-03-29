@@ -38,7 +38,6 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -60,7 +59,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockReader;
@@ -71,16 +70,12 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
@@ -89,16 +84,13 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 import org.spongepowered.common.util.SpawnerSpawnType;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * Contains default Vanilla implementations for features that are only
@@ -162,10 +154,6 @@ public class SpongeImplHooks {
 
     // Block
 
-    public static boolean isBlockFlammable(final Block block, final IBlockAccess world, final BlockPos pos, final Direction face) {
-        return ((FireBlockAccessor) Blocks.FIRE).accessor$getFlammability(block) > 0;
-    }
-
     public static int getBlockLightOpacity(final BlockState state, final IBlockReader world, final BlockPos pos) {
         return state.getLightValue();
     }
@@ -178,7 +166,7 @@ public class SpongeImplHooks {
     @Nullable
     public static TileEntity createTileEntity(final Block block, final World world, final BlockState state) {
         if (block instanceof ITileEntityProvider) {
-            return ((ITileEntityProvider) block).createNewTileEntity(world, block.getMetaFromState(state));
+            return ((ITileEntityProvider) block).createNewTileEntity(world);
         }
         return null;
     }
@@ -235,7 +223,7 @@ public class SpongeImplHooks {
                 spawnFuzz = 2;
             }
             final int spawnFuzzHalf = spawnFuzz / 2;
-            ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
+            ret = world.gets(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }
 
         return ret;
@@ -344,32 +332,20 @@ public class SpongeImplHooks {
     }
 
     public static void register(final ResourceLocation name, final IRecipe recipe) {
-        CraftingManager.register(name, recipe);
+//        CraftingManager.register(name, recipe);
     }
 
     public static PluginContainer getActiveModContainer() {
         return null;
     }
 
-    public static Text getAdditionalCommandDescriptions() {
-        return Text.EMPTY;
-    }
 
-    public static void registerAdditionalCommands(final ChildCommandElementExecutor flagChildren, final ChildCommandElementExecutor nonFlagChildren) {
-        // Overwritten in SpongeForge
-    }
-
-    public static Predicate<? super PluginContainer> getPluginFilterPredicate() {
-        return plugin -> !SpongeCommandFactory.CONTAINER_LIST_STATICS.contains(plugin.getId());
-    }
 
     // Borrowed from Forge, with adjustments by us
 
     @Nullable
     public static RayTraceResult rayTraceEyes(final LivingEntity entity, final double length) {
-        final Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
-        final Vec3d endPos = startPos.add(entity.getLookVec().scale(length));
-        return entity.world.rayTraceBlocks(startPos, endPos);
+        return null;
     }
 
     public static boolean shouldKeepSpawnLoaded(final DimensionType dimensionType) {
@@ -402,7 +378,7 @@ public class SpongeImplHooks {
     }
 
     public static void onTileEntityInvalidate(final TileEntity tileEntity) {
-        te.remove();
+        tileEntity.remove();
     }
 
     public static void capturePerEntityItemDrop(final PhaseContext<?> phaseContext, final Entity owner, final ItemEntity item) {
@@ -420,26 +396,6 @@ public class SpongeImplHooks {
         return 2.0D;
     }
 
-    /**
-     * Provides the {@link Profession} to set onto the villager. Since forge has it's own
-     * villager profession system, sponge has to bridge the compatibility and
-     * the profession may not be "properly" registered.
-     * @param professionId
-     * @return
-     */
-    public static Profession validateProfession(final int professionId) {
-        final List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
-        for (final Profession profession : professions) {
-            if (profession instanceof SpongeProfession) {
-                if (professionId == ((SpongeProfession) profession).type) {
-                    return profession;
-                }
-            }
-        }
-        throw new IllegalStateException("Invalid Villager profession id is present! Found: " + professionId
-                                        + " when the expected contain: " + professions);
-
-    }
 
     public static void onUseItemTick(final LivingEntity living, final ItemStack stack, final int activeItemStackUseCount) {
     }
@@ -474,10 +430,6 @@ public class SpongeImplHooks {
 
     public static String getImplementationId() {
         throw new UnsupportedOperationException("SpongeCommon does not have it's own ecosystem, this needs to be mixed into for implementations depending on SpongeCommon");
-    }
-
-    public static BlockEntityType getTileEntityType(final Class<? extends TileEntity> tileEntityClass) {
-        return SpongeImpl.getRegistry().getTranslated(tileEntityClass, BlockEntityType.class);
     }
 
     /**
@@ -600,11 +552,17 @@ public class SpongeImplHooks {
      */
     @Nullable
     public static ResourceLocation getItemResourceLocation(final Item item) {
-        return Item.REGISTRY.getKey(mixinItem_api);
+        return Registry.ITEM.getKey(item);
     }
 
+    /**
+     * Used in game dictionaries
+     * @param id
+     * @param textualID
+     * @param item
+     */
     public static void registerItemForSpongeRegistry(final int id, final ResourceLocation textualID, final Item item) {
-        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) item);
+        // todo
     }
 
     public static void writeItemStackCapabilitiesToDataView(final DataContainer container, final ItemStack stack) {

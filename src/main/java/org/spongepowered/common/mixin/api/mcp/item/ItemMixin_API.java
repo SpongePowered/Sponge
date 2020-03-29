@@ -37,22 +37,19 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(Item.class)
 public abstract class ItemMixin_API implements ItemType {
 
     @Shadow public abstract int shadow$getMaxStackSize();
     @Shadow public abstract String shadow$getTranslationKey();
-    @Shadow private Item containerItem;
 
     @Nullable protected BlockType blockType = null;
-    @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
 
     @Override
-    public CatalogKey getKey() {
+    public final CatalogKey getKey() {
         final ResourceLocation resourceLocation = SpongeImplHooks.getItemResourceLocation((Item) (Object) this);
         checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
         return (CatalogKey) (Object) resourceLocation;

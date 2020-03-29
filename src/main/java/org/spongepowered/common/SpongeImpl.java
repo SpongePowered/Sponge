@@ -33,7 +33,6 @@ import static org.spongepowered.common.config.SpongeConfig.Type.TRACKER;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.datafix.DataFixer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.GameState;
@@ -44,14 +43,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventHooks;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -62,13 +59,12 @@ import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-
-import javax.annotation.Nullable;
 
 @Singleton
 public final class SpongeImpl {

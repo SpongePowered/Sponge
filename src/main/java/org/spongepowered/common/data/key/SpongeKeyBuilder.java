@@ -56,7 +56,7 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
     private static final TypeVariable<?> valueElementParameter = Value.class.getTypeParameters()[0];
     private static final Map<Class<?>, Tuple<Object, Object>> defaultBounds = new HashMap<>();
 
-    private static <T> void setDefaultBounds(Class<T> type, T min, T max) {
+    private static <T> void setDefaultBounds(final Class<T> type, final T min, final T max) {
         defaultBounds.put(type, new Tuple<>(min, max));
     }
 
@@ -76,65 +76,65 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
     @Nullable private BiPredicate<? super E, ? super E> includesTester;
 
     @Override
-    public <T, B extends Value<T>> SpongeKeyBuilder<T, B> type(TypeToken<B> token) {
+    public <T, B extends Value<T>> SpongeKeyBuilder<T, B> type(final TypeToken<B> token) {
         checkNotNull(token, "token");
         this.valueToken = (TypeToken<V>) token;
         return (SpongeKeyBuilder<T, B>) this;
     }
 
     @Override
-    public <T, B extends BoundedValue<T>> SpongeKeyBuilder<T, B> boundedType(TypeToken<B> token) {
+    public <T, B extends BoundedValue<T>> SpongeKeyBuilder<T, B> boundedType(final TypeToken<B> token) {
         return this.type(token);
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> minValue(E minValue) {
+    public SpongeKeyBuilder<E, V> minValue(final E minValue) {
         checkNotNull(minValue, "minValue");
         return minValueSupplier(CopyHelper.createSupplier(minValue));
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> minValueSupplier(Supplier<? extends E> supplier) {
+    public SpongeKeyBuilder<E, V> minValueSupplier(final Supplier<? extends E> supplier) {
         checkNotNull(supplier, "supplier");
         this.minValueSupplier = supplier;
         return this;
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> maxValue(E maxValue) {
+    public SpongeKeyBuilder<E, V> maxValue(final E maxValue) {
         checkNotNull(maxValue, "maxValue");
         return maxValueSupplier(CopyHelper.createSupplier(maxValue));
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> maxValueSupplier(Supplier<? extends E> supplier) {
+    public SpongeKeyBuilder<E, V> maxValueSupplier(final Supplier<? extends E> supplier) {
         checkNotNull(supplier, "supplier");
         this.maxValueSupplier = supplier;
         return this;
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> comparator(Comparator<? super E> comparator) {
+    public SpongeKeyBuilder<E, V> comparator(final Comparator<? super E> comparator) {
         checkNotNull(comparator, "comparator");
         this.comparator = comparator;
         return this;
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> includesTester(BiPredicate<? super E, ? super E> predicate) {
+    public SpongeKeyBuilder<E, V> includesTester(final BiPredicate<? super E, ? super E> predicate) {
         checkNotNull(predicate, "predicate");
         this.includesTester = predicate;
         return this;
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> key(CatalogKey key) {
+    public SpongeKeyBuilder<E, V> key(final CatalogKey key) {
         super.key(key);
         return this;
     }
 
     @Override
-    protected Key<V> build(CatalogKey key) {
+    protected Key<V> build(final CatalogKey key) {
         checkNotNull(this.valueToken, "The value token must be set");
 
         final TypeToken<E> elementToken = (TypeToken<E>) this.valueToken.resolveType(valueElementParameter);
@@ -165,7 +165,7 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
         if (BoundedValue.class.isAssignableFrom(this.valueToken.getRawType())) {
             @Nullable Supplier<? extends E> minValueSupplier = this.minValueSupplier;
             @Nullable Supplier<? extends E> maxValueSupplier = this.maxValueSupplier;
-            @Nullable Tuple<E, E> bounds = (Tuple<E, E>) defaultBounds.get(elementToken.getRawType());
+            @Nullable final Tuple<E, E> bounds = (Tuple<E, E>) defaultBounds.get(elementToken.getRawType());
             if (minValueSupplier == null && bounds != null) {
                 final E minimum = bounds.getFirst();
                 minValueSupplier = () -> minimum;

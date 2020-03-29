@@ -36,7 +36,7 @@ public class SpongePatternLayer implements BannerPatternLayer {
     private final BannerPatternShape id;
     private final DyeColor color;
 
-    public SpongePatternLayer(BannerPatternShape id, DyeColor color) {
+    public SpongePatternLayer(final BannerPatternShape id, final DyeColor color) {
         this.id = id;
         this.color = color;
     }

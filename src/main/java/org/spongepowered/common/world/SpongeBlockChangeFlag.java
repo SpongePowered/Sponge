@@ -27,7 +27,6 @@ package org.spongepowered.common.world;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
-import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 /**
@@ -47,7 +46,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     private final int rawFlag;
     private final String name;
 
-    public SpongeBlockChangeFlag(String name, int flag) {
+    public SpongeBlockChangeFlag(final String name, final int flag) {
         this.updateNeighbors = (flag & Constants.BlockChangeFlags.NEIGHBOR_MASK) != 0;
         this.performBlockPhysics = (flag & Constants.BlockChangeFlags.PHYSICS_MASK) == 0;
         this.notifyObservers = (flag & Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE) == 0;
@@ -60,7 +59,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     @Override
-    public boolean notifyNeighbors() {
+    public boolean updateNeighbors() {
         return this.updateNeighbors;
     }
 
@@ -75,7 +74,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     @Override
-    public SpongeBlockChangeFlag withUpdateNeighbors(boolean updateNeighbors) {
+    public SpongeBlockChangeFlag withUpdateNeighbors(final boolean updateNeighbors) {
         if (this.updateNeighbors == updateNeighbors) {
             return this;
         }
@@ -84,7 +83,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     @Override
-    public SpongeBlockChangeFlag withPhysics(boolean performBlockPhysics) {
+    public SpongeBlockChangeFlag withPhysics(final boolean performBlockPhysics) {
         if (this.performBlockPhysics == performBlockPhysics) {
             return this;
         }
@@ -93,7 +92,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     @Override
-    public SpongeBlockChangeFlag withNotifyObservers(boolean notifyObservers) {
+    public SpongeBlockChangeFlag withNotifyObservers(final boolean notifyObservers) {
         if (this.notifyObservers == notifyObservers) {
             return this;
         }
@@ -113,7 +112,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     @Override
-    public SpongeBlockChangeFlag andFlag(BlockChangeFlag flag) {
+    public SpongeBlockChangeFlag andFlag(final BlockChangeFlag flag) {
         final SpongeBlockChangeFlag o = (SpongeBlockChangeFlag) flag;
         final int maskedFlag = (this.updateNeighbors || o.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
                                | (this.performBlockPhysics || o.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
@@ -125,7 +124,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     @Override
-    public SpongeBlockChangeFlag andNotFlag(BlockChangeFlag flag) {
+    public SpongeBlockChangeFlag andNotFlag(final BlockChangeFlag flag) {
         final SpongeBlockChangeFlag o = (SpongeBlockChangeFlag) flag;
         final int maskedFlag = (this.updateNeighbors && !o.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
                                | (this.performBlockPhysics && !o.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
@@ -134,6 +133,11 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                | (this.ignoreRender && !o.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
                                | (this.forceReRender && !o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
+    }
+
+    @Override
+    public boolean isMoving() {
+        return false;
     }
 
     public boolean notifyClients() {

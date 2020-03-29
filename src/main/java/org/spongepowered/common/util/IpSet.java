@@ -41,21 +41,21 @@ public class IpSet implements Predicate<InetAddress> {
     private final InetAddress addr;
     private final int prefixLen;
 
-    private IpSet(InetAddress addr, int prefixLen) {
+    private IpSet(final InetAddress addr, final int prefixLen) {
         this.addr = addr;
         this.prefixLen = prefixLen;
     }
 
     @Override
-    public boolean apply(InetAddress input) {
-        byte[] address = input.getAddress();
-        byte[] checkAddr = this.addr.getAddress();
+    public boolean apply(final InetAddress input) {
+        final byte[] address = input.getAddress();
+        final byte[] checkAddr = this.addr.getAddress();
         if (address.length != checkAddr.length) {
             return false;
         }
 
-        byte completeSegments = (byte) (this.prefixLen >> 3);
-        byte overlap = (byte) (this.prefixLen & 7);
+        final byte completeSegments = (byte) (this.prefixLen >> 3);
+        final byte overlap = (byte) (this.prefixLen & 7);
         for (byte i = 0; i < completeSegments; ++i) {
             if (address[i] != checkAddr[i]) {
                 return false;
@@ -70,7 +70,7 @@ public class IpSet implements Predicate<InetAddress> {
         return true;
     }
 
-    public static IpSet fromAddrPrefix(InetAddress address, int prefixLen) {
+    public static IpSet fromAddrPrefix(final InetAddress address, final int prefixLen) {
         validatePrefixLength(checkNotNull(address, "address"), checkNotNull(prefixLen, "prefixLen"));
         return new IpSet(address, prefixLen);
     }
@@ -80,10 +80,10 @@ public class IpSet implements Predicate<InetAddress> {
      * @param spec
      * @return
      */
-    public static IpSet fromCidr(String spec) {
-        String addrString;
-        int prefixLen;
-        int slashIndex = checkNotNull(spec, "spec").lastIndexOf("/");
+    public static IpSet fromCidr(final String spec) {
+        final String addrString;
+        final int prefixLen;
+        final int slashIndex = checkNotNull(spec, "spec").lastIndexOf("/");
         if (slashIndex == -1) {
             prefixLen = 32;
             addrString = spec;
@@ -92,27 +92,27 @@ public class IpSet implements Predicate<InetAddress> {
             addrString = spec.substring(0, slashIndex);
         }
 
-        InetAddress addr;
+        final InetAddress addr;
         try {
             addr = InetAddress.getByName(addrString);
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             throw new IllegalArgumentException(addrString + " does not contain a valid IP address");
         }
 
         return fromAddrPrefix(addr, prefixLen);
     }
 
-    private static void validatePrefixLength(InetAddress address, int prefixLen) throws IllegalArgumentException {
+    private static void validatePrefixLength(final InetAddress address, final int prefixLen) throws IllegalArgumentException {
         if (prefixLen < 0) {
             throw new IllegalArgumentException("Minimum prefix length for an IP address is 0!");
         }
-        int maxLen = getMaxPrefixLength(address);
+        final int maxLen = getMaxPrefixLength(address);
         if (prefixLen > maxLen) {
             throw new IllegalArgumentException("Maximum prefix length for a " + address.getClass().getSimpleName() + " is " + maxLen);
         }
     }
 
-    private static int getMaxPrefixLength(InetAddress address) {
+    private static int getMaxPrefixLength(final InetAddress address) {
         if (address instanceof Inet4Address) {
             return 32;
         } else if (address instanceof Inet6Address) {
@@ -129,16 +129,16 @@ public class IpSet implements Predicate<InetAddress> {
     public static final class IpSetSerializer implements TypeSerializer<IpSet> {
 
         @Override
-        public IpSet deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
+        public IpSet deserialize(final TypeToken<?> type, final ConfigurationNode value) throws ObjectMappingException {
             try {
                 return IpSet.fromCidr(value.getString());
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 throw new ObjectMappingException(e);
             }
         }
 
         @Override
-        public void serialize(TypeToken<?> type, IpSet obj, ConfigurationNode value) throws ObjectMappingException {
+        public void serialize(final TypeToken<?> type, final IpSet obj, final ConfigurationNode value) throws ObjectMappingException {
             value.setValue(obj.toString());
         }
     }

@@ -39,9 +39,9 @@ public final class BoundedKey<V extends BoundedValue<E>, E> extends SpongeKey<V,
     private final Supplier<E> minimum;
     private final Supplier<E> maximum;
 
-    BoundedKey(CatalogKey key, TypeToken<V> valueToken,
-            TypeToken<E> elementToken, Comparator<E> elementComparator,
-            BiPredicate<E, E> elementIncludesTester, Supplier<E> minimum, Supplier<E> maximum) {
+    BoundedKey(final CatalogKey key, final TypeToken<V> valueToken,
+        final TypeToken<E> elementToken, final Comparator<E> elementComparator,
+        final BiPredicate<E, E> elementIncludesTester, final Supplier<E> minimum, final Supplier<E> maximum) {
         super(key, valueToken, elementToken, elementComparator, elementIncludesTester, () -> null);
         this.minimum = minimum;
         this.maximum = maximum;
@@ -63,7 +63,7 @@ public final class BoundedKey<V extends BoundedValue<E>, E> extends SpongeKey<V,
     @Override
     protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
-                .add("minimum", this.minimum.get())
-                .add("maximum", this.maximum.get());
+            .add("minimum", this.minimum.get())
+            .add("maximum", this.maximum.get());
     }
 }

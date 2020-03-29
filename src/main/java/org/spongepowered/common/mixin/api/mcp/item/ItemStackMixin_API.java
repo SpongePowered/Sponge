@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
-import org.apache.logging.log4j.Level;
-import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.SerializableDataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -42,25 +40,16 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.bridge.item.ItemBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.Constants;
-
-import java.util.Collection;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
 @Implements(@Interface(iface = ItemStack.class, prefix = "apiStack$")) // We need to soft implement this interface due to a synthetic bridge method
-public abstract class ItemStackMixin_API implements DataHolder {       // conflict from overriding ValueContainer#copy() from DataHolder
+public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable {       // conflict from overriding ValueContainer#copy() from DataHolder
 
     @Shadow public abstract int shadow$getCount();
     @Shadow public abstract void shadow$setCount(int size); // Do not use field directly as Minecraft tracks the empty state
@@ -82,7 +71,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
         return (ItemType) this.shadow$getItem();
     }
 
-    public void apiStack$setQuantity(int quantity) throws IllegalArgumentException {
+    public void apiStack$setQuantity(final int quantity) throws IllegalArgumentException {
         this.shadow$setCount(quantity);
     }
 
@@ -91,12 +80,12 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         return false;
     }
 
     @Override
-    public void setRawData(DataView container) throws InvalidDataException {
+    public void setRawData(final DataView container) throws InvalidDataException {
         if (this.shadow$isEmpty()) {
             throw new IllegalArgumentException("Cannot set data on empty item stacks!");
         }
@@ -109,13 +98,13 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
             this.shadow$setDamage(integer);
             final CompoundNBT stackCompound = NbtTranslator.getInstance().translate(nbtData);
             this.shadow$setTag(stackCompound);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
         }
     }
 
     @Override
-    public DataHolder copy() {
+    public SerializableDataHolder.Mutable copy() {
         return this.apiStack$copy();
     }
 
@@ -132,7 +121,7 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.ItemStack.TYPE, this.apiStack$getType().getId())
+                .set(Constants.ItemStack.TYPE, this.apiStack$getType().getKey())
                 .set(Constants.ItemStack.COUNT, this.apiStack$getQuantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamage());
         if (this.shadow$hasTag()) { // no tag? no data, simple as that.
@@ -150,13 +139,13 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
             }
         }
         // We only need to include the custom data, not vanilla manipulators supported by sponge implementation
-        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
-        if (!manipulators.isEmpty()) {
-            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
-        }
+//        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
+//        if (!manipulators.isEmpty()) {
+//            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+//        }
         try {
             SpongeImplHooks.writeItemStackCapabilitiesToDataView(container, (net.minecraft.item.ItemStack) (Object) this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         return container;
@@ -167,10 +156,11 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     }
 
     public ItemStackSnapshot apiStack$createSnapshot() {
-        return new SpongeItemStackSnapshot((ItemStack) this);
+//        return new SpongeItemStackSnapshot((ItemStack) this);
+        throw new UnsupportedOperationException("Reimplement me!");
     }
 
-    public boolean apiStack$equalTo(ItemStack that) {
+    public boolean apiStack$equalTo(final ItemStack that) {
         return net.minecraft.item.ItemStack.areItemStacksEqual(
                 (net.minecraft.item.ItemStack) (Object) this,
                 (net.minecraft.item.ItemStack) (Object) that
@@ -180,32 +170,6 @@ public abstract class ItemStackMixin_API implements DataHolder {       // confli
     @Intrinsic
     public boolean apiStack$isEmpty() {
         return this.shadow$isEmpty();
-    }
-
-    @Override
-    public Collection<Mutable<?, ?>> getContainers() {
-        if (this.shadow$isEmpty()) {
-            return Lists.newArrayList();
-        }
-        final List<Mutable<?, ?>> manipulators = Lists.newArrayList();
-        final Item item = this.shadow$getItem();
-        // Null items should be impossible to create
-        if (item == null) {
-            final PrettyPrinter printer = new PrettyPrinter(60);
-            printer.add("Null Item found!").centre().hr();
-            printer.add("An ItemStack has a null ItemType! This is usually not supported as it will likely have issues elsewhere.");
-            printer.add("Please ask help for seeing if this is an issue with a mod and report it!");
-            printer.add("Printing a Stacktrace:");
-            printer.add(new Exception());
-            printer.log(SpongeImpl.getLogger(), Level.WARN);
-            return manipulators;
-        }
-        ((ItemBridge) item).bridge$gatherManipulators((net.minecraft.item.ItemStack) (Object) this, manipulators);
-        if (((CustomDataHolderBridge) this).bridge$hasManipulators()) {
-            final Collection<Mutable<?, ?>> customManipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
-            manipulators.addAll(customManipulators);
-        }
-        return manipulators;
     }
 
 }

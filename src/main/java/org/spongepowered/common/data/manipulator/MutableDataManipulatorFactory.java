@@ -43,11 +43,11 @@ public final class MutableDataManipulatorFactory implements DataManipulator.Muta
     }
 
     @Override
-    public DataManipulator.Mutable of(Iterable<? extends Value<?>> values) {
+    public DataManipulator.Mutable of(final Iterable<? extends Value<?>> values) {
         return new MutableDataManipulator(mapValues(values));
     }
 
-    static Map<Key<?>, Object> mapValues(Iterable<? extends Value<?>> values) {
+    static Map<Key<?>, Object> mapValues(final Iterable<? extends Value<?>> values) {
         checkNotNull(values, "values");
         final Map<Key<?>, Object> mappedValues = new HashMap<>();
         for (final Value<?> value : values) {
@@ -57,7 +57,7 @@ public final class MutableDataManipulatorFactory implements DataManipulator.Muta
     }
 
     @Override
-    public DataManipulator.Mutable of(ValueContainer valueContainer) {
+    public DataManipulator.Mutable of(final ValueContainer valueContainer) {
         checkNotNull(valueContainer, "valueContainer");
         final MutableDataManipulator manipulator = new MutableDataManipulator();
         manipulator.copyFrom(valueContainer);

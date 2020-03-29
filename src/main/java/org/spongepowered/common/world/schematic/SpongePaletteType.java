@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.schematic;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -35,7 +36,7 @@ public class SpongePaletteType<T extends CatalogType> extends SpongeCatalogType 
 
     private final Supplier<? extends Palette<T>> builder;
 
-    public SpongePaletteType(String id, Supplier<? extends Palette<T>> builder) {
+    public SpongePaletteType(final CatalogKey id, final Supplier<? extends Palette<T>> builder) {
         super(id);
         this.builder = builder;
     }

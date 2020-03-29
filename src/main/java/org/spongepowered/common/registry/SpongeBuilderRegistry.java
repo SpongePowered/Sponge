@@ -37,7 +37,6 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
@@ -46,7 +45,6 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.EntityArchetype;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.LookRandomlyGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
@@ -91,9 +89,6 @@ import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.biome.VirtualBiomeType;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTreeBuilder;
 import org.spongepowered.common.advancement.SpongeCriterionBuilder;
@@ -104,7 +99,6 @@ import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
-import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
@@ -113,7 +107,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
-import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
 import org.spongepowered.common.entity.ai.goal.builtin.SpongeLookRandomlyGoalBuilder;
 import org.spongepowered.common.entity.ai.goal.builtin.SpongeSwimGoalBuilder;
@@ -151,12 +144,9 @@ import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
-import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
-import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
-import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -172,7 +162,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
     }
 
     @Override
-    public <T extends ResettableBuilder<?, ? super T>> T provideBuilder(Class<T> builderClass) {
+    public <T extends ResettableBuilder<?, ? super T>> T provideBuilder(final Class<T> builderClass) {
         checkNotNull(builderClass);
 
         final Supplier<?> supplier = this.builders.get(builderClass);
@@ -183,7 +173,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
         return (T) supplier.get();
     }
 
-    public <T> SpongeBuilderRegistry register(Class<T> builderClass, Supplier<? extends T> supplier) {
+    public <T> SpongeBuilderRegistry register(final Class<T> builderClass, final Supplier<? extends T> supplier) {
         checkNotNull(builderClass);
         checkNotNull(supplier);
 
@@ -210,10 +200,10 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
             .register(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
             .register(WorldArchetype.Builder.class, SpongeWorldArchetypeBuilder::new)
-            .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
+//            .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
             .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .register(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
-            .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
+//            .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
             .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
             .register(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)
             .register(AvoidLivingGoal.Builder.class, SpongeAvoidEntityGoalBuilder::new)
@@ -234,9 +224,9 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
             .register(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
             .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
-            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
-            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
-            .register(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
+//            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
+//            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
+//            .register(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
             .register(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
             .register(SoundType.Builder.class, SpongeSoundBuilder::new)

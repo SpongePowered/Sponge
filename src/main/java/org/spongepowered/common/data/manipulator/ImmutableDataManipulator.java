@@ -38,7 +38,7 @@ final class ImmutableDataManipulator extends SpongeDataManipulator implements Da
 
     @Nullable private Set<Value.Immutable<?>> cachedValues;
 
-    ImmutableDataManipulator(Map<Key<?>, Object> values) {
+    ImmutableDataManipulator(final Map<Key<?>, Object> values) {
         super(values);
     }
 
@@ -48,7 +48,7 @@ final class ImmutableDataManipulator extends SpongeDataManipulator implements Da
     }
 
     @Override
-    public Immutable without(Key<?> key) {
+    public Immutable without(final Key<?> key) {
         checkNotNull(key, "key");
         if (!this.values.containsKey(key)) {
             return this;

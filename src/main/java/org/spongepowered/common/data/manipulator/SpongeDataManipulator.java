@@ -43,7 +43,7 @@ abstract class SpongeDataManipulator implements DataManipulator {
 
     protected final Map<Key<?>, Object> values;
 
-    SpongeDataManipulator(Map<Key<?>, Object> values) {
+    SpongeDataManipulator(final Map<Key<?>, Object> values) {
         this.values = values;
     }
 
@@ -56,20 +56,20 @@ abstract class SpongeDataManipulator implements DataManipulator {
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends Value<E>> key) {
+    public <E> Optional<E> get(final Key<? extends Value<E>> key) {
         checkNotNull(key, "key");
         return Optional.ofNullable((E) CopyHelper.copy(this.values.get(key)));
     }
 
     @Override
-    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
         checkNotNull(key, "key");
         final E element = (E) CopyHelper.copy(this.values.get(key));
         return element == null ? Optional.empty() : Optional.of(Value.genericMutableOf(key, element));
     }
 
     @Override
-    public boolean supports(Key<?> key) {
+    public boolean supports(final Key<?> key) {
         return true;
     }
 

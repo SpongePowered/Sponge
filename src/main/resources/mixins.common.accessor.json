@@ -85,6 +85,7 @@
         "scoreboard.ScoreObjectiveAccessor",
         "scoreboard.ScorePlayerTeamAccessor",
         "server.MinecraftServerAccessor",
+        "server.management.IPBanListAccessor",
         "server.management.PlayerProfileCache_ProfileEntryAccessor",
         "tileentity.BannerPatternAccessor",
         "tileentity.BannerTileEntityAccessor",

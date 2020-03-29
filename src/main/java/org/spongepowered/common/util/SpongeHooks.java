@@ -55,22 +55,22 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.LoggingCategory;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.mixin.accessor.world.server.ServerWorldAccessor;
-import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
-import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
-import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
-import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
 import org.spongepowered.math.vector.Vector3i;
+
+import javax.management.MBeanServer;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -81,8 +81,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
-import javax.management.MBeanServer;
 
 public final class SpongeHooks {
 

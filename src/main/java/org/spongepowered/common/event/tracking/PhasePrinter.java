@@ -29,7 +29,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
-import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tuple;
@@ -50,9 +49,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-final class PhasePrinter {
+public final class PhasePrinter {
 
-    public static final String ASYNC_BLOCK_CHANGE_MESSAGE = "Sponge adapts the vanilla handling of block changes to power events and plugins "
+    static final String ASYNC_BLOCK_CHANGE_MESSAGE = "Sponge adapts the vanilla handling of block changes to power events and plugins "
                                                 + "such that it follows the known fact that block changes MUST occur on the server "
                                                 + "thread (even on clients, this exists as the InternalServer thread). It is NOT "
                                                 + "possible to change this fact and must be reported to the offending mod for async "
@@ -84,7 +83,7 @@ final class PhasePrinter {
             context.printTrace(printer);
         };
 
-    public static void printNullSourceForBlock(final ServerWorld worldServer, final BlockPos pos, final Block blockIn, final BlockPos otherPos,
+    static void printNullSourceForBlock(final ServerWorld worldServer, final BlockPos pos, final Block blockIn, final BlockPos otherPos,
                                                final NullPointerException e) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block from Unknown Source!").centre().hr()
@@ -145,7 +144,7 @@ final class PhasePrinter {
         }
     }
 
-    public static void printNullSourceBlockWithTile(
+    static void printNullSourceBlockWithTile(
             final BlockPos pos, final Block blockIn, final BlockPos otherPos, final ResourceLocation type, final boolean useTile,
             final NullPointerException e) {
         final PhaseTracker instance = PhaseTracker.getInstance();
@@ -167,7 +166,7 @@ final class PhasePrinter {
             .log(SpongeImpl.getLogger(), Level.WARN);
     }
 
-    public static void printNullSourceBlockNeighborNotificationWithNoTileSource(final BlockPos pos, final Block blockIn, final BlockPos otherPos,
+    static void printNullSourceBlockNeighborNotificationWithNoTileSource(final BlockPos pos, final Block blockIn, final BlockPos otherPos,
                                                                                 final NullPointerException e) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block on TileEntity!").centre().hr()
@@ -188,7 +187,7 @@ final class PhasePrinter {
             .log(SpongeImpl.getLogger(), Level.WARN);
     }
 
-    public static void printPhaseStackWithException(final PhaseStack stack, final PrettyPrinter printer, final Throwable e) {
+    static void printPhaseStackWithException(final PhaseStack stack, final PrettyPrinter printer, final Throwable e) {
         stack.forEach(data -> PhasePrinter.PHASE_PRINTER.accept(printer, data));
         printer.add()
             .add(" %s :", "StackTrace")
@@ -220,7 +219,11 @@ final class PhasePrinter {
         printer.add(e);
     }
 
-    static void printMessageWithCaughtException(final PhaseStack stack, final String header, final String subHeader, final IPhaseState<?> state, final PhaseContext<?> context, @Nullable final Throwable t) {
+    public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subheader, final Throwable e) {
+        printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getCurrentState(), tracker.getCurrentContext(), e);
+    }
+
+    public static void printMessageWithCaughtException(final PhaseStack stack, final String header, final String subHeader, final IPhaseState<?> state, final PhaseContext<?> context, @Nullable final Throwable t) {
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
@@ -240,7 +243,7 @@ final class PhasePrinter {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    public static void printExceptionFromPhase(final PhaseStack stack, final Throwable e, final PhaseContext<?> context) {
+    static void printExceptionFromPhase(final PhaseStack stack, final Throwable e, final PhaseContext<?> context) {
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !PhasePrinter.printedExceptionsForState.isEmpty()) {
             for (final IPhaseState<?> iPhaseState : PhasePrinter.printedExceptionsForState) {
                 if (context.state == iPhaseState) {
@@ -309,7 +312,7 @@ final class PhasePrinter {
         }
     }
 
-    public static void generateVersionInfo(final PrettyPrinter printer) {
+    static void generateVersionInfo(final PrettyPrinter printer) {
         for (final PluginContainer pluginContainer : SpongeImpl.getInternalPlugins()) {
             pluginContainer.getVersion().ifPresent(version ->
                     printer.add("%s : %s", pluginContainer.getName(), version)
@@ -399,7 +402,7 @@ final class PhasePrinter {
             .log(SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    public static void printAsyncEntitySpawn(final Entity entity) {
+    static void printAsyncEntitySpawn(final Entity entity) {
         // We aren't in the server thread at this point, and an entity is spawning on the server....
         // We will DEFINITELY be doing bad things otherwise. We need to artificially capture here.
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().captureEntitiesAsync()) {
@@ -462,7 +465,7 @@ final class PhasePrinter {
         PhasePrinter.hasPrintedAsyncEntities = true;
     }
 
-    public static boolean checkMaxBlockProcessingDepth(final IPhaseState<?> state, final PhaseContext<?> context, final int currentDepth) {
+    static boolean checkMaxBlockProcessingDepth(final IPhaseState<?> state, final PhaseContext<?> context, final int currentDepth) {
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
         final PhaseTrackerCategory trackerConfig = globalConfigAdapter.getConfig().getPhaseTracker();
         int maxDepth = trackerConfig.getMaxBlockProcessingDepth();

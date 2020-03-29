@@ -44,7 +44,7 @@ public class SpongeFireworkEffect implements FireworkEffect {
     private final ImmutableList<Color> fades;
     private final FireworkShape shape;
 
-    SpongeFireworkEffect(boolean flicker, boolean trails, Iterable<Color> colors, Iterable<Color> fades, FireworkShape shape) {
+    SpongeFireworkEffect(final boolean flicker, final boolean trails, final Iterable<Color> colors, final Iterable<Color> fades, final FireworkShape shape) {
         this.flicker = flicker;
         this.trails = trails;
         this.colors = ImmutableList.copyOf(colors);
@@ -53,14 +53,14 @@ public class SpongeFireworkEffect implements FireworkEffect {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        SpongeFireworkEffect that = (SpongeFireworkEffect) o;
+        final SpongeFireworkEffect that = (SpongeFireworkEffect) o;
         return this.flicker == that.flicker &&
                 this.trails == that.trails &&
                 Objects.equals(this.colors, that.colors) &&
@@ -108,7 +108,7 @@ public class SpongeFireworkEffect implements FireworkEffect {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.Item.Fireworks.FIREWORK_SHAPE, this.shape.getId())
+                .set(Constants.Item.Fireworks.FIREWORK_SHAPE, this.shape.getKey())
                 .set(Constants.Item.Fireworks.FIREWORK_COLORS, this.colors)
                 .set(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, this.fades)
                 .set(Constants.Item.Fireworks.FIREWORK_TRAILS, this.trails)

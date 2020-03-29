@@ -45,13 +45,13 @@ public class BimapPalette<T extends CatalogType> implements Palette<T> {
     private final PaletteType<T> paletteType;
     private int maxId = 0;
 
-    public BimapPalette(PaletteType<T> paletteType) {
+    public BimapPalette(final PaletteType<T> paletteType) {
         this.ids = HashBiMap.create();
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
     }
 
-    public BimapPalette(PaletteType<T> paletteType, int expectedSize) {
+    public BimapPalette(final PaletteType<T> paletteType, final int expectedSize) {
         this.ids = HashBiMap.create(expectedSize);
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
@@ -68,15 +68,15 @@ public class BimapPalette<T extends CatalogType> implements Palette<T> {
     }
 
     @Override
-    public Optional<Integer> get(T state) {
+    public Optional<Integer> get(final T state) {
         return Optional.ofNullable(this.idsr.get(state));
     }
 
     @Override
-    public int getOrAssign(T state) {
-        Integer id = this.idsr.get(state);
+    public int getOrAssign(final T state) {
+        final Integer id = this.idsr.get(state);
         if (id == null) {
-            int next = this.allocation.nextClearBit(0);
+            final int next = this.allocation.nextClearBit(0);
             if (this.maxId < next) {
                 this.maxId = next;
             }
@@ -88,11 +88,11 @@ public class BimapPalette<T extends CatalogType> implements Palette<T> {
     }
 
     @Override
-    public Optional<T> get(int id) {
+    public Optional<T> get(final int id) {
         return Optional.ofNullable(this.ids.get(id));
     }
 
-    public void assign(T state, int id) {
+    public void assign(final T state, final int id) {
         if (this.maxId < id) {
             this.maxId = id;
         }
@@ -101,8 +101,8 @@ public class BimapPalette<T extends CatalogType> implements Palette<T> {
     }
 
     @Override
-    public boolean remove(T state) {
-        Integer id = this.idsr.get(state);
+    public boolean remove(final T state) {
+        final Integer id = this.idsr.get(state);
         if (id == null) {
             return false;
         }
@@ -120,14 +120,14 @@ public class BimapPalette<T extends CatalogType> implements Palette<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        BimapPalette<?> that = (BimapPalette<?>) o;
+        final BimapPalette<?> that = (BimapPalette<?>) o;
         return this.maxId == that.maxId &&
                this.ids.equals(that.ids) &&
                this.allocation.equals(that.allocation) &&

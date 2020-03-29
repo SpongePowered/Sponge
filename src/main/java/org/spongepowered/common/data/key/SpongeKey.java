@@ -51,8 +51,9 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     private final Supplier<E> defaultValueSupplier;
     private final EmptyDataProvider<V, E> emptyDataProvider;
 
-    SpongeKey(CatalogKey key, TypeToken<V> valueToken, TypeToken<E> elementToken, Comparator<? super E> elementComparator,
-            BiPredicate<? super E, ? super E> elementIncludesTester, Supplier<E> defaultValueSupplier) {
+    SpongeKey(final CatalogKey key, final TypeToken<V> valueToken, final TypeToken<E> elementToken,
+        final Comparator<? super E> elementComparator,
+        final BiPredicate<? super E, ? super E> elementIncludesTester, final Supplier<E> defaultValueSupplier) {
         this.key = key;
         this.valueToken = valueToken;
         this.elementToken = elementToken;
@@ -89,14 +90,15 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     }
 
     @Override
-    public <H extends DataHolder> void registerEvent(Class<H> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
+    public <H extends DataHolder> void registerEvent(final Class<H> holderFilter,
+        final EventListener<ChangeDataHolderEvent.ValueChange> listener) {
         // TODO
     }
 
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
-                .add("key", this.key)
-                .add("valueToken", this.valueToken);
+            .add("key", this.key)
+            .add("valueToken", this.valueToken);
     }
 
     @Override

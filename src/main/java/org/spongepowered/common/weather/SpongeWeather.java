@@ -28,10 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.weather.Weather;
 
-@NonnullByDefault
 public class SpongeWeather implements Weather {
 
     private final String id;
@@ -76,5 +75,10 @@ public class SpongeWeather implements Weather {
     @Override
     public int hashCode() {
         return Objects.hashCode(this.id, this.name);
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return null;
     }
 }

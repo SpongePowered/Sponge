@@ -50,7 +50,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
         super(new HashMap<>());
     }
 
-    MutableDataManipulator(Map<Key<?>, Object> values) {
+    MutableDataManipulator(final Map<Key<?>, Object> values) {
         super(values);
     }
 
@@ -65,14 +65,15 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     }
 
     @Override
-    public Mutable copyFrom(ValueContainer valueContainer, MergeFunction overlap, Predicate<Key<?>> predicate) {
+    public Mutable copyFrom(final ValueContainer valueContainer, final MergeFunction overlap,
+        final Predicate<Key<?>> predicate) {
         checkNotNull(valueContainer, "valueContainer");
         checkNotNull(predicate, "predicate");
         checkNotNull(overlap, "overlap");
         if (valueContainer instanceof SpongeDataManipulator) {
             // Do this to prevent unnecessary object allocations
             final SpongeDataManipulator manipulator = (SpongeDataManipulator) valueContainer;
-            for (Map.Entry<Key<?>, Object> entry : manipulator.values.entrySet()) {
+            for (final Map.Entry<Key<?>, Object> entry : manipulator.values.entrySet()) {
                 if (!predicate.test(entry.getKey())) {
                     continue;
                 }
@@ -89,7 +90,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
                 }
             }
         } else {
-            for (Key<?> key : valueContainer.getKeys()) {
+            for (final Key<?> key : valueContainer.getKeys()) {
                 if (!predicate.test(key)) {
                     continue;
                 }
@@ -101,7 +102,8 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
                         // Prefer the original
                         continue;
                     }
-                    final Object merged = MergeHelper.merge(overlap, (Key) key, original, valueContainer.require((Key) key));
+                    final Object merged = MergeHelper.merge(overlap, (Key) key, original,
+                        valueContainer.require((Key) key));
                     this.values.put(key, CopyHelper.copy(merged));
                 }
             }
@@ -110,7 +112,8 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     }
 
     @Override
-    public Mutable copyFrom(ValueContainer valueContainer, MergeFunction overlap, Iterable<Key<?>> keys) {
+    public Mutable copyFrom(final ValueContainer valueContainer, final MergeFunction overlap,
+        final Iterable<Key<?>> keys) {
         checkNotNull(valueContainer, "valueContainer");
         checkNotNull(overlap, "overlap");
         checkNotNull(keys, "keys");
@@ -125,14 +128,15 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     }
 
     @Override
-    public Mutable copyFrom(ValueContainer valueContainer, MergeFunction overlap) {
+    public Mutable copyFrom(final ValueContainer valueContainer, final MergeFunction overlap) {
         checkNotNull(valueContainer, "valueContainer");
         checkNotNull(overlap, "overlap");
         copyFrom(this.values, valueContainer, overlap);
         return this;
     }
 
-    public static void copyFrom(Map<Key<?>, Object> values, ValueContainer valueContainer, MergeFunction overlap) {
+    public static void copyFrom(
+        final Map<Key<?>, Object> values, final ValueContainer valueContainer, final MergeFunction overlap) {
         if (valueContainer instanceof SpongeDataManipulator) {
             // Do this to prevent unnecessary object allocations
             final SpongeDataManipulator manipulator = (SpongeDataManipulator) valueContainer;
@@ -142,9 +146,10 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
         }
     }
 
-    private static void copyFrom(Map<Key<?>, Object> values, MergeFunction overlap, Iterable<Key<?>> keys,
-            Function<Key<?>, @Nullable Object> function) {
-        for (Key<?> key : keys) {
+    private static void copyFrom(final Map<Key<?>, Object> values, final MergeFunction overlap,
+        final Iterable<Key<?>> keys,
+        final Function<Key<?>, @Nullable Object> function) {
+        for (final Key<?> key : keys) {
             @Nullable final Object replacement = function.apply(key);
             if (overlap == MergeFunction.REPLACEMENT_PREFERRED && replacement != null) {
                 values.put(key, CopyHelper.copy(replacement));
@@ -161,7 +166,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     }
 
     @Override
-    public <E> Mutable set(Key<? extends Value<E>> key, E value) {
+    public <E> Mutable set(final Key<? extends Value<E>> key, final E value) {
         checkNotNull(key, "key");
         checkNotNull(value, "value");
         this.values.put(key, CopyHelper.copy(value));
@@ -169,7 +174,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     }
 
     @Override
-    public Mutable remove(Key<?> key) {
+    public Mutable remove(final Key<?> key) {
         checkNotNull(key, "key");
         this.values.remove(key);
         return this;

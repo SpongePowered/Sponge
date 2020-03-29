@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import com.google.common.collect.Lists;
-import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -40,13 +39,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -58,21 +54,21 @@ import java.util.Set;
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class TileEntityMixin_API implements BlockEntity {
 
-    @Shadow protected boolean tileEntityInvalid;
+    //@formatter:off
+    @Shadow @Final private TileEntityType<?> type;
     @Shadow protected net.minecraft.world.World world;
     @Shadow protected BlockPos pos;
 
-    @Shadow public abstract BlockPos getPos();
-    @Shadow public abstract Block getBlockType();
-    @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
+    @Shadow public abstract BlockPos shadow$getPos();
     @Shadow public abstract void shadow$markDirty();
-
-    private final BlockEntityType api$TileEntityType = SpongeImplHooks.getTileEntityType(((net.minecraft.tileentity.TileEntity) (Object) this).getClass());
+    @Shadow public abstract CompoundNBT shadow$write(CompoundNBT compound);
+    @Shadow protected boolean removed;
+    //@formatter:on
     @Nullable private LocatableBlock api$LocatableBlock;
 
     @Override
     public Location getLocation() {
-        return Location.of((World) this.world, VecHelper.toVector3i(this.getPos()));
+        return Location.of((World) this.world, VecHelper.toVector3i(this.shadow$getPos()));
     }
 
     @Override
@@ -85,23 +81,23 @@ public abstract class TileEntityMixin_API implements BlockEntity {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(Queries.WORLD_ID, ((World) this.world).getProperties().getUniqueId().toString())
-            .set(Queries.POSITION_X, this.getPos().getX())
-            .set(Queries.POSITION_Y, this.getPos().getY())
-            .set(Queries.POSITION_Z, this.getPos().getZ())
-            .set(Constants.TileEntity.TILE_TYPE, this.api$TileEntityType.getId());
+            .set(Queries.POSITION_X, this.shadow$getPos().getX())
+            .set(Queries.POSITION_Y, this.shadow$getPos().getY())
+            .set(Queries.POSITION_Z, this.shadow$getPos().getZ())
+            .set(Constants.TileEntity.TILE_TYPE, ((BlockEntityType) this.type).getKey());
         final CompoundNBT compound = new CompoundNBT();
-        this.writeToNBT(compound);
+        this.shadow$write(compound);
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
-        if (!manipulators.isEmpty()) {
-            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
-        }
+//        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
+//        if (!manipulators.isEmpty()) {
+//            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+//        }
         return container;
     }
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         return container.contains(Queries.WORLD_ID)
             && container.contains(Queries.POSITION_X)
             && container.contains(Queries.POSITION_Y)
@@ -111,53 +107,41 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public void setRawData(DataView container) throws InvalidDataException {
+    public void setRawData(final DataView container) throws InvalidDataException {
         throw new UnsupportedOperationException(); // TODO Data API
     }
 
     @Override
     public boolean isValid() {
-        return !this.tileEntityInvalid;
+        return !this.removed;
     }
 
     @Override
-    public void setValid(boolean valid) {
-        this.tileEntityInvalid = valid;
+    public void setValid(final boolean valid) {
+        this.removed = valid;
     }
 
     @Override
     public final BlockEntityType getType() {
-        return this.api$TileEntityType;
+        return (BlockEntityType) this.type;
     }
 
     @Override
     public BlockState getBlock() {
-        return (BlockState) this.world.getBlockState(this.getPos());
+        return (BlockState) this.world.getBlockState(this.shadow$getPos());
     }
 
-    public void supplyVanillaManipulators(List<Mutable<?, ?>> manipulators) {
-
-    }
-
-    @Override
-    public Collection<Mutable<?, ?>> getContainers() {
-        final List<Mutable<?, ?>> list = Lists.newArrayList();
-        this.supplyVanillaManipulators(list);
-        if (this instanceof CustomDataHolderBridge) {
-            list.addAll(((CustomDataHolderBridge) this).bridge$getCustomManipulators());
-        }
-        return list;
-    }
 
     @Override
     public BlockEntityArchetype createArchetype() {
-        return new SpongeBlockEntityArchetypeBuilder().tile(this).build();
+//        return new SpongeBlockEntityArchetypeBuilder().tile(this).build();
+        throw new UnsupportedOperationException("lolnope");
     }
 
     @Override
     public LocatableBlock getLocatableBlock() {
         if (this.api$LocatableBlock == null) {
-            BlockState blockState = this.getBlock();
+            final BlockState blockState = this.getBlock();
             this.api$LocatableBlock = new SpongeLocatableBlockBuilder()
                 .world((World) this.world)
                 .position(this.pos.getX(), this.pos.getY(), this.pos.getZ())

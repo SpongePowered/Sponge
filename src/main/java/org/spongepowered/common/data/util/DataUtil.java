@@ -30,13 +30,10 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.datafix.DataFixer;
-import net.minecraft.util.datafix.FixTypes;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataRegistration;
@@ -46,63 +43,36 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
-import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.data.ValueProcessor;
-import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
-import org.spongepowered.common.data.fixer.entity.player.PlayerRespawnData;
-import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
-import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
-import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
-import org.spongepowered.common.data.nbt.validation.RawDataValidator;
-import org.spongepowered.common.data.nbt.validation.ValidationType;
-import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.TypeTokenHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
+
+import javax.annotation.Nullable;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
-
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class DataUtil {
-
-    public static final DataFixer spongeDataFixer = new DataFixer(Constants.Sponge.SPONGE_DATA_VERSION);
-    private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
-
-    static {
-        spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
-        spongeDataFixer.registerFix(FixTypes.ENTITY, new EntityTrackedUser());
-        spongeDataFixer.registerFix(FixTypes.PLAYER, new PlayerRespawnData());
-    }
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
         if (!checkNotNull(dataView).contains(checkNotNull(query))) {
@@ -111,63 +81,7 @@ public final class DataUtil {
         return dataView;
     }
 
-    @SuppressWarnings("rawtypes")
-    public static <T> T getData(final DataView dataView, final Key<? extends Value<T>> key) throws InvalidDataException {
-        checkDataExists(dataView, checkNotNull(key).getQuery());
-        final Object object;
-        final TypeToken<?> elementToken = key.getElementToken();
-        // Order matters here
-        // We always check DataSerializeable first, since this should override
-        // any other handling (e.g. for CatalogTypes)
-        if (elementToken.isSubtypeOf(TypeToken.of(DataSerializable.class))) {
-            object = dataView.getSerializable(key.getQuery(), (Class<DataSerializable>) elementToken.getRawType())
-                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
-        } else if (elementToken.isSubtypeOf(TypeToken.of(CatalogType.class))) {
-            object = dataView.getCatalogType(key.getQuery(), (Class<CatalogType>) elementToken.getRawType())
-                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
-        } else if (elementToken.isSubtypeOf(TypeToken.of(Text.class))) {
-            final String input = dataView.getString(key.getQuery())
-                    .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
-            object = TextSerializers.PLAIN.deserialize(input);
-        } else if (elementToken.isSubtypeOf(TypeToken.of(List.class))) {
-            final Optional<?> opt;
-            if (elementToken.isSubtypeOf(TypeTokens.LIST_DATA_SERIALIZEABLE_TOKEN)) {
-                final Class<?> listElement = TypeTokenHelper.getGenericParam(elementToken, 0);
-                opt = dataView.getSerializableList(key.getQuery(), (Class) listElement);
-            } else {
-                opt = dataView.getList(key.getQuery());
-            }
-            object = opt.orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
-        } else if (elementToken.isSubtypeOf(TypeToken.of(Set.class))) {
-            final List<?> objects = dataView.getList(key.getQuery()).orElse(Collections.emptyList());
-            object = new HashSet<Object>(objects);
-        } else if (elementToken.isSubtypeOf(TypeToken.of(Map.class))) {
-            object = dataView.getMap(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
-        } else if (elementToken.isSubtypeOf(TypeToken.of(Enum.class))) {
-            object = Enum.valueOf((Class<Enum>) elementToken.getRawType(), dataView.getString(key.getQuery())
-                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId())));
-        } else {
-            final Optional<? extends DataTranslator<?>> translator = SpongeDataManager.getInstance().getTranslator(elementToken.getRawType());
-            if (translator.isPresent()) {
-                object = translator.map(trans -> trans.translate(dataView.getView(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()))))
-                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getId()));
-            } else {
-                object = dataView.get(key.getQuery())
-                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getId()));
-            }
-        }
 
-        return (T) object;
-    }
-
-    public static <T> T getData(final DataView dataView, final Key<?> key, final Class<T> clazz) throws InvalidDataException {
-        checkDataExists(dataView, checkNotNull(key).getQuery());
-        final Object object = dataView.get(key.getQuery()).orElseThrow(dataNotFound());
-        if (clazz.isInstance(object)) {
-            return (T) object;
-        }
-        throw new InvalidDataException("Could not cast to the correct class type!");
-    }
 
     public static <T> T getData(final DataView dataView, final DataQuery query, final Class<T> data) throws InvalidDataException {
         checkDataExists(dataView, query);
@@ -178,7 +92,7 @@ public final class DataUtil {
         throw new InvalidDataException("Data does not match!");
     }
 
-    public static List<DataView> getSerializedManipulatorList(final Iterable<? extends Mutable<?, ?>> manipulators) {
+    public static List<DataView> getSerializedManipulatorList(final Iterable<? extends Mutable> manipulators) {
         return getSerializedManipulatorList(manipulators, DataUtil::getRegistrationFor);
     }
 
@@ -223,7 +137,7 @@ public final class DataUtil {
     private static void tryDeserializeManipulator(final SerializedDataTransaction.Builder builder, final DataView view, final String dataId) {
         final DataView manipulatorView = view.getView(Constants.Sponge.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
         try {
-            final Optional<Mutable<?, ?>> build = deserializeManipulator(dataId, manipulatorView);
+            final Optional<Mutable> build = deserializeManipulator(dataId, manipulatorView);
             if (build.isPresent()) {
                 builder.successfulData(build.get());
             } else {
@@ -234,9 +148,12 @@ public final class DataUtil {
         }
     }
 
-    private static <T extends Mutable<?, ?>> Optional<T> deserializeManipulator(final String dataId, final DataView data) {
+    private static Optional<DataManipulator.Mutable> deserializeManipulator(final String dataId, final DataView data) {
         return getRegistrationFor(dataId) // Get Registration
-                .map(DataRegistration::getDataManipulatorBuilder) // Find Builder
+                .map(DataRegistration::getDataStore) // Find Builder
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map()
                 .flatMap(b -> (Optional<T>) b.build(data)); // Build CustomData
     }
 
@@ -374,17 +291,6 @@ public final class DataUtil {
     }
 
     /**
-     * Gets the raw typed {@link DataProcessor} with no type generics.
-     *
-     * @param mutableClass The class of the {@link DataManipulator}
-     * @return The raw typed data processor
-     */
-    @SuppressWarnings("rawtypes")
-    public static Optional<DataProcessor> getWildDataProcessor(final Class<? extends Mutable> mutableClass) {
-        return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(mutableClass));
-    }
-
-    /**
      * Gets the {@link DataProcessor} for the {@link ImmutableDataManipulator}
      * class.
      *
@@ -419,52 +325,11 @@ public final class DataUtil {
         SpongeManipulatorRegistry.getInstance().registerValueProcessor(key, valueProcessor);
     }
 
-    public static <E, V extends Value<E>> Optional<ValueProcessor<E, V>> getValueProcessor(final Key<V> key) {
-        return Optional.ofNullable((ValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
-    }
-
-    public static Optional<ValueProcessor<?, ?>> getWildValueProcessor(final Key<?> key) {
-        return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(key));
-    }
-
-    public static <E> Optional<ValueProcessor<E, ? extends Value<E>>> getBaseValueProcessor(final Key<? extends Value<E>> key) {
-        return Optional.ofNullable((ValueProcessor<E, ? extends Value<E>>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
-    }
-
-    public static RawDataValidator getValidators(final ValidationType validationType) {
-
-        return new DelegateDataValidator(ImmutableList.of(), validationType);
-    }
-
-    public static <E, V extends Value<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(final NBTDataType dataType, final Key<V> key) {
-        return Optional.ofNullable((NbtValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getNbtProcessor(dataType, key));
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static Optional<NbtDataProcessor> getRawNbtProcessor(final NBTDataType dataType, final Class<? extends Mutable> aClass) {
-        return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getNbtDelegate(dataType, aClass));
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static Optional<NbtValueProcessor> getRawNbtProcessor(final NBTDataType dataType, final Key<?> key) {
-        return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getNbtProcessor(dataType, key));
-    }
-
-    public static Collection<NbtDataProcessor<?, ?>> getNbtProcessors(final NBTDataType type) {
-        return SpongeManipulatorRegistry.getInstance().getNbtProcessors(type);
-    }
-
-    public static Collection<NbtValueProcessor<?, ?>> getNbtValueProcessors(final NBTDataType type) {
-        return SpongeManipulatorRegistry.getInstance().getNbtValueProcessors(type);
-    }
 
     public static DataRegistration<?, ?> getRegistrationFor(final Mutable<?, ?> manipulator) {
         return SpongeManipulatorRegistry.getInstance().getRegistrationFor(manipulator);
     }
 
-    private static DataRegistration<?, ?> getRegistrationFor(final Immutable<?, ?> immutableDataManipulator) {
-        return SpongeManipulatorRegistry.getInstance().getRegistrationFor(immutableDataManipulator);
-    }
 
     private static Optional<DataRegistration<?, ?>> getRegistrationFor(final String id) {
         return (Optional<DataRegistration<?, ?>>) (Optional<?>) SpongeManipulatorRegistry.getInstance().getRegistrationFor(id);

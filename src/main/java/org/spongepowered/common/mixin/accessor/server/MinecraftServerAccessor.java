@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.accessor.server;
 
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,6 +34,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface MinecraftServerAccessor {
 
     @Accessor("serverThread") Thread accessor$getServerThread();
+
+    @Accessor("dataFixer") DataFixer accessor$getDataFixer();
 
     @Accessor("chunkStatusListenerFactory") IChunkStatusListenerFactory accessor$getChunkStatusListenerFactory();
 }

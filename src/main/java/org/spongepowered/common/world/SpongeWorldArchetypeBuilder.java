@@ -33,32 +33,34 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.gen.GeneratorTypes;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
+import org.spongepowered.common.util.Functional;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
 
-    @Nullable private CatalogKey key;
-    @Nullable private DimensionType dimensionType;
-    @Nullable private GeneratorType generatorType;
-    @Nullable private Difficulty difficulty;
-    @Nullable private GameMode gameMode;
-    @Nullable private SerializationBehavior serializationBehavior;
+    private CatalogKey key;
+    private Supplier<? extends DimensionType> dimensionType = Functional.throwNull();
+    private Supplier<? extends GeneratorType> generatorType = Functional.throwNull();
+    private Supplier<? extends Difficulty> difficulty = Functional.throwNull();
+    private Supplier<? extends GameMode> gameMode = Functional.throwNull();
+    private Supplier<? extends SerializationBehavior> serializationBehavior = Functional.throwNull();
+    private Supplier<? extends PortalAgentType> portalAgentType = Functional.throwNull();
     private long seed;
     private boolean areStructuresEnabled;
     private boolean hardcore;
@@ -70,7 +72,6 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     private boolean commandsEnabled;
     private boolean generateBonusChest;
     @Nullable private DataContainer generatorSettings;
-    @Nullable private PortalAgentType portalAgentType;
     private boolean randomizedSeed;
 
     public SpongeWorldArchetypeBuilder() {
@@ -99,25 +100,29 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     @Override
     public SpongeWorldArchetypeBuilder gameMode(GameMode gameMode) {
-        this.gameMode = checkNotNull(gameMode);
+        checkNotNull(gameMode);
+        this.gameMode = () -> gameMode;
         return this;
     }
 
     @Override
     public SpongeWorldArchetypeBuilder generatorType(GeneratorType type) {
-        this.generatorType = checkNotNull(type);
+        checkNotNull(type);
+        this.generatorType = () -> type;
         return this;
     }
 
     @Override
     public SpongeWorldArchetypeBuilder dimensionType(DimensionType type) {
-        this.dimensionType = checkNotNull(type);
+        checkNotNull(type);
+        this.dimensionType = () -> type;
         return this;
     }
 
     @Override
     public WorldArchetype.Builder difficulty(Difficulty difficulty) {
-        this.difficulty = checkNotNull(difficulty);
+        checkNotNull(difficulty);
+        this.difficulty = () -> difficulty;
         return this;
     }
 
@@ -159,7 +164,8 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     @Override
     public WorldArchetype.Builder portalAgent(PortalAgentType type) {
-        this.portalAgentType = checkNotNull(type);
+        checkNotNull(type);
+        this.portalAgentType = () -> type;
         return this;
     }
 
@@ -183,7 +189,8 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     @Override
     public SpongeWorldArchetypeBuilder serializationBehavior(SerializationBehavior behavior) {
-        this.serializationBehavior = checkNotNull(behavior);
+        checkNotNull(behavior);
+        this.serializationBehavior = () -> behavior;
         return this;
     }
 
@@ -196,11 +203,11 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     @Override
     public SpongeWorldArchetypeBuilder from(WorldArchetype value) {
         checkNotNull(value);
-        this.dimensionType = value.getDimensionType();
-        this.generatorType = value.getGeneratorType();
-        this.gameMode = value.getGameMode();
-        this.difficulty = value.getDifficulty();
-        this.serializationBehavior = value.getSerializationBehavior();
+        this.dimensionType(value.getDimensionType());
+        this.generatorType(value.getGeneratorType());
+        this.gameMode(value.getGameMode());
+        this.difficulty(value.getDifficulty());
+        this.serializationBehavior(value.getSerializationBehavior());
         this.seed = value.getSeed();
         this.randomizedSeed = value.isSeedRandomized();
         this.areStructuresEnabled = value.areStructuresEnabled();
@@ -212,7 +219,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         this.commandsEnabled = value.areCommandsEnabled();
         this.generateBonusChest = value.doesGenerateBonusChest();
-        this.portalAgentType = value.getPortalAgentType();
+        this.portalAgent(value.getPortalAgentType());
         this.generatorSettings = value.getGeneratorSettings();
         return this;
     }
@@ -220,11 +227,11 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     @Override
     public SpongeWorldArchetypeBuilder from(WorldProperties value) {
         checkNotNull(value);
-        this.dimensionType = value.getDimensionType();
-        this.generatorType = value.getGeneratorType();
-        this.gameMode = value.getGameMode();
-        this.difficulty = value.getDifficulty();
-        this.serializationBehavior = value.getSerializationBehavior();
+        this.dimensionType(value.getDimensionType());
+        this.generatorType(value.getGeneratorType());
+        this.gameMode(value.getGameMode());
+        this.difficulty(value.getDifficulty());
+        this.serializationBehavior(value.getSerializationBehavior());
         this.seed = value.getSeed();
         this.randomizedSeed = false;
         this.areStructuresEnabled = value.areStructuresEnabled();
@@ -236,7 +243,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         this.commandsEnabled = value.areCommandsEnabled();
         this.generateBonusChest = value.doesGenerateBonusChest();
-        this.portalAgentType = value.getPortalAgentType();
+        this.portalAgent(value.getPortalAgentType());
         this.generatorSettings = value.getGeneratorSettings();
         return this;
     }
@@ -255,14 +262,13 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.enabled = true;
         this.loadOnStartup = true;
         this.keepSpawnLoaded = null;
-        this.generateSpawnOnLoad =
-            ((DimensionTypeBridge) this.dimensionType).bridge$getDimensionConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
+//        this.generateSpawnOnLoad = ((DimensionTypeBridge) this.dimensionType.get()).bridge$getDimensionConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
         this.generatorSettings = DataContainer.createNew();
         this.pvpEnabled = true;
         this.commandsEnabled = true;
         this.generateBonusChest = false;
         this.portalAgentType = PortalAgentTypes.DEFAULT;
-        this.generatorSettings = this.generatorType.getDefaultGeneratorSettings();
+        this.generatorSettings = this.generatorType.get().getDefaultGeneratorSettings();
         return this;
     }
 
@@ -272,9 +278,9 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
             (WorldType) this.generatorType);
         final WorldSettingsBridge settingsBridge = (WorldSettingsBridge) (Object) settings;
         settingsBridge.bridge$setKey(this.key);
-        settingsBridge.bridge$setDimensionType(this.dimensionType);
-        settingsBridge.bridge$setDifficulty(this.difficulty);
-        settingsBridge.bridge$setSerializationBehavior(this.serializationBehavior);
+        settingsBridge.bridge$setDimensionType(this.dimensionType.get());
+        settingsBridge.bridge$setDifficulty(this.difficulty.get());
+        settingsBridge.bridge$setSerializationBehavior(this.serializationBehavior.get());
         settingsBridge.bridge$setGeneratorSettings(this.generatorSettings);
         settingsBridge.bridge$setEnabled(this.enabled);
         settingsBridge.bridge$setLoadOnStartup(this.loadOnStartup);
@@ -283,7 +289,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         settingsBridge.bridge$setPVPEnabled(this.pvpEnabled);
         settingsBridge.bridge$setCommandsEnabled(this.commandsEnabled);
         settingsBridge.bridge$setGenerateBonusChest(this.generateBonusChest);
-        settingsBridge.bridge$setPortalAgentType(this.portalAgentType);
+        settingsBridge.bridge$setPortalAgentType(this.portalAgentType.get());
         settingsBridge.bridge$setRandomSeed(this.randomizedSeed);
         settingsBridge.bridge$setGeneratorSettings(this.generatorSettings);
 

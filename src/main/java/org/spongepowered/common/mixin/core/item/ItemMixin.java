@@ -26,65 +26,16 @@ package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
-import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.item.ItemBridge;
 
-import java.util.List;
-
 @Mixin(Item.class)
-public abstract class ItemMixin implements ItemBridge, SpongeGameDictionaryEntry {
+public abstract class ItemMixin implements ItemBridge {
 
     @Shadow private String translationKey;
 
     @Shadow public abstract String getTranslationKey();
-
-    /**
-     * @author gabizou - June 10th, 2019 - 1.12.2
-     * @reason This uses the SpongeImplHooks so that we eliminate
-     * more Mixins in SpongeForge and SpongeVanilla. The hook here
-     * is to allow a mod in Forge to replace a previously registered
-     * item. Vanilla doesn't do this, so we don't have to care about
-     * vanilla, but Forge, we have to check against the Item registry.
-     *
-     * @param id The numerical id supposed to be assigned, ignored
-     * @param textualID The location id of the item, like "minecraft:diamond_sword"
-     * @param itemIn The item instance
-     * @param ci callback
-     */
-    @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
-    private static void spongeImpl$registerItemWithSpongeRegistry(final int id, final ResourceLocation textualID, final Item itemIn, final CallbackInfo ci) {
-        SpongeImplHooks.registerItemForSpongeRegistry(id, textualID, itemIn);
-    }
-
-    @Override
-    public void bridge$gatherManipulators(final ItemStack itemStack, final List<Mutable<?, ?>> list) {
-        if (!itemStack.hasTag()) {
-            return;
-        }
-
-        final org.spongepowered.api.item.inventory.ItemStack spongeStack = ((org.spongepowered.api.item.inventory.ItemStack) itemStack);
-        if (itemStack.isEnchanted()) {
-            list.add(((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(EnchantmentData.class).get());
-        }
-        spongeStack.get(DisplayNameData.class).ifPresent(list::add);
-        spongeStack.get(LoreData.class).ifPresent(list::add);
-    }
-
-    @Override
-    public ItemStack bridge$createDictionaryStack(final int wildcardValue) {
-        return new ItemStack((Item) (Object) this, 1, wildcardValue);
-    }
 
     @Override
     public String toString() {

@@ -32,25 +32,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(ChunkManager.class)
 public abstract class ChunkManagerMixin {
 
     @Shadow @Final private ServerWorld world;
 
-    @Redirect(method = "track(Lnet/minecraft/entity/Entity;)V",
-        at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
-    private IllegalStateException impl$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn) {
-        final IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, this.world.getWorldInfo().getWorldName()));
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors()) {
-            PhaseTracker.getInstance().printMessageWithCaughtException("Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
-        }
-        return exception;
-    }
 
     @Inject(method = "track(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
     private void onAddEntityToTracker(final Entity entityIn, final CallbackInfo ci) {

@@ -96,6 +96,7 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
         return this;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public DisplayInfo build() {
         checkState(this.title != null, "Title has not been set");
@@ -103,7 +104,7 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
         final ITextComponent title = SpongeTexts.toComponent(this.title);
         final ITextComponent description = SpongeTexts.toComponent(this.description);
         final FrameType frameType = (FrameType) (Object) this.advancementType;
-        final net.minecraft.item.ItemStack icon = (net.minecraft.item.ItemStack) this.icon.createStack();
+        final net.minecraft.item.ItemStack icon = (net.minecraft.item.ItemStack) (Object) this.icon.createStack();
         return (DisplayInfo) new net.minecraft.advancements.DisplayInfo(icon, title, description, null,
                 frameType, this.showToast, this.announceToChat, this.hidden);
     }

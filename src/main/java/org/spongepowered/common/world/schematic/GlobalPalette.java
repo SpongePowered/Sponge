@@ -26,6 +26,7 @@ package org.spongepowered.common.world.schematic;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
@@ -36,13 +37,13 @@ import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-
-import javax.annotation.Nullable;
+import java.util.stream.Collectors;
 
 public class GlobalPalette<T extends CatalogType> implements Palette<T> {
 
@@ -57,10 +58,10 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     private final Class<T> catalogType;
     private final int length;
 
-    private GlobalPalette(PaletteType<T> paletteType, Function<T, Integer> map, IntFunction<T> identity, Class<T> catalogType) {
+    private GlobalPalette(final PaletteType<T> paletteType, final Function<T, Integer> map, final IntFunction<T> identity, final Class<T> catalogType) {
         int highest = 0;
-        for (T type : Sponge.getRegistry().getAllOf(catalogType)) {
-            int id = map.apply(type);
+        for (final T type : Sponge.getRegistry().getCatalogRegistry().getAllOf(catalogType).collect(Collectors.toList())) {
+            final int id = map.apply(type);
             if (id > highest) {
                 highest = id;
             }
@@ -75,19 +76,19 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     @SuppressWarnings("deprecation")
     public static Palette<BlockState> getBlockPalette() {
         if (blockPalette == null) {
-            blockPalette = new BlockPaletteWrapper(new GlobalPalette<>(PaletteTypes.GLOBAL_BLOCKS,
+            blockPalette = new GlobalPalette<>(PaletteTypes.GLOBAL_BLOCKS.get(),
                 (type) -> Block.BLOCK_STATE_IDS.get((net.minecraft.block.BlockState) type),
                 (id) -> (BlockState) Block.BLOCK_STATE_IDS.getByValue(id),
-                BlockState.class), org.spongepowered.api.world.schematic.BlockPaletteTypes.GLOBAL);
+                BlockState.class);
         }
         return blockPalette;
     }
 
     public static GlobalPalette<BiomeType> getBiomePalette() {
         if (biomePalette == null) {
-            biomePalette = new GlobalPalette<>(PaletteTypes.GLOBAL_BIOMES,
-                (type) -> Biome.getIdForBiome((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
-                (id) -> (BiomeType) Biome.getBiomeForId(id),
+            biomePalette = new GlobalPalette<>(PaletteTypes.GLOBAL_BIOMES.get(),
+                (type) -> Registry.BIOME.getId((Biome) (type instanceof VirtualBiomeType ? ((VirtualBiomeType) type).getPersistedType() : type)),
+                (id) -> (BiomeType) Registry.BIOME.getByValue(id),
                 BiomeType.class
                 );
 
@@ -106,28 +107,28 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
     }
 
     @Override
-    public Optional<Integer> get(T type) {
+    public Optional<Integer> get(final T type) {
         return Optional.of(this.typeToInt.apply(type));
     }
 
     @Override
-    public int getOrAssign(T state) {
+    public int getOrAssign(final T state) {
         return this.typeToInt.apply(state);
     }
 
     @Override
-    public Optional<T> get(int id) {
+    public Optional<T> get(final int id) {
         return Optional.ofNullable(this.intToType.apply(id));
     }
 
     @Override
-    public boolean remove(T state) {
+    public boolean remove(final T state) {
         throw new UnsupportedOperationException("Cannot remove blockstates from the global palette");
     }
 
     @Override
     public Collection<T> getEntries() {
-        return Sponge.getRegistry().getAllOf(this.catalogType);
+        return Sponge.getRegistry().getCatalogRegistry().getAllOf(this.catalogType).collect(Collectors.toList());
     }
 
     @Override
@@ -137,7 +138,7 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

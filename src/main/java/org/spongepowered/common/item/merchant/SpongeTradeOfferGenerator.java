@@ -28,13 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
+import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
 
-import java.util.Random;
-
 import javax.annotation.Nullable;
+import java.util.Random;
 
 public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
 
@@ -49,7 +49,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     final VariableAmount baseUses;
     final VariableAmount maxUses;
 
-    SpongeTradeOfferGenerator(org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder builder) {
+    SpongeTradeOfferGenerator(final org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder builder) {
         this.firstItemGenerator = builder.firstGenerator;
         this.secondItemGenerator = builder.secondGenerator;
         this.sellingItemGenerator = builder.sellingGenerator;
@@ -59,7 +59,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     }
 
     @Override
-    public TradeOffer apply(Random random) {
+    public TradeOffer apply(final Random random, final Merchant merchant) {
         checkNotNull(random, "Random cannot be null!");
         final TradeOffer.Builder builder = TradeOffer.builder();
         builder.firstBuyingItem(this.firstItemGenerator.apply(random));
@@ -84,37 +84,37 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
         VariableAmount maxUses;
 
         @Override
-        public TradeOfferGenerator.Builder setPrimaryItemGenerator(ItemStackGenerator generator) {
+        public TradeOfferGenerator.Builder setPrimaryItemGenerator(final ItemStackGenerator generator) {
             this.firstGenerator = checkNotNull(generator, "ItemStackGenerator cannot be null!");
             return this;
         }
 
         @Override
-        public TradeOfferGenerator.Builder setSecondItemGenerator(@Nullable ItemStackGenerator generator) {
+        public TradeOfferGenerator.Builder setSecondItemGenerator(@Nullable final ItemStackGenerator generator) {
             this.secondGenerator = generator;
             return this;
         }
 
         @Override
-        public TradeOfferGenerator.Builder setSellingGenerator(ItemStackGenerator sellingGenerator) {
+        public TradeOfferGenerator.Builder setSellingGenerator(final ItemStackGenerator sellingGenerator) {
             this.sellingGenerator = checkNotNull(sellingGenerator, "ItemStackGenerator cannot be null!");
             return this;
         }
 
         @Override
-        public TradeOfferGenerator.Builder experienceChance(double experience) {
+        public TradeOfferGenerator.Builder experienceChance(final double experience) {
             this.experience = experience;
             return this;
         }
 
         @Override
-        public TradeOfferGenerator.Builder startingUses(VariableAmount amount) {
+        public TradeOfferGenerator.Builder startingUses(final VariableAmount amount) {
             this.baseUses = checkNotNull(amount, "Variable amount cannot be null!");
             return this;
         }
 
         @Override
-        public TradeOfferGenerator.Builder maxUses(VariableAmount amount) {
+        public TradeOfferGenerator.Builder maxUses(final VariableAmount amount) {
             this.maxUses = checkNotNull(amount, "Variable amount cannot be null!");
             return this;
         }
@@ -129,7 +129,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
         }
 
         @Override
-        public TradeOfferGenerator.Builder from(TradeOfferGenerator value) {
+        public TradeOfferGenerator.Builder from(final TradeOfferGenerator value) {
             this.reset();
             if (value instanceof SpongeTradeOfferGenerator) {
                 final SpongeTradeOfferGenerator generator = (SpongeTradeOfferGenerator) value;
