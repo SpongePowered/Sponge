@@ -34,19 +34,23 @@ import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 import net.minecraft.entity.monster.BlazeEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.ParrotEntity;
 import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.RabbitEntity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
@@ -56,14 +60,22 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.api.data.type.PickupRule;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
+import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.BedLocationHolder;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
@@ -78,6 +90,8 @@ import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntity
 import org.spongepowered.common.data.provider.entity.base.EntityFireDamageDelayProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvulnerabilityTicksProvider;
 import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityIsSaddledProvider;
+import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityTamedOwnerProvider;
+import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityTamedProvider;
 import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseColorProvider;
 import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseStyleProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityActiveItemProvider;
@@ -112,7 +126,10 @@ import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntity
 import org.spongepowered.common.data.provider.entity.wolf.WolfEntityIsWetProvider;
 import org.spongepowered.common.data.provider.util.FireworkUtils;
 import org.spongepowered.common.data.type.SpongeCatType;
+import org.spongepowered.common.data.type.SpongeParrotType;
+import org.spongepowered.common.data.type.SpongeRabbitType;
 import org.spongepowered.common.data.util.PotionEffectHelper;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
@@ -127,8 +144,11 @@ import org.spongepowered.common.mixin.accessor.entity.monster.EndermanEntityAcce
 import org.spongepowered.common.mixin.accessor.entity.monster.VindicatorEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.ZombiePigmanEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.projectile.AbstractArrowEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.projectile.ShulkerBulletEntityAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.stream.Collectors;
 
 public class EntityDataProviders extends DataProviderRegistryBuilder {
 
@@ -189,12 +209,59 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(HangingEntityAccessor.class, Keys.DIRECTION,
                 e -> e.accessor$facingDirection() == null ? Direction.NONE : Constants.DirectionFunctions.getFor(e.accessor$facingDirection()),
                 (e, v) -> e.accessor$updateFacingWithBoundingBox(Constants.DirectionFunctions.getFor(v)));
+
+        // TODO deduplicate code
         register(CatEntity.class, Keys.CAT_TYPE, e -> {
             int type = e.getCatType();
             return Sponge.getRegistry().getCatalogRegistry().getAllOf(CatType.class)
                     .filter(t -> ((SpongeCatType)t).getMetadata() == type)
                     .findFirst().orElse(null);
         }, (e, v) -> e.setCatType(((SpongeCatType)v).getMetadata()));
+        register(ParrotEntity.class, Keys.PARROT_TYPE, e -> {
+            int type = e.getVariant();
+            return Sponge.getRegistry().getCatalogRegistry().getAllOf(ParrotType.class)
+                    .filter(t -> ((SpongeParrotType)t).getMetadata() == type)
+                    .findFirst().orElse(null);
+        }, (e, v) -> e.setVariant(((SpongeParrotType)v).getMetadata()));
+        register(RabbitEntity.class, Keys.RABBIT_TYPE, e -> {
+            int type = e.getRabbitType();
+            return Sponge.getRegistry().getCatalogRegistry().getAllOf(RabbitType.class)
+                    .filter(t -> ((SpongeRabbitType)t).getMetadata() == type)
+                    .findFirst().orElse(null);
+        }, (e, v) -> e.setRabbitType(((SpongeRabbitType)v).getMetadata()));
+
+        register(new TameableEntityTamedProvider());
+        register(new TameableEntityTamedOwnerProvider());
+
+        register(ItemFrameEntity.class, Keys.ITEM_STACK_SNAPSHOT, // TODO removal allowed?
+                e -> ItemStackUtil.snapshotOf(e.getDisplayedItem()), (e, i) -> e.setDisplayedItem(ItemStackUtil.fromSnapshotToNative(i)));
+        register(ItemEntity.class, Keys.ITEM_STACK_SNAPSHOT, // TODO no removal allowed?
+                e -> ItemStackUtil.snapshotOf(e.getItem()), (e, i) -> e.setItem(ItemStackUtil.fromSnapshotToNative(i)));
+
+        register(ItemFrameEntity.class, Keys.ROTATION,
+                e -> Rotation.fromDegrees(e.getRotation() * 45).get(), (e, r) -> e.setItemRotation(r.getAngle() / 45));
+
+        register(ShulkerBulletEntityAccessor.class, Keys.DIRECTION,
+                e -> e.accessor$getDirection() == null ? Direction.NONE : Constants.DirectionFunctions.getFor(e.accessor$getDirection()),
+                (e, d) -> e.accessor$setDirection(Constants.DirectionFunctions.getFor(d)));
+
+        register(ShulkerEntityBridge.class, Keys.DIRECTION, ShulkerEntityBridge::bridge$getDirection, ShulkerEntityBridge::bridge$setDirection);
+
+        register(HumanEntity.class, Keys.SKIN_UNIQUE_ID, e -> e.getSkinUuid(), (e, p) -> e.setSkinUuid(p));
+
+        register(Entity.class, Keys.PASSENGERS,
+                e -> e.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()),
+                (e, p) -> {
+                    e.getPassengers().clear();
+                    p.forEach(p1 -> e.getPassengers().add((Entity)p1));
+                });
+
+        register(BedLocationHolder.class, Keys.RESPAWN_LOCATIONS, BedLocationHolder::bridge$getBedlocations, BedLocationHolder::bridge$setBedLocations);
+        register(LocationTargetingBridge.class, Keys.TARGET_LOCATION, LocationTargetingBridge::bridge$getTargetedLocation, LocationTargetingBridge::bridge$setTargetedLocation);
+
+        register(ShulkerBulletEntityAccessor.class, Keys.TARGET_ENTITY,
+                e -> (org.spongepowered.api.entity.Entity) e.accessor$getTarget(),
+                (e, te) -> e.accessor$setTarget((Entity)te));
     }
 
     private void registerFireworkRocketEntityData() {
@@ -347,6 +414,8 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
 
     private void registerAbstractHorseEntityData() {
         register(new AbstractHorseEntityIsSaddledProvider());
+        register(new AbstractHorseEntityTamedOwnerProvider());
+        register(new AbstractHorseEntityTamedProvider());
     }
 
     private void registerHorseEntityData() {
