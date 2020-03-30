@@ -22,17 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.accessor.tileentity;
+package org.spongepowered.common.data.provider.block;
 
-import net.minecraft.tileentity.BrewingStandTileEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.WallSkullBlock;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.data.provider.BlockStateDataProvider;
+import org.spongepowered.common.util.Constants;
 
-@Mixin(BrewingStandTileEntity.class)
-public interface BrewingStandTileEntityAccessor {
+import java.util.Optional;
 
-    @Invoker("canBrew") boolean accessor$canBrew();
-    @Accessor("brewTime") int accessor$getBrewTime();
-    @Accessor("brewTime") void accessor$setBrewTime(int brewTime);
+public class WallSkullBlockDirectionProvider extends BlockStateDataProvider<Direction> {
+
+    WallSkullBlockDirectionProvider() {
+        super(Keys.DIRECTION, WallSkullBlock.class);
+    }
+
+    @Override
+    protected Optional<Direction> getFrom(BlockState dataHolder) {
+        return Optional.of(Constants.DirectionFunctions.getFor(dataHolder.get(WallSkullBlock.FACING)));
+    }
+
+    @Override
+    protected Optional<BlockState> set(BlockState dataHolder, Direction value) {
+        return Optional.of(dataHolder.with(WallSkullBlock.FACING, Constants.DirectionFunctions.getFor(value)));
+    }
 }

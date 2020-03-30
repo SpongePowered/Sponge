@@ -53,6 +53,8 @@ public interface StructureBlockTileEntityAccessor {
 
     @Accessor("showBoundingBox") boolean accessor$getShowBoundingBox();
 
+    @Accessor("seed") long accessor$getSeed();
+
     @Accessor("size") BlockPos accessor$getSize();
 
     @Accessor("size") void accessor$setSize(BlockPos size);

@@ -36,6 +36,8 @@ import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.entity.monster.BlazeEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.EndermanEntity;
@@ -50,7 +52,14 @@ import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.entity.projectile.ShulkerBulletEntity;
+import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.MerchantOffer;
+import net.minecraft.item.MerchantOffers;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.PotionUtils;
+import net.minecraft.stats.ServerStatisticsManager;
+import net.minecraft.stats.Stat;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
@@ -62,10 +71,12 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.api.data.type.PickupRule;
+import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.profile.property.ProfileProperty;
+import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
@@ -77,7 +88,9 @@ import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationHolder;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
 import org.spongepowered.common.data.provider.commandblock.CommandBlockLogicDataProviders;
@@ -137,6 +150,7 @@ import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.ExperienceOrbEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.FallingBlockEntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.item.FireworkRocketEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.HangingEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.BlazeEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.monster.CreeperEntityAccessor;
@@ -148,6 +162,7 @@ import org.spongepowered.common.mixin.accessor.entity.projectile.ShulkerBulletEn
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EntityDataProviders extends DataProviderRegistryBuilder {
@@ -262,6 +277,46 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(ShulkerBulletEntityAccessor.class, Keys.TARGET_ENTITY,
                 e -> (org.spongepowered.api.entity.Entity) e.accessor$getTarget(),
                 (e, te) -> e.accessor$setTarget((Entity)te));
+
+        register(VillagerEntity.class, Keys.PROFESSION,
+                e -> (Profession) e.getVillagerData().getProfession(),
+                (e, p) -> e.setVillagerData(e.getVillagerData().withProfession((VillagerProfession) p)));
+
+        register(FireworkRocketEntity.class, Keys.FIREWORK_FLIGHT_MODIFIER,
+                e -> {
+                    final ItemStack item = FireworkUtils.getItem(e);
+                    final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
+                    if (fireworks.contains(Constants.Item.Fireworks.FLIGHT)) {
+                        return (int) fireworks.getByte(Constants.Item.Fireworks.FLIGHT);
+                    }
+                    return null;
+                },
+                (e, m) -> {
+                    final ItemStack item = FireworkUtils.getItem(e);
+                    final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
+                    fireworks.putByte(Constants.Item.Fireworks.FLIGHT, m.byteValue());
+                    ((FireworkRocketEntityAccessor) e).accessor$setLifeTime(10 * m.byteValue() + ((EntityAccessor) e).accessor$getRand().nextInt(6) + ((EntityAccessor) e).accessor$getRand().nextInt(7));
+                }
+                );
+        register(PotionEntity.class, Keys.POTION_EFFECTS,
+                e -> PotionUtils.getEffectsFromStack(e.getItem()).stream().map(PotionEffect.class::cast).collect(Collectors.toList()),
+                // no setter?
+                );
+
+        register(new PotionEntityItemProvider());
+
+        register(VillagerEntity.class, Keys.TRADE_OFFERS,
+                e -> e.getOffers().stream().map(TradeOffer.class::cast).collect(Collectors.toList()),
+                (e, offers) -> e.setOffers(offers.stream().map(MerchantOffer.class::cast).collect(Collectors.toCollection(MerchantOffers::new))));
+
+        register(ServerPlayerEntity.class, Keys.STATISTICS,
+                p -> ((StatisticsManagerBridge)p.getStats()).bridge$getStatsData().entrySet().stream().collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> e.getValue().longValue())),
+                (p, stats) -> stats.forEach((k, v) -> p.getStats().setValue(p, (Stat<?>) k, v.intValue())));
+
+        register(ServerPlayerEntityBridge.class, Keys.HEALTH_SCALE, Constants.Entity.Player.DEFAULT_HEALTH_SCALE,
+                p -> p.bridge$isHealthScaled() ? p.bridge$getHealthScale() : null,
+                (p, s) -> p.bridge$setHealthScale(s) // TODO limit 1-Float.MAX_VALUE
+                );
     }
 
     private void registerFireworkRocketEntityData() {

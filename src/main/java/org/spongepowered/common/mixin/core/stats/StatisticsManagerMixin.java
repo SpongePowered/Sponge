@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.stats;
 
 import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatisticsManager;
@@ -48,21 +49,21 @@ import java.util.Map;
 @Mixin(StatisticsManager.class)
 public abstract class StatisticsManagerMixin implements StatisticsManagerBridge {
 
-    @Shadow public abstract int readStat(Stat stat);
-    @Shadow public abstract void increaseStat(PlayerEntity player, Stat stat, int amount);
+    @Shadow public abstract int getValue(Stat<?> stat);
+    @Shadow public abstract void increment(PlayerEntity player, Stat<?> stat, int amount);
 
-    @Shadow @Final protected Map<Stat, TupleIntJsonSerializable> statsData;
+    @Shadow @Final protected Object2IntMap<Stat<?>> statsData;
 
     private boolean statCaptured = false;
 
-    @Inject(method = "increaseStat(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/stats/StatBase;I)V",
+    @Inject(method = "increment",
             at = @At("HEAD"), cancellable = true)
     private void impl$throwEvent(final PlayerEntity player, final Stat stat, final int amount, final CallbackInfo ci) {
         if (this.statCaptured) {
             return;
         }
 
-        final int prev = this.readStat(stat);
+        final int prev = this.getValue(stat);
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
@@ -74,14 +75,14 @@ public abstract class StatisticsManagerMixin implements StatisticsManagerBridge 
             ci.cancel();
 
             if (!cancelled) {
-                this.increaseStat(player, stat, (int) (event.getValue() - prev));
+                this.increment(player, stat, (int) (event.getValue() - prev));
                 this.statCaptured = false;
             }
         }
     }
 
     @Override
-    public Map<Stat, TupleIntJsonSerializable> bridge$getStatsData() {
+    public Map<Stat<?>, Integer> bridge$getStatsData() {
         return ImmutableMap.copyOf(this.statsData);
     }
 

@@ -22,17 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.accessor.tileentity;
+package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.tileentity.BrewingStandTileEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.mixin.accessor.tileentity.HopperTileEntityAccessor;
 
-@Mixin(BrewingStandTileEntity.class)
-public interface BrewingStandTileEntityAccessor {
+import java.util.Optional;
 
-    @Invoker("canBrew") boolean accessor$canBrew();
-    @Accessor("brewTime") int accessor$getBrewTime();
-    @Accessor("brewTime") void accessor$setBrewTime(int brewTime);
+// TODO default 8?
+public class HopperTileEntityCooldownProvider extends GenericMutableDataProvider<HopperTileEntityAccessor, Integer> {
+
+    public HopperTileEntityCooldownProvider() {
+        super(Keys.COOLDOWN);
+    }
+
+    @Override
+    protected Optional<Integer> getFrom(HopperTileEntityAccessor dataHolder) {
+        int cd = dataHolder.accessor$getTransferCooldown();
+        return cd < 1 ? Optional.empty() : Optional.of(cd);
+    }
+
+    @Override
+    protected boolean set(HopperTileEntityAccessor dataHolder, Integer value) {
+        if (value < 1) {
+            return false;
+        }
+        dataHolder.accessor$setTransferCooldown(value);
+        return true;
+    }
+
 }

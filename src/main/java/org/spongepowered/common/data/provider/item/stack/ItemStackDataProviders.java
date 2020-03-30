@@ -123,5 +123,13 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
         register(new ItemStackDamageAbsorbtionProvider());
         register(new ItemStackContainerProvider());
 
+
+        register(new ItemStackFluidProvider());
+
+        register(new ItemStackColorProvider());
+        register(new ItemStackDyeColorProvider());
+
+        register(new ItemStackGameProfileProvider());
+
     }
 }

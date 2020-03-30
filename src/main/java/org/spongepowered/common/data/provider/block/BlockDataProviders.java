@@ -405,6 +405,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // SkullBlock
         register(new SkullBlockDirectionProvider());
+        register(new WallSkullBlockDirectionProvider());
 
         // PaneBlock
         registerHorizontalConnectedSides(PaneBlock.class,

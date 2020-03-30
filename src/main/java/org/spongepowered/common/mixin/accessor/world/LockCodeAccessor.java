@@ -22,17 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.accessor.tileentity;
+package org.spongepowered.common.mixin.accessor.world;
 
-import net.minecraft.tileentity.BrewingStandTileEntity;
+import net.minecraft.world.LockCode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(BrewingStandTileEntity.class)
-public interface BrewingStandTileEntityAccessor {
+@Mixin(LockCode.class)
+public interface LockCodeAccessor {
 
-    @Invoker("canBrew") boolean accessor$canBrew();
-    @Accessor("brewTime") int accessor$getBrewTime();
-    @Accessor("brewTime") void accessor$setBrewTime(int brewTime);
+    @Accessor("lock") String accessor$getLock();
+    @Accessor("lock") void accessor$setLock(String lock);
+
 }

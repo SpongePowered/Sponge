@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.mixin.accessor.tileentity;
 
-import net.minecraft.tileentity.BrewingStandTileEntity;
+import net.minecraft.tileentity.LockableTileEntity;
+import net.minecraft.world.LockCode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(BrewingStandTileEntity.class)
-public interface BrewingStandTileEntityAccessor {
+@Mixin(LockableTileEntity.class)
+public interface LockableTileEntityAccessor {
 
-    @Invoker("canBrew") boolean accessor$canBrew();
-    @Accessor("brewTime") int accessor$getBrewTime();
-    @Accessor("brewTime") void accessor$setBrewTime(int brewTime);
+    @Accessor("code") LockCode accessor$getCode();
+    @Accessor("code") void accessor$setCode(LockCode code);
 }
