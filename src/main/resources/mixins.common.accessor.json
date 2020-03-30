@@ -88,6 +88,7 @@
         "server.MinecraftServerAccessor",
         "server.management.IPBanListAccessor",
         "server.management.PlayerProfileCache_ProfileEntryAccessor",
+        "tileentity.AbstractFurnaceTileEntityAccessor",
         "tileentity.BannerPatternAccessor",
         "tileentity.BannerTileEntityAccessor",
         "tileentity.BeaconTileEntityAccessor",

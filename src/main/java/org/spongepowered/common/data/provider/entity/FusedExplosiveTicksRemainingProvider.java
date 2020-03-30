@@ -22,32 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.player;
+package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;
 
-public class PlayerEntityExperienceLevelProvider extends GenericMutableDataProvider<PlayerEntity, Integer> {
+public class FusedExplosiveTicksRemainingProvider extends GenericMutableDataProvider<FusedExplosive, Integer> {
 
-    public PlayerEntityExperienceLevelProvider() {
-        super(Keys.EXPERIENCE_LEVEL);
+    public FusedExplosiveTicksRemainingProvider() {
+        super(Keys.TICKS_REMAINING);
     }
 
     @Override
-    protected boolean set(final PlayerEntity player, final Integer value) {
-        player.experienceTotal = ExperienceHolderUtils.xpAtLevel(value);
-        player.experience = 0;
-        player.experienceLevel = value;
-        ((ServerPlayerEntityBridge) player).bridge$refreshExp();
+    protected Optional<Integer> getFrom(FusedExplosive dataHolder) {
+        return Optional.of(((FusedExplosiveBridge) dataHolder).bridge$getFuseTicksRemaining());
+    }
+
+    @Override
+    protected boolean set(FusedExplosive dataHolder, Integer value) {
+        if (value < 0) {
+            return false;
+        }
+        // TODO isPrimed on bridge?
+        if (dataHolder.primed().get()) {
+            ((FusedExplosiveBridge) dataHolder).bridge$setFuseTicksRemaining(value);
+        }
         return true;
-    }
-
-    @Override
-    protected Optional<Integer> getFrom(final PlayerEntity player) {
-        return Optional.of(player.experienceLevel);
     }
 }

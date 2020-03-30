@@ -32,11 +32,11 @@ import net.minecraft.world.spawner.AbstractSpawner;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
 import org.spongepowered.common.data.provider.commandblock.CommandBlockLogicDataProviders;
 import org.spongepowered.common.data.provider.item.stack.ItemStackGameProfileProvider;
+import org.spongepowered.common.mixin.accessor.tileentity.AbstractFurnaceTileEntityAccessor;
 import org.spongepowered.common.mixin.accessor.tileentity.BeaconTileEntityAccessor;
 import org.spongepowered.common.mixin.accessor.tileentity.BrewingStandTileEntityAccessor;
 import org.spongepowered.common.mixin.accessor.tileentity.EndGatewayTileEntityAccessor;
@@ -60,8 +60,32 @@ public class TileEntityDataProviders extends DataProviderRegistryBuilder {
         registerCommandBlockTileEntityData();
         registerEndGatewayEntityData();
         registerMobSpawnerEntityData();
+        registerStructure();
 
         register(new SignTileEntityLinesProvider());
+
+
+        register(BrewingStandTileEntityAccessor.class, Keys.REMAINING_BREW_TIME, 400,
+                e -> e.accessor$canBrew() ? e.accessor$getBrewTime() : null,
+                (e, t) -> {
+                    if (e.accessor$canBrew()) {
+                        e.accessor$setBrewTime(t);
+                    }
+                });
+
+        register(new HopperTileEntityCooldownProvider());
+        register(new JukeBoxTileEntityItemStackSnapshotProvider());
+
+        register(SkullTileEntity.class, Keys.GAME_PROFILE,
+                e -> (GameProfile) ((SkullTileEntityAccessor) e).accessor$getPlayerProfile(),
+                (e, g) -> e.setPlayerProfile((com.mojang.authlib.GameProfile) ItemStackGameProfileProvider.resolveProfileIfNecessary(g))
+        );
+
+        register(LockableTileEntityAccessor.class, Keys.LOCK_TOKEN,
+                e -> ((LockCodeAccessor) e.accessor$getCode()).accessor$getLock(),
+                (e, lock) -> e.accessor$setCode(lock.isEmpty() ? LockCode.EMPTY_CODE : new LockCode(lock)));
+
+        registerFurnace();
     }
 
     private void registerBannerTileEntityData() {
@@ -141,27 +165,9 @@ public class TileEntityDataProviders extends DataProviderRegistryBuilder {
         register(MobSpawnerTileEntityAccessor.class, Keys.SPAWNER_SPAWN_RANGE,
                 (accessor) -> (double) ((AbstractSpawnerAccessor) accessor.accessor$getSpawnerLogic()).accessor$getSpawnRange(),
                 (accessor, value) -> ((AbstractSpawnerAccessor) accessor.accessor$getSpawnerLogic()).accessor$setSpawnRange(value.intValue()));
+    }
 
-        register(BrewingStandTileEntityAccessor.class, Keys.REMAINING_BREW_TIME, 400,
-                e -> e.accessor$canBrew() ? e.accessor$getBrewTime() : null,
-                (e, t) -> {
-                    if (e.accessor$canBrew()) {
-                        e.accessor$setBrewTime(t);
-                    }
-                });
-
-        register(new HopperTileEntityCooldownProvider());
-        register(new JukeBoxTileEntityItemStackSnapshotProvider());
-
-        register(SkullTileEntity.class, Keys.GAME_PROFILE,
-                e -> (GameProfile) ((SkullTileEntityAccessor) e).accessor$getPlayerProfile(),
-                (e, g) -> e.setPlayerProfile((com.mojang.authlib.GameProfile) ItemStackGameProfileProvider.resolveProfileIfNecessary(g))
-        );
-
-        register(LockableTileEntityAccessor.class, Keys.LOCK_TOKEN,
-                e -> ((LockCodeAccessor) e.accessor$getCode()).accessor$getLock(),
-                (e, lock) -> e.accessor$setCode(lock.isEmpty() ? LockCode.EMPTY_CODE : new LockCode(lock)));
-
+    private void registerStructure() {
         register(StructureBlockTileEntityAccessor.class, Keys.STRUCTURE_AUTHOR, StructureBlockTileEntityAccessor::accessor$getAuthor, StructureBlockTileEntityAccessor::accessor$setAuthor);
         register(StructureBlockTileEntity.class, Keys.STRUCTURE_IGNORE_ENTITIES,
                 e -> ((StructureBlockTileEntityAccessor) e).accessor$getIgnoreEntities(),
@@ -188,5 +194,28 @@ public class TileEntityDataProviders extends DataProviderRegistryBuilder {
         register(StructureBlockTileEntityAccessor.class, Keys.STRUCTURE_SIZE,
                 e -> VecHelper.toVector3i(e.accessor$getSize()),
                 (e, v) -> e.accessor$setSize(VecHelper.toBlockPos(v)));
+    }
+
+    private void registerFurnace() {
+        register(AbstractFurnaceTileEntityAccessor.class, Keys.PASSED_BURN_TIME,
+                e -> e.accessor$getRecipesUsed() - e.accessor$getBurnTime(),
+                (e, burnTime) -> {
+                    if (burnTime <= e.accessor$getRecipesUsed()) {
+                        e.accessor$setBurnTime(e.accessor$getRecipesUsed() - burnTime);
+                    }
+                });
+        register(AbstractFurnaceTileEntityAccessor.class, Keys.MAX_BURN_TIME,
+                AbstractFurnaceTileEntityAccessor::accessor$getRecipesUsed,
+                AbstractFurnaceTileEntityAccessor::accessor$setRecipesUsed);
+        register(AbstractFurnaceTileEntityAccessor.class, Keys.PASSED_COOK_TIME,
+                AbstractFurnaceTileEntityAccessor::accessor$getCookTime,
+                (e, cookTime) -> {
+                    if (cookTime <= e.accessor$getCookTimeTotal()) {
+                        e.accessor$setCookTime(cookTime);
+                    }
+                });
+        register(AbstractFurnaceTileEntityAccessor.class, Keys.MAX_COOK_TIME,
+                AbstractFurnaceTileEntityAccessor::accessor$getCookTimeTotal,
+                AbstractFurnaceTileEntityAccessor::accessor$setCookTimeTotal);
     }
 }

@@ -256,6 +256,12 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // ChestBlock
         registerDirection(ChestBlock.class, ChestBlock.FACING);
+        register(new BlockChestConnectedDirectionsProvider());
+        register(new BlockChestConnectedDirectionProvider(Keys.CONNECTED_EAST, Direction.EAST));
+        register(new BlockChestConnectedDirectionProvider(Keys.CONNECTED_NORTH, Direction.NORTH));
+        register(new BlockChestConnectedDirectionProvider(Keys.CONNECTED_SOUTH, Direction.SOUTH));
+        register(new BlockChestConnectedDirectionProvider(Keys.CONNECTED_WEST, Direction.WEST));
+
         // TODO: Connection Type, Waterlogged
 
         // DaylightDetectorBlock

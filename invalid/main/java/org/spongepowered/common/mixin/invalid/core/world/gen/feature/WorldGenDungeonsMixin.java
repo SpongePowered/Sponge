@@ -35,7 +35,7 @@ import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.data.processor.common.SpawnerUtils;
+import org.spongepowered.common.data.provider.block.entity.SpawnerUtils;
 
 @Mixin(DungeonsFeature.class)
 public abstract class WorldGenDungeonsMixin extends WorldGeneratorMixin {

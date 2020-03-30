@@ -22,32 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.player;
+package org.spongepowered.common.data.provider.block;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.state.properties.ChestType;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.util.Constants;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
-public class PlayerEntityExperienceLevelProvider extends GenericMutableDataProvider<PlayerEntity, Integer> {
+public class BlockChestConnectedDirectionsProvider extends GenericMutableDataProvider<BlockState, Set<Direction>> {
 
-    public PlayerEntityExperienceLevelProvider() {
-        super(Keys.EXPERIENCE_LEVEL);
+    public BlockChestConnectedDirectionsProvider() {
+        super(Keys.CONNECTED_DIRECTIONS);
     }
 
     @Override
-    protected boolean set(final PlayerEntity player, final Integer value) {
-        player.experienceTotal = ExperienceHolderUtils.xpAtLevel(value);
-        player.experience = 0;
-        player.experienceLevel = value;
-        ((ServerPlayerEntityBridge) player).bridge$refreshExp();
-        return true;
+    protected Optional<Set<Direction>> getFrom(BlockState dataHolder) {
+        if (dataHolder.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+            return Optional.empty();
+        }
+        Direction attached = Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(dataHolder));
+        return Optional.of(Collections.singleton(attached));
     }
 
     @Override
-    protected Optional<Integer> getFrom(final PlayerEntity player) {
-        return Optional.of(player.experienceLevel);
+    protected boolean supports(BlockState dataHolder) {
+        return dataHolder.getBlock() instanceof ChestBlock;
     }
 }

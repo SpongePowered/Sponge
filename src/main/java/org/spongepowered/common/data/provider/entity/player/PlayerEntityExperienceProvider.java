@@ -27,7 +27,6 @@ package org.spongepowered.common.data.provider.entity.player;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.Optional;

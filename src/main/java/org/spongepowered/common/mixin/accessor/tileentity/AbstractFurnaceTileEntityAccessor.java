@@ -22,32 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.player;
+package org.spongepowered.common.mixin.accessor.tileentity;
 
-import net.minecraft.entity.player.PlayerEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(AbstractFurnaceTileEntity.class)
+public interface AbstractFurnaceTileEntityAccessor {
 
-public class PlayerEntityExperienceLevelProvider extends GenericMutableDataProvider<PlayerEntity, Integer> {
-
-    public PlayerEntityExperienceLevelProvider() {
-        super(Keys.EXPERIENCE_LEVEL);
-    }
-
-    @Override
-    protected boolean set(final PlayerEntity player, final Integer value) {
-        player.experienceTotal = ExperienceHolderUtils.xpAtLevel(value);
-        player.experience = 0;
-        player.experienceLevel = value;
-        ((ServerPlayerEntityBridge) player).bridge$refreshExp();
-        return true;
-    }
-
-    @Override
-    protected Optional<Integer> getFrom(final PlayerEntity player) {
-        return Optional.of(player.experienceLevel);
-    }
+    @Accessor("burnTime") int accessor$getBurnTime();
+    @Accessor("burnTime") void accessor$setBurnTime(int burnTime);
+    @Accessor("recipesUsed") int accessor$getRecipesUsed();
+    @Accessor("recipesUsed") void accessor$setRecipesUsed(int recipesUsed);
+    @Accessor("cookTime") int accessor$getCookTime();
+    @Accessor("cookTime") void accessor$setCookTime(int cookTime);
+    @Accessor("cookTimeTotal") int accessor$getCookTimeTotal();
+    @Accessor("cookTimeTotal") void accessor$setCookTimeTotal(int cookTimeTotal);
 }

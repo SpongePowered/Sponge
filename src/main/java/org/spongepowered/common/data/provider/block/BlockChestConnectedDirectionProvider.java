@@ -22,32 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.player;
+package org.spongepowered.common.data.provider.block;
 
-import net.minecraft.entity.player.PlayerEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.state.properties.ChestType;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public class PlayerEntityExperienceLevelProvider extends GenericMutableDataProvider<PlayerEntity, Integer> {
+public class BlockChestConnectedDirectionProvider extends GenericMutableDataProvider<BlockState, Boolean> {
 
-    public PlayerEntityExperienceLevelProvider() {
-        super(Keys.EXPERIENCE_LEVEL);
+    private final Direction direction;
+
+    public BlockChestConnectedDirectionProvider(Supplier<? extends Key<? extends Value<Boolean>>> key, Direction direction) {
+        super(key);
+        this.direction = direction;
     }
 
     @Override
-    protected boolean set(final PlayerEntity player, final Integer value) {
-        player.experienceTotal = ExperienceHolderUtils.xpAtLevel(value);
-        player.experience = 0;
-        player.experienceLevel = value;
-        ((ServerPlayerEntityBridge) player).bridge$refreshExp();
-        return true;
+    protected Optional<Boolean> getFrom(BlockState dataHolder) {
+        if (dataHolder.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+            return Optional.empty();
+        }
+        Direction attached = Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(dataHolder));
+        return Optional.of(attached == this.direction);
     }
 
     @Override
-    protected Optional<Integer> getFrom(final PlayerEntity player) {
-        return Optional.of(player.experienceLevel);
+    protected boolean supports(BlockState dataHolder) {
+        return dataHolder.getBlock() instanceof ChestBlock;
     }
 }

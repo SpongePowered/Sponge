@@ -146,6 +146,7 @@ import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.MobEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.item.ExperienceOrbEntityAccessor;
@@ -317,6 +318,35 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 p -> p.bridge$isHealthScaled() ? p.bridge$getHealthScale() : null,
                 (p, s) -> p.bridge$setHealthScale(s) // TODO limit 1-Float.MAX_VALUE
                 );
+
+        register(LivingEntity.class, Keys.LAST_ATTACKER,
+                e -> (org.spongepowered.api.entity.Entity) e.getAttackingEntity(),
+                (e, attacker) -> e.setLastAttackedEntity((Entity) attacker));
+        // TODO revenge target?
+        register(LivingEntityAccessor.class, Keys.LAST_DAMAGE_RECEIVED,
+                e -> (double) e.accessor$getLastDamage(),
+                (e, d) -> e.accessor$setLastDamage(d.floatValue()));
+
+        register(ItemEntityBridge.class, Keys.DESPAWN_DELAY,
+                ItemEntityBridge::bridge$getDespawnDelay,
+                (e, d) -> e.bridge$setDespawnDelay(d, false));
+        register(ItemEntityBridge.class, Keys.INFINITE_DESPAWN_DELAY,
+                ItemEntityBridge::bridge$infiniteDespawnDelay,
+                (e, d) -> e.bridge$setDespawnDelay(6000, d));
+
+        register(ItemEntityBridge.class, Keys.PICKUP_DELAY,
+                ItemEntityBridge::bridge$getPickupDelay,
+                (e, d) -> e.bridge$setPickupDelay(d, false));
+        register(ItemEntityBridge.class, Keys.INFINITE_PICKUP_DELAY,
+                ItemEntityBridge::bridge$infinitePickupDelay,
+                (e, d) -> e.bridge$setPickupDelay(6000, d));
+
+        register(Entity.class, Keys.VEHICLE,
+                e -> ((org.spongepowered.api.entity.Entity) e.getRidingEntity()),
+                (e, vehicle) -> e.startRiding((Entity) vehicle, true));
+        register(Entity.class, Keys.BASE_VEHICLE,
+                e -> ((org.spongepowered.api.entity.Entity) e.getLowestRidingEntity()));
+
     }
 
     private void registerFireworkRocketEntityData() {
@@ -391,6 +421,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 (accessor) -> !accessor.accessor$getDontSetBlock(),
                 (accessor, value) -> accessor.accessor$setDontSetAsBlock(!value));
 
+        // TODO old Key in API? CAN_DROP_AS_ITEM
         register(FallingBlockEntity.class, Keys.SHOULD_DROP,
                 (accessor) -> accessor.shouldDropItem,
                 (accessor, value) -> accessor.shouldDropItem = value);

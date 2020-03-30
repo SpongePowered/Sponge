@@ -36,7 +36,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
+import org.spongepowered.common.data.provider.entity.player.ExperienceHolderUtils;
 
 import java.util.Iterator;
 import java.util.UUID;

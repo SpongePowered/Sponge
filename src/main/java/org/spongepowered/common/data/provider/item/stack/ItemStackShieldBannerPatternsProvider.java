@@ -32,7 +32,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.BannerPattern;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.data.util.NbtCollectors;
@@ -46,7 +46,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("ConstantConditions")
-public class ItemStackShieldBannerPatternsProvider extends ItemStackDataProvider<List<PatternLayer>> {
+public class ItemStackShieldBannerPatternsProvider extends ItemStackDataProvider<List<BannerPatternLayer>> {
 
     private static final Map<String, BannerPatternShape> SHAPE_BY_HASHNAME = new HashMap<>();
 
@@ -57,7 +57,7 @@ public class ItemStackShieldBannerPatternsProvider extends ItemStackDataProvider
     }
 
     public ItemStackShieldBannerPatternsProvider() {
-        super(Keys.BANNER_PATTERNS);
+        super(Keys.BANNER_PATTERN_LAYERS);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ItemStackShieldBannerPatternsProvider extends ItemStackDataProvider
     }
 
     @Override
-    protected Optional<List<PatternLayer>> getFrom(ItemStack dataHolder) {
+    protected Optional<List<BannerPatternLayer>> getFrom(ItemStack dataHolder) {
         final CompoundNBT tag = dataHolder.getTag();
         if (tag == null || tag.contains(Constants.TileEntity.Banner.BANNER_PATTERNS, Constants.NBT.TAG_LIST)) {
             return Optional.of(new ArrayList<>());
@@ -78,7 +78,7 @@ public class ItemStackShieldBannerPatternsProvider extends ItemStackDataProvider
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, List<PatternLayer> value) {
+    protected boolean set(ItemStack dataHolder, List<BannerPatternLayer> value) {
         final ListNBT layersTag = value.stream()
                 .map(ItemStackShieldBannerPatternsProvider::layerToNbt)
                 .collect(NbtCollectors.toTagList());
@@ -88,15 +88,15 @@ public class ItemStackShieldBannerPatternsProvider extends ItemStackDataProvider
         return true;
     }
 
-    private static PatternLayer layerFromNbt(CompoundNBT layerCompound) {
+    private static BannerPatternLayer layerFromNbt(CompoundNBT layerCompound) {
         final BannerPatternShape shape = SHAPE_BY_HASHNAME.get(
                 layerCompound.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID));
         final DyeColor dyeColor = DyeColor.byId(
                 layerCompound.getInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR));
-        return PatternLayer.of(shape, (org.spongepowered.api.data.type.DyeColor) (Object) dyeColor);
+        return BannerPatternLayer.of(shape, (org.spongepowered.api.data.type.DyeColor) (Object) dyeColor);
     }
 
-    private static CompoundNBT layerToNbt(PatternLayer layer) {
+    private static CompoundNBT layerToNbt(BannerPatternLayer layer) {
         final CompoundNBT layerCompound = new CompoundNBT();
         layerCompound.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID,
                 ((BannerPattern) (Object) layer.getShape()).getHashname());
