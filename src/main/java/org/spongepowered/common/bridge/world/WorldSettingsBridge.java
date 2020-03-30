@@ -32,12 +32,13 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldSettingsBridge {
 
     CatalogKey bridge$getKey();
 
-    DimensionType bridge$getDimensionType();
+    SpongeDimensionType bridge$getDimensionType();
 
     Difficulty bridge$getDifficulty();
 

@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.world.server.WorldRegistration;
 
 import javax.annotation.Nullable;
 
@@ -61,6 +60,6 @@ public final class SpongeWorldRegistrationBuilder implements WorldRegistration.B
         checkNotNull(this.directoryName);
         checkState(!this.directoryName.isEmpty(), "Directory name cannot be empty!");
 
-        return new SpongeWorldRegistration(this.key, this.directoryName);
+        return new WorldRegistration(this.key, this.directoryName);
     }
 }

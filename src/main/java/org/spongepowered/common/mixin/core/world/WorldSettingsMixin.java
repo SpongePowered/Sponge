@@ -47,6 +47,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import javax.annotation.Nullable;
 
@@ -57,9 +58,9 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     @Shadow private boolean bonusChestEnabled;
 
     @Nullable private CatalogKey key;
-    @Nullable private DimensionType dimensionType = DimensionTypes.OVERWORLD;
-    @Nullable private Difficulty difficulty = Difficulties.NORMAL;
-    @Nullable private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
+    @Nullable private SpongeDimensionType dimensionType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
+    @Nullable private Difficulty difficulty = Difficulties.NORMAL.get();
+    @Nullable private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
     @Nullable private Boolean keepSpawnLoaded = null;
@@ -73,7 +74,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
         if (((WorldInfoBridge) info).bridge$isValid()) {
-            this.dimensionType = properties.getDimensionType();
+            this.dimensionType = (SpongeDimensionType) properties.getDimensionType();
             this.difficulty = properties.getDifficulty();
             this.serializationBehavior = properties.getSerializationBehavior();
             this.isEnabled = properties.isEnabled();
@@ -107,7 +108,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public DimensionType bridge$getDimensionType() {
+    public SpongeDimensionType bridge$getDimensionType() {
         return this.dimensionType;
     }
 
@@ -119,7 +120,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     @Override
     public PortalAgentType bridge$getPortalAgentType() {
         if (this.portalAgentType == null) {
-            this.portalAgentType = PortalAgentTypes.DEFAULT;
+            this.portalAgentType = PortalAgentTypes.DEFAULT.get();
         }
         return this.portalAgentType;
     }
@@ -152,7 +153,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     @Override
     public boolean bridge$doesKeepSpawnLoaded() {
         if (this.keepSpawnLoaded == null) {
-            this.keepSpawnLoaded = this.dimensionType == DimensionTypes.OVERWORLD;
+            this.keepSpawnLoaded = this.dimensionType == DimensionTypes.OVERWORLD.get();
         }
         return this.keepSpawnLoaded;
     }
@@ -174,7 +175,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
 
     @Override
     public void bridge$setDimensionType(DimensionType dimensionType) {
-        this.dimensionType = dimensionType;
+        this.dimensionType = (SpongeDimensionType) dimensionType;
     }
 
     @Override

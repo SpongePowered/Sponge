@@ -51,19 +51,3 @@ tasks.test {
 
 // Configure the TestPlugins project.
 val api = spongeDev.api!!
-val testPlugins = project(":testplugins") {
-    apply(plugin = "org.spongepowered.gradle.sponge.dev")
-    apply(plugin = "java-library")
-    configure<SpongeDevExtension> {
-        licenseProject = "Sponge"
-    }
-    dependencies {
-        implementation(project(api.path))
-    }
-}
-dependencies {
-    // For unit testing... not really going to work.
-    runtime(project(testPlugins.path)) {
-        exclude(module="spongeapi")
-    }
-}

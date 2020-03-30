@@ -25,34 +25,24 @@
 package org.spongepowered.common.world.server;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.world.server.WorldRegistration;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.mixin.accessor.world.dimension.DimensionTypeAccessor;
+import net.minecraft.world.WorldSettings;
 
-public final class SpongeWorldRegistration implements WorldRegistration {
+public final class WorldRegistration {
 
-    private final CatalogKey key;
     private final String directoryName;
+    private WorldSettings defaultSettings;
 
-    public SpongeWorldRegistration(CatalogKey key, String directoryName) {
-        this.key = key;
+    public WorldRegistration(String directoryName, WorldSettings defaultSettings) {
         this.directoryName = directoryName;
+        this.defaultSettings = defaultSettings;
     }
 
-    public SpongeWorldRegistration(DimensionType dimensionType) {
-        this(((DimensionTypeBridge) dimensionType).bridge$getKey(), ((DimensionTypeAccessor) dimensionType).accessor$getDirectory());
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.key;
-    }
-
-    @Override
     public String getDirectoryName() {
         return this.directoryName;
+    }
+
+    public WorldSettings getDefaultSettings() {
+        return this.defaultSettings;
     }
 
     @Override
@@ -63,19 +53,18 @@ public final class SpongeWorldRegistration implements WorldRegistration {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final SpongeWorldRegistration that = (SpongeWorldRegistration) o;
-        return this.key.equals(that.key) && this.directoryName.equals(that.directoryName);
+        final WorldRegistration that = (WorldRegistration) o;
+        return this.directoryName.equals(that.directoryName);
     }
 
     @Override
     public int hashCode() {
-        return this.key.hashCode();
+        return this.directoryName.hashCode();
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("key", this.key)
             .add("directoryName", this.directoryName)
             .toString();
     }

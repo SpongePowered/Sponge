@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry.builtin.vanilla;
 
 import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
 public final class DimensionTypeSupplier {
@@ -34,9 +35,9 @@ public final class DimensionTypeSupplier {
 
     public static void registerSuppliers(SpongeCatalogRegistry registry) {
         registry
-            .registerSupplier(DimensionType.class, "overworld", () -> (DimensionType) net.minecraft.world.dimension.DimensionType.OVERWORLD)
-            .registerSupplier(DimensionType.class, "the_nether", () -> (DimensionType) net.minecraft.world.dimension.DimensionType.THE_NETHER)
-            .registerSupplier(DimensionType.class, "the_end", () -> (DimensionType) net.minecraft.world.dimension.DimensionType.THE_END)
+            .registerSupplier(DimensionType.class, "overworld", ((DimensionTypeBridge) net.minecraft.world.dimension.DimensionType.OVERWORLD)::bridge$getSpongeDimensionType)
+            .registerSupplier(DimensionType.class, "the_nether", ((DimensionTypeBridge) net.minecraft.world.dimension.DimensionType.THE_NETHER)::bridge$getSpongeDimensionType)
+            .registerSupplier(DimensionType.class, "the_end", ((DimensionTypeBridge) net.minecraft.world.dimension.DimensionType.THE_END)::bridge$getSpongeDimensionType)
         ;
     }
 }

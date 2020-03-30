@@ -41,11 +41,8 @@ import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.common.mixin.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
-import org.spongepowered.common.registry.type.world.WorldRegistrationRegistryModule;
 import org.spongepowered.common.world.dimension.DimensionToTypeRegistry;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
-import org.spongepowered.common.world.server.SpongeWorldRegistration;
 
 import javax.annotation.Nullable;
 
@@ -53,7 +50,6 @@ import javax.annotation.Nullable;
 public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
     @Nullable private SpongeDimensionType impl$spongeDimensionType;
-    @Nullable private SpongeWorldRegistration impl$spongeWorldRegistration;
 
     @Inject(method = "register", at = @At("RETURN"))
     private static void impl$setupBridgeFields(String id, final DimensionType dimensionType, CallbackInfoReturnable<DimensionType> cir) {
@@ -74,14 +70,10 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
         if (spongeDimensionType == null) {
             spongeDimensionType = new SpongeDimensionType(id, dimensionType::hasSkyLight);
             DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, spongeDimensionType);
-            DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog(spongeDimensionType);
+            SpongeImpl.getRegistry().getCatalogRegistry().registerCatalog(spongeDimensionType);
         }
 
-        dimensionTypeBridge.setSpongeDimensionType(spongeDimensionType);
-
-        final SpongeWorldRegistration spongeWorldRegistration = new SpongeWorldRegistration(dimensionType);
-        dimensionTypeBridge.bridge$setWorldRegistration(spongeWorldRegistration);
-        WorldRegistrationRegistryModule.getInstance().registerAdditionalCatalog(spongeWorldRegistration);
+        dimensionTypeBridge.bridge$setSpongeDimensionType(spongeDimensionType);
     }
 
     @Override
@@ -90,17 +82,7 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     }
 
     @Override
-    public void setSpongeDimensionType(SpongeDimensionType dimensionType) {
+    public void bridge$setSpongeDimensionType(SpongeDimensionType dimensionType) {
         this.impl$spongeDimensionType = dimensionType;
-    }
-
-    @Override
-    public SpongeWorldRegistration bridge$getWorldRegistration() {
-        return this.impl$spongeWorldRegistration;
-    }
-
-    @Override
-    public void bridge$setWorldRegistration(SpongeWorldRegistration worldRegistration) {
-        this.impl$spongeWorldRegistration = worldRegistration;
     }
 }
