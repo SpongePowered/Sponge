@@ -42,7 +42,9 @@ public class JukeBoxTileEntityItemStackSnapshotProvider extends GenericMutableDa
 
     @Override
     protected Optional<ItemStackSnapshot> getFrom(JukeboxTileEntity dataHolder) {
-        // TODO return empty for AIR?
+        if (dataHolder.getRecord().isEmpty()) {
+            return Optional.empty();
+        }
         return Optional.of(ItemStackUtil.snapshotOf(dataHolder.getRecord()));
     }
 

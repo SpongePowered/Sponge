@@ -36,11 +36,11 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class BlockChestConnectedDirectionProvider extends GenericMutableDataProvider<BlockState, Boolean> {
+public class ChestBlockConnectedDirectionProvider extends GenericMutableDataProvider<BlockState, Boolean> {
 
     private final Direction direction;
 
-    public BlockChestConnectedDirectionProvider(Supplier<? extends Key<? extends Value<Boolean>>> key, Direction direction) {
+    public ChestBlockConnectedDirectionProvider(Supplier<? extends Key<? extends Value<Boolean>>> key, Direction direction) {
         super(key);
         this.direction = direction;
     }

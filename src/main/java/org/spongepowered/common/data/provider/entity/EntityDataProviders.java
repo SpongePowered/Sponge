@@ -300,7 +300,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 }
                 );
         register(PotionEntity.class, Keys.POTION_EFFECTS,
-                e -> PotionUtils.getEffectsFromStack(e.getItem()).stream().map(PotionEffect.class::cast).collect(Collectors.toList()),
+                e -> PotionUtils.getEffectsFromStack(e.getItem()).stream().map(PotionEffect.class::cast).collect(Collectors.toList())
                 // no setter?
                 );
 
@@ -319,33 +319,20 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 (p, s) -> p.bridge$setHealthScale(s) // TODO limit 1-Float.MAX_VALUE
                 );
 
-        register(LivingEntity.class, Keys.LAST_ATTACKER,
-                e -> (org.spongepowered.api.entity.Entity) e.getAttackingEntity(),
-                (e, attacker) -> e.setLastAttackedEntity((Entity) attacker));
         // TODO revenge target?
         register(LivingEntityAccessor.class, Keys.LAST_DAMAGE_RECEIVED,
                 e -> (double) e.accessor$getLastDamage(),
                 (e, d) -> e.accessor$setLastDamage(d.floatValue()));
-
-        register(ItemEntityBridge.class, Keys.DESPAWN_DELAY,
-                ItemEntityBridge::bridge$getDespawnDelay,
-                (e, d) -> e.bridge$setDespawnDelay(d, false));
-        register(ItemEntityBridge.class, Keys.INFINITE_DESPAWN_DELAY,
-                ItemEntityBridge::bridge$infiniteDespawnDelay,
-                (e, d) -> e.bridge$setDespawnDelay(6000, d));
-
-        register(ItemEntityBridge.class, Keys.PICKUP_DELAY,
-                ItemEntityBridge::bridge$getPickupDelay,
-                (e, d) -> e.bridge$setPickupDelay(d, false));
-        register(ItemEntityBridge.class, Keys.INFINITE_PICKUP_DELAY,
-                ItemEntityBridge::bridge$infinitePickupDelay,
-                (e, d) -> e.bridge$setPickupDelay(6000, d));
 
         register(Entity.class, Keys.VEHICLE,
                 e -> ((org.spongepowered.api.entity.Entity) e.getRidingEntity()),
                 (e, vehicle) -> e.startRiding((Entity) vehicle, true));
         register(Entity.class, Keys.BASE_VEHICLE,
                 e -> ((org.spongepowered.api.entity.Entity) e.getLowestRidingEntity()));
+
+        register(new DamagingProjectileEntityAccelerationProvider());
+
+        register(new FusedExplosiveTicksRemainingProvider());
 
     }
 
@@ -704,6 +691,14 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(ItemEntityBridge.class, Keys.PICKUP_DELAY,
                 ItemEntityBridge::bridge$getPickupDelay,
                 (accessor, value) -> accessor.bridge$setPickupDelay(accessor.bridge$getPickupDelay(), false));
+
+        // TODO above setters do not set the value
+        register(ItemEntityBridge.class, Keys.DESPAWN_DELAY,
+                ItemEntityBridge::bridge$getDespawnDelay,
+                (e, d) -> e.bridge$setDespawnDelay(d, false));
+        register(ItemEntityBridge.class, Keys.PICKUP_DELAY,
+                ItemEntityBridge::bridge$getPickupDelay,
+                (e, d) -> e.bridge$setPickupDelay(d, false));
 
         register(ItemEntityBridge.class, Keys.INFINITE_DESPAWN_DELAY,
                 ItemEntityBridge::bridge$infiniteDespawnDelay,

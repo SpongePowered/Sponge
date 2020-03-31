@@ -36,9 +36,9 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-public class BlockChestConnectedDirectionsProvider extends GenericMutableDataProvider<BlockState, Set<Direction>> {
+public class ChestBlockConnectedDirectionsProvider extends GenericMutableDataProvider<BlockState, Set<Direction>> {
 
-    public BlockChestConnectedDirectionsProvider() {
+    public ChestBlockConnectedDirectionsProvider() {
         super(Keys.CONNECTED_DIRECTIONS);
     }
 

@@ -49,10 +49,10 @@ public class ArmorStandEntityTakingDisabledProvider extends GenericMutableDataPr
 
         final Set<EquipmentType> val = new HashSet<>();
 
-        if ((resultantChunk & (1 << 1)) != 0) val.add(EquipmentTypes.BOOTS);
-        if ((resultantChunk & (1 << 2)) != 0) val.add(EquipmentTypes.LEGGINGS);
-        if ((resultantChunk & (1 << 3)) != 0) val.add(EquipmentTypes.CHESTPLATE);
-        if ((resultantChunk & (1 << 4)) != 0) val.add(EquipmentTypes.HEADWEAR);
+        if ((resultantChunk & (1 << 1)) != 0) val.add(EquipmentTypes.BOOTS.get());
+        if ((resultantChunk & (1 << 2)) != 0) val.add(EquipmentTypes.LEGGINGS.get());
+        if ((resultantChunk & (1 << 3)) != 0) val.add(EquipmentTypes.CHESTPLATE.get());
+        if ((resultantChunk & (1 << 4)) != 0) val.add(EquipmentTypes.HEADWEAR.get());
 
         return Optional.of(val);
     }
@@ -61,8 +61,8 @@ public class ArmorStandEntityTakingDisabledProvider extends GenericMutableDataPr
     protected boolean set(ArmorStandEntity dataHolder, Set<EquipmentType> value) {
         int chunk = 0;
 
-        // try and keep the all chunk empty
         int disabledSlots = ((ArmorStandEntityAccessor) dataHolder).accessor$getDisabledSlots();
+        // try and keep the all chunk empty
         final int allChunk = disabledSlots & 0b1111_1111;
         if (allChunk != 0) {
             disabledSlots |= (allChunk << 16);
@@ -70,10 +70,10 @@ public class ArmorStandEntityTakingDisabledProvider extends GenericMutableDataPr
             ((ArmorStandEntityAccessor) dataHolder).accessor$setDisabledSlots(disabledSlots);
         }
 
-        if (value.contains(EquipmentTypes.BOOTS)) chunk |= 1 << 1;
-        if (value.contains(EquipmentTypes.LEGGINGS)) chunk |= 1 << 2;
-        if (value.contains(EquipmentTypes.CHESTPLATE)) chunk |= 1 << 3;
-        if (value.contains(EquipmentTypes.HEADWEAR)) chunk |= 1 << 4;
+        if (value.contains(EquipmentTypes.BOOTS.get())) chunk |= 1 << 1;
+        if (value.contains(EquipmentTypes.LEGGINGS.get())) chunk |= 1 << 2;
+        if (value.contains(EquipmentTypes.CHESTPLATE.get())) chunk |= 1 << 3;
+        if (value.contains(EquipmentTypes.HEADWEAR.get())) chunk |= 1 << 4;
 
         disabledSlots |= (chunk << 8);
         ((ArmorStandEntityAccessor) dataHolder).accessor$setDisabledSlots(disabledSlots);
