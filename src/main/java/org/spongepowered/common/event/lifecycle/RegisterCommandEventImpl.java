@@ -37,7 +37,7 @@ public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> imple
     private final TypeToken<C> token;
     private final C registrar;
 
-    public RegisterCommandEventImpl(Cause cause, Game game, TypeToken<C> token, C registrar) {
+    public RegisterCommandEventImpl(final Cause cause, final Game game, final TypeToken<C> token, final C registrar) {
         this.cause = cause;
         this.game = game;
         this.token = token;

@@ -32,6 +32,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;

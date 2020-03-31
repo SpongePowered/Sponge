@@ -152,7 +152,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     private int impl$maxAir = this.shadow$getMaxAir();
     @Nullable private ItemStack impl$activeItemStackCopy;
 
-    @Override
+/*    @Override
     public int bridge$getMaxAir() {
         return this.impl$maxAir;
     }
@@ -186,14 +186,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    /**
+    *//**
      * @param health The health
      * @param info The callback
      * @author gabizou - April 29th, 2018
      * @reason Due to cancelling death events, "healing" the entity is the only way to cancel the
      *     death, but we still want to reset the death event counter. This is the simplest way to get it working
      *     with forge mods who do not have access to Sponge's API.
-     */
+     *//*
     @Inject(method = "setHealth",
         at = @At("HEAD"))
     private void onSetHealthResetEvents(final float health, final CallbackInfo info) {
@@ -209,12 +209,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         return false; // handled in our bridge$damageEntityHook
     }
 
-    /**
+    *//**
      * @param entityIn The entity being damaged
      * @param damage The damage to deal
      * @author blood - Some time ago in 2015?
      * @reason Our damage hook handles armor modifiers and "replaying" damage to armor.
-     */
+     *//*
     @Redirect(method = "applyArmorCalculations",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/LivingEntity;damageArmor(F)V"))
@@ -222,21 +222,21 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         // do nothing as this is handled in our bridge$damageEntityHook
     }
 
-    /**
+    *//**
      * @author bloodmc - November 21, 2015
      * @reason This shouldn't be used internally but a mod may still call it so we simply reroute to our hook.
-     */
+     *//*
     @Overwrite
     protected void damageEntity(final DamageSource damageSource, final float damage) {
         this.bridge$damageEntity(damageSource, damage);
     }
 
-    /**
+    *//**
      * @author bloodmc - November 22, 2015
      * @author gabizou - Updated April 11th, 2016 - Update for 1.9 changes
      * @author Aaron1011 - Updated Nov 11th, 2016 - Update for 1.11 changes
      * @reason Reroute damageEntity calls to our hook in order to prevent damage.
-     */
+     *//*
     @SuppressWarnings("ConstantConditions")
     @Override
     @Overwrite
@@ -450,10 +450,10 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    /**
+    *//**
      * @author gabizou - January 4th, 2016
      *     This is necessary for invisibility checks so that vanish players don't actually send the particle stuffs.
-     */
+     *//*
     @Redirect(method = "updateItemUse",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/LivingEntity;addItemParticles(Lnet/minecraft/item/ItemStack;I)V"))
@@ -571,7 +571,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         return false;
     }
 
-    /**
+    *//**
      * @author Aaron1011 - August 15, 2016
      * @author i509VCB - Minecraft 1.14.4
      * @reason An overwrite avoids the need for a local-capture inject and two redirects
@@ -665,7 +665,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             return true;
         }
     }
-
+/*
     @Override
     public float bridge$applyModDamage(final LivingEntity entityLivingBase, final DamageSource source, final float damage) {
         return damage;
@@ -697,10 +697,10 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         return true;
     }
 
-    /**
+    *//**
      * @author gabizou - January 4th, 2016
      * @reason This allows invisiblity to ignore entity collisions.
-     */
+     *//*
     @Overwrite
     public boolean canBeCollidedWith() {
         return !(this.bridge$isVanished() && this.bridge$isUncollideable()) && !this.removed;
@@ -930,7 +930,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
         }
         this.impl$activeItemStackCopy = null;
-    }
+    }*/
 
     // End implementation of UseItemStackEvent
 }

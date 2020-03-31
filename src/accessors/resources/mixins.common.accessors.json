@@ -17,6 +17,8 @@
     "block.JukeboxBlockAccessor",
     "block.PistonBlockAccessor",
     "block.RedstoneWireBlockAccessor",
+    "command.CommandSourceAccessor",
+    "command.arguments.ArgumentSerializerAccessor",
     "crash.CrashReportAccessor",
     "crash.CrashReportCategoryAccessor",
     "entity.AgeableEntityAccessor",

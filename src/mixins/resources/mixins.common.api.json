@@ -8,17 +8,24 @@
     "mixinPriority": 1100,
     "mixins": [
         "authlib.GameProfileMixin_API",
-        "mcp.server.management.PlayerProfileCacheMixin_API",
+        "mcp.command.CommandSourceMixin_API",
+        "mcp.command.arguments.ArgumentTypes_EntryMixin_API",
+        "mcp.entity.EntityMixin_API",
+        "mcp.entity.LivingEntityMixin_API",
+        "mcp.entity.player.PlayerEntityMixin_API",
+        "mcp.entity.player.ServerPlayerEntityMixin_API",
         "mcp.server.MinecraftServerMixin_API",
-        "mcp.util.ResourceLocationMixin_API"
+        "mcp.server.management.PlayerProfileCacheMixin_API",
+        "mcp.util.ResourceLocationMixin_API",
+        "service.permission.SubjectMixin_API"
     ],
     "server": [
         "mcp.server.dedicated.DedicatedServerMixin_API"
     ],
     "injectors": {
-      "defaultRequire": 1
+        "defaultRequire": 1
     },
     "overwrites": {
-      "conformVisibility": true
+        "conformVisibility": true
     }
 }

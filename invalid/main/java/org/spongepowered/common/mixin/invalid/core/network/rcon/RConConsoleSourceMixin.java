@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.invalid.core.network.rcon;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.CommandSource;
 import net.minecraft.network.rcon.ClientThread;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Final;
@@ -39,18 +39,19 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.network.rcon.RConConsoleSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 import javax.annotation.Nullable;
 
 @Mixin(RConConsoleSource.class)
-public abstract class RConConsoleSourceMixin implements ICommandSender, CommandSourceBridge, CommandSenderBridge, RConConsoleSourceBridge,
-    SubjectBridge {
+public abstract class RConConsoleSourceMixin implements CommandSourceBridge, RConConsoleSourceBridge, SubjectBridge, CommandSourceProviderBridge {
 
     @Shadow @Final private StringBuffer buffer;
+
+    @Shadow public abstract CommandSource getCommandSource();
 
     @Nullable private ClientThread impl$clientThread;
 
@@ -74,11 +75,6 @@ public abstract class RConConsoleSourceMixin implements ICommandSender, CommandS
     }
 
     @Override
-    public String bridge$getIdentifier() {
-        return getName();
-    }
-
-    @Override
     public String bridge$getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_SYSTEM;
     }
@@ -89,12 +85,7 @@ public abstract class RConConsoleSourceMixin implements ICommandSender, CommandS
     }
 
     @Override
-    public ICommandSender bridge$asICommandSender() {
-        return this;
-    }
-
-    @Override
-    public CommandSource bridge$asCommandSource() {
-        return (CommandSource) this;
+    public CommandSource bridge$getCommandSource(Cause cause) {
+        return this.getCommandSource();
     }
 }

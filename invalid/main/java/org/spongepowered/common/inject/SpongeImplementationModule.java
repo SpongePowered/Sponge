@@ -50,8 +50,7 @@ import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.asset.SpongeAssetManager;
-import org.spongepowered.common.command.SpongeCommandDisambiguator;
-import org.spongepowered.common.command.SpongeCommandManager;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
@@ -98,12 +97,6 @@ public class SpongeImplementationModule extends PrivateModule {
     protected <T> AnnotatedBindingBuilder<T> bindAndExpose(final Class<T> type) {
         this.expose(type);
         return this.bind(type);
-    }
-
-    @Provides
-    @Singleton
-    SpongeCommandManager commandManager(final Logger logger, final Game game) {
-        return new SpongeCommandManager(logger, new SpongeCommandDisambiguator(game));
     }
 
 }

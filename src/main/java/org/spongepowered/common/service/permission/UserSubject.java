@@ -48,7 +48,7 @@ public class UserSubject extends SpongeSubject {
     private final UserCollection collection;
 
     public UserSubject(final GameProfile player, final UserCollection users) {
-        this.player = player;
+        this.player = Preconditions.checkNotNull(player);
         this.data = new SingleParentMemorySubjectData(this) {
             @Override
             public SubjectReference getParent() {
@@ -56,8 +56,8 @@ public class UserSubject extends SpongeSubject {
             }
 
             @Override
-            public void setParent(SubjectReference parent) {
-                int opLevel;
+            public void setParent(final SubjectReference parent) {
+                final int opLevel;
                 if (parent == null) {
                     opLevel = 0;
                 } else {

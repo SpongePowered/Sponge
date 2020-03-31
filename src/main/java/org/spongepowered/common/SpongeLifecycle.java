@@ -25,6 +25,7 @@
 package org.spongepowered.common;
 
 import org.spongepowered.api.Engine;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.registry.SpongeBuilderRegistry;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.registry.SpongeFactoryRegistry;
@@ -64,4 +65,9 @@ public abstract class SpongeLifecycle {
         // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
         ((SpongeServer) this.engine.getGame().getServer()).getUsernameCache().load();
     }
+
+    public void establishCommands() {
+        ((SpongeCommandManager) this.engine.getGame().getCommandManager()).init();
+    }
+
 }

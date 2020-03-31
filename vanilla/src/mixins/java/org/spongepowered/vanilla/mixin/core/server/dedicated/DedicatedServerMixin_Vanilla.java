@@ -75,6 +75,8 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
         this.vanilla$lifecycle.callConstructEvent();
         this.vanilla$lifecycle.establishServices();
         this.vanilla$lifecycle.establishServerFeatures();
+        this.vanilla$lifecycle.establishCommands();
+
         // TODO Evaluate exactly where we want to call this
         this.vanilla$lifecycle.callStartingEngineEvent();
         super.run();

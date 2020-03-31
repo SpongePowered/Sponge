@@ -45,7 +45,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.asset.SpongeAssetManager;
-import org.spongepowered.common.command.SpongeCommandManager;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;

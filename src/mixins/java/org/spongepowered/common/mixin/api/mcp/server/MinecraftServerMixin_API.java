@@ -40,11 +40,13 @@ import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.profile.GameProfileManager;
@@ -89,7 +91,7 @@ import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 @Implements(value = @Interface(iface = Server.class, prefix = "server$"))
-public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer {
+public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, SystemSubject {
 
     @Shadow @Final public long[] tickTimeArray;
     @Shadow public abstract PlayerList shadow$getPlayerList();
@@ -99,6 +101,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$initiateShutdown(boolean p_71263_1_);
     @Shadow public abstract int shadow$getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
+    @Shadow public abstract void shadow$sendMessage(ITextComponent p_145747_1_);
 
     private SpongeScheduler api$scheduler;
     private SpongeTeleportHelper api$teleportHelper;
@@ -108,6 +111,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
     private SpongeUserManager api$userManager;
+    private MessageChannel api$messageChannel = null; //TODO: MessageChannel.toPlayersAndServer();
 
     public MinecraftServerMixin_API(String name) {
         super(name);
@@ -310,4 +314,25 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
         return this.api$usernameCache;
     }
+
+    @Override
+    public void sendMessage(final Text message) {
+        this.shadow$sendMessage(SpongeTexts.toComponent(message));
+    }
+
+    @Override
+    public MessageChannel getMessageChannel() {
+        return this.api$messageChannel;
+    }
+
+    @Override
+    public void setMessageChannel(final MessageChannel channel) {
+        this.api$messageChannel = Preconditions.checkNotNull(channel);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return this.getName(); // from superclass.
+    }
+
 }

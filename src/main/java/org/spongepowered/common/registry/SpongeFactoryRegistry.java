@@ -30,15 +30,23 @@ import co.aikar.timings.TimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
+import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.common.command.parameter.SpongeParameterValueFactory;
+import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParameterBuilderFactory;
+import org.spongepowered.common.command.registrar.tree.SpongeRootCommandTreeBuilderFactory;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
 
 import java.util.Map;
 
@@ -64,7 +72,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
         return (T) duck;
     }
 
-    public <T> void registerFactory(Class<T> factoryClass, T factory) {
+    public <T> SpongeFactoryRegistry registerFactory(Class<T> factoryClass, T factory) {
         checkNotNull(factoryClass);
         checkNotNull(factory);
 
@@ -73,6 +81,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
         }
 
         this.factories.put(factoryClass, factory);
+        return this;
     }
 
     public void registerDefaultFactories() {
@@ -80,5 +89,10 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
         this.registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE);
         this.registerFactory(TimingsFactory.class, SpongeTimingsFactory.INSTANCE);
         this.registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE);
+        this.registerFactory(CommandCause.Factory.class, SpongeCommandCauseFactory.INSTANCE);
+        this.registerFactory(Parameter.Value.Factory.class, SpongeParameterValueFactory.INSTANCE);
+        this.registerFactory(CommandTreeBuilder.RootNodeFactory.class, SpongeRootCommandTreeBuilderFactory.INSTANCE);
+        this.registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE);
     }
+
 }

@@ -353,11 +353,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         this.connection.sendPacket(packet);
     }
 
-    @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
-    private void onPlayerActive(final CallbackInfo ci) {
-        ((ServerPlayNetHandlerBridge) this.connection).bridge$resendLatestResourcePackRequest();
-    }
-
     @Override
     public TabList getTabList() {
         return this.api$tabList;

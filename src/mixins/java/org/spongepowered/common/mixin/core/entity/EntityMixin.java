@@ -29,6 +29,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -83,6 +84,7 @@ import org.spongepowered.common.accessor.world.server.EntityTrackerAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -112,7 +114,8 @@ import java.util.Optional;
 import java.util.Random;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge {
+public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge,
+        CommandSourceProviderBridge {
 
     // @formatter:off
     @Shadow @Nullable private Entity ridingEntity;
@@ -165,6 +168,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract void shadow$setPositionAndUpdate(double x, double y, double z);
     @Shadow public abstract int shadow$getMaxAir();
     @Shadow protected abstract void shadow$applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);
+    @Shadow public abstract CommandSource shadow$getCommandSource();
 
     private boolean impl$isConstructing = true;
     @Nullable private Text impl$displayName;
@@ -180,6 +184,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private int vanish$visibilityTicks = 0;
 
     // @formatter:on
+/*
 
     @Override
     public boolean bridge$isConstructing() {
@@ -231,10 +236,12 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
     }
 
-    /**
+    */
+/**
      * @author rexbut - December 16th, 2016
      * @reason - adjusted to support {@link DismountTypes}
-     */
+     *//*
+
     @Overwrite
     public void stopRiding() {
         if (this.ridingEntity != null) {
@@ -391,7 +398,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         return this.invulnerable;
     }
 
-    /**
+    */
+/**
      * Hooks into vanilla's writeToNBT to call {@link #impl$writeToSpongeCompound}.
      *
      * <p> This makes it easier for other entity mixins to override writeToNBT
@@ -400,14 +408,16 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @param compound The compound vanilla writes to (unused because we write
      *     to SpongeData)
      * @param ci (Unused) callback info
-     */
+     *//*
+
     @Inject(method = "writeWithoutTypeId(Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/nbt/CompoundNBT;",
         at = @At("HEAD"))
     private void impl$spongeWriteToNBT(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         this.impl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
     }
 
-    /**
+    */
+/**
      * Hooks into vanilla's readFromNBT to call {@link #impl$readFromSpongeCompound}.
      *
      * <p> This makes it easier for other entity mixins to override readSpongeNBT
@@ -416,7 +426,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      * @param compound The compound vanilla reads from (unused because we read
      *     from SpongeData)
      * @param ci (Unused) callback info
-     */
+     *//*
+
     @Inject(method = "read(Lnet/minecraft/nbt/CompoundNBT;)V",
         at = @At("RETURN"))
     private void impl$spongeReadFromNBT(final CompoundNBT compound, final CallbackInfo ci) {
@@ -426,7 +437,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         this.impl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
     }
 
-    /**
+    */
+/**
      * Read extra data (SpongeData) from the entity's NBT tag. This is
      * meant to be overridden for each impl based mixin that has to store
      * custom fields based on it's implementation. Examples can include:
@@ -435,6 +447,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *
      * @param compound The SpongeData compound to read from
      */
+
     protected void impl$readFromSpongeCompound(final CompoundNBT compound) {
         SpongeDataManager.getInstance().deserializeCustomData(compound, this);
 
@@ -451,6 +464,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
     }
 
+
     /**
      * Write extra data (SpongeData) to the entity's NBT tag. This is
      * meant to be overridden for each impl based mixin that has to store
@@ -460,6 +474,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *
      * @param compound The SpongeData compound to write to
      */
+
     protected void impl$writeToSpongeCompound(final CompoundNBT compound) {
         SpongeDataManager.getInstance().serializeCustomData(compound, this);
 
@@ -475,7 +490,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             compound.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         }
     }
-
+/*
     @Override
     public void bridge$setImplVelocity(final Vector3d velocity) {
         this.motion = VecHelper.toVec3d(velocity);
@@ -613,12 +628,14 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         this.vanish$untargetable = untargetable;
     }
 
-    /**
+    */
+/**
      * @author gabizou - January 4th, 2016
      * @reason gabizou - January 27th, 2016 - Rewrite to a redirect
      *     <p>
      *     This prevents sounds from being sent to the server by entities that are vanished
-     */
+     *//*
+
     @Redirect(method = "playSound",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
@@ -686,6 +703,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
     }
 
+    */
     /**
      * @param stack
      * @param offsetY
@@ -700,7 +718,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
      *     2) If we are in a client environment, we should not perform any sort of processing whatsoever.
      *     3) This method is entirely managed from the standpoint where our events have final say, as per usual.
      */
-
+/*
     @javax.annotation.Nullable
     @Overwrite
     @Nullable
@@ -773,13 +791,15 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
     }
 
-    /**
+    */
+/**
      * Overridden method for Players to determine whether this entity is immune to fire
      * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
      * take fire damage, nor do they light on fire.
      *
      * @return True if this entity is immune to fire.
-     */
+     *//*
+
     protected boolean impl$isImmuneToFireForIgniteEvent() { // Since normal entities don't have the concept of having game modes...
         return false;
     }
@@ -812,8 +832,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
     }
 
-    @Inject(method = "getFireImmuneTicks",
-        at = @At(value = "RETURN"))
+    @Inject(method = "getFireImmuneTicks", at = @At(value = "RETURN"), cancellable = true)
     private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
         ci.setReturnValue(this.impl$customFireImmuneTicks);
     }
@@ -822,4 +841,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     public void bridge$setFireImmuneTicks(final int ticks) {
         this.impl$customFireImmuneTicks = ticks;
     }
+*/
+
+    @Override
+    public CommandSource bridge$getCommandSource(Cause cause) {
+        return this.shadow$getCommandSource();
+    }
+
 }

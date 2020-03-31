@@ -51,6 +51,7 @@ import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -64,6 +65,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.provider.entity.player.ExperienceHolderUtils;
@@ -210,7 +212,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         }
     }
 
-
+/*
     @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
     private List<Entity> impl$ignoreOtherEntitiesWhenUncollideable(final World world, Entity entityIn, AxisAlignedBB bb) {
         if (this.bridge$isUncollideable()) {
@@ -218,7 +220,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         }
         return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
     }
-
+*/
     /**
      * @author gabizou - September 4th, 2018
      * @author i509VCB - February 17th, 2020 - 1.14.4
@@ -298,9 +300,9 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return this.impl$shouldRestoreInventory;
     }
 
-    @Override
+/*    @Override
     public boolean impl$isImmuneToFireForIgniteEvent() {
         return this.shadow$isSpectator() || this.shadow$isCreative();
-    }
+    }*/
 
 }

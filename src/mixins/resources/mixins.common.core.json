@@ -7,8 +7,17 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1101,
     "mixins": [
+        "command.CommandsMixin",
+        "command.CommandSourceMixin",
+        "command.arguments.ArgumentTypes_EntryMixin",
+        "command.arguments.ArgumentTypesMixin",
+        "entity.EntityMixin",
+        "entity.LivingEntityMixin",
+        "entity.player.PlayerEntityMixin",
+        "entity.player.ServerPlayerEntityMixin",
+        "server.MinecraftServerMixin",
         "server.management.PlayerProfileCacheMixin",
-        "server.MinecraftServerMixin"
+        "service.permission.SubjectMixin"
     ],
     "server": [
     ],

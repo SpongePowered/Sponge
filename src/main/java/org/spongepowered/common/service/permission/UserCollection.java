@@ -60,7 +60,9 @@ public class UserCollection extends SpongeSubjectCollection {
             return (GameProfile) Sponge.getServer().getGameProfileManager().get(uniqueId, true).get();
         } catch (Exception e) {
             SpongeCommon.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
-            return null;
+            // TODO: I'm sure this is null for a reason, but it breaks subjects.
+            // Temporary.
+            return new GameProfile(uniqueId, null);
         }
     }
 

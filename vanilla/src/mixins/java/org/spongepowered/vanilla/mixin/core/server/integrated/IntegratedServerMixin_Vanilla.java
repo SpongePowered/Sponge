@@ -68,6 +68,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer impl
     @Override
     public void run() {
         this.vanilla$lifecycle.establishServerFeatures();
+        this.vanilla$lifecycle.establishCommands();
 
         // TODO Evaluate exactly where we want to call this
         this.vanilla$lifecycle.callStartingEngineEvent();

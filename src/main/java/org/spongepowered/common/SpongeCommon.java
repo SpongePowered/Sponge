@@ -59,8 +59,8 @@ public final class SpongeCommon {
     public static final String ECOSYSTEM_ID = "sponge";
 
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion(
-        Constants.MINECRAFT_VERSION,
-        Constants.MINECRAFT_PROTOCOL_VERSION
+            Constants.MINECRAFT_VERSION,
+            Constants.MINECRAFT_PROTOCOL_VERSION
     );
 
     // Can't @Inject these because they are referenced before everything is initialized

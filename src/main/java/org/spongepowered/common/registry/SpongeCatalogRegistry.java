@@ -64,6 +64,8 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
+import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
+import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.type.ArmorMaterial;
@@ -136,6 +138,8 @@ import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTyp
 import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.CatalogedValueParameterStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerator;
@@ -412,6 +416,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 //            .generateMappedRegistry(TextStyle.Type.class, ResourceKey.minecraft("text_style"), TextStyleTypeStreamGenerator.stream(), true)
 //            .generateRegistry(TextSerializer.class, ResourceKey.minecraft("text_serializer"), TextSerializerStreamGenerator.stream(), true)
 //        ;
+        // This is required for CatalogedValueParameter
+        this.generateRegistry(ClientCompletionType.class, ResourceKey.sponge("client_completion"), ClientCompletionTypeStreamGenerator.stream(), true);
 
         this
 //            .generateRegistry(AccountDeletionResultType.class, ResourceKey.sponge("account_deletion_result_type"), AccountDeletionResultTypeStreamGenerator.stream(), true)
@@ -434,6 +440,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 //            .generateRegistry(DismountType.class, ResourceKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true)
 //            .generateRegistry(DragonPhaseType.class, ResourceKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true)
 //            .generateRegistry(DyeColor.class, ResourceKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
+            .generateRegistry(CatalogedValueParameter.class, ResourceKey.sponge("value_parameter"), CatalogedValueParameterStreamGenerator.stream(), true)
             .generateRegistry(EventContextKey.class, ResourceKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true)
 //            .generateRegistry(FoxType.class, ResourceKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
 //            .generateRegistry(GameMode.class, ResourceKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true)

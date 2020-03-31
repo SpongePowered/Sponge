@@ -29,10 +29,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.registry.BuilderRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.util.ResettableBuilder;
+import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
+import org.spongepowered.common.command.parameter.managed.builder.SpongeTextParameterBuilder;
+import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameterBuilder;
+import org.spongepowered.common.command.parameter.multi.SpongeSequenceParameterBuilder;
+import org.spongepowered.common.command.parameter.subcommand.SpongeSubcommandParameterBuilder;
+import org.spongepowered.common.command.result.SpongeCommandResultBuilder;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -138,6 +148,12 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
 //            .register(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
 //            .register(Trigger.Builder.class, SpongeTriggerBuilder::new)
 //            .register(ResourceKey.Builder.class, SpongeCatalogKeyBuilder::new)
+            .register(Command.Builder.class, SpongeParameterizedCommandBuilder::new)
+            .register(Parameter.FirstOfBuilder.class, SpongeFirstOfParameterBuilder::new)
+            .register(Parameter.SequenceBuilder.class, SpongeSequenceParameterBuilder::new)
+            .register(Parameter.Subcommand.Builder.class, SpongeSubcommandParameterBuilder::new)
+            .register(VariableValueParameters.TextBuilder.class, SpongeTextParameterBuilder::new)
+            .register(CommandResult.Builder.class, SpongeCommandResultBuilder::new)
         ;
     }
 }

@@ -106,6 +106,7 @@ public abstract class HangingEntityMixin extends EntityMixin {
      * @reason Redirect the flow of logic to sponge for events and captures. Forge's compatibility is built in
      * to the implementation.
      */
+    /*
     @Override
     @Overwrite
     public ItemEntity entityDropItem(final ItemStack stack, final float offsetY) {
@@ -122,5 +123,5 @@ public abstract class HangingEntityMixin extends EntityMixin {
         // Sponge - redirect server sided logic to sponge to handle cause stacks and phase states
         return EntityUtil.entityOnDropItem((HangingEntity) (Object) this, stack, offsetY, this.posX + xOffset, this.posZ + zOffset);
     }
-
+*/
 }
