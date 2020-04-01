@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CPlayerTryUseItemPacket;
 import net.minecraft.util.Hand;
@@ -67,7 +68,7 @@ public final class UseItemPacketState extends BasicPacketState {
                         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
                         final ItemStack itemStack = ctx.getItemUsed();
                         frame.addContext(EventContextKeys.SPAWN_TYPE,
-                                itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
+                                itemStack.getType() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
                         frame.pushCause(ctx.getSpongePlayer());
                     });
 

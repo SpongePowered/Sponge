@@ -72,7 +72,6 @@ import javax.sql.DataSource;
  *     -- if some plugin makes database connections to a ton of different databases
  *     we may want to implement this, but it is kinda unimportant.
  */
-@NonnullByDefault
 public class SqlServiceImpl implements SqlService, Closeable {
 
     static final Map<String, Properties> PROTOCOL_SPECIFIC_PROPS;

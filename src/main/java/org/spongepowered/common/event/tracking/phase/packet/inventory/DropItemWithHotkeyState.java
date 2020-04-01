@@ -40,7 +40,6 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -113,11 +112,11 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                             packetIn.getSlotId()).orElse(null);
                     }
 
-                    final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE,
-                        ItemStackSnapshot.NONE);
+                    final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.empty(),
+                        ItemStackSnapshot.empty());
                     final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
                     final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
-                    final ClickInventoryEvent.Drop dropItemEvent = this.createInventoryEvent(player,
+                    final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(player,
                         ContainerUtil.fromNative(player.openContainer),
                         cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
 

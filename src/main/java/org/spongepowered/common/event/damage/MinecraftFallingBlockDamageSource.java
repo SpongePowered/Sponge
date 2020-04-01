@@ -24,26 +24,16 @@
  */
 package org.spongepowered.common.event.damage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.util.EntityDamageSource;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
-import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
 
 public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 
 
     public MinecraftFallingBlockDamageSource(final String damageType, final FallingBlockEntity damageSourceEntityIn) {
-        super(p_i1567_1_, damageSourceEntityIn);
-        this.fallingBlockData = ((DataHolder) damageSourceEntityIn).get(FallingBlockData.class).get().asImmutable();
+        super(damageType, damageSourceEntityIn);
     }
 
-    public MinecraftFallingBlockDamageSource(final String type, final FallingBlockEntity damageSourceEntityIn, final ImmutableFallingBlockData data) {
-        super(type, damageSourceEntityIn);
-        this.fallingBlockData = checkNotNull(data);
-    }
 
     @Override
     public FallingBlockEntity getTrueSource() {

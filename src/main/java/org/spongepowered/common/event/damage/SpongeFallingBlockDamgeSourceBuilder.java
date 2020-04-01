@@ -27,7 +27,7 @@ package org.spongepowered.common.event.damage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
+import net.minecraft.entity.item.FallingBlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
@@ -35,19 +35,11 @@ import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDam
 import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
 
 import java.lang.ref.WeakReference;
-import net.minecraft.entity.item.FallingBlockEntity;
 
 public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder>
     implements FallingBlockDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
-    private ImmutableFallingBlockData blockData = null;
-
-    @Override
-    public SpongeFallingBlockDamgeSourceBuilder fallingBlock(final ImmutableFallingBlockData fallingBlock) {
-        this.blockData = fallingBlock;
-        return this;
-    }
 
     @Override
     public SpongeFallingBlockDamgeSourceBuilder entity(final Entity entity) {
@@ -56,16 +48,19 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
         return this;
     }
 
+    @Override
+    public FallingBlockDamageSource.Builder fire() {
+        return null;
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Override
     public FallingBlockDamageSource build() throws IllegalStateException {
         checkState(this.reference.get() != null);
-        checkState(this.blockData != null);
         checkState(this.damageType != null);
         final MinecraftFallingBlockDamageSource damageSource =
-            new MinecraftFallingBlockDamageSource(this.damageType.getId(),
-                (FallingBlockEntity) this.reference.get(),
-                this.blockData);
+            new MinecraftFallingBlockDamageSource(this.damageType.getKey().getFormatted(),
+                (FallingBlockEntity) this.reference.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
             accessor.accessor$setDamageAllowedInCreativeMode();
@@ -95,7 +90,6 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
     public FallingBlockDamageSource.Builder from(final FallingBlockDamageSource value) {
         super.from(value);
         this.reference = new WeakReference<>(value.getSource());
-        this.blockData = value.getFallingBlockData();
         return this;
     }
 
@@ -103,7 +97,31 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
     public SpongeFallingBlockDamgeSourceBuilder reset() {
         super.reset();
         this.reference = null;
-        this.blockData = null;
         return this;
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder places(final boolean canPlace) {
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder fallTime(final int time) {
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder hurtsEntities(final boolean hurts) {
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder maxDamage(final double damage) {
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder damagePerBlock(final double damagePer) {
+        throw new UnsupportedOperationException("implement me");
     }
 }

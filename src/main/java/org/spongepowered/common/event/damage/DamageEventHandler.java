@@ -34,7 +34,6 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -48,6 +47,7 @@ import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.CauseStackManager;
@@ -66,10 +66,11 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.mixin.accessor.item.ArmorItemAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -108,6 +109,7 @@ public class DamageEventHandler {
 
     private static double damageToHandle;
 
+    @SuppressWarnings("ConstantConditions")
     public static Optional<List<DamageFunction>> createArmorModifiers(final LivingEntity entityLivingBase,
             final DamageSource damageSource, double damage) {
         if (!damageSource.isUnblockable()) {
@@ -124,7 +126,8 @@ public class DamageEventHandler {
                 final Item item = itemStack.getItem();
                 if (item instanceof ArmorItem) {
                     final ArmorItem armor = (ArmorItem) item;
-                    final double reduction = armor.damageReduceAmount / 25D;
+                    final ArmorItemAccessor accessor = (ArmorItemAccessor) item;
+                    final double reduction = accessor.accessor$getDamageReduceAmount() / 25D;
                     final DamageObject object = new DamageObject();
                     object.slot = index;
                     object.ratio = reduction;
@@ -162,7 +165,7 @@ public class DamageEventHandler {
 
                 // TODO: direct cause creation: bad bad bad
                 final DamageModifier modifier = DamageModifier.builder()
-                    .cause(Cause.of(EventContext.empty(), ((org.spongepowered.api.item.inventory.ItemStack) inventory[prop.slot]).createSnapshot(),
+                    .cause(Cause.of(EventContext.empty(), ((org.spongepowered.api.item.inventory.ItemStack) (Object) inventory[prop.slot]).createSnapshot(),
                                     prop, // We need this property to refer to the slot.
                                     object)) // We need this object later on.
                     .type(DamageModifierTypes.ARMOR)
@@ -199,21 +202,21 @@ public class DamageEventHandler {
             }
 
             final int itemDamage = (int) (damage / 25D < 1 ? 1 : damage / 25D);
-            stack.damageItem(itemDamage, entity);
+            stack.damageItem(itemDamage, entity, (livingEntity) -> livingEntity.sendBreakAnimation(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, property.get().slot)));
         }
     }
 
     public static EquipmentType resolveEquipment(final int slot) {
         if (slot == 0) {
-            return EquipmentTypes.BOOTS;
+            return EquipmentTypes.BOOTS.get();
         } else if (slot == 1) {
-            return EquipmentTypes.LEGGINGS;
+            return EquipmentTypes.LEGGINGS.get();
         } else if (slot == 2) {
-            return EquipmentTypes.CHESTPLATE;
+            return EquipmentTypes.CHESTPLATE.get();
         } else if (slot == 3) {
-            return EquipmentTypes.HEADWEAR;
+            return EquipmentTypes.HEADWEAR.get();
         } else {
-            return EquipmentTypes.WORN;
+            return EquipmentTypes.WORN.get();
         }
     }
 
@@ -250,13 +253,13 @@ public class DamageEventHandler {
                     continue;
                 }
 
-                for (int i = 0; i < enchantmentList.tagCount(); ++i) {
+                for (int i = 0; i < enchantmentList.size(); ++i) {
                     final short enchantmentId = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
                     final short level = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
-                    if (Enchantment.getEnchantmentByID(enchantmentId) != null) {
+                    final Enchantment enchantment = Registry.ENCHANTMENT.getByValue(enchantmentId);
+                    if (enchantment != null) {
                         // Ok, we have an enchantment!
-                        final Enchantment enchantment = Enchantment.getEnchantmentByID(enchantmentId);
                         final int temp = enchantment.calcModifierDamage(level, damageSource);
                         if (temp != 0) {
                             enchantments.put(enchantment, level);
@@ -384,7 +387,7 @@ public class DamageEventHandler {
                 ownerBridge.tracked$getOwnerReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
             }
         } else if (damageSource instanceof BlockDamageSource) {
-            final Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
+            final Location location = ((BlockDamageSource) damageSource).getLocation();
             final BlockPos blockPos = VecHelper.toBlockPos(location);
             final ChunkBridge mixinChunk = (ChunkBridge) ((net.minecraft.world.World) location.getWorld()).getChunkAt(blockPos);
             mixinChunk.bridge$getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
@@ -403,11 +406,11 @@ public class DamageEventHandler {
                 return ImmutableList.of();
             }
 
-            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
+            for (int i = 0; i < nbttaglist.size(); ++i) {
                 final int j = nbttaglist.getCompound(i).getShort("id");
                 final int enchantmentLevel = nbttaglist.getCompound(i).getShort("lvl");
 
-                final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
+                final Enchantment enchantment = Registry.ENCHANTMENT.getByValue(j);
                 if (enchantment != null) {
                     enchantments.put(enchantment, enchantmentLevel);
                 }
@@ -459,11 +462,12 @@ public class DamageEventHandler {
         return new DamageFunction(modifier, function);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static Optional<DamageFunction> createShieldFunction(final LivingEntity entity, final DamageSource source, final float amount) {
         if (entity.isActiveItemStackBlocking() && amount > 0.0 && ((LivingEntityAccessor) entity).accessor$canBlockDamageSource(source)) {
             // TODO: direct cause creation: bad bad bad
             final DamageModifier modifier = DamageModifier.builder()
-                    .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) entity.getActiveItemStack()).createSnapshot()))
+                    .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) (Object) entity.getActiveItemStack()).createSnapshot()))
                     .type(DamageModifierTypes.SHIELD)
                     .build();
             return Optional.of(new DamageFunction(modifier, (damage) -> -damage));

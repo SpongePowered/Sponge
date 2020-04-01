@@ -24,20 +24,19 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import net.minecraft.world.chunk.AbstractChunkProvider;
+import net.minecraft.world.gen.ChunkGenerator;
 import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.gen.ChunkGenerator;
 
 public class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
 
     @Nullable private Feature type;
-    @Nullable SpongeChunkGenerator spongeGen;
+//    @Nullable SpongeChunkGenerator spongeGen;
     @Nullable AbstractChunkProvider provider;
     @Nullable ChunkGenerator modGen;
 
@@ -50,7 +49,6 @@ public class GenerationCompatibileContext extends GenerationContext<GenerationCo
     protected void reset() {
         super.reset();
         this.type = null;
-        this.spongeGen = null;
         this.provider = null;
         this.modGen = null;
     }
@@ -65,20 +63,20 @@ public class GenerationCompatibileContext extends GenerationContext<GenerationCo
         final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "PopulatorType", this.type)
-            .add(s + "- %s: %s", "SpongeChunkGenerator", this.spongeGen)
+//            .add(s + "- %s: %s", "SpongeChunkGenerator", this.spongeGen)
             .add(s + "- %s: %s", "ChunkProvider", this.provider)
             .add(s + "- %s: %s", "Mod Provided Chunk Generator", this.modGen)
             ;
 
     }
-
-    @SuppressWarnings("deprecation")
-    public GenerationCompatibileContext assignModCompatiblity(
-        final SpongeChunkGenerator spongeGen, final AbstractChunkProvider chunkProvider, final ChunkGenerator chunkGenerator) {
-        this.spongeGen = spongeGen;
-        this.provider = chunkProvider;
-        this.modGen = chunkGenerator;
-        return this;
-    }
+//
+//    @SuppressWarnings("deprecation")
+//    public GenerationCompatibileContext assignModCompatiblity(
+//        final SpongeChunkGenerator spongeGen, final AbstractChunkProvider chunkProvider, final ChunkGenerator chunkGenerator) {
+//        this.spongeGen = spongeGen;
+//        this.provider = chunkProvider;
+//        this.modGen = chunkGenerator;
+//        return this;
+//    }
 
 }

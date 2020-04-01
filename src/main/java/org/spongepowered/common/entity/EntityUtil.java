@@ -666,7 +666,7 @@ public final class EntityUtil {
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final Location location) {
         final Transform fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
-        final Transform toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
+        final Transform toTransform = fromTransform.withPosition(location.getPosition()).withRotation(location.get).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
@@ -725,7 +725,7 @@ public final class EntityUtil {
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    ((ServerWorldBridge) entityToSpawn.world).bridge$forceSpawnEntity(entityToSpawn);
+                    entityToSpawn.world.addEntity(entityToSpawn);
                     return true;
                 }
             }
@@ -738,89 +738,10 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((ServerWorldBridge) entity.getWorld()).bridge$forceSpawnEntity((Entity) entity);
+        ((net.minecraft.world.World) entity.getWorld()).addEntity((Entity) entity);
         return true;
     }
 
-    static final class EntityTrace {
-
-        Entity entity;
-        Vec3d location;
-        double distance;
-
-        EntityTrace(final double entityDistance) {
-            this.distance = entityDistance;
-        }
-
-        RayTraceResult asRayTraceResult() {
-            return new RayTraceResult(this.entity, this.location);
-        }
-    }
-
-    public static RayTraceResult rayTraceFromEntity(final Entity source, final double traceDistance, final float partialTicks, final boolean includeEntities) {
-        final RayTraceResult blockRay = EntityUtil.rayTraceFromEntity(source, traceDistance, partialTicks);
-
-        if (!includeEntities) {
-            return blockRay;
-        }
-
-        final Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
-        final double blockDistance = (blockRay != null) ? blockRay.hitResult.distanceTo(traceStart) : traceDistance;
-        final EntityTrace trace = new EntityTrace(blockDistance);
-
-        final Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
-        final Vec3d traceEnd = traceStart.add(lookDir);
-
-        final AxisAlignedBB boundingBox = source.getBoundingBox();
-        final AxisAlignedBB traceBox = boundingBox.expand(lookDir.x, lookDir.y, lookDir.z);
-        final List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), EntityUtil.TRACEABLE);
-        for (final Entity entity : entities) {
-            final AxisAlignedBB entityBB = entity.getBoundingBox().grow(entity.getCollisionBorderSize());
-            final RayTraceResult entityRay1 = entityBB.calculateIntercept(traceStart, traceEnd);
-
-            if (entityBB.contains(traceStart)) {
-                if (trace.distance >= 0.0D) {
-                    trace.entity = entity;
-                    trace.location = entityRay1 == null ? traceStart : entityRay1.hitResult;
-                    trace.distance = 0.0D;
-                }
-                continue;
-            }
-
-            if (entityRay1 == null) {
-                continue;
-            }
-
-            final double distanceToEntity = traceStart.distanceTo(entityRay1.hitResult);
-
-            if (distanceToEntity < trace.distance || trace.distance == 0.0D) {
-                if (entity.getLowestRidingEntity() == source.getLowestRidingEntity()) {
-                    if (trace.distance == 0.0D) {
-                        trace.entity = entity;
-                        trace.location = entityRay1.hitResult;
-                    }
-                } else {
-                    trace.entity = entity;
-                    trace.location = entityRay1.hitResult;
-                    trace.distance = distanceToEntity;
-                }
-            }
-        }
-
-        if (trace.entity != null && (trace.distance < blockDistance || blockRay == null)) {
-            return trace.asRayTraceResult();
-        }
-
-        return blockRay;
-    }
-
-    @Nullable
-    public static RayTraceResult rayTraceFromEntity(final Entity source, final double traceDistance, final float partialTicks) {
-        final Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
-        final Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
-        final Vec3d traceEnd = traceStart.add(lookDir);
-        return source.world.rayTraceBlocks(traceStart, traceEnd, false, false, true);
-    }
 
     private static Vec3d getPositionEyes(final Entity entity, final float partialTicks)
     {
