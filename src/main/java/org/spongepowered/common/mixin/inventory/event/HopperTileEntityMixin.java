@@ -31,6 +31,7 @@ import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.IHopper;
 import net.minecraft.util.Direction;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -117,9 +118,9 @@ public abstract class HopperTileEntityMixin {
         if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = impl$forCapture(this);
-            InventoryEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
+            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
             // Call event
-            InventoryEventFactory.callTransferPost(capture, (Inventory) this, InventoryUtil.toInventory(iInventory));
+            InventoryEventFactory.callTransferPost(capture, (Inventory) this, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
         }
     }
 
@@ -135,9 +136,9 @@ public abstract class HopperTileEntityMixin {
         if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = impl$forCapture(hopper);
-            InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
+            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
-            InventoryEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper));
+            InventoryEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper), itemStack1, sourceSlotTransaction);
         }
     }
 

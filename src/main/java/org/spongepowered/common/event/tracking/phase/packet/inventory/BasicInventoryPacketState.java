@@ -56,9 +56,9 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
@@ -206,7 +206,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         if (packetIn.getSlotId() >= 0) {
             slot = ((InventoryAdapter) trackedInventory).inventoryAdapter$getSlot(packetIn.getSlotId()).orElse(null);
         }
-        // else TODO slot for ClickInventoryEvent.Drag
+        // else TODO slot for ClickContainerEvent.Drag
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(openContainer);
             Sponge.getCauseStackManager().pushCause(player);

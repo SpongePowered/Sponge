@@ -64,6 +64,7 @@ import org.spongepowered.api.event.item.inventory.container.InteractContainerEve
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -260,7 +261,7 @@ public class InventoryEventFactory {
     }
 
 
-    public static ClickContainerEvent.Creative callCreativeClickInventoryEvent(final ServerPlayerEntity player, final CCreativeInventoryActionPacket packetIn) {
+    public static ClickContainerEvent.Creative callCreativeClickContainerEvent(final ServerPlayerEntity player, final CCreativeInventoryActionPacket packetIn) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
@@ -392,13 +393,29 @@ public class InventoryEventFactory {
         return event;
     }
 
-    public static void callTransferPost(@Nullable final TrackedInventoryBridge captureSource, @Nullable final Inventory source, @Nullable final Inventory destination) {
+    public static void callTransferPost(@Nullable final TrackedInventoryBridge captureSource, @Nullable final Inventory source,
+            @Nullable final Inventory destination, ItemStack sourceStack, SlotTransaction sourceSlotTransaction) {
         // TODO make sure we never got null
-        if (captureSource == null || source == null || destination == null) {
+        if (captureSource == null || source == null || destination == null || sourceSlotTransaction == null) {
             return;
         }
         Sponge.getCauseStackManager().pushCause(source);
         List<SlotTransaction> slotTransactions = captureSource.bridge$getCapturedSlotTransactions();
+
+        sourceStack = sourceStack.copy();
+        sourceStack.setCount(1);
+        ItemStackSnapshot transferredStack = ItemStackUtil.snapshotOf(sourceStack);
+
+        Slot sourceSlot = sourceSlotTransaction.getSlot();
+        Slot targetSlot = null;
+        // There should only be 2 transactions - the other is the transaction on the target slot
+        for (SlotTransaction transaction : slotTransactions) {
+            if (transaction != sourceSlotTransaction) {
+                targetSlot = transaction.getSlot();
+                break;
+            }
+        }
+
         final TransferInventoryEvent.Post event =
                 SpongeEventFactory.createTransferInventoryEventPost(Sponge.getCauseStackManager().getCurrentCause(),
                         source, sourceSlot, destination, targetSlot, transferredStack);
@@ -416,10 +433,10 @@ public class InventoryEventFactory {
      * @param index the affected SlotIndex
      * @param originalStack the original Stack
      */
-    public static void captureTransaction(@Nullable final TrackedInventoryBridge captureIn, @Nullable final Inventory inv, final int index, final ItemStack originalStack) {
+    public static SlotTransaction captureTransaction(@Nullable final TrackedInventoryBridge captureIn, @Nullable final Inventory inv, final int index, final ItemStack originalStack) {
         // TODO make sure we never got null
         if (captureIn == null || inv == null) {
-            return;
+            return null;
         }
 
         Optional<org.spongepowered.api.item.inventory.Slot> slot = inv.getSlot(index);
@@ -428,8 +445,10 @@ public class InventoryEventFactory {
                     ItemStackUtil.snapshotOf(originalStack),
                     ItemStackUtil.snapshotOf(slot.get().peek()));
             captureIn.bridge$getCapturedSlotTransactions().add(trans);
+            return trans;
         } else {
             SpongeImpl.getLogger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
+            return null;
         }
     }
 

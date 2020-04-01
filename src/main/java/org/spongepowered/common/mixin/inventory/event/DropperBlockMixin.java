@@ -35,6 +35,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -61,8 +62,8 @@ public abstract class DropperBlockMixin {
         if (itemstack1.getCount() == itemstack.getCount() - 1) {
             final TrackedInventoryBridge capture = impl$forCapture(tileentitydispenser);
             final Inventory sourceInv = ((Inventory) tileentitydispenser);
-            InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-            InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory));
+            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+            InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
         }
         callbackInfo.cancel();
     }
@@ -77,11 +78,11 @@ public abstract class DropperBlockMixin {
         if (itemstack1.getCount() == itemstack.getCount() - 1) {
             final TrackedInventoryBridge capture = impl$forCapture(tileentitydispenser);
             final Inventory sourceInv = ((Inventory) tileentitydispenser);
-            InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
             final Direction enumfacing = worldIn.getBlockState(pos).get(DispenserBlock.FACING);
             final BlockPos blockpos = pos.offset(enumfacing);
             final IInventory iinventory = HopperTileEntity.getInventoryAtPosition(worldIn, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
-            InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory));
+            InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
         }
         callbackInfo.cancel();
     }

@@ -66,7 +66,7 @@ public class ServerPlayNetHandlerMixin {
             final boolean ignoresCreative = context.getIgnoringCreative();
 
             if (!ignoresCreative) {
-                final ClickContainerEvent.Creative clickEvent = InventoryEventFactory.callCreativeClickInventoryEvent(this.player, packetIn);
+                final ClickContainerEvent.Creative clickEvent = InventoryEventFactory.callCreativeClickContainerEvent(this.player, packetIn);
                 if (clickEvent.isCancelled()) {
                     // Reset slot on client
                     if (packetIn.getSlotId() >= 0 && packetIn.getSlotId() < this.player.container.inventorySlots.size()) {
@@ -121,7 +121,7 @@ public class ServerPlayNetHandlerMixin {
 
             if (itemValidCheck) {
                 if (!ignoresCreative) {
-                    final ClickContainerEvent.Creative clickEvent = InventoryEventFactory.callCreativeClickInventoryEvent(this.player, packetIn);
+                    final ClickContainerEvent.Creative clickEvent = InventoryEventFactory.callCreativeClickContainerEvent(this.player, packetIn);
                     if (clickEvent.isCancelled()) {
                         // Reset slot on client
                         if (packetIn.getSlotId() >= 0 && packetIn.getSlotId() < this.player.container.inventorySlots.size()) {
