@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.config.category;
 
-import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.launch.SpongeLaunch;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,8 +120,8 @@ public class WorldCategory extends ConfigCategory {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
             // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-            this.denyChunkRequests = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
-        } catch (IOException e) {
+            this.denyChunkRequests = SpongeLaunch.isVanilla();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

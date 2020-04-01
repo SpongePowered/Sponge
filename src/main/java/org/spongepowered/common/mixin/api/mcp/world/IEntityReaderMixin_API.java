@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -50,10 +51,9 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
-
 @Mixin(IEntityReader.class)
 public interface IEntityReaderMixin_API extends ReadableEntityVolume {
+    //@formatter:off
     @Shadow List<net.minecraft.entity.Entity> shadow$getEntitiesInAABBexcluding(@Nullable net.minecraft.entity.Entity p_175674_1_, AxisAlignedBB p_175674_2_, @Nullable Predicate<? super net.minecraft.entity.Entity> p_175674_3_);
     @Shadow<T extends net.minecraft.entity.Entity> List<T> shadow$getEntitiesWithinAABB(Class<? extends T> p_175647_1_, AxisAlignedBB p_175647_2_, @Nullable Predicate<? super T> p_175647_3_);
     @Shadow <T extends net.minecraft.entity.Entity> List<T> shadow$func_225316_b(Class<? extends T> p_225316_1_, AxisAlignedBB p_225316_2_, @Nullable Predicate<? super T> p_225316_3_);
@@ -89,6 +89,8 @@ public interface IEntityReaderMixin_API extends ReadableEntityVolume {
     @Nullable
     @Shadow PlayerEntity shadow$getPlayerByUuid(UUID p_217371_1_);
 
+    //@formatter:on
+
     @Override
     default Vector3i getBlockMin() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
@@ -105,17 +107,17 @@ public interface IEntityReaderMixin_API extends ReadableEntityVolume {
     }
 
     @Override
-    default boolean containsBlock(int x, int y, int z) {
+    default boolean containsBlock(final int x, final int y, final int z) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
     }
 
     @Override
-    default boolean isAreaAvailable(int x, int y, int z) {
+    default boolean isAreaAvailable(final int x, final int y, final int z) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
     }
 
     @Override
-    default ReadableEntityVolume getView(Vector3i newMin, Vector3i newMax) {
+    default ReadableEntityVolume getView(final Vector3i newMin, final Vector3i newMax) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
     }
 
@@ -130,7 +132,7 @@ public interface IEntityReaderMixin_API extends ReadableEntityVolume {
     }
 
     @Override
-    default Optional<Entity> getEntity(UUID uuid) {
+    default Optional<Entity> getEntity(final UUID uuid) {
         return Optional.empty();
     }
 
@@ -142,14 +144,15 @@ public interface IEntityReaderMixin_API extends ReadableEntityVolume {
 
     @SuppressWarnings("unchecked")
     @Override
-    default Collection<? extends Entity> getEntities(AABB box, Predicate<? super Entity> filter) {
+    default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
         return (Collection<? extends Entity>) this
                 .shadow$getEntitiesInAABBexcluding(null, VecHelper.toMinecraftAABB(box), entity -> entity instanceof Entity && filter.test((Entity) entity));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default <E extends Entity> Collection<? extends E> getEntities(Class<? extends E> entityClass, AABB box, @Nullable Predicate<? super E> predicate) {
+    default <E extends Entity> Collection<? extends E> getEntities(final Class<? extends E> entityClass, final AABB box, @Nullable
+    final Predicate<? super E> predicate) {
         final Predicate<? super net.minecraft.entity.Entity> filter = entity -> predicate == null || (entityClass.isInstance(entity) && predicate.test((E) entity));
         final List<net.minecraft.entity.Entity>
             ts =

@@ -28,6 +28,7 @@ import net.minecraft.launchwrapper.Launch;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
 
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.function.Supplier;
@@ -77,6 +78,16 @@ public class SpongeLaunchWrapperLaunchService implements InternalLaunchService {
     @Override
     public Supplier<? extends Logger> getLaunchLogger() {
         return () -> this.logger;
+    }
+
+    @Override
+    public boolean isVanilla() {
+        try {
+            return Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override

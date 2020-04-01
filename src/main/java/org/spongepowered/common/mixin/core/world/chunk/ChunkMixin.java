@@ -27,23 +27,15 @@ package org.spongepowered.common.mixin.core.world.chunk;
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.provider.BiomeProvider;
-import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.ChunkGenerator;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.world.volume.entity.ReadableEntityVolume;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -52,24 +44,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.world.gen.WorldGenConstants;
-import org.spongepowered.math.GenericMath;
-import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 @Mixin(net.minecraft.world.chunk.Chunk.class)
@@ -77,27 +63,15 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     // @formatter:off
     @Shadow @Final private World world;
-    @Shadow @Final public int x;
-    @Shadow @Final public int z;
-    @Shadow @Final private ExtendedBlockStorage[] storageArrays;
-    @Shadow @Final private int[] precipitationHeightMap;
-    @Shadow @Final private int[] heightMap;
+    @Shadow @Final private ChunkPos pos;
     @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entityLists;
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
     @Shadow private boolean loaded;
     @Shadow private boolean dirty;
-    @Shadow public boolean unloadQueued;
 
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, net.minecraft.world.chunk.Chunk.CreateEntityType p_177424_2_);
-    @Shadow public abstract void generateSkylightMap();
-    @Shadow public abstract int getLightFor(LightType p_177413_1_, BlockPos pos);
-    @Shadow public abstract BlockState getBlockState(BlockPos pos);
-    @Shadow public abstract BlockState getBlockState(int x, int y, int z);
-    @Shadow public abstract Biome getBiome(BlockPos pos, BiomeProvider chunkManager);
-    @Shadow private void propagateSkylightOcclusion(final int x, final int z) { }
-    @Shadow private void relightBlock(final int x, final int y, final int z) { }
-    @Shadow protected abstract void populate(ChunkGenerator generator);
 
+    @Shadow public abstract BlockState getBlockState(BlockPos pos);
     // @formatter:on
 
     private long impl$scheduledForUnload = -1; // delay chunk unloads
@@ -108,8 +82,9 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/ChunkPos;[Lnet/minecraft/world/biome/Biome;)V",
             at = @At("RETURN"))
-    private void impl$onConstruct(World worldIn, ChunkPos p_i49945_2_, Biome[] p_i49945_3_, CallbackInfo ci) {
-        this.impl$cacheKey = ChunkPos.asLong(x, z);
+    private void impl$onConstruct(
+        final World worldIn, final ChunkPos p_i49945_2_, final Biome[] p_i49945_3_, final CallbackInfo ci) {
+        this.impl$cacheKey = ChunkPos.asLong(p_i49945_2_.x, p_i49945_2_.z);
     }
 
     @Override
@@ -124,7 +99,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public boolean bridge$isQueuedForUnload() {
-        return this.unloadQueued;
+        throw new UnsupportedOperationException("implement me");
     }
 
     @Override
@@ -276,92 +251,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Override
-    public void bridge$getIntersectingEntities(final Vector3d start, final Vector3d direction, final double distance,
-            final java.util.function.Predicate<? super ReadableEntityVolume.EntityHit> filter, final double entryY, final double exitY,
-            final Set<? super ReadableEntityVolume.EntityHit> intersections) {
-        // Order the entry and exit y coordinates by magnitude
-        final double yMin = Math.min(entryY, exitY);
-        final double yMax = Math.max(entryY, exitY);
-        // Added offset matches the one in Chunk.getEntitiesWithinAABBForEntity
-        final int lowestSubChunk = GenericMath.clamp(GenericMath.floor((yMin - 2) / 16D), 0, this.entityLists.length - 1);
-        final int highestSubChunk = GenericMath.clamp(GenericMath.floor((yMax + 2) / 16D), 0, this.entityLists.length - 1);
-        // For each sub-chunk, perform intersections in its entity list
-        for (int i = lowestSubChunk; i <= highestSubChunk; i++) {
-            this.impl$getIntersectingEntities(this.entityLists[i], start, direction, distance, filter, intersections);
-        }
-    }
-
-    private void impl$getIntersectingEntities(final Collection<? extends Entity> entities, final Vector3d start, final Vector3d direction,
-            final double distance, final java.util.function.Predicate<? super ReadableEntityVolume.EntityHit> filter,
-            final Set<? super ReadableEntityVolume.EntityHit> intersections) {
-        // Check each entity in the list
-        for (final net.minecraft.entity.Entity entity : entities) {
-            final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
-            final Optional<AABB> box = spongeEntity.getBoundingBox();
-            // Can't intersect if the entity doesn't have a bounding box
-            if (!box.isPresent()) {
-                continue;
-            }
-            // Ignore entities that didn't intersect
-            final Optional<Tuple<Vector3d, Vector3d>> optionalIntersection = box.get().intersects(start, direction);
-            if (!optionalIntersection.isPresent()) {
-                continue;
-            }
-            // Check that the entity isn't too far away
-            final Tuple<Vector3d, Vector3d> intersection = optionalIntersection.get();
-            final double distanceSquared = intersection.getFirst().sub(start).lengthSquared();
-            if (distanceSquared > distance * distance) {
-                continue;
-            }
-            // Now test the filter on the entity and intersection
-            final ReadableEntityVolume.EntityHit hit = new ReadableEntityVolume.EntityHit(spongeEntity, intersection.getFirst(), intersection.getSecond(), Math.sqrt(distanceSquared));
-            if (!filter.test(hit)) {
-                continue;
-            }
-            // If everything passes we have an intersection!
-            intersections.add(hit);
-            // If the entity has part, recurse on these
-            final net.minecraft.entity.Entity[] parts = entity.getParts();
-            if (parts != null && parts.length > 0) {
-                this.impl$getIntersectingEntities(Arrays.asList(parts), start, direction, distance, filter, intersections);
-            }
-        }
-    }
-
-    @Inject(method = "generateSkylightMap", at = @At("HEAD"), cancellable = true)
-    private void impl$IfLightingEnabledCancel(final CallbackInfo ci) {
-        if (!WorldGenConstants.lightingEnabled) {
-            ci.cancel();
-        }
-    }
-
-    @Override
-    public void bridge$fill(final ChunkPrimer primer) {
-        final boolean flag = this.world.dimension.hasSkyLight();
-        for (int x = 0; x < 16; ++x) {
-            for (int z = 0; z < 16; ++z) {
-                for (int y = 0; y < 256; ++y) {
-                    final BlockState block = primer.getBlockState(x, y, z);
-                    if (block.getMaterial() != Material.AIR) {
-                        final int section = y >> 4;
-                        if (this.storageArrays[section] == net.minecraft.world.chunk.Chunk.EMPTY_SECTION) {
-                            this.storageArrays[section] = new ExtendedBlockStorage(section << 4, flag);
-                        }
-                        this.storageArrays[section].setBlockState(x, y & 15, z, block);
-                    }
-                }
-            }
-        }
-    }
-
-    @Redirect(
-            method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;invalidate()V"))
-    private void redirectInvalidate(final TileEntity te) {
-        SpongeImplHooks.onTileEntityInvalidate(te);
-    }
-
-    @Override
     public boolean bridge$isActive() {
         if (this.bridge$isPersistedChunk()) {
             return true;
@@ -373,7 +262,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("World", this.world)
-                .add("Position", this.x + this.z)
+                .add("Position", this.pos.x + this.pos.z)
                 .toString();
     }
 

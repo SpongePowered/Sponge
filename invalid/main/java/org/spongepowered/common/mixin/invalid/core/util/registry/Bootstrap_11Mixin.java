@@ -22,21 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.mixin.invalid.core.util.registry;
 
-import org.apache.logging.log4j.Logger;
+import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
+import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.function.Supplier;
+@Mixin(targets = "net/minecraft/util/registry/Bootstrap$11")
+public abstract class Bootstrap_11Mixin {
 
-public interface InternalLaunchService {
+    @Redirect(method = "dispenseStack(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
+    private boolean impl$setShooterOnSmallFireball(final World world, final Entity smallFireball, final IBlockSource source, final ItemStack stack) {
+        ((SmallFireball) smallFireball).setShooter(source.getBlockTileEntity());
+        return world.addEntity0(smallFireball);
+    }
 
-    void addJreExtensionsToClassPath();
-
-    void registerSuperclassModification(final String targetClass, final String newSuperClass);
-
-    Supplier<? extends IExitHandler> getExitHandler();
-
-    Supplier<? extends Logger> getLaunchLogger();
-
-    boolean isVanilla();
 }

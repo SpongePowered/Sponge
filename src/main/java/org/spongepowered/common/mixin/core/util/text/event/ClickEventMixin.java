@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.util.text.event;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.util.text.event.ClickEvent;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Final;
@@ -39,9 +38,7 @@ import org.spongepowered.common.text.action.SpongeCallbackHolder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 @Mixin(ClickEvent.class)
 public abstract class ClickEventMixin implements ClickEventBridge {
@@ -68,11 +65,11 @@ public abstract class ClickEventMixin implements ClickEventBridge {
                         if (this.value.startsWith(SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED)) {
                             try {
                                 UUID callbackId = UUID.fromString(this.value.substring(SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED.length() + 1));
-                                Optional<Consumer<CommandSource>> callback = SpongeCallbackHolder.getInstance().getCallbackForUUID(callbackId);
-                                if (callback.isPresent()) {
-                                    this.bridge$setHandle(TextActions.executeCallback(callback.get()));
-                                    break;
-                                }
+//                                Optional<Consumer<CommandSource>> callback = SpongeCallbackHolder.getInstance().getCallbackForUUID(callbackId);
+//                                if (callback.isPresent()) {
+//                                    this.bridge$setHandle(TextActions.executeCallback(callback.get()));
+//                                    break;
+//                                }
                             } catch (IllegalArgumentException ex) {
                             }
                         }
@@ -90,7 +87,7 @@ public abstract class ClickEventMixin implements ClickEventBridge {
                 this.initialized = true;
             }
         }
-
+        throw new UnsupportedOperationException("Implement me properly");
         return this.handle;
     }
 

@@ -48,56 +48,37 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.sound.SoundCategory;
-import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
-import org.spongepowered.api.text.BookView;
-import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.ProtoWorld;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.volume.biome.worker.MutableBiomeVolumeStream;
-import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
 import org.spongepowered.api.world.volume.entity.ImmutableEntityVolume;
 import org.spongepowered.api.world.volume.entity.UnmodifiableEntityVolume;
-import org.spongepowered.api.world.volume.entity.worker.MutableEntityStream;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.time.Duration;
+import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 @Mixin(IWorld.class)
 public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderMixin_API, IWorldReaderMixin_API<T>, IWorldGenerationReaderMixin_API, ProtoWorld<T> {
@@ -123,7 +104,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
 
 
     @Override
-    default boolean setBiome(int x, int y, int z, BiomeType biome) {
+    default boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
         final IChunk iChunk = this.shadow$getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
         if (iChunk == null) {
             return false;
@@ -152,17 +133,17 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     }
 
     @Override
-    default boolean containsBlock(int x, int y, int z) {
+    default boolean containsBlock(final int x, final int y, final int z) {
         return this.shadow$chunkExists(x >> 4, z >> 4);
     }
 
     @Override
-    default boolean isAreaAvailable(int x, int y, int z) {
+    default boolean isAreaAvailable(final int x, final int y, final int z) {
         return this.shadow$chunkExists(x >> 4, z >> 4);
     }
 
     @Override
-    default T getView(Vector3i newMin, Vector3i newMax) {
+    default T getView(final Vector3i newMin, final Vector3i newMax) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
@@ -177,7 +158,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     }
 
     @Override
-    default Optional<Entity> getEntity(UUID uuid) {
+    default Optional<Entity> getEntity(final UUID uuid) {
         return Optional.empty();
     }
 
@@ -185,12 +166,12 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     default Collection<? extends Player> getPlayers() {
         return IEntityReaderMixin_API.super.getPlayers();
     }
-    @Override default Collection<? extends Entity> getEntities(AABB box, Predicate<? super Entity> filter) {
+    @Override default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
         return IEntityReaderMixin_API.super.getEntities(box, filter);
     }
     @Override
-    default <E extends Entity> Collection<? extends E> getEntities(Class<? extends E> entityClass, AABB box,
-                                                                   @Nullable Predicate<? super E> predicate) {
+    default <E extends Entity> Collection<? extends E> getEntities(final Class<? extends E> entityClass, final AABB box,
+                                                                   @Nullable final Predicate<? super E> predicate) {
         return IEntityReaderMixin_API.super.getEntities(entityClass, box, predicate);
     }
 
@@ -211,259 +192,116 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     }
 
     @Override
-    default boolean setBlock(Vector3i position, BlockState block) {
+    default boolean setBlock(final Vector3i position, final BlockState block) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
     @Override
-    default boolean setBlock(int x, int y, int z, BlockState block) {
+    default boolean setBlock(final int x, final int y, final int z, final BlockState block) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
     @Override
-    default boolean setBlock(Vector3i position, BlockState state, BlockChangeFlag flag) {
+    default boolean setBlock(final Vector3i position, final BlockState state, final BlockChangeFlag flag) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
     @Override
-    default <V> Optional<V> getProperty(int x, int y, int z, Property<V> property) {
+    default Entity createEntity(final EntityType<?> type, final Vector3d position) throws IllegalArgumentException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    default Entity createEntityNaturally(final EntityType<?> type, final Vector3d position) throws IllegalArgumentException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    default Optional<Entity> createEntity(final DataContainer entityContainer) {
         return Optional.empty();
     }
 
     @Override
-    default OptionalInt getIntProperty(int x, int y, int z, Property<Integer> property) {
-        return OptionalInt.empty();
-    }
-
-    @Override
-    default OptionalDouble getDoubleProperty(int x, int y, int z, Property<Double> property) {
-        return OptionalDouble.empty();
-    }
-
-    @Override
-    default <V> Optional<V> getProperty(int x, int y, int z, Direction direction, Property<V> property) {
+    default Optional<Entity> createEntity(final DataContainer entityContainer, final Vector3d position) {
         return Optional.empty();
     }
 
     @Override
-    default OptionalInt getIntProperty(int x, int y, int z, Direction direction, Property<Integer> property) {
-        return OptionalInt.empty();
-    }
-
-    @Override
-    default OptionalDouble getDoubleProperty(int x, int y, int z, Direction direction, Property<Double> property) {
-        return OptionalDouble.empty();
-    }
-
-    @Override
-    default Map<Property<?>, ?> getProperties(int x, int y, int z) {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    default Collection<Direction> getFacesWithProperty(int x, int y, int z, Property<?> property) {
-        return Collections.emptyList();
-    }
-
-    // TODO - the rest of this implementation.
-
-    @Override
-    default void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
-    }
-
-    @Override
-    default void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
-
-    }
-
-    @Override
-    default void stopSounds() {
-
-    }
-
-    @Override
-    default void stopSounds(SoundType sound) {
-
-    }
-
-    @Override
-    default void stopSounds(SoundCategory category) {
-
-    }
-
-    @Override
-    default void stopSounds(SoundType sound, SoundCategory category) {
-
-    }
-
-    @Override
-    default void playMusicDisc(Vector3i position, MusicDisc musicDiscType) {
-
-    }
-
-    @Override
-    default void stopMusicDisc(Vector3i position) {
-
-    }
-
-    @Override
-    default void sendTitle(Title title) {
-
-    }
-
-    @Override
-    default void sendBookView(BookView bookView) {
-
-    }
-
-    @Override
-    default void sendBlockChange(int x, int y, int z, BlockState state) {
-
-    }
-
-    @Override
-    default void resetBlockChange(int x, int y, int z) {
-
-    }
-
-    @Override
-    default Entity createEntity(EntityType<?> type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
+    default Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
         return null;
     }
 
     @Override
-    default Entity createEntityNaturally(EntityType<?> type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
+    @Override default ProtoChunk<?> getChunk(final int x, final int y, final int z) {
         return null;
     }
-
-    @Override
-    default Optional<Entity> createEntity(DataContainer entityContainer) {
-        return Optional.empty();
-    }
-
-    @Override
-    default Optional<Entity> createEntity(DataContainer entityContainer, Vector3d position) {
-        return Optional.empty();
-    }
-
-    @Override
-    default Collection<Entity> spawnEntities(Iterable<? extends Entity> entities) {
-        return null;
-    }
-
-    @Override
-    default MutableEntityStream<T> toEntityStream() {
-        return null;
-    }
-
-    @Override
-    default MutableBlockVolumeStream<T> toBlockStream() {
-        return null;
-    }
-    @Override default ProtoChunk<?> getChunk(int x, int y, int z) {
-        return null;
-    }
-    @Override default int getHeight(HeightType type, int x, int z) {
+    @Override default int getHeight(final HeightType type, final int x, final int z) {
         return 0;
     }
 
     @Override
-    default boolean hitBlock(int x, int y, int z, Direction side, GameProfile profile) {
-        return false;
-    }
-
-    @Override
-    default boolean interactBlock(int x, int y, int z, Direction side, GameProfile profile) {
-        return false;
-    }
-
-    @Override
-    default boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, GameProfile profile) {
-        return false;
-    }
-
-    @Override
-    default boolean placeBlock(int x, int y, int z, BlockState block, Direction side, GameProfile profile) {
-        return false;
-    }
-
-    @Override
-    default boolean digBlock(int x, int y, int z, GameProfile profile) {
-        return false;
-    }
-
-    @Override
-    default boolean digBlockWith(int x, int y, int z, ItemStack itemStack, GameProfile profile) {
-        return false;
-    }
-
-    @Override
-    default Duration getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, GameProfile profile) {
-        return null;
-    }
-
-    @Override
-    default <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
+    default <E> Optional<E> get(final int x, final int y, final int z, final Key<? extends Value<E>> key) {
         return Optional.empty();
     }
 
     @Override
-    default <E, V extends Value<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
+    default <E, V extends Value<E>> Optional<V> getValue(final int x, final int y, final int z, final Key<V> key) {
         return Optional.empty();
     }
 
     @Override
-    default boolean supports(int x, int y, int z, Key<?> key) {
+    default boolean supports(final int x, final int y, final int z, final Key<?> key) {
         return false;
     }
 
     @Override
-    default Set<Key<?>> getKeys(int x, int y, int z) {
+    default Set<Key<?>> getKeys(final int x, final int y, final int z) {
         return null;
     }
 
     @Override
-    default Set<Value.Immutable<?>> getValues(int x, int y, int z) {
+    default Set<Value.Immutable<?>> getValues(final int x, final int y, final int z) {
         return null;
     }
 
     @Override
-    default <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
+    default <E> DataTransactionResult offer(final int x, final int y, final int z, final Key<? extends Value<E>> key, final E value) {
         return null;
     }
 
     @Override
-    default DataTransactionResult remove(int x, int y, int z, Key<?> key) {
+    default DataTransactionResult remove(final int x, final int y, final int z, final Key<?> key) {
         return null;
     }
 
     @Override
-    default DataTransactionResult undo(int x, int y, int z, DataTransactionResult result) {
+    default DataTransactionResult undo(final int x, final int y, final int z, final DataTransactionResult result) {
         return null;
     }
 
     @Override
-    default DataTransactionResult copyFrom(int xTo, int yTo, int zTo, DataHolder from) {
+    default DataTransactionResult copyFrom(final int xTo, final int yTo, final int zTo, final DataHolder from) {
         return null;
     }
 
     @Override
-    default DataTransactionResult copyFrom(int xTo, int yTo, int zTo, DataHolder from, MergeFunction function) {
+    default DataTransactionResult copyFrom(
+        final int xTo, final int yTo, final int zTo, final DataHolder from, final MergeFunction function) {
         return null;
     }
 
     @Override
-    default DataTransactionResult copyFrom(int xTo, int yTo, int zTo, int xFrom, int yFrom, int zFrom, MergeFunction function) {
+    default DataTransactionResult copyFrom(final int xTo, final int yTo, final int zTo, final int xFrom, final int yFrom, final int zFrom, final MergeFunction function) {
         return null;
     }
 
     @Override
-    default boolean validateRawData(int x, int y, int z, DataView container) {
+    default boolean validateRawData(final int x, final int y, final int z, final DataView container) {
         return false;
     }
 
     @Override
-    default void setRawData(int x, int y, int z, DataView container) throws InvalidDataException {
+    default void setRawData(final int x, final int y, final int z, final DataView container) throws InvalidDataException {
 
     }
 
@@ -483,32 +321,32 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     }
 
     @Override
-    default boolean setBlock(int x, int y, int z, BlockState state, BlockChangeFlag flag) {
+    default boolean setBlock(final int x, final int y, final int z, final BlockState state, final BlockChangeFlag flag) {
         return false;
     }
 
     @Override
-    default boolean spawnEntity(Entity entity) {
+    default boolean spawnEntity(final Entity entity) {
         return false;
     }
 
     @Override
-    default boolean removeBlock(int x, int y, int z) {
+    default boolean removeBlock(final int x, final int y, final int z) {
         return false;
     }
 
     @Override
-    default ProtoChunk<?> getChunk(Vector3i chunkPosition) {
+    default ProtoChunk<?> getChunk(final Vector3i chunkPosition) {
         return null;
     }
 
     @Override
-    default ProtoChunk<?> getChunkAtBlock(Vector3i blockPosition) {
+    default ProtoChunk<?> getChunkAtBlock(final Vector3i blockPosition) {
         return null;
     }
 
     @Override
-    default ProtoChunk<?> getChunkAtBlock(int bx, int by, int bz) {
+    default ProtoChunk<?> getChunkAtBlock(final int bx, final int by, final int bz) {
         return null;
     }
 }

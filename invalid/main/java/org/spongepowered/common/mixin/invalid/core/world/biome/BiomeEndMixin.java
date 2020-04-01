@@ -29,7 +29,6 @@ import net.minecraft.world.biome.SkyBiome;
 import org.spongepowered.api.world.gen.populator.ChorusFlower;
 import org.spongepowered.api.world.gen.populator.EndIsland;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.world.biome.BiomeMixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.populators.EndBiomeGenerationPopulator;
 import org.spongepowered.common.world.gen.populators.EndSpikePopulator;

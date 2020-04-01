@@ -25,36 +25,36 @@
 package org.spongepowered.common.mixin.invalid.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeSnow;
+import net.minecraft.world.biome.ForestBiome;
+import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.IcePath;
-import org.spongepowered.api.world.gen.populator.IceSpike;
+import org.spongepowered.api.world.gen.populator.DoublePlant;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeSnow.class)
-public abstract class BiomeSnowMixin extends BiomeMixin {
+@Mixin(ForestBiome.class)
+public abstract class ForestBiomeMixin extends BiomeMixin {
 
-    @Shadow @Final private boolean superIcy;
+    @Shadow @Final private ForestBiome.Type type;
 
     @Override
     public void bridge$buildPopulators(final World world, final SpongeBiomeGenerationSettings gensettings) {
-        if (this.superIcy) {
-            final IceSpike spike = IceSpike.builder()
-                    .spikesPerChunk(3)
-                    .build();
-            gensettings.getPopulators().add(spike);
-            final IcePath path = IcePath.builder()
-                    .perChunk(2)
-                    .radius(VariableAmount.baseWithRandomAddition(2, 2))
-                    .build();
-            gensettings.getPopulators().add(path);
+        int base = -3;
+        if (this.type == ForestBiome.Type.FLOWER) {
+            base = -1;
         }
+        final DoublePlant plant = DoublePlant.builder()
+                .perChunk(VariableAmount.baseWithRandomAddition(base * 5, 5 * 5))
+                .type(DoublePlantTypes.SYRINGA, 1)
+                .type(DoublePlantTypes.ROSE, 1)
+                .type(DoublePlantTypes.PAEONIA, 1)
+                .build();
+        gensettings.getPopulators().add(plant);
         super.bridge$buildPopulators(world, gensettings);
-        WorldGenConstants.buildSnowPopulators(gensettings, this.decorator);
+        WorldGenConstants.buildForestPopulators(gensettings, this.decorator, this.type);
     }
 
 }

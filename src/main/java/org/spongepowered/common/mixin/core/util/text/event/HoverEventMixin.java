@@ -26,11 +26,12 @@ package org.spongepowered.common.mixin.core.util.text.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.HoverEvent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
@@ -38,9 +39,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
@@ -71,7 +72,8 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         String name = nbt.getString("name");
                         EntityType type = null;
                         if (nbt.contains("type", Constants.NBT.TAG_STRING)) {
-                            type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, name).orElse(null);
+                            type = SpongeImpl.getGame().getRegistry().getCatalogRegistry().get(EntityType.class,
+                                CatalogKey.resolve(name)).orElse(null);
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));
@@ -89,8 +91,8 @@ public abstract class HoverEventMixin implements HoverEventBridge {
 
     private CompoundNBT loadNbt() {
         try {
-            return checkNotNull(JsonToNBT.getTagFromJson(this.value.getUnformattedText()), "NBT");
-        } catch (NBTException e) {
+            return checkNotNull(JsonToNBT.getTagFromJson(this.value.getUnformattedComponentText()), "NBT");
+        } catch (CommandSyntaxException e) {
             throw new RuntimeException(e);
         }
     }

@@ -146,4 +146,7 @@ public class SpongeLaunch {
                 "org.spongepowered.common.event.damage.SpongeCommonIndirectEntityDamageSource");
     }
 
+    public static boolean isVanilla() {
+        return iLS.get().isVanilla();
+    }
 }

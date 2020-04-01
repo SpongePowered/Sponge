@@ -27,45 +27,30 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
-import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
-import org.spongepowered.api.event.entity.ai.goal.GoalEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-
-import java.util.Iterator;
 
 import javax.annotation.Nullable;
 
@@ -99,44 +84,6 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         }
     }
 
-    @Override
-    public void bridge$fireConstructors() {
-        super.bridge$fireConstructors();
-        if (ShouldFire.A_I_TASK_EVENT_ADD) {
-            this.handleDelayedTaskEventFiring((GoalSelectorBridge) this.goalSelector);
-            this.handleDelayedTaskEventFiring((GoalSelectorBridge) this.targetSelector);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void handleDelayedTaskEventFiring(final GoalSelectorBridge tasks) {
-        final Iterator<GoalSelector.EntityAITaskEntry> taskItr = tasks.bridge$getTasksUnsafe().iterator();
-        while (taskItr.hasNext()) {
-            final GoalSelector.EntityAITaskEntry task = taskItr.next();
-            final GoalEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
-                    task.priority, task.priority, (GoalExecutor<? extends Agent>) tasks, (Agent) this, (Goal<?>) task.action);
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                ((GoalBridge) task.action).bridge$setGoalExecutor(null);
-                taskItr.remove();
-            }
-        }
-    }
-
-    @Inject(method = "processInitialInteract", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashHolder(Lnet/minecraft/entity/Entity;Z)V"))
-    private void callLeashEvent(final PlayerEntity playerIn, final Hand hand, final CallbackInfoReturnable<Boolean> ci) {
-        if (!playerIn.world.isRemote) {
-            Sponge.getCauseStackManager().pushCause(playerIn);
-            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (Living) this);
-            SpongeImpl.postEvent(event);
-            Sponge.getCauseStackManager().popCause();
-            if(event.isCancelled()) {
-                ci.setReturnValue(false);
-            }
-        }
-    }
-
     @Inject(method = "clearLeashed",
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/entity/MobEntity;leashHolder:Lnet/minecraft/entity/Entity;",
@@ -159,58 +106,6 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
                 ci.cancel();
             }
         }
-    }
-
-    @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
-    private double getHardDespawnRange(final double value) {
-        if (!this.world.isRemote) {
-            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
-        }
-        return value;
-    }
-
-    // Note that this should inject twice.
-    @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
-    private double getSoftDespawnRange(final double value) {
-        if (!this.world.isRemote) {
-            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
-        }
-        return value;
-    }
-
-    @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
-    private int getMinimumLifetime(final int value) {
-        if (!this.world.isRemote) {
-            return ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
-        }
-        return value;
-    }
-
-    @Nullable
-    @Redirect(
-        method = "despawnEntity",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"))
-    private PlayerEntity impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entity, final double distance) {
-        double bestDistance = -1.0D;
-        PlayerEntity result = null;
-
-        for (final Object entity1 : world.playerEntities) {
-            final PlayerEntity player = (PlayerEntity) entity1;
-            if (player == null || player.removed || !((PlayerEntityBridge) player).bridge$affectsSpawning()) {
-                continue;
-            }
-
-            final double playerDistance = player.getDistanceSq(entity.posX, entity.posY, entity.posZ);
-
-            if ((distance < 0.0D || playerDistance < distance * distance) && (bestDistance == -1.0D || playerDistance < bestDistance)) {
-                bestDistance = playerDistance;
-                result = player;
-            }
-        }
-
-        return result;
     }
 
     /**

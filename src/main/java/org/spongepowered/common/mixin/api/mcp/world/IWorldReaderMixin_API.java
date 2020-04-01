@@ -44,12 +44,8 @@ import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.dimension.Dimension;
 import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import org.spongepowered.api.world.volume.biome.UnmodifiableBiomeVolume;
-import org.spongepowered.api.world.volume.biome.worker.BiomeVolumeStream;
-import org.spongepowered.api.world.volume.block.entity.worker.BlockEntityStream;
-import org.spongepowered.api.world.volume.block.worker.BlockVolumeStream;
 import org.spongepowered.api.world.volume.entity.ImmutableEntityVolume;
 import org.spongepowered.api.world.volume.entity.UnmodifiableEntityVolume;
-import org.spongepowered.api.world.volume.entity.worker.EntityStream;
 import org.spongepowered.api.world.volume.game.ReadableRegion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -68,8 +64,11 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Mixin(IWorldReader.class)
-@Implements(@Interface(iface = ReadableRegion.class, prefix = "readable$"))
+@Implements(@Interface(iface = ReadableRegion.class,
+    prefix = "readable$"))
 public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnvironmentBlockReaderMixin_API, ReadableRegion<R> {
+    //@formatter:off
+
     @Shadow boolean shadow$isAirBlock(BlockPos p_175623_1_);
     @Shadow boolean shadow$canBlockSeeSky(BlockPos p_175710_1_);
     @Shadow int shadow$getLightSubtracted(BlockPos p_201669_1_, int p_201669_2_);
@@ -114,13 +113,14 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     @Shadow boolean shadow$isAreaLoaded(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
     @Shadow net.minecraft.world.dimension.Dimension shadow$getDimension();
 
+    //@formatter:on
     @Override
     default WorldBorder getBorder() {
         return (WorldBorder) this.shadow$getWorldBorder();
     }
 
     @Override
-    default boolean isInBorder(Entity entity) {
+    default boolean isInBorder(final Entity entity) {
         return this.shadow$getWorldBorder().contains(((net.minecraft.entity.Entity) entity).getBoundingBox());
     }
 
@@ -130,12 +130,12 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     }
 
     @Override
-    default boolean canSeeSky(int x, int y, int z) {
+    default boolean canSeeSky(final int x, final int y, final int z) {
         return this.shadow$isSkyLightMax(new BlockPos(x, y, z));
     }
 
     @Override
-    default boolean hasWater(int x, int y, int z) {
+    default boolean hasWater(final int x, final int y, final int z) {
         return this.shadow$hasWater(new BlockPos(x, y, z));
     }
 
@@ -150,12 +150,13 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     }
 
     @Override
-    default boolean isCollisionBoxesEmpty(@Nullable Entity entity, AABB aabb) {
+    default boolean isCollisionBoxesEmpty(@Nullable final Entity entity, final AABB aabb) {
         return this.shadow$isCollisionBoxesEmpty((net.minecraft.entity.Entity) entity, VecHelper.toMinecraftAABB(aabb));
     }
 
     @Override
-    default boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty) {
+    default boolean isAreaLoaded(final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd,
+        final int zEnd, final boolean allowEmpty) {
         return this.shadow$isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd);
     }
 
@@ -171,91 +172,82 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     }
 
     @Override
-    default BiomeVolumeStream<R, ?> toBiomeStream() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
-    default BlockEntityStream<R, ?> toBlockEntityStream() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
-    default EntityStream<R, ?> toEntityStream() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
     default UnmodifiableBiomeVolume<?> asUnmodifiableBiomeVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
+
     @Override
     default ImmutableBiomeVolume asImmutableBiomeVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
+
     @Override
-    default R getView(Vector3i newMin, Vector3i newMax) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+    default R getView(final Vector3i newMin, final Vector3i newMax) {
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
     default UnmodifiableEntityVolume<?> asUnmodifiableEntityVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
     default ImmutableEntityVolume asImmutableEntityVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
-    default Optional<Entity> getEntity(UUID uuid) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+    default Optional<Entity> getEntity(final UUID uuid) {
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
     default Collection<? extends Player> getPlayers() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
-    default Collection<? extends Entity> getEntities(AABB box, Predicate<? super Entity> filter) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+    default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
-    default <T extends Entity> Collection<? extends T> getEntities(Class<? extends T> entityClass, AABB box,
-                                                                   @javax.annotation.Nullable Predicate<? super T> predicate) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+    default <T extends Entity> Collection<? extends T> getEntities(final Class<? extends T> entityClass, final AABB box,
+        @javax.annotation.Nullable final Predicate<? super T> predicate) {
+        throw new UnsupportedOperationException(
+            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
-    default BlockVolumeStream<R, ?> toBlockStream() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
-    default ProtoChunk<?> getChunk(int x, int y, int z) {
+    default ProtoChunk<?> getChunk(final int x, final int y, final int z) {
         return (ProtoChunk<?>) this.shadow$getChunk(x >> 4, z >> 4, ChunkStatus.EMPTY, true);
     }
 
     @Override
-    default boolean isChunkLoaded(int x, int y, int z, boolean allowEmpty) {
+    default boolean isChunkLoaded(final int x, final int y, final int z, final boolean allowEmpty) {
         return this.shadow$chunkExists(x >> 4, z >> 4);
     }
 
     @Override
-    default boolean hasChunk(int x, int y, int z) {
+    default boolean hasChunk(final int x, final int y, final int z) {
         return this.shadow$chunkExists(x >> 4, z >> 4);
     }
 
     @Override
-    default boolean hasChunk(Vector3i position) {
+    default boolean hasChunk(final Vector3i position) {
         return this.shadow$chunkExists(position.getX() >> 4, position.getZ() >> 4);
     }
 
     @Override
-    default int getHeight(HeightType type, int x, int z) {
+    default int getHeight(final HeightType type, final int x, final int z) {
         return this.shadow$getHeight((Heightmap.Type) (Object) type, x, z);
     }
 }

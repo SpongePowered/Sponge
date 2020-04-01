@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.config.category;
 
-import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.launch.SpongeLaunch;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @ConfigSerializable
@@ -182,7 +179,7 @@ public class PhaseTrackerCategory extends ConfigCategory {
 
     private boolean isVanilla() {
         try {
-            return Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
+            return SpongeLaunch.isVanilla();
         } catch (Throwable t) {
             return true;
         }

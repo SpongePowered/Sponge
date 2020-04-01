@@ -61,9 +61,18 @@ val launch by sourceSets.creating
 val launchWrapper by sourceSets.creating {
     compileClasspath += launch.compileClasspath
 }
-sourceSets.main {
-    compileClasspath += launch.compileClasspath
-    runtimeClasspath += launch.runtimeClasspath
+sourceSets {
+    // TODO - once invalid is cleaned up, it can be be removed
+    val invalid by creating {
+        java {
+            srcDir("invalid/main/java")
+        }
+    }
+    main {
+        compileClasspath += launch.compileClasspath
+        runtimeClasspath += launch.runtimeClasspath
+        invalid.compileClasspath += compileClasspath + output
+    }
 }
 
 dependencies {

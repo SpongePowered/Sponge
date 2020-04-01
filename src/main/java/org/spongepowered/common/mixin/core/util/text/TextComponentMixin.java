@@ -43,8 +43,6 @@ import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.text.TextComponentBridge;
-import org.spongepowered.common.bridge.util.text.StyleBridge;
-import org.spongepowered.common.bridge.util.text.TextFormattingBridge;
 import org.spongepowered.common.bridge.util.text.event.ClickEventBridge;
 import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.text.ResolvedChatStyle;
