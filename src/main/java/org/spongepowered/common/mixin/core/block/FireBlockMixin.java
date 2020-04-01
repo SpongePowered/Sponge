@@ -46,7 +46,7 @@ import java.util.Random;
 @Mixin(FireBlock.class)
 public abstract class FireBlockMixin extends BlockMixin {
 
-    @Redirect(method = "updateTick",
+    @Redirect(method = "tick",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z",

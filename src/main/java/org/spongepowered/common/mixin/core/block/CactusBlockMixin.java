@@ -49,7 +49,7 @@ public abstract class CactusBlockMixin extends BlockMixin {
         try {
             final Location location = Location.of((World) world, pos.getX(), pos.getY(), pos.getZ());
             final MinecraftBlockDamageSource cactus = new MinecraftBlockDamageSource("cactus", location);
-            ((DamageSourceBridge) cactus).bridge$setCactusSource();
+            ((DamageSourceBridge) (Object) cactus).bridge$setCactusSource();
             return entity.attackEntityFrom(DamageSource.CACTUS, damage);
         } finally {
             ((DamageSourceBridge) source).bridge$setCactusSource();

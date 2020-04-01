@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.block.FarmlandBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
@@ -37,18 +38,19 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 @Mixin(FarmlandBlock.class)
 public abstract class FarmlandBlockMixin extends BlockMixin {
 
-    @Shadow protected static void turnToDirt(final World world, final BlockPos pos) {}
+    @Shadow public static void turnToDirt(final BlockState state, final World world, final BlockPos pos) {}
 
     @Redirect(method = "onFallenUpon",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"
+            target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"
         )
     )
-    private void impl$CheckIfGrieferCanGrief(final World world, final BlockPos pos, final World worldIn, final BlockPos samePos,
-        final Entity entityIn, final float fallDistance) {
+    private void impl$CheckIfGrieferCanGrief(final BlockState state, final World world, final BlockPos pos,
+                                             final World worldIn, final BlockPos samePos, final Entity entityIn,
+                                             final float fallDistance) {
         if (entityIn instanceof GrieferBridge && ((GrieferBridge) entityIn).bridge$canGrief()) {
-            turnToDirt(world, pos);
+            turnToDirt(state, world, pos);
         }
     }
 }

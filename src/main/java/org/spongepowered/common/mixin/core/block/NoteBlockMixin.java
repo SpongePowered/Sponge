@@ -33,12 +33,14 @@ import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
+import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
@@ -68,7 +70,10 @@ public abstract class NoteBlockMixin extends BlockMixin {
         float pitch = (float) Math.pow(2.0D, (double) (param - 12) / 12.0D);
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(frame.getCurrentCause(), (org.spongepowered.api.world.World) worldIn, pos, NoteBlockInstrument.byState(state).getSound(), instrumentType, NotePitchRegistryModule.getPitch((byte) param), pitch);
+            final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
+                    frame.getCurrentCause(), (org.spongepowered.api.world.World) worldIn, pos,
+                    NoteBlockInstrument.byState(state).getSound(), instrumentType,
+                    SpongeImpl.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class).getByValue(param), pitch);
             if (event.isCancelled()) {
                 callbackInfo.setReturnValue(true);
             }

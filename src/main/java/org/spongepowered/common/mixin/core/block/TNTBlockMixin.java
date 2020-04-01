@@ -59,13 +59,13 @@ public abstract class TNTBlockMixin extends BlockMixin {
         return removed;
     }
 
-    @Inject(method = "explode",
+    @Inject(method = "explode(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/LivingEntity;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
-    private void impl$ThrowPrimeAndMaybeCancel(final World worldIn, final BlockPos pos, final BlockState state, @Nullable
-        final LivingEntity igniter, final CallbackInfo ci, final TNTEntity tnt) {
+    private static void impl$ThrowPrimeAndMaybeCancel(final World worldIn, final BlockPos pos,
+            @Nullable final LivingEntity igniter, final CallbackInfo ci, final TNTEntity tnt) {
         ((EntityTNTPrimedBridge) tnt).bridge$setDetonator(igniter);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -118,7 +118,7 @@ public abstract class TNTBlockMixin extends BlockMixin {
         return removed;
     }
 
-    @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
+    @Redirect(method = "onProjectileCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean impl$removeonCollide(final World world, final BlockPos pos) {
         // Called when the TNT is hit with a flaming arrow
         return this.impl$onRemove(world, pos);
