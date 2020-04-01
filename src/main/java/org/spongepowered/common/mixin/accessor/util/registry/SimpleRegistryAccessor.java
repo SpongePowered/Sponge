@@ -36,4 +36,8 @@ public interface SimpleRegistryAccessor {
     @Accessor(value = "values") Object[] accessor$getValues();
 
     @Accessor(value = "registryObjects") BiMap<ResourceLocation, Object> accessor$getRegistryObjects();
+
+    @Accessor(value = "nextFreeId") int accessor$getNextFreeId();
+
+    @Accessor(value = "nextFreeId") int accessor$setNextFreeId(int nextFreeId);
 }
