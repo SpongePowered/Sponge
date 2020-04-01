@@ -24,16 +24,22 @@
  */
 package org.spongepowered.common.world.server;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.MoreObjects;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.dimension.DimensionType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class WorldRegistration {
 
     private final String directoryName;
+    private final DimensionType dimensionType;
     private WorldSettings defaultSettings;
 
-    public WorldRegistration(String directoryName, WorldSettings defaultSettings) {
-        this.directoryName = directoryName;
+    public WorldRegistration(String directoryName, DimensionType dimensionType, @Nullable WorldSettings defaultSettings) {
+        this.directoryName = checkNotNull(directoryName);
+        this.dimensionType = checkNotNull(dimensionType);
         this.defaultSettings = defaultSettings;
     }
 
@@ -41,8 +47,16 @@ public final class WorldRegistration {
         return this.directoryName;
     }
 
+    public DimensionType getDimensionType() {
+        return this.dimensionType;
+    }
+
     public WorldSettings getDefaultSettings() {
         return this.defaultSettings;
+    }
+
+    public void setDefaultSettings(@Nullable WorldSettings defaultSettings) {
+        this.defaultSettings = defaultSettings;
     }
 
     @Override

@@ -41,6 +41,7 @@ import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.common.mixin.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.mixin.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.world.dimension.DimensionToTypeRegistry;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
@@ -53,8 +54,6 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
     @Inject(method = "register", at = @At("RETURN"))
     private static void impl$setupBridgeFields(String id, final DimensionType dimensionType, CallbackInfoReturnable<DimensionType> cir) {
-        final DimensionTypeBridge dimensionTypeBridge = (DimensionTypeBridge) dimensionType;
-
         // Commence hackery to get the dimension class this type is meant to make
         final MinecraftServer server = SpongeImpl.getServer();
         final WorldSettings worldSettings = new WorldSettings(0L, GameType.ADVENTURE, false, false, WorldType.DEFAULT);
@@ -65,15 +64,13 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
         final Dimension dimension = dimensionType.create(fakeWorld);
         final Class<? extends Dimension> dimensionClass = dimension.getClass();
-        @Nullable SpongeDimensionType spongeDimensionType = DimensionToTypeRegistry.getInstance().getDimensionType(dimensionClass);
+        @Nullable SpongeDimensionType logicType = DimensionToTypeRegistry.getInstance().getLogicType(dimensionClass);
 
-        if (spongeDimensionType == null) {
-            spongeDimensionType = new SpongeDimensionType(id, dimensionType::hasSkyLight);
-            DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, spongeDimensionType);
-            SpongeImpl.getRegistry().getCatalogRegistry().registerCatalog(spongeDimensionType);
+        if (logicType == null) {
+            logicType = new SpongeDimensionType(id, ((DimensionTypeAccessor) dimensionType)::accessor$getFactory, dimensionType::hasSkyLight);
+            DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, logicType);
+            SpongeImpl.getRegistry().getCatalogRegistry().registerCatalog(logicType);
         }
-
-        dimensionTypeBridge.bridge$setSpongeDimensionType(spongeDimensionType);
     }
 
     @Override

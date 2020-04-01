@@ -24,12 +24,27 @@
  */
 package org.spongepowered.common.mixin.accessor.world.dimension;
 
+import net.minecraft.world.World;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.function.BiFunction;
 
 @Mixin(DimensionType.class)
 public interface DimensionTypeAccessor {
 
+    @Accessor("factory") BiFunction<World, DimensionType, ? extends Dimension> accessor$getFactory();
+
     @Accessor("directory") String accessor$getDirectory();
+
+    @Invoker("<init>") static DimensionType accessor$construct(int id, String suffix, String directoryName, BiFunction<World, DimensionType, ? extends Dimension> factory, boolean hasSkylight) {
+        throw new RuntimeException("Accessor was not mixed!");
+    }
+
+    @Invoker("register") static DimensionType accessor$register(String directoryName, DimensionType dimensionType) {
+        throw new RuntimeException("Accessor was not mixed!");
+    }
 }

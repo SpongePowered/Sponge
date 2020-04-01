@@ -96,7 +96,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public DimensionType getDimensionType() {
-        return ((WorldSettingsBridge) this).bridge$getDimensionType();
+        return ((WorldSettingsBridge) this).bridge$getLogicType();
     }
 
     @Override

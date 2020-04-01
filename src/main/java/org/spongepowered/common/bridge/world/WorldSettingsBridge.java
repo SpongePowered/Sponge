@@ -38,7 +38,7 @@ public interface WorldSettingsBridge {
 
     CatalogKey bridge$getKey();
 
-    SpongeDimensionType bridge$getDimensionType();
+    SpongeDimensionType bridge$getLogicType();
 
     Difficulty bridge$getDifficulty();
 

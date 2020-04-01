@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.world.dimension;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.minecraft.world.World;
+import net.minecraft.world.dimension.Dimension;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.dimension.DimensionType;
@@ -33,7 +37,9 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 
 import java.nio.file.Path;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public final class SpongeDimensionType implements DimensionType {
 
@@ -41,10 +47,15 @@ public final class SpongeDimensionType implements DimensionType {
     private final Path configPath;
     private final SpongeConfig<DimensionConfig> config;
     private final Context context;
+    private final Supplier<BiFunction<World, net.minecraft.world.dimension.DimensionType, ? extends Dimension>> dimensionFactory;
     private final BooleanSupplier hasSkyLight;
 
-    public SpongeDimensionType(String id, BooleanSupplier hasSkyLight) {
+    public SpongeDimensionType(String id, Supplier<BiFunction<World, net.minecraft.world.dimension.DimensionType, ? extends Dimension>> dimensionFactory, BooleanSupplier hasSkyLight) {
         // TODO This may not work out, we'll see.
+        checkNotNull(id);
+        checkNotNull(dimensionFactory);
+        checkNotNull(hasSkyLight);
+
         final String modId = SpongeImplHooks.getActiveModContainer().getId();
         final String dimName = id.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
 
@@ -53,6 +64,7 @@ public final class SpongeDimensionType implements DimensionType {
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"),
             SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfigAdapter(), false);
         this.context = new Context(Context.DIMENSION_KEY, modId + "." + dimName);
+        this.dimensionFactory = dimensionFactory;
         this.hasSkyLight = hasSkyLight;
     }
 
@@ -77,5 +89,9 @@ public final class SpongeDimensionType implements DimensionType {
 
     public SpongeConfig<DimensionConfig> getConfigAdapter() {
         return this.config;
+    }
+
+    public BiFunction<World, net.minecraft.world.dimension.DimensionType, ? extends Dimension> getDimensionFactory() {
+        return this.dimensionFactory.get();
     }
 }

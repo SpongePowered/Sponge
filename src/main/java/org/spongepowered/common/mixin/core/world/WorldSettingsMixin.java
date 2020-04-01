@@ -108,7 +108,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public SpongeDimensionType bridge$getDimensionType() {
+    public SpongeDimensionType bridge$getLogicType() {
         return this.dimensionType;
     }
 

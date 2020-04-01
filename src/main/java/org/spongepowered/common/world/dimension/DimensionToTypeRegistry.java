@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.world.dimension;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.world.dimension.Dimension;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 public final class DimensionToTypeRegistry {
@@ -37,15 +39,18 @@ public final class DimensionToTypeRegistry {
     private final Map<Class<Dimension>, SpongeDimensionType> dimensionTypeMappings;
 
     public DimensionToTypeRegistry() {
-        this.dimensionTypeMappings = new HashMap<>();
+        this.dimensionTypeMappings = new IdentityHashMap<>();
     }
 
-    public void registerTypeMapping(Class<? extends Dimension> dimensionClass, SpongeDimensionType dimensionType) {
-        this.dimensionTypeMappings.put((Class<Dimension>) dimensionClass, dimensionType);
+    public void registerTypeMapping(Class<? extends Dimension> dimensionClass, SpongeDimensionType logicType) {
+        checkNotNull(dimensionClass);
+        checkNotNull(logicType);
+
+        this.dimensionTypeMappings.put((Class<Dimension>) dimensionClass, logicType);
     }
 
     @Nullable
-    public SpongeDimensionType getDimensionType(Class<? extends Dimension> dimensionClass) {
+    public SpongeDimensionType getLogicType(Class<? extends Dimension> dimensionClass) {
         return this.dimensionTypeMappings.get(dimensionClass);
     }
 

@@ -88,12 +88,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final protected IChunkStatusListenerFactory chunkStatusListenerFactory;
-    @Shadow private long serverTime;
     @Shadow private int tickCounter;
-    @Shadow protected abstract void shadow$convertMapIfNeeded(String directoryName);
-    @Shadow protected abstract void shadow$setUserMessage(ITextComponent translationKey);
-    @Shadow public abstract Difficulty shadow$getDifficulty();
-    @Shadow protected abstract void shadow$runScheduledTasks();
     @Shadow public abstract boolean shadow$isDedicatedServer();
     @Shadow public abstract boolean shadow$isServerRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
@@ -123,59 +118,12 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      */
     @Overwrite
     public void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions) {
-        this.shadow$convertMapIfNeeded(directoryName);
-
-        this.shadow$setUserMessage(new TranslationTextComponent("menu.loadingLevel"));
-
         SpongeImpl.getWorldManager().loadAllWorlds((MinecraftServer) (Object) this, directoryName, levelName, seed, type, generatorOptions);
-
-        this.setDifficultyForAllWorlds(this.shadow$getDifficulty(), true);
     }
 
-    @Override
-    public void bridge$loadInitialChunks(ServerWorld world) {
-
-        final WorldInfoBridge infoBridge = (WorldInfoBridge) world.getWorldInfo();
-        if (!infoBridge.bridge$isValid() || !infoBridge.bridge$doesGenerateSpawnOnLoad()) {
-            return;
-        }
-
-        final IChunkStatusListener chunkStatusListener = this.chunkStatusListenerFactory.create(11);
-
-        this.shadow$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
-        LOGGER.info("Preparing start region for world '[{}}]'...", ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
-        final BlockPos blockpos = world.getSpawnPoint();
-        chunkStatusListener.start(new ChunkPos(blockpos));
-        final ServerChunkProvider serverChunkProvider = world.getChunkProvider();
-        serverChunkProvider.getLightManager().func_215598_a(500);
-        this.serverTime = Util.milliTime();
-        serverChunkProvider.func_217228_a(TicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
-
-        while (serverChunkProvider.func_217229_b() != 441) {
-            this.serverTime = Util.milliTime() + 10L;
-            this.shadow$runScheduledTasks();
-        }
-
-        this.serverTime = Util.milliTime() + 10L;
-        this.shadow$runScheduledTasks();
-
-        final ForcedChunksSaveData forcedChunksData = world.getSavedData().get(ForcedChunksSaveData::new, "chunks");
-
-        if (forcedChunksData != null) {
-            final LongIterator longiterator = forcedChunksData.getChunks().iterator();
-
-            while (longiterator.hasNext()) {
-                final long i = longiterator.nextLong();
-                final ChunkPos chunkpos = new ChunkPos(i);
-                serverChunkProvider.forceChunk(chunkpos, true);
-            }
-        }
-
-        this.serverTime = Util.milliTime() + 10L;
-        this.shadow$runScheduledTasks();
-        chunkStatusListener.stop();
-        serverChunkProvider.getLightManager().func_215598_a(5);
-
+    @Inject(method = "loadInitialChunks", at = @At("HEAD"), cancellable = true)
+    private void impl$cancelLoadInitialChunks(IChunkStatusListener p_213186_1_, CallbackInfo ci) {
+        ci.cancel();
     }
 
     @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )

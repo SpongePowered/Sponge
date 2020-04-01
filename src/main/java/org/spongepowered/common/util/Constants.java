@@ -272,6 +272,7 @@ public final class Constants {
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
             public static final String LEVEL_SPONGE_DAT_OLD = "level_sponge.dat_old";
             public static final String LEVEL_SPONGE_DAT_NEW = "level_sponge.dat_new";
+            public static final String UNIQUE_ID = "UUID";
         }
 
         public static final class Schematic {

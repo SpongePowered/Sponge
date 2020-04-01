@@ -59,7 +59,6 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -294,7 +293,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public PortalAgentType bridge$getPortalAgent() {
         if (this.impl$portalAgentType == null) {
-            this.impl$portalAgentType = PortalAgentTypes.DEFAULT;
+            this.impl$portalAgentType = PortalAgentTypes.DEFAULT.get();
         }
         return this.impl$portalAgentType;
     }
@@ -353,7 +352,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$writeSpongeLevelData(CompoundNBT compound) {
 
-        if (this.impl$uniqueId == null || !this.bridge$isValid()) {
+        if (!this.bridge$isValid()) {
             return;
         }
 
@@ -365,13 +364,13 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType().getKey().toString());
         spongeDataCompound.putBoolean(Constants.World.GENERATE_BONUS_CHEST, this.impl$generateBonusChest);
         if (this.impl$portalAgentType == null) {
-            this.impl$portalAgentType = PortalAgentTypes.DEFAULT;
+            this.impl$portalAgentType = PortalAgentTypes.DEFAULT.get();
         }
         spongeDataCompound.putString(Constants.Sponge.World.PORTAL_AGENT_TYPE, this.impl$portalAgentType.getPortalAgentClass().getName());
         short saveBehavior = 1;
-        if (this.impl$serializationBehavior == SerializationBehaviors.NONE) {
+        if (this.impl$serializationBehavior == SerializationBehaviors.NONE.get()) {
             saveBehavior = -1;
-        } else if (this.impl$serializationBehavior == SerializationBehaviors.MANUAL) {
+        } else if (this.impl$serializationBehavior == SerializationBehaviors.MANUAL.get()) {
             saveBehavior = 0;
         }
         spongeDataCompound.putShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
@@ -386,6 +385,8 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             playerIdList.add(playerIdCompound);
             iter.remove();
         }
+
+        compound.put(Constants.Sponge.SPONGE_DATA, spongeDataCompound);
     }
 
     @Override
@@ -398,7 +399,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         // TODO 1.14 - Run DataFixer on the SpongeData compound
 
         final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
-        if (!spongeDataCompound.contains(Constants.UUID_MOST) || !spongeDataCompound.contains(Constants.UUID_LEAST)) {
+        if (!spongeDataCompound.hasUniqueId(Constants.Sponge.World.UNIQUE_ID)) {
             // TODO 1.14 - Bad Sponge level data...warn/crash?
             return;
         }
@@ -409,14 +410,14 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         this.impl$portalAgentType = PortalAgentRegistryModule.getInstance()
             .validatePortalAgent(spongeDataCompound.getString(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
         this.impl$hasCustomDifficulty = spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
-        this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC;
+        this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
         this.impl$modCreated = spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED);
         if (spongeDataCompound.contains(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR)) {
             final short saveBehavior = spongeDataCompound.getShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR);
             if (saveBehavior == 0) {
-                this.impl$serializationBehavior = SerializationBehaviors.MANUAL;
+                this.impl$serializationBehavior = SerializationBehaviors.MANUAL.get();
             } else {
-                this.impl$serializationBehavior = SerializationBehaviors.NONE;
+                this.impl$serializationBehavior = SerializationBehaviors.NONE.get();
             }
         }
 
