@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.play.client.CClickWindowPacket;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -51,15 +55,11 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CClickWindowPacket;
 
 public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
 
@@ -187,7 +187,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     if (entiy instanceof OwnershipTrackedBridge) {
                         ((OwnershipTrackedBridge) entiy).tracked$setOwnerReference((Player) player);
                     } else {
-                        entiy.setCreator(player.getUniqueID());
+                        entiy.offer(Keys.CREATOR, player.getUniqueID());
                     }
                 }
                 try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import net.minecraft.entity.item.ItemEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
@@ -36,7 +37,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
-import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.minecraft.entity.item.ItemEntity;
 
 final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
 

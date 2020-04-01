@@ -28,7 +28,7 @@ import net.minecraft.entity.item.EnderCrystalEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.provider.GenericMutableBoundedDataProvider;
-import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
+import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 
 import java.util.Optional;
 
@@ -56,7 +56,7 @@ public class EnderCrystalEntityHealthProvider extends GenericMutableBoundedDataP
             return false;
         }
         if (value == 0) {
-            dataHolder.attackEntityFrom(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 1000F);
+            dataHolder.attackEntityFrom(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
         } else {
             dataHolder.removed = false;
         }

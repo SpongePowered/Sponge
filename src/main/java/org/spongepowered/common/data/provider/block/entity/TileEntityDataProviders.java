@@ -90,7 +90,7 @@ public class TileEntityDataProviders extends DataProviderRegistryBuilder {
 
     private void registerBannerTileEntityData() {
         register(new BannerTileEntityBaseColorProvider());
-        register(new BannerTileEntityPatternsProvider());
+//        register(new BannerTileEntityPatternsProvider());
 
         register(new BeaconTileEntityEffectProvider(Keys.BEACON_PRIMARY_EFFECT.get(),
                 BeaconTileEntityAccessor::accessor$getPrimaryEffect,

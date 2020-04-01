@@ -32,8 +32,6 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.volume.game.MutableGameVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
-import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 

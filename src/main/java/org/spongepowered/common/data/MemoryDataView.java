@@ -40,15 +40,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Coerce;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -59,8 +58,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 /**
  * Default implementation of a {@link DataView} being used in memory.
@@ -305,11 +302,6 @@ public class MemoryDataView implements DataView {
             this.map.put(key, value);
         }
         return this;
-    }
-
-    @Override
-    public <E> DataView set(Key<? extends Value<E>> key, E value) {
-        return set(checkNotNull(key, "Key was null!").getQuery(), value);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

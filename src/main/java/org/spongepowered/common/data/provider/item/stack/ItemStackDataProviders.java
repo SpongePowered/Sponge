@@ -29,9 +29,9 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.provider.util.BreakablePlaceableUtils;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
+import org.spongepowered.common.data.provider.util.BreakablePlaceableUtils;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.BiConsumer;
@@ -118,13 +118,13 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
         register(new ItemStackMusicDiscProvider());
         register(new ItemStackUseLimitProvider());
         register(new ItemStackToolTypeProvider());
-        register(new ItemStackArmorTypeProvider());
+//        register(new ItemStackArmorTypeProvider());
         register(new ItemStackEquipmentTypeProvider());
         register(new ItemStackDamageAbsorbtionProvider());
         register(new ItemStackContainerProvider());
 
 
-        register(new ItemStackFluidProvider());
+//        register(new ItemStackFluidProvider());
 
         register(new ItemStackColorProvider());
         register(new ItemStackDyeColorProvider());

@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.value.Value;
+
 import java.util.Optional;
 
 /**
@@ -42,8 +39,8 @@ public class MemoryDataContainer extends MemoryDataView implements DataContainer
 
     /**
      * Creates a new {@link MemoryDataContainer} with a default
-     * {@link org.spongepowered.api.data.DataView.SafetyMode} of
-     * {@link org.spongepowered.api.data.DataView.SafetyMode#ALL_DATA_CLONED}.
+     * {@link org.spongepowered.api.data.persistence.DataView.SafetyMode} of
+     * {@link org.spongepowered.api.data.persistence.DataView.SafetyMode#ALL_DATA_CLONED}.
      *
      */
     public MemoryDataContainer() {
@@ -52,10 +49,10 @@ public class MemoryDataContainer extends MemoryDataView implements DataContainer
 
     /**
      * Creates a new {@link MemoryDataContainer} with the provided
-     * {@link org.spongepowered.api.data.DataView.SafetyMode}.
+     * {@link org.spongepowered.api.data.persistence.DataView.SafetyMode}.
      *
      * @param safety The safety mode to use
-     * @see org.spongepowered.api.data.DataView.SafetyMode
+     * @see org.spongepowered.api.data.persistence.DataView.SafetyMode
      */
     public MemoryDataContainer(DataView.SafetyMode safety) {
         super(safety);
@@ -74,11 +71,6 @@ public class MemoryDataContainer extends MemoryDataView implements DataContainer
     @Override
     public DataContainer set(DataQuery path, Object value) {
         return (DataContainer) super.set(path, value);
-    }
-
-    @Override
-    public <E> DataContainer set(Key<? extends Value<E>> key, E value) {
-        return set(checkNotNull(key).getQuery(), value);
     }
 
     @Override

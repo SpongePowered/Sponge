@@ -34,7 +34,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
+import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,7 +74,7 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
             .filter(entity -> !(entity instanceof ExperienceOrb))
             .collect(Collectors.toList());
         if (!other.isEmpty()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.ENTITY_DEATH);
             SpongeCommonEventFactory.callSpawnEntity(experience, context);
         }
     }

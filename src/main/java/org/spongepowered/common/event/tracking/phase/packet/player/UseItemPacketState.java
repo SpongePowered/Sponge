@@ -41,6 +41,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -49,7 +50,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -109,7 +109,7 @@ public final class UseItemPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
-        final SpongeItemStackSnapshot snapshot = context.getItemUsedSnapshot();
+        final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
         final HandType hand = context.getHandUsed();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE,
@@ -122,7 +122,7 @@ public final class UseItemPacketState extends BasicPacketState {
                 // TODO - Determine if we need to pass the supplier or perform some parameterized
                 //  process if not empty method on the capture object.
                 boolean success = TrackingUtil.processBlockCaptures(context);
-                if (!success && snapshot.isNone()) {
+                if (!success && snapshot.isEmpty()) {
                     Sponge.getCauseStackManager().pushCause(player);
                     PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (Hand) (Object) hand);
                 }

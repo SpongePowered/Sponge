@@ -26,13 +26,10 @@ package org.spongepowered.common.registry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.spongepowered.api.registry.BuilderRegistry;
-import org.spongepowered.api.registry.CatalogRegistry;
+import org.spongepowered.api.item.merchant.VillagerRegistry;
+import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.GameRegistry;
-import org.spongepowered.api.item.merchant.VillagerRegistry;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
-import org.spongepowered.api.item.recipe.smelting.SmeltingRecipeRegistry;
 
 @Singleton
 public final class SpongeGameRegistry implements GameRegistry {
@@ -42,11 +39,13 @@ public final class SpongeGameRegistry implements GameRegistry {
     private final SpongeFactoryRegistry factoryRegistry;
 
     @Inject
-    public SpongeGameRegistry(SpongeCatalogRegistry catalogRegistry, SpongeBuilderRegistry builderRegistry, SpongeFactoryRegistry factoryRegistry) {
+    public SpongeGameRegistry(final SpongeCatalogRegistry catalogRegistry, final SpongeBuilderRegistry builderRegistry,
+        final SpongeFactoryRegistry factoryRegistry) {
         this.catalogRegistry = catalogRegistry;
         this.builderRegistry = builderRegistry;
         this.factoryRegistry = factoryRegistry;
     }
+
     @Override
     public SpongeCatalogRegistry getCatalogRegistry() {
         return this.catalogRegistry;
@@ -63,17 +62,12 @@ public final class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public CraftingRecipeRegistry getRecipeRegistry() {
-        return null;
-    }
-
-    @Override
-    public SmeltingRecipeRegistry getSmeltingRecipeRegistry() {
-        return null;
+    public RecipeRegistry getRecipeRegistry() {
+        throw new UnsupportedOperationException("implement me");
     }
 
     @Override
     public VillagerRegistry getVillagerRegistry() {
-        return null;
+        throw new UnsupportedOperationException("implement me");
     }
 }

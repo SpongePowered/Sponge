@@ -41,7 +41,7 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
     @Shadow private String author;
     @Shadow private BlockPos position;
     @Shadow private BlockPos size = BlockPos.ZERO;
-    @Shadow private StructureBlockTileEntity.Mode mode;
+    @Shadow private net.minecraft.state.properties.StructureMode mode;
     @Shadow private boolean ignoreEntities;
     @Shadow private boolean showAir;
     @Shadow private boolean showBoundingBox;
@@ -53,7 +53,7 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
     }
 
     @Override
-    public void bridge$setAuthor(String author) {
+    public void bridge$setAuthor(final String author) {
         this.author = author;
     }
 
@@ -67,14 +67,16 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
         return this.integrity;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public StructureMode bridge$getMode() {
         return (StructureMode) (Object) this.mode;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public void bridge$setMode(StructureMode mode) {
-        this.mode = (StructureBlockTileEntity.Mode) (Object) checkNotNull(mode, "mode");
+    public void bridge$setMode(final StructureMode mode) {
+        this.mode = (net.minecraft.state.properties.StructureMode) (Object) checkNotNull(mode, "mode");
     }
 
     @Override
@@ -83,7 +85,7 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
     }
 
     @Override
-    public void bridge$setPosition(Vector3i position) {
+    public void bridge$setPosition(final Vector3i position) {
         this.position = VecHelper.toBlockPos(checkNotNull(position, "position"));
     }
 
@@ -103,7 +105,7 @@ public abstract class StructureBlockTileEntityMixin extends TileEntityMixin impl
     }
 
     @Override
-    public void bridge$setSize(Vector3i size) {
+    public void bridge$setSize(final Vector3i size) {
         this.size = VecHelper.toBlockPos(checkNotNull(size, "size"));
     }
 

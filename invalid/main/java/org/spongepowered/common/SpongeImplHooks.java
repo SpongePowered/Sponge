@@ -90,7 +90,7 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
-import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
+import org.spongepowered.common.mixin.invalid.plugin.tileentityactivation.TileEntityActivation;
 import org.spongepowered.common.util.SpawnerSpawnType;
 
 import java.util.Collection;

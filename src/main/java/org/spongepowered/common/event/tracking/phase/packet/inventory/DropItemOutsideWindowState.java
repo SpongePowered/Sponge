@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -32,7 +35,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -40,48 +43,50 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-
 public final class DropItemOutsideWindowState extends BasicInventoryPacketState {
 
-    public DropItemOutsideWindowState(int stateid) {
+    public DropItemOutsideWindowState(final int stateid) {
         super(stateid);
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(InventoryPacketContext context) {
+    public boolean doesCaptureEntityDrops(final InventoryPacketContext context) {
         return true;
     }
 
     @Override
-    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, InventoryPacketContext context) {
+    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet,
+        final InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(ServerPlayerEntity playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer,
+        final Transaction<ItemStackSnapshot> transaction,
+        final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
+        @Nullable final Slot slot) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
-            for (Entity currentEntity : capturedEntities) {
+            for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof OwnershipTrackedBridge) {
                     ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference((Player) playerMP);
                 } else {
-                    currentEntity.setCreator(playerMP.getUniqueID());
+                    currentEntity.offer(Keys.CREATOR, playerMP.getUniqueID());
                 }
             }
             if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
-                return SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(frame.getCurrentCause(), transaction, capturedEntities,
-                        Optional.ofNullable(slot), openContainer, slotTransactions);
+                return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(frame.getCurrentCause(),
+                    openContainer, transaction, capturedEntities,
+                    Optional.ofNullable(slot), slotTransactions);
             } else {
-                return SpongeEventFactory.createClickInventoryEventDropOutsideSecondary(frame.getCurrentCause(), transaction, capturedEntities,
-                        Optional.ofNullable(slot), openContainer, slotTransactions);
+                return SpongeEventFactory.createClickContainerEventDropOutsideSecondary(frame.getCurrentCause(),
+                    openContainer, transaction, capturedEntities,
+                    Optional.ofNullable(slot), slotTransactions);
             }
         }
     }

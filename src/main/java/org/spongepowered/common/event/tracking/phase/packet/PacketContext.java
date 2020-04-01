@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -31,11 +33,8 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.item.SpongeItemStackSnapshot;
 
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
 
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
@@ -44,7 +43,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     @Nullable IPacket<?> packet;
     private ItemStackSnapshot cursor = ItemStackSnapshot.empty();
     private ItemStack itemUsed = ItemStack.empty();
-    private SpongeItemStackSnapshot itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.empty();
+    private ItemStackSnapshot itemUsedSnapshot = ItemStackSnapshot.empty();
     @Nullable private HandType handUsed;
     private boolean ignoreCreative;
     private boolean interactItemChanged;
@@ -96,7 +95,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public P itemUsed(final ItemStack stack) {
         this.itemUsed = stack;
-        this.itemUsedSnapshot = (SpongeItemStackSnapshot) this.itemUsed.createSnapshot();
+        this.itemUsedSnapshot = this.itemUsed.createSnapshot();
         return (P) this;
     }
 
@@ -104,7 +103,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return this.itemUsed;
     }
 
-    public SpongeItemStackSnapshot getItemUsedSnapshot() {
+    public ItemStackSnapshot getItemUsedSnapshot() {
         return this.itemUsedSnapshot;
     }
 
@@ -144,7 +143,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         this.packet = null;
         this.cursor = ItemStackSnapshot.empty();
         this.itemUsed = ItemStack.empty();
-        this.itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.empty();
+        this.itemUsedSnapshot = ItemStackSnapshot.empty();
         this.handUsed = null;
         this.ignoreCreative = false;
         this.interactItemChanged = false;

@@ -107,14 +107,6 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
             .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Panda", PANDA_ONLY)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixinTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
-            .put("org.spongepowered.common.mixin.optimization.network.play.server.SPacketChunkDataMixin_Async_Lighting",
-                    OptimizationCategory::useAsyncLighting)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.chunk.ChunkMixin_Async_Lighting",
-                    OptimizationCategory::useAsyncLighting)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.WorldServerMixin_Async_Lighting",
-                    OptimizationCategory::useAsyncLighting)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.gen.ChunkProviderServerMixin_Async_Lighting",
-                    OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.invalid.optimization.world.gen.structure.MapGenStructureMixin_Structure_Saving",
                     OptimizationCategory::useStructureSave)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.EntityItemFrameMixin_MapOptimization",

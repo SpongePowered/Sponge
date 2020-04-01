@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.inventory.adapter.impl.comp;
 
-import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
@@ -97,6 +95,6 @@ public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements 
     }
 
     private Inventory queryForType(EquipmentType equipmentType) {
-        return this.query(PropertyMatcher.of(InventoryProperties.EQUIPMENT_TYPE, equipmentType));
+        throw new UnsupportedOperationException("implement me");
     }
 }

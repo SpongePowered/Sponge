@@ -24,30 +24,18 @@
  */
 package org.spongepowered.common.rotation;
 
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.common.SpongeCatalogType;
 
-@NonnullByDefault
-public class SpongeRotation implements Rotation {
+public class SpongeRotation extends SpongeCatalogType implements Rotation {
 
     private final int angle;
-    private final String name;
-    private final String id;
 
-    public SpongeRotation(int angle, String id, String name) {
+
+    public SpongeRotation(final CatalogKey key, final int angle) {
+        super(key);
         this.angle = angle;
-        this.id = id;
-        this.name = name;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @Override

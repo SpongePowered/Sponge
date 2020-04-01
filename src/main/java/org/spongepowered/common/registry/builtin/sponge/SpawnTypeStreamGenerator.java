@@ -32,7 +32,8 @@ import java.util.stream.Stream;
 
 public final class SpawnTypeStreamGenerator {
 
-    public static SpawnType FORCED = new SpongeSpawnType(CatalogKey.sponge("forced")).forced();
+    public static final SpongeSpawnType ENTITY_DEATH = new SpongeSpawnType(CatalogKey.sponge("entity_death"));
+    public static final SpawnType FORCED = new SpongeSpawnType(CatalogKey.sponge("forced")).forced();
 
     public static Stream<SpawnType> stream() {
         return Stream.of(
@@ -54,7 +55,7 @@ public final class SpawnTypeStreamGenerator {
             new SpongeSpawnType(CatalogKey.sponge("chunk_load")),
             new SpongeSpawnType(CatalogKey.sponge("world_spawner")),
             new SpongeSpawnType(CatalogKey.sponge("plugin")),
-            new SpongeSpawnType(CatalogKey.sponge("entity_death")),
+            ENTITY_DEATH,
             FORCED
         );
     }

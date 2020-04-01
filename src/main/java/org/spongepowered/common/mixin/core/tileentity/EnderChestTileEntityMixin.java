@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 import net.minecraft.tileentity.EnderChestTileEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,10 +41,11 @@ public abstract class EnderChestTileEntityMixin extends TileEntityMixin {
 
     /**
      * @author bloodmc - July 21st, 2016
+     * @author gabizou - March 31st, 2020 - Minecraft 1.14.4
      *
      * @reason Overwritten in case ender chests ever attempt to tick
      */
-    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void impl$IgnoreTicking(CallbackInfo ci) {
         if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server

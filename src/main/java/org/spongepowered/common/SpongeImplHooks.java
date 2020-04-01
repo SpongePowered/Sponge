@@ -78,7 +78,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
-import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
 import java.util.Collection;
 
@@ -469,7 +468,7 @@ public class SpongeImplHooks {
     }
 
     /**
-     * For use with {@link TileEntityActivation}.
+     * For use with TileActivation.
      *
      * @param tileEntity The tile to tick
      * @return True whether to tick or false, not to

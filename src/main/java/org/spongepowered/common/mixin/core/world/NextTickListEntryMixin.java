@@ -43,9 +43,8 @@ import javax.annotation.Nullable;
 public abstract class NextTickListEntryMixin implements NextTickListEntryBridge {
 
     @Shadow @Final public BlockPos position;
-    @Shadow public int priority;
 
-    @Nullable @MonotonicNonNull private Location<org.spongepowered.api.world.World> impl$location;
+    @Nullable @MonotonicNonNull private Location impl$location;
 
     @Override
     public void bridge$setWorld(World world) {
@@ -54,7 +53,7 @@ public abstract class NextTickListEntryMixin implements NextTickListEntryBridge 
     }
 
     @Override
-    public Location<org.spongepowered.api.world.World> bridge$getLocation() {
+    public Location bridge$getLocation() {
         checkState(this.impl$location != null, "Unable to determine location at this time");
         return this.impl$location;
     }

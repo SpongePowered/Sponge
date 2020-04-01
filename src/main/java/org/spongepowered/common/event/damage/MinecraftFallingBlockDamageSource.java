@@ -34,7 +34,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
 
 public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 
-    @SuppressWarnings("unused") private final ImmutableFallingBlockData fallingBlockData; // Used in the mixin
 
     public MinecraftFallingBlockDamageSource(final String damageType, final FallingBlockEntity damageSourceEntityIn) {
         super(p_i1567_1_, damageSourceEntityIn);

@@ -24,38 +24,41 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
 
 public final class MiddleInventoryClickState extends BasicInventoryPacketState {
 
     public MiddleInventoryClickState() {
-        super(Constants.Networking.BUTTON_PRIMARY // The primary is set if the pick block is used as a different button mapping.
-              | Constants.Networking.BUTTON_MIDDLE
-              | Constants.Networking.MODE_PICKBLOCK
-              | Constants.Networking.CLICK_INSIDE_WINDOW
-              | Constants.Networking.CLICK_OUTSIDE_WINDOW);
+        super(
+            Constants.Networking.BUTTON_PRIMARY // The primary is set if the pick block is used as a different button mapping.
+                | Constants.Networking.BUTTON_MIDDLE
+                | Constants.Networking.MODE_PICKBLOCK
+                | Constants.Networking.CLICK_INSIDE_WINDOW
+                | Constants.Networking.CLICK_OUTSIDE_WINDOW);
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
-            final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
-        return SpongeEventFactory.createClickInventoryEventMiddle(Sponge.getCauseStackManager().getCurrentCause(), transaction,
-                Optional.ofNullable(slot), openContainer, slotTransactions);
+    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer,
+        final Transaction<ItemStackSnapshot> transaction,
+        final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
+        @Nullable final Slot slot) {
+        return SpongeEventFactory.createClickContainerEventMiddle(Sponge.getCauseStackManager().getCurrentCause(),
+            openContainer, transaction,
+            Optional.ofNullable(slot), slotTransactions);
     }
 
 }

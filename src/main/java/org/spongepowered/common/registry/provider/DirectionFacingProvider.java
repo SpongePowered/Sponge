@@ -31,7 +31,7 @@ import org.spongepowered.api.util.Direction;
 
 import java.util.Optional;
 
-public final class DirectionFacingProvider implements TypeProvider<Direction, net.minecraft.util.Direction> {
+public final class DirectionFacingProvider {
 
     public static DirectionFacingProvider getInstance() {
         return Holder.INSTANCE;
@@ -46,12 +46,10 @@ public final class DirectionFacingProvider implements TypeProvider<Direction, ne
         .put(Direction.DOWN, net.minecraft.util.Direction.DOWN)
         .build();
 
-    @Override
     public Optional<net.minecraft.util.Direction> get(Direction key) {
         return Optional.ofNullable(directionMap.get(checkNotNull(key)));
     }
 
-    @Override
     public Optional<Direction> getKey(net.minecraft.util.Direction value) {
         return Optional.ofNullable(directionMap.inverse().get(checkNotNull(value)));
     }

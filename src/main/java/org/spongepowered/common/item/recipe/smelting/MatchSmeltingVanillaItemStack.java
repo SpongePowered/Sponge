@@ -27,12 +27,11 @@ package org.spongepowered.common.item.recipe.smelting;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
+import java.util.function.Predicate;
 
 /**
  * Needs to be a separate class so it can be used in mixed-in code
@@ -60,13 +59,13 @@ public class MatchSmeltingVanillaItemStack implements Predicate<ItemStackSnapsho
     /**
      * Same method, but static.
      *
-     * @see FurnaceRecipes#compareItemStacks(ItemStack, ItemStack)
+     * @see net.minecraft.item.crafting.Ingredient#(ItemStack, ItemStack)
      */
     public static boolean compareItemStacks(@Nonnull ItemStack stack1, @Nonnull ItemStack stack2) {
         checkNotNull(stack1, "stack1");
         checkNotNull(stack2, "stack2");
 
-        return stack2.getItem() == stack1.getItem() && (stack2.getMetadata() == Short.MAX_VALUE || stack2.getMetadata() == stack1.getMetadata());
+        return stack1.isItemEqualIgnoreDurability(stack2);
     }
 
 }

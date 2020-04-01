@@ -24,10 +24,17 @@
  */
 package org.spongepowered.common.inventory.property;
 
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.CollectionValue;
+import org.spongepowered.api.data.value.MapValue;
+import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.item.inventory.Inventory;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -37,6 +44,12 @@ public interface InventoryDataHolder extends Inventory {
 //     InventoryPropertyProvider.getRootProperty(this, property);
 //     SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
 // TODO
+
+
+    @Override
+    default <V> Optional<V> get(Inventory child, Key<? extends Value<V>> key) {
+        return Optional.empty();
+    }
 
     @Override default <E> Optional<E> get(Key<? extends Value<E>> key) {
         return Optional.empty();
@@ -55,6 +68,100 @@ public interface InventoryDataHolder extends Inventory {
     }
 
     @Override default Set<Value.Immutable<?>> getValues() {
+        return null;
+    }
+
+    @Override
+    default <E> DataTransactionResult offer(Key<? extends Value<E>> key, E value) {
+        return null;
+    }
+
+    @Override
+    default DataTransactionResult offer(Value<?> value) {
+        return null;
+    }
+
+    @Override
+    default <E> DataTransactionResult offerSingle(Key<? extends CollectionValue<E, ?>> key, E element) {
+        return null;
+    }
+
+    @Override
+    default <K, V> DataTransactionResult offerSingle(Key<? extends MapValue<K, V>> key, K valueKey, V value) {
+        return null;
+    }
+
+    @Override
+    default <K, V> DataTransactionResult offerAll(Key<? extends MapValue<K, V>> key,
+        Map<? extends K, ? extends V> map) {
+        return null;
+    }
+
+    @Override
+    default DataTransactionResult offerAll(MapValue<?, ?> value) {
+        return null;
+    }
+
+    @Override
+    default DataTransactionResult offerAll(CollectionValue<?, ?> value) {
+        return null;
+    }
+
+    @Override
+    default <E> DataTransactionResult offerAll(Key<? extends CollectionValue<E, ?>> key,
+        Collection<? extends E> elements) {
+        return null;
+    }
+
+    @Override
+    default <E> DataTransactionResult removeSingle(Key<? extends CollectionValue<E, ?>> key, E element) {
+        return null;
+    }
+
+    @Override
+    default <K> DataTransactionResult removeKey(Key<? extends MapValue<K, ?>> key, K mapKey) {
+        return null;
+    }
+
+    @Override
+    default DataTransactionResult removeAll(CollectionValue<?, ?> value) {
+        return null;
+    }
+
+    @Override
+    default <E> DataTransactionResult removeAll(Key<? extends CollectionValue<E, ?>> key,
+        Collection<? extends E> elements) {
+        return null;
+    }
+
+    @Override
+    default DataTransactionResult removeAll(MapValue<?, ?> value) {
+        return null;
+    }
+
+    @Override
+    default <K, V> DataTransactionResult removeAll(Key<? extends MapValue<K, V>> key,
+        Map<? extends K, ? extends V> map) {
+        return null;
+    }
+
+    @Override
+    default <E> DataTransactionResult tryOffer(Key<? extends Value<E>> key, E value) {
+        return null;
+    }
+
+    @Override
+    default DataTransactionResult remove(Key<?> key) {
+        return null;
+    }
+
+    @Override
+    default DataTransactionResult undo(DataTransactionResult result) {
+        return null;
+    }
+
+    @Override
+    default DataTransactionResult copyFrom(ValueContainer that, MergeFunction function) {
         return null;
     }
 }

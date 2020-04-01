@@ -38,13 +38,9 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.text.TextComponentBridge;
-import org.spongepowered.common.bridge.util.text.event.ClickEventBridge;
-import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.text.ResolvedChatStyle;
 import org.spongepowered.common.text.TextComponentIterable;
 
@@ -155,25 +151,7 @@ public abstract class TextComponentMixin implements TextComponentBridge, ITextCo
     }
 
     private static ResolvedChatStyle resolve(final ResolvedChatStyle current, final Style previous, final Style style) {
-        final StyleBridge bridge = (StyleBridge) style;
-        if (current != null && bridge.bridge$getParentStyle() == previous) {
-            return new ResolvedChatStyle(
-                    defaultIfNull(bridge.bridge$getColor(), current.color),
-                    firstNonNull(bridge.bridge$getBold(), current.bold),
-                    firstNonNull(bridge.bridge$getItalic(), current.italic),
-                    firstNonNull(bridge.bridge$getUnderlined(), current.underlined),
-                    firstNonNull(bridge.bridge$getStrikethrough(), current.strikethrough),
-                    firstNonNull(bridge.bridge$getObfuscated(), current.obfuscated)
-            );
-        }
-        return new ResolvedChatStyle(
-                style.getColor(),
-                style.getBold(),
-                style.getItalic(),
-                style.getUnderlined(),
-                style.getStrikethrough(),
-                style.getObfuscated()
-        );
+        throw new UnsupportedOperationException("implement me");
     }
 
     private static boolean firstNonNull(final Boolean b1, final boolean b2) {
@@ -182,44 +160,13 @@ public abstract class TextComponentMixin implements TextComponentBridge, ITextCo
 
     @SuppressWarnings("ConstantConditions")
     private static void apply(final StringBuilder builder, final char code, final TextFormatting formatting) {
-        builder.append(code).append(((TextFormattingBridge) (Object) formatting).bridge$getFormattingCode());
+        throw new UnsupportedOperationException("implement me");
     }
 
     private static void apply(final StringBuilder builder, final char code, final TextFormatting formatting, final boolean state) {
         if (state) {
             apply(builder, code, formatting);
         }
-    }
-
-    @Override
-    public Text bridge$toText() {
-        final Text.Builder builder = this.impl$createBuilder();
-
-        final StyleBridge style = (StyleBridge) this.style;
-        if (style != null) {
-            if (style.bridge$getColor() != null) {
-                builder.color(SpongeTextColor.of(style.bridge$getColor()));
-            }
-
-            builder.style(new TextStyle(style.bridge$getBold(), style.bridge$getItalic(), style.bridge$getUnderlined(), style.bridge$getStrikethrough(),
-                    style.bridge$getObfuscated()));
-
-            if (style.bridge$getClickEvent() != null) {
-                builder.onClick(((ClickEventBridge) style.bridge$getClickEvent()).bridge$getHandle());
-            }
-            if (style.bridge$getHoverEvent() != null) {
-                builder.onHover(((HoverEventBridge) style.bridge$getHoverEvent()).bridge$getHandle());
-            }
-            if (style.bridge$getInsertion() != null) {
-                builder.onShiftClick(TextActions.insertText(style.bridge$getInsertion()));
-            }
-        }
-
-        for (final ITextComponent child : this.siblings) {
-            builder.append(((TextComponentBridge) child).bridge$toText());
-        }
-
-        return builder.build();
     }
 
 }

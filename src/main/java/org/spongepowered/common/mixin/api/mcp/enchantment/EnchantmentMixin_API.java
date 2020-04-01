@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.api.mcp.enchantment;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -42,7 +42,6 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
 @Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$"))
 public abstract class EnchantmentMixin_API implements EnchantmentType {
@@ -58,19 +57,19 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Shadow public abstract boolean shadow$isTreasureEnchantment();
     @Shadow public abstract boolean shadow$isCurse();
 
-    @Shadow @Final public static SimpleRegistry<ResourceLocation, Enchantment> REGISTRY;
 
-    @Nullable private String api$id;
+    @Nullable private ResourceLocation api$id;
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public final String getId() {
-        if (this.api$id == null || this.api$id.isEmpty()) {
-            final ResourceLocation id = REGISTRY.getKey((Enchantment) (Object) this);
+    public CatalogKey getKey() {
+        if (this.api$id == null) {
+            final ResourceLocation id = Registry.ENCHANTMENT.getKey((Enchantment) (Object) this);
             if (id != null) {
-                this.api$id = id.toString();
+                this.api$id = id;
             }
         }
-        return this.api$id;
+        return (CatalogKey) (Object) this.api$id;
     }
 
     @Override

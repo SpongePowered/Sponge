@@ -24,34 +24,36 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
 
 public final class SecondaryInventoryClickState extends BasicInventoryPacketState {
 
     public SecondaryInventoryClickState() {
-        super(Constants.Networking.MODE_CLICK | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_INSIDE_WINDOW);
+        super(
+            Constants.Networking.MODE_CLICK | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_INSIDE_WINDOW);
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(ServerPlayerEntity playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
-        return SpongeEventFactory.createClickInventoryEventSecondary(Sponge.getCauseStackManager().getCurrentCause(),
-                transaction, Optional.ofNullable(slot), openContainer, slotTransactions);
+    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer,
+        final Transaction<ItemStackSnapshot> transaction,
+        final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
+        @Nullable final Slot slot) {
+        return SpongeEventFactory.createClickContainerEventSecondary(Sponge.getCauseStackManager().getCurrentCause(),
+            openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
     }
 
 }

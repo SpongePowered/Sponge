@@ -25,12 +25,12 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.block.Block;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -55,6 +55,7 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.world.BlockChange;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -63,8 +64,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 final class CommandState extends GeneralState<CommandPhaseContext> {
 
@@ -127,7 +126,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                 list.clear();
             }
         }
-        final CommandSource sender = phaseContext.getSource(CommandSource.class)
+        final ICommandSource sender = phaseContext.getSource(ICommandSource.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.

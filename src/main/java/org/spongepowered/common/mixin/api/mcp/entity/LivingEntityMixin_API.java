@@ -24,24 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.projectile.ProjectileLauncher;
-import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Optional;
 import java.util.Set;
 
-@SuppressWarnings("rawtypes")
 @Mixin(value = LivingEntity.class, priority = 999)
 public abstract class LivingEntityMixin_API extends EntityMixin_API implements Living {
 
@@ -51,16 +44,6 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     @Override
     public Text getTeamRepresentation() {
         return Text.of(this.shadow$getUniqueID().toString());
-    }
-
-    @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectile class"), this, null);
-    }
-
-    @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectile class"), this, checkNotNull(velocity, "velocity"));
     }
 
     @Override

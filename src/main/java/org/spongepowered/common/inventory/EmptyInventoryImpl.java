@@ -24,9 +24,15 @@
  */
 package org.spongepowered.common.inventory;
 
+import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
-import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.data.property.PropertyMatcher;
+import org.spongepowered.api.data.value.CollectionValue;
+import org.spongepowered.api.data.value.MapValue;
+import org.spongepowered.api.data.value.MergeFunction;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -38,14 +44,13 @@ import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResu
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-
-import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * Bottom type / empty results set for inventory queries.
@@ -113,6 +118,36 @@ public class EmptyInventoryImpl implements EmptyInventory {
     @Override
     public boolean containsAny(ItemStack stack) {
         return false;
+    }
+
+    @Override
+    public <V> Optional<V> get(Inventory child, Key<? extends Value<V>> key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <V> Optional<V> get(Key<? extends Value<V>> key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean supports(Key<?> key) {
+        return false;
+    }
+
+    @Override
+    public Set<Key<?>> getKeys() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public Set<Value.Immutable<?>> getValues() {
+        return ImmutableSet.of();
     }
 
     @Override
@@ -204,5 +239,98 @@ public class EmptyInventoryImpl implements EmptyInventory {
     @Override
     public Optional<ViewableInventory> asViewable() {
         return Optional.empty();
+    }
+
+    @Override
+    public <E> DataTransactionResult offer(Key<? extends Value<E>> key, E value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult offer(Value<?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult offerSingle(Key<? extends CollectionValue<E, ?>> key, E element) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <K, V> DataTransactionResult offerSingle(Key<? extends MapValue<K, V>> key, K valueKey, V value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <K, V> DataTransactionResult offerAll(Key<? extends MapValue<K, V>> key, Map<? extends K, ? extends V> map) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult offerAll(MapValue<?, ?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult offerAll(CollectionValue<?, ?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult offerAll(Key<? extends CollectionValue<E, ?>> key,
+        Collection<? extends E> elements) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult removeSingle(Key<? extends CollectionValue<E, ?>> key, E element) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <K> DataTransactionResult removeKey(Key<? extends MapValue<K, ?>> key, K mapKey) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult removeAll(CollectionValue<?, ?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult removeAll(Key<? extends CollectionValue<E, ?>> key,
+        Collection<? extends E> elements) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult removeAll(MapValue<?, ?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <K, V> DataTransactionResult removeAll(Key<? extends MapValue<K, V>> key,
+        Map<? extends K, ? extends V> map) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult tryOffer(Key<? extends Value<E>> key, E value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult remove(Key<?> key) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult undo(DataTransactionResult result) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult copyFrom(ValueContainer that, MergeFunction function) {
+        return DataTransactionResult.failNoData();
     }
 }

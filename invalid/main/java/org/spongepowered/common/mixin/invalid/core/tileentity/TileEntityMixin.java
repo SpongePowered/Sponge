@@ -1,5 +1,9 @@
 package org.spongepowered.common.mixin.invalid.core.tileentity;
 
+import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.Inject;
+
 @Mixin(TileEntity.class)
 public class TileEntityMixin {
 

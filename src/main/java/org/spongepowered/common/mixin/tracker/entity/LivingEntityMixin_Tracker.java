@@ -67,6 +67,11 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
     @Shadow @Nullable public abstract LivingEntity shadow$getAttackingEntity();
     @Shadow public abstract void shadow$onDeath(DamageSource cause);
+    @Shadow public abstract boolean shadow$isSleeping();
+
+    @Shadow protected abstract void shadow$spawnDrops(DamageSource damageSourceIn);
+
+    @Shadow public float attackedAtYaw;
     // @formatter:on
     private int tracker$deathEventsPosted;
 

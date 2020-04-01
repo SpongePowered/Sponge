@@ -39,6 +39,8 @@ import net.minecraft.network.play.server.SCombatPacket;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
@@ -51,6 +53,7 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -71,10 +74,14 @@ import java.util.Optional;
 public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_Tracker implements PlayerEntityBridge {
 
     // @formatter:off
-    @Shadow public abstract ServerWorld shadow$getServerWorld();
-
+    @Shadow @Final public MinecraftServer server;
     @Shadow public ServerPlayNetHandler connection;
+
+    @Shadow public abstract void shadow$takeStat(Stat<?> stat);
+    @Shadow public abstract ServerWorld shadow$func_71121_q();
+    @Shadow public abstract boolean shadow$isSpectator();
     // @formatter:on
+
 
     @Nullable
     private Boolean tracker$keepInventory = null;
@@ -125,7 +132,7 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
                     }
 
                 });
-                final Team team = this.shadow$getTeam();
+                final Team team = this.getTeam();
                 if (team != null && team.getDeathMessageVisibility() != Team.Visible.ALWAYS) {
                     if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OTHER_TEAMS) {
                         this.server.getPlayerList().sendMessageToAllTeamMembers((ServerPlayerEntity) (Object) this, itextcomponent);
@@ -195,8 +202,8 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
             basicEntityContext.buildAndSwitch();
             // Sponge end
 
-            if (this.isSleeping()) {
-                this.shadow$getServerWorld().getChunkProvider().sendToTrackingAndSelf(this, new SAnimateHandPacket(this, 2));
+            if (this.shadow$isSleeping()) {
+                this.shadow$func_71121_q().getChunkProvider().sendToTrackingAndSelf((ServerPlayerEntity) (Object) this, new SAnimateHandPacket((ServerPlayerEntity) (Object) this, 2));
             }
 
             super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);

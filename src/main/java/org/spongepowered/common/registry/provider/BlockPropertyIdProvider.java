@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.block.*;
-import net.minecraft.block.properties.IProperty;
+import net.minecraft.state.IProperty;
 import org.apache.logging.log4j.LogManager;
 
 import java.lang.reflect.Field;
@@ -39,7 +39,7 @@ import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.Optional;
 
-public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, String> {
+public class BlockPropertyIdProvider  {
 
     private final IdentityHashMap<IProperty<?>, String> propertyIdMap = new IdentityHashMap<>();
     private final HashMap<String, IProperty<?>> idPropertyMap = new HashMap<>();
@@ -48,26 +48,24 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         return Holder.INSTANCE;
     }
 
-    public static String getIdFor(IProperty<?> iProperty) {
+    public static String getIdFor(final IProperty<?> iProperty) {
         return getInstance().propertyIdMap.get(iProperty);
     }
 
-    @Override
-    public Optional<String> get(IProperty<?> key) {
+    public Optional<String> get(final IProperty<?> key) {
         return Optional.ofNullable(this.propertyIdMap.get(checkNotNull(key, "Property cannot be null!")));
     }
 
-    @Override
-    public Optional<IProperty<?>> getKey(String value) {
+    public Optional<IProperty<?>> getKey(final String value) {
         return Optional.ofNullable(this.idPropertyMap.get(checkNotNull(value, "Id cannot be null!").toLowerCase(Locale.ENGLISH)));
     }
 
-    private boolean isRegistered(IProperty<?> property) {
+    private boolean isRegistered(final IProperty<?> property) {
         return this.propertyIdMap.containsKey(property);
     }
 
-    public static String getIdAndTryRegistration(IProperty<?> property, Block block, String blockId) {
-        BlockPropertyIdProvider instance = getInstance();
+    public static String getIdAndTryRegistration(final IProperty<?> property, final Block block, final String blockId) {
+        final BlockPropertyIdProvider instance = getInstance();
         checkNotNull(property, "Property is null! Cannot retrieve a registration for a null property!");
         checkNotNull(block, "Block cannot be null!");
         checkNotNull(blockId, "Block id cannot be null!");
@@ -92,7 +90,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
                     return propertyId;
                 }
                 // Had enough?
-                for (Field field : blockClass.getDeclaredFields()) {
+                for (final Field field : blockClass.getDeclaredFields()) {
                     field.setAccessible(true);
 
                     final boolean isStatic = Modifier.isStatic(field.getModifiers());
@@ -121,7 +119,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
                 blockClass = blockClass.getSuperclass();
             }
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogManager.getLogger("Sponge").warn("An exception was thrown while trying to resolve the property "
                                                 + property.getName() +"'s owning class, assigning "
                                                 + "fallback id: " + lastAttemptId, e);
@@ -130,7 +128,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         }
     }
 
-    private void register(IProperty<?> property, String id) {
+    private void register(final IProperty<?> property, final String id) {
         checkArgument(!this.propertyIdMap.containsKey(property), "Property is already registered! Property: " + property.getName()
                                                                  + " is registered as : " + this.propertyIdMap.get(property));
         this.propertyIdMap.put(property, id.toLowerCase(Locale.ENGLISH));
@@ -141,9 +139,9 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         this.register(HorizontalBlock.HORIZONTAL_FACING, "minecraft:horizontal_facing");
         this.register(RotatedPillarBlock.AXIS, "minecraft:pillar_axis");
         this.register(DirectionalBlock.FACING, "minecraft:directional_facing");
-        this.register(LogBlock.LOG_AXIS, "minecraft:log_axis");
-        this.register(BlockNewLog.VARIANT, "minecraft:new_log_variant");
-        this.register(BlockOldLog.VARIANT, "minecraft:log_variant");
+//        this.register(LogBlock.LOG_AXIS, "minecraft:log_axis");
+//        this.register(BlockNewLog.VARIANT, "minecraft:new_log_variant");
+//        this.register(BlockOldLog.VARIANT, "minecraft:log_variant");
         this.register(FarmlandBlock.MOISTURE, "minecraft:farmland_moisture");
         this.register(PistonBlock.EXTENDED, "minecraft:piston_extended");
         this.register(VineBlock.NORTH, "minecraft:vine_north");
@@ -151,81 +149,81 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         this.register(VineBlock.SOUTH, "minecraft:vine_south");
         this.register(VineBlock.WEST, "minecraft:vine_west");
         this.register(VineBlock.UP, "minecraft:vine_up");
-        this.register(BlockRedSandstone.TYPE, "minecraft:red_sandstone_type");
-        this.register(BlockLiquid.LEVEL, "minecraft:liquid_level");
+//        this.register(BlockRedSandstone.TYPE, "minecraft:red_sandstone_type");
+//        this.register(BlockLiquid.LEVEL, "minecraft:liquid_level");
         this.register(SugarCaneBlock.AGE, "minecraft:reed_age");
         this.register(MyceliumBlock.SNOWY, "minecraft:mycelium_snowy");
-        this.register(BlockColored.COLOR, "minecraft:dyed_color");
-        this.register(TorchBlock.FACING, "minecraft:torch_facing");
-        this.register(BlockDirt.SNOWY, "minecraft:dirt_snowy");
-        this.register(BlockDirt.VARIANT, "minecraft:dirt_variant");
+//        this.register(BlockColored.COLOR, "minecraft:dyed_color");
+//        this.register(TorchBlock.FACING, "minecraft:torch_facing");
+//        this.register(BlockDirt.SNOWY, "minecraft:dirt_snowy");
+//        this.register(BlockDirt.VARIANT, "minecraft:dirt_variant");
         this.register(EndPortalFrameBlock.EYE, "minecraft:end_portal_eye");
-        this.register(CarpetBlock.COLOR, "minecraft:carpet_color");
-        this.register(BlockStone.VARIANT, "minecraft:stone_variant");
-        this.register(HugeMushroomBlock.VARIANT, "minecraft:huge_mushroom_variant");
+//        this.register(CarpetBlock.COLOR, "minecraft:carpet_color");
+//        this.register(BlockStone.VARIANT, "minecraft:stone_variant");
+//        this.register(HugeMushroomBlock.VARIANT, "minecraft:huge_mushroom_variant");
         this.register(SnowBlock.LAYERS, "minecraft:snow_layer");
         this.register(WallBlock.UP, "minecraft:wall_up");
         this.register(WallBlock.NORTH, "minecraft:wall_north");
         this.register(WallBlock.EAST, "minecraft:wall_east");
         this.register(WallBlock.SOUTH, "minecraft:wall_south");
         this.register(WallBlock.WEST, "minecraft:wall_west");
-        this.register(WallBlock.VARIANT, "minecraft:wall_variant");
+//        this.register(WallBlock.VARIANT, "minecraft:wall_variant");
         this.register(StairsBlock.HALF, "minecraft:stairs_half");
         this.register(StairsBlock.SHAPE, "minecraft:stairs_shape");
         this.register(AbstractButtonBlock.POWERED, "minecraft:button_powered");
         this.register(CactusBlock.AGE, "minecraft:cactus_age");
         this.register(CropsBlock.AGE, "minecraft:crops_age");
         this.register(NetherWartBlock.AGE, "minecraft:nether_wart_age");
-        this.register(DoublePlantBlock.VARIANT, "minecraft:double_plant_variant");
+//        this.register(DoublePlantBlock.VARIANT, "minecraft:double_plant_variant");
         this.register(DoublePlantBlock.HALF, "minecraft:double_plant_half");
         this.register(StemBlock.AGE, "minecraft:stem_age");
-        this.register(TallGrassBlock.TYPE, "minecraft:tall_grass_type");
-        this.register(SaplingBlock.TYPE, "minecraft:sapling_type");
+//        this.register(TallGrassBlock.TYPE, "minecraft:tall_grass_type");
+//        this.register(SaplingBlock.TYPE, "minecraft:sapling_type");
         this.register(SaplingBlock.STAGE, "minecraft:sapling_stage");
-        this.register(BlockPrismarine.VARIANT, "minecraft:prismarine_variant");
+//        this.register(BlockPrismarine.VARIANT, "minecraft:prismarine_variant");
         this.register(FenceBlock.NORTH, "minecraft:fence_north");
         this.register(FenceBlock.EAST, "minecraft:fence_east");
         this.register(FenceBlock.SOUTH, "minecraft:fence_south");
         this.register(FenceBlock.WEST, "minecraft:fence_west");
-        this.register(SilverfishBlock.VARIANT, "minecraft:disguised_variant");
+//        this.register(SilverfishBlock.VARIANT, "minecraft:disguised_variant");
         this.register(PaneBlock.NORTH, "minecraft:pane_north");
         this.register(PaneBlock.EAST, "minecraft:pane_east");
         this.register(PaneBlock.SOUTH, "minecraft:pane_south");
         this.register(PaneBlock.WEST, "minecraft:pane_west");
-        this.register(StainedGlassPaneBlock.COLOR, "minecraft:stained_dyed_color");
-        this.register(BlockQuartz.VARIANT, "minecraft:quartz_variant");
+//        this.register(StainedGlassPaneBlock.COLOR, "minecraft:stained_dyed_color");
+//        this.register(BlockQuartz.VARIANT, "minecraft:quartz_variant");
         this.register(PistonHeadBlock.TYPE, "minecraft:piston_extension_type");
         this.register(PistonHeadBlock.SHORT, "minecraft:piston_extension_short");
-        this.register(BlockSandStone.TYPE, "minecraft:sand_stone_type");
-        this.register(BlockPlanks.VARIANT, "minecraft:plank_variant");
+//        this.register(BlockSandStone.TYPE, "minecraft:sand_stone_type");
+//        this.register(BlockPlanks.VARIANT, "minecraft:plank_variant");
         this.register(NetherPortalBlock.AXIS, "minecraft:portal_axis");
-        this.register(StainedGlassBlock.COLOR, "minecraft:stained_glass_color");
+//        this.register(StainedGlassBlock.COLOR, "minecraft:stained_glass_color");
         this.register(RailBlock.SHAPE, "minecraft:rail_shape");
         this.register(PoweredRailBlock.POWERED, "minecraft:powered_rail_powered");
         this.register(PoweredRailBlock.SHAPE, "minecraft:powered_rail_shape");
         this.register(DetectorRailBlock.POWERED, "minecraft:detector_rail_powered");
         this.register(DetectorRailBlock.SHAPE, "minecraft:detector_rail_shape");
-        this.register(LeavesBlock.DECAYABLE, "minecraft:leaves_decay");
-        this.register(LeavesBlock.CHECK_DECAY, "minecraft:leaves_check_decay");
-        this.register(BlockOldLeaf.VARIANT, "minecraft:old_leaves_variant");
-        this.register(BlockNewLeaf.VARIANT, "minecraft:new_leaves_variant");
+//        this.register(LeavesBlock.DECAYABLE, "minecraft:leaves_decay");
+//        this.register(LeavesBlock.CHECK_DECAY, "minecraft:leaves_check_decay");
+//        this.register(BlockOldLeaf.VARIANT, "minecraft:old_leaves_variant");
+//        this.register(BlockNewLeaf.VARIANT, "minecraft:new_leaves_variant");
         this.register(GrassBlock.SNOWY, "minecraft:grass_snowy");
         this.register(CauldronBlock.LEVEL, "minecraft:cauldron_level");
         this.register(BannerBlock.ROTATION, "minecraft:banner_rotation");
-        this.register(SkullBlock.NODROP, "minecraft:skull_no_drop");
+//        this.register(SkullBlock.NODROP, "minecraft:skull_no_drop");
         this.register(StandingSignBlock.ROTATION, "minecraft:standing_sign_rotation");
         this.register(BrewingStandBlock.HAS_BOTTLE[0], "minecraft:brewing_stand_1_has_bottle");
         this.register(BrewingStandBlock.HAS_BOTTLE[1], "minecraft:brewing_stand_2_has_bottle");
         this.register(BrewingStandBlock.HAS_BOTTLE[2], "minecraft:brewing_stand_3_has_bottle");
         this.register(HopperBlock.ENABLED, "minecraft:hopper_enabled");
         this.register(HopperBlock.FACING, "minecraft:hopper_facing");
-        this.register(FlowerPotBlock.LEGACY_DATA, "minecraft:flower_pot_legacy");
-        this.register(FlowerPotBlock.CONTENTS, "minecraft:flower_pot_contents");
+//        this.register(FlowerPotBlock.LEGACY_DATA, "minecraft:flower_pot_legacy");
+//        this.register(FlowerPotBlock.CONTENTS, "minecraft:flower_pot_contents");
         this.register(DaylightDetectorBlock.POWER, "minecraft:daylight_detector_power");
         this.register(DispenserBlock.TRIGGERED, "minecraft:dispenser_triggered");
         this.register(JukeboxBlock.HAS_RECORD, "minecraft:jukebox_has_record");
-        this.register(SandBlock.VARIANT, "minecraft:sand_variant");
-        this.register(AnvilBlock.DAMAGE, "minecraft:anvil_damage");
+//        this.register(SandBlock.VARIANT, "minecraft:sand_variant");
+//        this.register(AnvilBlock.DAMAGE, "minecraft:anvil_damage");
         this.register(CakeBlock.BITES, "minecraft:cake_bites");
         this.register(FireBlock.AGE, "minecraft:fire_age");
         this.register(FireBlock.NORTH, "minecraft:fire_north");
@@ -233,23 +231,23 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         this.register(FireBlock.SOUTH, "minecraft:fire_south");
         this.register(FireBlock.WEST, "minecraft:fire_west");
         this.register(FireBlock.UP, "minecraft:fire_upper");
-        this.register(SlabBlock.HALF, "minecraft:slab_half");
-        this.register(BlockStoneSlabNew.SEAMLESS, "minecraft:stone_slab_new_seamless");
-        this.register(BlockStoneSlabNew.VARIANT, "minecraft:stone_slab_new_variant");
-        this.register(BlockStoneSlab.SEAMLESS, "minecraft:stone_slab_seamless");
-        this.register(BlockStoneSlab.VARIANT, "minecraft:stone_slab_variant");
-        this.register(BlockWoodSlab.VARIANT, "minecraft:wood_slab_variant");
-        this.register(SpongeBlock.WET, "minecraft:sponge_wet");
+//        this.register(SlabBlock.HALF, "minecraft:slab_half");
+//        this.register(BlockStoneSlabNew.SEAMLESS, "minecraft:stone_slab_new_seamless");
+//        this.register(BlockStoneSlabNew.VARIANT, "minecraft:stone_slab_new_variant");
+//        this.register(BlockStoneSlab.SEAMLESS, "minecraft:stone_slab_seamless");
+//        this.register(BlockStoneSlab.VARIANT, "minecraft:stone_slab_variant");
+//        this.register(BlockWoodSlab.VARIANT, "minecraft:wood_slab_variant");
+//        this.register(SpongeBlock.WET, "minecraft:sponge_wet");
         this.register(TripWireHookBlock.ATTACHED, "minecraft:trip_wire_hook_attached");
         this.register(TripWireHookBlock.POWERED, "minecraft:trip_wire_hook_powered");
         this.register(DoorBlock.OPEN, "minecraft:door_open");
         this.register(DoorBlock.HINGE, "minecraft:door_hinge");
         this.register(DoorBlock.POWERED, "minecraft:door_powered");
         this.register(DoorBlock.HALF, "minecraft:door_half");
-        this.register(BlockStoneBrick.VARIANT, "minecraft:stone_brick_variant");
-        this.register(LeverBlock.FACING, "minecraft:lever_variant");
+//        this.register(BlockStoneBrick.VARIANT, "minecraft:stone_brick_variant");
+//        this.register(LeverBlock.FACING, "minecraft:lever_variant");
         this.register(LeverBlock.POWERED, "minecraft:lever_powered");
-        this.register(TNTBlock.EXPLODE, "minecraft:tnt_explode");
+//        this.register(TNTBlock.EXPLODE, "minecraft:tnt_explode");
         this.register(BedBlock.PART, "minecraft:bed_part");
         this.register(BedBlock.OCCUPIED, "minecraft:bed_occupied");
         this.register(ComparatorBlock.MODE, "minecraft:comparator_mode");
@@ -276,7 +274,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         this.register(TrapDoorBlock.HALF, "minecraft:trap_door_half");
         this.register(RepeaterBlock.DELAY, "minecraft:redstone_repeater_delay");
         this.register(RepeaterBlock.LOCKED, "minecraft:redstone_repeater_locked");
-        this.register(ConcretePowderBlock.COLOR, "minecraft:concrete_powder_color");
+//        this.register(ConcretePowderBlock.COLOR, "minecraft:concrete_powder_color");
     }
 
     private static final class Holder {

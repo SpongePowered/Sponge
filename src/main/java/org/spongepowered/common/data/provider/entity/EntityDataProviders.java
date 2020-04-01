@@ -58,7 +58,6 @@ import net.minecraft.item.MerchantOffer;
 import net.minecraft.item.MerchantOffers;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.PotionUtils;
-import net.minecraft.stats.ServerStatisticsManager;
 import net.minecraft.stats.Stat;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
@@ -105,8 +104,6 @@ import org.spongepowered.common.data.provider.entity.base.EntityInvulnerabilityT
 import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityIsSaddledProvider;
 import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityTamedOwnerProvider;
 import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityTamedProvider;
-import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseColorProvider;
-import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseStyleProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityActiveItemProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityBodyRotationsProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityChestRotationProvider;
@@ -142,7 +139,6 @@ import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.data.type.SpongeParrotType;
 import org.spongepowered.common.data.type.SpongeRabbitType;
 import org.spongepowered.common.data.util.PotionEffectHelper;
-import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
@@ -163,7 +159,6 @@ import org.spongepowered.common.mixin.accessor.entity.projectile.ShulkerBulletEn
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EntityDataProviders extends DataProviderRegistryBuilder {
@@ -263,7 +258,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
 
         register(ShulkerEntityBridge.class, Keys.DIRECTION, ShulkerEntityBridge::bridge$getDirection, ShulkerEntityBridge::bridge$setDirection);
 
-        register(HumanEntity.class, Keys.SKIN_UNIQUE_ID, e -> e.getSkinUuid(), (e, p) -> e.setSkinUuid(p));
+//        register(HumanEntity.class, Keys.SKIN_UNIQUE_ID, e -> e.getSkinUuid(), (e, p) -> e.setSkinUuid(p));
 
         register(Entity.class, Keys.PASSENGERS,
                 e -> e.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()),
@@ -492,8 +487,9 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
     }
 
     private void registerHorseEntityData() {
-        register(new HorseEntityHorseColorProvider());
-        register(new HorseEntityHorseStyleProvider());
+        throw new UnsupportedOperationException("Implement me");
+//        register(new HorseEntityHorseColorProvider());
+//        register(new HorseEntityHorseStyleProvider());
     }
 
     private void registerAreaEffectCloudEntityData() {

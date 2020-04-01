@@ -403,8 +403,9 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
         this.impl$dimensionType = net.minecraft.world.dimension.DimensionType.getById(spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID));
         this.impl$generateBonusChest = spongeDataCompound.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
-        this.impl$portalAgentType = PortalAgentRegistryModule.getInstance()
-            .validatePortalAgent(spongeDataCompound.getString(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
+        // TODO - Zidane.
+//        this.impl$portalAgentType = PortalAgentRegistryModule.getInstance()
+//            .validatePortalAgent(spongeDataCompound.getString(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
         this.impl$hasCustomDifficulty = spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
         this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
         this.impl$modCreated = spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED);

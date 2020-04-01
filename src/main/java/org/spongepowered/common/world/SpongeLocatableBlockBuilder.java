@@ -109,7 +109,7 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
         checkNotNull(this.position, "Position cannot be null!");
         checkNotNull(this.worldId, "World UUID cannot be null!");
         checkNotNull(this.worldReference, "World reference cannot be null!");
-        return new SpongeLocatableBlock(this);
+        throw new UnsupportedOperationException("implement me");
     }
 
     @Override

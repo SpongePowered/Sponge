@@ -57,13 +57,13 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BoundedWorldView;
 import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.volume.biome.worker.MutableBiomeVolumeStream;
 import org.spongepowered.api.world.volume.entity.ImmutableEntityVolume;
 import org.spongepowered.api.world.volume.entity.UnmodifiableEntityVolume;
 import org.spongepowered.asm.mixin.Mixin;
@@ -81,7 +81,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Mixin(IWorld.class)
-public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderMixin_API, IWorldReaderMixin_API<T>, IWorldGenerationReaderMixin_API, ProtoWorld<T> {
+public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderMixin_API, IWorldReaderMixin_API<BoundedWorldView<T>>, IWorldGenerationReaderMixin_API, ProtoWorld<T> {
     @Shadow long shadow$getSeed();
     @Shadow float shadow$getCurrentMoonPhaseFactor();
     @Shadow float shadow$getCelestialAngle(float p_72826_1_);
@@ -113,11 +113,6 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     }
 
     @Override
-    default MutableBiomeVolumeStream<T> toBiomeStream() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
-    }
-
-    @Override
     default Vector3i getBlockMin() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
@@ -143,7 +138,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     }
 
     @Override
-    default T getView(final Vector3i newMin, final Vector3i newMax) {
+    default BoundedWorldView<T> getView(final Vector3i newMin, final Vector3i newMax) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
@@ -173,6 +168,11 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     default <E extends Entity> Collection<? extends E> getEntities(final Class<? extends E> entityClass, final AABB box,
                                                                    @Nullable final Predicate<? super E> predicate) {
         return IEntityReaderMixin_API.super.getEntities(entityClass, box, predicate);
+    }
+
+    @Override
+    default ProtoChunk<?> getChunk(final int x, final int y, final int z) {
+        return null;
     }
 
 
@@ -231,10 +231,6 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
         return null;
     }
 
-    @Override
-    @Override default ProtoChunk<?> getChunk(final int x, final int y, final int z) {
-        return null;
-    }
     @Override default int getHeight(final HeightType type, final int x, final int z) {
         return 0;
     }

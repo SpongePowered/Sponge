@@ -62,7 +62,6 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -770,7 +769,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Used in the {@link SpongeEventManager} and mod event manager equivalent for
+     * Used in the {@link org.spongepowered.api.event.EventManager} and mod event manager equivalent for
      * world generation tasks to avoid event listener state entrance due to listeners
      * during world generation performing various operations that should not be tracked.
      *

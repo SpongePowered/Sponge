@@ -38,13 +38,10 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.boss.ServerBossBar;
-import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
-import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.LookRandomlyGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
@@ -61,8 +58,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
-import org.spongepowered.api.fluid.FluidStack;
-import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -76,7 +71,6 @@ import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
-import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.registry.BuilderRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
@@ -100,13 +94,10 @@ import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.boss.ServerBossBarBuilder;
-import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
-import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
-import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
 import org.spongepowered.common.entity.ai.goal.builtin.SpongeLookRandomlyGoalBuilder;
 import org.spongepowered.common.entity.ai.goal.builtin.SpongeSwimGoalBuilder;
@@ -123,8 +114,6 @@ import org.spongepowered.common.event.damage.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.damage.SpongeEntityDamageSourceBuilder;
 import org.spongepowered.common.event.damage.SpongeFallingBlockDamgeSourceBuilder;
 import org.spongepowered.common.event.damage.SpongeIndirectEntityDamageSourceBuilder;
-import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
-import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
@@ -139,7 +128,6 @@ import org.spongepowered.common.item.recipe.crafting.SpongeShapedCraftingRecipeB
 import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeSpecialCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeStoneCutterRecipeBuilder;
-import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
@@ -204,7 +192,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .register(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
 //            .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
-            .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
+//            .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
             .register(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)
             .register(AvoidLivingGoal.Builder.class, SpongeAvoidEntityGoalBuilder::new)
             .register(RunAroundLikeCrazyGoal.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
@@ -217,13 +205,13 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(BannerPatternLayer.Builder.class, SpongePatternLayerBuilder::new)
             .register(Task.Builder.class, SpongeTaskBuilder::new)
             .register(Ban.Builder.class, SpongeBanBuilder::new)
-            .register(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
-            .register(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
+//            .register(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
+//            .register(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
             .register(TabListEntry.Builder.class, TabListEntryBuilder::new)
             .register(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
             .register(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
-            .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
+//            .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
 //            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
 //            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
 //            .register(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
@@ -231,13 +219,13 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
             .register(SoundType.Builder.class, SpongeSoundBuilder::new)
             .register(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
-            .register(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
+//            .register(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
             .register(WorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
             .register(Ingredient.Builder.class, SpongeIngredientBuilder::new)
             .register(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
             .register(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
             .register(SpecialCraftingRecipe.Builder.class, SpongeSpecialCraftingRecipeBuilder::new)
-            .register(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
+//            .register(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
             .register(StoneCutterRecipe.Builder.class, SpongeStoneCutterRecipeBuilder::new)
             .register(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
             .register(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)

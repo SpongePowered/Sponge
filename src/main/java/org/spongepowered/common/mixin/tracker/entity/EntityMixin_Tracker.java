@@ -29,7 +29,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,16 +44,40 @@ import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
+import java.util.Random;
+import java.util.UUID;
+
 @Mixin(Entity.class)
 public abstract class EntityMixin_Tracker implements TrackableBridge {
 
     // @formatter:off
     @Shadow @Final private EntityType<?> type;
-    // @formatter:on
-
     @Shadow public World world;
-
     @Shadow public boolean removed;
+    @Shadow public double posX;
+    @Shadow public double posY;
+    @Shadow public double posZ;
+    @Shadow public float rotationYaw;
+    @Shadow public float rotationPitch;
+
+    @Shadow public abstract void shadow$extinguish();
+    @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
+    //@formatter:on
+
+    @Shadow @Nullable public abstract Team getTeam();
+
+    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
+
+    @Shadow public abstract void shadow$setMotion(Vec3d motionIn);
+
+    @Shadow public abstract void shadow$setMotion(double x, double y, double z);
+
+    @Shadow @Final protected Random rand;
+
+    @Shadow public abstract float getEyeHeight();
+
+    @Shadow public abstract UUID getUniqueID();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$refreshTrackerStates(final EntityType<?> entityType, final net.minecraft.world.World world, final CallbackInfo ci) {

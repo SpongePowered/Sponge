@@ -29,10 +29,14 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.IItemProvider;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -60,7 +64,25 @@ import java.util.Random;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracker {
 
+    //@formatter:off
     @Shadow @Final public PlayerInventory inventory;
+
+    @Shadow public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {
+        throw new UnsupportedOperationException("Shadowed");
+    }
+
+    @Shadow public abstract void shadow$addStat(Stat<?> stat);
+    @Shadow public abstract void shadow$addStat(ResourceLocation stat);
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
+    @Shadow protected abstract void shadow$spawnShoulderEntities();
+    @Shadow protected abstract void shadow$destroyVanishingCursedItems();
+    @Shadow public abstract String shadow$getScoreboardName();
+    @Shadow public abstract Scoreboard shadow$getWorldScoreboard();
+    @Shadow public abstract boolean shadow$isSpectator();
+    @Shadow public abstract void shadow$takeStat(Stat<?> stat);
+    //@formatter:on
+
+    @Shadow public abstract void shadow$addStat(Stat<?> stat, int amount);
 
     /**
      * @author blood - May 12th, 2016
@@ -161,12 +183,12 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
                     final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
                     itemEntity.setMotion(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
                 } else {
-                    float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
-                    float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
-                    float f3 = MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F));
-                    float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
-                    float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
-                    float f6 = 0.02F * this.rand.nextFloat();
+                    final float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
+                    final float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
+                    final float f3 = MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F));
+                    final float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
+                    final float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
+                    final float f6 = 0.02F * this.rand.nextFloat();
                     itemEntity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
                 }
                 // FIFTH - Capture the entity maybe?
@@ -189,12 +211,12 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             }
         }
         // Sponge end
-        final double d0 = this.posY - 0.30000001192092896D + (double) this.shadow$getEyeHeight();
+        final double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
         final ItemEntity itemEntity = new ItemEntity(this.world, this.posX, d0, this.posZ, droppedItem);
         itemEntity.setPickupDelay(40);
 
         if (traceItem) {
-            itemEntity.setThrowerId(this.shadow$getUniqueID());
+            itemEntity.setThrowerId(this.getUniqueID());
         }
 
         if (dropAround) {
@@ -202,23 +224,13 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             final float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
             itemEntity.setMotion(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
         } else {
-            float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
-            float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
-            float f3 = MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F));
-            float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
-            float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
-            float f6 = 0.02F * this.rand.nextFloat();
+            final float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
+            final float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
+            final float f3 = MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F));
+            final float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
+            final float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
+            final float f6 = 0.02F * this.rand.nextFloat();
             itemEntity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
-        }
-
-        final ItemStack itemstack = this.dropItemAndGetStack(itemEntity);
-
-        if (traceItem) {
-            if (itemstack != null && !itemstack.isEmpty()) { // Sponge - add null check
-                this.shadow$addStat(Stats.ITEM_DROPPED.get(itemstack.getItem()), droppedItem.getCount());
-            }
-
-            this.shadow$addStat(Stats.DROP);
         }
 
         return itemEntity;

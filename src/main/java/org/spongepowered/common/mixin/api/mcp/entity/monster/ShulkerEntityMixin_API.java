@@ -27,22 +27,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 import net.minecraft.entity.monster.ShulkerEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.golem.Shulker;
-import org.spongepowered.api.entity.projectile.EntityTargetingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.mixin.api.mcp.entity.passive.GolemEntityMixin_API;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Mixin(ShulkerEntity.class)
 public abstract class ShulkerEntityMixin_API extends GolemEntityMixin_API implements Shulker {
-
-    @Override
-    public <P extends EntityTargetingProjectile> Optional<P> launchWithTarget(final Class<P> projectileClass,
-        final org.spongepowered.api.entity.Entity target) {
-        return ProjectileLauncher.launchWithArgs(projectileClass, Shulker.class, this, null, target);
-    }
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

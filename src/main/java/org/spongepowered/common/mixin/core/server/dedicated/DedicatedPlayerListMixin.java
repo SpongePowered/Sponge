@@ -25,6 +25,9 @@
 package org.spongepowered.common.mixin.core.server.dedicated;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedPlayerList;
+import net.minecraft.server.management.PlayerList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -37,15 +40,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.player.LoginPermissions;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.dedicated.DedicatedPlayerList;
-import net.minecraft.server.management.PlayerList;
-
 @Mixin(DedicatedPlayerList.class)
 public abstract class DedicatedPlayerListMixin extends PlayerList {
 
-    public DedicatedPlayerListMixin(final MinecraftServer server) {
-        super(server);
+    public DedicatedPlayerListMixin(final MinecraftServer server, final int p_i50688_2_) {
+        super(server, p_i50688_2_);
     }
 
     @Inject(method = "canJoin", at = @At("HEAD"), cancellable = true)

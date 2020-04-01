@@ -40,15 +40,16 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
     public DoubleClickInventoryState() {
-        super(Constants.Networking.MODE_DOUBLE_CLICK | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY, Constants.Networking.MASK_MODE | Constants.Networking.MASK_BUTTON);
+        super(
+            Constants.Networking.MODE_DOUBLE_CLICK | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY,
+            Constants.Networking.MASK_MODE | Constants.Networking.MASK_BUTTON);
     }
 
     @Override
@@ -57,20 +58,24 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(ServerPlayerEntity playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
-        return SpongeEventFactory.createClickContainerEventDouble(Sponge.getCauseStackManager().getCurrentCause(), openContainer, transaction,
-                Optional.ofNullable(slot), slotTransactions);
+    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer,
+        final Transaction<ItemStackSnapshot> transaction,
+        final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
+        @Nullable final Slot slot) {
+        return SpongeEventFactory.createClickContainerEventDouble(Sponge.getCauseStackManager().getCurrentCause(),
+            openContainer, transaction,
+            Optional.ofNullable(slot), slotTransactions);
     }
 
     @Override
-    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, InventoryPacketContext context) {
+    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet,
+        final InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
         ((TrackedContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
     }
 
     @Override
-    public void unwind(InventoryPacketContext context) {
+    public void unwind(final InventoryPacketContext context) {
         DragInventoryStopState.unwindCraftPreview(context);
         super.unwind(context);
     }

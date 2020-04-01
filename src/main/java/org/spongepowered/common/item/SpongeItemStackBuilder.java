@@ -159,15 +159,16 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 //        for (final Immutable<?, ?> manipulator : snapshot.getContainers()) {
 //            this.itemData(manipulator);
 //        }
-        if (snapshot instanceof SpongeItemStackSnapshot) {
-            final Optional<CompoundNBT> compoundOptional = ((SpongeItemStackSnapshot) snapshot).getCompound();
-            if (compoundOptional.isPresent()) {
-                this.compound = compoundOptional.get();
-            } else {
-                this.compound = null;
-            }
-
-        }
+//        if (snapshot instanceof SpongeItemStackSnapshot) {
+//            final Optional<CompoundNBT> compoundOptional = ((SpongeItemStackSnapshot) snapshot).getCompound();
+//            if (compoundOptional.isPresent()) {
+//                this.compound = compoundOptional.get();
+//            } else {
+//                this.compound = null;
+//            }
+//
+//        }
+        throw new UnsupportedOperationException("implement me");
         return this;
     }
 
