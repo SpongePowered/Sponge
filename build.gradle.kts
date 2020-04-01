@@ -47,16 +47,16 @@ tasks.test {
 
 // Configure the TestPlugins project.
 val api = spongeDev.api!!
-val testPlugins = project(":testplugins") {
-    apply(plugin = "org.spongepowered.gradle.sponge.dev")
-    apply(plugin = "java-library")
-    configure<SpongeDevExtension> {
-        licenseProject = "Sponge"
-    }
-    dependencies {
-        implementation(project(api.path))
-    }
-}
+//val testPlugins = project(":testplugins") {
+//    apply(plugin = "org.spongepowered.gradle.sponge.dev")
+//    apply(plugin = "java-library")
+//    configure<SpongeDevExtension> {
+//        licenseProject = "Sponge"
+//    }
+//    dependencies {
+//        implementation(project(api.path))
+//    }
+//}
 val launch by sourceSets.creating
 val launchWrapper by sourceSets.creating {
     compileClasspath += launch.compileClasspath
@@ -77,9 +77,9 @@ sourceSets {
 
 dependencies {
     // For unit testing... not really going to work.
-    runtime(project(testPlugins.path)) {
-        exclude(module="spongeapi")
-    }
+//    runtime(project(testPlugins.path)) {
+//        exclude(module="spongeapi")
+//    }
     "launchImplementation"("org.spongepowered:mixin:0.8")
     "launchImplementation"("org.ow2.asm:asm-tree:6.2")
     "launchImplementation"("org.ow2.asm:asm-util:6.2")
