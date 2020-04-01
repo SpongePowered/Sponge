@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.launch;
 
-import com.google.common.collect.Maps;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.launch.SpongeLaunch;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public final class PathTokens {
 
@@ -52,8 +51,8 @@ public final class PathTokens {
     private PathTokens() {
     }
 
-    public static String replace(String string) {
-        final Map<String, String> tokens = getPathTokens();
+    public static String replace(final Supplier<String> ecosystemId, String string) {
+        final Map<String, String> tokens = getPathTokens(ecosystemId);
         for (final Map.Entry<String, String> token : tokens.entrySet()) {
             string = string.replace(token.getKey(), token.getValue());
         }
@@ -61,16 +60,16 @@ public final class PathTokens {
         return string;
     }
 
-    private static Map<String, String> getPathTokens() {
-        final Map<String, String> tokens = Maps.newHashMap();
+    private static Map<String, String> getPathTokens(final Supplier<String> ecosystemId) {
+        final Map<String, String> tokens = new HashMap<>();
         tokens.put(formatToken(PATHTOKEN_CANONICAL_MODS_DIR), SpongeLaunch.getPluginsDir().toFile().getAbsolutePath());
         tokens.put(formatToken(PATHTOKEN_CANONICAL_GAME_DIR), SpongeLaunch.getGameDir().toFile().getAbsolutePath());
         tokens.put(formatToken(PATHTOKEN_CANONICAL_CONFIG_DIR), SpongeLaunch.getConfigDir().toFile().getAbsolutePath());
-        tokens.put(formatToken(PATHTOKEN_MC_VERSION), SpongeImpl.MINECRAFT_VERSION.getName());
+        tokens.put(formatToken(PATHTOKEN_MC_VERSION), ecosystemId.get());
         return tokens;
     }
 
-    private static String formatToken(String name) {
+    private static String formatToken(final String name) {
         return String.format("${%s}", name);
     }
 

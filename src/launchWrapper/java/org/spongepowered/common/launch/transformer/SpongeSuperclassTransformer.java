@@ -40,17 +40,17 @@ import java.util.List;
 public class SpongeSuperclassTransformer implements IClassTransformer {
 
     @Override
-    public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        String superclass = SpongeSuperclassRegistry.getSuperclass(name);
+    public byte[] transform(final String name, final String transformedName, final byte[] basicClass) {
+        final String superclass = SpongeSuperclassRegistry.getSuperclass(name);
         if (superclass != null) {
-            ClassNode node = this.readClass(basicClass);
+            final ClassNode node = this.readClass(basicClass);
 
             node.methods.stream().forEach(m -> this.transformMethod(m, name, node.superName, superclass));
             node.superName = superclass;
 
             node.accept(new CheckClassAdapter(new ClassWriter(0)));
 
-            ClassWriter writer = new ClassWriter(0);
+            final ClassWriter writer = new ClassWriter(0);
             node.accept(writer);
             return writer.toByteArray();
 
@@ -58,15 +58,15 @@ public class SpongeSuperclassTransformer implements IClassTransformer {
         return basicClass;
     }
 
-    private void transformMethod(MethodNode node, String name, String originalSuperclass, String superClass) {
-        for (MethodInsnNode insn: this.findSuper(node, originalSuperclass, name)) {
+    private void transformMethod(final MethodNode node, final String name, final String originalSuperclass, final String superClass) {
+        for (final MethodInsnNode insn: this.findSuper(node, originalSuperclass, name)) {
             insn.owner = superClass;
         }
     }
 
-    private List<MethodInsnNode> findSuper(MethodNode method, String originalSuperClass, String name) {
-        List<MethodInsnNode> nodes = new ArrayList<>();
-        for (AbstractInsnNode node: method.instructions.toArray()) {
+    private List<MethodInsnNode> findSuper(final MethodNode method, final String originalSuperClass, final String name) {
+        final List<MethodInsnNode> nodes = new ArrayList<>();
+        for (final AbstractInsnNode node: method.instructions.toArray()) {
             if (node.getOpcode() == Opcodes.INVOKESPECIAL && originalSuperClass.equals(((MethodInsnNode) node).owner)) {
                 nodes.add((MethodInsnNode) node);
             }
@@ -74,10 +74,10 @@ public class SpongeSuperclassTransformer implements IClassTransformer {
         return nodes;
     }
 
-    private ClassNode readClass(byte[] basicClass) {
-        ClassReader classReader = new ClassReader(basicClass);
+    private ClassNode readClass(final byte[] basicClass) {
+        final ClassReader classReader = new ClassReader(basicClass);
 
-        ClassNode classNode = new ClassNode();
+        final ClassNode classNode = new ClassNode();
         classReader.accept(classNode, 0);
         return classNode;
     }

@@ -24,22 +24,21 @@
  */
 package org.spongepowered.common.launch.transformer;
 
-import com.google.common.collect.Maps;
-
+import java.util.HashMap;
 import java.util.Map;
 
 public class SpongeSuperclassRegistry {
 
-    private static Map<String, String> classSuperclassMap = Maps.newHashMap();
+    private static Map<String, String> classSuperclassMap = new HashMap<>();
 
-    public static void registerSuperclassModification(String targetClass, String newSuperClass) {
+    public static void registerSuperclassModification(final String targetClass, final String newSuperClass) {
         if (classSuperclassMap.containsKey(targetClass)) {
             throw new IllegalArgumentException(String.format("Superclass '%s' already registered for class '%s'!", newSuperClass, targetClass));
         }
         classSuperclassMap.put(targetClass, newSuperClass.replace('.', '/'));
     }
 
-    public static String getSuperclass(String targetClass) {
+    public static String getSuperclass(final String targetClass) {
         return classSuperclassMap.get(targetClass);
     }
 

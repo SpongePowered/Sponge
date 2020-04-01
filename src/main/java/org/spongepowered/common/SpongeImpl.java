@@ -190,7 +190,7 @@ public final class SpongeImpl {
     }
 
     public static Path getPluginConfigDir() {
-        return SpongeLaunch.getPluginConfigDir();
+        return SpongeLaunch.getPluginConfigDir(() -> ECOSYSTEM_ID, () -> SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().configDir());
     }
 
     public static Path getPluginsDir() {

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.launch;
 
-import static org.spongepowered.common.SpongeImpl.ECOSYSTEM_ID;
 
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.launch.MixinBootstrap;
@@ -32,23 +31,16 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.asm.util.VersionNumber;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
-import org.spongepowered.common.mixin.handler.TerminateVM;
-import org.spongepowered.common.util.PathTokens;
 
 import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Supplier;
 
 public class SpongeLaunch {
 
     private SpongeLaunch() {
     }
-
-    public static final String SUPERCLASS_TRANSFORMER = "org.spongepowered.common.launch.transformer.SpongeSuperclassTransformer";
 
     private static Path gameDir;
     private static Path pluginsDir;
@@ -56,6 +48,7 @@ public class SpongeLaunch {
     private static Path configDir;
     private static Path spongeConfigDir;
     private static Path pluginConfigDir;
+    private static Supplier<InternalLaunchService> iLS;
 
     public static Path getGameDir() {
         return gameDir;
@@ -65,9 +58,9 @@ public class SpongeLaunch {
         return pluginsDir;
     }
 
-    public static Path getAdditionalPluginsDir() {
+    public static Path getAdditionalPluginsDir(final Supplier<String> ecosystemId, final Supplier<String> configuredDirectoryNameSupplier) {
         if (additionalPluginsDir == null) {
-            additionalPluginsDir = Paths.get(PathTokens.replace(SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().pluginsDir()));
+            additionalPluginsDir = Paths.get(PathTokens.replace(ecosystemId, configuredDirectoryNameSupplier.get()));
         }
 
         return additionalPluginsDir;
@@ -77,9 +70,9 @@ public class SpongeLaunch {
         return configDir;
     }
 
-    public static Path getPluginConfigDir() {
+    public static Path getPluginConfigDir(final Supplier<String> ecosystemId, final Supplier<String> configuredDirectoryNameSupplier) {
         if (pluginConfigDir == null) {
-            pluginConfigDir = Paths.get(PathTokens.replace(SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().configDir()));
+            pluginConfigDir = Paths.get(PathTokens.replace(ecosystemId, configuredDirectoryNameSupplier.get()));
         }
         return pluginConfigDir;
     }
@@ -88,38 +81,15 @@ public class SpongeLaunch {
         return spongeConfigDir;
     }
 
-    public static void initPaths(File gameDirIn) {
+    public static void initPaths(final Supplier<String> ecosystemId, final File gameDirIn) {
         gameDir = gameDirIn.toPath();
         pluginsDir = gameDir.resolve("mods");
         configDir = gameDir.resolve("config");
-        spongeConfigDir = configDir.resolve(ECOSYSTEM_ID);
+        spongeConfigDir = configDir.resolve(ecosystemId.get());
     }
 
-    public static void addJreExtensionsToClassPath() {
-        // Make sure JRE extensions are loaded using the system class loader
-        Launch.classLoader.addClassLoaderExclusion("jdk.");
-
-        /*
-         * By default Launchwrapper inherits the class path from the system class loader.
-         * However, JRE extensions (e.g. Nashorn in the jre/lib/ext directory) are not part
-         * of the class path of the system class loader.
-         * Instead, they're loaded using a parent class loader (Launcher.ExtClassLoader).
-         * Currently, Launchwrapper does not fall back to the parent class loader if it's
-         * unable to find a class on its class path. To make the JRE extensions usable for
-         * plugins we manually add the URLs from the ExtClassLoader to Launchwrapper's
-         * class path.
-        */
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        if (classLoader == null) {
-            return;
-        }
-
-        classLoader = classLoader.getParent(); // Launcher.ExtClassLoader
-        if (classLoader instanceof URLClassLoader) {
-            for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-                Launch.classLoader.addURL(url);
-            }
-        }
+    public static void initializeLaunchService(final InternalLaunchService launchService) {
+        iLS = () -> launchService;
     }
 
     public static void setupMixinEnvironment() {
@@ -143,6 +113,7 @@ public class SpongeLaunch {
         final VersionNumber environment = VersionNumber.parse(MixinEnvironment.getCurrentEnvironment().getVersion());
         final VersionNumber required = VersionNumber.parse("0.7.11");
         if (required.compareTo(environment) > 0) {
+            final InternalLaunchService iLS = SpongeLaunch.iLS.get();
             new PrettyPrinter(60).add("Old Mixin Version Loaded!").centre().hr()
                 .add("Hey, sorry, but Sponge requires a newer version of Mixin being loaded, and unfortunately\n"
                      + "with an older version, nothing will work as it should. Please rename the sponge jar to load\n"
@@ -152,20 +123,25 @@ public class SpongeLaunch {
                 .add()
                 .add("%s : %s", "Current Loaded Mixin", environment.toString())
                 .add("%s : %s", "Required Mixin Version", required.toString())
-                .log(SpongeImpl.getLogger(), Level.FATAL);
-            TerminateVM.terminate("org.spongepowered.core", -1);
+                .log(iLS.getLaunchLogger().get(), Level.FATAL);
+            iLS.getExitHandler().get().terminate("org.spongepowered.core", -1);
         }
     }
 
-    public static void setupSuperClassTransformer() {
-        SpongeSuperclassRegistry.registerSuperclassModification("org.spongepowered.api.entity.ai.task.AbstractAITask",
+    public static void forceEarlyExit(final String spoof, final int exitCode) {
+        iLS.get().getExitHandler().get().terminate(spoof, exitCode);
+    }
+
+    public static void setupSuperClassTransformer(final Supplier<? extends InternalLaunchService> launchService) {
+        final InternalLaunchService iLS = launchService.get();
+        iLS.registerSuperclassModification("org.spongepowered.api.entity.ai.task.AbstractAITask",
                 "org.spongepowered.common.entity.ai.SpongeEntityAICommonSuperclass");
-        SpongeSuperclassRegistry.registerSuperclassModification("org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource",
+        iLS.registerSuperclassModification("org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource",
                 "org.spongepowered.common.event.damage.SpongeCommonDamageSource");
-        SpongeSuperclassRegistry.registerSuperclassModification(
+        iLS.registerSuperclassModification(
                 "org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource",
                 "org.spongepowered.common.event.damage.SpongeCommonEntityDamageSource");
-        SpongeSuperclassRegistry.registerSuperclassModification(
+        iLS.registerSuperclassModification(
                 "org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource",
                 "org.spongepowered.common.event.damage.SpongeCommonIndirectEntityDamageSource");
     }

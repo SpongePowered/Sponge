@@ -22,9 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.handler;
+package org.spongepowered.common.launch;
 
-public interface IExitHandler
-{
+public interface IExitHandler {
+
     void exit(int status);
+
+    void terminate(final String masqueradePackage, final int status);
 }

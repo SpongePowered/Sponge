@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.handler;
+package org.spongepowered.common.launch;
 
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -33,7 +33,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.common.mixin.handler.TerminateVM.MasqueradeClassLoader;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 
@@ -104,7 +104,7 @@ public final class TerminateVM implements IExitHandler {
     }
     
     @SuppressWarnings("unchecked")
-    public static void terminate(final String masqueradePackage, final int status) {
+    public void terminate(final String masqueradePackage, final int status) {
         final Logger log = LogManager.getLogger("Sponge");
 
         IExitHandler handler = null;

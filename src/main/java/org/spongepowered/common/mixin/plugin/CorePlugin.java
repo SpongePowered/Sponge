@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.mixin.handler.TerminateVM;
+import org.spongepowered.common.launch.SpongeLaunch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,7 +153,7 @@ public class CorePlugin implements IMixinConfigPlugin {
             .add()
             .add(new IncompatibleClassChangeError("FoamFix Incompatibility Detected"))
             .log(SpongeImpl.getLogger(), Level.FATAL);
-        TerminateVM.terminate("net.minecraftforge.fml", 1);
+        SpongeLaunch.forceEarlyExit("net.minecraftforge.fml", 1);
     }
 
 }
