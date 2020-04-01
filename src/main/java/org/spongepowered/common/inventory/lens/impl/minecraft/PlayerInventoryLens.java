@@ -25,9 +25,9 @@
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
 import net.minecraft.inventory.container.Container;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryKeys;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -122,7 +122,7 @@ public class PlayerInventoryLens extends AbstractLens {
         this.addSpanningChild(this.offhand);
 
         for (Map.Entry<EquipmentType, SlotLens> entry : equipmentLenses.entrySet()) {
-            this.addChild(entry.getValue(), KeyValuePair.of(InventoryKeys.EQUIPMENT_TYPE.get(), entry.getKey()));
+            this.addChild(entry.getValue(), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), entry.getKey()));
         }
         this.addChild(this.equipment);
         this.addMissingSpanningSlots(base, slots);

@@ -25,13 +25,13 @@
 package org.spongepowered.common.inventory.property;
 
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.item.inventory.InventoryKeys;
 
 public final class KeyValuePair {
 
     public static KeyValuePair slotIndex(int index) {
-        return of(InventoryKeys.SLOT_INDEX.get(), index);
+        return of(Keys.SLOT_INDEX.get(), index);
     }
 
     public static <V> KeyValuePair of(Key<? extends Value<V>> property, V value) {

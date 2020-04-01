@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft.container;
 
-import org.spongepowered.api.item.inventory.InventoryKeys;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
@@ -57,11 +57,11 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
     protected void init(SlotLensProvider slots) {
         super.init(slots);
 
-        this.addChild(slots.getSlotLens(this.base + 0), KeyValuePair.of(InventoryKeys.EQUIPMENT_TYPE.get(), EquipmentTypes.HEADWEAR.get()));
-        this.addChild(slots.getSlotLens(this.base + 1), KeyValuePair.of(InventoryKeys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHESTPLATE.get()));
-        this.addChild(slots.getSlotLens(this.base + 2), KeyValuePair.of(InventoryKeys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGGINGS.get()));
-        this.addChild(slots.getSlotLens(this.base + 3), KeyValuePair.of(InventoryKeys.EQUIPMENT_TYPE.get(), EquipmentTypes.BOOTS.get()));
-        this.addChild(slots.getSlotLens(this.base + 4 + 4 * 9), KeyValuePair.of(InventoryKeys.EQUIPMENT_TYPE.get(), EquipmentTypes.OFF_HAND.get()));
+        this.addChild(slots.getSlotLens(this.base + 0), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.HEADWEAR.get()));
+        this.addChild(slots.getSlotLens(this.base + 1), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHESTPLATE.get()));
+        this.addChild(slots.getSlotLens(this.base + 2), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGGINGS.get()));
+        this.addChild(slots.getSlotLens(this.base + 3), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.BOOTS.get()));
+        this.addChild(slots.getSlotLens(this.base + 4 + 4 * 9), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.OFF_HAND.get()));
     }
 
 }

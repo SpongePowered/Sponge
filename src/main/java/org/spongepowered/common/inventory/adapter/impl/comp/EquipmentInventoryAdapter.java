@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.inventory.adapter.impl.comp;
 
+import org.spongepowered.api.data.KeyValueMatcher;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -95,6 +97,6 @@ public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements 
     }
 
     private Inventory queryForType(EquipmentType equipmentType) {
-        throw new UnsupportedOperationException("implement me");
+        return this.query(KeyValueMatcher.of(Keys.EQUIPMENT_TYPE, equipmentType));
     }
 }

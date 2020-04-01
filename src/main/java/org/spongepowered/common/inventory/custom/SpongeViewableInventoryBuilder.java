@@ -52,11 +52,11 @@ import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.IntArray;
 import org.apache.commons.lang3.Validate;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryKeys;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -241,7 +241,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
             CustomSlotProvider slotProvider = new CustomSlotProvider();
             for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
                 Slot slot = entry.getValue();
-                int idx = slot.get(InventoryKeys.SLOT_INDEX).get();
+                int idx = slot.get(Keys.SLOT_INDEX).get();
 
                 int offset = 0;
                 for (int i = 0; i < this.finalInventories.indexOf(slot.parent()); i++) {
