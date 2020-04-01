@@ -689,7 +689,7 @@ public final class PhaseTracker {
 
         // Vanilla isremote is redundant
         // if (!this.isRemote && (flags & 1) != 0) {
-        if (spongeFlag.notifyNeighbors()) {
+        if (spongeFlag.updateNeighbors()) {
             // this.notifyNeighbors(pos, originalState.getBlock());
             world.notifyNeighbors(pos, originalState.getBlock());
             if (newWorldState.hasComparatorInputOverride()) {
@@ -710,7 +710,7 @@ public final class PhaseTracker {
             newWorldState.updateDiagonalNeighbors(world, pos, newFlag);
         }
 
-        world.func_217393_a(pos, originalState, newWorldState);
+        world.onBlockStateChange(pos, originalState, newWorldState);
 
         return true;
         // } // Sponge - unnecessary formatting

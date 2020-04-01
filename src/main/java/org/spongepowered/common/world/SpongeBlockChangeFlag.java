@@ -135,11 +135,6 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
-    @Override
-    public boolean isMoving() {
-        return false;
-    }
-
     public boolean notifyClients() {
         return this.notifyClients;
     }

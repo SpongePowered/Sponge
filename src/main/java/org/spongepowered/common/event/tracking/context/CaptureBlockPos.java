@@ -90,7 +90,7 @@ public final class CaptureBlockPos implements AutoCloseable {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("pos", this.pos)
-                .add("world", this.getMixinWorld().map(w -> ((World) w).getName()))
+                .add("world", this.getMixinWorld().map(w -> ((ServerWorld) w).getWorldInfo().getWorldName()))
                 .toString();
     }
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.launch.SpongeLaunch;
 
 import java.io.IOException;
 
@@ -116,13 +117,9 @@ public class OptimizationCategory extends ConfigCategory {
     private boolean disableFailingAdvancementDeserialization = true;
 
     public OptimizationCategory() {
-        try {
-            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
-            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-            this.preItemDropMerge = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
+        // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
+        this.preItemDropMerge = SpongeLaunch.isVanilla();
     }
 
 

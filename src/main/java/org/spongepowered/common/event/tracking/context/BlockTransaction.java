@@ -208,7 +208,7 @@ public abstract class BlockTransaction {
         @SuppressWarnings("unchecked")
         @Override
         Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<ServerWorldBridge>) (Optional<?>) this.addedSnapshot.getServerWorld();
+            return (Optional<TrackedWorldBridge>) (Optional<?>) this.addedSnapshot.getServerWorld();
         }
 
         @Override
@@ -295,7 +295,7 @@ public abstract class BlockTransaction {
         @SuppressWarnings("unchecked")
         @Override
         Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<ServerWorldBridge>) (Optional<?>) this.tileSnapshot.getServerWorld();
+            return (Optional<TrackedWorldBridge>) (Optional<?>) this.tileSnapshot.getServerWorld();
         }
 
     }
@@ -358,7 +358,7 @@ public abstract class BlockTransaction {
         @SuppressWarnings("unchecked")
         @Override
         Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<ServerWorldBridge>) (Optional<?>) this.removedSnapshot.getServerWorld();
+            return (Optional<TrackedWorldBridge>) (Optional<?>) this.removedSnapshot.getServerWorld();
         }
 
         @Override
@@ -497,7 +497,7 @@ public abstract class BlockTransaction {
         @SuppressWarnings("unchecked")
         @Override
         Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<ServerWorldBridge>) (Optional<?>) this.original.getServerWorld();
+            return (Optional<TrackedWorldBridge>) (Optional<?>) this.original.getServerWorld();
         }
 
         @Override

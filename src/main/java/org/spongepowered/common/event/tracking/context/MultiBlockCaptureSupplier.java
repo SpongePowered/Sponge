@@ -416,7 +416,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      * various transactional aspects, such as potential tile entity removals, replacements, etc. Specifically should never be called outside
      * of that reaction since {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, MultiBlockCaptureSupplier)}
      * does not get called automatically, it is called prior to queueing potential tile replacements, and prior to calling to
-     * {@link #logTileChange(ServerWorldBridge, BlockPos, TileEntity, TileEntity)} in the event a tile entity is going to be removed.
+     * {@link #logTileChange(TrackedWorldBridge, BlockPos, TileEntity, TileEntity)} in the event a tile entity is going to be removed.
      *
      * @param originalBlockSnapshot The original snapshot being changed
      * @param newState The new state
@@ -434,7 +434,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     public void logTileChange(
-            final ServerWorldBridge trackedWorld, final BlockPos pos, @Nullable final TileEntity oldTile, @Nullable final TileEntity newTile) {
+            final TrackedWorldBridge trackedWorld, final BlockPos pos, @Nullable final TileEntity oldTile, @Nullable final TileEntity newTile) {
         final ServerWorld world = (ServerWorld) trackedWorld;
         final BlockState current = world.getBlockState(pos);
 

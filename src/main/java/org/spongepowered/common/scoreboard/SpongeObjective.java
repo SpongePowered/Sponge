@@ -60,7 +60,7 @@ public class SpongeObjective implements Objective {
     public SpongeObjective(final String name, final Criterion criterion) {
         this.name = name;
         this.displayName = SpongeTexts.fromLegacy(name);
-        this.displayMode = ObjectiveDisplayModes.INTEGER;
+        this.displayMode = ObjectiveDisplayModes.INTEGER.get();
         this.criterion = criterion;
     }
 
@@ -82,8 +82,7 @@ public class SpongeObjective implements Objective {
 
     private void updateDisplayName() {
         for (final ScoreObjective objective: this.objectives.values()) {
-            ((ScoreObjectiveAccessor) objective).accessor$setDisplayName(SpongeTexts.toLegacy(this.displayName));
-            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().onObjectiveDisplayNameChanged(objective);
+            objective.setDisplayName(SpongeTexts.toComponent(this.displayName));
         }
     }
 
@@ -107,8 +106,7 @@ public class SpongeObjective implements Objective {
     @SuppressWarnings("ConstantConditions")
     private void updateDisplayMode() {
         for (final ScoreObjective objective: this.objectives.values()) {
-            ((ScoreObjectiveAccessor) objective).accessor$setRenderType((ScoreCriteria.RenderType) (Object) this.displayMode);
-            ((ScoreObjectiveAccessor) objective).accessor$getScoreboard().onObjectiveDisplayNameChanged(objective);
+            objective.setRenderType((ScoreCriteria.RenderType) (Object) this.displayMode);
         }
     }
 
@@ -220,17 +218,9 @@ public class SpongeObjective implements Objective {
         if (this.objectives.containsKey(scoreboard)) {
             return this.objectives.get(scoreboard);
         }
-        final ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (ScoreCriteria) this.criterion);
-
-        // We deliberately set the fields here instead of using the methods.
-        // Since a new objective is being created here, we want to avoid
-        // sending packets until everything is in the proper state.
-
-        ((ScoreObjectiveAccessor) objective).accessor$setDisplayName(SpongeTexts.toLegacy(this.displayName));
-        ((ScoreObjectiveAccessor) objective).accessor$setRenderType((ScoreCriteria.RenderType) (Object) this.displayMode);
-        ((ScoreObjectiveBridge) objective).bridge$setSpongeObjective(this);
+        final ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (ScoreCriteria) this.criterion,
+                SpongeTexts.toComponent(this.displayName), (ScoreCriteria.RenderType) (Object) this.displayMode);
         this.objectives.put(scoreboard, objective);
-
         return objective;
     }
 

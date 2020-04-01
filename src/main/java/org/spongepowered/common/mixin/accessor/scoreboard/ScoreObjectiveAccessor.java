@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.mixin.accessor.scoreboard;
 
-import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -35,8 +33,4 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface ScoreObjectiveAccessor {
 
     @Accessor("scoreboard") Scoreboard accessor$getScoreboard();
-
-    @Accessor("displayName") void accessor$setDisplayName(ITextComponent component);
-
-    @Accessor("renderType") void accessor$setRenderType(ScoreCriteria.RenderType displayMode);
 }

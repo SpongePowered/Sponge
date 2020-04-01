@@ -47,7 +47,7 @@ public final class DataSerializableTypeSerializer implements TypeSerializer<Data
         }
         Class<?> clazz = type.getRawType();
         return Sponge.getDataManager()
-                .deserialize(clazz.asSubclass(DataSerializable.class), DataTranslators.CONFIGURATION_NODE.translate(value))
+                .deserialize(clazz.asSubclass(DataSerializable.class), DataTranslators.CONFIGURATION_NODE.get().translate(value))
                 .orElseThrow(() -> new ObjectMappingException("Could not translate DataSerializable of type: " + clazz.getName()));
     }
 
@@ -56,7 +56,7 @@ public final class DataSerializableTypeSerializer implements TypeSerializer<Data
         if (obj instanceof CatalogType) {
             new CatalogTypeTypeSerializer().serialize(type, (CatalogType) obj, value);
         } else {
-            value.setValue(DataTranslators.CONFIGURATION_NODE.translate(obj.toContainer()));
+            value.setValue(DataTranslators.CONFIGURATION_NODE.get().translate(obj.toContainer()));
         }
     }
 }
