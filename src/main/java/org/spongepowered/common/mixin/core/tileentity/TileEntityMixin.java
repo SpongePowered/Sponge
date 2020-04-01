@@ -26,32 +26,39 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge, TrackableBridge {
+
+    //@formatter:off
+    @Shadow @Final private TileEntityType<?> type;
+    @Shadow @Nullable private BlockState cachedBlockState;
+    @Shadow protected net.minecraft.world.World world;
+    @Shadow protected BlockPos pos;
+
+    @Shadow public abstract BlockPos getPos();
+    //@formatter:on
 
     @Nullable private Timing impl$timing;
     private boolean impl$isTicking = false;
@@ -62,63 +69,12 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
     private boolean impl$allowsEntityEventCreation = true;
     private boolean impl$isCaptured = false;
 
-    @Shadow protected net.minecraft.world.World world;
-    @Shadow private int blockMetadata;
-    @Shadow protected BlockPos pos;
-
-    @Shadow public abstract BlockPos getPos();
-    @Shadow public abstract Block getBlockType();
-    @Shadow public abstract CompoundNBT writeToNBT(CompoundNBT compound);
-    @Shadow public abstract void shadow$markDirty();
-
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void impl$RefreshTrackerStates(final CallbackInfo ci) {
         this.bridge$refreshTrackerStates();
     }
 
 
-    @SuppressWarnings({"rawtypes"})
-    @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
-    private static void impl$registerTileEntityClassWithSpongeRegistry(final String name, @Nullable final Class clazz, final CallbackInfo callbackInfo) {
-        if (clazz != null) {
-            TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);
-        }
-    }
-
-    @Inject(method = "invalidate", at = @At("RETURN"))
-    private void impl$RemoveActiveChunkOnInvalidate(final CallbackInfo ci) {
-        ((ActiveChunkReferantBridge) this).bridge$setActiveChunk(null);
-    }
-
-    /**
-     * Hooks into vanilla's writeToNBT to call {@link #bridge$writeToSpongeCompound}.
-     * <p>
-     * <p> This makes it easier for other entity mixins to override writeToNBT without having to specify the <code>@Inject</code> annotation. </p>
-     *
-     * @param compound The compound vanilla writes to (unused because we write to SpongeData)
-     * @param ci (Unused) callback info
-     */
-    @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
-    private void impl$WriteSpongeDataToCompound(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
-        if (!((CustomDataHolderBridge) this).bridge$getCustomManipulators().isEmpty()) {
-            this.bridge$writeToSpongeCompound(this.data$getSpongeDataCompound());
-        }
-    }
-
-    /**
-     * Hooks into vanilla's readFromNBT to call {@link #bridge$readFromSpongeCompound}.
-     * <p>
-     * <p> This makes it easier for other entity mixins to override readSpongeNBT without having to specify the <code>@Inject</code> annotation. </p>
-     *
-     * @param compound The compound vanilla reads from (unused because we read from SpongeData)
-     * @param ci (Unused) callback info
-     */
-    @Inject(method = "readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    private void impl$ReadSpongeDataFromCompound(final CompoundNBT compound, final CallbackInfo ci) {
-        if (this.data$hasSpongeCompound()) {
-            this.bridge$readFromSpongeCompound(this.data$getSpongeDataCompound());
-        }
-    }
 
     /**
      * Read extra data (SpongeData) from the tile entity's NBT tag.
@@ -126,7 +82,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param compound The SpongeData compound to read from
      */
     protected void bridge$readFromSpongeCompound(final CompoundNBT compound) {
-        DataUtil.readCustomData(compound, (BlockEntity) this);
+        throw new UnsupportedOperationException("Implement me");
     }
 
     /**
@@ -135,7 +91,7 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
      * @param compound The SpongeData compound to write to
      */
     protected void bridge$writeToSpongeCompound(final CompoundNBT compound) {
-        DataUtil.writeCustomData(compound, (BlockEntity) this);
+        throw new UnsupportedOperationException("Implement me");
     }
 
 
@@ -164,19 +120,20 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
     }
 
     @Override
-    public boolean bridge$allowsBlockBulkCapture() {
+    public boolean bridge$allowsBlockBulkCaptures() {
         return this.impl$allowsBlockBulkCapture;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityBulkCapture() {
-        return this.impl$allowsEntityBulkCapture;
     }
 
     @Override
     public boolean bridge$allowsBlockEventCreation() {
         return this.impl$allowsBlockEventCreation;
     }
+
+    @Override
+    public boolean bridge$allowsEntityBulkCaptures() {
+        return this.impl$allowsEntityBulkCapture;
+    }
+
 
     @Override
     public boolean bridge$allowsEntityEventCreation() {
@@ -196,30 +153,29 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
     @Override
     public void bridge$refreshTrackerStates() {
         if (((BlockEntity) this).getType() != null) {
-            this.impl$allowsBlockBulkCapture = ((SpongeTileEntityType) ((BlockEntity) this).getType()).allowsBlockBulkCapture;
-            this.impl$allowsEntityBulkCapture = ((SpongeTileEntityType) ((BlockEntity) this).getType()).allowsEntityBulkCapture;
-            this.impl$allowsBlockEventCreation = ((SpongeTileEntityType) ((BlockEntity) this).getType()).allowsBlockEventCreation;
-            this.impl$allowsEntityEventCreation = ((SpongeTileEntityType) ((BlockEntity) this).getType()).allowsEntityEventCreation;
+            this.impl$allowsBlockBulkCapture = ((TrackableBridge) this.type).bridge$allowsBlockBulkCaptures();
+            this.impl$allowsEntityBulkCapture = ((TrackableBridge) this.type).bridge$allowsEntityBulkCaptures();
+            this.impl$allowsBlockEventCreation = ((TrackableBridge) this.type).bridge$allowsBlockEventCreation();
+            this.impl$allowsEntityEventCreation = ((TrackableBridge) this.type).bridge$allowsEntityEventCreation();
         }
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public String toString() {
-        final BlockEntityType type = ((BlockEntity) this).getType();
         return MoreObjects.toStringHelper(this)
                 // Double check some mods are registering their tile entities and doing some "interesting"
                 // things with doing a to string on a tile entity not actually functionally valid in the game "yet".
-            .add("tileType", type == null ? this.getClass() : type.getId())
+            .add("tileType", ((BlockEntityType) this.type).getKey())
             .add("world", this.world)
             .add("pos", this.pos)
-            .add("blockMetadata", this.blockMetadata)
+            .add("blockMetadata", this.cachedBlockState)
             .toString();
     }
 
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
         return MoreObjects.toStringHelper(this)
-            .add("type", ((BlockEntity) this).getType().getId())
+            .add("type", ((BlockEntityType) this.type).getKey())
             .add("world", this.world.getWorldInfo().getWorldName())
             .add("pos", this.pos);
     }

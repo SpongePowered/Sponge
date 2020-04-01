@@ -42,32 +42,22 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerWorld;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.LoggingCategory;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.mixin.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.management.MBeanServer;
@@ -86,19 +76,19 @@ public final class SpongeHooks {
 
     private static Object2LongMap<CollisionWarning> recentWarnings = new Object2LongOpenHashMap<>();
 
-    public static void logInfo(String msg, Object... args) {
+    public static void logInfo(final String msg, final Object... args) {
         SpongeImpl.getLogger().info(MessageFormat.format(msg, args));
     }
 
-    public static void logWarning(String msg, Object... args) {
+    public static void logWarning(final String msg, final Object... args) {
         SpongeImpl.getLogger().warn(MessageFormat.format(msg, args));
     }
 
-    public static void logSevere(String msg, Object... args) {
+    public static void logSevere(final String msg, final Object... args) {
         SpongeImpl.getLogger().fatal(MessageFormat.format(msg, args));
     }
 
-    public static void logStack(SpongeConfig<? extends GeneralConfigBase> config) {
+    public static void logStack(final SpongeConfig<? extends GeneralConfigBase> config) {
         if (config.getConfig().getLogging().logWithStackTraces()) {
             final Throwable ex = new Throwable();
             ex.fillInStackTrace();
@@ -106,7 +96,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logEntityDeath(@Nullable Entity entity) {
+    public static void logEntityDeath(@Nullable final Entity entity) {
         if (entity == null || entity.getEntityWorld().isRemote()) {
             return;
         }
@@ -118,7 +108,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logEntityDespawn(@Nullable Entity entity, String reason) {
+    public static void logEntityDespawn(@Nullable final Entity entity, final String reason) {
         if (entity == null || entity.getEntityWorld().isRemote()) {
             return;
         }
@@ -130,7 +120,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logEntitySpawn(@Nullable Entity entity) {
+    public static void logEntitySpawn(@Nullable final Entity entity) {
         if (entity == null) {
             return;
         }
@@ -148,7 +138,8 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logBlockTrack(World world, Block block, BlockPos pos, User user, boolean allowed) {
+    public static void logBlockTrack(
+        final World world, final Block block, final BlockPos pos, final User user, final boolean allowed) {
         if (world.isRemote()) {
             return;
         }
@@ -167,7 +158,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
+    public static void logBlockAction(final World world, @Nullable final BlockChange type, final Transaction<BlockSnapshot> transaction) {
         if (world.isRemote()) {
             return;
         }
@@ -184,7 +175,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logChunkLoad(World world, Vector3i chunkPos) {
+    public static void logChunkLoad(final World world, final Vector3i chunkPos) {
         if (world.isRemote()) {
             return;
         }
@@ -197,7 +188,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logChunkUnload(World world, Vector3i chunkPos) {
+    public static void logChunkUnload(final World world, final Vector3i chunkPos) {
         if (world.isRemote()) {
             return;
         }
@@ -210,7 +201,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logChunkGCQueueUnload(World world, Chunk chunk) {
+    public static void logChunkGCQueueUnload(final World world, final Chunk chunk) {
         if (world.isRemote()) {
             return;
         }
@@ -223,7 +214,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logExploitSignCommandUpdates(PlayerEntity player, TileEntity tileEntity, String command) {
+    public static void logExploitSignCommandUpdates(final PlayerEntity player, final TileEntity tileEntity, final String command) {
         if (player.getEntityWorld().isRemote()) {
             return;
         }
@@ -239,7 +230,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logExploitItemNameOverflow(PlayerEntity player, int length) {
+    public static void logExploitItemNameOverflow(final PlayerEntity player, final int length) {
         if (player.getEntityWorld().isRemote()) {
             return;
         }
@@ -254,7 +245,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logExploitRespawnInvisibility(PlayerEntity player) {
+    public static void logExploitRespawnInvisibility(final PlayerEntity player) {
         if (player.getEntityWorld().isRemote()) {
             return;
         }
@@ -267,7 +258,7 @@ public final class SpongeHooks {
         }
     }
 
-    public static boolean checkBoundingBoxSize(@Nullable Entity entity, AxisAlignedBB aabb) {
+    public static boolean checkBoundingBoxSize(@Nullable final Entity entity, final AxisAlignedBB aabb) {
         if (entity == null || entity.getEntityWorld().isRemote()) {
             return false;
         }
@@ -306,7 +297,7 @@ public final class SpongeHooks {
         return false;
     }
 
-    public static boolean checkEntitySpeed(@Nullable Entity entity, double x, double y, double z) {
+    public static boolean checkEntitySpeed(@Nullable final Entity entity, final double x, final double y, final double z) {
         if (entity == null || entity.getEntityWorld().isRemote()) {
             return false;
         }
@@ -348,7 +339,7 @@ public final class SpongeHooks {
         return true;
     }
 
-    public static void logEntitySize(@Nullable Entity entity, List list) {
+    public static void logEntitySize(@Nullable final Entity entity, final List list) {
         if (entity == null || list == null || entity.getEntityWorld().isRemote()) {
             return;
         }
@@ -377,13 +368,13 @@ public final class SpongeHooks {
         public BlockPos blockPos;
         public DimensionType dimensionType;
 
-        public CollisionWarning(DimensionType dimensionType, Entity entity) {
+        public CollisionWarning(final DimensionType dimensionType, final Entity entity) {
             this.dimensionType = dimensionType;
             this.blockPos = new BlockPos(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
         }
 
         @Override
-        public boolean equals(Object otherObj) {
+        public boolean equals(final Object otherObj) {
             if (!(otherObj instanceof CollisionWarning)) {
                 return false;
             }
@@ -398,7 +389,7 @@ public final class SpongeHooks {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void dumpHeap(File file, boolean live) {
+    public static void dumpHeap(final File file, final boolean live) {
         try {
             if (file.getParentFile() != null) {
                 file.getParentFile().mkdirs();
@@ -409,7 +400,7 @@ public final class SpongeHooks {
             final Object hotspotMBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", clazz);
             final Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
             m.invoke(hotspotMBean, file.getPath(), live);
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             logSevere("Could not write heap to {0}", file);
         }
     }
@@ -422,7 +413,8 @@ public final class SpongeHooks {
         mbean.setThreadContentionMonitoringEnabled(true);
     }
 
-    public static SpongeConfig<? extends GeneralConfigBase> getOrLoadConfigAdapter(@Nullable Path dimensionPath, @Nullable String worldDirectory) {
+    public static SpongeConfig<? extends GeneralConfigBase> getOrLoadConfigAdapter(@Nullable final Path dimensionPath, @Nullable
+    final String worldDirectory) {
         if (worldDirectory != null) {
             final org.spongepowered.api.world.World apiWorld = SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldDirectory)
                     .orElse(null);
@@ -448,52 +440,7 @@ public final class SpongeHooks {
         return dimensionConfigAdapter;
     }
 
-    public static void refreshActiveConfigs() {
-        for (final BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
-            if (blockType instanceof CollisionCapabilityBridge) {
-                ((CollisionCapabilityBridge) blockType).collision$requiresCollisionsCacheRefresh(true);
-            }
-            if (blockType instanceof TrackableBridge) {
-                ((BlockBridge) blockType).bridge$initializeTrackerState();
-            }
-        }
-        for (final BlockEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
-            ((SpongeTileEntityType) tileEntityType).initializeTrackerState();
-        }
-        for (final EntityType entityType : EntityTypeRegistryModule.getInstance().getAll()) {
-            ((SpongeEntityType) entityType).initializeTrackerState();
-        }
-
-        for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeImpl.getWorldManager().getWorlds()) {
-            final ServerWorld world = (ServerWorld) apiWorld;
-            final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-            // Reload before updating world config cache
-            configAdapter.load();
-            ((ServerWorldBridge) world).bridge$updateConfigCache();
-            for (final Entity entity : ((ServerWorldAccessor) world).accessor$getEntitiesById().values()) {
-                if (entity instanceof ActivationCapabilityBridge) {
-                    ((ActivationCapabilityBridge) entity).activation$requiresActivationCacheRefresh(true);
-                }
-                if (entity instanceof CollisionCapabilityBridge) {
-                    ((CollisionCapabilityBridge) entity).collision$requiresCollisionsCacheRefresh(true);
-                }
-                if (entity instanceof TrackableBridge) {
-                    ((TrackableBridge) entity).bridge$refreshTrackerStates();
-                }
-            }
-            for (final TileEntity tileEntity : world.loadedTileEntityList) {
-                if (tileEntity instanceof ActivationCapabilityBridge) {
-                    ((ActivationCapabilityBridge) tileEntity).activation$requiresActivationCacheRefresh(true);
-                }
-                if (tileEntity instanceof TrackableBridge) {
-                    ((TrackableBridge) tileEntity).bridge$refreshTrackerStates();
-                }
-            }
-        }
-        ConfigTeleportHelperFilter.invalidateCache();
-    }
-
-    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(Map<String, Tristate> entries) {
+    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Tristate> entries) {
         return SpongeImpl.getGlobalConfigAdapter()
             .updateSetting("metrics.plugin-states", entries, new TypeToken<Map<String, Tristate>>() {
                 private static final long serialVersionUID = 190617916448550012L;

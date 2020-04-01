@@ -41,24 +41,18 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.persistence.SerializedDataTransaction;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -112,7 +106,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
         if ((Object) itemStack instanceof net.minecraft.item.ItemStack) {
-            this.damageValue = ((net.minecraft.item.ItemStack) (Object) itemStack).getDamage();
             final CompoundNBT itemCompound = ((net.minecraft.item.ItemStack) (Object) itemStack).getTag();
             if (itemCompound != null) {
                 this.compound = itemCompound.copy();
@@ -140,7 +133,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         final ItemType itemType = container.getCatalogType(org.spongepowered.common.util.Constants.ItemStack.TYPE, ItemType.class).get();
         this.itemType(itemType);
 
-        this.damageValue = container.getInt(Constants.ItemStack.DAMAGE_VALUE).get();
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             if (compound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
@@ -168,7 +160,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 //            this.itemData(manipulator);
 //        }
         if (snapshot instanceof SpongeItemStackSnapshot) {
-            this.damageValue = ((SpongeItemStackSnapshot) snapshot).getDamageValue();
             final Optional<CompoundNBT> compoundOptional = ((SpongeItemStackSnapshot) snapshot).getCompound();
             if (compoundOptional.isPresent()) {
                 this.compound = compoundOptional.get();
@@ -215,23 +206,9 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             return this;
         }
         this.itemType(item.get());
-        this.damageValue = minecraftState.getBlock().damageDropped(minecraftState);
         return this;
     }
 
-    @Override
-    public ItemStack.Builder remove(final Class<? extends Mutable<?, ?>> manipulatorClass) {
-        if (this.itemDataSet != null) {
-            for (final Iterator<Mutable<?, ?>> iterator = this.itemDataSet.iterator(); iterator.hasNext(); ) {
-                final Mutable<?, ?> next = iterator.next();
-                if (manipulatorClass.isInstance(next)) {
-                    iterator.remove();
-                    break;
-                }
-            }
-        }
-        return this;
-    }
 
     @Override
     public ItemStack.Builder from(final ItemStack value) {
@@ -245,28 +222,26 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             Constants.ItemStack.DAMAGE_VALUE)) {
             return Optional.empty();
         }
-        final String itemTypeId = getData(container, Constants.ItemStack.TYPE, String.class);
-        final int count = getData(container, Constants.ItemStack.COUNT, Integer.class);
-        final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).orElseThrow(() -> new IllegalStateException("Unable to find item with id: " + itemTypeId));
-        final int damage = getData(container, Constants.ItemStack.DAMAGE_VALUE, Integer.class);
-        final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
+        final int count = container.getInt(Constants.ItemStack.COUNT).get();
+        final ItemType itemType = container.getCatalogType(Constants.ItemStack.TYPE, ItemType.class).orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
+        final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
             fixEnchantmentData(itemType, compound);
-            itemStack.put(compound);
+            itemStack.setTag(compound);
         }
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
-            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
-            final List<Mutable<?, ?>> manipulators = transaction.deserializedManipulators;
-            for (final Mutable<?, ?> manipulator : manipulators) {
-                ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator, MergeFunction.IGNORE_ALL);
-            }
-            if (!transaction.failedData.isEmpty()) {
-                ((CustomDataHolderBridge) itemStack).bridge$addFailedData(transaction.failedData);
-            }
+//            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
+//            final List<Mutable<?, ?>> manipulators = transaction.deserializedManipulators;
+//            for (final Mutable<?, ?> manipulator : manipulators) {
+//                ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator, MergeFunction.IGNORE_ALL);
+//            }
+//            if (!transaction.failedData.isEmpty()) {
+//                ((CustomDataHolderBridge) itemStack).bridge$addFailedData(transaction.failedData);
+//            }
         }
-        return Optional.of((ItemStack) itemStack);
+        return Optional.of((ItemStack) (Object) itemStack);
     }
 
     @Override
@@ -275,7 +250,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.quantity = 1;
         this.itemDataSet = new HashSet<>();
         this.compound = null;
-        this.damageValue = 0;
         return this;
     }
 
@@ -303,7 +277,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (this.compound != null && this.compound.contains(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
             final CompoundNBT compoundTag = this.compound.getCompound(Constants.Forge.FORGE_CAPS);
             if (compoundTag != null) {
-                SpongeImplHooks.setCapabilitiesFromSpongeBuilder(stack, compoundTag);
+                SpongeImplHooks.setCapabilitiesFromSpongeBuilder((net.minecraft.item.ItemStack) (Object) stack, compoundTag);
             }
         }
 

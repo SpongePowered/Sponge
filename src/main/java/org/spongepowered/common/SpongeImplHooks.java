@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -63,6 +59,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.Dimension;
@@ -73,8 +70,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
@@ -82,15 +77,10 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
-import org.spongepowered.common.util.SpawnerSpawnType;
 
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
 
 /**
  * Contains default Vanilla implementations for features that are only
@@ -185,10 +175,6 @@ public class SpongeImplHooks {
 
     // World
 
-    public static Iterator<Chunk> getChunkIterator(final ServerWorld world) {
-        return world.getPlayerChunkMap().getChunkIterator();
-    }
-
     public static void registerPortalAgentType(@Nullable final ForgeITeleporterBridge teleporter) {
         // Overwritten in SpongeForge
     }
@@ -211,22 +197,23 @@ public class SpongeImplHooks {
         BlockPos ret = world.getSpawnPoint();
 
         final boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
-        int spawnFuzz = Math.max(0, world.getServer().getSpawnRadius(world));
+        int spawnFuzz = Math.max(0, world.getServer().getSpawnProtectionSize());
         final int border = MathHelper.floor(world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
         if (border < spawnFuzz) {
             spawnFuzz = border;
         }
 
-        if (!world.dimension.isNether() && !isAdventure && spawnFuzz != 0)
-        {
-            if (spawnFuzz < 2) {
-                spawnFuzz = 2;
-            }
-            final int spawnFuzzHalf = spawnFuzz / 2;
-            ret = world.gets(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
-        }
+        throw new UnsupportedOperationException("Implement the rest of this please");
+//        if (!world.dimension.isNether() && !isAdventure && spawnFuzz != 0)
+//        {
+//            if (spawnFuzz < 2) {
+//                spawnFuzz = 2;
+//            }
+//            final int spawnFuzzHalf = spawnFuzz / 2;
+//            ret = world.getSpawnCoordinate(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
+//        }
 
-        return ret;
+//        return ret;
     }
 
     // Item stack merging
@@ -238,24 +225,10 @@ public class SpongeImplHooks {
         }
     }
 
-    public static MapStorage getWorldMapStorage(final World world) {
-        return world.getMapStorage();
-    }
-
-    public static int countEntities(final ServerWorld world, final EntityClassification type, final boolean forSpawnCount) {
-        return world.countEntities(type.getCreatureClass());
-    }
-
     public static int getMaxSpawnPackSize(final MobEntity mob) {
         return mob.getMaxSpawnedInChunk();
     }
 
-    public static SpawnerSpawnType canEntitySpawnHere(final MobEntity mob, final boolean entityNotColliding) {
-        if (mob.getCanSpawnHere() && entityNotColliding) {
-            return SpawnerSpawnType.NORMAL;
-        }
-        return SpawnerSpawnType.NONE;
-    }
 
     public static void onEntityError(final Entity entity, final CrashReport crashReport) {
         throw new ReportedException(crashReport);
@@ -287,49 +260,10 @@ public class SpongeImplHooks {
         // forge only method
     }
 
-    public static boolean canConnectRedstone(final Block block, final BlockState state, final IBlockAccess world, final BlockPos pos, @Nullable final Direction side) {
+    public static boolean canConnectRedstone(final Block block, final BlockState state, final IWorldReader world, final BlockPos pos, @Nullable final Direction side) {
         return state.canProvidePower() && side != null;
     }
     // Crafting
-
-    public static Optional<ItemStack> getContainerItem(final ItemStack itemStack) {
-        checkNotNull(itemStack, "The itemStack must not be null");
-
-        final net.minecraft.item.ItemStack nmsStack = ItemStackUtil.toNative(itemStack);
-
-        if (nmsStack.isEmpty()) {
-            return Optional.empty();
-        }
-
-        final Item nmsItem = nmsStack.getItem();
-
-        if (nmsItem.hasContainerItem()) {
-            final Item nmsContainerItem = nmsItem.getContainerItem();
-            final net.minecraft.item.ItemStack nmsContainerStack = new net.minecraft.item.ItemStack(nmsContainerItem);
-            final ItemStack containerStack = ItemStackUtil.fromNative(nmsContainerStack);
-
-            return Optional.of(containerStack);
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    public static Optional<CraftingRecipe> findMatchingRecipe(final CraftingGridInventory inventory, final org.spongepowered.api.world.World world) {
-        final IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
-        return Optional.ofNullable(((CraftingRecipe) recipe));
-    }
-
-    public static Collection<CraftingRecipe> getCraftingRecipes() {
-        return Streams.stream(CraftingManager.REGISTRY.iterator()).map(CraftingRecipe.class::cast).collect(ImmutableList.toImmutableList());
-    }
-
-    public static Optional<CraftingRecipe> getRecipeById(final String id) {
-        final IRecipe recipe = CraftingManager.REGISTRY.getOrDefault(new ResourceLocation(id));
-        if (recipe == null) {
-            return Optional.empty();
-        }
-        return Optional.of(((CraftingRecipe) recipe));
-    }
 
     public static void register(final ResourceLocation name, final IRecipe recipe) {
 //        CraftingManager.register(name, recipe);

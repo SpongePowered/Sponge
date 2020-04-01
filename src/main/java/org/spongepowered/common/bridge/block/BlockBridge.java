@@ -133,8 +133,6 @@ public interface BlockBridge {
         return false;
     }
 
-    ImmutableMap<Class<? extends Property>, Property> bridge$getProperties(BlockState blockState);
-
     void bridge$initializeTrackerState();
 
     default BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> bridge$getTickFrameModifier() {

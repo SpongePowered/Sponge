@@ -31,13 +31,9 @@ dependencies {
     // TODO - migrate this to the plugin, from the gradle properties
     minecraft("net.minecraft:" + project.properties["minecraftDep"] + ":" + project.properties["minecraftVersion"])
 
-    api("org.spongepowered:mixin:0.8-SNAPSHOT") {
-    }
-    api("org.ow2.asm:asm-tree:6.2")
-
     runtime("org.apache.logging.log4j:log4j-slf4j-impl:2.8.1")
 
-    // Database stuffs... likely needs to be looked at
+    // Database stuffs... likely needs to be looked atå
     runtime("com.zaxxer:HikariCP:2.6.3")
     runtime("org.mariadb.jdbc:mariadb-java-client:2.0.3")
     runtime("com.h2database:h2:1.4.196")
@@ -51,3 +47,40 @@ tasks.test {
 
 // Configure the TestPlugins project.
 val api = spongeDev.api!!
+val testPlugins = project(":testplugins") {
+    apply(plugin = "org.spongepowered.gradle.sponge.dev")
+    apply(plugin = "java-library")
+    configure<SpongeDevExtension> {
+        licenseProject = "Sponge"
+    }
+    dependencies {
+        implementation(project(api.path))
+    }
+}
+val launch by sourceSets.creating
+val launchWrapper by sourceSets.creating {
+    compileClasspath += launch.compileClasspath
+}
+sourceSets.main {
+    compileClasspath += launch.compileClasspath
+    runtimeClasspath += launch.runtimeClasspath
+}
+
+dependencies {
+    // For unit testing... not really going to work.
+    runtime(project(testPlugins.path)) {
+        exclude(module="spongeapi")
+    }
+    "launchImplementation"("org.spongepowered:mixin:0.8")
+    "launchImplementation"("org.ow2.asm:asm-tree:6.2")
+    "launchImplementation"("org.ow2.asm:asm-util:6.2")
+    "launchImplementation"("org.apache.logging.log4j:log4j-api:2.8.1")
+    implementation(launch.output)
+
+    "launchWrapperImplementation"(launch.output)
+    "launchWrapperImplementation"("net.minecraft:launchwrapper:1.11") {
+        exclude(module="lwjgl")
+    }
+    implementation(launchWrapper.output)
+
+}

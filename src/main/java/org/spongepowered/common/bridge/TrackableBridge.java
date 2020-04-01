@@ -49,7 +49,7 @@ public interface TrackableBridge {
      * Usually these states are only needing to be refreshed
      * when the {@link TrackerConfig} is being changed, but some
      * trackable types have that information tracked through
-     * their parent type (such as {@link SpongeEntityType}.
+     * their parent type (such as {@link org.spongepowered.common.mixin.core.entity.EntityTypeMixin}.
      */
     default void bridge$refreshTrackerStates() {
     }

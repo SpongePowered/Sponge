@@ -48,7 +48,6 @@ import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.TrackerConfig;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventHooks;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -93,10 +92,7 @@ public final class SpongeImpl {
 
     @Inject @Nullable private static SpongeGame game;
     @Inject @Nullable private static SpongeGameRegistry registry;
-    @Inject @Nullable private static SpongeDataManager dataManager;
-    @Inject @Nullable private static SpongePropertyRegistry propertyRegistry;
     @Inject @Nullable private static SpongeScheduler scheduler;
-    @Inject @Nullable private static SpongeCommandManager commandManager;
     @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
     @Inject @Nullable private static SpongeWorldManager worldManager;
 
@@ -144,14 +140,6 @@ public final class SpongeImpl {
 
     public static SpongeGameRegistry getRegistry() {
         return check(registry);
-    }
-
-    public static SpongeDataManager getDataManager() {
-        return check(dataManager);
-    }
-
-    public static SpongePropertyRegistry getPropertyRegistry() {
-        return check(propertyRegistry);
     }
 
     public static ServerScheduler getServerScheduler() {

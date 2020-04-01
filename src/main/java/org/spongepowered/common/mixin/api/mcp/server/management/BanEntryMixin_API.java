@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.management;
 
+import net.minecraft.server.management.BanEntry;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
@@ -34,7 +35,6 @@ import org.spongepowered.common.bridge.server.management.BanUserListEntryBridge;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
-import net.minecraft.server.management.BanEntry;
 
 @Mixin(BanEntry.class)
 public abstract class BanEntryMixin_API<T> extends UserListEntryMixin_API<T> implements Ban {
@@ -55,11 +55,6 @@ public abstract class BanEntryMixin_API<T> extends UserListEntryMixin_API<T> imp
     @Override
     public Optional<Text> getBanSource() {
         return ((BanUserListEntryBridge) this).bridge$getSource();
-    }
-
-    @Override
-    public Optional<CommandSource> getBanCommandSource() {
-        return ((BanUserListEntryBridge) this).bridge$getCmdSource();
     }
 
     @Override

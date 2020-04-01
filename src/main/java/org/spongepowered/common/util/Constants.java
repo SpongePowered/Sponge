@@ -75,8 +75,6 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -1256,14 +1254,6 @@ public final class Constants {
 
     public static final class Functional {
 
-        /**
-         * This will compare two {@link ValueProcessor}s where the higher priority
-         * will compare opposite to the lower priority.
-         */
-        public static final Comparator<ValueProcessor<?, ?>> VALUE_PROCESSOR_COMPARATOR =
-            (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
-        public static final Comparator<DataProcessor<?, ?>> DATA_PROCESSOR_COMPARATOR =
-            (o1, o2) -> intComparator().compare(o2.getPriority(), o1.getPriority());
         public static final Comparator<DataContentUpdater> DATA_CONTENT_UPDATER_COMPARATOR =
             (o1, o2) -> ComparisonChain.start()
                 .compare(o2.getInputVersion(), o1.getInputVersion())

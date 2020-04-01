@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.bridge.world.biome;
 
-import net.minecraft.world.World;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
-
 public interface BiomeBridge {
 
     void bridge$setId(String id);
@@ -37,5 +34,4 @@ public interface BiomeBridge {
 
     String bridge$getModId();
 
-    void bridge$buildPopulators(World world, SpongeBiomeGenerationSettings gensettings);
 }

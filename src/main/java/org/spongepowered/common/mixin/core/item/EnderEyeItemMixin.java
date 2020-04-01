@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.item;
 import net.minecraft.entity.item.EyeOfEnderEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnderEyeItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
@@ -37,6 +36,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -54,6 +54,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.math.vector.Vector3d;
+
 import javax.annotation.Nullable;
 
 @Mixin(EnderEyeItem.class)
@@ -168,7 +169,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
-        ((EyeOfEnder) enderEye).setShooter((ProjectileSource) playerIn);
+        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER, (ProjectileSource) playerIn);
     }
 
     /**
@@ -193,7 +194,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         if (((WorldBridge) worldIn).bridge$isFake()) {
             return;
         }
-        ((EyeOfEnder) enderEye).setShooter((ProjectileSource) playerIn);
+        ((EyeOfEnder) enderEye).offer(Keys.SHOOTER, (ProjectileSource) playerIn);
     }
 
 }

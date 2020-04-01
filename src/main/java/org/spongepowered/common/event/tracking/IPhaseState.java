@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
@@ -34,12 +33,12 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -58,7 +57,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -73,18 +71,19 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.mixin.core.world.chunk.ChunkMixin;
 import org.spongepowered.common.mixin.tracker.world.chunk.ChunkMixin_OwnershipTracked;
+import org.spongepowered.common.mixin.tracker.world.chunk.ChunkMixin_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
+
+import javax.annotation.Nullable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
-
-import javax.annotation.Nullable;
+import java.util.function.Predicate;
 
 /**
  * A literal phase state of which the {@link World} is currently running
@@ -211,7 +210,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * </p>
      *
      * <p>Note that the {@link PhaseTracker} is only provided for easy access
-     * to the {@link WorldServer}, {@link ServerWorldBridge}, and
+     * to the {@link ServerWorld}, {@link ServerWorldBridge}, and
      * {@link World} instances.</p>
      *
      * @param phaseContext The context of the current state being unwound
@@ -384,7 +383,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return true;
     }
     /**
-     * Gets whether this state specifically supports splitting up {@link Block#dropBlockAsItem(net.minecraft.world.World, BlockPos, IBlockState, int)}
+     * Gets whether this state specifically supports splitting up {@link Block#spawnDrops(BlockState, net.minecraft.world.World, BlockPos, TileEntity, Entity, net.minecraft.item.ItemStack)}
      * drops as some blocks may drop multiple items at once. In some cases, the individual block
      * transactions can be associated directly with captured item/entity spawns. In other
      * cases, we cannot safely perform these captures as some mods may be expecting those items to
@@ -494,7 +493,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * <p>If this and {@link #doesBulkBlockCapture(PhaseContext)} both return {@code false}, vanilla
      * mechanics will take place, and no tracking or capturing is taking place unless otherwise
      * noted by
-     * {@link #associateNeighborStateNotifier(PhaseContext, BlockPos, Block, BlockPos, WorldServer, PlayerTracker.Type)}</p>
+     * {@link #associateNeighborStateNotifier(PhaseContext, BlockPos, Block, BlockPos, ServerWorld, PlayerTracker.Type)}</p>
      *
      * @return True by default, false for things like world gen
      * @param context
@@ -522,7 +521,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * can occasionally ignore collision events for those states. Examples include world generation,
      * or explosions.
      *
-     * @return Whether this state will throw entity collision events when calling {@link Chunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)}
+     * @return Whether this state will throw entity collision events when calling {@link Chunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, java.util.function.Predicate)}
      */
     default boolean ignoresEntityCollisions() {
         return false;
@@ -540,7 +539,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state will already consider any captures or extra processing for a
-     * {@link Block#updateTick(net.minecraft.world.World, BlockPos, IBlockState, Random)}. Again usually
+     * {@link Block#tick(BlockState, net.minecraft.world.World, BlockPos, Random)}. Again usually
      * considered for world generation or post states or block restorations.
      *
      * @param context The phase data currently present
@@ -564,7 +563,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state will specifically ignore attempting to merge {@link ItemStack}s
-     * within capture lists and avoid creating the {@link EntityItem} speicifcally. In some cases
+     * within capture lists and avoid creating the {@link ItemEntity} speicifcally. In some cases
      * however, these items need to be directly created as entities for them to be acted upon
      * during the phase process and therefor cannot be captured. Examples can include where
      * mods are attempting to modify the captured entities by providing their own form of a
@@ -789,7 +788,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Gets the populator offset for the given {@link Chunk} that will be passed to
-     * {@link Populator}s. Normally, during any sort of world generation, the offset
+     * {@link Feature}s. Normally, during any sort of world generation, the offset
      * is 8, but sometimes, for chunk regeneration, we don't want to use an offset.
      *
      * @param chunk The chunk
@@ -811,8 +810,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Specifically captures a block change by {@link ChunkMixin#bridge$setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
-     * such that the change of a {@link IBlockState} will be appropriately logged, along with any changes of tile entities being removed
+     * Specifically captures a block change by {@link ChunkMixin_Tracker#bridge$setBlockState(BlockPos, BlockState, BlockState, BlockChangeFlag)}
+     * such that the change of a {@link BlockState} will be appropriately logged, along with any changes of tile entities being removed
      * or added, likewise, this will avoid duplicating transactions later after the fact, in the event that multiple changes are taking
      * place, including but not withstanding, tile entity replacements after the fact.
      */
@@ -840,10 +839,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             context.getCapturedBlockSupplier().cancelTransaction(original);
             ((SpongeBlockSnapshot) original).getServerWorld().ifPresent(worldServer -> {
                 final Chunk chunk = worldServer.getChunkAt(((SpongeBlockSnapshot) original).getBlockPos());
-                final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
-                if (entry != null) {
-                    ((PlayerChunkMapEntryBridge) entry).bridge$markBiomesForUpdate();
-                }
+                // INTERACT WITH CHUNK MANAGER
             });
         }
         if (this.tracksBlockSpecificDrops(context)) {

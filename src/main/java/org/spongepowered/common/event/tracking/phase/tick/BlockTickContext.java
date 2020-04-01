@@ -25,13 +25,14 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.FlowingFluidBlock;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class BlockTickContext extends LocationBasedTickContext<BlockTickContext> {
 
@@ -39,25 +40,25 @@ public class BlockTickContext extends LocationBasedTickContext<BlockTickContext>
     boolean providesModifier;
     World world;
 
-    protected BlockTickContext(IPhaseState<BlockTickContext> phaseState) {
+    protected BlockTickContext(final IPhaseState<BlockTickContext> phaseState, final PhaseTracker tracker) {
         super(phaseState, tracker);
     }
 
     @Override
-    public BlockTickContext source(Object owner) {
+    public BlockTickContext source(final Object owner) {
         super.source(owner);
         if (owner instanceof LocatableBlock) {
             final LocatableBlock locatableBlock = (LocatableBlock) owner;
             final Block block = ((BlockState) locatableBlock.getBlockState()).getBlock();
             this.tickingBlock = (BlockBridge) block;
-            this.providesModifier = !(block instanceof BlockDynamicLiquid);
+            this.providesModifier = !(block instanceof FlowingFluidBlock);
             this.world = locatableBlock.getWorld();
             if (block instanceof TrackableBridge) {
                 final TrackableBridge trackable = (TrackableBridge) block;
                 this.setBlockEvents(trackable.bridge$allowsBlockEventCreation())
-                    .setBulkBlockCaptures(trackable.bridge$allowsBlockBulkCapture())
+                    .setBulkBlockCaptures(trackable.bridge$allowsBlockBulkCaptures())
                     .setEntitySpawnEvents(trackable.bridge$allowsEntityEventCreation())
-                    .setBulkEntityCaptures(trackable.bridge$allowsEntityBulkCapture());
+                    .setBulkEntityCaptures(trackable.bridge$allowsEntityBulkCaptures());
             }
         }
         return this;

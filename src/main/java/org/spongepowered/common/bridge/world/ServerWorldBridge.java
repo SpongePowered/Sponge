@@ -24,30 +24,18 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SessionLockException;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.math.vector.Vector3d;
+
 import java.util.function.Function;
 
 public interface ServerWorldBridge {
@@ -57,12 +45,6 @@ public interface ServerWorldBridge {
     void bridge$updateRotation(Entity entityIn);
 
     void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
-
-    SpongeWorldGenerator bridge$createTerrainGenerator(DataContainer settings);
-
-    SpongeWorldGenerator bridge$createTerrainGenerator(String settings);
-
-    SpongeChunkGenerator bridge$createChunkGenerator(SpongeWorldGenerator newGenerator);
 
     boolean bridge$isLightLevel(Chunk chunk, BlockPos pos, int level);
 
@@ -81,18 +63,9 @@ public interface ServerWorldBridge {
 
     void bridge$updateConfigCache();
 
-    SpongeChunkGenerator bridge$getSpongeGenerator();
-
-    @Nullable
-    ScheduledBlockUpdate bridge$getScheduledBlockUpdate();
-
-    void bridge$setScheduledBlockUpdate(@Nullable ScheduledBlockUpdate sbu);
-
     long bridge$getWeatherStartTime();
 
     void bridge$setWeatherStartTime(long start);
-
-    void bridge$setProviderGenerator(SpongeChunkGenerator newGenerator);
 
     void bridge$saveChunksAndProperties(@Nullable IProgressUpdate update, boolean flush, boolean saveChunks) throws SessionLockException;
 }

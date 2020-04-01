@@ -27,28 +27,28 @@ package org.spongepowered.common.mixin.core.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.tileentity.BannerTileEntity;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
+import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.BannerTileEntity;
-import net.minecraft.world.server.ServerWorld;
 
 @Mixin(BannerTileEntity.class)
 public abstract class BannerTileEntityMixin extends TileEntityMixin implements BannerTileEntityBridge {
@@ -98,12 +98,12 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
     }
 
     @Override
-    public List<PatternLayer> bridge$getLayers() {
+    public List<BannerPatternLayer> bridge$getLayers() {
         return new ArrayList<>(this.impl$patternLayers);
     }
 
     @Override
-    public void bridge$setLayers(final List<PatternLayer> layers) {
+    public void bridge$setLayers(final List<BannerPatternLayer> layers) {
         this.impl$patternLayers = new NonNullArrayList<>();
         this.impl$patternLayers.addAll(layers);
         this.patterns = new ListNBT();

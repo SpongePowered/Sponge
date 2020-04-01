@@ -28,9 +28,9 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.SerializableDataHolder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
@@ -43,11 +43,11 @@ import java.util.Optional;
 
 public interface CustomDataHolderBridge {
 
-    DataTransactionResult bridge$offerCustom(Mutable manipulator, MergeFunction function);
+    DataTransactionResult bridge$offerCustom(SerializableDataHolder.Mutable manipulator, MergeFunction function);
 
-    <T extends Mutable> Optional<T> bridge$getCustom(Class<T> customClass);
+    <T extends SerializableDataHolder.Mutable> Optional<T> bridge$getCustom(Class<T> customClass);
 
-    DataTransactionResult bridge$removeCustom(Class<? extends Mutable> customClass);
+    DataTransactionResult bridge$removeCustom(Class<? extends SerializableDataHolder.Mutable> customClass);
 
     boolean bridge$hasManipulators();
 
@@ -57,13 +57,13 @@ public interface CustomDataHolderBridge {
 
     <E, V extends Value<E>> Optional<V> bridge$getCustomValue(Key<V> key);
 
-    Collection<Mutable> bridge$getCustomManipulators();
+    Collection<SerializableDataHolder.Mutable> bridge$getCustomManipulators();
 
     <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value);
 
     DataTransactionResult bridge$removeCustom(Key<?> key);
 
-    default void bridge$removeCustomFromNBT(Mutable manipulator) {
+    default void bridge$removeCustomFromNBT(SerializableDataHolder.Mutable manipulator) {
         if (this instanceof DataCompoundHolder) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             if (spongeData.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {

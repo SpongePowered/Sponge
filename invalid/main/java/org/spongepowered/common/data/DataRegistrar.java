@@ -84,7 +84,7 @@ import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
+import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.ItemStackSnapshotDuplicateManipulatorUpdater;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;

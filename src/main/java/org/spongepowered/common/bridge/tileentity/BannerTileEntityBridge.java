@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.bridge.tileentity;
 
-import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 
 import java.util.List;
 
 public interface BannerTileEntityBridge {
 
-    List<PatternLayer> bridge$getLayers();
+    List<BannerPatternLayer> bridge$getLayers();
 
-    void bridge$setLayers(List<PatternLayer> layers);
+    void bridge$setLayers(List<BannerPatternLayer> layers);
 
     DyeColor bridge$getBaseColor();
 

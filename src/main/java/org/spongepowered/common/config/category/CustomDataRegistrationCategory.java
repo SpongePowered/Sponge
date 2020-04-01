@@ -30,16 +30,11 @@ import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Collectors;
 
 @ConfigSerializable
 public class CustomDataRegistrationCategory extends ConfigCategory {
@@ -50,7 +45,7 @@ public class CustomDataRegistrationCategory extends ConfigCategory {
      * startup. This is always auto-populated after the data manager is
      * finally baked with all data registrations.
      *
-     * This should be populated after {@link SpongeManipulatorRegistry#bake()}.
+     * This should be populated after the default registrations are done.
      */
     @Setting(value = "registered-data", comment = "An auto generated list, by Sponge, to provide a list of \n"
                                                 + "registered custom data manipulators by plugins. Since \n"
@@ -96,14 +91,14 @@ public class CustomDataRegistrationCategory extends ConfigCategory {
     private boolean printFailedDataOnDiscovery = false;
 
 
-    public void populateRegistrations(Collection<DataRegistration<?, ?>> registrations) {
+    public void populateRegistrations(final Collection<DataRegistration> registrations) {
         this.registeredDataIds.clear();
-        for (DataRegistration<?, ?> registration : registrations) {
-            this.registeredDataIds.add(registration.getId());
+        for (final DataRegistration registration : registrations) {
+            this.registeredDataIds.add(registration.getKey().getFormatted());
         }
     }
 
-    public void addFailedData(String dataId, Throwable cause) {
+    public void addFailedData(final String dataId, final Throwable cause) {
         if (this.discoveredFailedDatas.add(dataId) && this.printFailedDataOnDiscovery) {
             new PrettyPrinter(60).add("Failed Data Discovery").centre().hr()
                 .addWrapped("Sponge found an unregistered DataRegistration id. Don't worry though!"
@@ -116,7 +111,7 @@ public class CustomDataRegistrationCategory extends ConfigCategory {
         }
     }
 
-    public void purgeOrAllow(SerializedDataTransaction.Builder builder, String dataId, DataView view) {
+    public void purgeOrAllow(final SerializedDataTransaction.Builder builder, final String dataId, final DataView view) {
         if (!this.purgeDatas.contains(dataId)) {
             builder.failedData(view);
         }

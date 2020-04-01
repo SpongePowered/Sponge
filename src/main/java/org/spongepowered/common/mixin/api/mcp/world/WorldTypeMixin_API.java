@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 @Mixin(WorldType.class)
 public abstract class WorldTypeMixin_API implements GeneratorType {
@@ -66,7 +65,7 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
     @Override
     public TerrainGenerator createGenerator(ServerWorld world) {
         checkNotNull(world);
-        return ((ServerWorldBridge) world).bridge$createTerrainGenerator(this.getDefaultGeneratorSettings());
+        throw new UnsupportedOperationException("implement me");
     }
 
     @Override

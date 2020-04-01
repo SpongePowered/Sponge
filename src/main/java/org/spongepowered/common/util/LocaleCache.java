@@ -26,14 +26,12 @@ package org.spongepowered.common.util;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.LocaleUtils;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
-@NonnullByDefault
 public final class LocaleCache {
 
     private static final Map<String, Locale> LOCALE_CACHE = Maps.newHashMap();

@@ -27,11 +27,10 @@ package org.spongepowered.common.inject;
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
-
-import javax.annotation.Nullable;
 
 public final class SpongeInjectionPoint implements AnnotatedElement {
 
@@ -39,7 +38,7 @@ public final class SpongeInjectionPoint implements AnnotatedElement {
     private final TypeToken<?> type;
     private final Annotation[] annotations;
 
-    SpongeInjectionPoint(TypeToken<?> source, TypeToken<?> type, Annotation[] annotations) {
+    SpongeInjectionPoint(final TypeToken<?> source, final TypeToken<?> type, final Annotation[] annotations) {
         this.annotations = annotations;
         this.source = source;
         this.type = type;
@@ -56,7 +55,7 @@ public final class SpongeInjectionPoint implements AnnotatedElement {
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+    public <A extends Annotation> A getAnnotation(final Class<A> annotationClass) {
         return (A) Arrays.stream(this.annotations).filter(annotationClass::isInstance).findFirst().orElse(null);
     }
 

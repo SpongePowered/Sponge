@@ -32,6 +32,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -78,7 +79,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Nullable UUID creatorUuid;
     @Nullable UUID notifierUuid;
     Vector3i coords;
-    @Nullable List<Immutable<?, ?>> manipulators;
+    @Nullable List<DataManipulator.Immutable> manipulators;
     @Nullable CompoundNBT compound;
     SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
     private final boolean pooled;
@@ -228,7 +229,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
                 .ifPresent(builder::unsafeNbt);
         if (container.contains(Constants.Sponge.SNAPSHOT_TILE_DATA)) {
             final List<DataView> dataViews = container.getViewList(Constants.Sponge.SNAPSHOT_TILE_DATA).get();
-            DataUtil.deserializeImmutableManipulatorList(dataViews).forEach(builder::add);
+//            DataUtil.deserializeImmutableManipulatorList(dataViews).forEach(builder::add);
         }
         return Optional.of(builder.build());
     }
