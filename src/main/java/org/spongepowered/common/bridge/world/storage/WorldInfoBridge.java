@@ -47,10 +47,6 @@ public interface WorldInfoBridge {
 
     void bridge$setUniqueId(UUID uniqueId);
 
-    String bridge$getWorldName();
-
-    void bridge$setWorldName(String worldName);
-
     boolean bridge$isEnabled();
 
     void bridge$setEnabled(boolean state);

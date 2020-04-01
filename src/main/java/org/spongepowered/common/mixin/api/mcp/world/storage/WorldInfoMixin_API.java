@@ -125,16 +125,6 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         return this.shadow$getWorldName();
     }
 
-    @Intrinsic
-    public String worldproperties$getWorldName() {
-        return ((WorldInfoBridge) this).bridge$getWorldName();
-    }
-
-    @Intrinsic
-    public void worldproperties$setWorldName(String worldName) {
-        ((WorldInfoBridge) this).bridge$setWorldName(worldName);
-    }
-
     @Override
     public Vector3i getSpawnPosition() {
         return new Vector3i(this.shadow$getSpawnX(), this.shadow$getSpawnY(), this.shadow$getSpawnZ());
@@ -317,7 +307,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         // TODO 1.14 - This may not be correct...
         if (this.legacyCustomOptions != null) {
             try {
-                return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, DataFormats.JSON.read(this.legacyCustomOptions));
+                return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, DataFormats.JSON.get().read(this.legacyCustomOptions));
             } catch (JsonParseException | IOException ignored) {
                 return DataContainer.createNew();
             }
@@ -392,11 +382,11 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public Weather getWeather() {
         if (this.shadow$isRaining()) {
-            return Weathers.RAIN;
+            return Weathers.RAIN.get();
         } else if (this.shadow$isThundering()) {
-            return Weathers.THUNDER_STORM;
+            return Weathers.THUNDER_STORM.get();
         }
-        return Weathers.CLEAR;
+        return Weathers.CLEAR.get();
     }
 
     @Override
@@ -428,19 +418,19 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setWeather(Weather weather, Duration duration) {
-        if (weather == Weathers.CLEAR) {
+        if (weather == Weathers.CLEAR.get()) {
             this.shadow$setClearWeatherTime((int) (duration.toMillis() / 1000));
             this.shadow$setRaining(false);
             this.shadow$setRainTime(0);
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
-        } else if (weather == Weathers.RAIN) {
+        } else if (weather == Weathers.RAIN.get()) {
             this.shadow$setRaining(true);
             this.shadow$setRainTime((int) (duration.toMillis() / 1000));
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
             this.shadow$setClearWeatherTime(0);
-        } else if (weather == Weathers.THUNDER_STORM) {
+        } else if (weather == Weathers.THUNDER_STORM.get()) {
             this.shadow$setRaining(true);
             this.shadow$setRainTime((int) (duration.toMillis() / 1000));
             this.shadow$setThundering(true);

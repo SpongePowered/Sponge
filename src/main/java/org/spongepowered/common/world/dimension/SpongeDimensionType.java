@@ -51,7 +51,6 @@ public final class SpongeDimensionType implements DimensionType {
     private final BooleanSupplier hasSkyLight;
 
     public SpongeDimensionType(String id, Supplier<BiFunction<World, net.minecraft.world.dimension.DimensionType, ? extends Dimension>> dimensionFactory, BooleanSupplier hasSkyLight) {
-        // TODO This may not work out, we'll see.
         checkNotNull(id);
         checkNotNull(dimensionFactory);
         checkNotNull(hasSkyLight);

@@ -84,7 +84,6 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     @Nullable private DimensionType impl$dimensionType;
     @Nullable private UUID impl$uniqueId;
-    @Nullable private String impl$worldName;
     @Nullable private SpongeConfig<WorldConfig> impl$configAdapter;
     private boolean impl$enabled;
     private boolean impl$pvp;
@@ -203,16 +202,6 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$setUniqueId(final UUID uniqueId) {
         this.impl$uniqueId = uniqueId;
-    }
-
-    @Override
-    public String bridge$getWorldName() {
-        return this.impl$worldName;
-    }
-
-    @Override
-    public void bridge$setWorldName(String worldName) {
-        this.impl$worldName = worldName;
     }
 
     @Override
@@ -341,6 +330,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$saveConfig() {
         final WorldCategory worldCat = this.impl$configAdapter.getConfig().getWorld();
+        // TODO 1.14 - Set the properties on the config adapter
         worldCat.setWorldEnabled(this.impl$enabled);
         worldCat.setLoadOnStartup(this.impl$loadOnStartup);
         worldCat.setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
@@ -399,12 +389,18 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         // TODO 1.14 - Run DataFixer on the SpongeData compound
 
         final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
+
+        if (!spongeDataCompound.contains(Constants.Sponge.World.DIMENSION_ID)) {
+            // TODO 1.14 - Bad Sponge level data...warn/crash?
+            return;
+        }
+
         if (!spongeDataCompound.hasUniqueId(Constants.Sponge.World.UNIQUE_ID)) {
             // TODO 1.14 - Bad Sponge level data...warn/crash?
             return;
         }
 
-        this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.UUID);
+        this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
         this.impl$dimensionType = net.minecraft.world.dimension.DimensionType.getById(spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID));
         this.impl$generateBonusChest = spongeDataCompound.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
         this.impl$portalAgentType = PortalAgentRegistryModule.getInstance()
@@ -459,8 +455,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("directoryName", this.shadow$getWorldName())
-            .add("worldName", this.impl$worldName)
-            .add("uuid", this.impl$uniqueId)
+            .add("uniqueId", this.impl$uniqueId)
             .add("dimensionType", this.impl$dimensionType)
             .add("generator", this.shadow$getGenerator())
             .add("modCreated", this.impl$modCreated)
