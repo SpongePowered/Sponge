@@ -69,8 +69,8 @@ import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
-import org.spongepowered.common.mixin.accessor.item.ArmorItemAccessor;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.item.ArmorItemAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 

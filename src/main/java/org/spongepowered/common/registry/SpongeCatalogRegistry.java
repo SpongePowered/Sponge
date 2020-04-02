@@ -122,7 +122,7 @@ import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.common.mixin.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;

@@ -30,7 +30,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
 
 import java.util.List;
 import java.util.Optional;

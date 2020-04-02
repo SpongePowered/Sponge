@@ -62,10 +62,10 @@ import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
-import org.spongepowered.common.mixin.accessor.entity.player.PlayerEntityAccessor;
-import org.spongepowered.common.mixin.accessor.network.play.server.SPlayerListItemPacketAccessor;
-import org.spongepowered.common.mixin.accessor.network.play.server.SSpawnPlayerPacketAccessor;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
+import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
+import org.spongepowered.common.accessor.network.play.server.SSpawnPlayerPacketAccessor;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;

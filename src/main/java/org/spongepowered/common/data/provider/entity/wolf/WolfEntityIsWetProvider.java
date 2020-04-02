@@ -28,7 +28,7 @@ import net.minecraft.entity.passive.WolfEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.passive.WolfEntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.WolfEntityAccessor;
 
 import java.util.Optional;
 

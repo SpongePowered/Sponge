@@ -30,7 +30,7 @@ import net.minecraft.entity.monster.EndermiteEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.monster.EndermiteEntityAccessor;
+import org.spongepowered.common.accessor.entity.monster.EndermiteEntityAccessor;
 
 import java.time.Duration;
 import java.util.Optional;

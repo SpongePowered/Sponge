@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.entity.monster.SlimeEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.monster.SlimeEntityAccessor;
+import org.spongepowered.common.accessor.entity.monster.SlimeEntityAccessor;
 
 import java.util.Optional;
 

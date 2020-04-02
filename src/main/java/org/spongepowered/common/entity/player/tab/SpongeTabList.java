@@ -34,7 +34,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPlayerListHeaderFooterPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
-import net.minecraft.network.play.server.SPlayerListItemPacket.AddPlayerData;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameType;
@@ -43,8 +42,8 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.mixin.accessor.network.play.server.SPlayerListHeaderFooterPacketAccessor;
-import org.spongepowered.common.mixin.accessor.network.play.server.SPlayerListItemPacketAccessor;
+import org.spongepowered.common.accessor.network.play.server.SPlayerListHeaderFooterPacketAccessor;
+import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;

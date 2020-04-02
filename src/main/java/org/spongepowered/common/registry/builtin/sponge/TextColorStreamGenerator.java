@@ -29,7 +29,7 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.mixin.accessor.util.text.TextFormattingAccessor;
+import org.spongepowered.common.accessor.util.text.TextFormattingAccessor;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.stream.Stream;

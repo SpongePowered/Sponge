@@ -30,7 +30,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.tileentity.BeaconTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.BeaconTileEntityAccessor;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;

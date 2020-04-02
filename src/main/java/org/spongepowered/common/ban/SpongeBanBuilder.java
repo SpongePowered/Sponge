@@ -36,7 +36,7 @@ import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.mixin.accessor.server.management.IPBanListAccessor;
+import org.spongepowered.common.accessor.server.management.IPBanListAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import javax.annotation.Nullable;

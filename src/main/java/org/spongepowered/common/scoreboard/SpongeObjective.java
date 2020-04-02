@@ -34,10 +34,9 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
-import org.spongepowered.common.mixin.accessor.scoreboard.ScoreAccessor;
-import org.spongepowered.common.mixin.accessor.scoreboard.ScoreObjectiveAccessor;
-import org.spongepowered.common.mixin.accessor.scoreboard.ScoreboardAccessor;
+import org.spongepowered.common.accessor.scoreboard.ScoreAccessor;
+import org.spongepowered.common.accessor.scoreboard.ScoreObjectiveAccessor;
+import org.spongepowered.common.accessor.scoreboard.ScoreboardAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;

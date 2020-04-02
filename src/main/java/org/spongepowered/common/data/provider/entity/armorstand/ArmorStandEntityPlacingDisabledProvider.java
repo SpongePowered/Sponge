@@ -29,7 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
+import org.spongepowered.common.accessor.entity.item.ArmorStandEntityAccessor;
 
 import java.util.HashSet;
 import java.util.Optional;

@@ -77,7 +77,7 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
+import org.spongepowered.common.accessor.world.WorldAccessor;
 
 import java.util.Collection;
 

@@ -29,7 +29,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.storage.RegionFile;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.storage.ChunkDataStream;
-import org.spongepowered.common.mixin.accessor.world.chunk.storage.RegionFileAccessor;
+import org.spongepowered.common.accessor.world.chunk.storage.RegionFileAccessor;
 
 import java.io.DataInputStream;
 import java.io.IOException;

@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.mixin.accessor.world.ExplosionAccessor;
+import org.spongepowered.common.accessor.world.ExplosionAccessor;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 
 import javax.annotation.Nullable;

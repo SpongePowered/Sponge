@@ -31,7 +31,7 @@ import net.minecraft.entity.monster.AbstractRaiderEntity;
 import org.spongepowered.api.entity.living.monster.raider.Raider;
 import org.spongepowered.api.raid.Raid;
 import org.spongepowered.api.raid.Wave;
-import org.spongepowered.common.mixin.accessor.world.raid.RaidAccessor;
+import org.spongepowered.common.accessor.world.raid.RaidAccessor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

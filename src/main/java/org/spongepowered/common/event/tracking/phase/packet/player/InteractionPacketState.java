@@ -51,7 +51,6 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -60,7 +59,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 
 import java.util.ArrayList;
 import java.util.Collection;

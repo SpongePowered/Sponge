@@ -30,7 +30,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.provider.GenericMutableBoundedDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

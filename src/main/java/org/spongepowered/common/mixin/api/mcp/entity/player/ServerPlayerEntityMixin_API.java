@@ -98,7 +98,7 @@ import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPack
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.mixin.accessor.network.play.server.SChangeBlockPacketAccessor;
+import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;

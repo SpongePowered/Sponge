@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.generic;
 import net.minecraft.util.INameable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.data.CustomNameableAccessor;
+import org.spongepowered.common.accessor.CustomNameableAccessor;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.text.SpongeTexts;
 

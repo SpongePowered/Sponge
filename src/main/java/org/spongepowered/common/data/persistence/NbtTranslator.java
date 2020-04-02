@@ -51,7 +51,7 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.mixin.accessor.nbt.LongArrayNBTAccessor;
+import org.spongepowered.common.accessor.nbt.LongArrayNBTAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;

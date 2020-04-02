@@ -37,8 +37,8 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
-import org.spongepowered.common.mixin.accessor.advancements.AdvancementListAccessor;
-import org.spongepowered.common.mixin.accessor.advancements.AdvancementManagerAccessor;
+import org.spongepowered.common.accessor.advancements.AdvancementListAccessor;
+import org.spongepowered.common.accessor.advancements.AdvancementManagerAccessor;
 
 import java.util.Map;
 

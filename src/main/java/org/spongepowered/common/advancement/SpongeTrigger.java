@@ -43,7 +43,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.mixin.accessor.advancements.ICriterionTrigger_ListenerAccessor;
+import org.spongepowered.common.accessor.advancements.ICriterionTrigger_ListenerAccessor;
 import org.spongepowered.common.bridge.advancements.TriggerBridge;
 
 import java.util.ArrayList;

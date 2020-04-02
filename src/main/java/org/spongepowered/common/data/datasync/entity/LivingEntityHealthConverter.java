@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 
 import java.util.List;
 import java.util.Optional;

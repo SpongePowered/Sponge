@@ -33,7 +33,7 @@ import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
-import org.spongepowered.common.mixin.accessor.item.ToolItemAccessor;
+import org.spongepowered.common.accessor.item.ToolItemAccessor;
 
 import java.util.Optional;
 import java.util.Set;

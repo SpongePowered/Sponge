@@ -28,7 +28,7 @@ import net.minecraft.tileentity.HopperTileEntity;
 import org.spongepowered.api.block.entity.carrier.Hopper;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.mixin.accessor.tileentity.HopperTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.HopperTileEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;

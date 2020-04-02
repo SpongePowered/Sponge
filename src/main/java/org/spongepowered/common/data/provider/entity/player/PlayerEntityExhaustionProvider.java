@@ -29,7 +29,7 @@ import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.provider.GenericMutableBoundedDataProvider;
-import org.spongepowered.common.mixin.accessor.util.FoodStatsAccessor;
+import org.spongepowered.common.accessor.util.FoodStatsAccessor;
 
 import java.util.Optional;
 

@@ -32,7 +32,7 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.mixin.accessor.advancements.AdvancementListAccessor;
+import org.spongepowered.common.accessor.advancements.AdvancementListAccessor;
 
 import java.util.Optional;
 

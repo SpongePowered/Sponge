@@ -30,7 +30,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
+import org.spongepowered.common.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 

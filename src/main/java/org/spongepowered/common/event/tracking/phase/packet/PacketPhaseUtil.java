@@ -64,12 +64,12 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
-import org.spongepowered.common.mixin.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
-import org.spongepowered.common.mixin.accessor.entity.passive.PigEntityAccessor;
-import org.spongepowered.common.mixin.accessor.entity.passive.SheepEntityAccessor;
-import org.spongepowered.common.mixin.accessor.entity.passive.WolfEntityAccessor;
-import org.spongepowered.common.mixin.accessor.network.play.client.CPlayerPacketAccessor;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.PigEntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.SheepEntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.WolfEntityAccessor;
+import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 
 import javax.annotation.Nullable;
 import java.util.List;

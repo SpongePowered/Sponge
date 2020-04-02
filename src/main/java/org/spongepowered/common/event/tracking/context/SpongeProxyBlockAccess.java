@@ -44,7 +44,7 @@ import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
+import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;

@@ -26,7 +26,7 @@ package org.spongepowered.common.event.damage;
 
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
-import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
 /*
 To summarize, the way this works is that DamageSource isn't directly created, but

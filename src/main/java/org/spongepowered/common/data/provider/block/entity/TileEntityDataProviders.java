@@ -36,16 +36,16 @@ import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
 import org.spongepowered.common.data.provider.commandblock.CommandBlockLogicDataProviders;
 import org.spongepowered.common.data.provider.item.stack.ItemStackGameProfileProvider;
-import org.spongepowered.common.mixin.accessor.tileentity.AbstractFurnaceTileEntityAccessor;
-import org.spongepowered.common.mixin.accessor.tileentity.BeaconTileEntityAccessor;
-import org.spongepowered.common.mixin.accessor.tileentity.BrewingStandTileEntityAccessor;
-import org.spongepowered.common.mixin.accessor.tileentity.EndGatewayTileEntityAccessor;
-import org.spongepowered.common.mixin.accessor.tileentity.LockableTileEntityAccessor;
-import org.spongepowered.common.mixin.accessor.tileentity.MobSpawnerTileEntityAccessor;
-import org.spongepowered.common.mixin.accessor.tileentity.SkullTileEntityAccessor;
-import org.spongepowered.common.mixin.accessor.tileentity.StructureBlockTileEntityAccessor;
-import org.spongepowered.common.mixin.accessor.world.LockCodeAccessor;
-import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
+import org.spongepowered.common.accessor.tileentity.AbstractFurnaceTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.BeaconTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.BrewingStandTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.EndGatewayTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.LockableTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.MobSpawnerTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.SkullTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.StructureBlockTileEntityAccessor;
+import org.spongepowered.common.accessor.world.LockCodeAccessor;
+import org.spongepowered.common.accessor.world.spawner.AbstractSpawnerAccessor;
 import org.spongepowered.common.util.VecHelper;
 
 public class TileEntityDataProviders extends DataProviderRegistryBuilder {

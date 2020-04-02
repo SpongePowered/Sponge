@@ -38,7 +38,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.accessor.item.crafting.ShapedRecipeAccessor;
+import org.spongepowered.common.accessor.item.crafting.ShapedRecipeAccessor;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 import org.spongepowered.plugin.meta.util.NonnullByDefault;
 

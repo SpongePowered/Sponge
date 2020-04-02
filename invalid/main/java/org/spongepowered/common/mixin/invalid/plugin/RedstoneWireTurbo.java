@@ -29,7 +29,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.RedstoneWireBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.common.mixin.accessor.block.RedstoneWireBlockAccessor;
+import org.spongepowered.common.accessor.block.RedstoneWireBlockAccessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -38,8 +38,8 @@ import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.mixin.accessor.util.WeightedRandom_ItemAccessor;
-import org.spongepowered.common.mixin.accessor.world.spawner.AbstractSpawnerAccessor;
+import org.spongepowered.common.accessor.util.WeightedRandom_ItemAccessor;
+import org.spongepowered.common.accessor.world.spawner.AbstractSpawnerAccessor;
 import org.spongepowered.common.util.Constants;
 
 public class SpawnerUtils {

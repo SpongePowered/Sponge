@@ -53,11 +53,11 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.provider.util.FireworkUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
-import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
-import org.spongepowered.common.mixin.accessor.entity.item.FireworkRocketEntityAccessor;
-import org.spongepowered.common.mixin.accessor.network.play.server.SEntityMetadataPacketAccessor;
-import org.spongepowered.common.mixin.accessor.network.play.server.SEntityStatusPacketAccessor;
-import org.spongepowered.common.mixin.accessor.network.play.server.SSpawnObjectPacketAccessor;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.entity.item.FireworkRocketEntityAccessor;
+import org.spongepowered.common.accessor.network.play.server.SEntityMetadataPacketAccessor;
+import org.spongepowered.common.accessor.network.play.server.SEntityStatusPacketAccessor;
+import org.spongepowered.common.accessor.network.play.server.SSpawnObjectPacketAccessor;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3f;
 

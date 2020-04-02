@@ -33,9 +33,9 @@ import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.mixin.accessor.util.text.StringTextComponentAccessor;
-import org.spongepowered.common.mixin.accessor.util.text.StyleAccessor;
-import org.spongepowered.common.mixin.accessor.util.text.TextFormattingAccessor;
+import org.spongepowered.common.accessor.util.text.StringTextComponentAccessor;
+import org.spongepowered.common.accessor.util.text.StyleAccessor;
+import org.spongepowered.common.accessor.util.text.TextFormattingAccessor;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import javax.annotation.Nullable;

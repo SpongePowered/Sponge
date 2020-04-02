@@ -28,7 +28,7 @@ import net.minecraft.tileentity.CommandBlockLogic;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
-import org.spongepowered.common.mixin.accessor.tileentity.CommandBlockLogicAccessor;
+import org.spongepowered.common.accessor.tileentity.CommandBlockLogicAccessor;
 
 import java.util.function.Function;
 

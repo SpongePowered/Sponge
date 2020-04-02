@@ -65,16 +65,16 @@ import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryL
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.mixin.accessor.inventory.container.AbstractFurnaceContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.BeaconContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.BrewingStandContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.ContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.CraftingResultSlotAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.DispenserContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.HopperContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.HorseInventoryContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.MerchantContainerAccessor;
-import org.spongepowered.common.mixin.accessor.inventory.container.RepairContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.AbstractFurnaceContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.BeaconContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.BrewingStandContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.ContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.CraftingResultSlotAccessor;
+import org.spongepowered.common.accessor.inventory.container.DispenserContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.HopperContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.HorseInventoryContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.MerchantContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.RepairContainerAccessor;
 
 import java.util.ArrayList;
 import java.util.Collection;

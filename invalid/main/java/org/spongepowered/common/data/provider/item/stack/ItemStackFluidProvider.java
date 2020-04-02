@@ -36,7 +36,7 @@ import org.spongepowered.api.fluid.FluidTypes;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
-import org.spongepowered.common.mixin.accessor.item.BucketItemAccessor;
+import org.spongepowered.common.accessor.item.BucketItemAccessor;
 
 import java.util.Optional;
 

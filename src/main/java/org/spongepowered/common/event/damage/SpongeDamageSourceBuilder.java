@@ -26,16 +26,10 @@ package org.spongepowered.common.event.damage;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
-
-import java.util.function.Function;
-import net.minecraft.entity.LivingEntity;
+import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
 public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<DamageSource, DamageSource.Builder> implements DamageSource.Builder {
 

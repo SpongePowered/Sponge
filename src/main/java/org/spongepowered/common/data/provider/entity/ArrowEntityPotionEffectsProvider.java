@@ -29,7 +29,7 @@ import net.minecraft.potion.EffectInstance;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.projectile.ArrowEntityAccessor;
+import org.spongepowered.common.accessor.entity.projectile.ArrowEntityAccessor;
 
 import java.util.List;
 import java.util.Optional;

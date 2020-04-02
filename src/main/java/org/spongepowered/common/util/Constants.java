@@ -76,7 +76,7 @@ import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
-import org.spongepowered.common.mixin.accessor.entity.item.ArmorStandEntityAccessor;
+import org.spongepowered.common.accessor.entity.item.ArmorStandEntityAccessor;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;

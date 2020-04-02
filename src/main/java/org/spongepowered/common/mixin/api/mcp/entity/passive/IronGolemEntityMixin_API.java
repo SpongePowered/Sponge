@@ -28,7 +28,6 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.golem.IronGolem;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.accessor.entity.passive.FoxEntityAccessor;
 
 import java.util.Set;
 

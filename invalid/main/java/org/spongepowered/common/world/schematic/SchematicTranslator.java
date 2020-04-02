@@ -53,13 +53,11 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_2;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
-import org.spongepowered.common.mixin.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PairStream;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
-import org.spongepowered.common.world.schematic.BimapPalette;
-import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;

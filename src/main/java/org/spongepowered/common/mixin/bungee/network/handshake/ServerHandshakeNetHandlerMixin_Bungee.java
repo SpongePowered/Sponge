@@ -41,8 +41,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
-import org.spongepowered.common.mixin.accessor.network.NetworkManagerAccessor;
-import org.spongepowered.common.mixin.accessor.network.handshake.client.CHandshakePacketAccessor;
+import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
+import org.spongepowered.common.accessor.network.handshake.client.CHandshakePacketAccessor;
 
 import java.net.InetSocketAddress;
 

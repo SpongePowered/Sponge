@@ -35,7 +35,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
-import org.spongepowered.common.mixin.accessor.network.play.client.CResourcePackStatusPacketAccessor;
+import org.spongepowered.common.accessor.network.play.client.CResourcePackStatusPacketAccessor;
 
 public final class ResourcePackState extends BasicPacketState {
 

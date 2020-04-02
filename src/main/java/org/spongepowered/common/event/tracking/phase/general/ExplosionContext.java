@@ -31,7 +31,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.accessor.world.ExplosionAccessor;
+import org.spongepowered.common.accessor.world.ExplosionAccessor;
 
 import javax.annotation.Nullable;
 

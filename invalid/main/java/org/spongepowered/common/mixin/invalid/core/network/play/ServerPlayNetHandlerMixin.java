@@ -112,7 +112,7 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.mixin.accessor.network.play.client.CPlayerPacketAccessor;
+import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;

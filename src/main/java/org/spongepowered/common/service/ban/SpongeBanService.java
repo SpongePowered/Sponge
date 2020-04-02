@@ -38,7 +38,7 @@ import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.mixin.accessor.server.management.UserListAccessor;
+import org.spongepowered.common.accessor.server.management.UserListAccessor;
 import org.spongepowered.common.util.UserListUtils;
 
 import java.net.InetAddress;

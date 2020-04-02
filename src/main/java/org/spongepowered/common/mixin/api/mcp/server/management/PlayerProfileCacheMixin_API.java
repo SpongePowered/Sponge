@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.mixin.accessor.server.management.PlayerProfileCache_ProfileEntryAccessor;
+import org.spongepowered.common.accessor.server.management.PlayerProfileCache_ProfileEntryAccessor;
 import org.spongepowered.common.profile.callback.MapProfileLookupCallback;
 import org.spongepowered.common.profile.callback.SingleProfileLookupCallback;
 

@@ -35,9 +35,9 @@ import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.item.HangingEntityAccessor;
-import org.spongepowered.common.mixin.accessor.world.server.ChunkManagerAccessor;
-import org.spongepowered.common.mixin.accessor.world.server.EntityTrackerAccessor;
+import org.spongepowered.common.accessor.entity.item.HangingEntityAccessor;
+import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
+import org.spongepowered.common.accessor.world.server.EntityTrackerAccessor;
 
 import java.util.ArrayList;
 import java.util.List;

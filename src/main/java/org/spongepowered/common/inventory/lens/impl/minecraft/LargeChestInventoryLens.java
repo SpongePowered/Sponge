@@ -29,7 +29,6 @@ import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.mixin.accessor.inventory.DoubleSidedInventoryAccessor;
 
 /**
  * This class is only used as an adapter when explicitly requested from the API, trough

@@ -35,7 +35,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.tileentity.SkullTileEntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.data.processor.common.SkullUtils;
-import org.spongepowered.common.mixin.accessor.tileentity.SkullTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.SkullTileEntityAccessor;
 
 @Mixin(SkullTileEntity.class)
 public abstract class SkullTileEntityMixin extends org.spongepowered.common.mixin.core.tileentity.TileEntityMixin implements SkullTileEntityBridge {

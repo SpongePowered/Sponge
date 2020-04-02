@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.tileentity.CommandBlockLogicAccessor;
+import org.spongepowered.common.accessor.tileentity.CommandBlockLogicAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.block.entity;
 
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.tileentity.HopperTileEntityAccessor;
+import org.spongepowered.common.accessor.tileentity.HopperTileEntityAccessor;
 
 import java.util.Optional;
 

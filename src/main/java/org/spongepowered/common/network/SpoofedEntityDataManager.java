@@ -29,8 +29,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
-import org.spongepowered.common.mixin.accessor.network.datasync.EntityDataManagerAccessor;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.network.datasync.EntityDataManagerAccessor;
 
 import java.io.IOException;
 import java.util.ArrayList;

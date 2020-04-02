@@ -30,8 +30,8 @@ import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.accessor.item.crafting.ShapedRecipeAccessor;
-import org.spongepowered.common.mixin.accessor.item.crafting.ShapelessRecipeAccessor;
+import org.spongepowered.common.accessor.item.crafting.ShapedRecipeAccessor;
+import org.spongepowered.common.accessor.item.crafting.ShapelessRecipeAccessor;
 
 import java.util.Optional;
 

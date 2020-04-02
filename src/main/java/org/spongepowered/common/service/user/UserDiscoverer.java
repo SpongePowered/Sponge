@@ -44,9 +44,9 @@ import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.mixin.accessor.server.management.UserListEntryAccessor;
-import org.spongepowered.common.mixin.accessor.server.management.UserListAccessor;
-import org.spongepowered.common.mixin.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
+import org.spongepowered.common.accessor.server.management.UserListAccessor;
+import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 
 import java.io.File;
 import java.util.Collection;

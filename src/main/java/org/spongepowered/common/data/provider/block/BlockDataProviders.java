@@ -100,8 +100,8 @@ import org.spongepowered.common.data.provider.BlockStateBoundedIntDataProvider;
 import org.spongepowered.common.data.provider.BlockStateDirectionDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
-import org.spongepowered.common.mixin.accessor.block.BlockAccessor;
-import org.spongepowered.common.mixin.accessor.block.FireBlockAccessor;
+import org.spongepowered.common.accessor.block.BlockAccessor;
+import org.spongepowered.common.accessor.block.FireBlockAccessor;
 
 import java.util.Map;
 import java.util.function.Function;

@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
 import java.lang.ref.WeakReference;
 

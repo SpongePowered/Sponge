@@ -28,7 +28,7 @@ import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
 
 import java.util.Optional;
 

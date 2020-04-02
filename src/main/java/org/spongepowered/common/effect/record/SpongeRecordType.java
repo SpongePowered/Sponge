@@ -34,7 +34,7 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.mixin.accessor.item.MusicDiscItemAccessor;
+import org.spongepowered.common.accessor.item.MusicDiscItemAccessor;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.math.vector.Vector3i;
 import javax.annotation.Nullable;

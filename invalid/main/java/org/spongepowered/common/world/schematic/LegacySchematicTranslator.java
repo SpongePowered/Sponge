@@ -53,12 +53,11 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
-import org.spongepowered.common.mixin.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
-import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;

@@ -88,8 +88,8 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.accessor.block.FireBlockAccessor;
-import org.spongepowered.common.mixin.accessor.world.WorldAccessor;
+import org.spongepowered.common.accessor.block.FireBlockAccessor;
+import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.mixin.invalid.plugin.tileentityactivation.TileEntityActivation;
 import org.spongepowered.common.util.SpawnerSpawnType;
 

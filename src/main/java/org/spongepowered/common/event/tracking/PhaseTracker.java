@@ -84,7 +84,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.mixin.accessor.world.server.ServerWorldAccessor;
+import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;

@@ -34,7 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.BlockStateDataProvider;
 import org.spongepowered.common.data.util.StateHelper;
-import org.spongepowered.common.mixin.accessor.block.AbstractSkullBlockAccessor;
+import org.spongepowered.common.accessor.block.AbstractSkullBlockAccessor;
 
 import java.util.HashMap;
 import java.util.Map;

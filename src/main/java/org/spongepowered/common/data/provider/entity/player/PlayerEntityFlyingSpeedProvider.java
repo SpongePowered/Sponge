@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity.player;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.mixin.accessor.entity.player.PlayerAbilitiesAccessor;
+import org.spongepowered.common.accessor.entity.player.PlayerAbilitiesAccessor;
 
 import java.util.Optional;
 

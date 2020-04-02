@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.mixin.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 

@@ -26,10 +26,9 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
-import org.spongepowered.common.mixin.accessor.item.ToolItemAccessor;
+import org.spongepowered.common.accessor.item.ToolItemAccessor;
 
 import java.util.Optional;
 

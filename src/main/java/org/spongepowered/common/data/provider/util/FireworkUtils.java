@@ -42,7 +42,7 @@ import org.spongepowered.common.data.util.NbtCollectors;
 import org.spongepowered.common.data.util.NbtStreams;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
-import org.spongepowered.common.mixin.accessor.entity.item.FireworkRocketEntityAccessor;
+import org.spongepowered.common.accessor.entity.item.FireworkRocketEntityAccessor;
 import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.util.Constants;
 

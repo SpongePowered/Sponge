@@ -73,9 +73,9 @@ import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.mixin.accessor.entity.EntityAccessor;
-import org.spongepowered.common.mixin.accessor.entity.LivingEntityAccessor;
-import org.spongepowered.common.mixin.accessor.util.math.AxisAlignedBBAccessor;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.util.math.AxisAlignedBBAccessor;
 
 import java.util.Map;
 

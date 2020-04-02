@@ -40,8 +40,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 
 import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.common.mixin.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.mixin.accessor.world.dimension.DimensionTypeAccessor;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.world.dimension.DimensionToTypeRegistry;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 

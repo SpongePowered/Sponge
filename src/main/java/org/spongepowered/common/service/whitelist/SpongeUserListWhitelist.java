@@ -29,7 +29,7 @@ import net.minecraft.server.management.WhitelistEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
-import org.spongepowered.common.mixin.accessor.server.management.UserListEntryAccessor;
+import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
 
 import java.io.File;
 import java.util.ArrayList;

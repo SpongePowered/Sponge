@@ -103,7 +103,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
             .put("org.spongepowered.common.mixin.optimization.mcp.enchantment.EnchantmentHelperMixin_No_Source_Leak",
                     OptimizationCategory::useEnchantmentHelperFix)
             .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Eigen", EIGEN_ONLY)
-            .put("org.spongepowered.common.mixin.accessor.block.BlockRedstoneWireAccessor_Eigen", EIGEN_ONLY)
+            .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", EIGEN_ONLY)
             .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Panda", PANDA_ONLY)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixinTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)

@@ -26,8 +26,8 @@ package org.spongepowered.common.util;
 
 import net.minecraft.server.management.UserList;
 import net.minecraft.server.management.UserListEntry;
-import org.spongepowered.common.mixin.accessor.server.management.UserListEntryAccessor;
-import org.spongepowered.common.mixin.accessor.server.management.UserListAccessor;
+import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
+import org.spongepowered.common.accessor.server.management.UserListAccessor;
 
 import java.io.IOException;
 

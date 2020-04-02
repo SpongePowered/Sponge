@@ -27,8 +27,8 @@ package org.spongepowered.common.service.whitelist;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.mixin.accessor.server.management.UserListEntryAccessor;
-import org.spongepowered.common.mixin.accessor.server.management.UserListAccessor;
+import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
+import org.spongepowered.common.accessor.server.management.UserListAccessor;
 import org.spongepowered.common.util.UserListUtils;
 
 import java.util.ArrayList;
