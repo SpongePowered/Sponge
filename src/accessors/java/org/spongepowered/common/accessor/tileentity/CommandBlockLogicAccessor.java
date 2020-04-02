@@ -36,5 +36,7 @@ public interface CommandBlockLogicAccessor {
 
     @Accessor("successCount") void accessor$setSuccessCount(int successCount);
 
+    @Accessor("trackOutput") boolean accessor$tracksOutput();
+
     @Accessor("commandStored") void accessor$setCommandStored(String commandStored);
 }

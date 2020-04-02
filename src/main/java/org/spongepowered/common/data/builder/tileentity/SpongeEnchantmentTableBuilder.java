@@ -22,31 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.tileentity;
+package org.spongepowered.common.data.builder.tileentity;
 
 import net.minecraft.tileentity.EnchantingTableTileEntity;
+import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.EnchantmentTable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<EnchantmentTable> {
+public final class SpongeEnchantmentTableBuilder extends AbstractTileEntityBuilder<EnchantmentTable> {
 
     public SpongeEnchantmentTableBuilder() {
-        super(EnchantmentTable.class, 1);
+        super(EnchantmentTable.class, BlockTypes.ENCHANTING_TABLE, 1);
     }
 
     @Override
-    protected Optional<EnchantmentTable> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).map(enchantmentTable -> {
-            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((EnchantingTableTileEntity) enchantmentTable).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
-            }
-            ((EnchantingTableTileEntity) enchantmentTable).validate();
-            return enchantmentTable;
-        });
+    protected Optional<EnchantmentTable> buildContent(final DataView container) throws InvalidDataException {
+        return super.buildContent(container)
+                .map(enchantmentTable -> {
+                    if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
+                        ((EnchantingTableTileEntity) enchantmentTable).setCustomName((ITextComponent) container.getSerializable(Constants.TileEntity.CUSTOM_NAME, Text.class).get());
+                    }
 
+                    return enchantmentTable;
+        });
     }
 }

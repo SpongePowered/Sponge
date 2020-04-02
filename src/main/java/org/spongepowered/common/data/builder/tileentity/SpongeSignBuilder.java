@@ -22,40 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.tileentity;
+package org.spongepowered.common.data.builder.tileentity;
 
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.Sign;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeSignBuilder extends AbstractTileBuilder<Sign> {
+public final class SpongeSignBuilder extends AbstractTileEntityBuilder<Sign> {
 
     public SpongeSignBuilder() {
-        super(Sign.class, 1);
+        super(Sign.class, BlockTypes.OAK_SIGN, 1);
     }
 
     @Override
-    protected Optional<Sign> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).flatMap(sign1 -> {
-            if (!container.contains(Keys.SIGN_LINES.get().getQuery())) {
-                ((TileEntity) sign1).remove();
-                return Optional.empty();
-            }
-            List<String> rawLines = container.getStringList(Keys.SIGN_LINES.getQuery()).get();
-            List<Text> textLines = SpongeTexts.fromJson(rawLines);
-            for (int i = 0; i < 4; i++) {
-                ((SignTileEntity) sign1).signText[i] = SpongeTexts.toComponent(textLines.get(i));
-            }
-            ((SignTileEntity) sign1).validate();
-            return Optional.of(sign1);
+    protected Optional<Sign> buildContent(final DataView container) throws InvalidDataException {
+        return super.buildContent(container)
+                .flatMap(sign -> {
+                    final List<String> rawLines = container.getStringList(Constants.TileEntity.Sign.SIGN_LINES).get();
+                    final List<Text> textLines = SpongeTexts.fromJson(rawLines);
+                    for (int i = 0; i < 4; i++) {
+                        ((SignTileEntity) sign).signText[i] = SpongeTexts.toComponent(textLines.get(i));
+                    }
+
+                    return Optional.of(sign);
         });
+    }
+
+    @Override
+    protected boolean validate(DataView container) {
+        final boolean valid = super.validate(container);
+
+        if (valid) {
+            return container.contains(Constants.TileEntity.Sign.SIGN_LINES);
+        }
+
+        return false;
     }
 }

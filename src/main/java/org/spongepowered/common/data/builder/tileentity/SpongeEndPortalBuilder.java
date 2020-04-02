@@ -22,26 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.tileentity;
+package org.spongepowered.common.data.builder.tileentity;
 
-import net.minecraft.tileentity.EndPortalTileEntity;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.EndPortal;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 
-import java.util.Optional;
-
-public class SpongeEndPortalBuilder extends AbstractTileBuilder<EndPortal> {
+public final class SpongeEndPortalBuilder extends AbstractTileEntityBuilder<EndPortal> {
 
     public SpongeEndPortalBuilder() {
-        super(EndPortal.class, 1);
-    }
-
-    @Override
-    protected Optional<EndPortal> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).map(endPortal -> {
-            ((EndPortalTileEntity) endPortal).validate();
-            return endPortal;
-        });
+        super(EndPortal.class, BlockTypes.END_PORTAL, 1);
     }
 }

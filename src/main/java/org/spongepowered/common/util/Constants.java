@@ -696,6 +696,11 @@ public final class Constants {
             public static final DataQuery MATERIALCOST = DataQuery.of("materialcost");
             public static final DataQuery LEVELCOST = DataQuery.of("levelcost");
         }
+
+        public static final class Sign {
+            // Sign Lines
+            public static final DataQuery SIGN_LINES = of("SignLines");
+        }
     }
 
     public static final class Catalog {

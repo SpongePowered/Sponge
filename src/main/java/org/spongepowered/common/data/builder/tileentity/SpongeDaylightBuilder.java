@@ -22,26 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.tileentity;
+package org.spongepowered.common.data.builder.tileentity;
 
-import net.minecraft.tileentity.ComparatorTileEntity;
-import org.spongepowered.api.block.entity.Comparator;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.entity.DaylightDetector;
 
-import java.util.Optional;
+public final class SpongeDaylightBuilder extends AbstractTileEntityBuilder<DaylightDetector> {
 
-public class SpongeComparatorBuilder extends AbstractTileBuilder<Comparator> {
-
-    public SpongeComparatorBuilder() {
-        super(Comparator.class, 1);
-    }
-
-    @Override
-    protected Optional<Comparator> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).map(comparator -> {
-            ((ComparatorTileEntity) comparator).validate();
-            return comparator;
-        });
+    public SpongeDaylightBuilder() {
+        super(DaylightDetector.class, BlockTypes.DAYLIGHT_DETECTOR, 1);
     }
 }

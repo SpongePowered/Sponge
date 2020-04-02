@@ -22,26 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.tileentity;
+package org.spongepowered.common.data.builder.tileentity;
 
-import net.minecraft.tileentity.EnderChestTileEntity;
-import org.spongepowered.api.block.entity.EnderChest;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.entity.Comparator;
 
-import java.util.Optional;
+public final class SpongeComparatorBuilder extends AbstractTileEntityBuilder<Comparator> {
 
-public class SpongeEnderChestBuilder extends AbstractTileBuilder<EnderChest> {
-
-    public SpongeEnderChestBuilder() {
-        super(EnderChest.class, 1);
-    }
-
-    @Override
-    protected Optional<EnderChest> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).map(enderChest -> {
-            ((EnderChestTileEntity) enderChest).validate();
-            return enderChest;
-        });
+    public SpongeComparatorBuilder() {
+        super(Comparator.class, BlockTypes.COMPARATOR, 1);
     }
 }
