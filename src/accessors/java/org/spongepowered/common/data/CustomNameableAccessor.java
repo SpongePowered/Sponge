@@ -25,10 +25,9 @@
 package org.spongepowered.common.data;
 
 import net.minecraft.util.text.ITextComponent;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 // Extend by target specific accessor mixins
 public interface CustomNameableAccessor {
 
-    void accessor$setCustomDisplayName(@Nullable ITextComponent component);
+    void accessor$setCustomDisplayName(ITextComponent component);
 }
