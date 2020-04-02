@@ -27,31 +27,21 @@ package org.spongepowered.common.world.biome;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.biome.BiomeGenerationSettings;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType.Builder;
+import org.spongepowered.common.util.SpongeCatalogBuilder;
 
-import java.util.function.Function;
+public class SpongeVirtualBiomeTypeBuilder extends SpongeCatalogBuilder<VirtualBiomeType, VirtualBiomeType.Builder> implements VirtualBiomeType.Builder {
 
-public class SpongeVirtualBiomeTypeBuilder implements VirtualBiomeType.Builder {
-
-    private String name;
     private double temperature;
     private double humidity;
     private BiomeType persisted;
-    private Function<World, BiomeGenerationSettings> func;
 
     public SpongeVirtualBiomeTypeBuilder() {
         this.reset();
-    }
-
-    @Override
-    public Builder name(String name) {
-        this.name = checkNotNull(name, "name");
-        return this;
     }
 
     @Override
@@ -75,37 +65,19 @@ public class SpongeVirtualBiomeTypeBuilder implements VirtualBiomeType.Builder {
     }
 
     @Override
-    public Builder from(VirtualBiomeType value) {
-        this.name = value.getName();
-        this.temperature = value.getTemperature();
-        this.humidity = value.getHumidity();
-        return this;
-    }
-
-    @Override
-    public Builder settingsBuilder(Function<World, BiomeGenerationSettings> settingsBuilder) {
-        this.func = checkNotNull(settingsBuilder, "settingsBuilder");
-        return this;
+    protected VirtualBiomeType build(CatalogKey key) {
+        checkNotNull(key, "key");
+        checkNotNull(this.persisted, "persistedBiome");
+        return new SpongeVirtualBiomeType(this.key, this.temperature, this.humidity, this.persisted);
     }
 
     @Override
     public Builder reset() {
-        this.name = null;
+        super.reset();
         this.temperature = 0;
         this.humidity = 0;
-        this.persisted = BiomeTypes.VOID;
-        this.func = null;
+        this.persisted = BiomeTypes.VOID.get();
         return this;
-    }
-
-    @Override
-    public VirtualBiomeType build(String id) throws IllegalStateException {
-        checkNotNull(this.name, "name");
-        checkNotNull(id, "id");
-        checkNotNull(this.persisted, "persistedBiome");
-        checkNotNull(this.func, "settings_function");
-        checkArgument(!id.isEmpty());
-        return new SpongeVirtualBiomeType(id, this.name, this.temperature, this.humidity, this.persisted, this.func);
     }
 
 }

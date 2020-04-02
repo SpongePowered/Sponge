@@ -27,34 +27,27 @@ package org.spongepowered.common.world.biome;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.biome.BiomeGenerationSettings;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
+import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.function.Function;
+public class SpongeVirtualBiomeType extends SpongeCatalogType implements VirtualBiomeType {
 
-public class SpongeVirtualBiomeType implements VirtualBiomeType {
-
-    private final String id;
-    private final String name;
-    private final double tempterature;
+    private final double temperature;
     private final double humidity;
     private final BiomeType persisted;
-    private final Function<World, BiomeGenerationSettings> defaultSettings;
 
-    public SpongeVirtualBiomeType(String id, String name, double t, double h, BiomeType persist, Function<World, BiomeGenerationSettings> func) {
-        this.id = checkNotNull(id);
-        this.name = checkNotNull(name);
-        this.tempterature = t;
-        this.humidity = h;
-        this.persisted = checkNotNull(persist);
-        this.defaultSettings = func;
+    public SpongeVirtualBiomeType(CatalogKey key, double temperature, double humidity, BiomeType persistedType) {
+        super(key);
+        this.temperature = temperature;
+        this.humidity = humidity;
+        this.persisted = checkNotNull(persistedType);
     }
 
     @Override
     public double getTemperature() {
-        return this.tempterature;
+        return this.temperature;
     }
 
     @Override
@@ -63,48 +56,15 @@ public class SpongeVirtualBiomeType implements VirtualBiomeType {
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
     public BiomeType getPersistedType() {
         return this.persisted;
     }
 
     @Override
-    public BiomeGenerationSettings createDefaultGenerationSettings(World world) {
-        return this.defaultSettings.apply(world);
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("temperature", this.temperature)
+                .add("humidity", this.humidity)
+                .add("persistedBiome", this.persisted);
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof VirtualBiomeType)) {
-            return false;
-        }
-        return this.id == ((VirtualBiomeType) o).getId();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .add("name", this.name)
-                .add("persistedBiome", this.persisted)
-                .toString();
-    }
-
 }

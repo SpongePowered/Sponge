@@ -83,6 +83,7 @@ import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTreeBuilder;
 import org.spongepowered.common.advancement.SpongeCriterionBuilder;
@@ -134,6 +135,7 @@ import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
+import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 
 import java.util.Map;
@@ -214,7 +216,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
 //            .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
 //            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
 //            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
-//            .register(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
+            .register(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
             .register(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
             .register(SoundType.Builder.class, SpongeSoundBuilder::new)
