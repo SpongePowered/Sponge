@@ -924,9 +924,9 @@ public class SpongeCommonEventFactory {
     @Nullable
     public static Event callMoveEntityEvent(final net.minecraft.entity.Entity entity,
         final EntityTickContext context) {
-        // Ignore movement event if entity is dead, a projectile, or item.
-        // Note: Projectiles are handled with CollideBlockEvent.Impact
-        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
+
+        // Ignore movement event if entity is dead
+        if (entity.isDead || (!ShouldFire.MOVE_ENTITY_EVENT && !ShouldFire.MOVE_ENTITY_EVENT_POSITION && !ShouldFire.ROTATE_ENTITY_EVENT)) {
             return null;
         }
 
@@ -935,7 +935,6 @@ public class SpongeCommonEventFactory {
         final double deltaY = context.prevY - entity.posY;
         final double deltaZ = context.prevZ - entity.posZ;
         final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
-
 
         if (deltaChange > 1f / 256 // Micro-optimization, avoids almost negligible position movement from floating point differences.
             || entity.rotationPitch != entity.prevRotationPitch
@@ -959,12 +958,16 @@ public class SpongeCommonEventFactory {
                 final Transform<World> newTransform = new Transform<>(world, currentPositionVector, currentRotationVector, spongeEntity.getScale());
                 Event event  = null;
                 Transform<World> eventToTransform = null;
-                if (!oldPositionVector.equals(currentPositionVector)) {
+                if (!oldPositionVector.equals(currentPositionVector) && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
                     event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
                     eventToTransform = ((MoveEntityEvent) event).getToTransform();
-                } else {
+                } else if (ShouldFire.ROTATE_ENTITY_EVENT) {
                     event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
                     eventToTransform = ((RotateEntityEvent) event).getToTransform();
+                }
+
+                if (event == null) {
+                    return null;
                 }
 
                 if (SpongeImpl.postEvent(event)) { // Cancelled event, reset positions to previous position.
