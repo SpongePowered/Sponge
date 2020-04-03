@@ -15,12 +15,7 @@
       "mcp.tileentity.TileEntityMixin_Optimization_Hopper",
       "mcp.world.WorldMixin_Optimization_Collision",
       "mcp.world.server.ServerWorldMixin_Optimization_Collision",
-      "mcp.world.storage.MapData_MapInfoMixin_Optimization_Map",
-      "org.spongepowered.common.mixin.invalid.optimization.mcp.block.RedstoneWireBlockMixin_Optimization_Panda",
-      "org.spongepowered.common.mixin.invalid.optimization.mcp.block.RedstoneWireMixinBlock_Optimization_Eigen",
-      "org.spongepowered.common.mixin.invalid.optimization.mcp.enchantment.EnchantmentHelperMixin_Optimization_No_Source_Leak",
-      "org.spongepowered.common.mixin.invalid.optimization.mcp.server.MinecraftServerMixin_Optimization_Map",
-      "org.spongepowered.common.mixin.invalid.optimization.mcp.world.storage.MapDataMixin_Optimization_Map"
+      "mcp.world.storage.MapData_MapInfoMixin_Optimization_Map"
     ],
     "injectors": {
         "defaultRequire": 1
