@@ -120,7 +120,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
 
             while (randomIn.nextInt(50) <= this.level)
             {
-                EnchantmentHelper.removeIncompatible(list1, (EnchantmentData) Util.getLastElement(list));
+                EnchantmentHelper.removeIncompatible(list1, Util.getLast(list));
 
                 if (list1.isEmpty())
                 {
@@ -143,12 +143,6 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         return list.stream().map(ench ->
                 new EnchantmentData(((net.minecraft.enchantment.Enchantment) ench.getType()), ench.getLevel())
         ).collect(Collectors.toList());
-    }
-
-    @Override
-    public Enchantment.RandomListBuilder from(List<Enchantment> value) {
-        this.pool = value;
-        return this;
     }
 
     @Override

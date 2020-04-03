@@ -22,32 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.relocate.co.aikar.timings;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
+import org.spongepowered.common.economy.SpongeAccountDeletionResultType;
 
-class UnsafeTimingHandler extends TimingHandler {
+import java.util.stream.Stream;
 
-    UnsafeTimingHandler(TimingIdentifier id) {
-        super(id);
+public final class AccountDeletionResultTypeStreamGenerator {
+
+    private AccountDeletionResultTypeStreamGenerator() {
     }
 
-    private static void checkThread() {
-        if (!SpongeImpl.getServer().isOnExecutionThread()) {
-            throw new IllegalStateException("Calling Timings from Async Operation");
-        }
-    }
-
-    @Override
-    public TimingHandler startTiming() {
-        checkThread();
-        super.startTiming();
-        return this;
-    }
-
-    @Override
-    public void stopTiming() {
-        checkThread();
-        super.stopTiming();
+    public static Stream<AccountDeletionResultType> stream() {
+        return Stream.of(
+            new SpongeAccountDeletionResultType(CatalogKey.sponge("absent")),
+            new SpongeAccountDeletionResultType(CatalogKey.sponge("failed")),
+            new SpongeAccountDeletionResultType(CatalogKey.sponge("success")),
+            new SpongeAccountDeletionResultType(CatalogKey.sponge("unsupported")),
+            new SpongeAccountDeletionResultType(CatalogKey.sponge("undeletable"))
+        );
     }
 }
