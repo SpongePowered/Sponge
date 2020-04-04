@@ -83,7 +83,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
         // Copy the ingredient list
         final NonNullList<Ingredient> ingredients = NonNullList.create();
         ingredients.addAll(this.ingredients);
-
+        // TODO generate JSON
         return (ShapelessCraftingRecipe) new ShapelessRecipe((ResourceLocation) (Object) key, this.groupName,
                 ItemStackUtil.fromSnapshotToNative(this.result), ingredients);
     }

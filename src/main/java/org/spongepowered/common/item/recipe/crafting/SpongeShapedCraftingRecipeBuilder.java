@@ -171,7 +171,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
         // Throws JsonException when pattern is not complete or defines unused Ingredients
         final NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipeAccessor
             .accessor$deserializeIngredients(keys, ingredientsMap, width, height);
-
+        // TODO generate JSON
         return (ShapedCraftingRecipe) new ShapedRecipe((ResourceLocation)(Object) key, this.groupName, width, height, ingredients, ItemStackUtil.toNative(this.result));
     }
 

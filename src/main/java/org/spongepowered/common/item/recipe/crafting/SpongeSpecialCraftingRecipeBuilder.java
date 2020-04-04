@@ -122,6 +122,8 @@ public final class SpongeSpecialCraftingRecipeBuilder extends SpongeCatalogBuild
                 )
         ));
 
+        // TODO generate JSON?
+
         return (SpecialCraftingRecipe) new SpongeSpecialRecipe(resourceLocation,
                 this.biPredicate,
                 this.remainingItemsFunction,

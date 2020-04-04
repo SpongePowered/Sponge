@@ -82,6 +82,7 @@ public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<S
         if (this.ingredientPredicate == null) {
             return (StoneCutterRecipe) new StonecuttingRecipe((ResourceLocation) (Object) key, group, this.ingredient, this.result);
         }
+        // TODO generate JSON
         return (StoneCutterRecipe) new SpongeStonecuttingRecipe((ResourceLocation) (Object) key, group, this.ingredientPredicate, this.ingredient, this.result);
     }
 
