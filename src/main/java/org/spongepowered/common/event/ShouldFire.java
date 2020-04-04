@@ -105,6 +105,10 @@ public class ShouldFire {
     public static boolean EXPLOSION_EVENT_DETONATE = false;
     public static boolean GAME_REGISTRY_EVENT_REGISTER = false;
     public static boolean LOAD_CHUNK_EVENT = false;
+    public static boolean UNLOAD_CHUNK_EVENT = false;
+    public static boolean SAVE_CHUNK_EVENT = false;
+    public static boolean SAVE_CHUNK_EVENT_PRE = false;
+    public static boolean SAVE_CHUNK_EVENT_POST = false;
     public static boolean COLLIDE_ENTITY_EVENT = false;
     public static boolean SEND_COMMAND_EVENT = false;
 

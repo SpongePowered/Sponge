@@ -42,6 +42,8 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
@@ -60,12 +62,15 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.QueuedChunk;
+import org.spongepowered.common.util.VecHelper;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -300,4 +305,11 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         return this.chunkSaveLocation.toPath();
     }
 
+    @Inject(method = "writeChunkData", at = @At("RETURN"))
+    private void impl$callSaveChunkEventPost(ChunkPos pos, NBTTagCompound compound, CallbackInfo ci) {
+        if (ShouldFire.SAVE_CHUNK_EVENT || ShouldFire.SAVE_CHUNK_EVENT_POST) {
+            final Cause cause = Cause.of(EventContext.empty(), Collections.singleton(SpongeImpl.getServer()));
+            SpongeImpl.postEvent(SpongeEventFactory.createSaveChunkEventPost(cause, VecHelper.toVec3i(pos)));
+        }
+    }
 }
