@@ -31,6 +31,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.effect.LightningBoltEntity;
@@ -161,7 +162,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract void shadow$setPositionAndUpdate(double x, double y, double z);
     @Shadow public abstract int shadow$getMaxAir();
 
-    private boolean impl$isConstructing = true;
+    @Shadow protected int portalCounter;@Shadow protected abstract void applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);@Shadow public abstract void setMotion(Vec3d motionIn);@Shadow public abstract Vec3d getMotion();private boolean impl$isConstructing = true;
     @Nullable private Text impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
     private boolean impl$trackedInWorld = false;

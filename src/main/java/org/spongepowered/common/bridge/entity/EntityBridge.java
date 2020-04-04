@@ -68,10 +68,6 @@ public interface EntityBridge {
 
     void bridge$setFireImmuneTicks(int ticks);
 
-    default void bridge$onJoinWorld() {
-
-    }
-
     boolean bridge$shouldTick();
 
     default void bridge$clearWrappedCaptureList() {

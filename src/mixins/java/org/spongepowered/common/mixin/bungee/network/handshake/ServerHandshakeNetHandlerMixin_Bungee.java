@@ -71,8 +71,6 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
             } else {
                 final StringTextComponent chatcomponenttext =
                         new StringTextComponent("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
-                // TODO 1.14 - If the client is in HANDSHAKE state, it has no Disconnect packet registered. This may not work anymore...
-                this.networkManager.sendPacket(new SDisconnectLoginPacket(chatcomponenttext));
                 this.networkManager.closeChannel(chatcomponenttext);
             }
         }

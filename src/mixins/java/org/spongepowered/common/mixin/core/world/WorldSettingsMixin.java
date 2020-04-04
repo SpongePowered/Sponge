@@ -240,6 +240,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
 
         // TODO 1.14 - Add all the property setters
         infoBridge.bridge$setEnabled(this$.isEnabled());
+        infoBridge.bridge$setLogicType(this$.getDimensionType());
         infoBridge.bridge$setLoadOnStartup(this$.doesLoadOnStartup());
         infoBridge.bridge$setGenerateSpawnOnLoad(this$.doesGenerateSpawnOnLoad());
         infoBridge.bridge$setKeepSpawnLoaded(this$.doesKeepSpawnLoaded());

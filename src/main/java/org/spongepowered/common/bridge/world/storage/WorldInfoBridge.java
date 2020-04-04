@@ -32,6 +32,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,6 +43,10 @@ public interface WorldInfoBridge {
     DimensionType bridge$getDimensionType();
 
     void bridge$setDimensionType(DimensionType type);
+
+    SpongeDimensionType bridge$getLogicType();
+
+    void bridge$setLogicType(org.spongepowered.api.world.dimension.DimensionType type);
 
     UUID bridge$getUniqueId();
 

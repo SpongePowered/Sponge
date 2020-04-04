@@ -24,9 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.goal.GoalSelector;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.MathHelper;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -35,6 +43,8 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -51,6 +61,10 @@ import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.damage.DamageEventHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -60,8 +74,6 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @Shadow @Final protected GoalSelector goalSelector;
     @Shadow @Final protected GoalSelector targetSelector;
     @Shadow @Nullable private LivingEntity attackTarget;
-
-    @Shadow public abstract boolean isAIDisabled();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity shadow$getLeashHolder();
     @Shadow protected abstract void shadow$registerGoals();
 
@@ -94,7 +106,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         final net.minecraft.entity.Entity entity = this.shadow$getLeashHolder();
         if (!this.world.isRemote) {
             final CauseStackManager csm = Sponge.getCauseStackManager();
-            if(entity == null) {
+            if (entity == null) {
                 csm.pushCause(this);
             } else {
                 csm.pushCause(entity);
@@ -102,7 +114,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.getCurrentCause(), (Living) this);
             SpongeImpl.postEvent(event);
             csm.popCause();
-            if(event.isCancelled()) {
+            if (event.isCancelled()) {
                 ci.cancel();
             }
         }
@@ -161,19 +173,87 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      * @reason Instead of redirecting the gamerule request, redirecting the dead check
      * to avoid compatibility issues with Forge's change of the gamerule check to an
      * event check that doesn't exist in sponge except in the case of griefing data.
-     *
-     * @param thisEntity
-     * @return
      */
     @Redirect(method = "livingTick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/MobEntity;canPickUpLoot()Z"))
     private boolean impl$onCanGrief(final MobEntity thisEntity) {
         return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$canGrief();
     }
 
+    /**
+     * @author gabizou - April 8th, 2016
+     * @author gabizou - April 11th, 2016 - Update for 1.9 additions
+     * @author Aaron1011 - November 12, 2016 - Update for 1.11
+     * @author Zidane - Minecraft 1.14.4
+     *
+     * @reason Rewrite this to throw an {@link AttackEntityEvent} and process correctly.
+     *
+     * float f        | baseDamage
+     * int i          | knockbackModifier
+     * boolean flag   | attackSucceeded
+     *
+     * @param targetEntity The entity to attack
+     * @return True if the attack was successful
+     */
+    @Overwrite
+    public boolean attackEntityAsMob(net.minecraft.entity.Entity targetEntity) {
+        // Sponge Start - Prepare our event values
+        // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+        final double originalBaseDamage = this.shadow$getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+        final List<DamageFunction> originalFunctions = new ArrayList<>();
+        // Sponge End
+        float knockbackModifier = (float) this.shadow$getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue();
 
-    @Override
-    public void bridge$onJoinWorld() {
-        this.initSpongeAI();
+        if (targetEntity instanceof LivingEntity) {
+            // Sponge Start - Gather modifiers
+            originalFunctions.addAll(DamageEventHandler
+                .createAttackEnchantmentFunction(this.shadow$getHeldItemMainhand(), ((LivingEntity) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+            // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
+            knockbackModifier += EnchantmentHelper.getKnockbackModifier((MobEntity) (Object) this);
+        }
+
+        // Sponge Start - Throw our event and handle appropriately
+        final DamageSource damageSource = DamageSource.causeMobDamage((MobEntity) (Object) this);
+        Sponge.getCauseStackManager().pushCause(damageSource);
+        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
+            originalFunctions, knockbackModifier, originalBaseDamage);
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+        if (event.isCancelled()) {
+            return false;
+        }
+        knockbackModifier = event.getKnockbackModifier();
+        // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
+        boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
+        // Sponge End
+        if (attackSucceeded) {
+            if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {
+                ((LivingEntity)targetEntity).knockBack((MobEntity) (Object) this, (float) knockbackModifier * 0.5F,
+                    MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F)), -MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F)));
+                this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
+            }
+
+            int j = EnchantmentHelper.getFireAspectModifier((MobEntity) (Object) this);
+
+            if (j > 0) {
+                targetEntity.setFire(j * 4);
+            }
+
+            if (targetEntity instanceof PlayerEntity) {
+                PlayerEntity playerentity = (PlayerEntity) targetEntity;
+                ItemStack itemstack = this.shadow$getHeldItemMainhand();
+                ItemStack itemstack1 = playerentity.isHandActive() ? playerentity.getActiveItemStack() : ItemStack.EMPTY;
+                if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof AxeItem && itemstack1.getItem() == Items.SHIELD) {
+                    float f2 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier((MobEntity) (Object) this) * 0.05F;
+                    if (this.rand.nextFloat() < f2) {
+                        playerentity.getCooldownTracker().setCooldown(Items.SHIELD, 100);
+                        this.world.setEntityState(playerentity, (byte)30);
+                    }
+                }
+            }
+
+            this.applyEnchantments((MobEntity) (Object) this, targetEntity);
+        }
+
+        return attackSucceeded;
     }
-
 }

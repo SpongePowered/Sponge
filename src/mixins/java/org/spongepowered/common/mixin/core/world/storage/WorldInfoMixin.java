@@ -60,6 +60,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -83,6 +84,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Shadow public abstract void shadow$populateFromWorldSettings(WorldSettings p_176127_1_);
 
     @Nullable private DimensionType impl$dimensionType;
+    @Nullable private SpongeDimensionType impl$logicType;
     @Nullable private UUID impl$uniqueId;
     @Nullable private SpongeConfig<WorldConfig> impl$configAdapter;
     private boolean impl$enabled;
@@ -153,6 +155,17 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$setDimensionType(final DimensionType type) {
         this.impl$dimensionType = type;
+        this.impl$logicType = ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType();
+    }
+
+    @Override
+    public SpongeDimensionType bridge$getLogicType() {
+        return this.impl$logicType;
+    }
+
+    @Override
+    public void bridge$setLogicType(final org.spongepowered.api.world.dimension.DimensionType type) {
+        this.impl$logicType = (SpongeDimensionType) type;
     }
 
     @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
@@ -342,16 +355,20 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$writeSpongeLevelData(CompoundNBT compound) {
 
-        if (!this.bridge$isValid()) {
+        if (!this.bridge$isValid() || this.impl$uniqueId == null) {
             return;
         }
 
         final CompoundNBT spongeDataCompound = new CompoundNBT();
         spongeDataCompound.putInt(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
         spongeDataCompound.putUniqueId(Constants.UUID, this.impl$uniqueId);
-        spongeDataCompound.putInt(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionType.getId());
-        spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE,
-            ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType().getKey().toString());
+        if (this.impl$dimensionType != null) {
+            spongeDataCompound.putInt(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionType.getId());
+        }
+        if (this.impl$logicType != null) {
+            spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE,
+                ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType().getKey().toString());
+        }
         spongeDataCompound.putBoolean(Constants.World.GENERATE_BONUS_CHEST, this.impl$generateBonusChest);
         if (this.impl$portalAgentType == null) {
             this.impl$portalAgentType = PortalAgentTypes.DEFAULT.get();
@@ -402,6 +419,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
         this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
         this.impl$dimensionType = net.minecraft.world.dimension.DimensionType.getById(spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID));
+        this.impl$logicType = ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType();
         this.impl$generateBonusChest = spongeDataCompound.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
         // TODO - Zidane.
 //        this.impl$portalAgentType = PortalAgentRegistryModule.getInstance()
@@ -457,7 +475,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         return MoreObjects.toStringHelper(this)
             .add("directoryName", this.shadow$getWorldName())
             .add("uniqueId", this.impl$uniqueId)
-            .add("dimensionType", this.impl$dimensionType)
+            .add("dimensionType", this.impl$logicType)
             .add("generator", this.shadow$getGenerator())
             .add("modCreated", this.impl$modCreated)
             .add("spawnX", this.shadow$getSpawnX())

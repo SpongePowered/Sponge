@@ -24,12 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -58,62 +54,35 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 @Mixin(IWorldReader.class)
-@Implements(@Interface(iface = ReadableRegion.class,
-    prefix = "readable$"))
+@Implements(@Interface(iface = ReadableRegion.class, prefix = "readable$"))
 public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnvironmentBlockReaderMixin_API, ReadableRegion<R> {
+
     //@formatter:off
 
-    @Shadow boolean shadow$isAirBlock(BlockPos p_175623_1_);
-    @Shadow boolean shadow$canBlockSeeSky(BlockPos p_175710_1_);
-    @Shadow int shadow$getLightSubtracted(BlockPos p_201669_1_, int p_201669_2_);
-    @Nullable
-    @Shadow IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
-    @Deprecated
-    @Shadow boolean shadow$chunkExists(int p_217354_1_, int p_217354_2_);
-    @Shadow BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
+    @Nullable @Shadow IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
+    @Deprecated @Shadow boolean shadow$chunkExists(int p_217354_1_, int p_217354_2_);
     @Shadow int shadow$getHeight(Heightmap.Type p_201676_1_, int p_201676_2_, int p_201676_3_);
-    @Shadow float shadow$getBrightness(BlockPos p_205052_1_);
     @Shadow int shadow$getSkylightSubtracted();
     @Shadow net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
-    @Shadow boolean shadow$checkNoEntityCollision(@javax.annotation.Nullable net.minecraft.entity.Entity p_195585_1_, VoxelShape p_195585_2_);
-    @Shadow int shadow$getStrongPower(BlockPos p_175627_1_, Direction p_175627_2_);
-    @Shadow boolean shadow$isRemote();
     @Shadow int shadow$getSeaLevel();
-    @Shadow IChunk shadow$getChunk(BlockPos p_217349_1_);
-    @Shadow IChunk shadow$getChunk(int p_212866_1_, int p_212866_2_);
-    @Shadow IChunk shadow$getChunk(int p_217348_1_, int p_217348_2_, ChunkStatus p_217348_3_);
-    @Shadow ChunkStatus shadow$getChunkStatus();
-    @Shadow boolean shadow$func_217350_a(BlockState p_217350_1_, BlockPos p_217350_2_, ISelectionContext p_217350_3_);
-    @Shadow boolean shadow$checkNoEntityCollision(net.minecraft.entity.Entity p_217346_1_);
-    @Shadow boolean shadow$areCollisionShapesEmpty(AxisAlignedBB p_217351_1_);
-    @Shadow boolean shadow$areCollisionShapesEmpty(net.minecraft.entity.Entity p_217345_1_);
     @Shadow boolean shadow$isCollisionBoxesEmpty(net.minecraft.entity.Entity p_195586_1_, AxisAlignedBB p_195586_2_);
-    @Shadow boolean shadow$isCollisionBoxesEmpty(@javax.annotation.Nullable
-                                                net.minecraft.entity.Entity p_211156_1_, AxisAlignedBB p_211156_2_, Set<net.minecraft.entity.Entity> p_211156_3_);
-    @Shadow Stream<VoxelShape> shadow$getEmptyCollisionShapes(@javax.annotation.Nullable
-                                                                   net.minecraft.entity.Entity p_223439_1_, AxisAlignedBB p_223439_2_, Set<net.minecraft.entity.Entity> p_223439_3_);
-    @Shadow Stream<VoxelShape> shadow$getCollisionShapes(@javax.annotation.Nullable
-                                                             net.minecraft.entity.Entity p_217352_1_, AxisAlignedBB p_217352_2_, Set<net.minecraft.entity.Entity> p_217352_3_);
-    @Shadow Stream<VoxelShape> shadow$getCollisionShapes(@javax.annotation.Nullable final net.minecraft.entity.Entity p_223438_1_, AxisAlignedBB p_223438_2_);
     @Shadow boolean shadow$hasWater(BlockPos p_201671_1_);
-    @Shadow boolean shadow$containsAnyLiquid(AxisAlignedBB p_72953_1_) ;
-    @Shadow int shadow$getLight(BlockPos p_201696_1_);
-    @Shadow int shadow$getNeighborAwareLightSubtracted(BlockPos p_205049_1_, int p_205049_2_);
-    @Deprecated
-    @Shadow boolean shadow$isBlockLoaded(BlockPos p_175667_1_);
-    @Deprecated
-    @Shadow boolean shadow$isAreaLoaded(BlockPos p_175707_1_, BlockPos p_175707_2_);
-    @Deprecated
-    @Shadow boolean shadow$isAreaLoaded(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
+    @Deprecated @Shadow boolean shadow$isBlockLoaded(BlockPos p_175667_1_);
+    @Deprecated @Shadow boolean shadow$isAreaLoaded(BlockPos p_175707_1_, BlockPos p_175707_2_);
+    @Deprecated @Shadow boolean shadow$isAreaLoaded(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
     @Shadow net.minecraft.world.dimension.Dimension shadow$getDimension();
 
     //@formatter:on
+
+    @Override
+    default Dimension getDimension() {
+        return (Dimension) this.shadow$getDimension();
+    }
+
     @Override
     default WorldBorder getBorder() {
         return (WorldBorder) this.shadow$getWorldBorder();
@@ -125,17 +94,12 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     }
 
     @Override
-    default Dimension getDimension() {
-        return (Dimension) this.shadow$getDimension();
-    }
-
-    @Override
     default boolean canSeeSky(final int x, final int y, final int z) {
         return this.shadow$isSkyLightMax(new BlockPos(x, y, z));
     }
 
     @Override
-    default boolean hasWater(final int x, final int y, final int z) {
+    default boolean hasLiquid(final int x, final int y, final int z) {
         return this.shadow$hasWater(new BlockPos(x, y, z));
     }
 

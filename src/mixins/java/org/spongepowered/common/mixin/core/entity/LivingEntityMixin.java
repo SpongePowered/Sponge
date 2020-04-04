@@ -30,6 +30,8 @@ import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -93,8 +95,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(value = LivingEntity.class,
-    priority = 999)
+@Mixin(value = LivingEntity.class, priority = 999)
 public abstract class LivingEntityMixin extends EntityMixin implements LivingEntityBridge {
 
     // @formatter:off
@@ -112,35 +113,30 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
 
-    @Shadow public void shadow$stopActiveHand() { }
-    @Shadow public abstract void setHealth(float health);
-    @Shadow public abstract void shadow$setLastAttackedEntity(Entity entity);
-    @Shadow public abstract void knockBack(Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
+    @Shadow public abstract IAttributeInstance shadow$getAttribute(IAttribute attribute);
+    @Shadow public abstract void shadow$setHealth(float health);
+    @Shadow public abstract void shadow$knockBack(Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
     @Shadow public abstract void shadow$setRevengeTarget(LivingEntity livingBase);
-    @Shadow public abstract void setAbsorptionAmount(float amount);
-    @Shadow public abstract void setHeldItem(Hand hand, @Nullable ItemStack stack);
-    @Shadow public abstract void shadow$setSprinting(boolean sprinting);
-    @Shadow public abstract void resetActiveHand();
-    @Shadow public abstract int getItemInUseCount();
-    @Shadow public abstract float getAbsorptionAmount();
+    @Shadow public abstract void shadow$setAbsorptionAmount(float amount);
+    @Shadow public abstract void shadow$setHeldItem(Hand hand, @Nullable ItemStack stack);
+    @Shadow public abstract void shadow$resetActiveHand();
+    @Shadow public abstract int shadow$getItemInUseCount();
+    @Shadow public abstract float shadow$getAbsorptionAmount();
     @Shadow public abstract float shadow$getHealth();
-    @Shadow public abstract float shadow$getMaxHealth();
     @Shadow public abstract boolean shadow$isPotionActive(Effect potion);
-    @Shadow public abstract boolean isOnLadder();
     @Shadow protected abstract boolean shadow$canBlockDamageSource(DamageSource p_184583_1_);
-    @Shadow public abstract ItemStack getItemStackFromSlot(EquipmentSlotType slotIn);
-    @Shadow public abstract ItemStack getHeldItem(Hand hand);
+    @Shadow public abstract ItemStack shadow$getItemStackFromSlot(EquipmentSlotType slotIn);
     @Shadow public abstract ItemStack shadow$getHeldItemMainhand();
-    @Shadow public abstract CombatTracker getCombatTracker();
-    @Shadow public void onKillCommand() { }
-    @Shadow public abstract Hand getActiveHand();
-    @Shadow protected abstract void markVelocityChanged();
-    @Shadow protected abstract void damageShield(float p_184590_1_);
+    @Shadow public abstract CombatTracker shadow$getCombatTracker();
+    @Shadow public void shadow$onKillCommand() { }
+    @Shadow public abstract Hand shadow$getActiveHand();
+    @Shadow protected abstract void shadow$markVelocityChanged();
+    @Shadow protected abstract void shadow$damageShield(float p_184590_1_);
     @Shadow protected abstract void shadow$playHurtSound(DamageSource p_184581_1_);
-    @Shadow protected abstract void blockUsingShield(LivingEntity p_190629_1_);
-    @Shadow protected abstract float getSoundVolume();
-    @Shadow protected abstract float getSoundPitch();
-    @Shadow protected abstract SoundEvent getDeathSound();
+    @Shadow protected abstract void shadow$blockUsingShield(LivingEntity p_190629_1_);
+    @Shadow protected abstract float shadow$getSoundVolume();
+    @Shadow protected abstract float shadow$getSoundPitch();
+    @Shadow protected abstract SoundEvent shadow$getDeathSound();
     @Shadow public abstract boolean shadow$isSleeping();
     @Shadow private boolean shadow$checkTotemDeathProtection(final DamageSource p_190628_1_) {
         return false; // SHADOWED
@@ -151,8 +147,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     // @formatter:on
 
     private int impl$maxAir = this.shadow$getMaxAir();
-    @Nullable
-    private ItemStack impl$activeItemStackCopy;
+    @Nullable private ItemStack impl$activeItemStackCopy;
 
     @Override
     public int bridge$getMaxAir() {
@@ -230,7 +225,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
      */
     @Overwrite
     protected void damageEntity(final DamageSource damageSource, final float damage) {
-        this.bridge$damageEntityHook(damageSource, damage);
+        this.bridge$damageEntity(damageSource, damage);
     }
 
     /**
@@ -279,7 +274,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
             final float f = amount;
 
-            // Sponge - ignore as this is handled in our damageEntityHookge
+            // Sponge - ignore as this is handled in our damageEntityHook
 //                if ((source == DamageSource.ANVIL || source == DamageSource.FALLING_BLOCK) && !this.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty())
 //                {
 //                    this.getItemStackFromSlot(EntityEquipmentSlot.HEAD).damageItem((int)(amount * 4.0F + this.rand.nextFloat() * amount * 2.0F), this);
@@ -327,7 +322,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 if (((EntityTypeBridge) this.shadow$getType()).bridge$overridesDamageEntity()) {
                     this.damageEntity(source, amount - this.lastDamage);
                 } else {
-                    if (!this.bridge$damageEntityHook(source, amount - this.lastDamage)) {
+                    if (!this.bridge$damageEntity(source, amount - this.lastDamage)) {
                         return false;
                     }
                 }
@@ -341,7 +336,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 if (((EntityTypeBridge) this.shadow$getType()).bridge$overridesDamageEntity()) {
                     this.damageEntity(source, amount);
                 } else {
-                    if (!this.bridge$damageEntityHook(source, amount)) {
+                    if (!this.bridge$damageEntity(source, amount)) {
                         return false;
                     }
                 }
@@ -366,11 +361,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 // Forge Start - Change WolfEntity check to TameableEntity check
                 // } else if (entity1 instanceof WolfEntity) { - Vanilla
             } else if (entity instanceof TameableEntity) {
-                final TameableEntity wolfentity = (TameableEntity) entity;
+                final TameableEntity tameableEntity = (TameableEntity) entity;
                 // Forge end
-                if (wolfentity.isTamed()) {
+                if (tameableEntity.isTamed()) {
                     this.recentlyHit = 100;
-                    final LivingEntity livingentity = wolfentity.getOwner();
+                    final LivingEntity livingentity = tameableEntity.getOwner();
                     if (livingentity != null && livingentity.getType() == EntityType.PLAYER) {
                         this.attackingPlayer = (PlayerEntity) livingentity;
                     } else {
@@ -401,7 +396,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
 
                 if (source != DamageSource.DROWN && !flag) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
-                    this.markVelocityChanged();
+                    this.shadow$markVelocityChanged();
                 }
 
                 if (entity != null) {
@@ -413,7 +408,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     }
 
                     this.attackedAtYaw = (float) (MathHelper.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
-                    this.knockBack(entity, 0.4F, d1, d0);
+                    this.shadow$knockBack(entity, 0.4F, d1, d0);
                 } else {
                     this.attackedAtYaw = (float) (Math.random() * 2.0D * 180);
                 }
@@ -421,10 +416,10 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
             if (this.shadow$getHealth() <= 0.0F) {
                 if (!this.shadow$checkTotemDeathProtection(source)) {
-                    final SoundEvent soundevent = this.getDeathSound();
+                    final SoundEvent soundevent = this.shadow$getDeathSound();
 
                     if (flag1 && soundevent != null) {
-                        this.shadow$playSound(soundevent, this.getSoundVolume(), this.getSoundPitch());
+                        this.shadow$playSound(soundevent, this.shadow$getSoundVolume(), this.shadow$getSoundPitch());
                     }
 
                     this.shadow$onDeath(source); // Sponge tracker will redirect this call
@@ -467,9 +462,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public boolean bridge$damageEntityHook(final DamageSource damageSource, float damage) {
+    public boolean bridge$damageEntity(final DamageSource damageSource, float damage) {
         if (!this.shadow$isInvulnerableTo(damageSource)) {
-            final boolean human = (LivingEntity) (Object) this instanceof PlayerEntity;
+            final boolean isHuman = (LivingEntity) (Object) this instanceof PlayerEntity;
             // apply forge damage hook
             damage = this.bridge$applyModDamage((LivingEntity) (Object) this, damageSource, damage);
             final float originalDamage = damage; // set after forge hook.
@@ -518,7 +513,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 damage = this.bridge$applyModDamagePost((LivingEntity) (Object) this, damageSource, damage);
 
                 // Helmet
-                final ItemStack helmet = this.getItemStackFromSlot(EquipmentSlotType.HEAD);
+                final ItemStack helmet = this.shadow$getItemStackFromSlot(EquipmentSlotType.HEAD);
                 // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
                 // without using our mixin redirects in EntityFallingBlockMixin.
                 if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
@@ -529,12 +524,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
                 // Shield
                 if (shieldFunction.isPresent()) {
-                    this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
+                    this.shadow$damageShield((float) event.getBaseDamage());
                     if (!damageSource.isProjectile()) {
                         final Entity entity = damageSource.getImmediateSource();
 
                         if (entity instanceof LivingEntity) {
-                            this.blockUsingShield((LivingEntity) entity);
+                            this.shadow$blockUsingShield((LivingEntity) entity);
                         }
                     }
                 }
@@ -551,21 +546,21 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     absorptionModifier = event.getDamage(absorptionFunction.get().getModifier());
                 }
 
-                this.setAbsorptionAmount(Math.max(this.getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
+                this.shadow$setAbsorptionAmount(Math.max(this.shadow$getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
                 if (damage != 0.0F) {
-                    if (human) {
+                    if (isHuman) {
                         ((PlayerEntity) (Object) this).addExhaustion(damageSource.getHungerDamage());
                     }
                     final float f2 = this.shadow$getHealth();
 
-                    this.setHealth(f2 - damage);
-                    this.getCombatTracker().trackDamage(damageSource, f2, damage);
+                    this.shadow$setHealth(f2 - damage);
+                    this.shadow$getCombatTracker().trackDamage(damageSource, f2, damage);
 
-                    if (human) {
+                    if (isHuman) {
                         return true;
                     }
 
-                    this.setAbsorptionAmount(this.getAbsorptionAmount() - damage);
+                    this.shadow$setAbsorptionAmount(this.shadow$getAbsorptionAmount() - damage);
                 }
                 return true;
             }
@@ -575,7 +570,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     /**
      * @author Aaron1011 - August 15, 2016
-     * @author i509VCB - February 17th 2020 - 1.14.4
+     * @author i509VCB - Minecraft 1.14.4
      * @reason An overwrite avoids the need for a local-capture inject and two redirects
      */
     // TODO: Investigate mixing into setPositionAndUpdate to catch more teleports
@@ -717,7 +712,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (!this.bridge$isVanished()) {
             return serverWorld.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed);
         }
-        return 0; // TODO: Is this correct to return 0?
+        return 0;
     }
 
     @Inject(method = "onItemUseFinish",
@@ -799,7 +794,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         final UseItemStackEvent.Tick event;
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
-            final HandType handType = (HandType) (Object) this.getActiveHand();
+            final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventTick(Sponge.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
@@ -817,7 +812,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         SpongeImplHooks.onUseItemTick((LivingEntity) (Object) this, this.activeItemStack, this.activeItemStackUseCount);
 
 
-        return this.getItemInUseCount();
+        return this.shadow$getItemInUseCount();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -834,7 +829,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         final UseItemStackEvent.Finish event;
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
-            final HandType handType = (HandType) (Object) this.getActiveHand();
+            final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventFinish(Sponge.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
@@ -844,7 +839,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             this.activeItemStackUseCount = event.getRemainingDuration();
             ci.cancel();
         } else if (event.isCancelled()) {
-            this.resetActiveHand();
+            this.shadow$resetActiveHand();
             ci.cancel();
         } else {
             this.impl$activeItemStackCopy = this.activeItemStack.copy();
@@ -881,16 +876,16 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
 
         if (SpongeImpl.postEvent(event)) {
-            this.setHeldItem(hand, this.impl$activeItemStackCopy.copy());
+            this.shadow$setHeldItem(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
         if (!event.getItemStackResult().isValid()) {
-            this.setHeldItem(hand, this.impl$activeItemStackCopy.copy());
+            this.shadow$setHeldItem(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
-        this.setHeldItem(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
+        this.shadow$setHeldItem(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -905,7 +900,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
-            final HandType handType = (HandType) (Object) this.getActiveHand();
+            final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
             if (!SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
                 duration, duration, snapshot))) {
@@ -934,5 +929,4 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     // End implementation of UseItemStackEvent
-
 }

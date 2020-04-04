@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.bungee.network;
 
 import com.mojang.authlib.properties.Property;
 import io.netty.channel.SimpleChannelInboundHandler;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
@@ -33,7 +34,7 @@ import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
 import java.util.UUID;
 
 @Mixin(NetworkManager.class)
-public abstract class NetworkManagerMixin_Bungee extends SimpleChannelInboundHandler implements NetworkManagerBridge_Bungee {
+public abstract class NetworkManagerMixin_Bungee extends SimpleChannelInboundHandler<IPacket<?>> implements NetworkManagerBridge_Bungee {
 
     private UUID bungee$spoofedUUID;
     private Property[] bungee$spoofedProfile;

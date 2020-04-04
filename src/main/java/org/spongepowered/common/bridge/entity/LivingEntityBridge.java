@@ -35,7 +35,7 @@ import java.util.Optional;
 
 public interface LivingEntityBridge {
 
-    boolean bridge$damageEntityHook(DamageSource damageSource, float damage);
+    boolean bridge$damageEntity(DamageSource damageSource, float damage);
 
     int bridge$getMaxAir();
 
