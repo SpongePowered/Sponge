@@ -38,7 +38,6 @@ import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
-import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.Map;

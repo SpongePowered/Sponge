@@ -29,7 +29,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 
 import java.util.Collection;

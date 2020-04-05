@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase.generation;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.world.World;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;

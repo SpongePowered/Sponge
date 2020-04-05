@@ -243,7 +243,7 @@ public final class EntityUtil {
             toWorld = (ServerWorld) event.getToWorld();
         }
 
-        fromWorld.profiler.endStartSection("reloading");
+        fromWorld.getProfiler().endStartSection("reloading");
         final Entity toReturn;
 
         if (recreate) {

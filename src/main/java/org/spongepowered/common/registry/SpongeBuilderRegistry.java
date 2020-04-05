@@ -28,8 +28,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+<<<<<<< Updated upstream
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.Advancement;
+=======
+>>>>>>> Stashed changes
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -86,7 +89,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
-import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTreeBuilder;
 import org.spongepowered.common.advancement.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.SpongeDisplayInfoBuilder;
@@ -236,7 +238,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
             .register(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)
             .register(Key.Builder.class, SpongeKeyBuilder::new)
-            .register(Advancement.Builder.class, SpongeAdvancementBuilder::new)
+//            .register(Advancement.Builder.class, SpongeAdvancementBuilder::new)
             .register(AdvancementTree.Builder.class, SpongeAdvancementTreeBuilder::new)
             .register(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
             .register(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)

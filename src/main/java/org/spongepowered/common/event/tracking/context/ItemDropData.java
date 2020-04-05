@@ -31,6 +31,7 @@ import com.google.common.base.Objects;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Random;
@@ -78,9 +79,7 @@ public class ItemDropData {
     public ItemEntity create(ServerWorld worldServer) {
         final ItemEntity entityItem = new ItemEntity(worldServer, this.position.getX(), this.position.getY(), this.position.getZ(), this.stack);
         if (this.motion != Vector3d.ZERO) {
-            entityItem.motionX = this.motion.getX();
-            entityItem.motionY = this.motion.getY();
-            entityItem.motionZ = this.motion.getZ();
+            entityItem.setMotion(this.motion.getX(), this.motion.getY(), this.motion.getZ());
         }
         return entityItem;
     }
@@ -170,7 +169,7 @@ public class ItemDropData {
         }
 
         private final boolean trace;
-        private final String playerName;
+        private final ITextComponent playerName;
         private final boolean dropAround;
         private final Random random;
 
@@ -186,7 +185,7 @@ public class ItemDropData {
             return this.trace;
         }
 
-        public String getPlayerName() {
+        public ITextComponent getPlayerName() {
             return this.playerName;
         }
 
@@ -204,7 +203,7 @@ public class ItemDropData {
             final ItemEntity entityItem = super.create(worldServer);
             entityItem.setPickupDelay(40);
             if (this.trace) {
-                entityItem.setThrower(this.playerName);
+                entityItem.setThrowerId(this.playerName);
             }
             return entityItem;
         }
@@ -250,7 +249,7 @@ public class ItemDropData {
         public static final class Builder extends ItemDropData.Builder {
 
             boolean trace;
-            String playerName;
+            ITextComponent playerName;
             boolean dropAround;
             Random random;
 

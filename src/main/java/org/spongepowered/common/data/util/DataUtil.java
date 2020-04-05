@@ -75,7 +75,7 @@ public final class DataUtil {
     }
 
     public static DataRegistration getRegistrationFor(final Mutable manipulator) {
-        return SpongeManipulatorRegistry.getInstance().getRegistrationFor(manipulator);
+        throw new UnsupportedOperationException("Implement me");
     }
 
 }

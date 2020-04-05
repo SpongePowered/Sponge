@@ -26,7 +26,6 @@ package org.spongepowered.common.accessor.tileentity;
 
 import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.util.text.ITextComponent;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.accessor.CustomNameableAccessor;
@@ -36,5 +35,5 @@ public interface BannerTileEntityAccessor extends CustomNameableAccessor {
 
     @Invoker("func_213136_a")
     @Override
-    void accessor$setCustomDisplayName(@Nullable ITextComponent component);
+    void accessor$setCustomDisplayName(ITextComponent component);
 }

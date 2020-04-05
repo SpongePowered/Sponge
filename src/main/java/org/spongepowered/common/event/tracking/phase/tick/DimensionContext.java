@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.api.world.World;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;

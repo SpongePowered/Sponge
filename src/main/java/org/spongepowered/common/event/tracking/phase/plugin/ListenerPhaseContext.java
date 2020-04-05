@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;

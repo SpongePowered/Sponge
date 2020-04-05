@@ -30,7 +30,6 @@ import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.util.List;

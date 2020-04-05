@@ -39,7 +39,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -60,6 +59,7 @@ import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
@@ -92,7 +92,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      */
     public static PhaseContext<?> empty() {
         if (PhaseContext.EMPTY == null) {
-            PhaseContext.EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE, tracker).markEmpty();
+            PhaseContext.EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE, new PhaseTracker()).markEmpty();
         }
         return PhaseContext.EMPTY;
     }
@@ -426,12 +426,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * and methods available in {@link MultiBlockCaptureSupplier} such as:
      * <ul>
      *     <li>{@link MultiBlockCaptureSupplier#clear()} - To clear the captured lists</li>
-     *     <li>{@link MultiBlockCaptureSupplier#put(BlockSnapshot, IBlockState)} to add a new snapshot/change</li>
      *     <li>{@link MultiBlockCaptureSupplier#prune(BlockSnapshot)} to remove a block snapshot change</li>
      * </ul>
      * Provided functionality through the supplier is aimed for common manipulation in
      * {@link IPhaseState}s and for the obvious reasons of capturing block changes, as long
-     * as {@link IPhaseState#shouldCaptureBlockChangeOrSkip(PhaseContext, BlockPos, IBlockState, IBlockState, org.spongepowered.api.world.BlockChangeFlag)} returns
+     * as {@code IPhaseState#shouldCaptureBlockChangeOrSkip(PhaseContext, BlockPos, IBlockState, IBlockState, org.spongepowered.api.world.BlockChangeFlag)} returns
      * {@code true}.
      * </p>
      *

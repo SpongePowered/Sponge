@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.world.gen.feature.Feature;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 import javax.annotation.Nullable;

@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
