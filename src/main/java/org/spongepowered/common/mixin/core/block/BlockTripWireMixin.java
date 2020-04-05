@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockTripWire;
 import net.minecraft.block.BlockWall;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -46,10 +46,9 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDisarmedData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DirectionalBlockUtils;
 
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -57,22 +56,15 @@ import java.util.Set;
 @Mixin(BlockTripWire.class)
 public abstract class BlockTripWireMixin extends BlockMixin {
 
-    private static final PropertyBool[] ALL_FACES =
-            new PropertyBool[] {BlockTripWire.NORTH, BlockTripWire.SOUTH, BlockTripWire.WEST, BlockTripWire.EAST};
+    private static final Map<Direction, PropertyBool> DIRECTION_TO_PROPERTY_MAPPING;
 
-    private static PropertyBool impl$getPropertyFor(EnumFacing facing) {
-        switch (facing) {
-            case NORTH:
-                return BlockTripWire.NORTH;
-            case SOUTH:
-                return BlockTripWire.SOUTH;
-            case WEST:
-                return BlockTripWire.WEST;
-            case EAST:
-                return BlockTripWire.EAST;
-            default:
-                throw new IllegalArgumentException(facing + " is an invalid choice");
-        }
+    static {
+        ImmutableMap.Builder<Direction, PropertyBool> directionToPropertyMappingBuilder = ImmutableMap.builder();
+        directionToPropertyMappingBuilder.put(Direction.NORTH, BlockTripWire.NORTH);
+        directionToPropertyMappingBuilder.put(Direction.SOUTH, BlockTripWire.SOUTH);
+        directionToPropertyMappingBuilder.put(Direction.WEST, BlockTripWire.WEST);
+        directionToPropertyMappingBuilder.put(Direction.EAST, BlockTripWire.EAST);
+        DIRECTION_TO_PROPERTY_MAPPING = directionToPropertyMappingBuilder.build();
     }
 
     @Override
@@ -86,25 +78,6 @@ public abstract class BlockTripWireMixin extends BlockMixin {
         return ImmutableDisarmedData.class.isAssignableFrom(immutable)
                 || ImmutableAttachedData.class.isAssignableFrom(immutable) || ImmutablePoweredData.class.isAssignableFrom(immutable)
                 || ImmutableConnectedDirectionData.class.isAssignableFrom(immutable);
-    }
-
-    private static IBlockState impl$applyConnectedDirections(IBlockState blockState, Set<Direction> directions) {
-        Map<PropertyBool, Boolean> facingStates = new HashMap<>();
-        for (PropertyBool property: ALL_FACES) {
-            facingStates.put(property, false);
-        }
-        for (Direction connectedDirection: directions) {
-            if (connectedDirection.isCardinal()) {
-                EnumFacing connectedFacing = Constants.DirectionFunctions.getFor(connectedDirection);
-                PropertyBool facingProperty = impl$getPropertyFor(connectedFacing);
-                facingStates.put(facingProperty, true);
-            }
-        }
-        IBlockState resultBlockState = blockState;
-        for (PropertyBool property: facingStates.keySet()) {
-            resultBlockState = resultBlockState.withProperty(property, facingStates.get(property));
-        }
-        return resultBlockState;
     }
 
     @Override
@@ -121,7 +94,11 @@ public abstract class BlockTripWireMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             ImmutableConnectedDirectionData connectedDirectionData = (ImmutableConnectedDirectionData) manipulator;
-            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, connectedDirectionData.connectedDirections().get()));
+            return Optional.of((BlockState) DirectionalBlockUtils.applyConnectedDirections(blockState,
+                                                                                           DIRECTION_TO_PROPERTY_MAPPING,
+                                                                                           (sourceBlockState, property) -> true,
+                                                                                           (sourceBlockState, property) -> false,
+                                                                                           connectedDirectionData.connectedDirections().get()));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -143,7 +120,11 @@ public abstract class BlockTripWireMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(BlockTripWire.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.CONNECTED_DIRECTIONS)) {
-            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, (Set<Direction>) value));
+            return Optional.of((BlockState) DirectionalBlockUtils.applyConnectedDirections(blockState,
+                                                                                           DIRECTION_TO_PROPERTY_MAPPING,
+                                                                                           (sourceBlockState, property) -> true,
+                                                                                           (sourceBlockState, property) -> false,
+                                                                                           (Set<Direction>) value));
         } else if (key.equals(Keys.CONNECTED_EAST)) {
             return Optional.of((BlockState) blockState.withProperty(BlockWall.EAST, (Boolean) value));
         } else if (key.equals(Keys.CONNECTED_NORTH)) {
