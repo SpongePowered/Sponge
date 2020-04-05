@@ -115,6 +115,7 @@ import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.service.economy.Currency;
+import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
@@ -159,6 +160,7 @@ import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator
 import org.spongepowered.common.registry.builtin.vanilla.TileEntityTypeSupplier;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.VillagerProfessionSupplier;
+import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -367,6 +369,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateMappedRegistry(TextStyle.Type.class, CatalogKey.minecraft("text_style"), TextStyleTypeStreamGenerator.stream(), true);
 
         this
+            .generateRegistry(AccountDeletionResultType.class, CatalogKey.sponge("account_deletion_result_type"), AccountDeletionResultTypeStreamGenerator.stream(), true)
             .registerRegistry(Advancement.class, CatalogKey.minecraft("advancement"))
             .registerRegistry(AdvancementTree.class, CatalogKey.minecraft("advancement_tree"))
             .generateRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)

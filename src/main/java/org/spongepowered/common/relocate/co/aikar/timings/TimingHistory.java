@@ -96,10 +96,10 @@ public class TimingHistory {
         }
 
         // Information about all loaded chunks/entities
-        this.worlds = JSONUtil.mapArrayToObject(SpongeImpl.getGame().getServer().getWorlds(), (world) -> {
+        this.worlds = JSONUtil.mapArrayToObject(SpongeImpl.getGame().getServer().getWorldManager().getWorlds(), (world) -> {
             Map<RegionId, RegionData> regions = LoadingMap.newHashMap(RegionData.LOADER);
-            return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getName())), JSONUtil.mapArray(world.getLoadedChunks(), (chunk) -> {
-                RegionData data = regions.get(new RegionId(chunk.getPosition().getX(), chunk.getPosition().getZ()));
+            return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getProperties().getDirectoryName())), JSONUtil.mapArray(world.getLoadedChunks(), (chunk) -> {
+                RegionData data = regions.get(new RegionId(chunk.getChunkPosition().getX(), chunk.getChunkPosition().getZ()));
 
                 for (Entity entity : chunk.getEntities()) {
                     if (entity.getType() == null) {
@@ -108,23 +108,20 @@ public class TimingHistory {
                     data.entityCounts.get(entity.getType()).increment();
                 }
 
-                for (BlockEntity tileEntity : chunk.getTileEntities()) {
-                    if (tileEntity.getType() == null) {
+                for (BlockEntity blockEntity : chunk.getBlockEntities()) {
+                    if (blockEntity.getType() == null) {
                         continue;
                     }
-                    data.tileEntityCounts.get(tileEntity.getType()).increment();
+                    data.tileEntityCounts.get(blockEntity.getType()).increment();
                 }
 
                 if (data.tileEntityCounts.isEmpty() && data.entityCounts.isEmpty()) {
                     return null;
                 }
                 return JSONUtil.arrayOf(
-                        chunk.getPosition().getX(),
-                        chunk.getPosition().getZ(),
+                        chunk.getChunkPosition().getX(),
+                        chunk.getChunkPosition().getZ(),
                         JSONUtil.mapArrayToObject(data.entityCounts.entrySet(), (entry) -> {
-                            if (entry.getKey() == EntityTypes.UNKNOWN) {
-                                return null;
-                            }
                             this.entityTypeSet.add(entry.getKey());
                             return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entry.getKey()), entry.getValue().count());
                         }),

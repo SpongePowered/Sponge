@@ -24,53 +24,19 @@
  */
 package org.spongepowered.common.economy;
 
-import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
-import org.spongepowered.api.service.economy.transaction.TransactionType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeAccountDeletionResultType implements AccountDeletionResultType {
+public final class SpongeAccountDeletionResultType extends SpongeCatalogType implements AccountDeletionResultType {
 
-    private final String id;
-    private final String name;
-
-    public SpongeAccountDeletionResultType(String id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
+    public SpongeAccountDeletionResultType(CatalogKey key) {
+        super(key);
     }
 
     @Override
     public boolean isSuccess() {
         return this == AccountDeletionResultTypes.SUCCESS;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (!(other instanceof TransactionType)) {
-            return false;
-        }
-        return ((TransactionType) other).getId().equals(this.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.getId())
-                .toString();
     }
 }
