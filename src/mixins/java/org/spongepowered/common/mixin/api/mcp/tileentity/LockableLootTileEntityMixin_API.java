@@ -25,27 +25,11 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import net.minecraft.tileentity.LockableLootTileEntity;
 
 @Mixin(LockableLootTileEntity.class)
 public abstract class LockableLootTileEntityMixin_API<T extends BlockEntity & Carrier> extends LockableTileEntityMixin_API {
-
-    @Nullable @Shadow protected String customName; // Not really nullable, but it should be...
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        if (this.customName != null) {
-            container.set(Constants.TileEntity.LOCKABLE_CONTAINER_CUSTOM_NAME, this.customName);
-        }
-        return container;
-    }
-
 }
