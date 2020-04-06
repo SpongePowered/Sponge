@@ -49,14 +49,13 @@ import javax.annotation.Nullable;
 public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API implements NameableCarrierBlockEntity {
 
     @Shadow @Nullable private LockCode code;
-
     @Nullable @Shadow private ITextComponent customName; // Not really nullable, but it should be... - Roquette
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.code != null) {
-            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this).accessor$getLock());
+            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.code).accessor$getLock());
         }
         final List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {
