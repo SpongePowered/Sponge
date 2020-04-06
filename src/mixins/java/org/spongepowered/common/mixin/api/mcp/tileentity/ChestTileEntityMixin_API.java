@@ -22,45 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.tileentity;
+package org.spongepowered.common.mixin.api.mcp.tileentity;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.state.properties.ChestType;
 import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.mcp.tileentity.LockableLootTileEntityMixin_API;
 
-import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Mixin(ChestTileEntity.class)
 public abstract class ChestTileEntityMixin_API extends LockableLootTileEntityMixin_API<Chest> implements Chest {
 
-    @Shadow public ChestTileEntity adjacentChestZNeg;
-    @Shadow public ChestTileEntity adjacentChestXPos;
-    @Shadow public ChestTileEntity adjacentChestXNeg;
-    @Shadow public ChestTileEntity adjacentChestZPos;
-
-    @Shadow public abstract void checkForAdjacentChests();
 
     @Override
-    public Set<Chest> getConnectedChests() {
-        this.checkForAdjacentChests();
-        Set<Chest> set = new HashSet<>();
-        if (this.adjacentChestXNeg != null) {
-            set.add(((Chest) this.adjacentChestXNeg));
+    public Optional<Chest> getConnectedChest() {
+        // Based off of the logic in ChestBlock.getChestInventory but without a blocked check and returning the TE instead of the inventory.
+        ChestTileEntity chestTileEntity = (ChestTileEntity) (Object) this;
+        BlockState chestState = chestTileEntity.getBlockState();
+        ChestType chestType = chestTileEntity.getBlockState().get(ChestBlock.TYPE);
+        World world = chestTileEntity.getWorld();
+
+        if (chestType != ChestType.SINGLE) {
+            BlockPos connectedPos = chestTileEntity.getPos().offset(ChestBlock.getDirectionToAttached(chestState));
+            BlockState connectedState = world.getBlockState(connectedPos);
+
+            if (connectedState.getBlock() == chestState.getBlock()) {
+                ChestType connectedType = connectedState.get(ChestBlock.TYPE);
+
+                if (connectedType != ChestType.SINGLE && chestType != connectedType && chestState.get(ChestBlock.FACING) == connectedState.get(ChestBlock.FACING)) {
+                    TileEntity connectedTileEntity = world.getTileEntity(connectedPos);
+
+                    if (connectedTileEntity instanceof ChestTileEntity) {
+                        return Optional.of((Chest) connectedTileEntity);
+                    }
+                }
+            }
         }
-        if (this.adjacentChestXPos != null) {
-            set.add(((Chest) this.adjacentChestXPos));
-        }
-        if (this.adjacentChestZNeg != null) {
-            set.add(((Chest) this.adjacentChestZNeg));
-        }
-        if (this.adjacentChestZPos != null) {
-            set.add(((Chest) this.adjacentChestZPos));
-        }
-        return set;
+
+        return Optional.empty();
     }
 
     @Override

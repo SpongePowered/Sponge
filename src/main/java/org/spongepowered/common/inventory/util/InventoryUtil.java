@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.inventory.util;
 
+import net.minecraft.block.ChestBlock;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.state.properties.ChestType;
 import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -90,26 +90,19 @@ public final class InventoryUtil {
     }
 
     public static Optional<Inventory> getDoubleChestInventory(ChestTileEntity chest) {
-        // BlockChest#getContainer(World, BlockPos, boolean) without isBlocked() check
-        for (Direction enumfacing : Direction.Plane.HORIZONTAL) {
-            BlockPos blockpos = chest.getPos().offset(enumfacing);
-
-            TileEntity tileentity1 = chest.getWorld().getTileEntity(blockpos);
-
-            if (tileentity1 instanceof ChestTileEntity && tileentity1.getBlockState().getBlock() == chest.getBlockState().getBlock()) {
-
-                DoubleSidedInventory inventory;
-
-                if (enumfacing != Direction.WEST && enumfacing != Direction.NORTH) {
-                    inventory = new DoubleSidedInventory( chest, (ChestTileEntity) tileentity1);
-                } else {
-                    inventory = new DoubleSidedInventory((ChestTileEntity) tileentity1, chest);
-                }
-
-                return Optional.of((Inventory) inventory);
-            }
+        Optional<Chest> connectedChestOptional = ((Chest) chest).getConnectedChest();
+        if (!connectedChestOptional.isPresent()) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        ChestType chestType = chest.getBlockState().get(ChestBlock.TYPE);
+        ChestTileEntity connectedChest = (ChestTileEntity) connectedChestOptional.get();
+        // Logic in the instanceof check of ChestBlock.getChestInventory but with exploded ternary operators.
+        if (chestType == ChestType.RIGHT) {
+            return Optional.of((Inventory) new DoubleSidedInventory(chest, connectedChest));
+        } else {
+            return Optional.of((Inventory) new DoubleSidedInventory(connectedChest, chest));
+        }
     }
 
     // Utility
