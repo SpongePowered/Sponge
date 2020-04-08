@@ -109,6 +109,7 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -184,7 +185,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         checkNotNull(message, "message");
 
         ITextComponent component = SpongeTexts.toComponent(message);
-        if (type == ChatTypes.ACTION_BAR) {
+        if (type == ChatTypes.ACTION_BAR.get()) {
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
@@ -448,7 +449,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public boolean setLocation(final Vector3d position, final UUID world) {
         final WorldProperties prop = Sponge.getServer().getWorldManager().getProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
-        final World loaded = Sponge.getServer().getWorldManager().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
+        final World loaded;
+        try {
+            loaded = Sponge.getServer().getWorldManager().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Invalid World: ", ex);
+        }
+
         return this.setLocation(Location.of(loaded, position));
     }
 

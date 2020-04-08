@@ -25,30 +25,28 @@
 package org.spongepowered.common.mixin.api.mcp.util;
 
 import net.minecraft.util.SoundCategory;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
 @Mixin(SoundCategory.class)
-@Implements(@Interface(iface = org.spongepowered.api.effect.sound.SoundCategory.class, prefix = "category$"))
 public abstract class SoundCategoryMixin_API implements org.spongepowered.api.effect.sound.SoundCategory {
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void api$setKey(CallbackInfo ci) {
+        api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getName());
+    }
 
     @Shadow public abstract String shadow$getName();
 
-    private String id;
+    private CatalogKey api$key;
 
     @Override
-    public String getId() {
-        if (this.id == null) {
-            this.id = "minecraft:" + this.shadow$getName();
-        }
-        return this.id;
-    }
-
-    @Intrinsic
-    public String category$getName() {
-        return this.shadow$getName();
+    public CatalogKey getKey() {
+        return api$key;
     }
 }

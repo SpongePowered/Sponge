@@ -36,6 +36,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.LockCodeAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -52,7 +53,7 @@ public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API im
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.code != null) {
-            container.set(Constants.TileEntity.LOCK_CODE, this.code.getLock());
+            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.code).accessor$getLock());
         }
         final List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {

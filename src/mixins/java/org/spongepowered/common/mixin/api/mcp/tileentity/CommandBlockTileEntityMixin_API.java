@@ -59,8 +59,8 @@ public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_AP
         container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.getCommandBlockLogic().getCommand());
         container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.getCommandBlockLogic().getSuccessCount());
         container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().getName());
-        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().shouldTrackOutput());
-        if (this.getCommandBlockLogic().shouldTrackOutput()) {
+        container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().shouldReceiveErrors()); // bad MCP name for shouldTrackOutput
+        if (this.getCommandBlockLogic().shouldReceiveErrors()) {
             container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeTexts.toLegacy(this.getCommandBlockLogic().getLastOutput()));
         }
         return container;

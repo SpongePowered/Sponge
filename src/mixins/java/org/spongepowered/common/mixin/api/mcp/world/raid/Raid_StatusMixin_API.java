@@ -42,7 +42,7 @@ public abstract class Raid_StatusMixin_API implements RaidStatus {
         api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$func_221277_a());
     }
 
-    @Shadow public abstract String shadow$func_221277_a();
+    @Shadow public abstract String shadow$func_221277_a(); // MCP 1.15.2: getName
 
     private CatalogKey api$key;
 

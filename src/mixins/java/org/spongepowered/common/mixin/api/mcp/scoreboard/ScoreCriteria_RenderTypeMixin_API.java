@@ -25,24 +25,28 @@
 package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
 import net.minecraft.scoreboard.ScoreCriteria;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 
 @Mixin(ScoreCriteria.RenderType.class)
 public abstract class ScoreCriteria_RenderTypeMixin_API implements ObjectiveDisplayMode {
-
-    @Shadow @Final private String renderType;
-
-    @Override
-    public String getId() {
-        return this.renderType;
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void api$setKey(CallbackInfo ci) {
+        api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getId());
     }
 
-    @Override
-    public String getName() {
-        return this.renderType;
-    }
+    @Shadow public abstract String shadow$getId();
 
+    private CatalogKey api$key;
+
+    @Override
+    public CatalogKey getKey() {
+        return api$key;
+    }
 }
