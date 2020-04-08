@@ -38,7 +38,7 @@ import org.spongepowered.common.SpongeImplHooks;
 public abstract class ScoreCriteria_RenderTypeMixin_API implements ObjectiveDisplayMode {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void api$setKey(CallbackInfo ci) {
-        api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getId());
+        this.api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getId());
     }
 
     @Shadow public abstract String shadow$getId();
