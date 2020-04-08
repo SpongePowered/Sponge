@@ -537,7 +537,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         if (getRidingEntity() != null) {
             this.dismountRidingEntity();
-            return true;
         }
         return entity != null && entity.addPassenger(this);
     }
