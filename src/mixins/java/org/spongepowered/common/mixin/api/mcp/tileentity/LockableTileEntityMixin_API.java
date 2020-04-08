@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.LockableTileEntity;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.block.entity.carrier.NameableCarrierBlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -36,6 +37,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.LockCodeAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -47,12 +49,13 @@ import javax.annotation.Nullable;
 public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API implements NameableCarrierBlockEntity {
 
     @Shadow @Nullable private LockCode code;
+    @Nullable @Shadow private ITextComponent customName; // Not really nullable, but it should be... - Roquette
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.code != null) {
-            container.set(Constants.TileEntity.LOCK_CODE, this.code.getLock());
+            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.code).accessor$getLock());
         }
         final List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {
@@ -65,6 +68,9 @@ public abstract class LockableTileEntityMixin_API extends TileEntityMixin_API im
                     .set(Constants.TileEntity.SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) (Object) stack).toContainer());
                 items.add(stackView);
             }
+        }
+        if (this.customName != null) {
+            container.set(Constants.TileEntity.LOCKABLE_CONTAINER_CUSTOM_NAME, this.customName);
         }
         container.set(Constants.TileEntity.ITEM_CONTENTS, items);
         return container;
