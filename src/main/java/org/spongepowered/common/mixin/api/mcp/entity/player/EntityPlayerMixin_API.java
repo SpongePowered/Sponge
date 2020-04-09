@@ -75,7 +75,6 @@ public abstract class EntityPlayerMixin_API extends EntityLivingBaseMixin_API {
         this.get(ExperienceHolderData.class).ifPresent(manipulators::add);
         this.get(FlyingAbilityData.class).ifPresent(manipulators::add);
         this.get(FoodData.class).ifPresent(manipulators::add);
-        this.get(FoodData.class).ifPresent(manipulators::add);
         this.get(MovementSpeedData.class).ifPresent(manipulators::add);
     }
 
