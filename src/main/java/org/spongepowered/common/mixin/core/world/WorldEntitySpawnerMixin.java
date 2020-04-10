@@ -208,7 +208,7 @@ public abstract class WorldEntitySpawnerMixin {
                         final int k1 = blockpos.getX();
                         final int l1 = blockpos.getY();
                         final int i2 = blockpos.getZ();
-                        final IBlockState iblockstate = world.getBlockState(blockpos);
+                        final IBlockState iblockstate = chunk.getBlockState(blockpos);
 
                         if (!iblockstate.isNormalCube()) {
                             int spawnCount = 0;
