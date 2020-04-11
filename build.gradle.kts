@@ -6,6 +6,7 @@ plugins {
 }
 
 spongeDev {
+    api(project.project("SpongeAPI"))
     addedSourceSets {
         register("mixins") {
             sourceType.set(SourceType.Mixin)
@@ -18,6 +19,9 @@ spongeDev {
         }
         register("launchWrapper") {
             dependsOn += "launch"
+        }
+        register("invalid") {
+            sourceType.set(SourceType.Invalid)
         }
     }
 }
@@ -49,6 +53,9 @@ tasks {
     }
 }
 
+val launch by sourceSets.getting
+val launchWrapper by sourceSets.getting
+
 dependencies {
     // Minecraft... duh
     minecraft("net.minecraft:" + project.properties["minecraftDep"] + ":" + project.properties["minecraftVersion"])
@@ -60,41 +67,32 @@ dependencies {
     runtime("org.mariadb.jdbc:mariadb-java-client:2.0.3")
     runtime("com.h2database:h2:1.4.196")
     runtime("org.xerial:sqlite-jdbc:3.20.0")
-//    implementation("org.ow2.asm:asm:6.2")
     implementation("org.ow2.asm:asm-util:6.2")
     implementation("org.ow2.asm:asm-tree:6.2")
-    "launchCompile"("org.checkerframework:checker-qual:2.8.1")
-    "launchCompile"("com.google.guava:guava:25.1-jre") {
+    "launchImplementation"("org.checkerframework:checker-qual:2.8.1")
+    "launchImplementation"("com.google.guava:guava:25.1-jre") {
         exclude(group ="com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
         exclude(group = "com.google.j2objc", module = "j2objc-annotations")
         exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
-
+        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
-    "launchCompile"("org.spongepowered:mixin:0.8")
-    "launchCompile"("org.ow2.asm:asm-tree:6.2")
-    "launchCompile"("org.ow2.asm:asm-util:6.2")
-    "launchCompile"("org.apache.logging.log4j:log4j-api:2.8.1")
+    "launchImplementation"("org.spongepowered:mixin:0.8")
+    "launchImplementation"("org.ow2.asm:asm-tree:6.2")
+    "launchImplementation"("org.ow2.asm:asm-util:6.2")
+    "launchImplementation"("org.apache.logging.log4j:log4j-api:2.8.1")
 
-    "launchWrapperCompile"("net.minecraft:launchwrapper:1.11") {
+    "launchWrapperImplementation"("net.minecraft:launchwrapper:1.11") {
         exclude(module="lwjgl")
     }
 }
 
+// This is needed to associate the MC dependency to accessors.
 configurations {
     val minecraft by getting
-    val accessorsImplementation by getting
-    accessorsImplementation.extendsFrom(minecraft)
+    project.afterEvaluate {
+        val accessorsApi by getting
+        accessorsApi.extendsFrom(minecraft)
+    }
 }
 
-sourceSets {
-    // TODO - once invalid is cleaned up, it can be be removed
-    val invalid by creating {
-        java {
-            srcDir("invalid/main/java")
-        }
-    }
-    main {
-        invalid.compileClasspath += compileClasspath + output
-    }
-}
