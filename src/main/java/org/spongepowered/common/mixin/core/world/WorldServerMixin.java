@@ -1287,6 +1287,15 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 entityList.add((Entity) entity);
             }
         }
+        if (!ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD) {
+            if (!entityList.isEmpty()) {
+                for (final Entity successful : entityList) {
+                    this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
+                    this.onEntityAdded((net.minecraft.entity.Entity) successful);
+                }
+            }
+            return;
+        }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
             frame.pushCause(this);
