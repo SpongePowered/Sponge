@@ -272,7 +272,9 @@ public class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
 
             final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(frame.getCurrentCause(), entities);
-            SpongeImpl.postEvent(event);
+            if (ShouldFire.SPAWN_ENTITY_EVENT_SPAWNER) {
+                SpongeImpl.postEvent(event);
+            }
             if (!event.isCancelled() && event.getEntities().size() > 0) {
                 return EntityUtil.processEntitySpawnsFromEvent(context, event);
             }
@@ -292,7 +294,9 @@ public class SpongeCommonEventFactory {
         Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
         try {
             final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-            SpongeImpl.postEvent(event);
+            if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                SpongeImpl.postEvent(event);
+            }
             return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
         } catch (final Exception e) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Exception trying to create a Spawn Event").centre().hr()
