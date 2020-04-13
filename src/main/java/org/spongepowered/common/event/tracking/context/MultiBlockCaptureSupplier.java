@@ -32,6 +32,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
@@ -648,7 +649,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transaction.getOriginal();
                     original.getServerWorld().ifPresent(worldServer -> {
                         final ServerWorldAccessor accessor = (ServerWorldAccessor) worldServer;
-                        final ServerWorld.ServerBlockEventList queue = accessor.accessor$getBlockEventQueue()[accessor.getBlockEventCacheIndexForSponge()];
+                        final ObjectLinkedOpenHashSet<BlockEventData> queue = accessor.accessor$getBlockEventQueue();
                         for (final BlockEventData blockEventData : scheduledEvents.get(original.getBlockPos())) {
                             boolean equals = false;
                             for (final BlockEventData eventData : queue) {

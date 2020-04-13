@@ -71,7 +71,7 @@ public class SpongeInternalListeners {
     @Listener
     public void onWorldSave(SaveWorldEvent event) {
         if (Sponge.getServer().getWorldManager().getDefaultProperties().isPresent()) {
-            if (event.getWorld().getUniqueId().equals(Sponge.getServer().getWorldManager().getDefaultProperties().get()
+            if (event.getWorld().getProperties().getUniqueId().equals(Sponge.getServer().getWorldManager().getDefaultProperties().get()
                     .getUniqueId())) {
                 SpongeUsernameCache.save();
                 final MinecraftServer server = SpongeImpl.getServer();

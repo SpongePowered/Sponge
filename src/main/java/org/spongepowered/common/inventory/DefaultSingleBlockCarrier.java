@@ -55,7 +55,7 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
 
             // build query for each slot
             Query.Builder builder = Query.builder();
-            Arrays.stream(slots).mapToObj(slot -> QueryTypes.PROPERTY.of(SlotMatchers.index(slot)))
+            Arrays.stream(slots).mapToObj(slot -> QueryTypes.KEY_VALUE.get().of(SlotMatchers.index(slot)))
                     .forEach(builder::and);
             Query query = builder.build();
 

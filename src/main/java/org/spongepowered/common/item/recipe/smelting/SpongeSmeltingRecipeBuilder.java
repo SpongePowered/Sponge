@@ -108,7 +108,7 @@ public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRe
         return this;
     }
 
-    @Override
+    // TODO vanilla does not use groups for cooking recipes @Override
     public EndStep group(String group) {
         this.group = group;
         return this;

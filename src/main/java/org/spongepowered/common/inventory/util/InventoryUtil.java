@@ -72,7 +72,7 @@ public final class InventoryUtil {
         Fabric fabric = ((CraftingGridInventoryAdapter) inv).inventoryAdapter$getFabric();
         for (Object inventory : fabric.fabric$allInventories()) {
             if (inventory instanceof CraftingInventory) {
-                return ((CraftingInventory) inventory);
+                return (C) inventory;
             }
         }
 

@@ -35,6 +35,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
 import java.util.Random;
+import java.util.UUID;
 
 public class ItemDropData {
 
@@ -164,21 +165,24 @@ public class ItemDropData {
 
     public static final class Player extends ItemDropData {
 
-        public static org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder player(PlayerEntity player) {
-            return new org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder(player);
+        public static Builder player(PlayerEntity player) {
+            return new Builder(player);
         }
+
 
         private final boolean trace;
         private final ITextComponent playerName;
         private final boolean dropAround;
         private final Random random;
+        private final UUID uuid;
 
-        Player(org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder builder) {
+        Player(Builder builder) {
             super(builder);
             this.trace = builder.trace;
             this.playerName = builder.playerName;
             this.dropAround = builder.dropAround;
             this.random = builder.random;
+            this.uuid = builder.uuid;
         }
 
         public boolean isTrace() {
@@ -197,13 +201,16 @@ public class ItemDropData {
             return this.random;
         }
 
+        public UUID getUuid() {
+            return uuid;
+        }
 
         @Override
         public ItemEntity create(ServerWorld worldServer) {
             final ItemEntity entityItem = super.create(worldServer);
             entityItem.setPickupDelay(40);
             if (this.trace) {
-                entityItem.setThrowerId(this.playerName);
+                entityItem.setThrowerId(this.uuid);
             }
             return entityItem;
         }
@@ -248,6 +255,7 @@ public class ItemDropData {
 
         public static final class Builder extends ItemDropData.Builder {
 
+            UUID uuid;
             boolean trace;
             ITextComponent playerName;
             boolean dropAround;
@@ -255,51 +263,52 @@ public class ItemDropData {
 
             Builder(PlayerEntity player) {
                 this.playerName = player.getName();
+                this.uuid = player.getUniqueID();
                 this.random = ((org.spongepowered.api.entity.Entity) player).getRandom();
             }
 
-            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder stack(ItemStack stack) {
+            public Builder stack(ItemStack stack) {
                 this.stack = stack;
                 return this;
             }
 
-            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder trace(boolean trace) {
+            public Builder trace(boolean trace) {
                 this.trace = trace;
                 return this;
             }
 
-            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder dropAround(boolean dropAround) {
+            public Builder dropAround(boolean dropAround) {
                 this.dropAround = dropAround;
                 return this;
             }
 
             @Override
-            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder position(Vector3d position) {
+            public Builder position(Vector3d position) {
                 super.position(position);
                 return this;
             }
 
             @Override
-            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder pitch(double pitch) {
+            public Builder pitch(double pitch) {
                 super.pitch(pitch);
                 return this;
             }
 
             @Override
-            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder yaw(double yaw) {
+            public Builder yaw(double yaw) {
                 super.yaw(yaw);
                 return this;
             }
 
             @Override
-            public org.spongepowered.common.event.tracking.context.ItemDropData.Player.Builder motion(Vector3d motion) {
+            public Builder motion(Vector3d motion) {
                 super.motion(motion);
                 return this;
             }
 
             @Override
             public ItemDropData.Player build() {
-                return new Player(this);
+                return new ItemDropData.Player(this);
             }
 
 

@@ -38,7 +38,7 @@ public final class SpongeOneParamQueryType<T> extends SpongeCatalogType implemen
     private final Function<T, Query> newInstance;
 
     public SpongeOneParamQueryType(String id, Function<T, Query> newInstance) {
-        super(CatalogKey.sponge(id), id);
+        super(CatalogKey.sponge(id));
         this.newInstance = newInstance;
     }
 

@@ -28,11 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-<<<<<<< Updated upstream
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.advancement.Advancement;
-=======
->>>>>>> Stashed changes
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;

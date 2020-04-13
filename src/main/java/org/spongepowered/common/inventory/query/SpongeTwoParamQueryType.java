@@ -38,7 +38,7 @@ public final class SpongeTwoParamQueryType<T1, T2> extends SpongeCatalogType imp
     private final BiFunction<T1, T2, Query> newInstance;
 
     public SpongeTwoParamQueryType(String id, BiFunction<T1, T2, Query> newInstance) {
-        super(CatalogKey.sponge(id), id);
+        super(CatalogKey.sponge(id));
         this.newInstance = newInstance;
     }
 

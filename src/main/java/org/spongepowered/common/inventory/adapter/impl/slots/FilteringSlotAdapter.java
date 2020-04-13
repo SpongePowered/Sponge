@@ -45,8 +45,8 @@ public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
 
     @Override
     public boolean isValidItem(ItemStack stack) {
-        Predicate<ItemStack> filter = this.filteringSlot.getItemStackFilter();
-        return filter == null || filter.test(stack);
+        FilteringSlotLens.ItemStackFilter filter = this.filteringSlot.getItemStackFilter();
+        return filter == null || filter.test(this.impl$getFabric(), stack);
     }
 
     @Override

@@ -41,7 +41,7 @@ public final class SpongeTextStyleType extends SpongeTextStyle implements TextSt
         final SimpleRegistry<TextStyle.Type> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextStyle.Type.class);
         TextStyle.Type style = ((MappedRegistry<TextStyle.Type, TextFormatting>) registry).getReverseMapping(formatting);
         if (style == null) {
-            style = TextStyles.NONE.get();
+            style = TextStyles.RESET.get();
         }
 
         return (SpongeTextStyleType) style;
