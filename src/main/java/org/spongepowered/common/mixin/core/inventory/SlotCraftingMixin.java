@@ -33,6 +33,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -94,7 +95,9 @@ public abstract class SlotCraftingMixin extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void beforeTake(final EntityPlayer thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
-        this.impl$lastRecipe = ((CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world));
+        if (this.impl$lastRecipe == null || !((IRecipe) this.impl$lastRecipe).matches(this.craftMatrix, thePlayer.world)) {
+            this.impl$lastRecipe = ((CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world));
+        }
         if (((ContainerBridge) thePlayer.openContainer).bridge$isShiftCrafting()) {
             ((ContainerBridge) thePlayer.openContainer).bridge$detectAndSendChanges(true);
             ((ContainerBridge) thePlayer.openContainer).bridge$setShiftCrafting(false);
@@ -118,6 +121,9 @@ public abstract class SlotCraftingMixin extends Slot {
     private NonNullList<ItemStack> onGetRemainingItems(final InventoryCrafting craftMatrix, final net.minecraft.world.World worldIn) {
         if (this.impl$lastRecipe == null) {
             return NonNullList.withSize(craftMatrix.getSizeInventory(), ItemStack.EMPTY);
+        }
+        if (((IRecipe) this.impl$lastRecipe).matches(this.craftMatrix, worldIn)) {
+            return ((IRecipe) this.impl$lastRecipe).getRemainingItems(craftMatrix);
         }
         return CraftingManager.getRemainingItems(craftMatrix, worldIn);
     }
