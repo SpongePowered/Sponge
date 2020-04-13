@@ -22,28 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.horse;
+package org.spongepowered.common.accessor.block;
 
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import net.minecraft.block.BedBlock;
+import net.minecraft.item.DyeColor;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(BedBlock.class)
+public interface BedBlockAccessor {
 
-public class AbstractHorseEntityTamedProvider extends GenericMutableDataProvider<AbstractHorseEntity, Boolean> {
-
-    public AbstractHorseEntityTamedProvider() {
-        super(Keys.IS_TAMED);
-    }
-
-    @Override
-    protected Optional<Boolean> getFrom(AbstractHorseEntity dataHolder) {
-        return Optional.of(dataHolder.isTame());
-    }
-
-    @Override
-    protected boolean set(AbstractHorseEntity dataHolder, Boolean value) {
-        dataHolder.setHorseTamed(value);
-        return true;
-    }
+    @Accessor("color") DyeColor accessor$getColor();
 }

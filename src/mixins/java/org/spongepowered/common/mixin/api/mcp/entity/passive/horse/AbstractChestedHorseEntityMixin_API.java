@@ -39,7 +39,7 @@ public abstract class AbstractChestedHorseEntityMixin_API extends AbstractHorseE
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.displayChest().asImmutable());
+        values.add(this.hasChest().asImmutable());
 
         return values;
     }

@@ -22,27 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.location;
+package org.spongepowered.common.accessor.entity.monster;
 
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.util.VecHelper;
+import net.minecraft.entity.monster.AbstractRaiderEntity;
+import net.minecraft.network.datasync.DataParameter;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(AbstractRaiderEntity.class)
+public interface AbstractRaiderEntityAccessor {
 
-public class GroundLuminanceProvider extends GenericMutableDataProvider<Location, Integer> {
-
-    public GroundLuminanceProvider() {
-        super(Keys.GROUND_LUMINANCE);
-    }
-
-    @Override
-    protected Optional<Integer> getFrom(Location dataHolder) {
-        World world = (World) dataHolder.getWorld();
-        int light = world.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(dataHolder));
-        return Optional.of(light);
+    @Accessor("field_213666_c") static DataParameter<Boolean> accessor$getDataIsCelebrating() {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 }

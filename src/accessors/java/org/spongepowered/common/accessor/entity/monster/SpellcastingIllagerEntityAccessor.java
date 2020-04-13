@@ -22,32 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common.accessor.entity.monster;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
+import net.minecraft.entity.monster.SpellcastingIllagerEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.Optional;
+@Mixin(SpellcastingIllagerEntity.class)
+public interface SpellcastingIllagerEntityAccessor {
 
-public class ItemStackUseLimitProvider extends ItemStackDataProvider<Integer> {
+    @Accessor("spellTicks") int accessor$getSpellTicks();
+    @Accessor("spellTicks") void accessor$setSpellTicks(int spellTicks);
+    @Invoker("getSpellType") SpellcastingIllagerEntity.SpellType accessor$getSpellType();
 
-    public ItemStackUseLimitProvider() {
-        super(Keys.USE_LIMIT);
-    }
-
-    @Override
-    protected Optional<Integer> getFrom(ItemStack dataHolder) {
-        Item item = dataHolder.getItem();
-        if (item.isDamageable()) {
-            return Optional.of(item.getMaxDamage());
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    protected boolean supports(Item item) {
-        return item.isDamageable();
-    }
 }

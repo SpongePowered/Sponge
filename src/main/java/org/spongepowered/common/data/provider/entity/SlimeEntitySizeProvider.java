@@ -34,7 +34,7 @@ import java.util.Optional;
 public class SlimeEntitySizeProvider extends GenericMutableDataProvider<SlimeEntity, Integer> {
 
     public SlimeEntitySizeProvider() {
-        super(Keys.SLIME_SIZE);
+        super(Keys.SIZE);
     }
 
     @Override

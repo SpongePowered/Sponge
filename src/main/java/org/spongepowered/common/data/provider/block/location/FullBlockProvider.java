@@ -37,7 +37,7 @@ import java.util.Optional;
 public class FullBlockProvider extends GenericMutableDataProvider<Location, Boolean> {
 
     public FullBlockProvider() {
-        super(Keys.FULL_BLOCK);
+        super(Keys.IS_FULL_BLOCK);
     }
 
     @Override

@@ -22,28 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.tileentity;
+package org.spongepowered.common.data.provider.block;
 
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalFaceBlock;
+import net.minecraft.state.properties.AttachFace;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.Surface;
+import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
-import java.util.Set;
+import java.util.Optional;
 
-@Mixin(AbstractFurnaceTileEntity.class)
-public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
+public class BlockAttachmentSurfaceProvider extends BlockStateDataProvider<Surface> {
 
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.remainingFuel().asImmutable());
-        values.add(this.maxBurnTime().asImmutable());
-        values.add(this.passedCookTime().asImmutable());
-        values.add(this.maxCookTime().asImmutable());
-
-        return values;
+    public BlockAttachmentSurfaceProvider() {
+        super(Keys.ATTACHMENT_SURFACE, HorizontalFaceBlock.class);
     }
 
+    @Override
+    protected Optional<Surface> getFrom(BlockState dataHolder) {
+        return Optional.of((Surface) (Object) dataHolder.get(HorizontalFaceBlock.FACE));
+    }
+
+    @Override
+    protected Optional<BlockState> set(BlockState dataHolder, Surface value) {
+        return Optional.ofNullable(dataHolder.with(HorizontalFaceBlock.FACE, (AttachFace)(Object) value));
+    }
 }

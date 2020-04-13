@@ -31,6 +31,8 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
+import org.spongepowered.common.data.provider.generic.INameableDisplayNameProvider;
+import org.spongepowered.common.data.provider.item.ItemDisplayNameProvider;
 import org.spongepowered.common.data.provider.util.BreakablePlaceableUtils;
 import org.spongepowered.common.util.Constants;
 
@@ -77,6 +79,7 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
         register(new ItemStackLoreProvider());
         register(new ItemStackAppliedEnchantmentsProvider());
         register(new ItemStackStoredEnchantmentsProvider());
+        register(new ItemStackApplicablePotionEffectsProvider());
 
         register(Keys.PLACEABLE_BLOCK_TYPES, ImmutableSet.of(),
                 (accessor) -> BreakablePlaceableUtils.get(accessor, Constants.Item.ITEM_PLACEABLE_BLOCKS),
@@ -113,14 +116,15 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
         // TODO ItemType Data? a bunch of the providers here actually operate on the ItemType instead of Stack
         register(new ItemStackFuelBurnTimeProvider());
         register(new ItemStackEfficiencyProvider());
-        register(new ItemStackFoodRestorationProvider());
+        register(new ItemStackReplenishedFoodProvider());
+        register(new ItemStackReplenishedSaturationProvider());
         register(new ItemStackHarvestingProvider());
         register(new ItemStackMusicDiscProvider());
-        register(new ItemStackUseLimitProvider());
+        register(new ItemStackMaxDurabilityProvider());
         register(new ItemStackToolTypeProvider());
 //        register(new ItemStackArmorTypeProvider());
         register(new ItemStackEquipmentTypeProvider());
-        register(new ItemStackDamageAbsorbtionProvider());
+        register(new ItemStackDamageAbsorptionProvider());
         register(new ItemStackContainerProvider());
 
 
@@ -130,6 +134,13 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
         register(new ItemStackDyeColorProvider());
 
         register(new ItemStackGameProfileProvider());
+
+
+        // TODO not actually ItemStack but ItemType
+        register(new ItemDisplayNameProvider());
+
+        // TODO generic DataProviderRegistryBuilder?
+        register(new INameableDisplayNameProvider());
 
     }
 }

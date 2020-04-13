@@ -32,17 +32,17 @@ import org.spongepowered.common.accessor.item.ToolItemAccessor;
 
 import java.util.Optional;
 
-public class ItemStackEfficiencyProvider extends ItemStackDataProvider<Float> {
+public class ItemStackEfficiencyProvider extends ItemStackDataProvider<Double> {
 
     public ItemStackEfficiencyProvider() {
         super(Keys.EFFICIENCY);
     }
 
     @Override
-    protected Optional<Float> getFrom(ItemStack dataHolder) {
+    protected Optional<Double> getFrom(ItemStack dataHolder) {
         if (dataHolder.getItem() instanceof ToolItemAccessor) {
             float efficiency = ((ToolItemAccessor) dataHolder.getItem()).accessor$getEfficiency();
-            return Optional.of(efficiency);
+            return Optional.of((double) efficiency);
         }
         return Optional.empty();
     }

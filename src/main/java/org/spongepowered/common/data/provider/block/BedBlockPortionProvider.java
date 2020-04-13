@@ -22,42 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.inventory;
+package org.spongepowered.common.data.provider.block;
 
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
-import org.spongepowered.common.data.provider.GenericImmutableDataProvider;
-import org.spongepowered.common.inventory.lens.Lens;
+import net.minecraft.block.BedBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.properties.BedPart;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
+import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-public class GenericSlotLensDataProvider<D> extends GenericImmutableDataProvider<Slot, D> {
+public class BedBlockPortionProvider extends BlockStateDataProvider<PortionType> {
 
-    public GenericSlotLensDataProvider(
-            Supplier<? extends Key<? extends Value<D>>> key) {
-        super(key);
+    public BedBlockPortionProvider() {
+        super(Keys.PORTION_TYPE, BedBlock.class);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected Optional<D> getFrom(Slot dataHolder) {
-        Inventory child = dataHolder;
-        Inventory parent = dataHolder.parent();
-
-        Lens parentLens = ((InventoryBridge) parent).bridge$getAdapter().inventoryAdapter$getRootLens();
-        Lens childLens = ((InventoryBridge) child).bridge$getAdapter().inventoryAdapter$getRootLens();
-        Map<Key, Object> dataMap = parentLens.getDataFor(childLens);
-        D data = (D) dataMap.get(this.getKey());
-        return Optional.ofNullable(data);
+    protected Optional<PortionType> getFrom(BlockState dataHolder) {
+        BedPart bedPart = dataHolder.get(BedBlock.PART);
+        switch (bedPart) {
+            case HEAD:
+                return Optional.of(PortionTypes.TOP.get());
+            case FOOT:
+                return Optional.of(PortionTypes.BOTTOM.get());
+        }
+        return Optional.empty();
     }
 
     @Override
-    protected Optional<Slot> set(Slot dataHolder, D value) {
+    protected Optional<BlockState> set(BlockState dataHolder, PortionType value) {
+        if (value == PortionTypes.TOP.get()) {
+            return Optional.of(dataHolder.with(BedBlock.PART, BedPart.HEAD));
+        }
+        if (value == PortionTypes.BOTTOM.get()) {
+            return Optional.of(dataHolder.with(BedBlock.PART, BedPart.FOOT));
+        }
         return Optional.empty();
     }
 }

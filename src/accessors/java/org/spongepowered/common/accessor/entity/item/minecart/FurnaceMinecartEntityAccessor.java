@@ -22,35 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common.accessor.entity.item.minecart;
 
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
+import net.minecraft.entity.item.minecart.FurnaceMinecartEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(FurnaceMinecartEntity.class)
+public interface FurnaceMinecartEntityAccessor {
 
-public class ItemStackDamageAbsorbtionProvider extends ItemStackDataProvider<Integer> {
-
-    public ItemStackDamageAbsorbtionProvider() {
-        super(Keys.DAMAGE_ABSORBTION);
-    }
-
-    @Override
-    protected Optional<Integer> getFrom(ItemStack dataHolder) {
-        if (dataHolder.getItem() instanceof ArmorItem) {
-            final ArmorItem armor = (ArmorItem) dataHolder.getItem();
-            final int reduction = armor.getDamageReduceAmount();
-            return Optional.of(reduction);
-        }
-        return Optional.empty();
-    }
-
-
-    @Override
-    protected boolean supports(Item item) {
-        return item instanceof ArmorItem;
-    }
+    @Accessor("fuel") int accessor$getFuel();
+    @Accessor("fuel") void accessor$setFuel(int fuel);
 }

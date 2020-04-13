@@ -22,40 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common.data.provider.block.location;
 
-import net.minecraft.item.Food;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataProvider;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.LightType;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+public class SkyLightProvider extends GenericMutableDataProvider<Location, Integer> {
 
-public class ItemStackFoodSaturationProvider extends ItemStackDataProvider<Double> {
-
-    public ItemStackFoodSaturationProvider() {
-        super(Keys.FOOD_SATURATION);
+    public SkyLightProvider() {
+        super(Keys.SKY_LIGHT);
     }
 
     @Override
-    protected Optional<Double> getFrom(ItemStack dataHolder) {
-        if (dataHolder.getItem().isFood()) {
-            @Nullable Food food = dataHolder.getItem().getFood();
-            if (food != null) {
-                // Translate's Minecraft's weird internal value to the actual saturation value
-                final double saturation = food.getSaturation() * food.getHealing() * 2.0;
-                return Optional.of(saturation);
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    protected boolean supports(Item item) {
-        return item.isFood();
+    protected Optional<Integer> getFrom(Location dataHolder) {
+        World world = (World) dataHolder.getWorld();
+        BlockPos pos = VecHelper.toBlockPos(dataHolder);
+        int lightFor = world.getLightFor(LightType.SKY, pos);
+        return Optional.of(lightFor);
     }
 }

@@ -55,8 +55,8 @@ public class LivingEntityBodyRotationsProvider extends GenericMutableDataProvide
 
     @Override
     protected boolean set(LivingEntity dataHolder, Map<BodyPart, Vector3d> value) {
-        final Vector3d headRotation = value.get(BodyParts.HEAD);
-        final Vector3d bodyRotation = value.get(BodyParts.CHEST);
+        final Vector3d headRotation = value.get(BodyParts.HEAD.get());
+        final Vector3d bodyRotation = value.get(BodyParts.CHEST.get());
 
         if (bodyRotation != null) {
             dataHolder.rotationYaw = (float) bodyRotation.getY();

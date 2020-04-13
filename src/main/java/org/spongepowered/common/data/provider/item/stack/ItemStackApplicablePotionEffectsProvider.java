@@ -22,29 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.horse;
+package org.spongepowered.common.data.provider.item.stack;
 
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.item.ItemStack;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.PotionUtils;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.util.OptBool;
-import org.spongepowered.common.bridge.entity.passive.horse.AbstractHorseEntityBridge;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-public class AbstractHorseEntityIsSaddledProvider extends GenericMutableDataProvider<AbstractHorseEntityBridge, Boolean> {
+public class ItemStackApplicablePotionEffectsProvider extends ItemStackDataProvider<Set<PotionEffect>> {
 
-    public AbstractHorseEntityIsSaddledProvider() {
-        super(Keys.IS_SADDLED);
+    public ItemStackApplicablePotionEffectsProvider() {
+        super(Keys.APPLICABLE_POTION_EFFECTS);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(AbstractHorseEntityBridge dataHolder) {
-        return OptBool.of(dataHolder.bridge$isSaddled());
-    }
-
-    @Override
-    protected boolean set(AbstractHorseEntityBridge dataHolder, Boolean value) {
-        dataHolder.bridge$setSaddled(value);
-        return true;
+    protected Optional<Set<PotionEffect>> getFrom(ItemStack dataHolder) {
+        final List<EffectInstance> effectsFromStack = PotionUtils.getEffectsFromStack(dataHolder);
+        if (effectsFromStack.isEmpty()) {
+            return Optional.empty();
+        }
+        @SuppressWarnings("unchecked")
+        ImmutableSet<PotionEffect> effects = ImmutableSet.copyOf((List) effectsFromStack);
+        return Optional.of(effects);
     }
 }

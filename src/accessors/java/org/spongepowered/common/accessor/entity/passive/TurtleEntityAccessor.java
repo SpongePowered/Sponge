@@ -22,28 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.tileentity;
+package org.spongepowered.common.accessor.entity.passive;
 
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.entity.passive.TurtleEntity;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.Set;
+@Mixin(TurtleEntity.class)
+public interface TurtleEntityAccessor {
 
-@Mixin(AbstractFurnaceTileEntity.class)
-public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
+    @Invoker("setHasEgg") void accessor$setHasEgg(boolean hasEgg);
 
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+    @Invoker("isGoingHome") boolean accessor$isGoingHome();
+    @Invoker("setGoingHome") void accessor$setGoingHome(boolean isGoingHome);
+    @Invoker("setDigging") void accessor$setDigging(boolean isDigging);
 
-        values.add(this.remainingFuel().asImmutable());
-        values.add(this.maxBurnTime().asImmutable());
-        values.add(this.passedCookTime().asImmutable());
-        values.add(this.maxCookTime().asImmutable());
+    @Invoker("isTravelling") boolean accessor$isTravelling();
+    @Invoker("setTravelling") void accessor$setTravelling(boolean isTravelling);
 
-        return values;
-    }
-
+    @Invoker("getTravelPos") BlockPos accessor$getTravelPos();
+    @Invoker("setTravelPos") void accessor$setTravelPos(BlockPos isTravelling);
 }

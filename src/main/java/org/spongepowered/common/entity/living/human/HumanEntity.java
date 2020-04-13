@@ -28,6 +28,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -57,6 +58,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
@@ -70,6 +72,8 @@ import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -328,7 +332,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         if (properties == null || properties.isEmpty()) {
             return false;
         }
-        this.fakeProfile.getProperties().replaceValues("textures", properties.get("textures"));
+        this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, properties.get(ProfileProperty.TEXTURES));
         this.skinUuid = skin;
         return true;
     }
@@ -364,6 +368,14 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         return true;
     }
 
+    public Property getSkinProperty() {
+        return this.fakeProfile.getProperties().get(ProfileProperty.TEXTURES).iterator().next();
+    }
+
+    public void setSkinProperty(Property property) {
+        this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(property));
+    }
+
     @Nullable
     public UUID getSkinUuid() {
         return this.skinUuid;
@@ -373,7 +385,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         if (this.skinUuid == null) {
             return DataTransactionResult.successNoData();
         }
-        this.fakeProfile.getProperties().removeAll("textures");
+        this.fakeProfile.getProperties().removeAll(ProfileProperty.TEXTURES);
         // TODO - figure out this new bit of mess.
 //        final Immutable<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
 //        this.skinUuid = null;
@@ -401,7 +413,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
      * @return Whether it can be removed with 0 ticks delay
      */
     public boolean canRemoveFromListImmediately() {
-        return !this.fakeProfile.getProperties().containsKey("textures");
+        return !this.fakeProfile.getProperties().containsKey(ProfileProperty.TEXTURES);
     }
 
     /**

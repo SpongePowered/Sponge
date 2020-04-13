@@ -28,6 +28,7 @@ import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,5 +43,9 @@ public interface FoxEntityAccessor {
     @Accessor("TRUSTED_UUID_MAIN") static DataParameter<Optional<UUID>> accessor$getTrustedUuidMain() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
+
+    @Invoker("setVariantType") void accessor$setVariantType(FoxEntity.Type typeIn);
+    @Invoker("setStuck") void accessor$setStuck(boolean isStuck);
+    @Invoker("setSleeping") void accessor$setSleeping(boolean isSleeping);
 
 }

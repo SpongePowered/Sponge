@@ -22,28 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.tileentity;
+package org.spongepowered.common.data.provider.block;
 
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.fluid.FlowingFluid;
+import net.minecraft.fluid.IFluidState;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
-import java.util.Set;
+import java.util.Optional;
 
-@Mixin(AbstractFurnaceTileEntity.class)
-public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
+public final class FluidLevelProvider extends BlockStateDataProvider<Integer> {
 
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.remainingFuel().asImmutable());
-        values.add(this.maxBurnTime().asImmutable());
-        values.add(this.passedCookTime().asImmutable());
-        values.add(this.maxCookTime().asImmutable());
-
-        return values;
+    public FluidLevelProvider() {
+        super(Keys.FLUID_LEVEL, FlowingFluidBlock.class);
     }
 
+    @Override
+    protected Optional<Integer> getFrom(BlockState dataHolder) {
+        FlowingFluidBlock block = (FlowingFluidBlock) dataHolder.getBlock();
+        IFluidState fluidState = block.getFluidState(dataHolder);
+        return Optional.of(fluidState.getLevel());
+    }
+
+    @Override
+    protected Optional<BlockState> set(BlockState dataHolder, Integer value) {
+        FlowingFluidBlock block = (FlowingFluidBlock) dataHolder.getBlock();
+        IFluidState newState = block.getFluidState(dataHolder).with(FlowingFluid.LEVEL_1_8, value);
+        return Optional.of(newState.getBlockState());
+    }
 }

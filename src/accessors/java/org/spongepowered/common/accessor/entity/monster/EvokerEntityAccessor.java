@@ -22,23 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block;
+package org.spongepowered.common.accessor.entity.monster;
 
-import net.minecraft.block.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import net.minecraft.entity.monster.EvokerEntity;
+import net.minecraft.entity.monster.PillagerEntity;
+import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.network.datasync.DataParameter;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(EvokerEntity.class)
+public interface EvokerEntityAccessor {
 
-public class LightEmissionProvider extends GenericMutableDataProvider<BlockState, Integer> {
-
-    public LightEmissionProvider() {
-        super(Keys.LIGHT_EMISSION);
-    }
-
-    @Override
-    protected Optional<Integer> getFrom(BlockState dataHolder) {
-        return Optional.of(dataHolder.getLightValue());
-    }
-
+    @Accessor("wololoTarget") SheepEntity accessor$getWololoTarget();
+    @Accessor("wololoTarget") void accessor$setWololoTarget(SheepEntity wololoTarget);
 }

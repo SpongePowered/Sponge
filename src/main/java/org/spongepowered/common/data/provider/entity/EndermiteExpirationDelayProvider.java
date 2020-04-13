@@ -35,31 +35,29 @@ import org.spongepowered.common.accessor.entity.monster.EndermiteEntityAccessor;
 import java.time.Duration;
 import java.util.Optional;
 
-public class EndermiteExpirationDelayProvider extends GenericMutableDataProvider<EndermiteEntity, Duration> {
+public class EndermiteExpirationDelayProvider extends GenericMutableDataProvider<EndermiteEntity, Integer> {
 
     public EndermiteExpirationDelayProvider() {
-        super(Keys.EXPIRATION_DELAY);
+        super(Keys.DESPAWN_DELAY);
     }
 
     @Override
-    protected Optional<Duration> getFrom(EndermiteEntity dataHolder) {
+    protected Optional<Integer> getFrom(EndermiteEntity dataHolder) {
         if (dataHolder.isNoDespawnRequired()) {
             return Optional.empty();
         }
         int ticks = ((EndermiteEntityAccessor) dataHolder).accessor$getLifetime();
-        Duration duration = Duration.of(ticks, TemporalUnits.MINECRAFT_TICKS);
-        return Optional.of(duration);
+        return Optional.of(ticks);
     }
 
     @Override
-    protected boolean set(EndermiteEntity dataHolder, Duration value) {
+    protected boolean set(EndermiteEntity dataHolder, Integer ticks) {
         if (dataHolder.isNoDespawnRequired()) {
             return false;
         }
-        long ticks = value.get(TemporalUnits.MINECRAFT_TICKS);
         checkArgument(ticks >= 0);
         checkArgument(ticks <= 2400);
-        ((EndermiteEntityAccessor) dataHolder).accessor$setLifetime((int)ticks);
+        ((EndermiteEntityAccessor) dataHolder).accessor$setLifetime(ticks);
         return true;
     }
 

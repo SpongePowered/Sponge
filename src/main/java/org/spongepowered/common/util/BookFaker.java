@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.util;
 
-import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.ServerPlayNetHandler;
-import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.network.play.server.SOpenBookWindowPacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.Hand;
@@ -52,8 +49,8 @@ public class BookFaker {
         // contents to the player's hand
         ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK, 1);
         item.offer(Keys.DISPLAY_NAME, bookView.getTitle());
-        item.offer(Keys.BOOK_AUTHOR, bookView.getAuthor());
-        item.offer(Keys.BOOK_PAGES, bookView.getPages());
+        item.offer(Keys.AUTHOR, bookView.getAuthor());
+        item.offer(Keys.PAGES, bookView.getPages());
 
         PlayerInventory inventory = mcPlayer.inventory;
         int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
