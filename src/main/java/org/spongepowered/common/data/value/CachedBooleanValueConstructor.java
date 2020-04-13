@@ -47,4 +47,9 @@ final class CachedBooleanValueConstructor implements ValueConstructor<Value<Bool
     public Value<Boolean> getImmutable(Boolean element) {
         return element ? this.immutableValueTrue : this.immutableValueFalse;
     }
+
+    @Override
+    public Value<Boolean> getRawImmutable(Boolean element) {
+        return null;
+    }
 }

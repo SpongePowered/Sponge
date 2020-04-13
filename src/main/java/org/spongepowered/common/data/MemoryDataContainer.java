@@ -54,7 +54,7 @@ public class MemoryDataContainer extends MemoryDataView implements DataContainer
      * @param safety The safety mode to use
      * @see org.spongepowered.api.data.persistence.DataView.SafetyMode
      */
-    public MemoryDataContainer(DataView.SafetyMode safety) {
+    public MemoryDataContainer(final DataView.SafetyMode safety) {
         super(safety);
     }
 
@@ -69,12 +69,12 @@ public class MemoryDataContainer extends MemoryDataView implements DataContainer
     }
 
     @Override
-    public DataContainer set(DataQuery path, Object value) {
+    public DataContainer set(final DataQuery path, final Object value) {
         return (DataContainer) super.set(path, value);
     }
 
     @Override
-    public DataContainer remove(DataQuery path) {
+    public DataContainer remove(final DataQuery path) {
         return (DataContainer) super.remove(path);
     }
 

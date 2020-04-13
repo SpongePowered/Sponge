@@ -43,7 +43,7 @@ public final class SpongeTwoParamQueryType<T1, T2> extends SpongeCatalogType imp
     }
 
     @Override
-    public Query of(T1 arg1, T2 arg2) {
+    public Query of(final T1 arg1, final T2 arg2) {
         checkNotNull(arg1);
         checkNotNull(arg2);
         return this.newInstance.apply(arg1, arg2);

@@ -44,6 +44,8 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
+import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -212,7 +214,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      * this list to be unmodifiable except by this object are as follows:
      * <ul>
      *     <li>Submitted {@link BlockSnapshot}s are to be added by the
-     *     {@link #put(BlockSnapshot, IBlockState)} method.</li>
+     *     {@link #put(BlockSnapshot, BlockState)} method.</li>
      *     <li>Adding multiple {@link BlockSnapshot}s per {@link BlockPos}
      *     results in an internal restructuring of storage such that a
      *     {@link Multimap} is created to keep track of intermediary
@@ -411,11 +413,15 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     /**
-     * Specifically called by {@link ChunkMixin#bridge$setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)} while it is preparing
-     * various transactional aspects, such as potential tile entity removals, replacements, etc. Specifically should never be called outside
-     * of that reaction since {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, MultiBlockCaptureSupplier)}
-     * does not get called automatically, it is called prior to queueing potential tile replacements, and prior to calling to
-     * {@link #logTileChange(TrackedWorldBridge, BlockPos, TileEntity, TileEntity)} in the event a tile entity is going to be removed.
+     * Specifically called by {@link TrackedChunkBridge#bridge$setBlockState(BlockPos, BlockState, BlockState, BlockChangeFlag)}
+     * while it is preparing various transactional aspects, such as potential
+     * tile entity removals, replacements, etc. Specifically should never be
+     * called outsideof that reaction since
+     * {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, MultiBlockCaptureSupplier)}
+     * does not get called automatically, it is called prior to queueing
+     * potential tile replacements, and prior to calling to
+     * {@link #logTileChange(TrackedWorldBridge, BlockPos, TileEntity, TileEntity)}
+     * in the event a tile entity is going to be removed.
      *
      * @param originalBlockSnapshot The original snapshot being changed
      * @param newState The new state
@@ -757,7 +763,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 try {
                     entry.getValue().close();
                 } catch (final Exception e) {
-                    PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
+                    PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Forcibly Closing Proxy", "Proxy Access could not be popped", e);
                 }
             }
             this.processingWorlds.clear();
@@ -818,7 +824,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             try {
                 entry.getValue().close();
             } catch (final Exception e) {
-                PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
+                throw new UnsupportedOperationException("Block events need a reimplementation");
+
+//                PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Forcibly Closing Proxy", "Proxy Access could not be popped", e);
             }
         }
     }

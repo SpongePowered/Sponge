@@ -63,29 +63,7 @@ public interface CustomDataHolderBridge {
 
     DataTransactionResult bridge$removeCustom(Key<?> key);
 
-    default void bridge$removeCustomFromNBT(SerializableDataHolder.Mutable manipulator) {
-        if (this instanceof DataCompoundHolder) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
-            if (spongeData.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
-                final ListNBT tagList = spongeData.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
-                if (!tagList.isEmpty()) {
-                    final CatalogKey key = DataUtil.getRegistrationFor(manipulator).getKey();
-                    for (int i = 0; i < tagList.size(); i++) {
-                        final CompoundNBT tag = tagList.getCompound(i);
-                        if (key.toString().equals(tag.getString(Constants.Sponge.MANIPULATOR_ID))) {
-                            tagList.remove(i);
-                            break;
-                        }
-                        final String dataClass = tag.getString(Constants.Sponge.CUSTOM_DATA_CLASS);
-                        if (dataClass.equalsIgnoreCase(manipulator.getClass().getName())) {
-                            tagList.remove(i);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    void bridge$removeCustomFromNBT(SerializableDataHolder.Mutable manipulator);
 
     void bridge$addFailedData(ImmutableList<DataView> failedData);
 

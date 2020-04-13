@@ -126,8 +126,6 @@ public final class EntityUtil {
     private EntityUtil() {
     }
 
-    @SuppressWarnings("Guava") private static final Predicate<Entity> TRACEABLE = Predicates.and(NOT_SPECTATING,
-      entity -> entity != null && entity.canBeCollidedWith());
 
     @Nullable
     public static Entity transferEntityToWorld(final Entity entity, @Nullable MoveEntityEvent.Teleport event,
@@ -142,7 +140,7 @@ public final class EntityUtil {
         final Transform fromTransform = sEntity.getTransform();
         final ServerWorld fromWorld = (ServerWorld) sEntity.getWorld();
 
-        fromWorld.profiler.startSection("changeDimension");
+        fromWorld.getProfiler().startSection("changeDimension");
 
         boolean loadChunks = true;
 
@@ -259,25 +257,25 @@ public final class EntityUtil {
         }
 
         if (!event.getKeepsVelocity()) {
-            toReturn.motionX = 0;
-            toReturn.motionY = 0;
-            toReturn.motionZ = 0;
+            toReturn.setMotion(0, 0, 0);
         }
 
         if (loadChunks) {
             final Vector3i toChunkPosition = Location.of((World) toWorld, toTransform.getPosition()).getChunkPosition();
-            toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
+            // TODO - Figure out how to do chunk tickets
+            throw new UnsupportedOperationException("Need to figure out how to load chunks");
+//            toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
         }
 
-        fromWorld.profiler.startSection("moving");
+        fromWorld.getProfiler().startSection("moving");
         ((EntityBridge) toReturn).bridge$setLocationAndAngles(toTransform);
-        fromWorld.profiler.endSection();
+        fromWorld.getProfiler().endSection();
 
         try (final PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext(PhaseTracker.SERVER).setTargetWorld(toWorld).buildAndSwitch()) {
             if (recreate) {
                 final boolean flag = toReturn.forceSpawn;
                 toReturn.forceSpawn = true;
-                toWorld.addEntity0(toReturn);
+                toWorld.addEntity(toReturn);
                 toReturn.forceSpawn = flag;
                 toWorld.updateEntityWithOptionalForce(toReturn, false);
             } else {

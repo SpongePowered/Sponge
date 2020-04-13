@@ -35,6 +35,7 @@ import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.Direction;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.common.accessor.block.DispenserBlockAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,9 +54,7 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
         if (projectile.isPresent()) {
             Direction enumfacing = getFacing((DispenserTileEntity) source);
             net.minecraft.entity.Entity projectileEntity = (net.minecraft.entity.Entity) projectile.get();
-            projectileEntity.motionX = enumfacing.getXOffset();
-            projectileEntity.motionY = enumfacing.getYOffset() + 0.1F;
-            projectileEntity.motionZ = enumfacing.getZOffset();
+            projectileEntity.setMotion(enumfacing.getXOffset(), enumfacing.getYOffset() + 0.1F, enumfacing.getZOffset());
         }
         return projectile;
     }
@@ -67,7 +66,7 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
 
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(DispenserTileEntity dispenser, Class<P> projectileClass, Item item) {
-        DefaultDispenseItemBehavior behavior = (DefaultDispenseItemBehavior) DispenserBlock.DISPENSE_BEHAVIOR_REGISTRY.getOrDefault(item);
+        DefaultDispenseItemBehavior behavior = (DefaultDispenseItemBehavior) DispenserBlockAccessor.accessor$DISPENSE_BEHAVIOR_REGISTRY().get(item);
         List<Entity> entityList = dispenser.getWorld().loadedEntityList;
         int numEntities = entityList.size();
         behavior.dispense(new ProxyBlockSource(dispenser.getWorld(), dispenser.getPos()), new ItemStack(item));

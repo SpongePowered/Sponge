@@ -45,14 +45,12 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@NonnullByDefault
 public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRecipe, SmeltingRecipe.Builder>
         implements SmeltingRecipe.Builder.ResultStep, SmeltingRecipe.Builder.IngredientStep, SmeltingRecipe.Builder.EndStep {
 

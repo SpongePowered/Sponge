@@ -43,7 +43,7 @@ public final class SpongeOneParamQueryType<T> extends SpongeCatalogType implemen
     }
 
     @Override
-    public Query of(T arg) {
+    public Query of(final T arg) {
         checkNotNull(arg);
         return this.newInstance.apply(arg);
     }

@@ -24,61 +24,14 @@
  */
 package org.spongepowered.common.weather;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeWeather implements Weather {
+public class SpongeWeather extends SpongeCatalogType implements Weather {
 
-    private final String id;
-    private final String name;
-
-    public SpongeWeather(String id, String name) {
-        this.id = checkNotNull(id);
-        this.name = checkNotNull(name);
+    public SpongeWeather(final CatalogKey key) {
+        super(key);
     }
 
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .add("name", this.name)
-                .toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-        SpongeWeather that = (SpongeWeather) o;
-        return Objects.equal(this.id, that.id) &&
-               Objects.equal(this.name, that.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return null;
-    }
 }

@@ -80,7 +80,6 @@ public class SpongeUserListWhitelist extends WhiteList {
         return getService().getWhitelistedProfiles().isEmpty();
     }
 
-    @Override
     @Nullable
     public com.mojang.authlib.GameProfile getByName(final String profileName) {
         for (final GameProfile profile : Sponge.getServiceManager().provideUnchecked(WhitelistService.class).getWhitelistedProfiles()) {

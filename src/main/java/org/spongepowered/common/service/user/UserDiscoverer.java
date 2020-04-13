@@ -42,6 +42,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.accessor.server.management.PlayerProfileCacheAccessor;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
@@ -138,7 +139,7 @@ class UserDiscoverer {
 
         // check mojang cache
         final PlayerProfileCache cache = SpongeImpl.getServer().getPlayerProfileCache();
-        final HashSet<String> names = Sets.newHashSet(cache.getUsernames());
+        final HashSet<String> names = Sets.newHashSet(((PlayerProfileCacheAccessor) cache).accessor$getUsernameToProfileEntryMap().keySet());
         if (names.contains(username.toLowerCase(Locale.ROOT))) {
             final GameProfile profile = cache.getGameProfileForUsername(username);
             if (profile != null) {
@@ -170,8 +171,8 @@ class UserDiscoverer {
         userCache.asMap().values().stream().map(User::getProfile).forEach(p -> profiles.put(p.getUniqueId(), p));
 
         // Add all known profiles from the data files
-        final SaveHandler saveHandler = (SaveHandler) SpongeImpl.getWorldManager().getDefaultWorld().getSaveHandler();
-        final String[] uuids = saveHandler.func_75754_f();
+        final SaveHandler saveHandler = SpongeImpl.getWorldManager().getDefaultWorld().getSaveHandler();
+        final String[] uuids = saveHandler.func_215771_d();
         final PlayerProfileCache profileCache = SpongeImpl.getServer().getPlayerProfileCache();
         for (final String playerUuid : uuids) {
 

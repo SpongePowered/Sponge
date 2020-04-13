@@ -49,7 +49,6 @@ import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.event.SpongeCauseStackManager;
-import org.spongepowered.common.event.SpongeCommonEventHooks;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
@@ -174,9 +173,6 @@ public final class SpongeImpl {
     public static void setSpongePlugin(PluginContainer common) {
         checkState(spongecommon == null);
         spongecommon = common;
-        if (isInitialized()) {
-            Sponge.getEventManager().registerListeners(spongecommon, new SpongeCommonEventHooks());
-        }
     }
 
     public static PluginContainer getSpongePlugin() {

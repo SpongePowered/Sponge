@@ -171,26 +171,24 @@ public class ItemDropData {
 
 
         private final boolean trace;
-        private final ITextComponent playerName;
+        private final UUID playerId;
         private final boolean dropAround;
         private final Random random;
-        private final UUID uuid;
 
         Player(Builder builder) {
             super(builder);
             this.trace = builder.trace;
-            this.playerName = builder.playerName;
+            this.playerId = builder.playerID;
             this.dropAround = builder.dropAround;
             this.random = builder.random;
-            this.uuid = builder.uuid;
         }
 
         public boolean isTrace() {
             return this.trace;
         }
 
-        public ITextComponent getPlayerName() {
-            return this.playerName;
+        public UUID getPlayerId() {
+            return this.playerId;
         }
 
         public boolean isDropAround() {
@@ -201,16 +199,13 @@ public class ItemDropData {
             return this.random;
         }
 
-        public UUID getUuid() {
-            return uuid;
-        }
 
         @Override
         public ItemEntity create(ServerWorld worldServer) {
             final ItemEntity entityItem = super.create(worldServer);
             entityItem.setPickupDelay(40);
             if (this.trace) {
-                entityItem.setThrowerId(this.uuid);
+                entityItem.setThrowerId(this.playerId);
             }
             return entityItem;
         }
@@ -229,20 +224,20 @@ public class ItemDropData {
             Player player = (Player) o;
             return this.trace == player.trace &&
                    this.dropAround == player.dropAround &&
-                   Objects.equal(this.playerName, player.playerName) &&
+                   Objects.equal(this.playerId, player.playerId) &&
                    Objects.equal(this.random, player.random);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(super.hashCode(), this.trace, this.playerName, this.dropAround, this.random);
+            return Objects.hashCode(super.hashCode(), this.trace, this.playerId, this.dropAround, this.random);
         }
 
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
                     .add("trace", this.trace)
-                    .add("playerName", this.playerName)
+                    .add("playerId", this.playerId)
                     .add("dropAround", this.dropAround)
                     .add("random", this.random)
                     .add("stack", this.stack)
@@ -255,15 +250,13 @@ public class ItemDropData {
 
         public static final class Builder extends ItemDropData.Builder {
 
-            UUID uuid;
             boolean trace;
-            ITextComponent playerName;
+            UUID playerID;
             boolean dropAround;
             Random random;
 
             Builder(PlayerEntity player) {
-                this.playerName = player.getName();
-                this.uuid = player.getUniqueID();
+                this.playerID = player.getUniqueID();
                 this.random = ((org.spongepowered.api.entity.Entity) player).getRandom();
             }
 

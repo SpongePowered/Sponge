@@ -77,7 +77,7 @@ public final class SpongeFindNearestAttackableTargetGoalBuilder extends SpongeTa
         this.checkSight = value.shouldCheckSight();
         this.checkOnlyNearby = value.shouldCheckOnlyNearby();
         this.chance = value.getChance();
-        this.predicate = (Predicate<? extends LivingEntity>) value.getFilter();
+        this.predicate = (Predicate<? extends LivingEntity>) (Predicate<?>) value.getFilter();
         return this;
     }
 

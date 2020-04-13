@@ -37,6 +37,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManager;
@@ -70,7 +72,7 @@ public class MemoryDataView implements DataView {
     private final DataQuery path;
     private final DataView.SafetyMode safety;
 
-    MemoryDataView(DataView.SafetyMode safety) {
+    MemoryDataView(final DataView.SafetyMode safety) {
         checkState(this instanceof DataContainer, "Cannot construct a root MemoryDataView without a container!");
         this.path = of();
         this.parent = this;
@@ -78,7 +80,7 @@ public class MemoryDataView implements DataView {
         this.safety = checkNotNull(safety, "Safety mode");
     }
 
-    private MemoryDataView(DataView parent, DataQuery path, DataView.SafetyMode safety) {
+    private MemoryDataView(final DataView parent, final DataQuery path, final DataView.SafetyMode safety) {
         checkArgument(path.getParts().size() >= 1, "Path must have at least one part");
         this.parent = parent;
         this.container = parent.getContainer();
@@ -98,7 +100,7 @@ public class MemoryDataView implements DataView {
 
     @Override
     public String getName() {
-        List<String> parts = this.path.getParts();
+        final List<String> parts = this.path.getParts();
         return parts.isEmpty() ? "" : parts.get(parts.size() - 1);
     }
 
@@ -108,16 +110,16 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public Set<DataQuery> getKeys(boolean deep) {
-        ImmutableSet.Builder<DataQuery> builder = ImmutableSet.builder();
+    public Set<DataQuery> getKeys(final boolean deep) {
+        final ImmutableSet.Builder<DataQuery> builder = ImmutableSet.builder();
 
-        for (Map.Entry<String, Object> entry : this.map.entrySet()) {
+        for (final Map.Entry<String, Object> entry : this.map.entrySet()) {
             builder.add(of(entry.getKey()));
         }
         if (deep) {
-            for (Map.Entry<String, Object> entry : this.map.entrySet()) {
+            for (final Map.Entry<String, Object> entry : this.map.entrySet()) {
                 if (entry.getValue() instanceof DataView) {
-                    for (DataQuery query : ((DataView) entry.getValue()).getKeys(true)) {
+                    for (final DataQuery query : ((DataView) entry.getValue()).getKeys(true)) {
                         builder.add(of(entry.getKey()).then(query));
                     }
                 }
@@ -127,10 +129,10 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public Map<DataQuery, Object> getValues(boolean deep) {
-        ImmutableMap.Builder<DataQuery, Object> builder = ImmutableMap.builder();
-        for (DataQuery query : this.getKeys(deep)) {
-            Object value = this.get(query).get();
+    public Map<DataQuery, Object> getValues(final boolean deep) {
+        final ImmutableMap.Builder<DataQuery, Object> builder = ImmutableMap.builder();
+        for (final DataQuery query : this.getKeys(deep)) {
+            final Object value = this.get(query).get();
             if (value instanceof DataView) {
                 builder.put(query, ((DataView) value).getValues(deep));
             } else {
@@ -141,31 +143,31 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public final boolean contains(DataQuery path) {
+    public final boolean contains(final DataQuery path) {
         checkNotNull(path, "path");
-        List<String> queryParts = path.getParts();
+        final List<String> queryParts = path.getParts();
 
-        String key = queryParts.get(0);
+        final String key = queryParts.get(0);
         if (queryParts.size() == 1) {
             return this.map.containsKey(key);
         }
-        Optional<DataView> subViewOptional = this.getUnsafeView(key);
+        final Optional<DataView> subViewOptional = this.getUnsafeView(key);
         return subViewOptional.isPresent() && subViewOptional.get().contains(path.popFirst());
     }
 
     @Override
-    public boolean contains(DataQuery path, DataQuery... paths) {
+    public boolean contains(final DataQuery path, final DataQuery... paths) {
         checkNotNull(path, "DataQuery cannot be null!");
         checkNotNull(paths, "DataQuery varargs cannot be null!");
         if (paths.length == 0) {
             return this.contains(path);
         }
-        List<DataQuery> queries = new ArrayList<>();
+        final List<DataQuery> queries = new ArrayList<>();
         queries.add(path);
-        for (DataQuery query : paths) {
+        for (final DataQuery query : paths) {
             queries.add(checkNotNull(query, "No null queries!"));
         }
-        for (DataQuery query : queries) {
+        for (final DataQuery query : queries) {
             if (!this.contains(query)) {
                 return false;
             }
@@ -174,17 +176,17 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public Optional<Object> get(DataQuery path) {
+    public Optional<Object> get(final DataQuery path) {
         checkNotNull(path, "path");
-        List<String> queryParts = path.getParts();
+        final List<String> queryParts = path.getParts();
 
-        int sz = queryParts.size();
+        final int sz = queryParts.size();
 
         if (sz == 0) {
             return Optional.<Object>of(this);
         }
 
-        String key = queryParts.get(0);
+        final String key = queryParts.get(0);
         if (sz == 1) {
             final Object object = this.map.get(key);
             if (object == null) {
@@ -213,18 +215,18 @@ public class MemoryDataView implements DataView {
             }
             return Optional.of(object);
         }
-        Optional<DataView> subViewOptional = this.getUnsafeView(key);
+        final Optional<DataView> subViewOptional = this.getUnsafeView(key);
         if (!subViewOptional.isPresent()) {
             return Optional.empty();
         }
-        DataView subView = subViewOptional.get();
+        final DataView subView = subViewOptional.get();
         return subView.get(path.popFirst());
 
     }
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public DataView set(DataQuery path, Object value) {
+    public DataView set(final DataQuery path, final Object value) {
         checkNotNull(path, "path");
         checkNotNull(value, "value");
         checkState(this.container != null);
@@ -235,16 +237,16 @@ public class MemoryDataView implements DataView {
         // TODO: this call to getDataManager each set can be cleaned up
         try {
             manager = Sponge.getDataManager();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             manager = null;
         }
 
-        List<String> parts = path.getParts();
-        String key = parts.get(0);
+        final List<String> parts = path.getParts();
+        final String key = parts.get(0);
         if (parts.size() > 1) {
-            DataQuery subQuery = of(key);
-            Optional<DataView> subViewOptional = this.getUnsafeView(subQuery);
-            DataView subView;
+            final DataQuery subQuery = of(key);
+            final Optional<DataView> subViewOptional = this.getUnsafeView(subQuery);
+            final DataView subView;
             if (!subViewOptional.isPresent()) {
                 this.createView(subQuery);
                 subView = (DataView) this.map.get(key);
@@ -260,14 +262,14 @@ public class MemoryDataView implements DataView {
             // views and to set the interior path correctly.
             this.copyDataView(path, (DataView) value);
         } else if (value instanceof DataSerializable) {
-            DataContainer valueContainer = ((DataSerializable) value).toContainer();
+            final DataContainer valueContainer = ((DataSerializable) value).toContainer();
             checkArgument(!(valueContainer).equals(this), "Cannot insert self-referencing DataSerializable");
             // see above for why this is copied
             this.copyDataView(path, valueContainer);
         } else if (value instanceof CatalogType) {
-            return set(path, ((CatalogType) value).getId());
+            return set(path, ((CatalogType) value).getKey());
         } else if (manager != null && manager.getTranslator(value.getClass()).isPresent()) {
-            DataTranslator serializer = manager.getTranslator(value.getClass()).get();
+            final DataTranslator serializer = manager.getTranslator(value.getClass()).get();
             final DataContainer container = serializer.translate(value);
             checkArgument(!container.equals(this), "Cannot insert self-referencing Objects!");
             // see above for why this is copied
@@ -305,24 +307,24 @@ public class MemoryDataView implements DataView {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setCollection(String key, Collection<?> value) {
-        ImmutableList.Builder<Object> builder = ImmutableList.builder();
+    private void setCollection(final String key, final Collection<?> value) {
+        final ImmutableList.Builder<Object> builder = ImmutableList.builder();
         @Nullable DataManager manager;
 
         try {
             manager = Sponge.getDataManager();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             manager = null;
         }
 
-        for (Object object : value) {
+        for (final Object object : value) {
             if (object instanceof DataSerializable) {
                 builder.add(((DataSerializable) object).toContainer());
             } else if (object instanceof DataView) {
                 if (this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.ALL_DATA_CLONED || this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.CLONED_ON_SET) {
-                    MemoryDataView view = new MemoryDataContainer(this.safety);
-                    DataView internalView = (DataView) object;
-                    for (Map.Entry<DataQuery, Object> entry : internalView.getValues(false).entrySet()) {
+                    final MemoryDataView view = new MemoryDataContainer(this.safety);
+                    final DataView internalView = (DataView) object;
+                    for (final Map.Entry<DataQuery, Object> entry : internalView.getValues(false).entrySet()) {
                         view.set(entry.getKey(), entry.getValue());
                     }
                     builder.add(view);
@@ -330,16 +332,17 @@ public class MemoryDataView implements DataView {
                     builder.add(object);
                 }
             } else if (object instanceof CatalogType) {
-                builder.add(((CatalogType) object).getId());
+                builder.add(((CatalogType) object).getKey());
             } else if (object instanceof Map) {
                 builder.add(this.ensureSerialization((Map) object));
             } else if (object instanceof Collection) {
                 builder.add(this.ensureSerialization((Collection) object));
             } else {
                 if (manager != null) {
-                    final Optional<? extends DataTranslator<?>> translatorOptional = manager.getTranslator(object.getClass());
+                    final Optional<? extends DataTranslator<?>> translatorOptional = manager.getTranslator(
+                        object.getClass());
                     if (translatorOptional.isPresent()) {
-                        DataTranslator translator = translatorOptional.get();
+                        final DataTranslator translator = translatorOptional.get();
                         final DataContainer container = translator.translate(object);
                         checkArgument(!container.equals(this), "Cannot insert self-referencing Objects!");
                         builder.add(container);
@@ -356,8 +359,8 @@ public class MemoryDataView implements DataView {
     }
 
     @SuppressWarnings("rawtypes")
-    private ImmutableList<Object> ensureSerialization(Collection<?> collection) {
-        ImmutableList.Builder<Object> objectBuilder = ImmutableList.builder();
+    private ImmutableList<Object> ensureSerialization(final Collection<?> collection) {
+        final ImmutableList.Builder<Object> objectBuilder = ImmutableList.builder();
         collection.forEach(element -> {
             if (element instanceof Collection) {
                 objectBuilder.add(this.ensureSerialization((Collection) element));
@@ -372,48 +375,48 @@ public class MemoryDataView implements DataView {
     }
 
     @SuppressWarnings("rawtypes")
-    private ImmutableMap<?, ?> ensureSerialization(Map<?, ?> map) {
-        ImmutableMap.Builder<Object, Object> builder = ImmutableMap.builder();
-        map.entrySet().forEach(entry -> {
-            if (entry.getValue() instanceof Map) {
-                builder.put(entry.getKey(), this.ensureSerialization((Map) entry.getValue()));
-            } else if (entry.getValue() instanceof DataSerializable) {
-                builder.put(entry.getKey(), ((DataSerializable) entry.getValue()).toContainer());
-            } else if (entry.getValue() instanceof Collection) {
-                builder.put(entry.getKey(), this.ensureSerialization((Collection) entry.getValue()));
+    private ImmutableMap<?, ?> ensureSerialization(final Map<?, ?> map) {
+        final ImmutableMap.Builder<Object, Object> builder = ImmutableMap.builder();
+        map.forEach((key, value) -> {
+            if (value instanceof Map) {
+                builder.put(key, this.ensureSerialization((Map) value));
+            } else if (value instanceof DataSerializable) {
+                builder.put(key, ((DataSerializable) value).toContainer());
+            } else if (value instanceof Collection) {
+                builder.put(key, this.ensureSerialization((Collection) value));
             } else {
-                builder.put(entry.getKey(), entry.getValue());
+                builder.put(key, value);
             }
         });
         return builder.build();
     }
 
-    private void setMap(String key, Map<?, ?> value) {
-        DataView view = this.createView(of(key));
-        for (Map.Entry<?, ?> entry : value.entrySet()) {
+    private void setMap(final String key, final Map<?, ?> value) {
+        final DataView view = this.createView(of(key));
+        for (final Map.Entry<?, ?> entry : value.entrySet()) {
             view.set(of(entry.getKey().toString()), entry.getValue());
         }
     }
 
-    private void copyDataView(DataQuery path, DataView value) {
-        Collection<DataQuery> valueKeys = value.getKeys(true);
-        for (DataQuery oldKey : valueKeys) {
+    private void copyDataView(final DataQuery path, final DataView value) {
+        final Collection<DataQuery> valueKeys = value.getKeys(true);
+        for (final DataQuery oldKey : valueKeys) {
             this.set(path.then(oldKey), value.get(oldKey).get());
         }
     }
 
     @Override
-    public DataView remove(DataQuery path) {
+    public DataView remove(final DataQuery path) {
         checkNotNull(path, "path");
-        List<String> parts = path.getParts();
+        final List<String> parts = path.getParts();
         if (parts.size() > 1) {
-            String subKey = parts.get(0);
-            DataQuery subQuery = of(subKey);
-            Optional<DataView> subViewOptional = this.getUnsafeView(subQuery);
+            final String subKey = parts.get(0);
+            final DataQuery subQuery = of(subKey);
+            final Optional<DataView> subViewOptional = this.getUnsafeView(subQuery);
             if (!subViewOptional.isPresent()) {
                 return this;
             }
-            DataView subView = subViewOptional.get();
+            final DataView subView = subViewOptional.get();
             subView.remove(path.popFirst());
         } else {
             this.map.remove(parts.get(0));
@@ -422,23 +425,23 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public DataView createView(DataQuery path) {
+    public DataView createView(final DataQuery path) {
         checkNotNull(path, "path");
-        List<String> queryParts = path.getParts();
+        final List<String> queryParts = path.getParts();
 
-        int sz = queryParts.size();
+        final int sz = queryParts.size();
 
         checkArgument(sz != 0, "The size of the query must be at least 1");
 
-        String key = queryParts.get(0);
-        DataQuery keyQuery = of(key);
+        final String key = queryParts.get(0);
+        final DataQuery keyQuery = of(key);
 
         if (sz == 1) {
-            DataView result = new MemoryDataView(this, keyQuery, this.safety);
+            final DataView result = new MemoryDataView(this, keyQuery, this.safety);
             this.map.put(key, result);
             return result;
         }
-        DataQuery subQuery = path.popFirst();
+        final DataQuery subQuery = path.popFirst();
         DataView subView = (DataView) this.map.get(key);
         if (subView == null) {
             subView = new MemoryDataView(this.parent, keyQuery, this.safety);
@@ -448,11 +451,11 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public DataView createView(DataQuery path, Map<?, ?> map) {
+    public DataView createView(final DataQuery path, final Map<?, ?> map) {
         checkNotNull(path, "path");
-        DataView section = this.createView(path);
+        final DataView section = this.createView(path);
 
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
+        for (final Map.Entry<?, ?> entry : map.entrySet()) {
             if (entry.getValue() instanceof Map) {
                 section.createView(of('.', entry.getKey().toString()), (Map<?, ?>) entry.getValue());
             } else {
@@ -463,17 +466,17 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public Optional<DataView> getView(DataQuery path) {
+    public Optional<DataView> getView(final DataQuery path) {
         return this.get(path).filter(obj -> obj instanceof DataView).map(obj -> (DataView) obj);
     }
 
     @Override
-    public Optional<? extends Map<?, ?>> getMap(DataQuery path) {
-        Optional<Object> val = this.get(path);
+    public Optional<? extends Map<?, ?>> getMap(final DataQuery path) {
+        final Optional<Object> val = this.get(path);
         if (val.isPresent()) {
             if (val.get() instanceof DataView) {
-                ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-                for (Map.Entry<DataQuery, Object> entry : ((DataView) val.get()).getValues(false).entrySet()) {
+                final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+                for (final Map.Entry<DataQuery, Object> entry : ((DataView) val.get()).getValues(false).entrySet()) {
                     builder.put(entry.getKey().asString('.'), this.ensureMappingOf(entry.getValue()));
                 }
                 return Optional.of(builder.build());
@@ -485,22 +488,22 @@ public class MemoryDataView implements DataView {
     }
 
     @SuppressWarnings("rawtypes")
-    private Object ensureMappingOf(Object object) {
+    private Object ensureMappingOf(final Object object) {
         if (object instanceof DataView) {
             final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-            for (Map.Entry<DataQuery, Object> entry : ((DataView) object).getValues(false).entrySet()) {
+            for (final Map.Entry<DataQuery, Object> entry : ((DataView) object).getValues(false).entrySet()) {
                 builder.put(entry.getKey().asString('.'), this.ensureMappingOf(entry.getValue()));
             }
             return builder.build();
         } else if (object instanceof Map) {
             final ImmutableMap.Builder<Object, Object> builder = ImmutableMap.builder();
-            for (Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
+            for (final Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
                 builder.put(entry.getKey().toString(), this.ensureMappingOf(entry.getValue()));
             }
             return builder.build();
         } else if (object instanceof Collection) {
             final ImmutableList.Builder<Object> builder = ImmutableList.builder();
-            for (Object entry : (Collection) object) {
+            for (final Object entry : (Collection) object) {
                 builder.add(this.ensureMappingOf(entry));
             }
             return builder.build();
@@ -509,11 +512,11 @@ public class MemoryDataView implements DataView {
         }
     }
 
-    private Optional<DataView> getUnsafeView(DataQuery path) {
+    private Optional<DataView> getUnsafeView(final DataQuery path) {
         return this.get(path).filter(obj -> obj instanceof DataView).map(obj -> (DataView) obj);
     }
 
-    private Optional<DataView> getUnsafeView(String path) {
+    private Optional<DataView> getUnsafeView(final String path) {
         final Object object = this.map.get(path);
         if (!(object instanceof DataView)) {
             return Optional.empty();
@@ -523,48 +526,48 @@ public class MemoryDataView implements DataView {
 
 
     @Override
-    public Optional<Boolean> getBoolean(DataQuery path) {
+    public Optional<Boolean> getBoolean(final DataQuery path) {
         return this.get(path).flatMap(Coerce::asBoolean);
     }
 
     @Override
-    public Optional<Byte> getByte(DataQuery path) {
+    public Optional<Byte> getByte(final DataQuery path) {
         return this.get(path).flatMap(Coerce::asByte);
     }
 
     @Override
-    public Optional<Short> getShort(DataQuery path) {
+    public Optional<Short> getShort(final DataQuery path) {
         return this.get(path).flatMap(Coerce::asShort);
     }
 
     @Override
-    public Optional<Integer> getInt(DataQuery path) {
+    public Optional<Integer> getInt(final DataQuery path) {
         return this.get(path).flatMap(Coerce::asInteger);
     }
 
     @Override
-    public Optional<Long> getLong(DataQuery path) {
+    public Optional<Long> getLong(final DataQuery path) {
         return this.get(path).flatMap(Coerce::asLong);
     }
 
     @Override
-    public Optional<Float> getFloat(DataQuery path) {
+    public Optional<Float> getFloat(final DataQuery path) {
         return this.get(path).flatMap(Coerce::asFloat);
     }
 
     @Override
-    public Optional<Double> getDouble(DataQuery path) {
+    public Optional<Double> getDouble(final DataQuery path) {
         return this.get(path).flatMap(Coerce::asDouble);
     }
 
     @Override
-    public Optional<String> getString(DataQuery path) {
+    public Optional<String> getString(final DataQuery path) {
         return this.get(path).flatMap(Coerce::asString);
     }
 
     @Override
-    public Optional<List<?>> getList(DataQuery path) {
-        Optional<Object> val = this.get(path);
+    public Optional<List<?>> getList(final DataQuery path) {
+        final Optional<Object> val = this.get(path);
         if (val.isPresent()) {
             if (val.get() instanceof List<?>) {
                 return Optional.<List<?>>of(Lists.newArrayList((List<?>) val.get()));
@@ -577,139 +580,139 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public Optional<List<String>> getStringList(DataQuery path) {
+    public Optional<List<String>> getStringList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asString)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asString)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
-    private Optional<List<?>> getUnsafeList(DataQuery path) {
+    private Optional<List<?>> getUnsafeList(final DataQuery path) {
         return this.get(path)
-                .filter(obj -> obj instanceof List<?> || obj instanceof Object[])
-                .map(obj -> {
+            .filter(obj -> obj instanceof List<?> || obj instanceof Object[])
+            .map(obj -> {
                     if (obj instanceof List<?>) {
                         return (List<?>) obj;
                     }
                     return Arrays.asList((Object[]) obj);
                 }
-        );
+            );
     }
 
     @Override
-    public Optional<List<Character>> getCharacterList(DataQuery path) {
+    public Optional<List<Character>> getCharacterList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asChar)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asChar)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<Boolean>> getBooleanList(DataQuery path) {
+    public Optional<List<Boolean>> getBooleanList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asBoolean)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asBoolean)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<Byte>> getByteList(DataQuery path) {
+    public Optional<List<Byte>> getByteList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asByte)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asByte)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<Short>> getShortList(DataQuery path) {
+    public Optional<List<Short>> getShortList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asShort)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asShort)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<Integer>> getIntegerList(DataQuery path) {
+    public Optional<List<Integer>> getIntegerList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asInteger)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asInteger)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<Long>> getLongList(DataQuery path) {
+    public Optional<List<Long>> getLongList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asLong)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asLong)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<Float>> getFloatList(DataQuery path) {
+    public Optional<List<Float>> getFloatList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asFloat)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asFloat)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<Double>> getDoubleList(DataQuery path) {
+    public Optional<List<Double>> getDoubleList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .map(Coerce::asDouble)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(Coerce::asDouble)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<Map<?, ?>>> getMapList(DataQuery path) {
+    public Optional<List<Map<?, ?>>> getMapList(final DataQuery path) {
         return this.getUnsafeList(path).<List<Map<?, ?>>>map(list ->
-                list.stream()
-                        .filter(obj -> obj instanceof Map<?, ?>)
-                        .map(obj -> (Map<?, ?>) obj)
-                        .collect(Collectors.toList())
+            list.stream()
+                .filter(obj -> obj instanceof Map<?, ?>)
+                .map(obj -> (Map<?, ?>) obj)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public Optional<List<DataView>> getViewList(DataQuery path) {
+    public Optional<List<DataView>> getViewList(final DataQuery path) {
         return this.getUnsafeList(path).map(list ->
-                list.stream()
-                        .filter(obj -> obj instanceof DataView)
-                        .map(obj -> (DataView) obj)
-                        .collect(Collectors.toList())
+            list.stream()
+                .filter(obj -> obj instanceof DataView)
+                .map(obj -> (DataView) obj)
+                .collect(Collectors.toList())
         );
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataSerializable> Optional<T> getSerializable(DataQuery path, Class<T> clazz) {
+    public <T extends DataSerializable> Optional<T> getSerializable(final DataQuery path, final Class<T> clazz) {
         checkNotNull(path, "path");
         checkNotNull(clazz, "clazz");
         if (clazz.isAssignableFrom(CatalogType.class)) {
@@ -720,32 +723,33 @@ public class MemoryDataView implements DataView {
         }
 
         return this.getUnsafeView(path).flatMap(view -> Sponge.getDataManager().getBuilder(clazz)
-                .flatMap(builder -> builder.build(view))
+            .flatMap(builder -> builder.build(view))
         );
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataSerializable> Optional<List<T>> getSerializableList(DataQuery path, Class<T> clazz) {
+    public <T extends DataSerializable> Optional<List<T>> getSerializableList(final DataQuery path, final Class<T> clazz) {
         checkNotNull(path, "path");
         checkNotNull(clazz, "clazz");
         return Stream.<Supplier<Optional<List<T>>>>of(
             () -> {
                 if (clazz.isAssignableFrom(CatalogType.class)) {
-                    return (Optional<List<T>>) (Optional<?>) this.getCatalogTypeList(path, (Class<? extends CatalogType>) clazz);
+                    return (Optional<List<T>>) (Optional<?>) this.getCatalogTypeList(path,
+                        (Class<? extends CatalogType>) clazz);
                 }
                 return Optional.empty();
             },
             () -> this.getViewList(path).flatMap(list ->
-                    Sponge.getDataManager().getBuilder(clazz).map(builder ->
-                            list.stream()
-                                    .map(builder::build)
-                                    .filter(Optional::isPresent)
-                                    .map(Optional::get)
-                                    .collect(Collectors.toList())
-                    )
+                Sponge.getDataManager().getBuilder(clazz).map(builder ->
+                    list.stream()
+                        .map(builder::build)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList())
                 )
             )
+        )
             .map(Supplier::get)
             .filter(Optional::isPresent)
             .map(Optional::get)
@@ -753,41 +757,46 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public <T extends CatalogType> Optional<T> getCatalogType(DataQuery path, Class<T> catalogType) {
+    public <T extends CatalogType> Optional<T> getCatalogType(final DataQuery path, final Class<T> catalogType) {
         checkNotNull(path, "path");
         checkNotNull(catalogType, "dummy type");
-        return this.getString(path).flatMap(string -> Sponge.getRegistry().getType(catalogType, string));
+        return this.getString(path)
+            .flatMap(string -> {
+                    return Sponge.getRegistry().getCatalogRegistry().get(catalogType,
+                        CatalogKey.resolve(string));
+                }
+            );
     }
 
     @Override
-    public <T extends CatalogType> Optional<List<T>> getCatalogTypeList(DataQuery path, Class<T> catalogType) {
+    public <T extends CatalogType> Optional<List<T>> getCatalogTypeList(final DataQuery path, final Class<T> catalogType) {
         checkNotNull(path, "path");
         checkNotNull(catalogType, "catalogType");
         return this.getStringList(path).map(list ->
-                list.stream()
-                        .map(string -> Sponge.getRegistry().getType(catalogType, string))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList())
+            list.stream()
+                .map(string -> Sponge.getRegistry().getCatalogRegistry().get(catalogType, CatalogKey.resolve(string)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList())
         );
     }
 
     @Override
-    public <T> Optional<T> getObject(DataQuery path, Class<T> objectClass) {
+    public <T> Optional<T> getObject(final DataQuery path, final Class<T> objectClass) {
         return this.getView(path).flatMap(view ->
-                Sponge.getDataManager().getTranslator(objectClass)
-                        .flatMap(serializer -> Optional.of(serializer.translate(view)))
+            Sponge.getDataManager().getTranslator(objectClass)
+                .flatMap(serializer -> Optional.of(serializer.translate(view)))
         );
     }
 
     @Override
-    public <T> Optional<List<T>> getObjectList(DataQuery path, Class<T> objectClass) {
+    public <T> Optional<List<T>> getObjectList(final DataQuery path, final Class<T> objectClass) {
         return this.getViewList(path).flatMap(viewList ->
-                Sponge.getDataManager().getTranslator(objectClass).map(serializer ->
-                        viewList.stream()
-                                .map(serializer::translate)
-                                .collect(Collectors.toList())
-                )
+            Sponge.getDataManager().getTranslator(objectClass).map(serializer ->
+                viewList.stream()
+                    .map(serializer::translate)
+                    .collect(Collectors.toList())
+            )
         );
     }
 
@@ -796,22 +805,22 @@ public class MemoryDataView implements DataView {
         final DataContainer container = new MemoryDataContainer(this.safety);
         this.getKeys(false)
             .forEach(query ->
-                    this.get(query).ifPresent(obj ->
-                        container.set(query, obj)
+                this.get(query).ifPresent(obj ->
+                    container.set(query, obj)
                 )
-        );
+            );
         return container;
     }
 
     @Override
-    public DataContainer copy(org.spongepowered.api.data.persistence.DataView.SafetyMode safety) {
+    public DataContainer copy(final org.spongepowered.api.data.persistence.DataView.SafetyMode safety) {
         final DataContainer container = new MemoryDataContainer(safety);
         this.getKeys(false)
             .forEach(query ->
-                    this.get(query).ifPresent(obj ->
-                        container.set(query, obj)
+                this.get(query).ifPresent(obj ->
+                    container.set(query, obj)
                 )
-        );
+            );
         return container;
     }
 
@@ -831,7 +840,7 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -841,7 +850,7 @@ public class MemoryDataView implements DataView {
         final MemoryDataView other = (MemoryDataView) obj;
 
         return Objects.equal(this.map.entrySet(), other.map.entrySet())
-               && Objects.equal(this.path, other.path);
+            && Objects.equal(this.path, other.path);
     }
 
     @Override

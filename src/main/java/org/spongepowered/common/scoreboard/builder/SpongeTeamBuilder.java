@@ -39,6 +39,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -46,14 +47,14 @@ public class SpongeTeamBuilder implements Team.Builder {
 
     @Nullable private String name;
     @Nullable private Text displayName;
-    private TextColor color;
+    private Supplier<? extends TextColor> color;
     private Text prefix;
     private Text suffix;
     private boolean allowFriendlyFire;
     private boolean showFriendlyInvisibles;
-    private Visibility nameTagVisibility;
-    private Visibility deathMessageVisibility;
-    private CollisionRule collisionRule;
+    private Supplier<? extends Visibility> nameTagVisibility;
+    private Supplier<? extends Visibility> deathMessageVisibility;
+    private Supplier<? extends CollisionRule> collisionRule;
     private Set<Text> members;
 
     public SpongeTeamBuilder() {
@@ -61,7 +62,7 @@ public class SpongeTeamBuilder implements Team.Builder {
     }
 
     @Override
-    public Team.Builder name(String name) {
+    public Team.Builder name(final String name) {
         this.name = checkNotNull(name, "Name cannot be null!");
         checkState(name.length() < 17, "Name is " + name.length() + " characters long! It must be at most 16.");
         if (this.displayName == null) {
@@ -71,13 +72,14 @@ public class SpongeTeamBuilder implements Team.Builder {
     }
 
     @Override
-    public Team.Builder color(TextColor color) {
-        this.color = checkNotNull(color, "Color cannot be null!");
+    public Team.Builder color(final TextColor color) {
+        checkNotNull(color, "Color cannot be null!");
+        this.color = () -> color;
         return this;
     }
 
     @Override
-    public Team.Builder displayName(Text displayName) throws IllegalArgumentException {
+    public Team.Builder displayName(final Text displayName) throws IllegalArgumentException {
         final int length = displayName.toPlain().length();
         checkState(length < 33, "DisplayName is " + length + " characters long! It must be at most 32.");
         this.displayName = checkNotNull(displayName, "DisplayName cannot be null!");
@@ -85,55 +87,58 @@ public class SpongeTeamBuilder implements Team.Builder {
     }
 
     @Override
-    public Team.Builder prefix(Text prefix) {
+    public Team.Builder prefix(final Text prefix) {
         this.prefix = checkNotNull(prefix, "Prefix cannot be null!");
         return this;
     }
 
     @Override
-    public Team.Builder suffix(Text suffix) {
+    public Team.Builder suffix(final Text suffix) {
         this.suffix = checkNotNull(suffix, "Suffix cannot be null!");
         return this;
     }
 
     @Override
-    public Team.Builder allowFriendlyFire(boolean enabled) {
+    public Team.Builder allowFriendlyFire(final boolean enabled) {
         this.allowFriendlyFire = enabled;
         return this;
     }
 
     @Override
-    public Team.Builder canSeeFriendlyInvisibles(boolean enabled) {
+    public Team.Builder canSeeFriendlyInvisibles(final boolean enabled) {
         this.showFriendlyInvisibles = enabled;
         return this;
     }
 
     @Override
-    public Team.Builder nameTagVisibility(Visibility visibility) {
-        this.nameTagVisibility = checkNotNull(visibility, "Visibility cannot be null!");
+    public Team.Builder nameTagVisibility(final Visibility visibility) {
+        checkNotNull(visibility, "Visibility cannot be null!");
+        this.nameTagVisibility = () -> visibility;
         return this;
     }
 
     @Override
-    public Team.Builder deathTextVisibility(Visibility visibility) {
-        this.deathMessageVisibility = checkNotNull(visibility, "Visibility cannot be null!");
+    public Team.Builder deathTextVisibility(final Visibility visibility) {
+        checkNotNull(visibility, "Visibility cannot be null!");
+        this.deathMessageVisibility = () -> visibility;
         return this;
     }
 
     @Override
-    public Team.Builder collisionRule(CollisionRule rule) {
-        this.collisionRule = checkNotNull(rule, "Collision rule cannot be null!");
+    public Team.Builder collisionRule(final CollisionRule rule) {
+        checkNotNull(rule, "Collision rule cannot be null!");
+        this.collisionRule = () -> rule;
         return this;
     }
 
     @Override
-    public Team.Builder members(Set<Text> members) {
+    public Team.Builder members(final Set<Text> members) {
         this.members = new HashSet<>(checkNotNull(members, "Members cannot be null!"));
         return this;
     }
 
     @Override
-    public Team.Builder from(Team value) {
+    public Team.Builder from(final Team value) {
         this.name(value.getName())
             .displayName(value.getDisplayName())
             .prefix(value.getPrefix())
@@ -169,17 +174,17 @@ public class SpongeTeamBuilder implements Team.Builder {
         checkState(this.name != null, "Name cannot be null!");
         checkState(this.displayName != null, "DisplayName cannot be null!");
 
-        Team team = (Team) new ScorePlayerTeam(null, this.name);
+        final Team team = (Team) new ScorePlayerTeam(null, this.name);
         team.setDisplayName(this.displayName);
-        team.setColor(this.color);
+        team.setColor(this.color.get());
         team.setPrefix(this.prefix);
         team.setSuffix(this.suffix);
         team.setAllowFriendlyFire(this.allowFriendlyFire);
         team.setCanSeeFriendlyInvisibles(this.showFriendlyInvisibles);
-        team.setNameTagVisibility(this.nameTagVisibility);
-        team.setDeathMessageVisibility(this.deathMessageVisibility);
-        team.setCollisionRule(this.collisionRule);
-        for (Text member: this.members) {
+        team.setNameTagVisibility(this.nameTagVisibility.get());
+        team.setDeathMessageVisibility(this.deathMessageVisibility.get());
+        team.setCollisionRule(this.collisionRule.get());
+        for (final Text member: this.members) {
             team.addMember(member);
         }
 

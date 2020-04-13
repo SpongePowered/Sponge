@@ -24,23 +24,13 @@
  */
 package org.spongepowered.common.data.nbt.validation;
 
-public class SpongeValidationType implements ValidationType {
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.common.SpongeCatalogType;
 
-    private final String id;
-    private final String name;
+public class SpongeValidationType extends SpongeCatalogType implements ValidationType {
 
-    public SpongeValidationType(String id, String name) {
-        this.id = id;
-        this.name = name;
+    public SpongeValidationType(final CatalogKey key) {
+        super(key);
     }
 
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
 }

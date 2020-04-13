@@ -37,47 +37,47 @@ public final class PlayerBorderListener implements IBorderListener {
     private final int dimensionId;
     private final MinecraftServer server;
 
-    public PlayerBorderListener(MinecraftServer server, int dimensionId) {
+    public PlayerBorderListener(final MinecraftServer server, final int dimensionId) {
         this.server = server;
         this.dimensionId = dimensionId;
     }
 
     @Override
-    public void onSizeChanged(WorldBorder border, double newSize) {
+    public void onSizeChanged(final WorldBorder border, final double newSize) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_SIZE));
     }
 
     @Override
-    public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time) {
+    public void onTransitionStarted(final WorldBorder border, final double oldSize, final double newSize, final long time) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.LERP_SIZE));
     }
 
     @Override
-    public void onCenterChanged(WorldBorder border, double x, double z) {
+    public void onCenterChanged(final WorldBorder border, final double x, final double z) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_CENTER));
     }
 
     @Override
-    public void onWarningTimeChanged(WorldBorder border, int newTime) {
+    public void onWarningTimeChanged(final WorldBorder border, final int newTime) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_TIME));
     }
 
     @Override
-    public void onWarningDistanceChanged(WorldBorder border, int newDistance) {
+    public void onWarningDistanceChanged(final WorldBorder border, final int newDistance) {
         this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_BLOCKS));
     }
 
     @Override
-    public void onDamageAmountChanged(WorldBorder border, double newAmount) {
+    public void onDamageAmountChanged(final WorldBorder border, final double newAmount) {
     }
 
     @Override
-    public void onDamageBufferChanged(WorldBorder border, double newSize) {
+    public void onDamageBufferChanged(final WorldBorder border, final double newSize) {
     }
 
-    private void sendBorderPacket(IPacket<?> packet) {
-        for (ServerPlayerEntity player : this.server.getPlayerList().getPlayers()) {
-            if (player.dimension == this.dimensionId && !((Player) player).getWorldBorder().isPresent()) {
+    private void sendBorderPacket(final IPacket<?> packet) {
+        for (final ServerPlayerEntity player : this.server.getPlayerList().getPlayers()) {
+            if (player.dimension.getId() == this.dimensionId && !((Player) player).getWorldBorder().isPresent()) {
                 player.connection.sendPacket(packet);
             }
         }

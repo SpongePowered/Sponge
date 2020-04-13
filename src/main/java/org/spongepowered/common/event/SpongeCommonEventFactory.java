@@ -447,59 +447,6 @@ public class SpongeCommonEventFactory {
         }
     }
 
-
-    /**
-     * This simulates the blocks a piston moves and calls the event for saner
-     * debugging.
-     *
-     * @return if the event was cancelled
-     */
-    public static boolean handlePistonEvent(
-            final ServerWorldBridge world, final ServerWorld.ServerBlockEventList list, final Object obj, final BlockPos pos, final Block blockIn,
-            final int eventId, final int eventParam) {
-        final boolean extending = (eventId == 0);
-        final net.minecraft.block.BlockState blockstate = ((net.minecraft.world.World) world).getBlockState(pos);
-        final net.minecraft.util.Direction direction = blockstate.get(DirectionalBlock.FACING);
-        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((World) world).state((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
-
-        // Sets toss out duplicate values (even though there shouldn't be any)
-        final HashSet<Location> locations = new HashSet<>();
-        locations.add(Location.of((org.spongepowered.api.world.World) world, pos.getX(), pos.getY(), pos.getZ()));
-
-        final PistonBlockStructureHelper movedBlocks = new PistonBlockStructureHelper((ServerWorld) world, pos, direction, extending);
-        movedBlocks.canMove(); // calculates blocks to be moved
-
-        Stream.concat(movedBlocks.getBlocksToMove().stream(), movedBlocks.getBlocksToDestroy().stream())
-                .map(block -> Location.of((org.spongepowered.api.world.World) world, block.getX(), block.getY(), block.getZ()))
-                .collect(Collectors.toCollection(() -> locations)); // SUPER
-                                                                    // efficient
-                                                                    // code!
-
-        // If the piston is extending and there are no blocks to destroy, add the offset location for protection purposes
-        if (extending && movedBlocks.getBlocksToDestroy().isEmpty()) {
-            final List<BlockPos> movedPositions = movedBlocks.getBlocksToMove();
-            final BlockPos offsetPos;
-            // If there are no blocks to move, add the offset of piston
-            if (movedPositions.isEmpty()) {
-                offsetPos = pos.offset(direction);
-            } else {
-                // Add the offset of last block set to move
-                offsetPos = movedPositions.get(movedPositions.size() - 1).offset(direction);
-            }
-            locations.add(Location.of((org.spongepowered.api.world.World) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
-        }
-
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            if (extending) {
-                frame.addContext(EventContextKeys.PISTON_EXTEND, (World) world);
-            } else {
-                frame.addContext(EventContextKeys.PISTON_RETRACT, (World) world);
-            }
-            return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), locatable)
-                .isCancelled();
-        }
-    }
-
     @SuppressWarnings("rawtypes")
     @Nullable
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(final World world, final BlockPos sourcePos, final EnumSet<net.minecraft.util.Direction> notifiedSides) {

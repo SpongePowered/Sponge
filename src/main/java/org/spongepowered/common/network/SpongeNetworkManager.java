@@ -33,6 +33,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.ChannelRegistrar;
@@ -44,36 +45,37 @@ import java.util.Optional;
 
 public abstract class SpongeNetworkManager implements ChannelRegistrar {
 
-    protected PluginContainer checkCreateChannelArgs(Object plugin, String channel) {
+    protected PluginContainer checkCreateChannelArgs(final Object plugin, final String channel) {
         if (checkNotNull(channel, "channel").length() > 20) {
             throw new ChannelRegistrationException("Channel name cannot be greater than 20 characters");
         }
-        Optional<PluginContainer> optPlugin = SpongeImpl.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
+        final Optional<PluginContainer> optPlugin = SpongeImpl.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
         checkArgument(optPlugin.isPresent(), "Provided plugin argument is not a plugin instance");
         return optPlugin.get();
     }
 
-    protected static SCustomPayloadPlayPacket getRegPacket(String channelName) {
+    protected static SCustomPayloadPlayPacket getRegPacket(final String channelName) {
         return new SCustomPayloadPlayPacket(new ResourceLocation("register"), new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 
-    protected static SCustomPayloadPlayPacket getUnregPacket(String channelName) {
+    protected static SCustomPayloadPlayPacket getUnregPacket(final String channelName) {
         return new SCustomPayloadPlayPacket(new ResourceLocation("unregister"), new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 
-    public static ChannelBuf toChannelBuf(ByteBuf buf) {
+    public static ChannelBuf toChannelBuf(final ByteBuf buf) {
         return (ChannelBuf) (buf instanceof PacketBuffer ? buf : new PacketBuffer(buf));
     }
 
     public static abstract class AbstractChannelBinding implements ChannelBinding {
 
         private final ChannelRegistrar registrar;
-        private final String channelName;
+        private final CatalogKey channelKey;
         private final PluginContainer owner;
 
-        public AbstractChannelBinding(ChannelRegistrar registrar, String channelName, PluginContainer owner) {
+        public AbstractChannelBinding(
+            final ChannelRegistrar registrar, final CatalogKey channelKey, final PluginContainer owner) {
             this.registrar = registrar;
-            this.channelName = channelName;
+            this.channelKey = channelKey;
             this.owner = owner;
         }
 
@@ -83,8 +85,8 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
         }
 
         @Override
-        public String getName() {
-            return this.channelName;
+        public CatalogKey getKey() {
+            return this.channelKey;
         }
 
         @Override
