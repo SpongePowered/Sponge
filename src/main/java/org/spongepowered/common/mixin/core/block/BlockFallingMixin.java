@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.event.ShouldFire;
 
 @Mixin(BlockFalling.class)
 public class BlockFallingMixin {
@@ -55,6 +56,9 @@ public class BlockFallingMixin {
     )
     private boolean impl$CheckIfAreaIsLoadedAndIfThrownEventIsntCancelled(final World world, final BlockPos pos, final BlockPos to) {
         if (world.isAreaLoaded(pos, to) && !((WorldBridge) world).bridge$isFake()) {
+            if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+                return true;
+            }
 
             final BlockPos actualPos = pos.add(32, 32, 32);
             final EntityType fallingBlock = EntityTypes.FALLING_BLOCK;

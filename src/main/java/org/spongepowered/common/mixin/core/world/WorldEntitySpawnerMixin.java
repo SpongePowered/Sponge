@@ -61,6 +61,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -235,7 +236,7 @@ public abstract class WorldEntitySpawnerMixin {
                                         }
 
                                         final EntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(spawnListEntry.entityClass);
-                                        if (entityType != null) {
+                                        if (entityType != null && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
                                             final Vector3d vector3d = new Vector3d(spawnX, spawnY, spawnZ);
                                             final Transform<org.spongepowered.api.world.World>
                                                 transform =
@@ -389,6 +390,9 @@ public abstract class WorldEntitySpawnerMixin {
         final EntityType entityType = WorldEntitySpawnerMixin.impl$spawnerEntityType;
         if (entityType == null) {
             return true; // Basically, we can't throw our own event.
+        }
+        if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+            return true;
         }
         final Vector3d vector3d = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
         final Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, vector3d);

@@ -60,6 +60,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.QueuedChunk;
@@ -179,6 +180,9 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         final EntityType type = EntityTypeRegistryModule.getInstance().getForClass(entityClass);
         if (type == null) {
             return null;
+        }
+        if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+            return EntityList.createEntityFromNBT(compound, world);
         }
         final NBTTagList positionList = compound.getTagList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
         final NBTTagList rotationList = compound.getTagList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);

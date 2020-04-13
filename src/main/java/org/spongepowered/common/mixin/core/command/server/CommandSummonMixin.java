@@ -29,6 +29,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandSummon;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -55,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
@@ -80,6 +82,9 @@ public abstract class CommandSummonMixin extends CommandBase {
         if (type == null) {
             return null;
         }
+        if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+            return AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
+        }
 
         final Transform<org.spongepowered.api.world.World> transform = new Transform<>(((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -97,10 +102,13 @@ public abstract class CommandSummonMixin extends CommandBase {
         final Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, new Vector3d(x, y, z));
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
-                    EntityTypes.LIGHTNING, transform);
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
+            ConstructEntityEvent.Pre event = null;
+            if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+                event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
+                        EntityTypes.LIGHTNING, transform);
+                SpongeImpl.postEvent(event);
+            }
+            if (event != null && event.isCancelled()) {
                 ci.cancel();
             } else {
                 final LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());

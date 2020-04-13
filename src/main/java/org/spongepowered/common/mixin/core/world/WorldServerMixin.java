@@ -600,12 +600,13 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 frame.pushCause(((org.spongepowered.api.world.World) this).getWeather());
                                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-                                final ConstructEntityEvent.Pre
-                                        constructEntityEvent =
-                                        SpongeEventFactory
-                                                .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.HORSE, transform);
-                                SpongeImpl.postEvent(constructEntityEvent);
-                                if (!constructEntityEvent.isCancelled()) {
+                                ConstructEntityEvent.Pre constructEntityEvent = null;
+                                if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+                                    constructEntityEvent = SpongeEventFactory
+                                                    .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.HORSE, transform);
+                                    SpongeImpl.postEvent(constructEntityEvent);
+                                }
+                                if (constructEntityEvent == null || !constructEntityEvent.isCancelled()) {
                                     // Sponge End
                                     final EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
                                     entityhorse.setTrap(true);
@@ -615,13 +616,13 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                                     // Sponge Start - Throw a construct event for the lightning
                                 }
 
-                                final ConstructEntityEvent.Pre
-                                        lightning =
-                                        SpongeEventFactory
-                                                .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING,
-                                                        transform);
-                                SpongeImpl.postEvent(lightning);
-                                if (!lightning.isCancelled()) {
+                                ConstructEntityEvent.Pre lightning = null;
+                                if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+                                    lightning = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING,
+                                            transform);
+                                    SpongeImpl.postEvent(lightning);
+                                }
+                                if (lightning == null || !lightning.isCancelled()) {
                                     final LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
                                     if (!SpongeImpl.postEvent(lightningPre)) {
                                         // Sponge End
@@ -635,12 +636,13 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 frame.pushCause(((org.spongepowered.api.world.World) this).getWeather());
                                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-                                final ConstructEntityEvent.Pre
-                                        event =
-                                        SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
-                                                EntityTypes.LIGHTNING, transform);
-                                SpongeImpl.postEvent(event);
-                                if (!event.isCancelled()) {
+                                ConstructEntityEvent.Pre event = null;
+                                if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+                                    event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
+                                                    EntityTypes.LIGHTNING, transform);
+                                    SpongeImpl.postEvent(event);
+                                }
+                                if (event == null || !event.isCancelled()) {
                                     final LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
                                     if (!SpongeImpl.postEvent(lightningPre)) {
                                         // Sponge End

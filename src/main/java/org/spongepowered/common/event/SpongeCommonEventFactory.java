@@ -1699,19 +1699,24 @@ public class SpongeCommonEventFactory {
 
         // SECOND throw the ConstructEntityEvent
         final Transform<World> suggested = new Transform<>((World) entity.world, new Vector3d(posX, posY, posZ));
-        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
-        frame.removeContext(EventContextKeys.SPAWN_TYPE);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            // Make sure the player is restoring inventories
-            if (mixinPlayer != null) {
-                mixinPlayer.bridge$shouldRestoreInventory(true);
+        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
+            frame.removeContext(EventContextKeys.SPAWN_TYPE);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                // Make sure the player is restoring inventories
+                if (mixinPlayer != null) {
+                    mixinPlayer.bridge$shouldRestoreInventory(true);
+                }
+                return null;
             }
-            return null;
+
+            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+        } else {
+            item = ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
         }
 
-        item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
         if (item == null) {
             // Make sure the player is restoring inventories
             if (mixinPlayer != null) {
