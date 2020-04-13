@@ -51,6 +51,7 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -147,8 +148,11 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         entities.add(spongeEntity);
         // We require spawn types. This is more of a sanity check to throw an IllegalStateException otherwise for the plugin developer to properly associate the type.
         final SpawnType require = Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        if (!event.isCancelled()) {
+        SpawnEntityEvent.Custom event = null;
+        if (ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM) {
+            event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+        }
+        if (event == null || !event.isCancelled()) {
             final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
             mixinWorldServer.bridge$forceSpawnEntity(entity);

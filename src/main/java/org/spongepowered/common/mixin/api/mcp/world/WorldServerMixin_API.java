@@ -82,6 +82,7 @@ import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBrid
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.mixin.core.world.chunk.ChunkAccessor;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
@@ -346,18 +347,22 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
 
     @Override
     public Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
-        final List<Entity> entitiesToSpawn = new NonNullArrayList<>();
-        entities.forEach(entitiesToSpawn::add);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
-        if (Sponge.getEventManager().post(event)) {
-            return ImmutableList.of();
+        Iterable<? extends Entity> ens = entities;
+        if (ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM) {
+            final List<Entity> entitiesToSpawn = new NonNullArrayList<>();
+            entities.forEach(entitiesToSpawn::add);
+            final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
+            if (Sponge.getEventManager().post(event)) {
+                return ImmutableList.of();
+            }
+            ens = event.getEntities();
         }
-        for (final Entity entity : event.getEntities()) {
+        for (final Entity entity : ens) {
             EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
 
         final ImmutableList.Builder<Entity> builder = ImmutableList.builder();
-        for (final Entity entity : event.getEntities()) {
+        for (final Entity entity : ens) {
             builder.add(entity);
         }
         return builder.build();

@@ -1145,14 +1145,15 @@ public final class PhaseTracker {
             return false;
         }
         // Sponge Start - throw an event
-        final List<Entity> entities = new ArrayList<>(1); // We need to use an arraylist so that filtering will work.
-        entities.add(entity);
+        SpawnEntityEvent.Custom event = null;
+        if (ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM) {
+            final List<Entity> entities = new ArrayList<>(1); // We need to use an arraylist so that filtering will work.
+            entities.add(entity);
 
-        final SpawnEntityEvent.Custom
-            event =
-            SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
-        if (entity instanceof EntityPlayer || !event.isCancelled()) {
+            event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            SpongeImpl.postEvent(event);
+        }
+        if (event == null || entity instanceof EntityPlayer || !event.isCancelled()) {
             EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
         // Sponge end

@@ -319,7 +319,9 @@ public class SpongeCommonEventFactory {
 
     public static boolean callSpawnEntityCustom(final List<Entity> entities, final PhaseContext<?> context) {
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
+        if (ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM) {
+            SpongeImpl.postEvent(event);
+        }
         return event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
     }
 
