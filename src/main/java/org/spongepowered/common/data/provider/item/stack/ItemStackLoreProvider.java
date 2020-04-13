@@ -41,7 +41,7 @@ import java.util.Optional;
 public class ItemStackLoreProvider extends ItemStackDataProvider<List<Text>> {
 
     public ItemStackLoreProvider() {
-        super(Keys.ITEM_LORE);
+        super(Keys.LORE);
     }
 
     @Override

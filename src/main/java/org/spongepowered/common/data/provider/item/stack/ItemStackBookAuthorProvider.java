@@ -41,7 +41,7 @@ import java.util.Optional;
 public class ItemStackBookAuthorProvider extends ItemStackDataProvider<Text> {
 
     public ItemStackBookAuthorProvider() {
-        super(Keys.BOOK_AUTHOR);
+        super(Keys.AUTHOR);
     }
 
     @Override

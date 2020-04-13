@@ -22,31 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity.areaeffectcloud;
+package org.spongepowered.common.data.provider.block;
 
-import net.minecraft.entity.AreaEffectCloudEntity;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.DirectionalBlock;
+import net.minecraft.block.PistonBlock;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.api.data.type.PistonType;
+import org.spongepowered.api.data.type.PistonTypes;
+import org.spongepowered.common.accessor.block.PistonBlockAccessor;
+import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
 
-public class AreaEffectCloudEntityParticleEffectProvider extends GenericMutableDataProvider<AreaEffectCloudEntity, ParticleEffect> {
+public class PistonTypeProvider extends BlockStateDataProvider<PistonType> {
 
-    public AreaEffectCloudEntityParticleEffectProvider() {
-        super(Keys.PARTICLE_EFFECT);
+    public PistonTypeProvider() {
+        super(Keys.PISTON_TYPE, PistonBlock.class);
     }
 
     @Override
-    protected Optional<ParticleEffect> getFrom(AreaEffectCloudEntity dataHolder) {
-        // TODO: Update particle effects and convert particle effect from particle data
-        return Optional.of(ParticleEffect.builder().type(ParticleTypes.ENTITY_EFFECT).build());
+    protected Optional<PistonType> getFrom(BlockState dataHolder) {
+        PistonBlockAccessor block = (PistonBlockAccessor) dataHolder.getBlock();
+        PistonType type = block.accessor$getIsSticky() ? PistonTypes.STICKY.get() : PistonTypes.NORMAL.get();
+        return Optional.of(type);
     }
 
     @Override
-    protected boolean set(AreaEffectCloudEntity dataHolder, ParticleEffect value) {
-        // TODO: Update particle effects and convert particle effect to particle data
-        return false;
+    protected Optional<BlockState> set(BlockState dataHolder, PistonType value) {
+        if (value == PistonTypes.NORMAL.get()) {
+            return Optional.of(Blocks.PISTON.getDefaultState().with(DirectionalBlock.FACING, dataHolder.get(DirectionalBlock.FACING)));
+        } else {
+            return Optional.of(Blocks.STICKY_PISTON.getDefaultState().with(DirectionalBlock.FACING, dataHolder.get(DirectionalBlock.FACING)));
+        }
     }
 }

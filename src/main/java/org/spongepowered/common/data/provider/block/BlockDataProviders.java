@@ -26,17 +26,22 @@ package org.spongepowered.common.data.provider.block;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.AbstractButtonBlock;
+import net.minecraft.block.AbstractCoralPlantBlock;
 import net.minecraft.block.AbstractFurnaceBlock;
+import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.AnvilBlock;
 import net.minecraft.block.AttachedStemBlock;
+import net.minecraft.block.BambooBlock;
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CactusBlock;
 import net.minecraft.block.CakeBlock;
+import net.minecraft.block.CampfireBlock;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.CocoaBlock;
+import net.minecraft.block.ConduitBlock;
 import net.minecraft.block.DaylightDetectorBlock;
 import net.minecraft.block.DetectorRailBlock;
 import net.minecraft.block.DirectionalBlock;
@@ -49,10 +54,12 @@ import net.minecraft.block.FallingBlock;
 import net.minecraft.block.FarmlandBlock;
 import net.minecraft.block.FenceBlock;
 import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.FourWayBlock;
 import net.minecraft.block.HopperBlock;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.HugeMushroomBlock;
 import net.minecraft.block.LadderBlock;
+import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.LeverBlock;
 import net.minecraft.block.MovingPistonBlock;
 import net.minecraft.block.NetherPortalBlock;
@@ -67,6 +74,9 @@ import net.minecraft.block.RedstoneWireBlock;
 import net.minecraft.block.RepeaterBlock;
 import net.minecraft.block.RotatedPillarBlock;
 import net.minecraft.block.SaplingBlock;
+import net.minecraft.block.ScaffoldingBlock;
+import net.minecraft.block.SeaPickleBlock;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.block.SnowyDirtBlock;
 import net.minecraft.block.StairsBlock;
@@ -86,24 +96,30 @@ import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.IntegerProperty;
+import net.minecraft.state.properties.ChestType;
 import net.minecraft.state.properties.NoteBlockInstrument;
 import net.minecraft.state.properties.RedstoneSide;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.ChestAttachmentType;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.accessor.block.BedBlockAccessor;
+import org.spongepowered.common.accessor.block.BlockAccessor;
+import org.spongepowered.common.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.data.provider.BlockStateBooleanDataProvider;
 import org.spongepowered.common.data.provider.BlockStateBoundedIntDataProvider;
+import org.spongepowered.common.data.provider.BlockStateDataProvider;
 import org.spongepowered.common.data.provider.BlockStateDirectionDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
-import org.spongepowered.common.accessor.block.BlockAccessor;
-import org.spongepowered.common.accessor.block.FireBlockAccessor;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -140,10 +156,10 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
     private void registerHorizontalConnectedSides(Class<? extends Block> blockType,
             BooleanProperty north, BooleanProperty south, BooleanProperty east, BooleanProperty west) {
-        registerBoolean(blockType, Keys.CONNECTED_EAST, east);
-        registerBoolean(blockType, Keys.CONNECTED_WEST, west);
-        registerBoolean(blockType, Keys.CONNECTED_SOUTH, south);
-        registerBoolean(blockType, Keys.CONNECTED_NORTH, north);
+        registerBoolean(blockType, Keys.IS_CONNECTED_EAST, east);
+        registerBoolean(blockType, Keys.IS_CONNECTED_WEST, west);
+        registerBoolean(blockType, Keys.IS_CONNECTED_SOUTH, south);
+        registerBoolean(blockType, Keys.IS_CONNECTED_NORTH, north);
         register(new BlockDirectionalSetProvider(Keys.CONNECTED_DIRECTIONS, blockType, ImmutableMap.of(
                 Direction.EAST, east,
                 Direction.WEST, west,
@@ -153,11 +169,11 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
     private void registerHorizontalAndUpConnectedSides(Class<? extends Block> blockType,
             BooleanProperty north, BooleanProperty south, BooleanProperty east, BooleanProperty west, BooleanProperty up) {
-        registerBoolean(blockType, Keys.CONNECTED_EAST, east);
-        registerBoolean(blockType, Keys.CONNECTED_WEST, west);
-        registerBoolean(blockType, Keys.CONNECTED_SOUTH, south);
-        registerBoolean(blockType, Keys.CONNECTED_NORTH, north);
-        registerBoolean(blockType, Keys.CONNECTED_UP, up);
+        registerBoolean(blockType, Keys.IS_CONNECTED_EAST, east);
+        registerBoolean(blockType, Keys.IS_CONNECTED_WEST, west);
+        registerBoolean(blockType, Keys.IS_CONNECTED_SOUTH, south);
+        registerBoolean(blockType, Keys.IS_CONNECTED_NORTH, north);
+        registerBoolean(blockType, Keys.IS_CONNECTED_UP, up);
         register(new BlockDirectionalSetProvider(Keys.CONNECTED_DIRECTIONS, blockType, ImmutableMap.of(
                 Direction.EAST, east,
                 Direction.WEST, west,
@@ -174,8 +190,8 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // TODO other DataHolders: Location/BlockType
 
-        register(Keys.HARDNESS, state -> (double) ((BlockAccessor) state.getBlock()).accessor$getBlockHardness());
-        register(Keys.BLAST_RESISTANCE, state -> (double) ((BlockAccessor) state.getBlock()).accessor$getBlockResistance());
+        registerDoubleFloat(BlockState.class, Keys.HARDNESS, state -> ((BlockAccessor) state.getBlock()).accessor$getBlockHardness());
+        registerDoubleFloat(BlockState.class, Keys.BLAST_RESISTANCE, state -> ((BlockAccessor) state.getBlock()).accessor$getBlockResistance());
         register(Keys.IS_GRAVITY_AFFECTED, state -> state.getBlock() instanceof FallingBlock);
         register(Keys.REPRESENTED_INSTRUMENT, state -> (InstrumentType) (Object) NoteBlockInstrument.byState(state));
         register(Keys.IS_PASSABLE, state -> !state.getMaterial().blocksMovement());
@@ -186,15 +202,15 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         register(Keys.IS_SURROGATE_BLOCK, state -> ((BlockBridge) state.getBlock()).bridge$isDummy());
 
         register(new BlockMatterProvider());
-        register(new HeldItemProvider()); // TODO also for ItemStack???
-        register(new LightEmissionProvider()); // TODO also for ItemStack
+        register(new HeldItemProvider());
+        register(Keys.LIGHT_EMISSION, BlockState::getLightValue); // TODO also for ItemStack/BlockType?
 
         // AbstractBannerBlock
         register(new AbstractBannerBlockAttachedProvider());
 
         // AbstractSignBlock
         register(new AbstractSignBlockAttachedProvider());
-        // TODO: Waterlogged
+        registerBoolean(AbstractSignBlock.class, Keys.IS_WATERLOGGED, AbstractSignBlock.WATERLOGGED);
 
         // AbstractSkullBlock
         register(new AbstractSkullBlockAttachedProvider());
@@ -204,7 +220,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // AbstractFurnaceBlock
         registerDirection(AbstractFurnaceBlock.class, AbstractFurnaceBlock.FACING);
-        registerBoolean(AbstractFurnaceBlock.class, Keys.LIT, AbstractFurnaceBlock.LIT);
+        registerBoolean(AbstractFurnaceBlock.class, Keys.IS_LIT, AbstractFurnaceBlock.LIT);
 
         // AbstractRailBlock
         register(new AbstractRailBlockRailDirectionProvider());
@@ -220,16 +236,17 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // BedBlock
         registerBoolean(BedBlock.class, Keys.IS_OCCUPIED, BedBlock.OCCUPIED);
-        // TODO: Part
+        register(BedBlock.class, Keys.DYE_COLOR, b -> (DyeColor) (Object) ((BedBlockAccessor) b).accessor$getColor());
+        register(new BedBlockPortionProvider());
 
         // HugeMushroomBlock
-        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_EAST, HugeMushroomBlock.EAST);
-        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_WEST, HugeMushroomBlock.WEST);
-        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_NORTH, HugeMushroomBlock.NORTH);
-        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_SOUTH, HugeMushroomBlock.SOUTH);
-        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_UP, HugeMushroomBlock.UP);
-        registerBoolean(HugeMushroomBlock.class, Keys.BIG_MUSHROOM_PORES_DOWN, HugeMushroomBlock.DOWN);
-        register(new BlockDirectionalSetProvider(Keys.BIG_MUSHROOM_PORES, HugeMushroomBlock.class,
+        registerBoolean(HugeMushroomBlock.class, Keys.HAS_PORES_EAST, HugeMushroomBlock.EAST);
+        registerBoolean(HugeMushroomBlock.class, Keys.HAS_PORES_WEST, HugeMushroomBlock.WEST);
+        registerBoolean(HugeMushroomBlock.class, Keys.HAS_PORES_NORTH, HugeMushroomBlock.NORTH);
+        registerBoolean(HugeMushroomBlock.class, Keys.HAS_PORES_SOUTH, HugeMushroomBlock.SOUTH);
+        registerBoolean(HugeMushroomBlock.class, Keys.HAS_PORES_UP, HugeMushroomBlock.UP);
+        registerBoolean(HugeMushroomBlock.class, Keys.HAS_PORES_DOWN, HugeMushroomBlock.DOWN);
+        register(new BlockDirectionalSetProvider(Keys.PORES, HugeMushroomBlock.class,
                 ImmutableMap.<Direction, BooleanProperty>builder()
                         .put(Direction.EAST, HugeMushroomBlock.EAST)
                         .put(Direction.WEST, HugeMushroomBlock.WEST)
@@ -257,12 +274,23 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         // ChestBlock
         registerDirection(ChestBlock.class, ChestBlock.FACING);
         register(new ChestBlockConnectedDirectionsProvider());
-        register(new ChestBlockConnectedDirectionProvider(Keys.CONNECTED_EAST, Direction.EAST));
-        register(new ChestBlockConnectedDirectionProvider(Keys.CONNECTED_NORTH, Direction.NORTH));
-        register(new ChestBlockConnectedDirectionProvider(Keys.CONNECTED_SOUTH, Direction.SOUTH));
-        register(new ChestBlockConnectedDirectionProvider(Keys.CONNECTED_WEST, Direction.WEST));
+        register(new ChestBlockConnectedDirectionProvider(Keys.IS_CONNECTED_EAST, Direction.EAST));
+        register(new ChestBlockConnectedDirectionProvider(Keys.IS_CONNECTED_NORTH, Direction.NORTH));
+        register(new ChestBlockConnectedDirectionProvider(Keys.IS_CONNECTED_SOUTH, Direction.SOUTH));
+        register(new ChestBlockConnectedDirectionProvider(Keys.IS_CONNECTED_WEST, Direction.WEST));
 
-        // TODO: Connection Type, Waterlogged
+        register(new BlockStateDataProvider<ChestAttachmentType>(Keys.CHEST_ATTACHMENT, ChestBlock.class) {
+            @Override
+            protected Optional<ChestAttachmentType> getFrom(BlockState dataHolder) {
+                return Optional.of((ChestAttachmentType) (Object) dataHolder.get(ChestBlock.TYPE));
+            }
+
+            @Override
+            protected Optional<BlockState> set(BlockState dataHolder, ChestAttachmentType value) {
+                return Optional.of(dataHolder.with(ChestBlock.TYPE, (ChestType) (Object) value));
+            }
+        });
+        registerBoolean(ChestBlock.class, Keys.IS_WATERLOGGED, ChestBlock.WATERLOGGED);
 
         // DaylightDetectorBlock
         registerBoundedInt(DaylightDetectorBlock.class, Keys.POWER, DaylightDetectorBlock.POWER);
@@ -290,11 +318,11 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // EndPortalFrameBlock
         registerDirection(EndPortalFrameBlock.class, EndPortalFrameBlock.FACING);
-        // registerBoolean(EndPortalFrameBlock.class, Keys.HAS_EYE, EndPortalFrameBlock.EYE); // TODO
+        registerBoolean(EndPortalFrameBlock.class, Keys.IS_FILLED, EndPortalFrameBlock.EYE);
 
         // EnderChestBlock
         registerDirection(EnderChestBlock.class, EnderChestBlock.FACING);
-        // TODO: Waterlogged
+        registerBoolean(EnderChestBlock.class, Keys.IS_WATERLOGGED, EnderChestBlock.WATERLOGGED);
 
         // FarmlandBlock
         registerBoundedInt(FarmlandBlock.class, Keys.MOISTURE, FarmlandBlock.MOISTURE);
@@ -312,7 +340,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         registerDirection(HorizontalBlock.class, HorizontalBlock.HORIZONTAL_FACING);
 
         // HorizontalFaceBlock
-        // TODO: Attach Face
+        register(new BlockAttachmentSurfaceProvider());
 
         // HopperBlock
         registerDirection(HopperBlock.class, HopperBlock.FACING);
@@ -320,7 +348,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // LadderBlock
         registerDirection(LadderBlock.class, LadderBlock.FACING);
-        // TODO: Waterlogged
+        registerBoolean(LadderBlock.class, Keys.IS_WATERLOGGED, LadderBlock.WATERLOGGED);
 
         // LeverBlock
         registerBoolean(LeverBlock.class, Keys.IS_POWERED, LeverBlock.POWERED);
@@ -336,6 +364,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // PistonBlock
         registerBoolean(PistonBlock.class, Keys.IS_EXTENDED, PistonBlock.EXTENDED);
+        register(new PistonTypeProvider());
 
         // PistonHeadBlock
         // registerBoolean(PistonHeadBlock.class, Keys.SHORT, PistonHeadBlock.SHORT); // TODO
@@ -364,20 +393,23 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         register(new RedstoneWireBlockWireAttachmentProvider(Keys.WIRE_ATTACHMENT_NORTH, RedstoneWireBlock.NORTH));
         register(new RedstoneWireBlockWireAttachmentProvider(Keys.WIRE_ATTACHMENT_SOUTH, RedstoneWireBlock.SOUTH));
         register(new RedstoneWireBlockWireAttachmentsProvider(Keys.WIRE_ATTACHMENTS, RedstoneWireBlock.class, redstoneSides));
-        register(new RedstoneWireBlockConnectedProvider(Keys.CONNECTED_EAST, RedstoneWireBlock.EAST));
-        register(new RedstoneWireBlockConnectedProvider(Keys.CONNECTED_WEST, RedstoneWireBlock.WEST));
-        register(new RedstoneWireBlockConnectedProvider(Keys.CONNECTED_NORTH, RedstoneWireBlock.NORTH));
-        register(new RedstoneWireBlockConnectedProvider(Keys.CONNECTED_SOUTH, RedstoneWireBlock.SOUTH));
+        register(new RedstoneWireBlockConnectedProvider(Keys.IS_CONNECTED_EAST, RedstoneWireBlock.EAST));
+        register(new RedstoneWireBlockConnectedProvider(Keys.IS_CONNECTED_WEST, RedstoneWireBlock.WEST));
+        register(new RedstoneWireBlockConnectedProvider(Keys.IS_CONNECTED_NORTH, RedstoneWireBlock.NORTH));
+        register(new RedstoneWireBlockConnectedProvider(Keys.IS_CONNECTED_SOUTH, RedstoneWireBlock.SOUTH));
         register(new RedstoneWireBlockConnectedDirectionsProvider(Keys.CONNECTED_DIRECTIONS, RedstoneWireBlock.class, redstoneSides));
 
         // RedstoneDiodeBlock
         registerBoolean(RedstoneDiodeBlock.class, Keys.IS_POWERED, RedstoneDiodeBlock.POWERED);
 
         // RedstoneTorchBlock
-        registerBoolean(RedstoneTorchBlock.class, Keys.LIT, RedstoneTorchBlock.LIT);
+        registerBoolean(RedstoneTorchBlock.class, Keys.IS_LIT, RedstoneTorchBlock.LIT);
+
+        registerBoolean(CampfireBlock.class, Keys.IS_LIT, CampfireBlock.LIT);
+        registerBoolean(CampfireBlock.class, Keys.IS_WATERLOGGED, CampfireBlock.WATERLOGGED);
 
         // RepeaterBlock
-        registerBoundedInt(RepeaterBlock.class, Keys.DELAY, RepeaterBlock.DELAY);
+        registerBoundedInt(RepeaterBlock.class, Keys.REDSTONE_DELAY, RepeaterBlock.DELAY);
 
         // RotatedPillarBlock
         register(new AxisBlockAxisProvider(RotatedPillarBlock.class, RotatedPillarBlock.AXIS));
@@ -392,7 +424,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         registerBoundedInt(SnowBlock.class, Keys.LAYER, SnowBlock.LAYERS);
 
         // SnowyDirtBlock
-        registerBoolean(SnowyDirtBlock.class, Keys.SNOWED, SnowyDirtBlock.SNOWY);
+        registerBoolean(SnowyDirtBlock.class, Keys.IS_SNOWY, SnowyDirtBlock.SNOWY);
 
         // SpongeBlock
         register(new SpongeBlockIsWetProvider());
@@ -401,13 +433,16 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         registerDirection(StairsBlock.class, StairsBlock.FACING);
         register(new HalfBlockPortionProvider(StairsBlock.class, StairsBlock.HALF));
         register(new StairsBlockShapeProvider());
-        // TODO: Waterlogged
+        registerBoolean(StairsBlock.class, Keys.IS_WATERLOGGED, StairsBlock.WATERLOGGED);
 
         // StandingSignBlock
         register(new StandingSignBlockDirectionProvider());
 
         // StemBlock
         registerBoundedInt(StemBlock.class, Keys.GROWTH_STAGE, StemBlock.AGE);
+
+        // BambooBlock
+        registerBoundedInt(BambooBlock.class, Keys.GROWTH_STAGE, BambooBlock.PROPERTY_STAGE);
 
         // SkullBlock
         register(new SkullBlockDirectionProvider());
@@ -430,7 +465,11 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         registerBoolean(TrapDoorBlock.class, Keys.IS_OPEN, TrapDoorBlock.OPEN);
         registerBoolean(TrapDoorBlock.class, Keys.IS_POWERED, TrapDoorBlock.POWERED);
         register(new HalfBlockPortionProvider(TrapDoorBlock.class, TrapDoorBlock.HALF));
-        // TODO: Waterlogged
+        registerBoolean(TrapDoorBlock.class, Keys.IS_WATERLOGGED, TrapDoorBlock.WATERLOGGED);
+
+        // SlabBlock
+        register(new SlabBlockPortionProvider());
+        registerBoolean(SlabBlock.class, Keys.IS_WATERLOGGED, SlabBlock.WATERLOGGED);
 
         // TripWireBlock
         registerBoolean(TripWireBlock.class, Keys.IS_ATTACHED, TripWireBlock.ATTACHED);
@@ -453,7 +492,6 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
         // WallSignBlock
         registerDirection(WallSignBlock.class, WallSignBlock.FACING);
-        // TODO: Waterlogged
 
         // WallTorchBlock
         registerDirection(WallTorchBlock.class, WallTorchBlock.HORIZONTAL_FACING);
@@ -461,9 +499,20 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         // WallBlock
         registerHorizontalAndUpConnectedSides(WallBlock.class,
                 WallBlock.NORTH, WallBlock.SOUTH, WallBlock.EAST, WallBlock.WEST, WallBlock.UP);
-        // TODO: Waterlogged
 
         // WeightedPressurePlateBlock
         registerBoundedInt(WeightedPressurePlateBlock.class, Keys.POWER, WeightedPressurePlateBlock.POWER);
+
+        // Leaves
+        registerBoundedInt(LeavesBlock.class, Keys.DECAY_DISTANCE, LeavesBlock.DISTANCE);
+        registerBoolean(LeavesBlock.class, Keys.IS_PERSISTENT, LeavesBlock.PERSISTENT);
+
+        register(new FluidLevelProvider());
+
+        registerBoolean(AbstractCoralPlantBlock.class, Keys.IS_WATERLOGGED, AbstractCoralPlantBlock.WATERLOGGED);
+        registerBoolean(ConduitBlock.class, Keys.IS_WATERLOGGED, ConduitBlock.WATERLOGGED);
+        registerBoolean(FourWayBlock.class, Keys.IS_WATERLOGGED, FourWayBlock.WATERLOGGED);
+        registerBoolean(ScaffoldingBlock.class, Keys.IS_WATERLOGGED, ScaffoldingBlock.WATERLOGGED);
+        registerBoolean(SeaPickleBlock.class, Keys.IS_WATERLOGGED, SeaPickleBlock.WATERLOGGED);
     }
 }

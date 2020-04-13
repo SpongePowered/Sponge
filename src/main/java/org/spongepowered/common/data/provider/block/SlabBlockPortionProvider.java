@@ -22,28 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.tileentity;
+package org.spongepowered.common.data.provider.block;
 
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.state.properties.SlabType;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.SlabPortion;
+import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
-import java.util.Set;
+import java.util.Optional;
 
-@Mixin(AbstractFurnaceTileEntity.class)
-public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
+public class SlabBlockPortionProvider extends BlockStateDataProvider<SlabPortion> {
 
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.remainingFuel().asImmutable());
-        values.add(this.maxBurnTime().asImmutable());
-        values.add(this.passedCookTime().asImmutable());
-        values.add(this.maxCookTime().asImmutable());
-
-        return values;
+    SlabBlockPortionProvider() {
+        super(Keys.SLAB_PORTION, SlabBlock.class);
     }
 
+    @Override
+    protected Optional<SlabPortion> getFrom(BlockState dataHolder) {
+        SlabType slabType = dataHolder.get(SlabBlock.TYPE);
+        return Optional.of(((SlabPortion) (Object) slabType));
+    }
+
+    @Override
+    protected Optional<BlockState> set(BlockState dataHolder, SlabPortion value) {
+        return Optional.of(dataHolder.with(SlabBlock.TYPE, (SlabType) (Object) value));
+    }
 }

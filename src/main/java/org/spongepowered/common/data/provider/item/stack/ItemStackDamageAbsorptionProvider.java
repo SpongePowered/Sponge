@@ -22,28 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.tileentity;
+package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 
-import java.util.Set;
+import java.util.Optional;
 
-@Mixin(AbstractFurnaceTileEntity.class)
-public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
+public class ItemStackDamageAbsorptionProvider extends ItemStackDataProvider<Integer> {
 
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.remainingFuel().asImmutable());
-        values.add(this.maxBurnTime().asImmutable());
-        values.add(this.passedCookTime().asImmutable());
-        values.add(this.maxCookTime().asImmutable());
-
-        return values;
+    public ItemStackDamageAbsorptionProvider() {
+        super(Keys.DAMAGE_ABSORPTION);
     }
 
+    @Override
+    protected Optional<Integer> getFrom(ItemStack dataHolder) {
+        if (dataHolder.getItem() instanceof ArmorItem) {
+            final ArmorItem armor = (ArmorItem) dataHolder.getItem();
+            final int reduction = armor.getDamageReduceAmount();
+            return Optional.of(reduction);
+        }
+        return Optional.empty();
+    }
+
+
+    @Override
+    protected boolean supports(Item item) {
+        return item instanceof ArmorItem;
+    }
 }

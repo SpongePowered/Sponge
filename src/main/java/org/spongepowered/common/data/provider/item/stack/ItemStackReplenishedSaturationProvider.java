@@ -22,28 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.item.Food;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 
 import java.util.Optional;
 
-public class TameableEntityTamedProvider extends GenericMutableDataProvider<TameableEntity, Boolean> {
+import javax.annotation.Nullable;
 
-    public TameableEntityTamedProvider() {
-        super(Keys.IS_TAMED);
+public class ItemStackReplenishedSaturationProvider extends ItemStackDataProvider<Double> {
+
+    public ItemStackReplenishedSaturationProvider() {
+        super(Keys.REPLENISHED_SATURATION);
     }
 
     @Override
-    protected Optional<Boolean> getFrom(TameableEntity dataHolder) {
-        return Optional.of(dataHolder.isTamed());
+    protected Optional<Double> getFrom(ItemStack dataHolder) {
+        if (dataHolder.getItem().isFood()) {
+            @Nullable Food food = dataHolder.getItem().getFood();
+            if (food != null) {
+                // Translate's Minecraft's weird internal value to the actual saturation value
+                final double saturation = food.getSaturation() * food.getHealing() * 2.0;
+                return Optional.of(saturation);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
-    protected boolean set(TameableEntity dataHolder, Boolean value) {
-        dataHolder.setTamed(value);
-        return true;
+    protected boolean supports(Item item) {
+        return item.isFood();
     }
 }

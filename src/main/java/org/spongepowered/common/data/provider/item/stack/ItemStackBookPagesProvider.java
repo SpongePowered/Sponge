@@ -33,7 +33,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 public class ItemStackBookPagesProvider extends AbstractItemStackBookPagesProvider<Text> {
 
     public ItemStackBookPagesProvider() {
-        super(Keys.BOOK_PAGES);
+        super(Keys.PAGES);
     }
 
     @Override

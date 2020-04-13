@@ -57,6 +57,13 @@ public class ItemStackColorProvider extends ItemStackDataProvider<Color> {
     }
 
     @Override
+    protected boolean delete(ItemStack dataHolder) {
+        IDyeableArmorItem item = (IDyeableArmorItem) dataHolder.getItem();
+        item.removeColor(dataHolder);
+        return true;
+    }
+
+    @Override
     protected boolean supports(Item item) {
         return item instanceof IDyeableArmorItem;
     }

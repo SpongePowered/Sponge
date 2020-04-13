@@ -22,37 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common.accessor.entity.item;
 
-import net.minecraft.item.Food;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.TNTEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(TNTEntity.class)
+public interface TNTEntityAccessor {
 
-import javax.annotation.Nullable;
+    @Accessor("tntPlacedBy") void accessor$setTntPlacedBy(LivingEntity tntPlacedBy);
 
-public class ItemStackFoodRestorationProvider extends ItemStackDataProvider<Integer> {
-
-    public ItemStackFoodRestorationProvider() {
-        super(Keys.FOOD_RESTORATION);
-    }
-
-    @Override
-    protected Optional<Integer> getFrom(ItemStack dataHolder) {
-        if (dataHolder.getItem().isFood()) {
-            @Nullable Food food = dataHolder.getItem().getFood();
-            if (food != null) {
-                return Optional.of(food.getHealing());
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    protected boolean supports(Item item) {
-        return item.isFood();
-    }
 }

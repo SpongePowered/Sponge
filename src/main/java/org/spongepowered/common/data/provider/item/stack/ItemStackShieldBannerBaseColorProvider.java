@@ -40,7 +40,7 @@ import java.util.Optional;
 public class ItemStackShieldBannerBaseColorProvider extends ItemStackDataProvider<DyeColor> {
 
     public ItemStackShieldBannerBaseColorProvider() {
-        super(Keys.BANNER_BASE_COLOR);
+        super(Keys.DYE_COLOR);
     }
 
     @Override

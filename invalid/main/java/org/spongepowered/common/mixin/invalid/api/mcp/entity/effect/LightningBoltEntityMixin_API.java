@@ -62,7 +62,7 @@ public abstract class LightningBoltEntityMixin_API extends EntityMixin_API imple
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.harmful().asImmutable());
+        values.add(this.isEffectOnly().asImmutable());
         values.add(this.expirationDelay().asImmutable());
 
         return values;

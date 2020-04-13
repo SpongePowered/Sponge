@@ -22,28 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.tileentity;
+package org.spongepowered.common.accessor.entity.passive.fish;
 
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.entity.passive.fish.PufferfishEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.Set;
+@Mixin(PufferfishEntity.class)
+public interface PufferfishEntityAccessor {
 
-@Mixin(AbstractFurnaceTileEntity.class)
-public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.remainingFuel().asImmutable());
-        values.add(this.maxBurnTime().asImmutable());
-        values.add(this.passedCookTime().asImmutable());
-        values.add(this.maxCookTime().asImmutable());
-
-        return values;
+    @Invoker("getPuffSize") static float accessor$getPuffSize(int puffState) {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
+
+
 
 }

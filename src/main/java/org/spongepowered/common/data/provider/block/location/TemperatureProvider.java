@@ -37,7 +37,7 @@ import java.util.Optional;
 public class TemperatureProvider extends GenericMutableDataProvider<Location, Double> {
 
     public TemperatureProvider() {
-        super(Keys.TEMPERATURE);
+        super(Keys.BLOCK_TEMPERATURE);
     }
 
     @Override

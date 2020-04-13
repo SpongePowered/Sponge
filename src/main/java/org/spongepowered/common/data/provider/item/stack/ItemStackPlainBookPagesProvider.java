@@ -31,7 +31,7 @@ import org.spongepowered.api.data.Keys;
 public class ItemStackPlainBookPagesProvider extends AbstractItemStackBookPagesProvider<String> {
 
     public ItemStackPlainBookPagesProvider() {
-        super(Keys.PLAIN_BOOK_PAGES);
+        super(Keys.PLAIN_PAGES);
     }
 
     @Override

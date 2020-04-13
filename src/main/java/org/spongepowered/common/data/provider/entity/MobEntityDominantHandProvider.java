@@ -46,7 +46,7 @@ public class MobEntityDominantHandProvider extends GenericMutableDataProvider<Mo
 
     @Override
     protected boolean set(MobEntity dataHolder, HandPreference value) {
-        dataHolder.setLeftHanded(value.equals(HandPreferences.LEFT));
+        dataHolder.setLeftHanded(value.equals(HandPreferences.LEFT.get()));
         return true;
     }
 }

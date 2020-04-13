@@ -22,28 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.generic;
+package org.spongepowered.common.accessor.entity.monster;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
+import net.minecraft.entity.monster.PhantomEntity;
+import org.spongepowered.api.data.type.PhantomPhase;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
-
-public class InvulnerableTrackedInvulnerableProvider extends GenericMutableDataProvider<InvulnerableTrackedBridge, Boolean> {
-
-    public InvulnerableTrackedInvulnerableProvider() {
-        super(Keys.INVULNERABLE);
-    }
-
-    @Override
-    protected Optional<Boolean> getFrom(InvulnerableTrackedBridge dataHolder) {
-        return Optional.of(dataHolder.bridge$getIsInvulnerable());
-    }
-
-    @Override
-    protected boolean set(InvulnerableTrackedBridge dataHolder, Boolean value) {
-        dataHolder.bridge$setInvulnerable(value);
-        return true;
-    }
+@Mixin(PhantomEntity.class)
+public interface PhantomEntityAccessor {
+    @Accessor("attackPhase") PhantomPhase accessor$getAttackPhase();
+    @Accessor("attackPhase") void accessor$setAttackPhase(PhantomPhase phase);
 }

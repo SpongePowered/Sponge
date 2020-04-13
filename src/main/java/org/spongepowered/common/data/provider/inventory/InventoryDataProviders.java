@@ -45,11 +45,10 @@ public class InventoryDataProviders extends DataProviderRegistryBuilder {
     @Override
     public void register() {
         // Lens Providers
-        this.register(new GenericSlotLensDataProvider<>(Keys.EQUIPMENT_TYPE.get()));
-        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_INDEX.get()));
-        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_POSITION.get()));
-        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_SIDE.get()));
-
+        this.register(new GenericSlotLensDataProvider<>(Keys.EQUIPMENT_TYPE));
+        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_INDEX));
+        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_POSITION));
+        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_SIDE));
 
         this.register(new GenericImmutableInventoryDataProvider<Integer>(Keys.MAX_STACK_SIZE.get()) {
             @Override protected Optional<Integer> getFrom(Inventory dataHolder) {

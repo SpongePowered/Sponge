@@ -112,6 +112,34 @@ public abstract class DataProviderRegistryBuilder {
      * @param key The key the provider is bound to
      * @param getter The getter function
      * @param setter The setter function
+     * @param <H> The target data holder type
+     */
+    protected <H> void registerDoubleFloat(Class<H> target, Supplier<? extends Key<? extends Value<Double>>> key,
+            Function<H, Float> getter, BiConsumer<H, Float> setter) {
+        this.register(target, key.get(),
+                (holder) -> getter.apply(holder).doubleValue(),
+                (holder, dValue) -> setter.accept(holder, dValue.floatValue()));
+    }
+
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param getter The getter function
+     * @param <H> The target data holder type
+     */
+    protected <H> void registerDoubleFloat(Class<H> target, Supplier<? extends Key<? extends Value<Double>>> key, Function<H, Float> getter) {
+        this.register(target, key.get(), (holder) -> getter.apply(holder).doubleValue());
+    }
+
+    /**
+     * Builds and registers a new {@link DataProvider}.
+     *
+     * @param target The target type which the provider is supported by
+     * @param key The key the provider is bound to
+     * @param getter The getter function
+     * @param setter The setter function
      * @param <E> The element type of the key
      * @param <H> The target data holder type
      */

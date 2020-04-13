@@ -37,7 +37,7 @@ import java.util.Optional;
 public class BannerTileEntityBaseColorProvider extends GenericMutableDataProvider<BannerTileEntity, DyeColor> {
 
     public BannerTileEntityBaseColorProvider() {
-        super(Keys.BANNER_BASE_COLOR);
+        super(Keys.DYE_COLOR);
     }
 
     @Override
