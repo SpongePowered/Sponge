@@ -39,6 +39,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -90,7 +92,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
     public boolean isBlockProtected(final net.minecraft.world.World worldIn, final BlockPos pos, final EntityPlayer playerIn) {
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
         final IPhaseState<?> phaseState = PhaseTracker.getInstance().getCurrentState();
-        if (!phaseState.isInteraction()) {
+        if (!phaseState.isInteraction() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             // TODO BLOCK_PROTECTED flag
             if (SpongeCommonEventFactory.callChangeBlockEventPre((WorldServerBridge) worldIn, pos, playerIn).isCancelled()) {
                 return true;

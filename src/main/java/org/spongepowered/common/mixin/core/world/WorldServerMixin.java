@@ -1614,7 +1614,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
 
     @Override
     public void onDestroyBlock(final BlockPos pos, final boolean dropBlock, final CallbackInfoReturnable<Boolean> cir) {
-        if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
+        if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
             cir.setReturnValue(false);
         }
     }
