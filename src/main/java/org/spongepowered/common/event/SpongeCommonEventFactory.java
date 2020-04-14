@@ -1068,9 +1068,12 @@ public class SpongeCommonEventFactory {
             }
 
             // TODO: Add target side support
-            final CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(frame.getCurrentCause(), (BlockState) state,
-                    new Location<>((World) world, VecHelper.toVector3d(pos)), direction);
-            final boolean cancelled = SpongeImpl.postEvent(event);
+            boolean cancelled = false;
+            if (ShouldFire.COLLIDE_BLOCK_EVENT) {
+                final CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(frame.getCurrentCause(), (BlockState) state,
+                        new Location<>((World) world, VecHelper.toVector3d(pos)), direction);
+                cancelled = SpongeImpl.postEvent(event);
+            }
             if (!cancelled) {
                 final EntityBridge spongeEntity = (EntityBridge) entity;
                 if (!pos.equals(spongeEntity.bridge$getLastCollidedBlockPos())) {
@@ -1115,10 +1118,12 @@ public class SpongeCommonEventFactory {
                     side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
                 }
 
-                final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
-                        impactPoint, targetBlock.getState(),
-                        targetBlock.getLocation().get(), side);
-                cancelled = SpongeImpl.postEvent(event);
+                if (ShouldFire.COLLIDE_BLOCK_EVENT) {
+                    final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
+                            impactPoint, targetBlock.getState(),
+                            targetBlock.getLocation().get(), side);
+                    cancelled = SpongeImpl.postEvent(event);
+                }
                 // Track impact block if event is not cancelled
                 if (!cancelled && owner.isPresent()) {
                     final BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
