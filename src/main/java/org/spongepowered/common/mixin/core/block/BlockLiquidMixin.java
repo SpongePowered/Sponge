@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 @Mixin(BlockLiquid.class)
@@ -54,16 +55,18 @@ public abstract class BlockLiquidMixin extends BlockMixin {
     )
     private void impl$CheckForLiquidMixing(final World worldIn, final BlockPos pos, final IBlockState state,
         final CallbackInfoReturnable<Boolean> cir, final boolean flag, final Integer integer) {
-        final IBlockState newState = integer == 0 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.COBBLESTONE.getDefaultState();
-        final ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, pos, newState, null);
-        final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
-        if (event.isCancelled() || !transaction.isValid()) {
-            cir.setReturnValue(false);
-            return;
-        }
-        final boolean success = worldIn.setBlockState(pos, (IBlockState) transaction.getFinal().getState());
-        if (!success) {
-            cir.setReturnValue(false);
+        if (ShouldFire.CHANGE_BLOCK_EVENT_MODIFY) {
+            final IBlockState newState = integer == 0 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.COBBLESTONE.getDefaultState();
+            final ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, pos, newState, null);
+            final Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
+            if (event.isCancelled() || !transaction.isValid()) {
+                cir.setReturnValue(false);
+                return;
+            }
+            final boolean success = worldIn.setBlockState(pos, (IBlockState) transaction.getFinal().getState());
+            if (!success) {
+                cir.setReturnValue(false);
+            }
         }
     }
 

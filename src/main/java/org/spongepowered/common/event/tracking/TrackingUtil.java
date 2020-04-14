@@ -861,7 +861,9 @@ public final class TrackingUtil {
                 causeToUse = currentCause;
             }
             final ChangeBlockEvent.Post post = ((IPhaseState) context.state).createChangeBlockPostEvent(context, transactions, causeToUse);
-            SpongeImpl.postEvent(post);
+            if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
+                SpongeImpl.postEvent(post);
+            }
             return post;
         }
         return null;
