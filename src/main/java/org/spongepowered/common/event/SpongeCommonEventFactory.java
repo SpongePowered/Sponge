@@ -1042,7 +1042,9 @@ public class SpongeCommonEventFactory {
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
                 originalChannel, Optional.of(channel), formatter,
                 (Living) entity, entity.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY), messageCancelled);
-            SpongeImpl.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
+            if (ShouldFire.DESTRUCT_ENTITY_EVENT) {
+                SpongeImpl.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
+            }
             final Text message = event.getMessage();
             // Check the event isn't cancelled either. If it is, then don't spawn the message.
             if (!event.isCancelled() && !event.isMessageCancelled() && !message.isEmpty()) {

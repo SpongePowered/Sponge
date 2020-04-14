@@ -328,11 +328,13 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
     @Overwrite
     @Override
     public void onDeath(final DamageSource cause) {
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        final Optional<DestructEntityEvent.Death>
-                event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread);
-        if (event.map(Cancellable::isCancelled).orElse(true)) {
-            return;
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT) {
+            final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+            final Optional<DestructEntityEvent.Death>
+                    event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread);
+            if (event.map(Cancellable::isCancelled).orElse(true)) {
+                return;
+            }
         }
         super.onDeath(cause);
         this.setSize(0.2F, 0.2F);

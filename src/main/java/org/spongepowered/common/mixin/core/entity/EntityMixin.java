@@ -241,7 +241,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         this.trackedInWorld = tracked;
         // Since this is called during removeEntity from world, we can
         // post the removal event here, basically.
-        if (!tracked && this.impl$destructCause != null) {
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT && !tracked && this.impl$destructCause != null) {
             final MessageChannel originalChannel = MessageChannel.TO_NONE;
             SpongeImpl.postEvent(SpongeEventFactory.createDestructEntityEvent(
                     this.impl$destructCause, originalChannel, Optional.of(originalChannel),

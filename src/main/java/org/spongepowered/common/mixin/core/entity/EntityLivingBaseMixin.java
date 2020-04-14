@@ -91,6 +91,7 @@ import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
@@ -236,7 +237,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
         // This will transitively call the forge event
         final boolean isMainThread = !((WorldBridge) this.world).bridge$isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
-            if (isMainThread && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
+            if (ShouldFire.DESTRUCT_ENTITY_EVENT && isMainThread && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
                 this.impl$deathEventsPosted++;
                 if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause, isMainThread).map(Cancellable::isCancelled).orElse(true)) {
