@@ -37,6 +37,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -63,11 +64,16 @@ public final class DropInventoryState extends BasicInventoryPacketState {
                     for (EntityItem item : items) {
                         entities.add((Entity) item);
                     }
-                    final DropItemEvent.Dispense dropItemEvent =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(dropItemEvent);
-                    if (!dropItemEvent.isCancelled()) {
-                        processSpawnedEntities(player, dropItemEvent);
+                    if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
+                        final DropItemEvent.Dispense dropItemEvent =
+                                SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeImpl.postEvent(dropItemEvent);
+
+                        if (!dropItemEvent.isCancelled()) {
+                            processSpawnedEntities(player, dropItemEvent);
+                        }
+                    } else {
+                        processEntities(player, entities);
                     }
                 });
 

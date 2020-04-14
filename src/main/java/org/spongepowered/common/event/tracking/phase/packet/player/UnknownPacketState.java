@@ -120,17 +120,21 @@ public final class UnknownPacketState extends BasicPacketState {
                         .map(entity -> (Entity) entity)
                         .collect(Collectors.toList());
                     if (!entities.isEmpty()) {
-                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            frame.pushCause(player);
-                            frame.pushCause(affectedEntity);
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
-                                entities);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                processSpawnedEntities(player, event);
+                        if (ShouldFire.DROP_ITEM_EVENT) {
+                            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                                frame.pushCause(player);
+                                frame.pushCause(affectedEntity);
+                                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
+                                DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
+                                        entities);
+                                SpongeImpl.postEvent(event);
+                                if (!event.isCancelled()) {
+                                    processSpawnedEntities(player, event);
 
+                                }
                             }
+                        } else {
+                            processEntities(player, entities);
                         }
                     }
                 }
@@ -144,16 +148,20 @@ public final class UnknownPacketState extends BasicPacketState {
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
             if (!entities.isEmpty()) {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame.pushCause(player);
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-                    DropItemEvent.Custom event =
-                        SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
-                    SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        processSpawnedEntities(player, event);
+                if (ShouldFire.DROP_ITEM_EVENT) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.pushCause(player);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
+                        DropItemEvent.Custom event =
+                                SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            processSpawnedEntities(player, event);
 
+                        }
                     }
+                } else {
+                    processEntities(player, entities);
                 }
             }
 

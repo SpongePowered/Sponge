@@ -33,6 +33,8 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -88,9 +90,11 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
         // Forge always fires a living drop event even if nothing was captured
         // This allows mods such as Draconic Evolution to add items to the drop list
         if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            final ArrayList<Entity> entities = new ArrayList<>();
-            SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                final ArrayList<Entity> entities = new ArrayList<>();
+                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            }
             return;
         }
         context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
@@ -104,9 +108,15 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
                 // This will also provide the highest compatibility with mods such as Tinkers Construct
                 entityPlayer.inventory.clear();
             }
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
-            SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            } else {
+                for (Entity entity : entities) {
+                    EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                }
+            }
 
             // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
             // This avoids many issues with mods such as Tinkers Construct's soulbound items.
@@ -133,7 +143,13 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
                     entityPlayer.inventory.clear();
                 }
 
-                SpongeCommonEventFactory.callDropItemDestruct(itemEntities, context);
+                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                    SpongeCommonEventFactory.callDropItemDestruct(itemEntities, context);
+                } else {
+                    for (Entity entity : itemEntities) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                }
 
                 // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
                 // This avoids many issues with mods such as Tinkers Construct's soulbound items.

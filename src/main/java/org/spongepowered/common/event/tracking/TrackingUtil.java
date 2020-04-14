@@ -760,6 +760,12 @@ public final class TrackingUtil {
 
     private static void spawnItemEntitiesForBlockDrops(final Collection<EntityItem> entityItems, final BlockSnapshot newBlockSnapshot,
         final PhaseContext<?> phaseContext) {
+        if (!ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+            for (EntityItem entity : entityItems) {
+                EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+            }
+            return;
+        }
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = entityItems.stream()
                 .map(entity -> (Entity) entity)
@@ -775,19 +781,21 @@ public final class TrackingUtil {
     public static void spawnItemDataForBlockDrops(final Collection<ItemDropData> itemStacks, final BlockSnapshot oldBlockSnapshot,
         final PhaseContext<?> phaseContext) {
         final Vector3i position = oldBlockSnapshot.getPosition();
-        final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()
-                .map(ItemDropData::getStack)
-                .map(ItemStackUtil::snapshotOf)
-                .collect(Collectors.toList());
-        final ImmutableList<ItemStackSnapshot> originalSnapshots = ImmutableList.copyOf(itemSnapshots);
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(oldBlockSnapshot);
-            final DropItemEvent.Pre
-                dropItemEventPre =
-                SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), originalSnapshots, itemSnapshots);
-            SpongeImpl.postEvent(dropItemEventPre);
-            if (dropItemEventPre.isCancelled()) {
-                return;
+        if (ShouldFire.DROP_ITEM_EVENT) {
+            final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()
+                    .map(ItemDropData::getStack)
+                    .map(ItemStackUtil::snapshotOf)
+                    .collect(Collectors.toList());
+            final ImmutableList<ItemStackSnapshot> originalSnapshots = ImmutableList.copyOf(itemSnapshots);
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(oldBlockSnapshot);
+                final DropItemEvent.Pre
+                        dropItemEventPre =
+                        SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), originalSnapshots, itemSnapshots);
+                SpongeImpl.postEvent(dropItemEventPre);
+                if (dropItemEventPre.isCancelled()) {
+                    return;
+                }
             }
         }
         final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
@@ -809,11 +817,17 @@ public final class TrackingUtil {
                 })
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(oldBlockSnapshot);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            phaseContext.applyNotifierIfAvailable(notifier ->  frame.addContext(EventContextKeys.NOTIFIER, notifier));
-            SpongeCommonEventFactory.callDropItemDestruct(itemDrops, phaseContext);
+        if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(oldBlockSnapshot);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+                SpongeCommonEventFactory.callDropItemDestruct(itemDrops, phaseContext);
+            }
+        } else {
+            for (Entity item : itemDrops) {
+                EntityUtil.processEntitySpawn(item, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+            }
         }
     }
 

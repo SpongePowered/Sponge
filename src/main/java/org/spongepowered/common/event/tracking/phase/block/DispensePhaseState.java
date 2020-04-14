@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -55,8 +56,14 @@ final class DispensePhaseState extends BlockPhaseState {
         TrackingUtil.processBlockCaptures(phaseContext);
         phaseContext.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-                SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
+                if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                    SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
+                } else {
+                    for (EntityItem entity : items) {
+                        EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                    }
+                }
             });
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
@@ -72,8 +79,14 @@ final class DispensePhaseState extends BlockPhaseState {
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(drops -> {
                 drops.asMap().forEach((key, value) -> {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), phaseContext);
+                    if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), phaseContext);
+                    } else {
+                        for (EntityItem entity : value) {
+                            EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                        }
+                    }
                 });
             });
     }

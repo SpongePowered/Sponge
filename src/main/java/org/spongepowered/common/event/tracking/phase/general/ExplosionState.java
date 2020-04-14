@@ -123,8 +123,9 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                         EntityUtil.processEntitySpawnsFromEvent(context, event);
                     }
                 } else {
-                    items
-                        .forEach(item -> EntityUtil.processEntitySpawn((Entity) item, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context)));
+                    for (EntityItem item : items) {
+                        EntityUtil.processEntitySpawn((Entity) item, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
                 }
             })
         );

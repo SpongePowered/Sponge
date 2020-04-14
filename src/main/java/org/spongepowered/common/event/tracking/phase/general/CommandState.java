@@ -191,7 +191,9 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                         csm.pushCause(affectedEntity.get());
                         final DropItemEvent.Destruct destruct =
                             SpongeEventFactory.createDropItemEventDestruct(csm.getCurrentCause(), itemEntities);
-                        SpongeImpl.postEvent(destruct);
+                        if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                            SpongeImpl.postEvent(destruct);
+                        }
                         csm.popCause();
                         if (!destruct.isCancelled())
                         {

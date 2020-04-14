@@ -203,11 +203,15 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     for (final EntityItem item : items) {
                         entities.add((Entity) item);
                     }
-                    final DropItemEvent.Dispense dispense =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(dispense);
-                    if (!dispense.isCancelled()) {
-                        processSpawnedEntities(player, dispense);
+                    if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
+                        final DropItemEvent.Dispense dispense =
+                                SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeImpl.postEvent(dispense);
+                        if (!dispense.isCancelled()) {
+                            processSpawnedEntities(player, dispense);
+                        }
+                    } else {
+                        processEntities(player, entities);
                     }
                 });
             phaseContext.getPerEntityItemDropSupplier()

@@ -39,6 +39,8 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
@@ -82,16 +84,28 @@ final class BlockDecayPhaseState extends BlockPhaseState {
 
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
-                final List<Entity> entities = items.stream()
-                    .map(entity -> (Entity) entity)
-                    .collect(Collectors.toList());
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                    final List<Entity> entities = items.stream()
+                            .map(entity -> (Entity) entity)
+                            .collect(Collectors.toList());
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+                } else {
+                    for (EntityItem entity : items) {
+                        EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                }
             });
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+                } else {
+                    for (Entity entity : entities) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                }
 
             });
         context.getCapturedItemStackSupplier()
@@ -101,15 +115,27 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                     .collect(Collectors.toList());
                 final List<Entity> entities = (List<Entity>) (List<?>) items;
                 if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+                    if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                        SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+                    } else {
+                        for (Entity entity : entities) {
+                            EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                        }
+                    }
                 }
             });
 
         context.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(drops -> {
                 drops.asMap().forEach((key, value) -> {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), context);
+                    if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), context);
+                    } else {
+                        for (EntityItem entity : value) {
+                            EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                        }
+                    }
                 });
             });
 

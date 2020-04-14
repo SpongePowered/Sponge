@@ -80,17 +80,29 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
 
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
-                final ArrayList<Entity> entities = new ArrayList<>();
-                for (EntityItem item : items) {
-                    entities.add((Entity) item);
+                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                    final ArrayList<Entity> entities = new ArrayList<>();
+                    for (EntityItem item : items) {
+                        entities.add((Entity) item);
+                    }
+                    SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+                } else {
+                    for (EntityItem entity : items) {
+                        EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
                 }
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
             });
         context.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(drops -> {
                 drops.asMap().forEach((key, value) -> {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), context);
+                    if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), context);
+                    } else {
+                        for (EntityItem entity : value) {
+                            EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                        }
+                    }
                 });
             });
         context.getCapturedEntitySupplier()
@@ -117,8 +129,14 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                     .collect(Collectors.toList());
                 final List<Entity> entities = (List<Entity>) (List<?>) items;
                 if (!entities.isEmpty()) {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context);
+                    if (ShouldFire.DROP_ITEM_EVENT) {
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        SpongeCommonEventFactory.callDropItemCustom(entities, context);
+                    } else {
+                        for (EntityItem entity : items) {
+                            EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                        }
+                    }
                 }
                 drops.clear();
             }));

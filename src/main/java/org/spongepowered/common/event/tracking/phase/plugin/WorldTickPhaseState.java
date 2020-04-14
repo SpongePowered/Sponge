@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -31,6 +32,8 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -59,16 +62,22 @@ final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
         TrackingUtil.processBlockCaptures(phaseContext);
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    final LocatableBlock
-                        block =
-                        new SpongeLocatableBlockBuilder().world((World) phaseContext.getWorld()).position(key.getX(), key.getY(),
-                            key.getZ()).build();
-                    frame.pushCause(container);
-                    frame.pushCause(block);
-                    final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-                    SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
+                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        final LocatableBlock
+                                block =
+                                new SpongeLocatableBlockBuilder().world((World) phaseContext.getWorld()).position(key.getX(), key.getY(),
+                                        key.getZ()).build();
+                        frame.pushCause(container);
+                        frame.pushCause(block);
+                        final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
+                        SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
+                    }
+                } else {
+                    for (EntityItem entity : value) {
+                        EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                    }
                 }
 
             }));

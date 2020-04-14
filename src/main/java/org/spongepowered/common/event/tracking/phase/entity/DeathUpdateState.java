@@ -65,14 +65,20 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         context.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(items -> {
-                    final DamageSource damageSource = context.getDamageSource();
-                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        if (damageSource != null) {
-                            frame.pushCause(damageSource);
+                    if (ShouldFire.DROP_ITEM_EVENT) {
+                        final DamageSource damageSource = context.getDamageSource();
+                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            if (damageSource != null) {
+                                frame.pushCause(damageSource);
+                            }
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                            frame.pushCause(dyingEntity);
+                            SpongeCommonEventFactory.callDropItemCustom((List<Entity>) (List) items, context);
                         }
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        frame.pushCause(dyingEntity);
-                        SpongeCommonEventFactory.callDropItemCustom((List<Entity>) (List) items, context);
+                    } else {
+                        for (EntityItem entity : items) {
+                            EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                        }
                     }
                 });
         context.getCapturedEntitySupplier()

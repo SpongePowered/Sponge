@@ -1694,7 +1694,9 @@ public class SpongeCommonEventFactory {
         // FIRST we want to throw the DropItemEvent.PRE
         final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(),
             ImmutableList.of(snapshot), original);
-        SpongeImpl.postEvent(dropEvent);
+        if (ShouldFire.DROP_ITEM_EVENT) {
+            SpongeImpl.postEvent(dropEvent);
+        }
         if (dropEvent.isCancelled()) {
             if (mixinPlayer != null) {
                 mixinPlayer.bridge$shouldRestoreInventory(true);

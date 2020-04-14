@@ -153,14 +153,19 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
                             .map(entity1 -> (Entity) entity1)
                             .collect(Collectors.toList());
                         if (!entities.isEmpty()) {
-                            // TODO - Remove the frame modifications to uncomment this line so we can simplify our code.
-                            // SpongeCommonEventFactory.callDropItemCustom(entities, context);
-                            DropItemEvent.Custom event =
-                                SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
-                                    entities);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                processSpawnedEntities(player, event);
+                            if (ShouldFire.DROP_ITEM_EVENT) {
+                                // TODO - Remove the frame modifications to uncomment this line so we can simplify our code.
+                                // SpongeCommonEventFactory.callDropItemCustom(entities, context);
+                                DropItemEvent.Custom event =
+                                        SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
+                                                entities);
+                                SpongeImpl.postEvent(event);
+
+                                if (!event.isCancelled()) {
+                                    processSpawnedEntities(player, event);
+                                }
+                            } else {
+                                processEntities(player, entities);
                             }
                         }
                     }
@@ -174,11 +179,16 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
                     .map(entity1 -> (Entity) entity1)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
-                        entities);
-                    SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        processSpawnedEntities(player, event);
+                    if (ShouldFire.DROP_ITEM_EVENT) {
+                        DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
+                                entities);
+                        SpongeImpl.postEvent(event);
+
+                        if (!event.isCancelled()) {
+                            processSpawnedEntities(player, event);
+                        }
+                    } else {
+                        processEntities(player, entities);
                     }
                 }
 

@@ -24,12 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class CreativeInventoryPacketState extends BasicPacketState {
 
@@ -51,9 +57,17 @@ public final class CreativeInventoryPacketState extends BasicPacketState {
         final EntityPlayerMP player = context.getPacketPlayer();
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame.pushCause(player);
-                    SpongeCommonEventFactory.callDropItemDrop(player, items, context);
+                if (ShouldFire.DROP_ITEM_EVENT) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.pushCause(player);
+                        SpongeCommonEventFactory.callDropItemDrop(player, items, context);
+                    }
+                } else {
+                    final List<Entity> entities = new ArrayList<>(items.size());
+                    for (final EntityItem item : items) {
+                        entities.add((Entity) item);
+                    }
+                    processEntities(player, entities);
                 }
             });
     }

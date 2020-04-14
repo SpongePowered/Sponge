@@ -165,13 +165,19 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 });
         phaseContext.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
-                    final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                    for (final EntityItem entity : entities) {
-                        capturedEntities.add((Entity) entity);
+                    if (ShouldFire.DROP_ITEM_EVENT) {
+                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                        for (final EntityItem entity : entities) {
+                            capturedEntities.add((Entity) entity);
+                        }
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        SpongeCommonEventFactory.callDropItemCustom(capturedEntities, phaseContext);
+                        frame.removeContext(EventContextKeys.SPAWN_TYPE);
+                    } else {
+                        for (EntityItem entity : entities) {
+                            EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                        }
                     }
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemCustom(capturedEntities, phaseContext);
-                    frame.removeContext(EventContextKeys.SPAWN_TYPE);
                 });
         // This could be happening regardless whether block bulk captures are done or not.
         // Would depend on whether entity captures are done.
@@ -182,12 +188,18 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     final BlockPos blockPos = snapshot.getBlockPos();
                     final Collection<EntityItem> entityItems = map.get(blockPos);
                     if (!entityItems.isEmpty()) {
-                        frame.pushCause(snapshot);
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        final List<Entity> items = entityItems.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-                        SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
+                        if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                            frame.pushCause(snapshot);
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                            final List<Entity> items = entityItems.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
+                            SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
 
-                        frame.popCause();
+                            frame.popCause();
+                        } else {
+                            for (EntityItem entity : entityItems) {
+                                EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                            }
+                        }
                     }
                 }
 
@@ -198,8 +210,14 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                             .map(drop -> drop.create((WorldServer) tickingEntity.getWorld()))
                             .map(entity -> (Entity) entity)
                             .collect(Collectors.toList());
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
+                    if (ShouldFire.DROP_ITEM_EVENT) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
+                    } else {
+                        for (Entity entity : items) {
+                            EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                        }
+                    }
                 });
 
         // Some entities (DynamicTrees) can tell blocks to break themselves while they're ticking, and

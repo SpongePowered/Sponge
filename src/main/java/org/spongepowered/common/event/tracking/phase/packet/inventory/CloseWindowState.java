@@ -36,6 +36,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -84,7 +85,11 @@ public final class CloseWindowState extends BasicPacketState {
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of((Player) player));
+                    if (ShouldFire.DROP_ITEM_EVENT) {
+                        SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of((Player) player));
+                    } else {
+                        processEntities(player, entities);
+                    }
                 }
             });
             // Pre-merged items
@@ -97,7 +102,11 @@ public final class CloseWindowState extends BasicPacketState {
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of((Player) player));
+                    if (ShouldFire.DROP_ITEM_EVENT) {
+                        SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of((Player) player));
+                    } else {
+                        processEntities(player, entities);
+                    }
                 }
             });
         }

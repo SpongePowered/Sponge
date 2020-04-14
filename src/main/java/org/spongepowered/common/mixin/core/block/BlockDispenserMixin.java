@@ -60,6 +60,7 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -152,6 +153,10 @@ public abstract class BlockDispenserMixin extends BlockMixin {
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // If we captured nothing, simply set the slot contents and return
         if (context.getCapturedItemsOrEmptyList().isEmpty()) {
+            dispenser.setInventorySlotContents(index, stack);
+            return;
+        }
+        if (!ShouldFire.DROP_ITEM_EVENT) {
             dispenser.setInventorySlotContents(index, stack);
             return;
         }

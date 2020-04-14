@@ -43,6 +43,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -141,15 +142,19 @@ public final class AttackEntityPacketState extends BasicPacketState {
                             .map(data -> data.create(((WorldServer) player.world)))
                             .map(entity1 -> (Entity) entity1)
                             .collect(Collectors.toList());
-                        frame.pushCause(player);
-                        frame.pushCause(affectedEntity.get());
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                            frame.pushCause(player);
+                            frame.pushCause(affectedEntity.get());
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
-                        final DropItemEvent.Destruct destruct =
-                            SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
-                        SpongeImpl.postEvent(destruct);
-                        if (!destruct.isCancelled()) {
-                            processSpawnedEntities(player, destruct);
+                            final DropItemEvent.Destruct destruct =
+                                    SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
+                            SpongeImpl.postEvent(destruct);
+                            if (!destruct.isCancelled()) {
+                                processSpawnedEntities(player, destruct);
+                            }
+                        } else {
+                            processEntities(player, itemEntities);
                         }
                     }
                 }
@@ -167,11 +172,16 @@ public final class AttackEntityPacketState extends BasicPacketState {
                     }
                     final List<Entity> items = entry.getValue().stream().map(entity1 -> (Entity) entity1).collect(Collectors.toList());
 
-                    final DropItemEvent.Destruct destruct =
-                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), items);
-                    SpongeImpl.postEvent(destruct);
-                    if (!destruct.isCancelled()) {
-                        processSpawnedEntities(player, destruct);
+                    if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                        final DropItemEvent.Destruct destruct =
+                                SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), items);
+                        SpongeImpl.postEvent(destruct);
+
+                        if (!destruct.isCancelled()) {
+                            processSpawnedEntities(player, destruct);
+                        }
+                    } else {
+                        processEntities(player, items);
                     }
                 }
             }

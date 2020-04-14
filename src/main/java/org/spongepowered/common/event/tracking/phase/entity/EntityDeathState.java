@@ -35,6 +35,8 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
 import org.spongepowered.common.bridge.world.GameRulesBridge;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
@@ -98,9 +100,15 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                 entityPlayer.inventory.clear();
             }
 
-            try (final CauseStackManager.StackFrame internal = Sponge.getCauseStackManager().pushCauseFrame()) {
-                internal.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                try (final CauseStackManager.StackFrame internal = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    internal.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+                }
+            } else {
+                for (Entity entity : entities) {
+                    EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                }
             }
 
             // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
@@ -123,7 +131,9 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                     ((GameRulesBridge) entityPlayer.world.getGameRules()).bridge$setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY, "true");
                 }
             }
-            SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            }
 
             if (entityPlayer != null) {
                 if (((EntityPlayerBridge) entityPlayer).bridge$keepInventory()) {
