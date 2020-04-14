@@ -579,6 +579,9 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         if (ridingEntity == this.player || ridingEntity.getControllingPassenger() != this.player || ridingEntity != this.lowestRiddenEnt) {
             return ridingEntity;
         }
+        if (!ShouldFire.MOVE_ENTITY_EVENT) {
+            return ridingEntity;
+        }
 
         // Sponge Start - Movement event
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) ridingEntity;
