@@ -39,6 +39,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -51,7 +52,7 @@ public class ListenerChecker {
 
     private final Class<?> clazz;
     private Map<String, FieldData> fields = new HashMap<>();
-    private Map<Class<?>, FieldData> fieldClassMap = new HashMap<>();
+    private Map<Class<?>, FieldData> fieldClassMap = new IdentityHashMap<>();
 
 
     private static String getName(Class<?> clazz) {
