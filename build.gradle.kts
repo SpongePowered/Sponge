@@ -1,8 +1,24 @@
 import org.spongepowered.gradle.dev.SourceType
 
+buildscript {
+    repositories {
+        maven("https://repo.spongepowered.org/maven")
+    }
+    dependencies {
+        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
+    }
+}
+
+repositories {
+    maven("https://files.minecraftforge.net/maven")
+}
 plugins {
     id("org.spongepowered.gradle.sponge.common")
     id("net.minecraftforge.gradle")
+}
+
+apply {
+    plugin("org.spongepowered.mixin")
 }
 
 spongeDev {
@@ -10,18 +26,28 @@ spongeDev {
     addedSourceSets {
         register("mixins") {
             sourceType.set(SourceType.Mixin)
+            configurations += arrayOf("launch", "mixins", "minecraft")
         }
         register("accessors") {
             sourceType.set(SourceType.Accessor)
+            configurations += arrayOf("launch", "mixins", "minecraft")
+
         }
         register("launch") {
             sourceType.set(SourceType.Launch)
+            configurations += "launch"
         }
         register("launchWrapper") {
             dependsOn += "launch"
+            configurations += arrayOf("launch", "launchWrapper")
+        }
+        register("modLauncher") {
+            dependsOn += "launch"
+            configurations += arrayOf("launch", "modLauncher")
         }
         register("invalid") {
             sourceType.set(SourceType.Invalid)
+            configurations += arrayOf("launch", "mixins")
         }
     }
 }
@@ -53,9 +79,16 @@ tasks {
     }
 }
 
-val launch by sourceSets.getting
-val launchWrapper by sourceSets.getting
+val launch by configurations.creating
+val launchWrapper by configurations.creating
+val mixins by configurations.creating
+val modLauncher by configurations.creating
+mixins.extendsFrom(launch)
 
+configure<org.spongepowered.asm.gradle.plugins.MixinExtension>() {
+    add(sourceSets["mixins"], "mixins.common.refmap.json")
+    add(sourceSets["accessors"], "mixins.common.accessors.refmap.json")
+}
 dependencies {
     // Minecraft... duh
     minecraft("net.minecraft:" + project.properties["minecraftDep"] + ":" + project.properties["minecraftVersion"])
@@ -64,35 +97,41 @@ dependencies {
 
     // Database stuffs... likely needs to be looked atå
     implementation("com.zaxxer:HikariCP:2.6.3")
-    runtime("org.mariadb.jdbc:mariadb-java-client:2.0.3")
-    runtime("com.h2database:h2:1.4.196")
-    runtime("org.xerial:sqlite-jdbc:3.20.0")
+    implementation("org.mariadb.jdbc:mariadb-java-client:2.0.3")
+    implementation("com.h2database:h2:1.4.196")
+    implementation("org.xerial:sqlite-jdbc:3.20.0")
+
+    // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:6.2")
     implementation("org.ow2.asm:asm-tree:6.2")
-    "launchImplementation"("org.checkerframework:checker-qual:2.8.1")
-    "launchImplementation"("com.google.guava:guava:25.1-jre") {
+
+    // Launch Dependencies - Needed to bootstrap the engine(s)
+    launch("org.spongepowered:mixin:0.8")
+    launch("org.checkerframework:checker-qual:2.8.1")
+    launch("com.google.guava:guava:25.1-jre") {
         exclude(group ="com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
         exclude(group = "com.google.j2objc", module = "j2objc-annotations")
         exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
-    "launchImplementation"("org.spongepowered:mixin:0.8")
-    "launchImplementation"("org.ow2.asm:asm-tree:6.2")
-    "launchImplementation"("org.ow2.asm:asm-util:6.2")
-    "launchImplementation"("org.apache.logging.log4j:log4j-api:2.8.1")
+    launch("com.google.code.gson:gson:2.2.4")
+    launch("org.ow2.asm:asm-tree:6.2")
+    launch("org.ow2.asm:asm-util:6.2")
+    launch("org.apache.logging.log4j:log4j-api:2.8.1")
 
-    "launchWrapperImplementation"("net.minecraft:launchwrapper:1.11") {
+    // Mixins needs to be able to target api classes
+    mixins(spongeDev.api.get())
+
+    // And the LaunchWrapper bootstrap
+    launchWrapper("net.minecraft:launchwrapper:1.11") {
         exclude(module="lwjgl")
     }
-}
 
-// This is needed to associate the MC dependency to accessors.
-configurations {
-    val minecraft by getting
-    project.afterEvaluate {
-        val accessorsApi by getting
-        accessorsApi.extendsFrom(minecraft)
-    }
+    // The ModLauncher compatibility launch layer
+    modLauncher("cpw.mods:modlauncher:4.1.+")
+    modLauncher("org.ow2.asm:asm-commons:6.2")
+    modLauncher("cpw.mods:grossjava9hacks:1.1.+")
+    modLauncher("net.minecraftforge:accesstransformers:1.0.+:shadowed")
 }
 
