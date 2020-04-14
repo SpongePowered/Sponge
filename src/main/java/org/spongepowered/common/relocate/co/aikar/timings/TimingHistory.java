@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.relocate.co.aikar.timings;
 
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.Counter;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.MinuteReport;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.PingRecord;
@@ -71,7 +72,7 @@ public class TimingHistory {
     final TimingHistoryEntry[] entries;
     final Set<BlockEntityType> tileEntityTypeSet = Sets.newHashSet();
     final Set<EntityType> entityTypeSet = Sets.newHashSet();
-    final JsonObject worlds;
+//    final JsonObject worlds;
 
     TimingHistory() {
         this.endTime = System.currentTimeMillis() / 1000;
@@ -96,41 +97,41 @@ public class TimingHistory {
         }
 
         // Information about all loaded chunks/entities
-        this.worlds = JSONUtil.mapArrayToObject(SpongeImpl.getGame().getServer().getWorldManager().getWorlds(), (world) -> {
-            Map<RegionId, RegionData> regions = LoadingMap.newHashMap(RegionData.LOADER);
-            return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getProperties().getDirectoryName())), JSONUtil.mapArray(world.getLoadedChunks(), (chunk) -> {
-                RegionData data = regions.get(new RegionId(chunk.getChunkPosition().getX(), chunk.getChunkPosition().getZ()));
-
-                for (Entity entity : chunk.getEntities()) {
-                    if (entity.getType() == null) {
-                        continue;
-                    }
-                    data.entityCounts.get(entity.getType()).increment();
-                }
-
-                for (BlockEntity blockEntity : chunk.getBlockEntities()) {
-                    if (blockEntity.getType() == null) {
-                        continue;
-                    }
-                    data.tileEntityCounts.get(blockEntity.getType()).increment();
-                }
-
-                if (data.tileEntityCounts.isEmpty() && data.entityCounts.isEmpty()) {
-                    return null;
-                }
-                return JSONUtil.arrayOf(
-                        chunk.getChunkPosition().getX(),
-                        chunk.getChunkPosition().getZ(),
-                        JSONUtil.mapArrayToObject(data.entityCounts.entrySet(), (entry) -> {
-                            this.entityTypeSet.add(entry.getKey());
-                            return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entry.getKey()), entry.getValue().count());
-                        }),
-                        JSONUtil.mapArrayToObject(data.tileEntityCounts.entrySet(), (entry) -> {
-                            this.tileEntityTypeSet.add(entry.getKey());
-                            return JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(entry.getKey()), entry.getValue().count());
-                        }));
-            }));
-        });
+//        this.worlds = JSONUtil.mapArrayToObject(SpongeImpl.getGame().getServer().getWorldManager().getWorlds(), (world) -> {
+//            Map<RegionId, RegionData> regions = LoadingMap.newHashMap(RegionData.LOADER);
+//            return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getProperties().getDirectoryName())), JSONUtil.mapArray(world.getLoadedChunks(), (chunk) -> {
+//                RegionData data = regions.get(new RegionId(chunk.getChunkPosition().getX(), chunk.getChunkPosition().getZ()));
+//
+//                for (Entity entity : chunk.getEntities()) {
+//                    if (entity.getType() == null) {
+//                        continue;
+//                    }
+//                    data.entityCounts.get(entity.getType()).increment();
+//                }
+//
+//                for (BlockEntity blockEntity : chunk.getBlockEntities()) {
+//                    if (blockEntity.getType() == null) {
+//                        continue;
+//                    }
+//                    data.tileEntityCounts.get(blockEntity.getType()).increment();
+//                }
+//
+//                if (data.tileEntityCounts.isEmpty() && data.entityCounts.isEmpty()) {
+//                    return null;
+//                }
+//                return JSONUtil.arrayOf(
+//                        chunk.getChunkPosition().getX(),
+//                        chunk.getChunkPosition().getZ(),
+//                        JSONUtil.mapArrayToObject(data.entityCounts.entrySet(), (entry) -> {
+//                            this.entityTypeSet.add(entry.getKey());
+//                            return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entry.getKey()), entry.getValue().count());
+//                        }),
+//                        JSONUtil.mapArrayToObject(data.tileEntityCounts.entrySet(), (entry) -> {
+//                            this.tileEntityTypeSet.add(entry.getKey());
+//                            return JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(entry.getKey()), entry.getValue().count());
+//                        }));
+//            }));
+//        });
     }
     static class RegionData {
         final RegionId regionId;
@@ -213,7 +214,7 @@ public class TimingHistory {
                 .add("e", this.endTime)
                 .add("tk", this.totalTicks)
                 .add("tm", this.totalTime)
-                .add("w", this.worlds)
+//                .add("w", this.worlds)
                 .add("h", JSONUtil.mapArray(this.entries, (entry) -> entry.data.count == 0 ? null : entry.export()))
                 .add("mp", JSONUtil.mapArray(this.minuteReports, MinuteReport::export))
                 .build();

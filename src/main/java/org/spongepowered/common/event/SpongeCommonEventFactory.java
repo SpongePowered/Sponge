@@ -74,6 +74,7 @@ import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -115,6 +116,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -844,7 +846,7 @@ public class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(projectile);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
-                    ? ProjectileSource.UNKNOWN
+                    ? UnknownProjectileSource.UNKNOWN
                     : projectileSource);
             final Optional<User> owner = PhaseTracker.getInstance().getCurrentContext().getOwner();
             owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
@@ -961,7 +963,7 @@ public class SpongeCommonEventFactory {
 
     public static Optional<net.minecraft.world.Explosion> detonateExplosive(final ExplosiveBridge explosiveBridge, final Explosion.Builder builder) {
         final DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
-                Sponge.getCauseStackManager().getCurrentCause(), builder, (Explosive) explosiveBridge, builder.build()
+                Sponge.getCauseStackManager().getCurrentCause(), builder, (FusedExplosive) explosiveBridge, builder.build()
         );
         if (!Sponge.getEventManager().post(event)) {
             final Explosion explosion = event.getExplosionBuilder().build();

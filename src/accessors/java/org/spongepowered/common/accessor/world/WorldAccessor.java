@@ -44,7 +44,11 @@ public interface WorldAccessor {
 
     @Invoker("getPendingTileEntityAt") @Nullable TileEntity accessor$getPendingTileEntityAt(BlockPos pos);
 
-    @Invoker("isValid") boolean accessor$isValid(BlockPos pos);
+    @Invoker("isValid") static boolean accessor$isValid(BlockPos pos) {
+        throw new UnsupportedOperationException("Accessor not mixed in!");
+    }
 
-    @Invoker("isOutsideBuildHeight") boolean accessor$isOutsideBuildHeight(BlockPos pos);
+    @Invoker("isOutsideBuildHeight") static boolean accessor$isOutsideBuildHeight(BlockPos pos) {
+        throw new UnsupportedOperationException("Accessor not mixed in!");
+    }
 }

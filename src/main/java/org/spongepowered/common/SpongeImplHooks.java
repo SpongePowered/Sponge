@@ -511,7 +511,7 @@ public class SpongeImplHooks {
     }
 
     public static TileEntity onChunkGetTileDuringRemoval(final ServerWorld world, final BlockPos pos) {
-        if (((WorldAccessor) world).accessor$isOutsideBuildHeight(pos)) {
+        if (WorldAccessor.accessor$isOutsideBuildHeight(pos)) {
             return null;
         } else {
             TileEntity tileentity2 = null;
