@@ -1328,14 +1328,16 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         // Sponge start
         final Explosion originalExplosion = (Explosion) explosion;
         // Set up the pre event
-        final ExplosionEvent.Pre
-                event =
-                SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                        explosion, ((org.spongepowered.api.world.World) this));
-        if (SpongeImpl.postEvent(event)) {
-            return (Explosion) explosion;
+        if (ShouldFire.EXPLOSION_EVENT_PRE) {
+            final ExplosionEvent.Pre
+                    event =
+                    SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                            explosion, ((org.spongepowered.api.world.World) this));
+            if (SpongeImpl.postEvent(event)) {
+                return (Explosion) explosion;
+            }
+            explosion = event.getExplosion();
         }
-        explosion = event.getExplosion();
         final Explosion mcExplosion;
         try {
             // Since we already have the API created implementation Explosion, let's use it.

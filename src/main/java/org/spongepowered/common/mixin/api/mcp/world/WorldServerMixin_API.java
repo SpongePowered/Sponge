@@ -375,15 +375,17 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
         // Sponge start
         this.processingExplosion = true;
         // Set up the pre event
-        final ExplosionEvent.Pre
-            event =
-            SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                explosion, this);
-        if (SpongeImpl.postEvent(event)) {
-            this.processingExplosion = false;
-            return;
+        if (ShouldFire.EXPLOSION_EVENT_PRE) {
+            final ExplosionEvent.Pre
+                    event =
+                    SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                            explosion, this);
+            if (SpongeImpl.postEvent(event)) {
+                this.processingExplosion = false;
+                return;
+            }
+            explosion = event.getExplosion();
         }
-        explosion = event.getExplosion();
         final Explosion mcExplosion;
         try {
             // Since we already have the API created implementation Explosion, let's use it.
