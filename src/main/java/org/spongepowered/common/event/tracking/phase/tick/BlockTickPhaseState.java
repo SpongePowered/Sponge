@@ -141,12 +141,18 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         TrackingUtil.processBlockCaptures(context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (EntityItem entity : items) {
-                            capturedEntities.add((Entity) entity);
+                        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                            for (EntityItem entity : items) {
+                                EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                            }
+                        } else {
+                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (EntityItem entity : items) {
+                                capturedEntities.add((Entity) entity);
+                            }
+                            SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                         }
-                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
 
     }
@@ -161,10 +167,10 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
 
     @Override
     public boolean spawnEntityOrCapture(BlockTickContext context, Entity entity, int chunkX, int chunkZ) {
-        final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
         if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
             return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
         }
+        final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
             if (entity instanceof EntityXPOrb) {

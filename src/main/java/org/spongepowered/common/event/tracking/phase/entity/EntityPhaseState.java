@@ -29,6 +29,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -59,6 +61,12 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
     }
 
     void standardSpawnCapturedEntities(final PhaseContext<?> context, final List<? extends Entity> entities) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            for (Entity entity : entities) {
+                EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+            }
+            return;
+        }
         // Separate experience orbs from other entity drops
         final List<Entity> experience = entities.stream()
             .filter(entity -> entity instanceof ExperienceOrb)

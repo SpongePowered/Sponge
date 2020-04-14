@@ -31,6 +31,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -56,16 +58,28 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
             context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (Entity entity : entities) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                } else {
+                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                }
             });
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                for (final EntityItem entity : entities) {
-                    capturedEntities.add((Entity) entity);
-                }
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (EntityItem entity : entities) {
+                        EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                } else {
+                    final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                    for (final EntityItem entity : entities) {
+                        capturedEntities.add((Entity) entity);
+                    }
 
-                SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
+                    SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
+                }
             });
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
@@ -84,6 +98,9 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
 
     @Override
     public boolean spawnEntityOrCapture(final PlayerTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

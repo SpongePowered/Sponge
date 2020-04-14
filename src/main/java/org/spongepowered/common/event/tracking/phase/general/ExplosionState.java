@@ -101,9 +101,15 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         TrackingUtil.processBlockCaptures(context);
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                try (final CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (Entity entity : entities) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                } else {
+                    try (final CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
+                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                    }
                 }
             });
         context.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(drops -> drops.asMap()
@@ -144,11 +150,15 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
             }
             return true;
         }).orElseGet(() -> {
-            final ArrayList<Entity> entities = new ArrayList<>(1);
-            entities.add(entity);
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+            if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+            } else {
+                final ArrayList<Entity> entities = new ArrayList<>(1);
+                entities.add(entity);
+                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                }
             }
         });
 

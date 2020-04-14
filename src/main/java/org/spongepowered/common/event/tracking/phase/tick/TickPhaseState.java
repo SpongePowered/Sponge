@@ -33,7 +33,9 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -81,6 +83,12 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
 
     @Override
     public void postProcessSpawns(final C phaseContext, final ArrayList<Entity> entities) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            for (Entity entity : entities) {
+                EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+            }
+            return;
+        }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (!frame.getCurrentContext().get(EventContextKeys.SPAWN_TYPE).isPresent()) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);

@@ -43,6 +43,7 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -141,6 +142,12 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
      */
     @Override
     public void postProcessSpawns(final P context, final ArrayList<Entity> entities) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            for (Entity entity : entities) {
+                EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+            }
+            return;
+        }
         final Player player = context.getSpongePlayer();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
@@ -180,6 +187,9 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
      * @return True if the entity was spawned
      */
     public boolean spawnEntity(final P context, final Entity entity, final int chunkX, final int chunkZ) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         final Player player = context.getSource(Player.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player", context));
         final ArrayList<Entity> entities = new ArrayList<>(1);

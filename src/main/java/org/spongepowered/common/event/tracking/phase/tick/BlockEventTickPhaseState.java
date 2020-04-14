@@ -47,7 +47,9 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
@@ -99,6 +101,9 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     @Override
     public boolean spawnEntityOrCapture(final BlockEventTickContext context, final Entity entity, final int chunkX, final int chunkZ) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
 
@@ -130,11 +135,17 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             TrackingUtil.processBlockCaptures(context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final EntityItem entity : items) {
-                            capturedEntities.add((Entity) entity);
+                        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                            for (EntityItem entity : items) {
+                                EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                            }
+                        } else {
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (final EntityItem entity : items) {
+                                capturedEntities.add((Entity) entity);
+                            }
+                            SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                         }
-                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
         }
     }

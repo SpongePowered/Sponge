@@ -32,6 +32,8 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
@@ -66,6 +68,9 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
 
     @Override
     public boolean spawnEntityOrCapture(GrowablePhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

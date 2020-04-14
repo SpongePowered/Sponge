@@ -51,6 +51,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -112,50 +113,55 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         }
         phaseContext.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
-                    final List<Entity> experience = new ArrayList<>(entities.size());
-                    final List<Entity> nonExp = new ArrayList<>(entities.size());
-                    final List<Entity> breeding = new ArrayList<>(entities.size());
-                    final List<Entity> projectile = new ArrayList<>(entities.size());
-                    for (final Entity entity : entities) {
-                        if (entity instanceof EntityXPOrb) {
-                            experience.add(entity);
-                        } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
-                            breeding.add(entity);
-                        } else if (entity instanceof Projectile) {
-                            projectile.add(entity);
-                        } else {
-                            nonExp.add(entity);
+                    if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                        for (Entity entity : entities) {
+                            EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
                         }
-                    }
-
-                    if (!experience.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                        appendContextOfPossibleEntityDeath(tickingEntity, frame);
-                        SpongeCommonEventFactory.callSpawnEntity(experience, phaseContext);
-                        frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
-                    }
-                    if (!breeding.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
-                        if (tickingEntity instanceof EntityAnimal) {
-                            final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
-                            if (playerInLove != null) {
-                                frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
+                    } else {
+                        final List<Entity> experience = new ArrayList<>(entities.size());
+                        final List<Entity> nonExp = new ArrayList<>(entities.size());
+                        final List<Entity> breeding = new ArrayList<>(entities.size());
+                        final List<Entity> projectile = new ArrayList<>(entities.size());
+                        for (final Entity entity : entities) {
+                            if (entity instanceof EntityXPOrb) {
+                                experience.add(entity);
+                            } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
+                                breeding.add(entity);
+                            } else if (entity instanceof Projectile) {
+                                projectile.add(entity);
+                            } else {
+                                nonExp.add(entity);
                             }
                         }
-                        SpongeCommonEventFactory.callSpawnEntity(breeding, phaseContext);
 
-                        frame.removeContext(EventContextKeys.PLAYER);
-                    }
-                    if (!projectile.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
-                        SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
+                        if (!experience.isEmpty()) {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                            appendContextOfPossibleEntityDeath(tickingEntity, frame);
+                            SpongeCommonEventFactory.callSpawnEntity(experience, phaseContext);
+                            frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
+                        }
+                        if (!breeding.isEmpty()) {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
+                            if (tickingEntity instanceof EntityAnimal) {
+                                final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
+                                if (playerInLove != null) {
+                                    frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
+                                }
+                            }
+                            SpongeCommonEventFactory.callSpawnEntity(breeding, phaseContext);
+
+                            frame.removeContext(EventContextKeys.PLAYER);
+                        }
+                        if (!projectile.isEmpty()) {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                            SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
+                            frame.removeContext(EventContextKeys.SPAWN_TYPE);
+
+                        }
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+                        SpongeCommonEventFactory.callSpawnEntity(nonExp, phaseContext);
                         frame.removeContext(EventContextKeys.SPAWN_TYPE);
-
                     }
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-                    SpongeCommonEventFactory.callSpawnEntity(nonExp, phaseContext);
-                    frame.removeContext(EventContextKeys.SPAWN_TYPE);
-
                 });
         phaseContext.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
@@ -314,6 +320,9 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 return context.getCapturedEntities().add(entity);
             }
             // Otherwise... we'll just spawn them normally.
+        }
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
         }
         // It kinda sucks we have to make the cause frame here, but if we're already here, we are
         // effectively already going to throw an event, and we're configured not to bulk capture.

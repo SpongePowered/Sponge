@@ -37,7 +37,9 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
@@ -208,7 +210,13 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
             if (!contextItems.isEmpty()) {
                 final ArrayList<Entity> items = new ArrayList<>(contextItems);
                 contextItems.clear();
-                SpongeCommonEventFactory.callSpawnEntity(items, unwindingContext);
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (Entity entity : items) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(unwindingContext));
+                    }
+                } else {
+                    SpongeCommonEventFactory.callSpawnEntity(items, unwindingContext);
+                }
 
             }
         } catch (Exception e) {

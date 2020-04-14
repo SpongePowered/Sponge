@@ -84,6 +84,7 @@ import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -813,6 +814,12 @@ public final class TrackingUtil {
     }
 
     private static void spawnEntitiesForBlock(final Collection<net.minecraft.entity.Entity> entities, final PhaseContext<?> phaseContext) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            for (net.minecraft.entity.Entity entity : entities) {
+                EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+            }
+            return;
+        }
         // Now we can spawn the entity items appropriately
         final List<Entity> entitiesSpawned = entities.stream()
             .map(entity -> (Entity) entity)

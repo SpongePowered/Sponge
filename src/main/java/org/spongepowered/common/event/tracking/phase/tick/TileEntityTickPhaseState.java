@@ -106,11 +106,17 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final EntityItem entity : entities) {
-                            capturedEntities.add((Entity) entity);
+                        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                            for (EntityItem entity : entities) {
+                                EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                            }
+                        } else {
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (final EntityItem entity : entities) {
+                                capturedEntities.add((Entity) entity);
+                            }
+                            SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                         }
-                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
             // Unwind the spawn type for the tile entity. because occasionaly, we have to handle
             // when mods interact with "internalized" entities within the TileEntity such that

@@ -42,6 +42,8 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -110,11 +112,23 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (Entity e : entities) {
+                        EntityUtil.processEntitySpawn(e, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                } else {
+                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                }
             });
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> items = entities.stream().map(entity1 -> (Entity) entity1).collect(Collectors.toList());
-                SpongeCommonEventFactory.callSpawnEntity(items, context);
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (EntityItem e : entities) {
+                        EntityUtil.processEntitySpawn((Entity) e, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                } else {
+                    final List<Entity> items = entities.stream().map(entity1 -> (Entity) entity1).collect(Collectors.toList());
+                    SpongeCommonEventFactory.callSpawnEntity(items, context);
+                }
             });
             context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);

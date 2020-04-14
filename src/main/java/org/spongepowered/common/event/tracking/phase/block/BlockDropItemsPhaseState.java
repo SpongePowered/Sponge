@@ -35,6 +35,8 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
@@ -92,7 +94,15 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                 });
             });
         context.getCapturedEntitySupplier()
-            .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
+            .acceptAndClearIfNotEmpty(entities -> {
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (Entity entity : entities) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                } else {
+                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                }
+            });
         final SpongeBlockSnapshot blockSnapshot = context.getSource(SpongeBlockSnapshot.class)
             .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
         final Optional<WorldServerBridge> maybeWorld = blockSnapshot.getWorldServer().map(worldserver -> (WorldServerBridge) worldserver);

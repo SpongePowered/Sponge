@@ -30,6 +30,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
@@ -56,16 +58,28 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
             TrackingUtil.processBlockCaptures(phaseContext);
 
             phaseContext.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities ->
-                        SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext)
-                    );
+                    .acceptAndClearIfNotEmpty(entities -> {
+                        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                            for (Entity entity : entities) {
+                                EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                            }
+                        } else {
+                            SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+                        }
+                    });
             phaseContext.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final EntityItem entity : entities) {
-                            capturedEntities.add((Entity) entity);
+                        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                            for (EntityItem entity : entities) {
+                                EntityUtil.processEntitySpawn((Entity) entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                            }
+                        } else {
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (final EntityItem entity : entities) {
+                                capturedEntities.add((Entity) entity);
+                            }
+                            SpongeCommonEventFactory.callSpawnEntity(capturedEntities, phaseContext);
                         }
-                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, phaseContext);
                     });
         }
     }
@@ -82,6 +96,9 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
      */
     @Override
     public boolean spawnEntityOrCapture(final DimensionContext context, final Entity entity, final int chunkX, final int chunkZ) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

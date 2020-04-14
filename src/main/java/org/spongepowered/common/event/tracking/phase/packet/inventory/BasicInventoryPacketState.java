@@ -45,6 +45,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -263,8 +264,14 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
                     } else if (!capturedItems.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                        SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
+                        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                            for (Entity entity : capturedItems) {
+                                EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                            }
+                        } else {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+                            SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
+                        }
                     }
                 } else if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
                     capturedItems.clear();

@@ -28,6 +28,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
@@ -58,8 +60,14 @@ final class DispensePhaseState extends BlockPhaseState {
             });
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-                SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (Entity entity : entities) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                    }
+                } else {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                    SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+                }
             });
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(drops -> {

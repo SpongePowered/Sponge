@@ -33,6 +33,8 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
@@ -74,31 +76,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                     }
                 });
         context.getCapturedEntitySupplier()
-                .acceptAndClearIfNotEmpty(entities -> {
-                    final List<Entity> experience = entities.stream()
-                            .filter(entity -> entity instanceof ExperienceOrb)
-                            .collect(Collectors.toList());
-                    if (!experience.isEmpty()) {
-                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            frame.pushCause(dyingEntity);
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                            SpongeCommonEventFactory.callSpawnEntity(experience, context);
-                        }
-                    }
-
-                    final List<Entity> other = entities.stream()
-                            .filter(entity -> !(entity instanceof ExperienceOrb))
-                            .collect(Collectors.toList());
-                    if (!other.isEmpty()) {
-                        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            frame.pushCause(dyingEntity);
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
-                            SpongeCommonEventFactory.callSpawnEntity(other, context);
-
-                        }
-                    }
-
-                });
+                .acceptAndClearIfNotEmpty(entities -> this.standardSpawnCapturedEntities(context, entities));
         context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((map) -> {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 final DamageSource damageSource = context.getDamageSource();

@@ -48,6 +48,7 @@ import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -135,11 +136,17 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities ->
             {
-                // TODO the entity spawn causes are not likely valid,
-                // need to investigate further.
-                csm.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (Entity entity : entities) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(phaseContext));
+                    }
+                } else {
+                    // TODO the entity spawn causes are not likely valid,
+                    // need to investigate further.
+                    csm.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
 
-                SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+                    SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+                }
             });
         phaseContext.getPerEntityItemDropSupplier()
             .acceptAndClearIfNotEmpty(uuidItemStackMultimap ->
@@ -200,6 +207,9 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
     public boolean spawnEntityOrCapture(final CommandPhaseContext context, final Entity entity, final int chunkX, final int chunkZ) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         // Instead of bulk capturing entities that are spawned in a command, some commands could potentially
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);

@@ -63,7 +63,9 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -238,6 +240,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return True if the entity was successfully captured
      */
     default boolean spawnEntityOrCapture(final C context, final org.spongepowered.api.entity.Entity entity, final int chunkX, final int chunkZ) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -365,6 +370,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param entities
      */
     default void postProcessSpawns(final C unwindingContext, final ArrayList<org.spongepowered.api.entity.Entity> entities) {
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            for (org.spongepowered.api.entity.Entity e : entities) {
+                EntityUtil.processEntitySpawn(e, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(unwindingContext));
+            }
+            return;
+        }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);

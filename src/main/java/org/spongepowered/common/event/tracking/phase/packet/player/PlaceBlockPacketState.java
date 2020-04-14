@@ -48,6 +48,7 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -121,9 +122,15 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final SpongeItemStackSnapshot snapshot = context.getItemUsedSnapshot();
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+                    for (Entity entity : entities) {
+                        EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+                    }
+                } else {
+                    try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
+                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                    }
                 }
             });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
