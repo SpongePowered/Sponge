@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 import javax.annotation.Nullable;
@@ -93,8 +94,10 @@ public abstract class BlockDropperMixin {
             final BlockSourceImpl blocksourceimpl, final TileEntityDispenser tileentitydispenser, final int i, final ItemStack itemstack,
             final EnumFacing enumfacing, final BlockPos blockpos, final IInventory iinventory) {
         // Before putStackInInventoryAllSlots
-        if (SpongeCommonEventFactory.callTransferPre(((Inventory) tileentitydispenser), ((Inventory) iinventory)).isCancelled()) {
-            ci.cancel();
+        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
+            if (SpongeCommonEventFactory.callTransferPre(((Inventory) tileentitydispenser), ((Inventory) iinventory)).isCancelled()) {
+                ci.cancel();
+            }
         }
     }
 
