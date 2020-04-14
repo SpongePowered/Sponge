@@ -916,7 +916,7 @@ public final class PhaseTracker {
             // that transaction.
             return true;
         }
-        if (((IPhaseState) phaseState).doesBlockEventTracking(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
+        if (((IPhaseState) phaseState).doesBlockEventTracking(context)) {
             try {
                 // Fall back to performing a singular block capture and throwing an event with all the
                 // repercussions, such as neighbor notifications and whatnot. Entity spawns should also be
@@ -925,48 +925,52 @@ public final class PhaseTracker {
 
                 final SpongeBlockSnapshot originalBlockSnapshot = context.getSingleSnapshot();
 
-                final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot).get();
-                final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);
-                // Create and throw normal event
-                final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
-                final ChangeBlockEvent normalEvent =
-                    originalBlockSnapshot.blockChange.createEvent(currentCause, transactions);
-                try (@SuppressWarnings("try") final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    SpongeImpl.postEvent(normalEvent);
-                    // We put the normal event at the end of the cause, still keeping in line with the
-                    // API contract that the ChangeBlockEvnets are pushed to the cause for Post, but they
-                    // will not replace the root causes. Likewise, this does not leak into the cause stack
-                    // for plugin event listeners performing other operations that could potentially alter
-                    // the cause stack (CauseStack:[Player, ScheduledTask] vs. CauseStack:[ChangeBlockEvent, Player, ScheduledTask])
-                    final Cause normalizedEvent;
-                    if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
-                        normalizedEvent = currentCause.with(normalEvent);
-                    } else {
-                        normalizedEvent = currentCause;
-                    }
-                    if (normalEvent.isCancelled()) {
-                        // If the normal event is cancelled, mark the transaction as invalid already
-                        transaction.setValid(false);
-                    }
-                    final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions, normalizedEvent);
-                    if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
-                        SpongeImpl.postEvent(post);
-                    }
-                    if (post.isCancelled()) {
-                        // And finally, if the post event is cancelled, mark the transaction as invalid.
-                        transaction.setValid(false);
-                    }
-                    if (!transaction.isValid()) {
-                        transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
-                        if (((IPhaseState) phaseState).tracksBlockSpecificDrops(context)) {
-                            ((PhaseContext) context).getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                if (ShouldFire.CHANGE_BLOCK_EVENT_POST || originalBlockSnapshot.blockChange.shouldFire()) {
+                    final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot).get();
+                    final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);
+                    // Create and throw normal event
+                    final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
+                    final ChangeBlockEvent normalEvent =
+                            originalBlockSnapshot.blockChange.createEvent(currentCause, transactions);
+                    try (@SuppressWarnings("try") final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        if (originalBlockSnapshot.blockChange.shouldFire()) {
+                            SpongeImpl.postEvent(normalEvent);
                         }
-                        return false; // Short circuit
+                        // We put the normal event at the end of the cause, still keeping in line with the
+                        // API contract that the ChangeBlockEvnets are pushed to the cause for Post, but they
+                        // will not replace the root causes. Likewise, this does not leak into the cause stack
+                        // for plugin event listeners performing other operations that could potentially alter
+                        // the cause stack (CauseStack:[Player, ScheduledTask] vs. CauseStack:[ChangeBlockEvent, Player, ScheduledTask])
+                        final Cause normalizedEvent;
+                        if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
+                            normalizedEvent = currentCause.with(normalEvent);
+                        } else {
+                            normalizedEvent = currentCause;
+                        }
+                        if (normalEvent.isCancelled()) {
+                            // If the normal event is cancelled, mark the transaction as invalid already
+                            transaction.setValid(false);
+                        }
+                        final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions, normalizedEvent);
+                        if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
+                            SpongeImpl.postEvent(post);
+                        }
+                        if (post.isCancelled()) {
+                            // And finally, if the post event is cancelled, mark the transaction as invalid.
+                            transaction.setValid(false);
+                        }
+                        if (!transaction.isValid()) {
+                            transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
+                            if (((IPhaseState) phaseState).tracksBlockSpecificDrops(context)) {
+                                ((PhaseContext) context).getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                            }
+                            return false; // Short circuit
+                        }
+                        // And now, proceed as normal.
+                        // If we've gotten this far, the transaction wasn't cancelled, so pass 'noCancelledTransactions' as 'true'
+                        TrackingUtil.performTransactionProcess(transaction, context, 0);
+                        return true;
                     }
-                    // And now, proceed as normal.
-                    // If we've gotten this far, the transaction wasn't cancelled, so pass 'noCancelledTransactions' as 'true'
-                    TrackingUtil.performTransactionProcess(transaction, context, 0);
-                    return true;
                 }
             } catch (final Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(context, phaseState, e);

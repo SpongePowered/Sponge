@@ -565,14 +565,18 @@ public final class TrackingUtil {
             if (!transactionArrays[blockChange.ordinal()].isEmpty()) {
                 final ChangeBlockEvent event = blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactionArrays[blockChange.ordinal()]);
                 mainEvents[blockChange.ordinal()] = event;
-                SpongeImpl.postEvent(event);
+                if (blockChange.shouldFire()) {
+                    SpongeImpl.postEvent(event);
+                }
                 blockEvents.add(event);
             }
         }
         if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
             final ChangeBlockEvent event = BlockChange.DECAY.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactionArrays[BlockChange.DECAY.ordinal()]);
             mainEvents[BlockChange.DECAY.ordinal()] = event;
-            SpongeImpl.postEvent(event);
+            if (ShouldFire.CHANGE_BLOCK_EVENT_DECAY) {
+                SpongeImpl.postEvent(event);
+            }
             blockEvents.add(event);
         }
     }

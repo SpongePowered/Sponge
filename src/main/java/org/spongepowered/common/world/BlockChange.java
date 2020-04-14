@@ -34,6 +34,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.common.config.category.LoggingCategory;
+import org.spongepowered.common.event.ShouldFire;
 
 public enum BlockChange {
 
@@ -41,6 +42,11 @@ public enum BlockChange {
         @Override
         public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions);
+        }
+
+        @Override
+        public boolean shouldFire() {
+            return ShouldFire.CHANGE_BLOCK_EVENT_BREAK;
         }
 
         @Override
@@ -60,6 +66,11 @@ public enum BlockChange {
         }
 
         @Override
+        public boolean shouldFire() {
+            return ShouldFire.CHANGE_BLOCK_EVENT_DECAY;
+        }
+
+        @Override
         public EventContextKey<? extends ChangeBlockEvent> getKey() {
             return EventContextKeys.DECAY_EVENT;
         }
@@ -68,6 +79,11 @@ public enum BlockChange {
         @Override
         public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventModify(cause, transactions);
+        }
+
+        @Override
+        public boolean shouldFire() {
+            return ShouldFire.CHANGE_BLOCK_EVENT_MODIFY;
         }
 
         @Override
@@ -87,6 +103,11 @@ public enum BlockChange {
         }
 
         @Override
+        public boolean shouldFire() {
+            return ShouldFire.CHANGE_BLOCK_EVENT_PLACE;
+        }
+
+        @Override
         public EventContextKey<? extends ChangeBlockEvent> getKey() {
             return EventContextKeys.PLACE_EVENT;
         }
@@ -103,6 +124,11 @@ public enum BlockChange {
         }
 
         @Override
+        public boolean shouldFire() {
+            return ShouldFire.CHANGE_BLOCK_EVENT_GROW;
+        }
+
+        @Override
         public EventContextKey<? extends ChangeBlockEvent> getKey() {
             return EventContextKeys.GROW_EVENT;
         }
@@ -116,6 +142,8 @@ public enum BlockChange {
     }
 
     public abstract ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions);
+
+    public abstract boolean shouldFire();
 
     public abstract EventContextKey<? extends ChangeBlockEvent> getKey();
 }
