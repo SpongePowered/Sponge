@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.accessor.CustomNameableAccessor;
 
-@Mixin({ EnchantingTableTileEntity.class, LockableTileEntity.class })
-public interface CustomNameableTileEntityAccessor extends CustomNameableAccessor {
+@Mixin({EnchantingTableTileEntity.class})
+public interface EnchantingTableTileEntityAccessor extends CustomNameableAccessor {
 
     @Invoker("setCustomName")
     @Override

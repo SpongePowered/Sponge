@@ -25,13 +25,20 @@
 package org.spongepowered.common.accessor.tileentity;
 
 import net.minecraft.tileentity.LockableTileEntity;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.LockCode;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.accessor.CustomNameableAccessor;
 
 @Mixin(LockableTileEntity.class)
-public interface LockableTileEntityAccessor {
+public interface LockableTileEntityAccessor extends CustomNameableAccessor {
 
     @Accessor("code") LockCode accessor$getCode();
+
     @Accessor("code") void accessor$setCode(LockCode code);
+
+    @Invoker("setCustomName") void accessor$setCustomDisplayName(@Nullable ITextComponent component);
 }
