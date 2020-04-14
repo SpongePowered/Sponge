@@ -114,7 +114,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
         return Optional.empty();
     }
 
-    public Set<Objective> scoreboard$getObjectivesByCriteria(final Criterion criterion) {
+    public Set<Objective> scoreboard$getObjectivesByCriterion(final Criterion criterion) {
         if (((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().containsKey(criterion)) {
             return ((ScoreboardAccessor) this).accessor$getScoreObjectiveCriterias().get(criterion).stream()
                     .map(objective -> ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective()).collect(Collectors.toSet());
