@@ -1126,10 +1126,12 @@ public class SpongeCommonEventFactory {
                     spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
                 }
             } else if (movingObjectPosition.entityHit != null) { // entity
-                final ArrayList<Entity> entityList = new ArrayList<>();
-                entityList.add((Entity) movingObjectPosition.entityHit);
-                final CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(frame.getCurrentCause(), entityList, impactPoint);
-                        cancelled = SpongeImpl.postEvent(event);
+                if (ShouldFire.COLLIDE_ENTITY_EVENT) {
+                    final ArrayList<Entity> entityList = new ArrayList<>();
+                    entityList.add((Entity) movingObjectPosition.entityHit);
+                    final CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(frame.getCurrentCause(), entityList, impactPoint);
+                    cancelled = SpongeImpl.postEvent(event);
+                }
             }
 
             if (cancelled) {

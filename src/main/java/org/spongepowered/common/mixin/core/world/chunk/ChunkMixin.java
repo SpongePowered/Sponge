@@ -308,6 +308,10 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
             return;
         }
 
+        if (!ShouldFire.COLLIDE_ENTITY_EVENT) {
+            return;
+        }
+
         final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
 
         if (event == null || event.isCancelled()) {
