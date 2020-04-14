@@ -26,7 +26,9 @@ package org.spongepowered.common.event.damage;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EntityDamageSource;
+import org.spongepowered.accessor.util.EntityDamageSourceAccessor;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
+import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
 /*
 To summarize, the way this works is that DamageSource isn't directly created, but
@@ -51,11 +53,11 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        this.damageType = type;
+        ((DamageSourceAccessor) this).accessor$setDamageType(type);
     }
 
     public void setEntitySource(final Entity entitySource) {
-        this.damageSourceEntity = entitySource;
+        ((EntityDamageSourceAccessor) this).accessor$setDamageSourceEntity(entitySource);
     }
 
     public void bridge$setDamageIsAbsolute() {

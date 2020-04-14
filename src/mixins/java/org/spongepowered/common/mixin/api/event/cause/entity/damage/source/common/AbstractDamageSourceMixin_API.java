@@ -48,7 +48,7 @@ public abstract class AbstractDamageSourceMixin_API implements DamageSource {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
         final SpongeCommonDamageSource commonSource = (SpongeCommonDamageSource) (Object) this;
-        commonSource.setDamageType(this.getType().getId());
+        commonSource.setDamageType(this.getType().getKey().getFormatted());
         if (this.isAbsolute()) {
             commonSource.bridge$setDamageIsAbsolute();
         }

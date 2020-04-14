@@ -51,7 +51,7 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        this.damageType = type;
+        ((DamageSourceAccessor) this).accessor$setDamageType(type);
     }
 
     @Override

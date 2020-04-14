@@ -56,8 +56,8 @@ public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<
         checkState(this.location != null);
         checkState(this.blockSnapshot != null);
         checkState(this.damageType != null);
-        final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getId(), this.location);
-        final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
+        final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getKey().getFormatted(), this.location);
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.absolute) {
             accessor.accessor$setDamageIsAbsolute();
         }
@@ -79,7 +79,7 @@ public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<
         if (this.exhaustion != null) {
             accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
-        return (BlockDamageSource) damageSource;
+        return (BlockDamageSource) (Object) damageSource;
     }
 
     @Override

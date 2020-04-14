@@ -27,83 +27,25 @@ package org.spongepowered.common.event.damage;
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.common.bridge.util.DamageSourceBridge;
 
-public final class MinecraftBlockDamageSource extends DamageSource implements BlockDamageSource {
+public final class MinecraftBlockDamageSource extends DamageSource {
 
     private final Location location;
     private final BlockSnapshot blockSnapshot;
 
-    public MinecraftBlockDamageSource(String damageTypeIn, Location location) {
+    public MinecraftBlockDamageSource(final String damageTypeIn, final Location location) {
         super(damageTypeIn);
         this.blockSnapshot = location.createSnapshot();
         this.location = location;
     }
 
-    @Override
-    public Location getLocation() {
-        return this.location;
-    }
-
-    @Override
-    public BlockSnapshot getBlockSnapshot() {
-        return this.blockSnapshot;
-    }
-
-    @Override
-    public DamageType getType() {
-        return ((DamageSourceBridge) (Object) this).bridge$getDamageType();
-    }
-
-    @Override
-    public boolean isAbsolute() {
-        return this.isDamageAbsolute();
-    }
-
-    @Override
-    public boolean isBypassingArmor() {
-        return this.isUnblockable();
-    }
-
-    @Override
-    public boolean isScaledByDifficulty() {
-        return this.isDifficultyScaled();
-    }
-
-    @Override
-    public boolean isExplosive() {
-        return this.isExplosion();
-    }
-
-    @Override
-    public boolean isMagic() {
-        return this.isMagicDamage();
-    }
-
-    @Override
-    public boolean doesAffectCreative() {
-        return this.canHarmInCreative();
-    }
-
-    @Override
-    public boolean isFire() {
-        return this.isFireDamage();
-    }
-
-    @Override
-    public double getExhaustion() {
-        return this.getExhaustion();
-    }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("BlockDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.getType().getKey())
-            .add("BlockSnapshot", this.getBlockSnapshot())
+            .add("BlockSnapshot", this.blockSnapshot)
             .add("Location", this.location)
             .toString();
     }
