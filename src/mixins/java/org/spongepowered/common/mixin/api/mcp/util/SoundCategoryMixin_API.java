@@ -28,22 +28,14 @@ import net.minecraft.util.SoundCategory;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 
 @Mixin(SoundCategory.class)
 public abstract class SoundCategoryMixin_API implements org.spongepowered.api.effect.sound.SoundCategory {
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void api$setKey(CallbackInfo ci) {
-        this.api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getName());
-    }
-
     @Shadow public abstract String shadow$getName();
 
-    private CatalogKey api$key;
+    private CatalogKey api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getName());
 
     @Override
     public CatalogKey getKey() {
