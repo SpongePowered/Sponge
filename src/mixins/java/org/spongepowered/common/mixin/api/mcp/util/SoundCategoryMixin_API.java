@@ -38,7 +38,7 @@ public abstract class SoundCategoryMixin_API implements org.spongepowered.api.ef
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void api$setKey(CallbackInfo ci) {
-        api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getName());
+        this.api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getName());
     }
 
     @Shadow public abstract String shadow$getName();

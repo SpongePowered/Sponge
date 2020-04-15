@@ -47,6 +47,6 @@ public abstract class ScoreCriteria_RenderTypeMixin_API implements ObjectiveDisp
 
     @Override
     public CatalogKey getKey() {
-        return api$key;
+        return this.api$key;
     }
 }

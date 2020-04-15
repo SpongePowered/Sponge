@@ -77,6 +77,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -448,9 +449,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean setLocation(final Vector3d position, final UUID world) {
-        final World targetWorld = Sponge.getServer().getWorldManager().getWorld(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No loaded world found for UUID"));
-
-        return this.setLocation(Location.of(targetWorld, position));
+        final Optional<ServerWorld> targetWorld = Sponge.getServer().getWorldManager().getWorld(world);
+        return targetWorld.isPresent() && this.setLocation(Location.of(targetWorld.get(), position));
     }
 
     @Override
