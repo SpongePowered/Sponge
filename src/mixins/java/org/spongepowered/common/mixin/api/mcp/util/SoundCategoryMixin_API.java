@@ -39,6 +39,6 @@ public abstract class SoundCategoryMixin_API implements org.spongepowered.api.ef
 
     @Override
     public CatalogKey getKey() {
-        return api$key;
+        return this.api$key;
     }
 }
