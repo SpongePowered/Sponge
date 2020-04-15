@@ -23,6 +23,7 @@ apply {
 
 spongeDev {
     api(project.project("SpongeAPI"))
+    common(project)
     addedSourceSets {
         register("mixins") {
             sourceType.set(SourceType.Mixin)
