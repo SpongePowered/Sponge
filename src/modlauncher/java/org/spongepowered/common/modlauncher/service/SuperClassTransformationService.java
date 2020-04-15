@@ -1,4 +1,4 @@
-package org.spongepowered.common.modlauncher.loading;
+package org.spongepowered.common.modlauncher.service;
 
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
