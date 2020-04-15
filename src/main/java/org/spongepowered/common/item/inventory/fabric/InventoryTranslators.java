@@ -27,10 +27,11 @@ package org.spongepowered.common.item.inventory.fabric;
 import net.minecraft.inventory.IInventory;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class InventoryTranslators {
-    private static final Map<Class, InventoryTranslator> fabricTranslators = new HashMap<>();
+    private static final Map<Class, InventoryTranslator> fabricTranslators = new IdentityHashMap<>();
 
     static {
         register(IInventory.class, new IInventoryTranslator());

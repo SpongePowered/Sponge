@@ -38,13 +38,14 @@ import org.spongepowered.common.item.inventory.custom.CustomInventory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class SpongeInventoryBuilder implements Inventory.Builder {
 
-    private final static Map<Class<?>, InventoryArchetype> inventoryTypes = new HashMap<>();
+    private final static Map<Class<?>, InventoryArchetype> inventoryTypes = new IdentityHashMap<>();
 
     public static void registerInventory(Class<? extends IInventory> inventory, InventoryArchetype archetype) {
         inventoryTypes.put(inventory, archetype);
@@ -56,7 +57,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     private InventoryArchetype archetype;
     private Map<String, InventoryProperty<?, ?>> properties = new HashMap<>();
-    private Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners = new HashMap<>();
+    private Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners = new IdentityHashMap<>();
     private Carrier carrier;
 
     public SpongeInventoryBuilder() {

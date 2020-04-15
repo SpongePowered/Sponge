@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.archetype;
 
+import com.google.common.collect.Sets;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -40,7 +41,7 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
 
     private List<InventoryArchetype> types = new ArrayList<>();
     private Map<String, InventoryProperty<String, ?>> properties = new HashMap<>();
-    private Set<Class<? extends InteractInventoryEvent>> events = new HashSet<>();
+    private Set<Class<? extends InteractInventoryEvent>> events = Sets.newIdentityHashSet();
     private CompositeInventoryArchetype.ContainerProvider containerProvider;
 
     @Override
