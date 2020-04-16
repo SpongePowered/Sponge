@@ -83,7 +83,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
     private void tracker$setUpUserService(@Nullable final World worldIn, final int x, final int z, final CallbackInfo ci) {
-        this.trackerImpl$userStorageService = worldIn != null && !((WorldBridge) worldIn).bridge$isFake()
+        this.trackerImpl$userStorageService = worldIn != null && ((WorldBridge) worldIn).bridge$isFake()
                                   ? null
                                   : SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
 
