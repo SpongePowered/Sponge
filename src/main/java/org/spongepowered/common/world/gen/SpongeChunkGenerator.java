@@ -78,6 +78,7 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.gen.ChunkGeneratorOverworldBridge;
 import org.spongepowered.common.bridge.world.gen.FlaggedPopulatorBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -334,7 +335,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             populators.add(snowPopulator);
         }
 
-        Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(Sponge.getCauseStackManager().getCurrentCause(), populators, chunk));
+        if (ShouldFire.POPULATE_CHUNK_EVENT) {
+            Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(Sponge.getCauseStackManager().getCurrentCause(), populators, chunk));
+        }
         List<String> flags = Lists.newArrayList();
         final IPhaseState<?> currentState = phaseTracker.getCurrentState();
         final Vector3i min = currentState.getChunkPopulatorOffset(chunk, chunkX, chunkZ);
@@ -342,8 +345,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         Extent volume = new SoftBufferExtentViewDownsize(chunk.getWorld(), min, min.add(15, 255, 15), min.sub(8, 0, 8), min.add(23, 255, 23));
         for (Populator populator : populators) {
             final PopulatorType type = populator.getType();
-            if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(Sponge.getCauseStackManager().getCurrentCause(), populator, chunk))) {
-                continue;
+            if (ShouldFire.POPULATE_CHUNK_EVENT) {
+                if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(Sponge.getCauseStackManager().getCurrentCause(), populator, chunk))) {
+                    continue;
+                }
             }
             try (CauseStackManager.StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Timing timing = null;
@@ -389,8 +394,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             }
         }
 
-        PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(Sponge.getCauseStackManager().getCurrentCause(), ImmutableList.copyOf(populators), chunk);
-        SpongeImpl.postEvent(event);
+        if (ShouldFire.POPULATE_CHUNK_EVENT) {
+            PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(Sponge.getCauseStackManager().getCurrentCause(), ImmutableList.copyOf(populators), chunk);
+            SpongeImpl.postEvent(event);
+        }
 
         BlockFalling.fallInstantly = false;
         this.chunkGeneratorTiming.stopTimingIfSync();
