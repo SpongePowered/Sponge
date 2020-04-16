@@ -266,7 +266,9 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         }
 
         if (!this.world.isRemote) {
-            SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
+            if (ShouldFire.UNLOAD_CHUNK_EVENT) {
+                SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
+            }
             SpongeHooks.logChunkUnload(this.world, ((Chunk) this).getPosition());
         }
     }
