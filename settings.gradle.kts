@@ -1,7 +1,6 @@
 rootProject.name = "SpongeCommon"
 
 include(":SpongeAPI")
-include(":vanilla")
 pluginManagement {
     repositories {
         mavenLocal()
