@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Appenders>
+        <TerminalConsole name="Console">
+            <PatternLayout>
+                <LoggerNamePatternSelector defaultPattern="%highlightError{[%d{HH:mm:ss} %level] [%logger]: %minecraftFormatting{%msg}%n%xEx}">
+                    <!-- Log root Minecraft and Mojang without logger prefix -->
+                    <PatternMatch key=",net.minecraft.,com.mojang."
+                                  pattern="%highlightError{[%d{HH:mm:ss} %level]: %minecraftFormatting{%msg}%n%xEx}"/>
+                </LoggerNamePatternSelector>
+            </PatternLayout>
+        </TerminalConsole>
+
+        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <LoggerNamePatternSelector defaultPattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %minecraftFormatting{%msg}{strip}%n">
+                    <!-- Log root Minecraft and Mojang without logger prefix -->
+                    <PatternMatch key=",net.minecraft.,com.mojang."
+                                  pattern="[%d{HH:mm:ss}] [%t/%level]: %minecraftFormatting{%msg}{strip}%n"/>
+                </LoggerNamePatternSelector>
+            </PatternLayout>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <OnStartupTriggeringPolicy/>
+            </Policies>
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Log Minecraft/Mojang with INFO level and skip network packet logging -->
+        <Logger name="net.minecraft" level="info">
+            <filters>
+                <MarkerFilter marker="NETWORK_PACKETS" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </filters>
+        </Logger>
+
+        <Logger name="com.mojang" level="info"/>
+
+        <!-- Hide LaunchWrapper INFO messages in the console -->
+        <Logger name="LaunchWrapper" level="debug" additivity="false">
+            <AppenderRef ref="Console" level="warn"/>
+            <AppenderRef ref="File"/>
+        </Logger>
+
+        <!-- Make HikariCP less verbose -->
+        <Logger name="com.zaxxer.hikari" level="info" additivity="false">
+            <AppenderRef ref="Console" level="warn"/>
+            <AppenderRef ref="File"/>
+        </Logger>
+
+        <Root level="debug">
+            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>

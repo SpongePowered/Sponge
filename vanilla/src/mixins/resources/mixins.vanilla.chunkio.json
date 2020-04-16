@@ -1,0 +1,20 @@
+{
+    "required": true,
+    "minVersion": "0.7.2",
+    "package": "org.spongepowered.server.mixin.chunkio",
+    "refmap": "mixins.vanilla.refmap.json",
+    "priority": 1112,
+    "server": [
+        "AnvilChunkLoaderAccessor_ChunkIO",
+        "AnvilChunkLoaderMixin_ChunkIO",
+        "ChunkProviderServerAccessor_Vanilla",
+        "ChunkProviderServerMixin_ChunkIO",
+        "MinecraftServerMixin_ChunkIO",
+        "PlayerChunkMapEntryMixin_ChunkIO",
+        "PlayerListMixin_ChunkIO",
+        "WorldMixin_ChunkIO"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

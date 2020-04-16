@@ -1,0 +1,9 @@
+[
+    {
+        "modid": "minecraft",
+        "name": "Minecraft",
+        "description": "Minecraft is a game about placing blocks and going on adventures",
+        "url": "https://minecraft.net",
+        "authorList": ["Mojang"]
+    }
+]

@@ -1,0 +1,10 @@
+[
+    {
+        "modid": "mcp",
+        "name": "Mod Coder Pack",
+        "version": "9.38",
+        "description": "Modding toolkit to decompile and deobfuscate the Minecraft client and server files.",
+        "url": "http://www.modcoderpack.com/website/",
+        "authorList": ["Searge", "ProfMobius", "IngisKahn", "Fesh0r", "ZeuX", "R4wk", "LexManos", "Bspkrs", "Others"]
+    }
+]

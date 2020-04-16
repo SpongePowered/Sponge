@@ -1,0 +1,18 @@
+{
+    "required": true,
+    "minVersion": "0.7.2",
+    "package": "org.spongepowered.server.mixin.api",
+    "refmap": "mixins.vanilla.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixinPriority": 901,
+    "priority": 1111,
+    "server": [
+        "minecraft.enchantment.EnchantmentMixin_VanillaAPI",
+        "minecraft.world.WorldProviderMixin_VanillaAPI",
+        "minecraft.world.chunk.ChunkMixin_VanillaAPI"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
