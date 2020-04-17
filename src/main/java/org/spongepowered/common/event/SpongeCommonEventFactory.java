@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event;
 
-import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
@@ -69,6 +67,7 @@ import org.spongepowered.api.block.tileentity.Jukebox;
 import org.spongepowered.api.block.tileentity.Note;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -93,6 +92,7 @@ import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -182,11 +182,11 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -197,7 +197,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
+import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
 
 public class SpongeCommonEventFactory {
 
@@ -1818,4 +1818,10 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
+    public static CreateMapEvent callCreateMapEvent(final Cause cause, final Player player, MapItemData mapData, final World world, HandType handType, ItemStackSnapshot oldItemStack, ItemStackSnapshot newItemStack, int id) {
+        final Transaction<ItemStackSnapshot> transaction = new Transaction<>(oldItemStack, newItemStack);
+        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, player, transaction, mapData, handType, world, id);
+        SpongeImpl.postEvent(event);
+        return event;
+    }
 }

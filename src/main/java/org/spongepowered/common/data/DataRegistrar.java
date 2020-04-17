@@ -785,6 +785,9 @@ public final class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(DisabledSlotsData.class, SpongeDisabledSlotsData.class,
                 ImmutableDisabledSlotsData.class, ImmutableSpongeDisabledSlotsData.class, new DisabledSlotsDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(MapItemData.class, SpongeMapItemData.class, ImmutableMapItemData.class,
+                ImmutableSpongeMapItemData.class, new MapItemDataProcessor());
+
         // Values
 
         DataUtil.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());
@@ -901,7 +904,13 @@ public final class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_TAKING_DISABLED, new TakingDisabledValueProcessor());
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_PLACING_DISABLED, new PlacingDisabledValueProcessor());
-        
+        DataUtil.registerValueProcessor(Keys.ARMOR_STAND_PLACING_DISABLED, new PlacingDisabledValueProcessor());
+        DataUtil.registerValueProcessor(Keys.MAP_LOCATION, new ItemMapLocationValueProcessor());
+        DataUtil.registerValueProcessor(Keys.MAP_WORLD, new ItemMapWorldValueProcessor());
+        DataUtil.registerValueProcessor(Keys.MAP_TRACKS_PLAYERS, new ItemMapTracksPlayersValueProcessor());
+        DataUtil.registerValueProcessor(Keys.MAP_UNLIMITED_TRACKING, new ItemMapUnlimitedTrackingValueProcessor());
+        DataUtil.registerValueProcessor(Keys.MAP_SCALE, new ItemMapScaleValueProcessor());
+
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();
 

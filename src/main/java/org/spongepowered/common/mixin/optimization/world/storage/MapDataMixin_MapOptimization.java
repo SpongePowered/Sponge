@@ -97,8 +97,6 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
     // To support both SpongeVanilla and SpongeForge, we use reflection to access it
     private static Field mapOptimizationImpl$dimensionField;
 
-
-
     static {
         try {
             mapOptimizationImpl$mapInfoConstructor = MapData.MapInfo.class.getDeclaredConstructor(MapData.class, EntityPlayer.class);
@@ -108,6 +106,25 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                 mapOptimizationImpl$dimensionField = MapData.class.getDeclaredField("field_76200_c");
             }
         } catch (final Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public int getWorldId() {
+        try {
+            return (int)mapOptimizationImpl$dimensionField.get(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public void setWorldId(int id) {
+        try {
+            mapOptimizationImpl$dimensionField.set(this, id);
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }

@@ -36,6 +36,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.map.MapStorage;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 
@@ -260,5 +261,10 @@ public class TestServer implements Server {
     @Override
     public boolean isMainThread() {
         return true;
+    }
+
+    @Override
+    public Optional<MapStorage> getMapStorage() {
+        return Optional.empty();
     }
 }

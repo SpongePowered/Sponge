@@ -65,6 +65,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.Sponge;
@@ -168,6 +169,7 @@ public abstract class WorldMixin_API implements World {
     @Shadow protected List<IWorldEventListener> eventListeners;
     @Shadow private int seaLevel;
     @Shadow protected WorldInfo worldInfo;
+    @Nullable @Shadow protected net.minecraft.world.storage.MapStorage mapStorage;
 
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow public net.minecraft.world.World init() { throw new RuntimeException("Bad things have happened"); }

@@ -42,4 +42,8 @@ public interface OptimizedMapDataBridge {
     void mapOptimizationBridge$updateItemFrameDecoration(EntityItemFrame frame);
 
     void mapOptimizationBridge$removeItemFrame(EntityItemFrame frame);
+
+    int getWorldId();
+
+    void setWorldId(int id);
 }

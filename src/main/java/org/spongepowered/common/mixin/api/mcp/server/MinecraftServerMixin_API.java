@@ -49,6 +49,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.map.MapStorage;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -329,6 +330,13 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
+    }
+
+    @Override
+    public Optional<MapStorage> getMapStorage() {
+        return WorldManager.getWorldByDimensionId(0)
+                .map(world -> (World)world)
+                .flatMap(World::getMapStorage);
     }
 
     @Override

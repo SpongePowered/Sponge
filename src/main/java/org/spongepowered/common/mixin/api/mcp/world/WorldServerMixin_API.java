@@ -68,6 +68,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.map.MapStorage;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
@@ -435,6 +436,11 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     @Override
     public WorldStorage getWorldStorage() {
         return (WorldStorage) ((WorldServer) (Object) this).getChunkProvider();
+    }
+
+    @Override
+    public Optional<MapStorage> getMapStorage() {
+        return Optional.ofNullable((MapStorage)mapStorage);
     }
 
     @Override

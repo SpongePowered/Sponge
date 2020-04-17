@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 public class ITemMapMixin extends ItemMapBase {
 
 
+
     @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int onCreateMap(World worldIn, String key) {
         if (worldIn.isRemote) {

@@ -603,6 +603,16 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("is_johnny", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_johnny").name("Is Johnny").query(of("IsJohnny")).build());
 
+        this.register("map_location", Key.builder().type(TypeTokens.VECTOR_2I_TOKEN).id("map_location").name("Map Location").query(of("MapLocation")).build());
+
+        this.register("map_tracks_players", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("map_tracks_players").name("Map Tracks Players").query(of("TracksPlayers")).build());
+
+        this.register("map_unlimited_tracking", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("map_unlimited_tracking").name("Map Unlimited Tracking").query(of("MapUnlimitedTracking")).build());
+
+        this.register("map_scale", Key.builder().type(TypeTokens.BYTE_VALUE_TOKEN).id("map_scale").name("Map Scale").query(of("MapScale")).build());
+
+        this.register("map_world", Key.builder().type(TypeTokens.WORLD_VALUE_TOKEN).id("map_world").name("Map World").query(of("MapWorld")).build());
+
         // Deprecated
         this.register("johnny_vindicator", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("johnny_vindicator").name("Johnny Vindicator").query(of("JohnnyVindicator")).build());
 
