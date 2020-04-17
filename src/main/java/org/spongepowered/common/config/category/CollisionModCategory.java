@@ -35,32 +35,16 @@ public class CollisionModCategory extends ConfigCategory {
 
     @Setting(value = "enabled", comment = "If 'false', entity collision rules for this mod will be ignored.")
     private boolean isEnabled = true;
-    @Setting(value = "defaults", comment = "Default maximum collisions used for all entities/blocks unless overridden.")
+    @Setting(value = "defaults", comment = "Default maximum collisions used for all entities unless overridden.")
     private Map<String, Integer> defaultMaxCollisions = new HashMap<>();
-    @Setting(value = "blocks")
-    private Map<String, Integer> blockList = new HashMap<>();
     @Setting(value = "entities")
     private Map<String, Integer> entityList = new HashMap<>();
 
     public CollisionModCategory() {
-        this.defaultMaxCollisions.put("blocks", 8);
         this.defaultMaxCollisions.put("entities", 8);
     }
 
     public CollisionModCategory(String modId) {
-        if (modId.equals("minecraft")) {
-            this.blockList.put("detector_rail", 1);
-            this.blockList.put("heavy_weighted_pressure_plate", 150);
-            this.blockList.put("light_weighted_pressure_plate", 15);
-            this.blockList.put("mob_spawner", -1);
-            this.blockList.put("stone_pressure_plate", 1);
-            this.blockList.put("wooden_button", 1);
-            this.blockList.put("wooden_pressure_plate", 1);
-            this.entityList.put("thrownpotion", -1);
-        } else if (modId.equals("botania")) {
-            this.entityList.put("spark", -1);
-            this.entityList.put("corporeaspark", -1);
-        }
     }
 
     public boolean isEnabled() {
@@ -69,10 +53,6 @@ public class CollisionModCategory extends ConfigCategory {
 
     public Map<String, Integer> getDefaultMaxCollisions() {
         return this.defaultMaxCollisions;
-    }
-
-    public Map<String, Integer>  getBlockList() {
-        return this.blockList;
     }
 
     public Map<String, Integer>  getEntityList() {

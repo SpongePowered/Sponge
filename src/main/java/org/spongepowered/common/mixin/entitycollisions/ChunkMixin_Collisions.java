@@ -91,22 +91,11 @@ public abstract class ChunkMixin_Collisions {
 
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
             final Object source = phaseContext.getSource();
-            if (source == null) {
+            if (!(source instanceof CollisionsCapability)) {
                 return true;
             }
 
-            CollisionsCapability capability;
-            if (source instanceof LocatableBlock) {
-                final LocatableBlock locatable = (LocatableBlock) source;
-                final BlockType blockType =locatable.getLocation().getBlockType();
-                capability = (CollisionsCapability) blockType;
-            } else if (source instanceof CollisionsCapability) {
-                capability = (CollisionsCapability) source;
-            } else {
-                return true;
-            }
-
-
+            final CollisionsCapability capability = (CollisionsCapability) source;
             if (capability.collision$requiresCollisionsCacheRefresh()) {
                 capability.collision$initializeCollisionState(this.world);
                 capability.collision$requiresCollisionsCacheRefresh(false);

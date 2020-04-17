@@ -44,7 +44,6 @@ public class EntityCollisionCategory extends ConfigCategory {
 
     public EntityCollisionCategory() {
         this.modList.put("minecraft", new CollisionModCategory("minecraft"));
-        this.modList.put("botania", new CollisionModCategory("botania"));
     }
 
     public boolean autoPopulateData() {
