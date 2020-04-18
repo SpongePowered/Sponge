@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClickWindow;
@@ -142,7 +143,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
 
-    private static Set<Class<?>> containersFailedCapture = Sets.newIdentityHashSet();
+    private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
 
     @Override
     public void unwind(final InventoryPacketContext context) {

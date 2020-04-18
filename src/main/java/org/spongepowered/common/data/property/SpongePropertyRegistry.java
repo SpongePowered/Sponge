@@ -33,6 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.PropertyRegistry;
@@ -105,7 +106,7 @@ public class SpongePropertyRegistry implements PropertyRegistry {
     public Collection<Property<?, ?>> getPropertiesFor(final PropertyHolder holder) {
         final ImmutableList.Builder<Property<?, ?>> builder = ImmutableList.builder();
         if (this.tempRegistry != null) { // Still doing registrations
-            final Set<Class<? extends Property<?, ?>>> used = Sets.newIdentityHashSet();
+            final Set<Class<? extends Property<?, ?>>> used = new ReferenceOpenHashSet<>();
             for (final Map.Entry<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> entry : this.tempRegistry.delegateMap.entrySet()) {
                 used.add(entry.getKey());
                 entry.getValue().getFor(holder).ifPresent(builder::add);
