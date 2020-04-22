@@ -343,8 +343,8 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
                         frame.addContext(EventContextKeys.BLOCK_HIT, currentSnapshot);
                         ((ContainerBridge) player.openContainer).bridge$setOpenLocation(currentSnapshot.getLocation().orElse(null));
                         if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(this.player)) {
-                            result = EnumActionResult.FAIL;
                             this.impl$interactBlockRightClickEventCancelled = true;
+                            return EnumActionResult.FAIL;
                         }
                     }
                 }
