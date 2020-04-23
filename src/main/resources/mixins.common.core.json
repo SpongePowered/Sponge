@@ -175,6 +175,7 @@
         "crash.CrashReportAccessor",
         "crash.CrashReportCategoryAccessor",
         "data.CustomDataHolderMixin",
+        "data.SpongeUserMixin",
         "dispenser.BehaviorProjectileDispenseMixin",
         "enchantment.EnchantmentMixin",
         "entity.EntityAccessor",
