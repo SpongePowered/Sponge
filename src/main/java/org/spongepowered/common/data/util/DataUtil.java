@@ -619,6 +619,8 @@ public final class DataUtil {
                     manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
                 }
                 compound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+            } else {
+                compound.removeTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
             }
             final List<DataView> failedData = ((CustomDataHolderBridge) dataHolder).bridge$getFailedData();
             if (!failedData.isEmpty()) {
@@ -627,6 +629,8 @@ public final class DataUtil {
                     failedList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
                 }
                 compound.setTag(Constants.Sponge.FAILED_CUSTOM_DATA, failedList);
+            } else {
+                compound.removeTag(Constants.Sponge.FAILED_CUSTOM_DATA);
             }
         }
     }
