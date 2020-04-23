@@ -110,6 +110,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
     @Nullable private InventoryEnderChest enderChest; // lazy load when accessing inventory
     @Nullable private NBTTagCompound nbt;
+    private boolean isConstructing;
 
     public SpongeUser(final GameProfile profile) {
         this.profile = profile;
@@ -343,7 +344,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(Constants.Forge.FORGE_DATA).getCompoundTag(Constants.Sponge.SPONGE_DATA);
+        this.isConstructing = true;
         DataUtil.readCustomData(spongeCompound, (DataHolder) this);
+        this.isConstructing = false;
         //if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
         //    ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         //}
@@ -587,6 +590,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void markDirty() {
+        if (this.isConstructing) {
+            return;
+        }
         dirtyUsers.add(this);
     }
 
