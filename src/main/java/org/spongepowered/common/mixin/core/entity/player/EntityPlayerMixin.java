@@ -401,7 +401,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
     @Override
     public boolean bridge$affectsSpawning() {
-        return this.affectsSpawning && !this.isSpectator() && !this.bridge$isVanished();
+        return this.affectsSpawning && !this.isSpectator() && !this.bridge$isUntargetable();
     }
 
     @Override
