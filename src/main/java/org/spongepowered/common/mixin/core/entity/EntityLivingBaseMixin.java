@@ -1172,7 +1172,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     // End implementation of UseItemStackEvent
 
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
-    private void collisions$runCollisions(EntityLivingBase self) {
+    private void impl$runCollisions(EntityLivingBase self) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             this.shadow$collideWithNearbyEntities();
         } else {
