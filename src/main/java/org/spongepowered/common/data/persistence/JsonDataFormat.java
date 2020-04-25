@@ -144,18 +144,17 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
     private static Number readNumber(JsonReader reader) throws IOException {
         // Similar to https://github.com/zml2008/configurate/blob/master/configurate-gson/src/main/java/ninja/leaping/configurate/gson/GsonConfigurationLoader.java#L113
         // Not sure what's the best way to detect the type of number
-        double nextDouble = reader.nextDouble();
-        int nextInt = (int) nextDouble;
-        if (nextInt == nextDouble) {
+
+        String number = reader.nextString();
+        if (number.contains(".")) {
+            return Double.parseDouble(number);
+        }
+        long nextLong = Long.parseLong(number);
+        int nextInt = (int) nextLong;
+        if (nextInt == nextLong) {
             return nextInt;
         }
-
-        long nextLong = (long) nextDouble;
-        if (nextLong == nextDouble) {
-            return nextLong;
-        }
-
-        return nextDouble;
+        return nextLong;
     }
 
     private static List<?> readArray(JsonReader reader) throws IOException {
