@@ -165,14 +165,11 @@ public final class NetworkUtil {
         WorldServer worldServer = ((PlayerListAccessor) playerList).accessor$getPlayerListServer().getWorld(playerIn.dimension);
         final int actualDimensionId = ((WorldServerBridge) worldServer).bridge$getDimensionId();
         final BlockPos spawnPos;
-        // Join data
-        final Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
-        final Instant lastJoined = Instant.now();
-        SpongePlayerDataHandler.setPlayerInfo(playerIn.getUniqueID(), firstJoined.orElse(lastJoined), lastJoined);
 
         if (actualDimensionId != playerIn.dimension) {
             SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded world [{}]. This is not safe so we have moved them to "
                                         + "the default world's spawn point.", playerIn.getName(), playerIn.dimension);
+            final Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
             if (!firstJoined.isPresent()) {
                 spawnPos = SpongeImplHooks.getRandomizedSpawnPoint(worldServer);
             } else {
@@ -226,6 +223,11 @@ public final class NetworkUtil {
                 return;
             }
         }
+
+        // Join data
+        final Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
+        final Instant lastJoined = Instant.now();
+        SpongePlayerDataHandler.setPlayerInfo(playerIn.getUniqueID(), firstJoined.orElse(lastJoined), lastJoined);
 
         // Sponge end
 

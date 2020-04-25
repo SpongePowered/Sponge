@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
 import net.minecraft.entity.passive.EntityLlama;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.type.LlamaVariant;
 import org.spongepowered.api.data.type.LlamaVariants;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
@@ -36,6 +37,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
+
+import java.util.Collection;
 
 @Mixin(EntityLlama.class)
 public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implements Llama {
@@ -74,5 +77,10 @@ public abstract class EntityLlamaMixin_API extends AbstractHorseMixin_API implem
                 .build();
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        // TODO LlamaData is missing
+    }
 
 }

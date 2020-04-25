@@ -179,7 +179,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -197,14 +196,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 public class SpongeCommonEventFactory {
-
-    // Set if any of the events fired during interaction with a block (open
-
-    public static int lastAnimationPacketTick = 0;
-    // For animation packet
-    public static int lastSecondaryPacketTick = 0;
-    public static int lastPrimaryPacketTick = 0;
-    @Nullable public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
 
     public static void callDropItemDispense(final List<EntityItem> items, final PhaseContext<?> context) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -933,9 +924,9 @@ public class SpongeCommonEventFactory {
     @Nullable
     public static Event callMoveEntityEvent(final net.minecraft.entity.Entity entity,
         final EntityTickContext context) {
-        // Ignore movement event if entity is dead, a projectile, or item.
-        // Note: Projectiles are handled with CollideBlockEvent.Impact
-        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
+
+        // Ignore movement event if entity is dead
+        if (entity.isDead || (!ShouldFire.MOVE_ENTITY_EVENT && !ShouldFire.MOVE_ENTITY_EVENT_POSITION && !ShouldFire.ROTATE_ENTITY_EVENT)) {
             return null;
         }
 
@@ -944,7 +935,6 @@ public class SpongeCommonEventFactory {
         final double deltaY = context.prevY - entity.posY;
         final double deltaZ = context.prevZ - entity.posZ;
         final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
-
 
         if (deltaChange > 1f / 256 // Micro-optimization, avoids almost negligible position movement from floating point differences.
             || entity.rotationPitch != entity.prevRotationPitch
@@ -968,12 +958,16 @@ public class SpongeCommonEventFactory {
                 final Transform<World> newTransform = new Transform<>(world, currentPositionVector, currentRotationVector, spongeEntity.getScale());
                 Event event  = null;
                 Transform<World> eventToTransform = null;
-                if (!oldPositionVector.equals(currentPositionVector)) {
+                if (!oldPositionVector.equals(currentPositionVector) && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
                     event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
                     eventToTransform = ((MoveEntityEvent) event).getToTransform();
-                } else {
+                } else if (ShouldFire.ROTATE_ENTITY_EVENT) {
                     event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
                     eventToTransform = ((RotateEntityEvent) event).getToTransform();
+                }
+
+                if (event == null) {
+                    return null;
                 }
 
                 if (SpongeImpl.postEvent(event)) { // Cancelled event, reset positions to previous position.
@@ -1484,6 +1478,9 @@ public class SpongeCommonEventFactory {
         final CraftItemEvent.Preview event = SpongeEventFactory
                 .createCraftItemEventPreview(Sponge.getCauseStackManager().getCurrentCause(), inventory, previewTransaction, Optional.ofNullable(recipe), ((Inventory) container), transactions);
         SpongeImpl.postEvent(event);
+        // capture crafting grid changes for the normal inventory event that were not captured yet (e.g. NumberPress)
+        ((ContainerBridge) container).bridge$detectAndSendChanges(true);
+        // because the slot-restore intentionally wont capture inventory changes
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
         if (player instanceof EntityPlayerMP) {
             if (event.getPreview().getCustom().isPresent() || event.isCancelled() || !event.getPreview().isValid()) {

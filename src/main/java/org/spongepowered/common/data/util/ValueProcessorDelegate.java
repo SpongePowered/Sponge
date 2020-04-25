@@ -29,6 +29,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ValueProcessor;
 
@@ -97,6 +98,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
         for (ValueProcessor<E, V> processor : this.processors) {
@@ -109,11 +111,19 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
         }
         for (ValueProcessor<E, V> processor : this.processors) {
             if (processor.supports(container)) {
-                final Optional<V> optional = processor.getApiValueFromContainer(container);
-                if (optional.isPresent()) {
-                    V mutable = optional.get();
-                    ((Value<E>) mutable).set(value);
-                    return DataTransactionResult.failResult(((Value<E>) mutable).asImmutable());
+                final Optional<V> currentValueOptional = processor.getApiValueFromContainer(container);
+                if (currentValueOptional.isPresent()) {
+                    V currentValue = currentValueOptional.get();
+                    ImmutableValue<?> rejectedValue;
+                    if (currentValue instanceof Value<?>) {
+                        Value<E> mutableCurrentValue = (Value<E>) currentValue;
+                        mutableCurrentValue.set(value);
+                        rejectedValue = mutableCurrentValue.asImmutable();
+                    } else {
+                        ImmutableValue<E> immutableCurrentValue = (ImmutableValue<E>) currentValue;
+                        rejectedValue = immutableCurrentValue.with(value);
+                    }
+                    return DataTransactionResult.failResult(rejectedValue);
                 }
             }
         }

@@ -25,10 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityLargeFireball;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.item.EntityLargeFireballBridge;
+
+import java.util.Collection;
 
 @Mixin(EntityLargeFireball.class)
 public abstract class EntityLargeFireballMixin_API extends EntityFireballMixin_API implements LargeFireball {
@@ -41,4 +44,9 @@ public abstract class EntityLargeFireballMixin_API extends EntityFireballMixin_A
         setDead();
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getExplosionRadiusData());
+    }
 }

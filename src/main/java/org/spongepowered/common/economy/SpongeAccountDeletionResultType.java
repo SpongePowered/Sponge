@@ -22,32 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.entity;
+package org.spongepowered.common.economy;
 
-import com.mojang.authlib.GameProfile;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
-import org.spongepowered.api.entity.living.Human;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.mixin.api.mcp.entity.EntityCreatureMixin_API;
+import com.google.common.base.MoreObjects;
+import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
+import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
+import org.spongepowered.api.service.economy.transaction.TransactionType;
 
-import java.util.Collection;
+public class SpongeAccountDeletionResultType implements AccountDeletionResultType {
 
-@Mixin(value = EntityHuman.class, remap = false)
-public abstract class EntityHumanMixin_API extends EntityCreatureMixin_API implements Human {
+    private final String id;
+    private final String name;
 
-    @Shadow private GameProfile fakeProfile;
-
-    @Override
-    public String getName() {
-        return this.fakeProfile.getName();
+    public SpongeAccountDeletionResultType(String id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
     @Override
-    protected void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        this.get(SkinData.class).ifPresent(manipulators::add);
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        return this == AccountDeletionResultTypes.SUCCESS;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof TransactionType)) {
+            return false;
+        }
+        return ((TransactionType) other).getId().equals(this.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", this.getId())
+                .toString();
     }
 }

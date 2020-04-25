@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.Sets;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntitySpawnPlacementRegistry;
@@ -71,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -79,7 +81,7 @@ public abstract class WorldEntitySpawnerMixin {
 
     @Nullable
     private static EntityType impl$spawnerEntityType;
-    private final List<Chunk> impl$eligibleSpawnChunks = new ArrayList<>();
+    private final Set<Chunk> impl$eligibleSpawnChunks = Sets.newIdentityHashSet();
 
     /**
      * @author blood - February 18th, 2017
@@ -136,6 +138,9 @@ public abstract class WorldEntitySpawnerMixin {
                                 .bridge$getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
                         if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).bridge$isPersistedChunk())) {
                             // Don't attempt to spawn in an unloaded chunk
+                            continue;
+                        }
+                        if (this.impl$eligibleSpawnChunks.contains(chunk)) {
                             continue;
                         }
 
@@ -203,7 +208,7 @@ public abstract class WorldEntitySpawnerMixin {
                         final int k1 = blockpos.getX();
                         final int l1 = blockpos.getY();
                         final int i2 = blockpos.getZ();
-                        final IBlockState iblockstate = world.getBlockState(blockpos);
+                        final IBlockState iblockstate = chunk.getBlockState(blockpos);
 
                         if (!iblockstate.isNormalCube()) {
                             int spawnCount = 0;

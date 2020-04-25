@@ -57,6 +57,8 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
@@ -75,6 +77,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -298,8 +302,24 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
-    public CommandResult process(CommandSource source, String commandLine) {
-        final String[] argSplit = commandLine.split(" ", 2);
+    public CommandResult process(final CommandSource source, final String command) {
+        if (!SpongeImplHooks.isMainThread()) {
+            try {
+                return SpongeImpl.getScheduler().callSync(() -> {
+                    SpongeImpl.getLogger().warn("Something attempted to run the command \"{}\" off the main server thread! "
+                            + "Calling command on main server thread instead.", command);
+                    return process(source, command);
+                }).get();
+            } catch (InterruptedException | ExecutionException e) {
+                // This is unlikely to happen as throwables are caught during invocation,
+                // but if it does happen, we should probably know about it.
+                SpongeImpl.getLogger().error("Error executing command.", e);
+                return CommandResult.empty();
+            }
+        }
+
+        String commandLine;
+        final String[] argSplit = command.split(" ", 2);
         if (ShouldFire.SEND_COMMAND_EVENT) {
             Sponge.getCauseStackManager().pushCause(source);
             final SendCommandEvent event = SpongeEventFactory.createSendCommandEvent(Sponge.getCauseStackManager().getCurrentCause(),
@@ -317,6 +337,8 @@ public class SpongeCommandManager implements CommandManager {
             if (!event.getArguments().isEmpty()) {
                 commandLine = commandLine + ' ' + event.getArguments();
             }
+        } else {
+            commandLine = command;
         }
 
         try {

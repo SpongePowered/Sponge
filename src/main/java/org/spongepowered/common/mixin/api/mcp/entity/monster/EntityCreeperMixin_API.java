@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.monster.EntityCreeper;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.ChargedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.monster.Creeper;
@@ -37,6 +39,8 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFuseData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
+
+import java.util.Collection;
 
 @Mixin(EntityCreeper.class)
 public abstract class EntityCreeperMixin_API extends EntityMobMixin_API implements Creeper {
@@ -79,4 +83,11 @@ public abstract class EntityCreeperMixin_API extends EntityMobMixin_API implemen
         this.explode();
     }
 
+    @Override
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        manipulators.add(this.getExplosionRadiusData());
+        manipulators.add(this.getFuseData());
+        this.get(ChargedData.class).ifPresent(manipulators::add);
+    }
 }

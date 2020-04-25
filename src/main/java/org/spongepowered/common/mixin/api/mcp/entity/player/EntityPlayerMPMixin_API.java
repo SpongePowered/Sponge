@@ -52,7 +52,9 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
+import org.spongepowered.api.data.manipulator.mutable.entity.HealthScalingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -521,10 +523,13 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getJoinData());
-        manipulators.add(getGameModeData());
+        manipulators.add(this.getGameModeData());
+        manipulators.add(this.getJoinData());
+        manipulators.add(this.getStatisticData());
+        this.get(AffectsSpawningData.class).ifPresent(manipulators::add);
+        this.get(HealthScalingData.class).ifPresent(manipulators::add);
     }
 
     public void sendBlockChange(final BlockPos pos, final IBlockState state) {

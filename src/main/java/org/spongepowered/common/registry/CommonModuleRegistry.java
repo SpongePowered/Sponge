@@ -101,6 +101,7 @@ import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
+import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticType;
@@ -174,6 +175,7 @@ import org.spongepowered.common.registry.type.advancement.*;
 import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.*;
 import org.spongepowered.common.registry.type.data.*;
+import org.spongepowered.common.registry.type.economy.AccountDeletionResultTypeRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.*;
 import org.spongepowered.common.registry.type.entity.*;
@@ -430,6 +432,7 @@ public final class CommonModuleRegistry {
                 .registerModule(WireAttachmentType.class, new WireAttachmentRegistryModule())
                 .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())
                 .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
+                .registerModule(AccountDeletionResultType.class, new AccountDeletionResultTypeRegistryModule())
                 .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
                 .registerModule(SkinPart.class, SkinPartRegistryModule.getInstance())
                 .registerModule(WorldArchetype.class, WorldArchetypeRegistryModule.getInstance())

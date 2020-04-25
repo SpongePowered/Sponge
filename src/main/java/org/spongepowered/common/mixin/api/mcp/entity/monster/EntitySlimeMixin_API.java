@@ -59,8 +59,8 @@ public abstract class EntitySlimeMixin_API extends EntityLivingMixin_API impleme
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getSlimeData());
+        manipulators.add(this.getSlimeData());
     }
 }

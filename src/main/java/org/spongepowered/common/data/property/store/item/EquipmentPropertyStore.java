@@ -40,16 +40,16 @@ public class EquipmentPropertyStore extends AbstractItemStackPropertyStore<Equip
             final ItemArmor armor = (ItemArmor) itemStack.getItem();
             switch (armor.armorType) {
                 case FEET: {
-                    return Optional.of(new EquipmentProperty(EquipmentTypes.HEADWEAR));
+                    return Optional.of(new EquipmentProperty(EquipmentTypes.BOOTS));
                 }
                 case LEGS: {
-                    return Optional.of(new EquipmentProperty(EquipmentTypes.CHESTPLATE));
-                }
-                case CHEST: {
                     return Optional.of(new EquipmentProperty(EquipmentTypes.LEGGINGS));
                 }
+                case CHEST: {
+                    return Optional.of(new EquipmentProperty(EquipmentTypes.CHESTPLATE));
+                }
                 case HEAD: {
-                    return Optional.of(new EquipmentProperty(EquipmentTypes.BOOTS));
+                    return Optional.of(new EquipmentProperty(EquipmentTypes.HEADWEAR));
                 }
                 default: {
                     break;

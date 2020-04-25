@@ -60,6 +60,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -126,6 +127,7 @@ import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -361,6 +363,14 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
         this.setFlag(0, false);
     }
 
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
+    private List<Entity> onSpongeGetEntitiesWithinAABBExcludingEntity(final World world, Entity entityIn, AxisAlignedBB bb) {
+        if (this.bridge$isUncollideable()) {
+            return Collections.emptyList();
+        }
+        return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
+    }
+
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     private boolean onSpongeIsPlayerSleeping(final EntityPlayer self) {
         if (self.isPlayerSleeping()) {
@@ -391,7 +401,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
     @Override
     public boolean bridge$affectsSpawning() {
-        return this.affectsSpawning && !this.isSpectator();
+        return this.affectsSpawning && !this.isSpectator() && !this.bridge$isUntargetable();
     }
 
     @Override

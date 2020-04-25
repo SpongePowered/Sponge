@@ -58,9 +58,9 @@ public abstract class EntityHangingMixin_API extends EntityMixin_API implements 
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getDirectionalData());
+        manipulators.add(this.getDirectionalData());
     }
 
 }

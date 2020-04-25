@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity;
+package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityShulkerBullet;
@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
@@ -89,9 +90,9 @@ public abstract class EntityShulkerBulletMixin_API extends EntityMixin_API imple
 
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(Collection<? super DataManipulator<?, ?>> manipulators) {
+    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(getTargetData());
-        manipulators.add(getDirectionalData());
+        manipulators.add(this.getDirectionalData());
+        manipulators.add(this.getTargetData());
     }
 }

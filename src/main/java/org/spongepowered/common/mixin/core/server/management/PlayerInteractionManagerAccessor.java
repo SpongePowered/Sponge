@@ -22,25 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.entity.item;
+package org.spongepowered.common.mixin.core.server.management;
 
-import net.minecraft.entity.item.EntityItemFrame;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
-import org.spongepowered.api.data.manipulator.mutable.RotationalData;
-import org.spongepowered.api.entity.hanging.ItemFrame;
+import net.minecraft.server.management.PlayerInteractionManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.mcp.entity.EntityHangingMixin_API;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Collection;
+@Mixin(PlayerInteractionManager.class)
+public interface PlayerInteractionManagerAccessor {
 
-@Mixin(EntityItemFrame.class)
-public abstract class EntityItemFrameMixin_API extends EntityHangingMixin_API implements ItemFrame {
-
-    @Override
-    protected void spongeApi$supplyVanillaManipulators(final Collection<? super DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        this.get(RepresentedItemData.class).ifPresent(manipulators::add);
-        this.get(RotationalData.class).ifPresent(manipulators::add);
-    }
+    @Accessor("isDestroyingBlock") boolean accessor$isDestroyingBlock();
 }
