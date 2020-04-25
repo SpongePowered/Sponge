@@ -55,7 +55,7 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
 
     @Override
     public Optional<Direction> getAscendingDirection() {
-        switch (getMetadata()) {
+        switch (this.getMetadata()) {
             case 2:
                 return Optional.of(Direction.EAST);
             case 3:
@@ -71,7 +71,7 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
 
     @Override
     public Direction getFirstDirection() {
-        switch (getMetadata()) {
+        switch (this.getMetadata()) {
             case 0:
             case 5:
             case 8:
@@ -93,7 +93,7 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
 
     @Override
     public Direction getSecondDirection() {
-        switch (getMetadata()) {
+        switch (this.getMetadata()) {
             case 4:
                 return Direction.NORTH;
             case 2:
@@ -114,7 +114,7 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
     }
 
     @Override
-    public boolean isFacing(Direction direction) {
+    public boolean isFacing(final Direction direction) {
         checkNotNull(direction, "direction");
 
         Direction cardinalDirection = Direction.getClosest(direction.asOffset(), Direction.Division.CARDINAL);
