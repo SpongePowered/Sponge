@@ -97,7 +97,7 @@ public class OptimizationCategory extends ConfigCategory {
     private boolean mapOptimization = true;
 
     @Setting(value = "optimize-hoppers", comment = ""
-            + "Based on Aikar's optimizationo of Hoppers, setting this to 'true'\n"
+            + "Based on Aikar's optimizations of Hoppers, setting this to 'true'\n"
             + "will allow for hoppers to save performing server -> client updates when transferring items.\n"
             + "Because hoppers can transfer items multiple times per tick, these updates can get costly on the server,\n"
             + "with little to no benefit to the client. Because of the nature of the change,\n"
