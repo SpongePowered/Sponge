@@ -24,22 +24,30 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
+import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemMapUnlimitedTrackingValueProcessor extends AbstractSpongeValueProcessor<MapData, Boolean, Value<Boolean>> {
+public class ItemMapUnlimitedTrackingValueProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, MapItemData, ImmutableMapItemData> {
 
     public ItemMapUnlimitedTrackingValueProcessor() {
-        super(MapData.class, Keys.MAP_UNLIMITED_TRACKING);
+        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
+                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_UNLIMITED_TRACKING);
     }
 
     @Override
@@ -49,13 +57,21 @@ public class ItemMapUnlimitedTrackingValueProcessor extends AbstractSpongeValueP
     }
 
     @Override
-    protected boolean set(MapData container, Boolean value) {
-        return container.unlimitedTracking = value;
+    protected boolean set(ItemStack dataHolder, Boolean value) {
+        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
+        if (!mapData.isPresent()) {
+            return false;
+        }
+        mapData.get().unlimitedTracking = value;
+        return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(MapData container) {
-        return Optional.of(container.unlimitedTracking);
+    protected Optional<Boolean> getVal(ItemStack dataHolder) {
+        return Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
+                .map(mapData -> mapData.unlimitedTracking);
     }
 
     @Override
@@ -66,5 +82,10 @@ public class ItemMapUnlimitedTrackingValueProcessor extends AbstractSpongeValueP
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    protected MapItemData createManipulator() {
+        return new SpongeMapItemData();
     }
 }

@@ -1139,7 +1139,9 @@ public final class Constants {
         public static final DataQuery TYPE = of("ItemType");
         public static final DataQuery DAMAGE_VALUE = of("UnsafeDamage");
         // Filled maps
-        public static final byte DEFAULT_MAP_SCALE = 0;
+        public static final int DEFAULT_MAP_SCALE = 0;
+        public static final int MIN_MAP_SCALE = 0;
+        public static final int MAX_MAP_SCALE = Byte.MAX_VALUE;
         public static final boolean DEFAULT_TRACKS_PLAYERS = true;
         public static final boolean DEFAULT_UNLIMITED_TRACKING = false;
         public static final String MAP_PREFIX = "map_";

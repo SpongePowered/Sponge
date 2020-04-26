@@ -227,6 +227,7 @@
         "mcp.item.Item_ToolMaterialMixin_API",
         "mcp.item.ItemArmorMaterialMixin_API",
         "mcp.item.ItemBlockMixin_API",
+        "mcp.item.ItemEmptyMapMixin_API",
         "mcp.item.ItemFishFood_FishTypeMixin_API",
         "mcp.item.ItemMixin_API",
         "mcp.item.ItemStackMixin_API",
@@ -359,6 +360,7 @@
         "mcp.world.gen.feature.WorldGenWaterLilyMixin_API",
         "mcp.world.gen.structure.MapGenStructureMixin_API",
         "mcp.world.gen.structure.MapGenVillageMixin_API",
+        "mcp.world.storage.MapStorageMixin_API",
         "mcp.world.storage.WorldInfoMixin_API",
         "service.permission.SubjectMixin_API",
         "world.extent.ExtentMixin_API"

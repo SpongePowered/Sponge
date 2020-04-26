@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.item;
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
@@ -48,19 +49,24 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.WorldManager;
 
 @Mixin(net.minecraft.item.ItemEmptyMap.class)
 public abstract class ItemEmptyMapMixin_API {
 
+    // World2 is the same as worldIn
     @Redirect(method = "onItemRightClick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/item/ItemMap;setupNewMap(Lnet/minecraft/world/World;DDBZZ)Lnet/minecraft/item/ItemStack;",
                     ordinal = 0))
     protected ItemStack setupNewMapRedirect(World worldIn, double x, double z, byte scale, boolean trackPosition,
-                                            boolean unlimitedTracking, EntityPlayer playerIn, EnumHand handIn) {
+                                            boolean unlimitedTracking, World world2, EntityPlayer playerIn, EnumHand handIn) {
         Player player = (Player)playerIn;
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -68,6 +74,7 @@ public abstract class ItemEmptyMapMixin_API {
             frame.addContext(EventContextKeys.PLAYER, player);
 
             int id = Sponge.getServer().getMapStorage().flatMap(MapStorage::getHighestMapId).orElse(-1);
+            id++;
 
             org.spongepowered.api.item.inventory.ItemStack newMap = (org.spongepowered.api.item.inventory.ItemStack)new ItemStack(Items.FILLED_MAP, 1, id);
             HandType handType = (HandType) (Object) handIn;
@@ -86,27 +93,56 @@ public abstract class ItemEmptyMapMixin_API {
             if (event.isCancelled()) {
                 return ItemStack.EMPTY; // Injection checks for this
             }
+            World targetWorld;
+            if (worldIn.isRemote) {
+                targetWorld = worldIn;
+            }
+            else {
+                targetWorld = WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get();
+            }
             // Call getUniqueDataId to advance the map ids.
-            if (id != worldIn.getUniqueDataId("map")) {
+            int mcId = targetWorld.getUniqueDataId("map");
+            if (id != mcId) {
                 // Short has overflown.
                 SpongeImpl.getLogger().warn("Map size corruption, vanilla only allows " + Short.MAX_VALUE + "! Expected next number was not equal to the true next number.");
+                SpongeImpl.getLogger().warn("Expected: " + id + ". Got: " + mcId);
                 SpongeImpl.getLogger().warn("Automatically cancelling map creation");
+                ((MapStorageBridge)Sponge.getServer().getMapStorage().get()).bridge$setHighestMapId((short)(id - 1));
                 return ItemStack.EMPTY;
             }
             String s = Constants.ItemStack.MAP_PREFIX + id;
             MapData mapData = new MapData(s);
-            worldIn.setData(s, mapData);
+            if (worldIn.isRemote) {
+                worldIn.setData(s, mapData);
+            }
+            else {
+                targetWorld.setData(s, mapData);
+            }
+            setMapData(mapData, mapItemData);
+            SpongeImpl.getLogger().warn("about to offer");
             newMap.offer(mapItemData);
+            mapData.markDirty();
+            mapData.updateMapData(0,127);
             return (ItemStack) newMap;
         }
     }
     @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", ordinal = 2),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    protected void checkIfShouldReturn(CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack itemStack, ItemStack itemStack1) {
+    protected void checkIfShouldReturn(World worldIn, EntityPlayer player, EnumHand handIn, CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack itemStack, ItemStack itemStack1) {
         if (itemStack.isEmpty()) {
             cir.cancel();
             cir.setReturnValue(new ActionResult<>(EnumActionResult.FAIL, itemStack1));
         }
+    }
+
+    public void setMapData(MapData mapData, MapItemData mapItemData) {
+        Vector2i loc = mapItemData.location().get();
+        mapData.xCenter = loc.getX();
+        mapData.zCenter = loc.getY();
+        mapData.dimension = (byte)((WorldServerBridge)mapItemData.world().get()).bridge$getDimensionId();
+        mapData.scale = mapItemData.scale().get().byteValue();
+        mapData.trackingPosition = mapItemData.trackPosition().get();
+        mapData.unlimitedTracking = mapItemData.unlimitedTracking().get();
     }
 
     // Based off minecraft's code MapData.calculateMapCenter to ensure

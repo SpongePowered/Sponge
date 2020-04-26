@@ -22,24 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.optimization;
+package org.spongepowered.common.mixin.core.world.storage;
 
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
-import org.spongepowered.common.config.category.OptimizationCategory;
+import net.minecraft.world.storage.WorldSavedData;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
+import org.spongepowered.common.util.Constants;
 
-/**
- * Only used for the {@link OptimizationCategory#useMapOptimization()} mixins targeting {@link MapData}.
- */
-public interface OptimizedMapDataBridge {
+import java.util.Map;
+import java.util.Optional;
 
-    void mapOptimizationBridge$tickMap();
+@Mixin(net.minecraft.world.storage.MapStorage.class)
+public abstract class MapStorageBridgeMixin implements MapStorageBridge {
 
-    void mapOptimizationBridge$updatePlayer(EntityPlayer player, ItemStack mapStack);
+    @Shadow
+    @Final
+    private Map<String, Short> idCounts;
 
-    void mapOptimizationBridge$updateItemFrameDecoration(EntityItemFrame frame);
+    @Shadow public abstract WorldSavedData getOrLoadData(Class<? extends WorldSavedData> clazz, String dataIdentifier);
 
-    void mapOptimizationBridge$removeItemFrame(EntityItemFrame frame);
+    @Override
+    public Optional<MapData> bridge$getMinecraftMapData(int id) {
+        return Optional.ofNullable((MapData)getOrLoadData(MapData.class, Constants.ItemStack.MAP_PREFIX + id));
+    }
+
+    @Override
+    public void bridge$setHighestMapId(short id) {
+        idCounts.put("map", id);
+    }
 }

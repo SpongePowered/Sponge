@@ -37,8 +37,8 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
@@ -66,11 +66,11 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
         Vector2i location = (Vector2i)keyValues.get(Keys.MAP_LOCATION);
         mapData.xCenter = location.getX();
         mapData.zCenter = location.getY();
-        int id = ((WorldServerBridge)keyValues.get(Keys.MAP_WORLD)).bridge$getDimensionId();
-        ((OptimizedMapDataBridge)mapData).setWorldId(id);
+        int dimensionId = ((WorldServerBridge)keyValues.get(Keys.MAP_WORLD)).bridge$getDimensionId();
+        ((MapDataBridge)mapData).bridge$setDimensionId(dimensionId);
         mapData.trackingPosition = (boolean)keyValues.get(Keys.MAP_TRACKS_PLAYERS);
         mapData.unlimitedTracking = (boolean)keyValues.get(Keys.MAP_UNLIMITED_TRACKING);
-        mapData.scale = (byte)keyValues.get(Keys.MAP_SCALE);
+        mapData.scale = ((Integer)keyValues.get(Keys.MAP_SCALE)).byteValue();
         return true;
     }
 

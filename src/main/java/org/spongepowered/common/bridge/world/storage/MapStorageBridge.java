@@ -22,24 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.optimization;
+package org.spongepowered.common.bridge.world.storage;
 
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
-import org.spongepowered.common.config.category.OptimizationCategory;
 
-/**
- * Only used for the {@link OptimizationCategory#useMapOptimization()} mixins targeting {@link MapData}.
- */
-public interface OptimizedMapDataBridge {
+import java.util.Optional;
 
-    void mapOptimizationBridge$tickMap();
+public interface MapStorageBridge {
+    Optional<MapData> bridge$getMinecraftMapData(int id);
 
-    void mapOptimizationBridge$updatePlayer(EntityPlayer player, ItemStack mapStack);
-
-    void mapOptimizationBridge$updateItemFrameDecoration(EntityItemFrame frame);
-
-    void mapOptimizationBridge$removeItemFrame(EntityItemFrame frame);
+    /**
+     * Only call if you know what you are doing, if used
+     * incorrectly, will cause maps to be overwritten.
+     * Next map created will use this id + 1
+     * @param id int To set highest map number to.
+     */
+    void bridge$setHighestMapId(short id);
 }

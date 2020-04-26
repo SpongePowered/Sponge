@@ -22,24 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.optimization;
+package org.spongepowered.common.bridge.world.storage;
 
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.storage.MapData;
-import org.spongepowered.common.config.category.OptimizationCategory;
+public interface MapDataBridge {
 
-/**
- * Only used for the {@link OptimizationCategory#useMapOptimization()} mixins targeting {@link MapData}.
- */
-public interface OptimizedMapDataBridge {
+    int bridge$getDimensionId();
 
-    void mapOptimizationBridge$tickMap();
+    void bridge$setDimensionId(int dimensionId);
 
-    void mapOptimizationBridge$updatePlayer(EntityPlayer player, ItemStack mapStack);
-
-    void mapOptimizationBridge$updateItemFrameDecoration(EntityItemFrame frame);
-
-    void mapOptimizationBridge$removeItemFrame(EntityItemFrame frame);
+    void updateMapArea(int x, int y);
 }

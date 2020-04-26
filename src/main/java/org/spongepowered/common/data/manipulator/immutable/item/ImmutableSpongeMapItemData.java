@@ -31,12 +31,15 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.WorldManager;
 
 @ImplementationRequiredForTest
 public class ImmutableSpongeMapItemData extends AbstractImmutableData<ImmutableMapItemData, MapItemData> implements ImmutableMapItemData {
@@ -45,20 +48,32 @@ public class ImmutableSpongeMapItemData extends AbstractImmutableData<ImmutableM
     private final World world;
     private final boolean trackingPosition;
     private final boolean unlimitedTracking;
-    private final byte scale;
+    private final int scale;
+
+    private final ImmutableBoundedValue<Integer> scaleValue;
 
     public ImmutableSpongeMapItemData() {
-        this(Vector2i.ZERO, Sponge.getServer().getWorld(Sponge.getServer().getDefaultWorldName()).get(),
+        this(Vector2i.ZERO,
+                (World) WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get(),
                 Constants.ItemStack.DEFAULT_TRACKS_PLAYERS,
                 Constants.ItemStack.DEFAULT_UNLIMITED_TRACKING, Constants.ItemStack.DEFAULT_MAP_SCALE);
     }
 
-    public ImmutableSpongeMapItemData(Vector2i center, World world, boolean trackingPosition, boolean unlimitedTracking, byte scale) {
+    public ImmutableSpongeMapItemData(Vector2i center, World world, boolean trackingPosition, boolean unlimitedTracking, int scale) {
         this.center = center;
         this.world = world;
         this.trackingPosition = trackingPosition;
         this.unlimitedTracking = unlimitedTracking;
         this.scale = scale;
+
+        scaleValue = SpongeValueFactory.boundedBuilder(Keys.MAP_SCALE)
+                .defaultValue(this.scale)
+                .actualValue(scale)
+                .minimum(Constants.ItemStack.MIN_MAP_SCALE)
+                .maximum(Constants.ItemStack.MAX_MAP_SCALE)
+                .build()
+                .asImmutable();
+
         registerGetters();
     }
 
@@ -84,7 +99,9 @@ public class ImmutableSpongeMapItemData extends AbstractImmutableData<ImmutableM
 
     @Override
     public ImmutableValue<World> world() {
-        return new ImmutableSpongeValue<>(Keys.MAP_WORLD, Sponge.getServer().getWorld(Sponge.getServer().getDefaultWorldName()).get(), this.world);
+        return new ImmutableSpongeValue<>(Keys.MAP_WORLD,
+                (World) WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get(),
+                this.world);
     }
 
     @Override
@@ -100,9 +117,9 @@ public class ImmutableSpongeMapItemData extends AbstractImmutableData<ImmutableM
     }
 
     @Override
-    public ImmutableValue<Byte> scale() {
-        return new ImmutableSpongeValue<>(Keys.MAP_SCALE,
-                Constants.ItemStack.DEFAULT_MAP_SCALE, scale);
+    public ImmutableBoundedValue<Integer> scale() {
+        return this.scaleValue;
+
     }
 
     @Override

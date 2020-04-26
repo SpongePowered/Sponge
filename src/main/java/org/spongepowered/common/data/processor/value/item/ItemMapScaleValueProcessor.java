@@ -24,48 +24,74 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
+import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.world.map.MapStorage;
+import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemMapScaleValueProcessor extends AbstractSpongeValueProcessor<MapData, Byte, Value<Byte>> {
+public class ItemMapScaleValueProcessor extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, MapItemData, ImmutableMapItemData> {
+
 
     public ItemMapScaleValueProcessor() {
-        super(MapData.class, Keys.MAP_SCALE);
+        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack)itemStack)
+                        .getType() == ItemTypes.FILLED_MAP, Keys.MAP_SCALE);
     }
 
     @Override
-    protected Value<Byte> constructValue(Byte actualValue) {
-        return new SpongeValue<>(Keys.MAP_SCALE, Constants.ItemStack.DEFAULT_MAP_SCALE, actualValue);
-    }
-
-    @Override
-    protected boolean set(MapData container, Byte value) {
-        container.scale = value;
+    protected boolean set(ItemStack dataHolder, Integer value) {
+        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
+        if (!mapData.isPresent()) {
+            return false;
+        }
+        mapData.get().scale = value.byteValue();
         return true;
     }
 
     @Override
-    protected Optional<Byte> getVal(MapData container) {
-        return Optional.of(container.scale);
+    protected Optional<Integer> getVal(ItemStack dataHolder) {
+        return Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
+                .map(mapData -> (int)mapData.scale);
     }
 
     @Override
-    protected ImmutableValue<Byte> constructImmutableValue(Byte value) {
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
         return constructValue(value).asImmutable();
+    }
+
+    @Override
+    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+        return SpongeValueFactory.boundedBuilder(Keys.MAP_SCALE)
+                .defaultValue(Constants.ItemStack.DEFAULT_MAP_SCALE)
+                .actualValue(actualValue)
+                .minimum(Constants.ItemStack.MIN_MAP_SCALE)
+                .maximum(Constants.ItemStack.MAX_MAP_SCALE)
+                .build();
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    protected MapItemData createManipulator() {
+        return new SpongeMapItemData();
     }
 }

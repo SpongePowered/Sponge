@@ -25,38 +25,49 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
+import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class ItemMapLocationValueProcessor extends AbstractSpongeValueProcessor<MapData, Vector2i, Value<Vector2i>> {
+public class ItemMapLocationValueProcessor extends AbstractItemSingleDataProcessor<Vector2i, Value<Vector2i>, MapItemData, ImmutableMapItemData> {
 
     public ItemMapLocationValueProcessor() {
-        super(MapData.class, Keys.MAP_LOCATION);
+        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
+                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_LOCATION);
     }
 
     @Override
-    protected Value<Vector2i> constructValue(Vector2i actualValue) {
-        return new SpongeValue<>(Keys.MAP_LOCATION, Vector2i.ZERO, actualValue);
-    }
-
-    @Override
-    protected boolean set(MapData container, Vector2i value) {
-        container.xCenter = value.getX();
-        container.zCenter = value.getY();
+    protected boolean set(ItemStack dataHolder, Vector2i value) {
+        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
+        if (!mapData.isPresent()) {
+            return false;
+        }
+        mapData.get().xCenter = value.getX();
+        mapData.get().zCenter = value.getY();
         return true;
     }
 
     @Override
-    protected Optional<Vector2i> getVal(MapData container) {
-        return Optional.of(new Vector2i(container.xCenter, container.zCenter));
+    protected Optional<Vector2i> getVal(ItemStack dataHolder) {
+        return Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
+                .map(mapData -> new Vector2i(mapData.xCenter, mapData.zCenter));
     }
 
     @Override
@@ -65,7 +76,17 @@ public class ItemMapLocationValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
+    protected Value<Vector2i> constructValue(Vector2i actualValue) {
+        return new SpongeValue<>(Keys.MAP_LOCATION, Vector2i.ZERO, actualValue);
+    }
+
+    @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    protected MapItemData createManipulator() {
+        return new SpongeMapItemData();
     }
 }

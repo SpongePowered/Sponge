@@ -24,45 +24,69 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import com.flowpowered.math.vector.Vector2i;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
+import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
 
-public class ItemMapWorldValueProcessor extends AbstractSpongeValueProcessor<MapData, World, Value<World>> {
+public class ItemMapWorldValueProcessor extends AbstractItemSingleDataProcessor<World, Value<World>, MapItemData, ImmutableMapItemData> {
 
     public ItemMapWorldValueProcessor() {
-        super(MapData.class, Keys.MAP_WORLD);
+        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
+                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_WORLD);
     }
 
     @Override
     protected Value<World> constructValue(World actualValue) {
-
         return new SpongeValue<>(Keys.MAP_WORLD,
-                Sponge.getServer().getWorld(Sponge.getServer().getDefaultWorldName()).get(), actualValue);
+                (World)WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get(), actualValue);
     }
 
     @Override
-    protected boolean set(MapData container, World value) {
-        container.dimension = (byte)((WorldServerBridge)value).bridge$getDimensionId();
+    protected boolean set(ItemStack dataHolder, World value) {
+        Sponge.getServer().getConsole().sendMessage(Text.of("in start of .set"));
+        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
+        Sponge.getServer().getConsole().sendMessage(Text.of("in set"));
+        if (!mapData.isPresent()) {
+            return false;
+        }
+        Sponge.getServer().getConsole().sendMessage(Text.of("in set past mapData.isPresent()"));
+        MapDataBridge mapDataBridge = (MapDataBridge)mapData.get();
+        mapDataBridge.bridge$setDimensionId(((WorldServerBridge)value).bridge$getDimensionId());
+        mapDataBridge.updateMapArea(0, 127);
+        mapData.get().markDirty();
+
+        //WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get().setData(Constants.ItemStack.MAP_PREFIX + dataHolder.getMetadata(), mapData.get());
         return true;
     }
 
     @Override
-    protected Optional<World> getVal(MapData container) {
-        return WorldManager.getWorldByDimensionId(container.dimension).map(world -> (World) world);
+    protected Optional<World> getVal(ItemStack dataHolder) {
+        return Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
+                .map(mapData -> (MapDataBridge)mapData)
+                .flatMap(bridge -> WorldManager.getWorldByDimensionId(bridge.bridge$getDimensionId()))
+                .map(worldServer -> (World)worldServer);
     }
 
     @Override
@@ -73,5 +97,10 @@ public class ItemMapWorldValueProcessor extends AbstractSpongeValueProcessor<Map
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    protected MapItemData createManipulator() {
+        return new SpongeMapItemData();
     }
 }

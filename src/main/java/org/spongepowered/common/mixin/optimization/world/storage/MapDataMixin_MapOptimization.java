@@ -110,25 +110,6 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
         }
     }
 
-    @Override
-    public int getWorldId() {
-        try {
-            return (int)mapOptimizationImpl$dimensionField.get(this);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    @Override
-    public void setWorldId(int id) {
-        try {
-            mapOptimizationImpl$dimensionField.set(this, id);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
     private Integer mapOptimizationImpl$getMapId() {
         return Integer.valueOf(this.mapName.split("map_")[1]);
     }
