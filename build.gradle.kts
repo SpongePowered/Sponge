@@ -21,9 +21,16 @@ apply {
     plugin("org.spongepowered.mixin")
 }
 
+val apiProject = project.project("SpongeAPI")
+val commonProject = project
+val mcpType: String by project
+val mcpMappings: String by project
+val minecraftDep: String by project
+val minecraftVersion: String by project
+
 spongeDev {
-    api(project.project("SpongeAPI"))
-    common(project)
+    api(apiProject)
+    common(commonProject)
     addedSourceSets {
         register("mixins") {
             sourceType.set(SourceType.Mixin)
@@ -50,7 +57,7 @@ spongeDev {
 }
 
 minecraft {
-    mappings(project.properties["mcpType"]!! as String, project.properties["mcpMappings"]!! as String)
+    mappings(mcpType, mcpMappings)
     runs {
         create("server") {
             workingDirectory( project.file("../run"))
@@ -61,13 +68,13 @@ minecraft {
             }
         }
     }
-    project.sourceSets["main"].resources
-            .filter { it.name.endsWith("_at.cfg") }
-            .files
-            .forEach {
-                accessTransformer(it)
-                parent?.minecraft?.accessTransformer(it)
-            }
+//    project.sourceSets["main"].resources
+//            .filter { it.name.endsWith("_at.cfg") }
+//            .files
+//            .forEach {
+//                accessTransformer(it)
+//                parent?.minecraft?.accessTransformer(it)
+//            }
 }
 
 tasks {
@@ -86,7 +93,7 @@ configure<org.spongepowered.asm.gradle.plugins.MixinExtension>() {
     add(sourceSets["accessors"], "mixins.common.accessors.refmap.json")
 }
 dependencies {
-    minecraft("net.minecraft:" + project.properties["minecraftDep"] + ":" + project.properties["minecraftVersion"])
+    minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
 
     runtime("org.apache.logging.log4j:log4j-slf4j-impl:2.8.1")
 
@@ -126,3 +133,88 @@ dependencies {
     modlauncher("cpw.mods:grossjava9hacks:1.1.+")
     modlauncher("net.minecraftforge:accesstransformers:1.0.+:shadowed")
 }
+
+allprojects {
+
+    afterEvaluate {
+        tasks {
+            compileJava {
+                options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
+            }
+        }
+    }
+}
+
+val accessors by sourceSets
+
+project("SpongeVanilla") {
+    val vanillaProject = this
+    apply {
+        plugin("org.spongepowered.gradle.sponge.impl")
+        plugin("net.minecraftforge.gradle")
+        plugin("org.spongepowered.mixin")
+    }
+
+    description = "The SpongeAPI implementation for Vanilla Minecraft"
+
+    configure<org.spongepowered.gradle.dev.SpongeImpl> {
+        common(commonProject)
+        api(apiProject)
+        addForgeFlower.set(true)
+        addedSourceSets {
+            register("mixins") {
+                sourceType.set(SourceType.Mixin)
+            }
+            register("accessors") {
+                sourceType.set(SourceType.Accessor)
+            }
+            register("launch") {
+                sourceType.set(SourceType.Launch)
+                configurations += "launch"
+            }
+            register("modlauncher") {
+                dependsOn += "launch"
+                configurations += "launch"
+            }
+            register("invalid") {
+                sourceType.set(SourceType.Invalid)
+            }
+        }
+    }
+
+    val launch by vanillaProject.configurations.creating
+
+    configure<net.minecraftforge.gradle.userdev.UserDevExtension> {
+        mappings(mcpType, mcpMappings)
+        runs {
+            create("server") {
+                workingDirectory(vanillaProject.file("./run"))
+                mods {
+                    create("sponge") {
+                        source(vanillaProject.sourceSets["main"])
+                    }
+                }
+            }
+        }
+
+        vanillaProject.sourceSets["main"].resources
+                .filter { it.name.endsWith("_at.cfg") }
+                .files
+                .forEach { accessTransformer(it) }
+    }
+
+    dependencies {
+        minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
+
+        implementation(project(commonProject.path)) {
+            exclude(group = "net.minecraft", module = "server")
+        }
+
+        launch("net.sf.jopt-simple:jopt-simple:5.0.4")
+        launch(group = "org.spongepowered", name = "plugin-meta", version = "0.4.1")
+        "mixinsImplementation"(commonProject)
+    }
+
+}
+
+
