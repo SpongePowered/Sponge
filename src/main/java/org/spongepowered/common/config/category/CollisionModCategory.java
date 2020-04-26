@@ -71,11 +71,12 @@ public class CollisionModCategory extends ConfigCategory {
         return this.defaultMaxCollisions;
     }
 
-    public Map<String, Integer>  getBlockList() {
+    public Map<String, Integer> getBlockList() {
         return this.blockList;
     }
 
-    public Map<String, Integer>  getEntityList() {
+    public Map<String, Integer> getEntityList() {
         return this.entityList;
     }
+
 }

@@ -33,22 +33,22 @@ import java.util.List;
 @ConfigSerializable
 public class TimingsCategory extends ConfigCategory {
 
-    @Setting
+    @Setting(comment = "???")
     private boolean verbose = false;
 
-    @Setting
+    @Setting(comment = "???")
     private boolean enabled = true;
 
-    @Setting("server-name-privacy")
+    @Setting(value = "server-name-privacy", comment = "???")
     private boolean serverNamePrivacy = false;
 
-    @Setting("hidden-config-entries")
+    @Setting(value = "hidden-config-entries", comment = "???")
     private List<String> hiddenConfigEntries = Lists.newArrayList("sponge.sql");
 
-    @Setting("history-interval")
+    @Setting(value = "history-interval", comment = "???")
     private int historyInterval = 300;
 
-    @Setting("history-length")
+    @Setting(value = "history-length", comment = "???")
     private int historyLength = 3600;
 
     public boolean isVerbose() {

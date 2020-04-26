@@ -30,14 +30,15 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class GlobalGeneralCategory extends GeneralCategory {
 
-    @Setting(value = "file-io-thread-sleep", comment = "If 'true', sleeping between chunk saves will be enabled, beware of memory issues.")
+    @Setting(value = "file-io-thread-sleep",
+            comment = "If 'true', sleeping between chunk saves will be enabled, beware of memory issues.")
     private boolean fileIOThreadSleep = false;
 
     public GlobalGeneralCategory() {
-        
     }
 
     public boolean getFileIOThreadSleep() {
         return this.fileIOThreadSleep;
     }
+
 }

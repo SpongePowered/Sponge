@@ -42,29 +42,45 @@ import java.util.List;
 
 public class GeneralConfigBase extends ConfigBase {
 
-    @Setting
+    @Setting(comment = "Configuration options that will affect all worlds.")
     protected WorldCategory world = new WorldCategory();
-    @Setting(value = "player-block-tracker")
+
+    @Setting(value = "player-block-tracker",
+            comment = "Configuration options related to tracking player interactions with blocks")
     private PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
-    @Setting
+
+    @Setting(comment = "Configuratiom options related to debugging features that are disabled by default.")
     private DebugCategory debug = new DebugCategory();
-    @Setting(value = "entity")
+
+    @Setting(value = "entity", comment = "Configuration options related to entities and their performance impact.")
     private EntityCategory entity = new EntityCategory();
-    @Setting(value = "entity-activation-range")
+
+    @Setting(value = "entity-activation-range",
+            comment = "Allows the configuration of the default entity activation ranges.")
     private EntityActivationRangeCategory entityActivationRange = new EntityActivationRangeCategory();
-    @Setting(value = "entity-collisions")
+
+    @Setting(value = "entity-collisions", comment = "Configuration options related to entity collision checks.")
     private EntityCollisionCategory entityCollisionCategory = new EntityCollisionCategory();
-    @Setting
+
+    @Setting(
+            comment = "Contains general configuration options for Sponge that don't fit into a specific classification")
     private GeneralCategory general = new GeneralCategory();
-    @Setting
+
+    @Setting(comment = "Configuration option related to logging certain action such as chunk loading.")
     private LoggingCategory logging = new LoggingCategory();
-    @Setting(value = "spawner", comment = "Used to control spawn limits around players. \n"
-                                        + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
+
+    @Setting(value = "spawner", comment = ""
+            + "Used to control spawn limits around players.\n"
+            + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
     private SpawnerCategory spawner = new SpawnerCategory();
-    @Setting(value = "tileentity-activation")
+
+    @Setting(value = "tileentity-activation",
+            comment = "Configuration options related to activation ranges of tile entities.")
     private TileEntityActivationCategory tileEntityActivationCategory = new TileEntityActivationCategory();
-    @Setting
+
+    @Setting(comment = "???")
     private TimingsCategory timings = new TimingsCategory();
+
     @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
     private final List<String> worldModifiers = new ArrayList<>();
 
@@ -115,4 +131,5 @@ public class GeneralConfigBase extends ConfigBase {
     public List<String> getWorldGenModifiers() {
         return this.worldModifiers;
     }
+
 }

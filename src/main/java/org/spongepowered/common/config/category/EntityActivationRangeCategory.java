@@ -33,10 +33,13 @@ import java.util.Map;
 @ConfigSerializable
 public class EntityActivationRangeCategory extends ConfigCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered entities will be added to this config with a default value.")
+    @Setting(value = "auto-populate",
+            comment = "If 'true', newly discovered entities will be added to this config with a default value.")
     private boolean autoPopulate = false;
+
     @Setting(value = "defaults", comment = "Default activation ranges used for all entities unless overridden.")
     private Map<String, Integer> defaultRanges = new HashMap<>();
+
     @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, EntityActivationModCategory> modList = new HashMap<>();
 
@@ -59,4 +62,5 @@ public class EntityActivationRangeCategory extends ConfigCategory {
     public Map<String, EntityActivationModCategory> getModList() {
         return this.modList;
     }
+
 }

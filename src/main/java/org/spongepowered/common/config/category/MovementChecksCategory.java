@@ -30,13 +30,16 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class MovementChecksCategory extends ConfigCategory {
 
-    @Setting(value = "player-moved-too-quickly", comment = "Controls whether the 'player moved too quickly!' check will be enforced")
+    @Setting(value = "player-moved-too-quickly",
+            comment = "Controls whether the 'player moved too quickly!' check will be enforced")
     private boolean playerMovedTooQuickly = true;
 
-    @Setting(value = "player-vehicle-moved-too-quickly", comment = "Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
+    @Setting(value = "player-vehicle-moved-too-quickly",
+            comment = "Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
     private boolean playerVehicleMovedTooQuickly = true;
 
-    @Setting(value = "moved-wrongly", comment = "Controls whether the 'player/entity moved wrongly!' check will be enforced")
+    @Setting(value = "moved-wrongly",
+            comment = "Controls whether the 'player/entity moved wrongly!' check will be enforced")
     private boolean movedWrongly = true;
 
     public boolean playerMovedTooQuickly() {

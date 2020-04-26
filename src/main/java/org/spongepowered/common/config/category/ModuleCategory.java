@@ -30,32 +30,33 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class ModuleCategory extends ConfigCategory {
 
-    @Setting(value = "bungeecord")
+    @Setting(value = "bungeecord", comment = "???")
     private boolean pluginBungeeCord = false;
 
-    @Setting(value = "entity-activation-range")
+    @Setting(value = "entity-activation-range", comment = "???")
     private boolean pluginEntityActivation = true;
 
-    @Setting(value = "tileentity-activation", comment = "Controls block range and tick rate of tileentities. \n"
-                                                      + "Use with caution as this can break intended functionality.")
+    @Setting(value = "tileentity-activation", comment = ""
+            + "Controls block range and tick rate of tileentities.\n"
+            + "Use with caution as this can break intended functionality.")
     private boolean pluginTileEntityActivation = false;
 
-    @Setting(value = "entity-collisions")
+    @Setting(value = "entity-collisions", comment = "???")
     private boolean pluginEntityCollisions = true;
 
-    @Setting("timings")
+    @Setting(value = "timings", comment = "???")
     private boolean pluginTimings = true;
 
-    @Setting(value = "exploits", comment = "Controls whether any exploit patches are applied.\n"
-                                           + "If there are issues with any specific exploits, please\n"
-                                           + "test in the exploit category first, before disabling all\n"
-                                           + "exploits with this toggle.")
+    @Setting(value = "exploits", comment = ""
+            + "Controls whether any exploit patches are applied.\n"
+            + "If there are issues with any specific exploits, please test in the exploit category first,\n"
+            + "before disabling all exploits with this toggle.")
     private boolean enableExploitPatches = true;
 
-    @Setting("optimizations")
+    @Setting(value = "optimizations")
     private boolean enableOptimizationPatches = true;
 
-    @Setting("tracking")
+    @Setting(value = "tracking", comment = "???")
     private boolean tracking = true;
 
     @Setting(value = "realtime", comment = "Use real (wall) time instead of ticks as much as possible")
@@ -138,4 +139,5 @@ public class ModuleCategory extends ConfigCategory {
     public void setPluginRealTime(boolean state) {
         this.pluginRealTime = state;
     }
+
 }

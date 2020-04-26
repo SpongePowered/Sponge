@@ -32,17 +32,17 @@ import com.google.common.collect.Maps;
 import ninja.leaping.configurate.objectmapping.Setting;
 import org.spongepowered.common.config.category.BrokenModCategory;
 import org.spongepowered.common.config.category.BungeeCordCategory;
-import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.CommandsCategory;
 import org.spongepowered.common.config.category.ExploitCategory;
 import org.spongepowered.common.config.category.GlobalGeneralCategory;
 import org.spongepowered.common.config.category.GlobalWorldCategory;
+import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.config.category.MovementChecksCategory;
 import org.spongepowered.common.config.category.OptimizationCategory;
 import org.spongepowered.common.config.category.PermissionCategory;
+import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.SqlCategory;
-import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
 import org.spongepowered.common.util.IpSet;
 
@@ -58,46 +58,51 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting(comment = "Configuration options related to the Sql service, including connection aliases etc")
     private SqlCategory sql = new SqlCategory();
 
-    @Setting
+    @Setting(comment = "Configuration options related to commands, including command aliases and hidden commands.")
     private CommandsCategory commands = new CommandsCategory();
 
-    @Setting
+    @Setting(comment = "Configuration options related to permissions and permission handling")
     private PermissionCategory permission = new PermissionCategory();
 
-    @Setting(value = "modules")
+    @Setting(value = "modules", comment = "Options related to optional modules, that can be enabled or disabled.")
     private ModuleCategory mixins = new ModuleCategory();
 
-    @Setting("ip-sets")
+    @Setting(value = "ip-sets", comment = "???")
     private Map<String, List<IpSet>> ipSets = new HashMap<>();
 
-    @Setting(value = "bungeecord")
+    @Setting(value = "bungeecord", comment = "Configuration options related for server proxies, such as bungeecord")
     private BungeeCordCategory bungeeCord = new BungeeCordCategory();
 
-    @Setting
+    @Setting(comment = "Configuration option related to sponge provided exploit patches")
     private ExploitCategory exploits = new ExploitCategory();
 
-    @Setting(value = "optimizations")
+    @Setting(value = "optimizations",
+            comment = "Configuration options related to sponge provided performance optimizations.")
     private OptimizationCategory optimizations = new OptimizationCategory();
 
-    @Setting
+    @Setting(
+            comment = "Contains general configuration options for Sponge that don't fit into a specific classification")
     protected GlobalGeneralCategory general = new GlobalGeneralCategory();
 
-    @Setting
+    @Setting(comment = "Configuration options that will affect all worlds.")
     protected GlobalWorldCategory world = new GlobalWorldCategory();
 
-    @Setting(value = "cause-tracker")
+    @Setting(value = "cause-tracker", comment = "Options related to Sponge's cause tracking system")
     private PhaseTrackerCategory causeTracker = new PhaseTrackerCategory();
 
     @Setting(value = "teleport-helper", comment = "Blocks to blacklist for safe teleportation.")
     private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
 
-    @Setting("movement-checks")
+    @Setting(value = "movement-checks",
+            comment = "Options related to minecraft'S movement checks, that can be enabled or disabled.")
     private MovementChecksCategory movementChecks = new MovementChecksCategory();
 
     @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
     private BrokenModCategory brokenMods = new BrokenModCategory();
 
-    @Setting(value = "metrics")
+    @Setting(value = "metrics", comment = ""
+            + "Configuration options related to metric collection.\n"
+            + "Metric collection is disabled by default.")
     private MetricsCategory metricsCategory = new MetricsCategory();
 
     public GlobalConfig() {
@@ -129,15 +134,17 @@ public class GlobalConfig extends GeneralConfigBase {
     }
 
     public Map<String, Predicate<InetAddress>> getIpSets() {
-        return ImmutableMap.copyOf(Maps.transformValues(this.ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
-            @Nullable
-            @Override
-            public Predicate<InetAddress> apply(List<IpSet> input) {
-                return Predicates.and(input);
-            }
-        }));
-    }
+        return ImmutableMap
+                .copyOf(Maps.transformValues(this.ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
 
+                    @Nullable
+                    @Override
+                    public Predicate<InetAddress> apply(List<IpSet> input) {
+                        return Predicates.and(input);
+                    }
+
+                }));
+    }
 
     public ExploitCategory getExploits() {
         return this.exploits;
@@ -176,4 +183,5 @@ public class GlobalConfig extends GeneralConfigBase {
     public MetricsCategory getMetricsCategory() {
         return this.metricsCategory;
     }
+
 }
