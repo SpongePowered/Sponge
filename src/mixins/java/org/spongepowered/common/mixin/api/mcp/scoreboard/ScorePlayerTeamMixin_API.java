@@ -186,7 +186,7 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
             throw new IllegalArgumentException(String.format("Member is %s characters long! It must be at most 40.", legacyName.length()));
         }
         if (this.scoreboard != null) {
-            this.scoreboard.addPlayerToTeam(legacyName, this.name);
+            this.scoreboard.addPlayerToTeam(legacyName, (ScorePlayerTeam) (Object) this);
         } else {
             this.membershipSet.add(legacyName); // this is normally done by addPlayerToTeam
         }

@@ -39,7 +39,7 @@ public abstract class Raid_StatusMixin_API implements RaidStatus {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void api$setKey(CallbackInfo ci) {
-        api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$func_221277_a());
+        this.api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$func_221277_a());
     }
 
     @Shadow public abstract String shadow$func_221277_a();

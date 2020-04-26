@@ -40,7 +40,7 @@ public abstract class TNTEntityMixin_API extends EntityMixin_API implements Prim
 
     @Override
     public void detonate() {
-        this.shadow$setDead();
+        this.shadow$remove();
         this.shadow$explode();
     }
 
