@@ -54,6 +54,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationHolder;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.util.Constants;
@@ -107,6 +108,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
     @Nullable private EnderChestInventory enderChest; // lazy load when accessing inventory
     @Nullable private CompoundNBT nbt;
+    private boolean isConstructing;
 
     public SpongeUser(final GameProfile profile) {
         this.profile = profile;
@@ -339,6 +341,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         final CompoundNBT spongeCompound = compound.getCompound(Constants.Forge.FORGE_DATA).getCompound(
             Constants.Sponge.SPONGE_DATA);
+        this.isConstructing = true;
+//        DataUtil.readCustomData(spongeCompound, (DataHolder) this);
+        this.isConstructing = false;
         //if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
         //    ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         //}
@@ -626,6 +631,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void markDirty() {
+        if (this.isConstructing) {
+            return;
+        }
         dirtyUsers.add(this);
     }
 

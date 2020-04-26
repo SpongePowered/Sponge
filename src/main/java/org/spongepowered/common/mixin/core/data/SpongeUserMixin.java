@@ -22,45 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.mixin.core.data;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.EntityPredicates;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.util.Constants;
 
-import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
-@Mixin(EntityPredicates.class)
-public abstract class EntityPredicatesMixin {
+@Mixin(value = SpongeUser.class, remap = false)
+public abstract class SpongeUserMixin implements DataCompoundHolder {
 
-    @Shadow @Final @Mutable public static Predicate<Entity> NOT_SPECTATING = entity -> {
-        if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$isVanished()) {
-            // Sponge: Count vanished entities as spectating
+    @Shadow public abstract boolean isInitialized();
+    @Shadow @Nullable private NBTTagCompound nbt;
+
+    @Override
+    public boolean data$hasRootCompound() {
+        if (this.nbt == null) {
             return false;
         }
-        if (entity.isSpectator()) {
-            return false;
-        }
-        return true;
-    };
+        return this.nbt.hasKey(Constants.Forge.FORGE_DATA);
+    }
 
-    @Shadow @Final @Mutable public static Predicate<Entity> CAN_AI_TARGET = entity ->{
-        if (entity instanceof VanishableBridge
-            && ((VanishableBridge) entity).bridge$isVanished()
-            && ((VanishableBridge) entity).bridge$isUntargetable()) {
-            // Sponge: Take into account untargetability from vanishing
-            return false;
+    @Override
+    public NBTTagCompound data$getRootCompound() {
+        if (this.nbt == null) {
+            return new NBTTagCompound();
         }
-        if (entity instanceof PlayerEntity && (entity.isSpectator() || ((PlayerEntity) entity).isCreative())) {
-            return false;
+        NBTTagCompound forgeCompound = this.nbt.getCompoundTag(Constants.Forge.FORGE_DATA);
+        if (forgeCompound == null) {
+            forgeCompound = new NBTTagCompound();
+            this.nbt.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
         }
-        return true;
-    };
-
-
+        return forgeCompound;
+    }
 }

@@ -46,16 +46,16 @@ public class ItemStackEquipmentTypeProvider extends ItemStackDataProvider<Equipm
         if (item instanceof ArmorItem) {
             switch (((ArmorItem) item).getEquipmentSlot()) {
                 case FEET: {
-                    return Optional.of(EquipmentTypes.HEADWEAR.get());
+                    return Optional.of(EquipmentTypes.BOOTS.get());
                 }
                 case LEGS: {
-                    return Optional.of(EquipmentTypes.CHESTPLATE.get());
-                }
-                case CHEST: {
                     return Optional.of(EquipmentTypes.LEGGINGS.get());
                 }
+                case CHEST: {
+                    return Optional.of(EquipmentTypes.CHESTPLATE.get());
+                }
                 case HEAD: {
-                    return Optional.of(EquipmentTypes.BOOTS.get());
+                    return Optional.of(EquipmentTypes.HEADWEAR.get());
                 }
                 default: {
                     break;

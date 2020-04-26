@@ -466,6 +466,14 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         if (ridingEntity == this.player || ridingEntity.getControllingPassenger() != this.player || ridingEntity != this.lowestRiddenEnt) {
             return ridingEntity;
         }
+        final double deltaX = packetIn.getX() - this.player.posX;
+        final double deltaY = packetIn.getY() - this.player.posY;
+        final double deltaZ = packetIn.getZ() - this.player.posZ;
+        final double deltaChange = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+        if (deltaChange <= 1f / 256) { // Micro-optimization, avoids almost negligible position movement from floating point differences.
+            return ridingEntity;
+        }
 
         // Sponge Start - Movement event
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) ridingEntity;

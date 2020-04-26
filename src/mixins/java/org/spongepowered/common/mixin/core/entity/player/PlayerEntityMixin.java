@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
@@ -39,6 +40,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -74,6 +76,8 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge {
@@ -182,7 +186,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
     @Override
     public boolean bridge$affectsSpawning() {
-        return this.impl$affectsSpawning && !this.shadow$isSpectator();
+        return this.impl$affectsSpawning && !this.shadow$isSpectator() && !this.bridge$isUntargetable();
     }
 
     @Override
@@ -202,6 +206,15 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
             this.world.setSpawnPoint(VecHelper.toBlockPos(this.impl$targetedLocation));
         }
+    }
+
+
+    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
+    private List<Entity> impl$ignoreOtherEntitiesWhenUncollideable(final World world, Entity entityIn, AxisAlignedBB bb) {
+        if (this.bridge$isUncollideable()) {
+            return Collections.emptyList();
+        }
+        return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
     }
 
     /**

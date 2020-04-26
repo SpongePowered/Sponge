@@ -193,8 +193,8 @@ public class PlayerInteractionManagerMixin_Tracker {
                         frame.addContext(EventContextKeys.BLOCK_HIT, currentSnapshot);
                         ((ContainerBridge) player.openContainer).bridge$setOpenLocation(currentSnapshot.getLocation().orElse(null));
                         if (!InventoryEventFactory.callInteractInventoryOpenEvent(this.player)) {
-                            result = ActionResultType.FAIL;
                             this.impl$interactBlockRightClickEventCancelled = true;
+                            return ActionResultType.FAIL;
                         }
                     }
                 }

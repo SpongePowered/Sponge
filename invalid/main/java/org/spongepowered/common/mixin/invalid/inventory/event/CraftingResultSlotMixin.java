@@ -96,7 +96,9 @@ public abstract class CraftingResultSlotMixin extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void beforeTake(final PlayerEntity thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
-        this.impl$lastRecipe = (CraftingRecipe) thePlayer.world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, this.field_75239_a, thePlayer.world).orElse(null);
+        if (this.impl$lastRecipe == null || !((IRecipe) this.impl$lastRecipe).matches(this.craftMatrix, thePlayer.world)) {
+            this.impl$lastRecipe = ((CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world));
+        }
         if (((TrackedContainerBridge) thePlayer.openContainer).bridge$isShiftCrafting()) {
             ((TrackedContainerBridge) thePlayer.openContainer).bridge$detectAndSendChanges(true);
             ((TrackedContainerBridge) thePlayer.openContainer).bridge$setShiftCrafting(false);
