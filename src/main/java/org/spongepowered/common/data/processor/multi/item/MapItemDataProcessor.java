@@ -37,6 +37,8 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
@@ -57,6 +59,7 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
 
     @Override
     public boolean set(ItemStack itemStack, Map<Key<?>, Object> keyValues) {
+        SpongeImpl.getLogger().info("in .set() in MapItemDataProcessor");
         int metaData = itemStack.getMetadata();
         MapData mapData = (MapData)
                 ((net.minecraft.world.storage.MapStorage)Sponge.getServer().getMapStorage().get())
@@ -66,11 +69,17 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
         Vector2i location = (Vector2i)keyValues.get(Keys.MAP_LOCATION);
         mapData.xCenter = location.getX();
         mapData.zCenter = location.getY();
+        SpongeImpl.getLogger().info("in .set() in MapItemDataProcessor 2");
         int dimensionId = ((WorldServerBridge)keyValues.get(Keys.MAP_WORLD)).bridge$getDimensionId();
-        ((MapDataBridge)mapData).bridge$setDimensionId(dimensionId);
+        SpongeImpl.getLogger().info("in .set() in MapItemDataProcessor 3");
+        MapDataBridge mapDataBridge = (MapDataBridge)mapData;
+        mapDataBridge.bridge$setDimensionId(dimensionId);
         mapData.trackingPosition = (boolean)keyValues.get(Keys.MAP_TRACKS_PLAYERS);
         mapData.unlimitedTracking = (boolean)keyValues.get(Keys.MAP_UNLIMITED_TRACKING);
         mapData.scale = ((Integer)keyValues.get(Keys.MAP_SCALE)).byteValue();
+        mapDataBridge.updateMapArea(0, 127);
+        mapData.markDirty();
+        SpongeImpl.getLogger().info("out of .set() in MapItemDataProcessor");
         return true;
     }
 
@@ -83,10 +92,10 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
                 ((net.minecraft.world.storage.MapStorage)Sponge.getServer().getMapStorage().get())
                         .getOrLoadData(MapData.class, Constants.ItemStack.MAP_PREFIX + metaData);
         values.put(Keys.MAP_LOCATION, new Vector2i(mapData.xCenter, mapData.zCenter));
-        values.put(Keys.MAP_WORLD, WorldManager.getWorldByDimensionId(mapData.dimension).get());
+        values.put(Keys.MAP_WORLD, (World)WorldManager.getWorldByDimensionId(((MapDataBridge)mapData).bridge$getDimensionId()).get());
         values.put(Keys.MAP_TRACKS_PLAYERS, mapData.trackingPosition);
         values.put(Keys.MAP_UNLIMITED_TRACKING, mapData.unlimitedTracking);
-        values.put(Keys.MAP_SCALE, mapData.scale);
+        values.put(Keys.MAP_SCALE, (int)mapData.scale);
 
         return values;
     }

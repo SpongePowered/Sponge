@@ -119,10 +119,11 @@ public abstract class ItemEmptyMapMixin_API {
                 targetWorld.setData(s, mapData);
             }
             setMapData(mapData, mapItemData);
+            SpongeImpl.getLogger().info(mapItemData.world().get().getName());
             SpongeImpl.getLogger().warn("about to offer");
             newMap.offer(mapItemData);
-            mapData.markDirty();
-            mapData.updateMapData(0,127);
+            //mapData.updateMapData(0,127);
+            //mapData.markDirty();
             return (ItemStack) newMap;
         }
     }
