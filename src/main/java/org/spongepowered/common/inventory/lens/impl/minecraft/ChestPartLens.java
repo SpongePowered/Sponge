@@ -24,38 +24,42 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
-import org.spongepowered.api.block.entity.carrier.chest.Chest;
+import net.minecraft.inventory.DoubleSidedInventory;
+import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.tileentity.ChestTileEntity;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.accessor.inventory.DoubleSidedInventoryAccessor;
+import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 /**
- * This class is only used as an adapter when explicitly requested from the API, trough
- * {@link Chest#getDoubleChestInventory()}
+ * A lens for a part of a double chest inventory
  */
-public class LargeChestInventoryLens extends RealLens {
+public class ChestPartLens extends RealLens {
 
-    private int upperChest;
-    private int lowerChest;
+    private boolean upper;
 
-    public LargeChestInventoryLens(int size, Class clazz, SlotLensProvider slots) {
-        super(0, size, clazz);
-        this.upperChest = size / 2;
-        this.lowerChest = size / 2;
-        this.init(slots);
+    public ChestPartLens(int base, int width, int height, SlotLensProvider slots, boolean upper) {
+        super(base, width * height, (Class) ChestTileEntity.class);
+        this.upper = upper;
+        this.addSpanningChild(new GridInventoryLens(base, width, height, slots));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void init(final SlotLensProvider slots) {
-        // add grids
-        int base = 0;
-        this.addSpanningChild(new ChestPartLens(base, 9, this.upperChest / 9, slots, true));
-        base += this.upperChest;
-        this.addSpanningChild(new ChestPartLens(base, 9, this.lowerChest / 9, slots, false));
-        base += this.lowerChest;
-
-        this.addChild(new GridInventoryLens(0, 9, (this.upperChest + this.lowerChest) / 9, slots));
-
-        this.addMissingSpanningSlots(base, slots);
+    @Override
+    public Inventory getAdapter(Fabric fabric, Inventory parent) {
+        if (fabric instanceof ChestContainer) {
+            fabric = fabric.fabric$get(this.base).bridge$getAdapter().inventoryAdapter$getFabric();
+        }
+        if (fabric instanceof DoubleSidedInventory) {
+            if (this.upper) {
+                return (Inventory) ((DoubleSidedInventoryAccessor) fabric).accessor$getField_70477_b();
+            } else {
+                return (Inventory) ((DoubleSidedInventoryAccessor) fabric).accessor$getField_70478_c();
+            }
+        }
+        return super.getAdapter(fabric, parent);
     }
+
 }

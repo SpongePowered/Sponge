@@ -53,11 +53,12 @@ import net.minecraft.tileentity.TrappedChestTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.LargeChestInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.SingleGridLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.SingleIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
@@ -164,7 +165,7 @@ public class LensRegistrar {
     private static Lens generateLens(Object inventory, int size, SlotLensProvider slotLensProvider) {
         LensFactory lensFactory = lensFactories.get(inventory.getClass());
         if (size == 0) {
-            return new DefaultEmptyLens(); // TODO why do we need an adapter in an empty lens?
+            return new DefaultEmptyLens();
         }
         Lens lens = lensFactory.apply(inventory.getClass(), size, slotLensProvider);
         if (lens != null) {
@@ -181,7 +182,7 @@ public class LensRegistrar {
         if (lens != null) {
             return lens;
         }
-        return new DefaultIndexedLens(0, size, slotLensProvider);
+        return new SingleIndexedLens(0, size, (Class) inventory.getClass(), slotLensProvider);
     }
 
     @Nullable
@@ -189,7 +190,7 @@ public class LensRegistrar {
         if (size != width * height) {
             return null; // Wrong size
         }
-        return new GridInventoryLens(0, width, height, inventory.getClass(), slotLensProvider);
+        return new SingleGridLens(0, width, height, (Class) inventory.getClass(), slotLensProvider);
     }
 
     private static Lens lensBrewingStandTileEntity(Object inventory, int size, SlotLensProvider slotLensProvider) {
@@ -199,7 +200,6 @@ public class LensRegistrar {
     private static Lens lensFurnace(Object inventory, int size, SlotLensProvider slotLensProvider) {
         return new FurnaceInventoryLens(size, inventory.getClass(), slotLensProvider);
     }
-
 
     private static Lens lensDoubleSided(Object inventory, int size, SlotLensProvider slotLensProvider) {
         return new LargeChestInventoryLens(size, inventory.getClass(), slotLensProvider);
