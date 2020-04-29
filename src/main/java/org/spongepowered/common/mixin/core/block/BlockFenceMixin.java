@@ -39,7 +39,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
-import org.spongepowered.common.util.DirectionalBlockUtils;
+import org.spongepowered.common.util.Constants;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -49,7 +49,7 @@ import java.util.Set;
 @Mixin(BlockFence.class)
 public abstract class BlockFenceMixin extends BlockMixin {
 
-    private static final Map<Direction, PropertyBool> DIRECTION_TO_PROPERTY_MAPPING;
+    private static final Map<Direction, PropertyBool> impl$DIRECTION_TO_PROPERTY_MAPPING;
 
     static {
         ImmutableMap.Builder<Direction, PropertyBool> directionToPropertyMappingBuilder = ImmutableMap.builder();
@@ -57,7 +57,7 @@ public abstract class BlockFenceMixin extends BlockMixin {
         directionToPropertyMappingBuilder.put(Direction.SOUTH, BlockFence.SOUTH);
         directionToPropertyMappingBuilder.put(Direction.WEST, BlockFence.WEST);
         directionToPropertyMappingBuilder.put(Direction.EAST, BlockFence.EAST);
-        DIRECTION_TO_PROPERTY_MAPPING = directionToPropertyMappingBuilder.build();
+        impl$DIRECTION_TO_PROPERTY_MAPPING = directionToPropertyMappingBuilder.build();
     }
 
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
@@ -74,12 +74,9 @@ public abstract class BlockFenceMixin extends BlockMixin {
     @Override
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableConnectedDirectionData) {
-            ImmutableConnectedDirectionData connectedDirectionData = (ImmutableConnectedDirectionData) manipulator;
-            return Optional.of((BlockState) DirectionalBlockUtils.applyConnectedDirections(blockState,
-                                                                                           DIRECTION_TO_PROPERTY_MAPPING,
-                                                                                           (sourceBlockState, property) -> true,
-                                                                                           (sourceBlockState, property) -> false,
-                                                                                           connectedDirectionData.connectedDirections().get()));
+            final ImmutableConnectedDirectionData connectedDirectionData = (ImmutableConnectedDirectionData) manipulator;
+            return Optional.of((BlockState) Constants.DirectionFunctions.applyConnectedDirections(blockState, impl$DIRECTION_TO_PROPERTY_MAPPING,
+                (sourceBlockState, property) -> true, (sourceBlockState, property) -> false, connectedDirectionData.connectedDirections().get()));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -88,11 +85,8 @@ public abstract class BlockFenceMixin extends BlockMixin {
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.CONNECTED_DIRECTIONS)) {
-            return Optional.of((BlockState) DirectionalBlockUtils.applyConnectedDirections(blockState,
-                                                                                           DIRECTION_TO_PROPERTY_MAPPING,
-                                                                                           (sourceBlockState, property) -> true,
-                                                                                           (sourceBlockState, property) -> false,
-                                                                                           (Set<Direction>) value));
+            return Optional.of((BlockState) Constants.DirectionFunctions.applyConnectedDirections(blockState, impl$DIRECTION_TO_PROPERTY_MAPPING,
+                (sourceBlockState, property) -> true, (sourceBlockState, property) -> false, (Set<Direction>) value));
         } else if (key.equals(Keys.CONNECTED_EAST)) {
             return Optional.of((BlockState) blockState.withProperty(BlockFence.EAST, (Boolean) value));
         } else if (key.equals(Keys.CONNECTED_NORTH)) {

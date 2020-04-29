@@ -32,6 +32,8 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import net.minecraft.block.BlockLever;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.nbt.NBTTagCompound;
@@ -106,8 +108,12 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiFunction;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -1350,6 +1356,26 @@ public final class Constants {
                 default:
                     return Axis.X;
             }
+        }
+
+        public static <V extends Comparable<V>, P extends IProperty<V>> IBlockState applyConnectedDirections(IBlockState blockState,
+                        Map<Direction, P> mapping, BiFunction<IBlockState, P, V> setValueResolver, BiFunction<IBlockState, P, V> resetValueResolver,
+                        Set<Direction> directions) {
+            Map<P, V> facingStates = new HashMap<>();
+            for (P property : mapping.values()) {
+                facingStates.put(property, resetValueResolver.apply(blockState, property));
+            }
+            for (Direction connectedDirection : directions) {
+                if (connectedDirection.isCardinal()) {
+                    P facingProperty = mapping.get(connectedDirection);
+                    facingStates.put(facingProperty, setValueResolver.apply(blockState, facingProperty));
+                }
+            }
+            IBlockState resultBlockState = blockState;
+            for (P property : facingStates.keySet()) {
+                resultBlockState = resultBlockState.withProperty(property, facingStates.get(property));
+            }
+            return resultBlockState;
         }
     }
 
