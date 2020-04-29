@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -55,74 +56,24 @@ public abstract class BlockRailBase_EnumRailDirectionMixin_API implements RailDi
 
     @Override
     public Optional<Direction> getAscendingDirection() {
-        switch (this.getMetadata()) {
-            case 2:
-                return Optional.of(Direction.EAST);
-            case 3:
-                return Optional.of(Direction.WEST);
-            case 4:
-                return Optional.of(Direction.NORTH);
-            case 5:
-                return Optional.of(Direction.SOUTH);
-            default:
-                return Optional.empty();
-        }
+        return Constants.RailDirections.getAscendingDirection((BlockRailBase.EnumRailDirection) (Object) this);
     }
 
     @Override
     public Direction getFirstDirection() {
-        switch (this.getMetadata()) {
-            case 0:
-            case 5:
-            case 8:
-            case 9:
-                return Direction.NORTH;
-            case 1:
-            case 3:
-                return Direction.EAST;
-            case 4:
-            case 6:
-            case 7:
-                return Direction.SOUTH;
-            case 2:
-                return Direction.WEST;
-            default:
-                throw new AssertionError();
-        }
+        return Constants.RailDirections.getFirstDirection((BlockRailBase.EnumRailDirection) (Object) this);
     }
 
     @Override
     public Direction getSecondDirection() {
-        switch (this.getMetadata()) {
-            case 4:
-                return Direction.NORTH;
-            case 2:
-            case 6:
-            case 9:
-                return Direction.EAST;
-            case 0:
-            case 5:
-                return Direction.SOUTH;
-            case 1:
-            case 3:
-            case 7:
-            case 8:
-                return Direction.WEST;
-            default:
-                throw new AssertionError();
-        }
+        return Constants.RailDirections.getSecondDirection((BlockRailBase.EnumRailDirection) (Object) this);
     }
 
     @Override
     public boolean isFacing(final Direction direction) {
         checkNotNull(direction, "direction");
-
-        Direction cardinalDirection = Direction.getClosest(direction.asOffset(), Direction.Division.CARDINAL);
-
-        Direction firstDirection = getFirstDirection();
-        Direction secondDirection = getSecondDirection();
-
-        return firstDirection.equals(cardinalDirection) || secondDirection.equals(cardinalDirection);
+        final Direction cardinalDirection = Direction.getClosest(direction.asOffset(), Direction.Division.CARDINAL);
+        return getFirstDirection().equals(cardinalDirection) || getSecondDirection().equals(cardinalDirection);
     }
 
     @SuppressWarnings("ConstantConditions")

@@ -32,6 +32,8 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import net.minecraft.block.BlockLever;
+import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockRailBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.nbt.NBTTagCompound;
@@ -107,6 +109,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -1349,6 +1352,81 @@ public final class Constants {
                     return Axis.Z;
                 default:
                     return Axis.X;
+            }
+        }
+
+        public static Optional<Axis> convertLogAxisToSponge(final BlockLog.EnumAxis logAxis) {
+            switch (logAxis) {
+                case X:
+                    return Optional.of(Axis.X);
+                case Y:
+                    return Optional.of(Axis.Y);
+                case Z:
+                    return Optional.of(Axis.Z);
+                default:
+                    return Optional.empty();
+            }
+        }
+    }
+
+    public static final class RailDirections {
+
+        private RailDirections() {}
+
+        public static Optional<Direction> getAscendingDirection(final BlockRailBase.EnumRailDirection railDirection) {
+            switch (railDirection.getMetadata()) {
+                case 2:
+                    return Optional.of(Direction.EAST);
+                case 3:
+                    return Optional.of(Direction.WEST);
+                case 4:
+                    return Optional.of(Direction.NORTH);
+                case 5:
+                    return Optional.of(Direction.SOUTH);
+                default:
+                    return Optional.empty();
+            }
+        }
+
+        public static Direction getFirstDirection(final BlockRailBase.EnumRailDirection railDirection) {
+            switch (railDirection.getMetadata()) {
+                case 0:
+                case 5:
+                case 8:
+                case 9:
+                    return Direction.NORTH;
+                case 1:
+                case 3:
+                    return Direction.EAST;
+                case 4:
+                case 6:
+                case 7:
+                    return Direction.SOUTH;
+                case 2:
+                    return Direction.WEST;
+                default:
+                    throw new AssertionError();
+            }
+        }
+
+        public static Direction getSecondDirection(final BlockRailBase.EnumRailDirection railDirection) {
+            switch (railDirection.getMetadata()) {
+                case 4:
+                    return Direction.NORTH;
+                case 2:
+                case 6:
+                case 9:
+                    return Direction.EAST;
+                case 0:
+                case 5:
+                    return Direction.SOUTH;
+                case 1:
+                case 3:
+                case 7:
+                case 8:
+                    return Direction.WEST;
+                default:
+                    throw new AssertionError();
             }
         }
     }

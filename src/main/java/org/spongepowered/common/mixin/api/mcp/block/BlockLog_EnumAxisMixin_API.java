@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -52,16 +53,7 @@ public abstract class BlockLog_EnumAxisMixin_API implements LogAxis {
 
     @Override
     public Optional<Axis> toAxis() {
-        switch ((BlockLog.EnumAxis) (Object) this) {
-            case X:
-                return Optional.of(Axis.X);
-            case Y:
-                return Optional.of(Axis.Y);
-            case Z:
-                return Optional.of(Axis.Z);
-            default:
-                return Optional.empty();
-        }
+        return Constants.DirectionFunctions.convertLogAxisToSponge((BlockLog.EnumAxis) (Object) this);
     }
 
     @SuppressWarnings("ConstantConditions")
