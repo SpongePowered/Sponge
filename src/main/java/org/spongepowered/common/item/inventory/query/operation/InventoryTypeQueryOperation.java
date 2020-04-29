@@ -26,8 +26,10 @@ package org.spongepowered.common.item.inventory.query.operation;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
 
 public final class InventoryTypeQueryOperation extends SpongeQueryOperation<Class<? extends Inventory>> {

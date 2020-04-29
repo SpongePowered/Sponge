@@ -29,7 +29,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.ReusableLensInventoryAdapaterBridge;
-import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -102,7 +101,7 @@ public class ReusableLens<T extends Lens> {
         if (slotCount == 0) {
             return new DefaultEmptyLens(adapter);
         } else {
-            return new OrderedInventoryLensImpl(0, slotCount, 1, slots);
+            return new OrderedInventoryLensImpl(0, slotCount, slots);
         }
     }
 

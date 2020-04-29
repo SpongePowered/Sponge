@@ -47,11 +47,11 @@ public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedI
     
     protected final List<LensHandle> slotCache = new ArrayList<>();
 
-    public OrderedInventoryLensImpl(int base, int size, int stride, SlotProvider slots) {
-        this(base, size, stride, OrderedInventoryAdapter.class, slots);
+    public OrderedInventoryLensImpl(int base, int size, SlotProvider slots) {
+        this(base, size, 1, OrderedInventoryAdapter.class, slots);
     }
 
-    public OrderedInventoryLensImpl(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    protected OrderedInventoryLensImpl(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, size, adapterType);
         checkArgument(stride > 0, "Invalid stride: %s", stride);
         this.stride = stride;

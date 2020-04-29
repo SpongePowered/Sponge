@@ -25,22 +25,20 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.TileEntityDispenser;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleGridLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 @Mixin(TileEntityDispenser.class)
 public abstract class TileEntityDispenserMixin extends TileEntityLockableLootMixin {
 
     @Override
     public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
+        return ReusableLens.getLens(SingleGridLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
     private SlotProvider impl$generateSlotProvider() {
@@ -48,8 +46,8 @@ public abstract class TileEntityDispenserMixin extends TileEntityLockableLootMix
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens impl$generateRootLens(final SlotProvider slots) {
-        return new GridInventoryLensImpl(0, 3, 3, 3, (Class<? extends Inventory>) this.getClass(), slots);
+    private SingleGridLens impl$generateRootLens(final SlotProvider slots) {
+        return new SingleGridLens(0, 3, 3, (Class) TileEntityDispenser.class, slots);
     }
 
 }

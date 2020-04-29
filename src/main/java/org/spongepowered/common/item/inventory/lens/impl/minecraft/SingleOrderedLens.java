@@ -22,32 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.tileentity;
+package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
-import net.minecraft.tileentity.TileEntityShulkerBox;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleGridLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.RealLens;
+import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
-@Mixin(TileEntityShulkerBox.class)
-public abstract class TileEntityShulkerBoxMixin extends TileEntityLockableLootMixin {
+/**
+ * A lens consisting of a single ordered lens.
+ */
+public class SingleOrderedLens extends RealLens {
 
-    @Override
-    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return ReusableLens.getLens(SingleGridLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
+    public SingleOrderedLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider slots) {
+        super(base, size, adapterType);
+        this.addSpanningChild(new OrderedInventoryLensImpl(base, size, slots));
     }
-
-    private SlotProvider impl$generateSlotProvider() {
-        return new SlotCollection.Builder().add(27).build();
-    }
-
-    @SuppressWarnings("unchecked")
-    private SingleGridLens impl$generateRootLens(final SlotProvider slots) {
-        return new SingleGridLens(0, 9, 3, (Class) TileEntityShulkerBox.class, slots);
-    }
-
 }

@@ -57,7 +57,7 @@ public final class InventoryUtil {
 
     @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(InventoryCrafting inv) {
-        CraftingGridInventoryLensImpl lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), SlotLensImpl::new);
+        CraftingGridInventoryLensImpl lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), SlotLensImpl::new);
 
         return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }

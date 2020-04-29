@@ -34,8 +34,8 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.bridge.inventory.LensProviderBridge;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleOrderedLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
 @Mixin(value = {InventoryBasic.class, InventoryCraftResult.class})
 public abstract class InventoryBasicMixin implements IInventory, LensProviderBridge {
@@ -45,7 +45,7 @@ public abstract class InventoryBasicMixin implements IInventory, LensProviderBri
         if (this.getSizeInventory() == 0) {
             return new DefaultEmptyLens(adapter);
         }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, adapter.bridge$getSlotProvider());
+        return new SingleOrderedLens(0, this.getSizeInventory(), (Class)this.getClass(), adapter.bridge$getSlotProvider());
     }
 
     @Override

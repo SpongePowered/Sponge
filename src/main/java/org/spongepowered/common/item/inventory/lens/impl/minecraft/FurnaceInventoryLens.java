@@ -51,7 +51,7 @@ public class FurnaceInventoryLens extends RealLens {
     }
 
     protected void init(final SlotProvider slots) {
-        this.addChild(new OrderedInventoryLensImpl(0, 3, 1, slots));
+        this.addChild(new OrderedInventoryLensImpl(0, 3, slots));
 
         this.input = new InputSlotLensImpl(0, (i) -> true, (i) -> true);
         this.fuel = new FuelSlotLensImpl(1, (i) -> true, (i) -> true);       // TODO SlotFurnaceFuel

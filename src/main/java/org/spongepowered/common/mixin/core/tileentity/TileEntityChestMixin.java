@@ -28,7 +28,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.SoundCategory;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,10 +37,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleGridLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
@@ -60,7 +58,7 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
 
     @Override
     public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
+        return ReusableLens.getLens(SingleGridLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
     }
 
     private SlotProvider impl$generateSlotProvider() {
@@ -68,9 +66,8 @@ public abstract class TileEntityChestMixin extends TileEntityLockableLootMixin {
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens impl$generateRootLens(final SlotProvider slots) {
-        final int size = this.getSizeInventory();
-        return new GridInventoryLensImpl(0, 9, size / 9, 9, (Class<? extends Inventory>) this.getClass(), slots);
+    private SingleGridLens impl$generateRootLens(final SlotProvider slots) {
+        return new SingleGridLens(0, 9, this.getSizeInventory() / 9, (Class)TileEntityChest.class, slots);
     }
 
     /**

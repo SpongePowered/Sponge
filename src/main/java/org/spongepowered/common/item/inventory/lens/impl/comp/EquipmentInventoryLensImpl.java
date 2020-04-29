@@ -40,8 +40,7 @@ import java.util.Optional;
 
 public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl implements EquipmentInventoryLens {
 
-    public EquipmentInventoryLensImpl(int base, int size, int stride, SlotProvider slots,
-            boolean isContainer) {
+    public EquipmentInventoryLensImpl(int base, int size, int stride, SlotProvider slots, boolean isContainer) {
         super(base, size, stride, EquipmentInventoryAdapter.class, slots);
         if (isContainer) {
             this.initContainer(slots);

@@ -42,7 +42,7 @@ public class HorseInventoryLens extends RealLens {
     }
 
     protected void init(SlotProvider slots) {
-        this.horseEquipment = new OrderedInventoryLensImpl(0, 2, 1, slots); // 0-1
+        this.horseEquipment = new OrderedInventoryLensImpl(0, 2, slots); // 0-1
         // TODO only for "chested" horses. Will this cause problems?
         //this.chest = new GridInventoryLensImpl(2, 5, 3, 5, slots);             // 2-16
 

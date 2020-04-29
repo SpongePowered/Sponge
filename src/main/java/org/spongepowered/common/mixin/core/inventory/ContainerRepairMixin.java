@@ -69,7 +69,7 @@ public abstract class ContainerRepairMixin extends ContainerMixin implements Len
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
         final List<Lens> lenses = new ArrayList<>();
-        lenses.add(new OrderedInventoryLensImpl(0, 3, 1, bridge$getSlotProvider()));
+        lenses.add(new OrderedInventoryLensImpl(0, 3, bridge$getSlotProvider()));
         lenses.add(new MainPlayerInventoryLensImpl(3, bridge$getSlotProvider(), true));
         return new ContainerLens(adapter.bridge$getFabric().fabric$getSize(), (Class<? extends Inventory>) adapter.getClass(), bridge$getSlotProvider(), lenses);
     }

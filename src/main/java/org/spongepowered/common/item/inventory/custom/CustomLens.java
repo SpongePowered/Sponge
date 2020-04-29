@@ -99,11 +99,11 @@ public class CustomLens extends RealLens {
         if (size instanceof InventoryDimension) {
             InventoryDimension dimension = ((InventoryDimension) size);
             slotCount = dimension.getColumns() * dimension.getRows();
-            lens = new GridInventoryLensImpl(base, dimension.getColumns(), dimension.getRows(), dimension.getColumns(), slots);
+            lens = new GridInventoryLensImpl(base, dimension.getColumns(), dimension.getRows(), slots);
         } else if (size instanceof InventoryCapacity) {
             InventoryCapacity capacity = ((InventoryCapacity) size);
             slotCount = capacity.getValue();
-            lens = new OrderedInventoryLensImpl(base, capacity.getValue(), 1, slots);
+            lens = new OrderedInventoryLensImpl(base, capacity.getValue(), slots);
         } else {
             throw new IllegalStateException("Unknown Inventory Size Property " + size.getClass().getName());
         }

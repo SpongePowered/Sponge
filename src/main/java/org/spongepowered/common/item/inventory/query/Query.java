@@ -138,6 +138,10 @@ public class Query {
             return matches;
         }
 
+        if (matches.size() == 1) {
+            return matches; // No need to reduce a single match
+        }
+
         for (final Lens child : lens.getChildren()) {
             if (child == null || !child.isSubsetOf(matches)) {
                 continue;

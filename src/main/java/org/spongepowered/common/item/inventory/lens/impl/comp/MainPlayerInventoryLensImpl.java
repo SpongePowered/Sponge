@@ -45,13 +45,8 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
     private boolean isContainer;
 
     public MainPlayerInventoryLensImpl(int base, SlotProvider slots, boolean isContainer) {
-        this(base, MainPlayerInventoryAdapter.class, slots, isContainer);
-    }
-
-    public MainPlayerInventoryLensImpl(int base, Class<? extends Inventory> adapterType, SlotProvider slots, boolean isContainer) {
-        super(base, 9, 4, adapterType, slots);
+        super(base, 9, 4, MainPlayerInventoryAdapter.class, slots);
         this.isContainer = isContainer;
-
         this.lateInit(slots);
     }
 
@@ -65,7 +60,7 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
         int hotbarSize = InventoryPlayer.getHotbarSize();
 
         if (this.isContainer) {
-            this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+            this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, slots);
             base += INVENTORY_WIDTH * 3;
             this.hotbar = new HotbarLensImpl(base - (hotbarSize - INVENTORY_WIDTH), hotbarSize, slots);
             /*
@@ -78,12 +73,12 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
             this.addSpanningChild(this.grid);
             this.addSpanningChild(this.hotbar);
 
-            this.addChild(new GridInventoryLensImpl(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, INVENTORY_WIDTH, slots));
+//            this.addChild(new GridInventoryLensImpl(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, slots));
 
         } else {
             this.hotbar = new HotbarLensImpl(base, hotbarSize, slots);
             base += INVENTORY_WIDTH;
-            this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+            this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, slots);
 
             /*
             2 |G|G|G|G|G|G|G|G|G|
@@ -97,7 +92,7 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
 
             // Shift slots so that Hotbar is always after the MainGrid
             ShiftedSlotProvider shiftedSlots = new ShiftedSlotProvider(slots, INVENTORY_WIDTH, INVENTORY_WIDTH * 4);
-            this.addChild(new GridInventoryLensImpl(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, INVENTORY_WIDTH, shiftedSlots));
+//            this.addChild(new GridInventoryLensImpl(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, shiftedSlots));
         }
 
         this.cache();
