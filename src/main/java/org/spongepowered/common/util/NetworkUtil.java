@@ -27,6 +27,8 @@ package org.spongepowered.common.util;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.local.LocalAddress;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -215,8 +217,13 @@ public final class NetworkUtil {
 
                 try {
                     ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
-                    netManager.sendPacket(new SPacketDisconnect(reason));
-                    netManager.closeChannel(reason);
+                    netManager.sendPacket(new SPacketDisconnect(reason), new GenericFutureListener<Future<? super Void>>() {
+                        @Override
+                        public void operationComplete(Future<? super Void> future) throws Exception {
+                            netManager.closeChannel(reason);
+                        }
+                    });
+                    netManager.disableAutoRead();
                 } catch (Exception exception) {
                     ((PlayerListAccessor) playerList).accessor$getPlayerListLogger().error("Error whilst disconnecting player", exception);
                 }
