@@ -46,5 +46,4 @@ public interface CollisionsCapability {
 
     void collision$setModDataId(String id);
 
-    boolean collision$isRunningCollideWithNearby();
 }

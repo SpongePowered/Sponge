@@ -520,14 +520,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state will ignore triggering entity collision events or not. Since there are
-     * many states that perform operations that would be slowed down by having spammed events, we
-     * can occasionally ignore collision events for those states. Examples include world generation,
-     * or explosions.
+     * Gets whether this state fires {@link org.spongepowered.api.event.entity.CollideEntityEvent}s.
+     * This is used for firing the events and for related optimizations.
      *
-     * @return Whether this state will throw entity collision events when calling {@link Chunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)}
+     * @return Whether this state should fire entity collision events
      */
-    default boolean ignoresEntityCollisions() {
+    default boolean isCollision() {
         return false;
     }
 

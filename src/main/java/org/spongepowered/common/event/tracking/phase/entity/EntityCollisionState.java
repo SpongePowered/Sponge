@@ -22,40 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.category;
+package org.spongepowered.common.event.tracking.phase.entity;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+public final class EntityCollisionState extends EntityPhaseState<BasicEntityContext> {
 
-import java.util.HashMap;
-import java.util.Map;
-
-@ConfigSerializable
-public class CollisionModCategory extends ConfigCategory {
-
-    @Setting(value = "enabled", comment = "If 'false', entity collision rules for this mod will be ignored.")
-    private boolean isEnabled = true;
-    @Setting(value = "defaults", comment = "Default maximum collisions used for all entities unless overridden.")
-    private Map<String, Integer> defaultMaxCollisions = new HashMap<>();
-    @Setting(value = "entities")
-    private Map<String, Integer> entityList = new HashMap<>();
-
-    public CollisionModCategory() {
-        this.defaultMaxCollisions.put("entities", 8);
+    @Override
+    protected BasicEntityContext createNewContext() {
+        return new BasicEntityContext(this);
     }
 
-    public CollisionModCategory(String modId) {
-    }
-
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    public Map<String, Integer> getDefaultMaxCollisions() {
-        return this.defaultMaxCollisions;
-    }
-
-    public Map<String, Integer>  getEntityList() {
-        return this.entityList;
+    @Override
+    public boolean isCollision() {
+        return true;
     }
 }

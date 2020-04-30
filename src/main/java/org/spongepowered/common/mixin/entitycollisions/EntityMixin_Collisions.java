@@ -181,8 +181,4 @@ public class EntityMixin_Collisions implements CollisionsCapability {
         return this.collision$refreshCache;
     }
 
-    @Override
-    public boolean collision$isRunningCollideWithNearby() {
-        return false;
-    }
 }

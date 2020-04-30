@@ -6,10 +6,8 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-        "BlockMixin_Collisions",
         "ChunkMixin_Collisions",
-        "EntityMixin_Collisions",
-        "EntityLivingBaseMixin_Collisions"
+        "EntityMixin_Collisions"
     ],
     "injectors": {
         "defaultRequire": 1
