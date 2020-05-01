@@ -82,6 +82,7 @@ import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -118,6 +119,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     private boolean impl$shiftCraft = false;
     //private boolean postPreCraftEvent = true; // used to prevent multiple craft events to fire when setting multiple slots simultaneously
     private List<SlotTransaction> impl$capturedSlotTransactions = new ArrayList<>();
+    private List<SlotTransaction> impl$capturedCurrentCraftShiftTransactions = new ArrayList<>();
     private List<SlotTransaction> impl$capturedCraftShiftTransactions = new ArrayList<>();
     private List<SlotTransaction> impl$capturedCraftPreviewTransactions = new ArrayList<>();
     private boolean impl$isLensInitialized;
@@ -261,7 +263,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
                         adapter = this.bridge$getContainerSlot(i);
                         SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
                         if (this.impl$shiftCraft) {
-                            this.impl$capturedCraftShiftTransactions.add(newTransaction);
+                            this.impl$capturedCurrentCraftShiftTransactions.add(newTransaction);
                         } else {
                             if (!this.impl$capturedCraftPreviewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
                                 final SlotTransaction previewTransaction = this.impl$capturedCraftPreviewTransactions.get(0);
@@ -514,6 +516,28 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
         }
         this.impl$shiftCraft = false;
 
+        this.impl$capturedCraftShiftTransactions.addAll(this.impl$capturedCurrentCraftShiftTransactions);
+        this.impl$capturedCurrentCraftShiftTransactions.clear();
+        if (result.isEmpty() || !ItemStack.areItemsEqual(slot.getStack(), result)) {
+            // When shift-crafting is done (no crafting result or crafting result differs from output-slot)
+            // consolidate the captured transactions
+            if (!this.impl$capturedCraftShiftTransactions.isEmpty()) {
+                Map<org.spongepowered.api.item.inventory.Slot, SlotTransaction> shiftTransactions = new HashMap<>();
+                for (SlotTransaction shiftTransaction : this.impl$capturedCraftShiftTransactions) {
+                    shiftTransactions.compute(shiftTransaction.getSlot(), (s, trans) -> {
+                        if (trans == null) {
+                            return shiftTransaction;
+                        }
+                        return new SlotTransaction(s, trans.getOriginal(), shiftTransaction.getFinal());
+                    });
+                }
+                this.impl$capturedSlotTransactions.addAll(shiftTransactions.values());
+                this.impl$capturedCraftShiftTransactions.clear();
+            }
+        } else {
+            this.impl$captureInventory = true; // Keep capturing
+        }
+
         return result;
     }
 
@@ -540,6 +564,11 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     @Override
     public List<SlotTransaction> bridge$getPreviewTransactions() {
         return this.impl$capturedCraftPreviewTransactions;
+    }
+
+    @Override
+    public List<SlotTransaction> bridge$getCurrentShiftCraftTransactions() {
+        return this.impl$capturedCurrentCraftShiftTransactions;
     }
 
     @Override

@@ -36,7 +36,6 @@ import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -1520,6 +1519,15 @@ public class SpongeCommonEventFactory {
         ((TrackedInventoryBridge) container).bridge$setCaptureInventory(false);
         // handle slot-transactions
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
+        List<SlotTransaction> currentShiftCraftTransactions = ((ContainerBridge) container).bridge$getCurrentShiftCraftTransactions();
+        if (event.isCancelled() && !currentShiftCraftTransactions.isEmpty()) {
+            List<SlotTransaction> shiftTransactions = new ArrayList<>(currentShiftCraftTransactions);
+            if (!shiftTransactions.isEmpty()) {
+                Collections.reverse(shiftTransactions); // These are accumulated Transactions we need to revert in reverse order
+                PacketPhaseUtil.handleSlotRestore(player, container, shiftTransactions, event.isCancelled());
+                currentShiftCraftTransactions.clear();
+            }
+        }
         if (event.isCancelled() || !event.getCursorTransaction().isValid() || event.getCursorTransaction().getCustom().isPresent()) {
             // handle cursor-transaction
             final ItemStackSnapshot newCursor = event.isCancelled() || !event.getCursorTransaction().isValid() ? event.getCursorTransaction().getOriginal() : event.getCursorTransaction().getFinal();
