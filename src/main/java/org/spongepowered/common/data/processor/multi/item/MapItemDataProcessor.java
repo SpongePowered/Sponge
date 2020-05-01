@@ -38,12 +38,12 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemDat
 import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.map.SpongeMapByteCanvas;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 
@@ -59,7 +59,6 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
 
     @Override
     public boolean set(ItemStack itemStack, Map<Key<?>, Object> keyValues) {
-        SpongeImpl.getLogger().info("in .set() in MapItemDataProcessor");
         int metaData = itemStack.getMetadata();
         MapData mapData = (MapData)
                 ((net.minecraft.world.storage.MapStorage)Sponge.getServer().getMapStorage().get())
@@ -69,17 +68,14 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
         Vector2i location = (Vector2i)keyValues.get(Keys.MAP_LOCATION);
         mapData.xCenter = location.getX();
         mapData.zCenter = location.getY();
-        SpongeImpl.getLogger().info("in .set() in MapItemDataProcessor 2");
         int dimensionId = ((WorldServerBridge)keyValues.get(Keys.MAP_WORLD)).bridge$getDimensionId();
-        SpongeImpl.getLogger().info("in .set() in MapItemDataProcessor 3");
         MapDataBridge mapDataBridge = (MapDataBridge)mapData;
         mapDataBridge.bridge$setDimensionId(dimensionId);
         mapData.trackingPosition = (boolean)keyValues.get(Keys.MAP_TRACKS_PLAYERS);
         mapData.unlimitedTracking = (boolean)keyValues.get(Keys.MAP_UNLIMITED_TRACKING);
         mapData.scale = ((Integer)keyValues.get(Keys.MAP_SCALE)).byteValue();
-        mapDataBridge.updateMapArea(0, 127);
+        mapDataBridge.setShouldSelfUpdate((boolean)keyValues.get(Keys.MAP_AUTO_UPDATE));
         mapData.markDirty();
-        SpongeImpl.getLogger().info("out of .set() in MapItemDataProcessor");
         return true;
     }
 
@@ -96,6 +92,8 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
         values.put(Keys.MAP_TRACKS_PLAYERS, mapData.trackingPosition);
         values.put(Keys.MAP_UNLIMITED_TRACKING, mapData.unlimitedTracking);
         values.put(Keys.MAP_SCALE, (int)mapData.scale);
+        values.put(Keys.MAP_CANVAS, new SpongeMapByteCanvas(mapData.colors));
+        values.put(Keys.MAP_AUTO_UPDATE, ((MapDataBridge)mapData).shouldSelfUpdate());
 
         return values;
     }
@@ -112,7 +110,9 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
                 Keys.MAP_WORLD.getQuery(),
                 Keys.MAP_TRACKS_PLAYERS.getQuery(),
                 Keys.MAP_UNLIMITED_TRACKING.getQuery(),
-                Keys.MAP_SCALE.getQuery()
+                Keys.MAP_SCALE.getQuery(),
+                Keys.MAP_CANVAS.getQuery(),
+                Keys.MAP_AUTO_UPDATE.getQuery()
         )) {
             return Optional.empty();
         }
@@ -122,6 +122,8 @@ public class MapItemDataProcessor extends AbstractItemDataProcessor<MapItemData,
         data.set(Keys.MAP_TRACKS_PLAYERS, DataUtil.getData(container, Keys.MAP_TRACKS_PLAYERS));
         data.set(Keys.MAP_UNLIMITED_TRACKING, DataUtil.getData(container, Keys.MAP_UNLIMITED_TRACKING));
         data.set(Keys.MAP_SCALE, DataUtil.getData(container, Keys.MAP_SCALE));
+        data.set(Keys.MAP_CANVAS, DataUtil.getData(container, Keys.MAP_CANVAS));
+        data.set(Keys.MAP_AUTO_UPDATE, DataUtil.getData(container, Keys.MAP_AUTO_UPDATE));
 
         return Optional.of(data);
     }

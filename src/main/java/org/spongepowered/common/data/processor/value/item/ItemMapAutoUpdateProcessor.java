@@ -44,17 +44,10 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemMapUnlimitedTrackingValueProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, MapItemData, ImmutableMapItemData> {
-
-    public ItemMapUnlimitedTrackingValueProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
-                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_UNLIMITED_TRACKING);
-    }
-
-    @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.MAP_UNLIMITED_TRACKING,
-                Constants.ItemStack.DEFAULT_UNLIMITED_TRACKING, actualValue);
+public class ItemMapAutoUpdateProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, MapItemData, ImmutableMapItemData> {
+    public ItemMapAutoUpdateProcessor() {
+        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack)itemStack)
+                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_AUTO_UPDATE);
     }
 
     @Override
@@ -64,8 +57,7 @@ public class ItemMapUnlimitedTrackingValueProcessor extends AbstractItemSingleDa
         if (!mapData.isPresent()) {
             return false;
         }
-        mapData.get().unlimitedTracking = value;
-        mapData.get().markDirty();
+        ((MapDataBridge)mapData.get()).setShouldSelfUpdate(value);
         return true;
     }
 
@@ -73,12 +65,17 @@ public class ItemMapUnlimitedTrackingValueProcessor extends AbstractItemSingleDa
     protected Optional<Boolean> getVal(ItemStack dataHolder) {
         return Sponge.getServer().getMapStorage()
                 .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> mapData.unlimitedTracking);
+                .map(mapData -> ((MapDataBridge)mapData).shouldSelfUpdate());
     }
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
         return constructValue(value).asImmutable();
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(Keys.MAP_AUTO_UPDATE, Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE, actualValue);
     }
 
     @Override

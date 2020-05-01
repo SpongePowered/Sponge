@@ -1820,7 +1820,7 @@ public class SpongeCommonEventFactory {
 
     public static CreateMapEvent callCreateMapEvent(final Cause cause, final Player player, MapItemData mapData, final World world, HandType handType, ItemStackSnapshot oldItemStack, ItemStackSnapshot newItemStack, int id) {
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(oldItemStack, newItemStack);
-        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, player, transaction, mapData, handType, world, id);
+        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapData.asImmutable(), mapData, player, transaction, handType, world, id + 1);
         SpongeImpl.postEvent(event);
         return event;
     }

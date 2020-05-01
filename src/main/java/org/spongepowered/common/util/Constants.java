@@ -1138,13 +1138,23 @@ public final class Constants {
         public static final DataQuery COUNT = of("Count");
         public static final DataQuery TYPE = of("ItemType");
         public static final DataQuery DAMAGE_VALUE = of("UnsafeDamage");
+
         // Filled maps
         public static final int DEFAULT_MAP_SCALE = 0;
         public static final int MIN_MAP_SCALE = 0;
         public static final int MAX_MAP_SCALE = Byte.MAX_VALUE;
         public static final boolean DEFAULT_TRACKS_PLAYERS = true;
         public static final boolean DEFAULT_UNLIMITED_TRACKING = false;
+        public static final boolean DEFAULT_MAP_AUTO_UPDATE = true;
         public static final String MAP_PREFIX = "map_";
+        public static final int MAP_SIZE = 16384;
+        public static final int MAP_MAX_INDEX = 127;
+        public static final int MAP_PIXELS = 128;
+        public static final int MAP_SHADES = 4;
+
+        // Colors are multiplied by this then divided by 255 to make the true RGB displayed
+        public static final int[] SHADE_MULTIPLIER = new int[] {180, 220, 255, 135};
+        public static final int SHADE_DIVIDER = 255;
     }
 
     public static final class Particles {

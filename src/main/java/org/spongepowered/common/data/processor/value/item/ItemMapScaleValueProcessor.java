@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.world.map.MapStorage;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -60,6 +60,7 @@ public class ItemMapScaleValueProcessor extends AbstractItemSingleDataProcessor<
             return false;
         }
         mapData.get().scale = value.byteValue();
+        mapData.get().markDirty();
         return true;
     }
 

@@ -22,51 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.storage;
+package org.spongepowered.common.mixin.api.mcp.item;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemMap;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.util.Constants;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-@Mixin(net.minecraft.world.storage.MapData.class)
-public abstract class MapDataBridgeMixin implements MapDataBridge {
-    private boolean shouldSelfUpdate = Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE;
-
-    @Shadow public abstract void updateMapData(int x, int y);
-
-    @Override
-    public boolean shouldSelfUpdate() {
-        return this.shouldSelfUpdate;
-    }
-
-    @Override
-    public void setShouldSelfUpdate(boolean shouldSelfUpdate) {
-        this.shouldSelfUpdate = shouldSelfUpdate;
-    }
-
-    @Override
-    public void updateMap(int x, int y) {
-        updateMapData(x, y);
-    }
-
-    @Override
-    public void updateWholeMap() {
-        updateMapData(0,0);
-        updateMapData(Constants.ItemStack.MAP_MAX_INDEX, Constants.ItemStack.MAP_MAX_INDEX);
+@Mixin(ItemMap.class)
+public class ItemMapMixin_API {
+    @Inject(method = "updateMapData", at = @At(value = "HEAD"), cancellable = true)
+    public void cancelUpdateIfShouldntUpdate(World worldIn, Entity viewer, MapData data, CallbackInfo ci) {
+        if (!((MapDataBridge)data).shouldSelfUpdate()) {
+            ci.cancel();
+        }
     }
 }

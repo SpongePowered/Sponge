@@ -22,20 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.storage;
+package org.spongepowered.common.map;
 
-// Partially implemented in Common, rest implemented in Vanilla/Forge
-public interface MapDataBridge {
+import net.minecraft.world.storage.MapData;
+import org.spongepowered.api.map.MapCanvas;
 
-    int bridge$getDimensionId();
-
-    void bridge$setDimensionId(int dimensionId);
-
-    void updateMap(int x, int y);
-
-    void updateWholeMap();
-
-    boolean shouldSelfUpdate();
-
-    void setShouldSelfUpdate(boolean shouldSelfUpdate);
+// This interface means that both canvases backed by a byte array
+// and the empty version can be applied
+public interface SpongeMapCanvas extends MapCanvas {
+    void applyToMapData(MapData mapData);
 }

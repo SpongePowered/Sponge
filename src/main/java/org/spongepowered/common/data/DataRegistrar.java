@@ -910,6 +910,8 @@ public final class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.MAP_TRACKS_PLAYERS, new ItemMapTracksPlayersValueProcessor());
         DataUtil.registerValueProcessor(Keys.MAP_UNLIMITED_TRACKING, new ItemMapUnlimitedTrackingValueProcessor());
         DataUtil.registerValueProcessor(Keys.MAP_SCALE, new ItemMapScaleValueProcessor());
+        DataUtil.registerValueProcessor(Keys.MAP_CANVAS, new ItemMapCanvasValueProcessor());
+        DataUtil.registerValueProcessor(Keys.MAP_AUTO_UPDATE, new ItemMapAutoUpdateProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();

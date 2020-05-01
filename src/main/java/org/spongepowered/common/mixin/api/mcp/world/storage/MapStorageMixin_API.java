@@ -33,7 +33,9 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
+import org.spongepowered.common.map.SpongeMapByteCanvas;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 
@@ -71,7 +73,9 @@ public abstract class MapStorageMixin_API implements org.spongepowered.api.world
                 (World) WorldManager.getWorldByDimensionId(mapData.dimension).get(),
                 mapData.trackingPosition,
                 mapData.unlimitedTracking,
-                mapData.scale
+                mapData.scale,
+                new SpongeMapByteCanvas(mapData.colors),
+                ((MapDataBridge)mapData).shouldSelfUpdate()
         ));
     }
 }

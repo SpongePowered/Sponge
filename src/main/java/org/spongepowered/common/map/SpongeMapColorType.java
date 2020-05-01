@@ -22,20 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.storage;
+package org.spongepowered.common.map;
 
-// Partially implemented in Common, rest implemented in Vanilla/Forge
-public interface MapDataBridge {
+import net.minecraft.block.material.MapColor;
+import net.minecraft.item.ItemMap;
+import org.spongepowered.api.map.MapColorType;
+import org.spongepowered.api.util.Color;
 
-    int bridge$getDimensionId();
+public class SpongeMapColorType implements MapColorType {
+    private String id;
+    private String name;
+    private int colorIndex;
 
-    void bridge$setDimensionId(int dimensionId);
+    public SpongeMapColorType(String id, String name, int colorIndex) {
+        this.id = id;
+        this.name = name;
+        this.colorIndex = colorIndex;
+    }
 
-    void updateMap(int x, int y);
+    public int getBaseColor() {
+        return colorIndex;
+    }
 
-    void updateWholeMap();
+    @Override
+    public String getId() {
+        return id;
+    }
 
-    boolean shouldSelfUpdate();
+    @Override
+    public String getName() {
+        return name;
+    }
 
-    void setShouldSelfUpdate(boolean shouldSelfUpdate);
+    public void setColorIndex(int colorIndex) {
+        this.colorIndex = colorIndex;
+    }
+
+    @Override
+    public Color getColor() {
+        return Color.of(new java.awt.Color(MapColor.COLORS[colorIndex].colorValue));
+    }
 }

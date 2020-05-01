@@ -62,20 +62,14 @@ public class ItemMapWorldValueProcessor extends AbstractItemSingleDataProcessor<
 
     @Override
     protected boolean set(ItemStack dataHolder, World value) {
-        Sponge.getServer().getConsole().sendMessage(Text.of("in start of .set"));
         Optional<MapData> mapData = Sponge.getServer().getMapStorage()
                 .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        Sponge.getServer().getConsole().sendMessage(Text.of("in set"));
         if (!mapData.isPresent()) {
             return false;
         }
-        Sponge.getServer().getConsole().sendMessage(Text.of("in set past mapData.isPresent()"));
         MapDataBridge mapDataBridge = (MapDataBridge)mapData.get();
         mapDataBridge.bridge$setDimensionId(((WorldServerBridge)value).bridge$getDimensionId());
-        mapDataBridge.updateMapArea(0, 127);
         mapData.get().markDirty();
-
-        //WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get().setData(Constants.ItemStack.MAP_PREFIX + dataHolder.getMetadata(), mapData.get());
         return true;
     }
 

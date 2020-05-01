@@ -33,6 +33,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemDat
 import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeMapItemData;
@@ -40,6 +41,7 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.map.SpongeMapByteCanvas;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 
@@ -53,21 +55,26 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
     private boolean trackingPosition;
     private boolean unlimitedTracking;
     private int scale;
+    private MapCanvas canvas;
+    private boolean autoUpdate;
 
     public SpongeMapItemData() {
         this(Vector2i.ZERO,
                 (World)WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get(),
                 Constants.ItemStack.DEFAULT_TRACKS_PLAYERS,
-                Constants.ItemStack.DEFAULT_UNLIMITED_TRACKING, Constants.ItemStack.DEFAULT_MAP_SCALE);
+                Constants.ItemStack.DEFAULT_UNLIMITED_TRACKING, Constants.ItemStack.DEFAULT_MAP_SCALE,
+                MapCanvas.blank(), Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE);
     }
 
-    public SpongeMapItemData(Vector2i center, World world, boolean trackingPosition, boolean unlimitedTracking, int scale) {
+    public SpongeMapItemData(Vector2i center, World world, boolean trackingPosition, boolean unlimitedTracking, int scale, MapCanvas canvas, boolean autoUpdate) {
         super(MapItemData.class);
         this.center = center;
         this.world = world;
         this.trackingPosition = trackingPosition;
         this.unlimitedTracking = unlimitedTracking;
         this.scale = scale;
+        this.canvas = canvas;
+        this.autoUpdate = autoUpdate;
 
         registerGettersAndSetters();
     }
@@ -79,7 +86,9 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
                         .getWorldByDimensionId(((MapDataBridge) mapData).bridge$getDimensionId()).get(),
                 mapData.trackingPosition,
                 mapData.unlimitedTracking,
-                mapData.scale
+                mapData.scale,
+                new SpongeMapByteCanvas(mapData.colors),
+                ((MapDataBridge)mapData).shouldSelfUpdate()
         );
     }
 
@@ -117,13 +126,25 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
     }
 
     @Override
+    public Value<MapCanvas> canvas() {
+        return new SpongeValue<>(Keys.MAP_CANVAS, MapCanvas.blank(), this.canvas);
+    }
+
+    @Override
+    public Value<Boolean> autoUpdate() {
+        return new SpongeValue<>(Keys.MAP_AUTO_UPDATE, Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE, this.autoUpdate);
+    }
+
+    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.MAP_LOCATION, this.center)
                 .set(Keys.MAP_WORLD, this.world)
                 .set(Keys.MAP_TRACKS_PLAYERS, this.trackingPosition)
                 .set(Keys.MAP_UNLIMITED_TRACKING, this.unlimitedTracking)
-                .set(Keys.MAP_SCALE, this.scale);
+                .set(Keys.MAP_SCALE, this.scale)
+                .set(Keys.MAP_CANVAS, this.canvas)
+                .set(Keys.MAP_AUTO_UPDATE, this.autoUpdate);
     }
 
     @Override
@@ -133,29 +154,37 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
         registerKeyValue(Keys.MAP_TRACKS_PLAYERS, SpongeMapItemData.this::trackPosition);
         registerKeyValue(Keys.MAP_UNLIMITED_TRACKING, SpongeMapItemData.this::unlimitedTracking);
         registerKeyValue(Keys.MAP_SCALE, SpongeMapItemData.this::scale);
+        registerKeyValue(Keys.MAP_CANVAS, SpongeMapItemData.this::canvas);
+        registerKeyValue(Keys.MAP_AUTO_UPDATE, SpongeMapItemData.this::autoUpdate);
 
         registerFieldGetter(Keys.MAP_LOCATION, () -> this.center);
         registerFieldGetter(Keys.MAP_WORLD, () -> this.world);
         registerFieldGetter(Keys.MAP_TRACKS_PLAYERS, () -> this.trackingPosition);
         registerFieldGetter(Keys.MAP_UNLIMITED_TRACKING, () -> this.unlimitedTracking);
         registerFieldGetter(Keys.MAP_SCALE, () -> this.scale);
+        registerFieldGetter(Keys.MAP_CANVAS, () -> this.canvas);
+        registerFieldGetter(Keys.MAP_AUTO_UPDATE, () -> this.autoUpdate);
 
         registerFieldSetter(Keys.MAP_LOCATION, location -> this.center = checkNotNull(location));
         registerFieldSetter(Keys.MAP_WORLD, world -> this.world = checkNotNull(world));
         registerFieldSetter(Keys.MAP_TRACKS_PLAYERS, tracksPlayers -> this.trackingPosition = checkNotNull(tracksPlayers));
         registerFieldSetter(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking -> this.unlimitedTracking = checkNotNull(unlimitedTracking));
         registerFieldSetter(Keys.MAP_SCALE, scale -> this.scale = checkNotNull(scale));
+        registerFieldSetter(Keys.MAP_CANVAS, canvas -> this.canvas = checkNotNull(canvas));
+        registerFieldSetter(Keys.MAP_AUTO_UPDATE, autoUpdate -> this.autoUpdate = checkNotNull(autoUpdate));
     }
 
     @Override
     public MapItemData copy() {
         return new SpongeMapItemData(this.center, this.world,
-                this.trackingPosition, this.unlimitedTracking, this.scale);
+                this.trackingPosition, this.unlimitedTracking, this.scale,
+                this.canvas, this.autoUpdate);
     }
 
     @Override
     public ImmutableMapItemData asImmutable() {
         return new ImmutableSpongeMapItemData(this.center, this.world,
-                this.trackingPosition, this.unlimitedTracking, this.scale);
+                this.trackingPosition, this.unlimitedTracking, this.scale,
+                this.canvas, this.autoUpdate);
     }
 }

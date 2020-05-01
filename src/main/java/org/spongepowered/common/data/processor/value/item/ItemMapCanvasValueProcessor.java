@@ -35,50 +35,21 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.map.SpongeMapByteCanvas;
+import org.spongepowered.common.map.SpongeMapCanvas;
 
 import java.util.Optional;
 
-public class ItemMapUnlimitedTrackingValueProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, MapItemData, ImmutableMapItemData> {
-
-    public ItemMapUnlimitedTrackingValueProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
-                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_UNLIMITED_TRACKING);
-    }
-
-    @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.MAP_UNLIMITED_TRACKING,
-                Constants.ItemStack.DEFAULT_UNLIMITED_TRACKING, actualValue);
-    }
-
-    @Override
-    protected boolean set(ItemStack dataHolder, Boolean value) {
-        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        if (!mapData.isPresent()) {
-            return false;
-        }
-        mapData.get().unlimitedTracking = value;
-        mapData.get().markDirty();
-        return true;
-    }
-
-    @Override
-    protected Optional<Boolean> getVal(ItemStack dataHolder) {
-        return Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> mapData.unlimitedTracking);
-    }
-
-    @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return constructValue(value).asImmutable();
+public class ItemMapCanvasValueProcessor extends AbstractItemSingleDataProcessor<MapCanvas, Value<MapCanvas>, MapItemData, ImmutableMapItemData> {
+    public ItemMapCanvasValueProcessor() {
+        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack)itemStack)
+                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_CANVAS);
     }
 
     @Override
@@ -89,5 +60,34 @@ public class ItemMapUnlimitedTrackingValueProcessor extends AbstractItemSingleDa
     @Override
     protected MapItemData createManipulator() {
         return new SpongeMapItemData();
+    }
+
+    @Override
+    protected boolean set(ItemStack dataHolder, MapCanvas value) {
+        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
+        if (!mapData.isPresent()) {
+            return false;
+        }
+        ((SpongeMapCanvas)value).applyToMapData(mapData.get());
+        ((MapDataBridge)mapData.get()).updateWholeMap();
+        return true;
+    }
+
+    @Override
+    protected Optional<MapCanvas> getVal(ItemStack dataHolder) {
+        return Sponge.getServer().getMapStorage()
+                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
+                .map(mapData -> new SpongeMapByteCanvas(mapData.colors));
+    }
+
+    @Override
+    protected ImmutableValue<MapCanvas> constructImmutableValue(MapCanvas value) {
+        return constructValue(value).asImmutable();
+    }
+
+    @Override
+    protected Value<MapCanvas> constructValue(MapCanvas actualValue) {
+        return new SpongeValue<>(Keys.MAP_CANVAS, MapCanvas.blank(), actualValue);
     }
 }

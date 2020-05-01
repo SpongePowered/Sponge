@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
@@ -64,6 +65,7 @@ public class ItemMapTracksPlayersValueProcessor extends AbstractItemSingleDataPr
             return false;
         }
         mapData.get().trackingPosition = value;
+        mapData.get().markDirty();
         return true;
     }
 

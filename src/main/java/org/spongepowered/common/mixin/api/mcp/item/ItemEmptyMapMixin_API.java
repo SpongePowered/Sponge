@@ -41,6 +41,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.world.map.MapStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,6 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -84,7 +86,7 @@ public abstract class ItemEmptyMapMixin_API {
 
             MapItemData mapItemData = new SpongeMapItemData(
                     calculateMapCenter(x,z,scale), (org.spongepowered.api.world.World)worldIn,
-                    trackPosition, unlimitedTracking, scale);
+                    trackPosition, unlimitedTracking, scale, MapCanvas.blank(), Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE);
 
             CreateMapEvent event = SpongeCommonEventFactory.callCreateMapEvent(
                     frame.getCurrentCause(), player, mapItemData,
@@ -119,11 +121,7 @@ public abstract class ItemEmptyMapMixin_API {
                 targetWorld.setData(s, mapData);
             }
             setMapData(mapData, mapItemData);
-            SpongeImpl.getLogger().info(mapItemData.world().get().getName());
-            SpongeImpl.getLogger().warn("about to offer");
             newMap.offer(mapItemData);
-            //mapData.updateMapData(0,127);
-            //mapData.markDirty();
             return (ItemStack) newMap;
         }
     }
@@ -144,6 +142,7 @@ public abstract class ItemEmptyMapMixin_API {
         mapData.scale = mapItemData.scale().get().byteValue();
         mapData.trackingPosition = mapItemData.trackPosition().get();
         mapData.unlimitedTracking = mapItemData.unlimitedTracking().get();
+        ((MapDataBridge)mapData).setShouldSelfUpdate(mapItemData.autoUpdate().get());
     }
 
     // Based off minecraft's code MapData.calculateMapCenter to ensure

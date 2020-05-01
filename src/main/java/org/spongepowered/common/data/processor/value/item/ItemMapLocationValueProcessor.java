@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
@@ -37,10 +36,12 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -58,8 +59,9 @@ public class ItemMapLocationValueProcessor extends AbstractItemSingleDataProcess
         if (!mapData.isPresent()) {
             return false;
         }
-        mapData.get().xCenter = value.getX();
-        mapData.get().zCenter = value.getY();
+        // This also sets xCenter and zCenter.
+        mapData.get().calculateMapCenter(value.getX(), value.getX(), mapData.get().scale);
+        mapData.get().markDirty();
         return true;
     }
 

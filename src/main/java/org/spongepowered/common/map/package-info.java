@@ -22,20 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.storage;
-
-// Partially implemented in Common, rest implemented in Vanilla/Forge
-public interface MapDataBridge {
-
-    int bridge$getDimensionId();
-
-    void bridge$setDimensionId(int dimensionId);
-
-    void updateMap(int x, int y);
-
-    void updateWholeMap();
-
-    boolean shouldSelfUpdate();
-
-    void setShouldSelfUpdate(boolean shouldSelfUpdate);
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.map;
