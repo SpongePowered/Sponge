@@ -22,21 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.economy;
+package org.spongepowered.common.registry.type.service.economy;
 
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
-import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
-import org.spongepowered.common.economy.SpongeAccountDeletionResultType;
+import org.spongepowered.api.service.economy.transaction.TransactionType;
+import org.spongepowered.api.service.economy.transaction.TransactionTypes;
+import org.spongepowered.common.economy.SpongeTransactionType;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-@RegisterCatalog(AccountDeletionResultTypes.class)
-public class AccountDeletionResultTypeRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<AccountDeletionResultType>
-        implements SpongeAdditionalCatalogRegistryModule<AccountDeletionResultType> {
+@RegisterCatalog(TransactionTypes.class)
+public class TransactionTypeRegistryModule
+    extends AbstractPrefixAlternateCatalogTypeRegistryModule<TransactionType>
+    implements SpongeAdditionalCatalogRegistryModule<TransactionType> {
 
-    public AccountDeletionResultTypeRegistryModule() {
+    public TransactionTypeRegistryModule() {
         super("sponge");
     }
 
@@ -46,7 +46,7 @@ public class AccountDeletionResultTypeRegistryModule
     }
 
     @Override
-    public void registerAdditionalCatalog(AccountDeletionResultType extraCatalog) {
+    public void registerAdditionalCatalog(TransactionType extraCatalog) {
         if (!this.catalogTypeMap.containsKey(extraCatalog.getId())) {
             this.catalogTypeMap.put(extraCatalog.getId(), extraCatalog);
         }
@@ -54,10 +54,8 @@ public class AccountDeletionResultTypeRegistryModule
 
     @Override
     public void registerDefaults() {
-        register(new SpongeAccountDeletionResultType("sponge:absent", "Absent"));
-        register(new SpongeAccountDeletionResultType("sponge:failed", "Failed"));
-        register(new SpongeAccountDeletionResultType("sponge:success", "Success"));
-        register(new SpongeAccountDeletionResultType("sponge:unsupported", "Unsupported"));
-        register(new SpongeAccountDeletionResultType("sponge:undeletable", "Undeletable"));
+        register(new SpongeTransactionType("sponge:deposit", "deposit"));
+        register(new SpongeTransactionType("sponge:withdraw", "withdraw"));
+        register(new SpongeTransactionType("sponge:transfer", "transfer"));
     }
 }
