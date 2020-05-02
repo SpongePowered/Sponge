@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import com.flowpowered.math.vector.Vector3d;
 import io.netty.util.collection.LongObjectHashMap;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -268,6 +269,20 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         }
         Sponge.getCauseStackManager().popCause();
         return ZERO_LENGTH_ARRAY; // will bypass the for loop after this method.
+    }
+
+    @Inject(method = "processUpdateSign", at = @At(value = "RETURN"))
+    private void impl$setPlayer(CPacketUpdateSign packetIn, final CallbackInfo ci) {
+        WorldServer worldserver = this.server.getWorld(this.player.dimension);
+        BlockPos blockpos = packetIn.getPosition();
+        TileEntity tileentity = worldserver.getTileEntity(blockpos);
+
+        if (!(tileentity instanceof TileEntitySign)) {
+            return;
+        }
+
+        TileEntitySign tileentitysign = (TileEntitySign)tileentity;
+        tileentitysign.setPlayer(null);
     }
 
     /**
