@@ -61,6 +61,7 @@ import org.spongepowered.common.util.TypeTokenHelper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,6 +79,8 @@ import javax.annotation.Nullable;
 
 @Singleton
 public class SpongeEventManager implements EventManager {
+
+    private static final TypeVariable<?> GENERIC_EVENT_TYPE = GenericEvent.class.getTypeParameters()[0];
 
     private final Object lock = new Object();
     protected final Logger logger;
@@ -286,7 +289,7 @@ public class SpongeEventManager implements EventManager {
             final Order order, final boolean beforeModifications, final EventListener<? super T> handler) {
         TypeToken<?> genericType = null;
         if (GenericEvent.class.isAssignableFrom(eventType.getRawType())) {
-            genericType = eventType;
+            genericType = eventType.resolveType(GENERIC_EVENT_TYPE);
         }
         return new RegisteredListener(plugin, new EventType(eventType.getRawType(), genericType), order, handler, beforeModifications);
     }
