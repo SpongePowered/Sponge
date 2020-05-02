@@ -928,12 +928,12 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
                 slotAdapter = slotLens.getAdapter(((InventoryAdapter) inventory).bridge$getFabric(), (Inventory) inventory);
             } else {
-                if (this.slotLens.isEmpty()) {
-                    for (final EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
-                        this.slotLens.put(slot, new SlotLensImpl(slot.getSlotIndex()));
-                    }
+                SlotLens lens = this.slotLens.get(entityEquipmentSlot);
+                if (lens == null) {
+                    lens =  new SlotLensImpl(entityEquipmentSlot.getSlotIndex());
+                    this.slotLens.put(entityEquipmentSlot, lens);
                 }
-                slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter((Fabric) this, null);
+                slotAdapter = lens.getAdapter((Fabric) this, null);
             }
             final ChangeEntityEquipmentEvent event = SpongeCommonEventFactory.callChangeEntityEquipmentEvent(entity,
                     ItemStackUtil.snapshotOf(before), ItemStackUtil.snapshotOf(after), (SlotAdapter) slotAdapter);
