@@ -273,6 +273,7 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
 
     @Redirect(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntitySign;markDirty()V"))
     private void impl$setPlayer(TileEntitySign tileentitysign) {
+        tileentitysign.markDirty();
         tileentitysign.setPlayer(null);
     }
 
