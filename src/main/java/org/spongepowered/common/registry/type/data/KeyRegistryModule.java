@@ -609,7 +609,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("map_unlimited_tracking", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("map_unlimited_tracking").name("Map Unlimited Tracking").query(of("MapUnlimitedTracking")).build());
 
-        this.register("map_scale", Key.builder().type(TypeTokens.BYTE_VALUE_TOKEN).id("map_scale").name("Map Scale").query(of("MapScale")).build());
+        this.register("map_scale", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("map_scale").name("Map Scale").query(of("MapScale")).build());
 
         this.register("map_world", Key.builder().type(TypeTokens.WORLD_VALUE_TOKEN).id("map_world").name("Map World").query(of("MapWorld")).build());
 
