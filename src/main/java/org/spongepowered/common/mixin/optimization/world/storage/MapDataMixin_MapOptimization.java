@@ -178,7 +178,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                 if (!mixinMapInfo.mapOptimizationBridge$isValid()) {
                     this.mapDecorations.remove(player.getName());
                 } else {
-                    if (this.trackingPosition && mapOptimizationImpl$dimensionField.get(this).equals(player.dimension)) {
+                    if (this.trackingPosition && mapOptimizationImpl$dimensionField.getInt(this) == player.dimension) {
                         this.updateDecorations(MapDecoration.Type.PLAYER, player.world, player.getName(), player.posX, player.posZ,
                                 (double) player.rotationYaw);
                     }
