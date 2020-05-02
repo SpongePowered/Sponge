@@ -271,11 +271,9 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         return ZERO_LENGTH_ARRAY; // will bypass the for loop after this method.
     }
 
-    @Inject(method = "processUpdateSign", locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;notifyBlockUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/block/state/IBlockState;I)V"))
-    private void impl$setPlayer(CPacketUpdateSign packetIn, final CallbackInfo ci, WorldServer worldserver,
-                                BlockPos blockpos, IBlockState iblockstate, TileEntity tileentitysign) {
-        ((TileEntitySign) tileentitysign).setPlayer(null);
+    @Redirect(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntitySign;markDirty()V"))
+    private void impl$setPlayer(TileEntitySign tileentitysign) {
+        tileentitysign.setPlayer(null);
     }
 
     /**
