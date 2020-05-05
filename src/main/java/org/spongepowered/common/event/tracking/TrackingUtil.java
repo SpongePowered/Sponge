@@ -743,14 +743,14 @@ public final class TrackingUtil {
                                                              final net.minecraft.block.BlockState newState, final SpongeBlockChangeFlag changeFlag) {
         final Block newBlock = newState.getBlock();
         final IPhaseState phaseState = phaseContext.state;
-        if (changeFlag.notifyNeighbors()) { // Notify neighbors only if the change flag allowed it.
+        if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
             // Append the snapshot being applied that is allowing us to keep track of which source is
             // performing the notification, it's quick and dirty.
             // TODO - somehow make this more functional so we're not relying on fields.
             final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
             final BlockSnapshot previousNeighbor = context.neighborNotificationSource;
             context.neighborNotificationSource = newBlockSnapshot;
-            if (changeFlag.notifyNeighbors()) {
+            if (changeFlag.updateNeighbors()) {
                 ((ServerWorld) mixinWorld).notifyNeighborsRespectDebug(pos, newState.getBlock(), changeFlag.notifyObservers());
 
                 if (newState.hasComparatorInputOverride()) {

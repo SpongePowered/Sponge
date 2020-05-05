@@ -76,7 +76,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
         if (this.aisle.stream().noneMatch(row -> row.indexOf(symbol) >= 0)) {
             throw new IllegalArgumentException("The symbol '" + symbol + "' is not defined in the aisle pattern.");
         }
-        this.ingredientMap.put(symbol, ingredient == null ? Ingredient.NONE : ingredient);
+        this.ingredientMap.put(symbol, ingredient == null ? Ingredient.empty() : ingredient);
         return this;
     }
 

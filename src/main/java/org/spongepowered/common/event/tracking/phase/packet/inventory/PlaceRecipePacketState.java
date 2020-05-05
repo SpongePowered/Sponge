@@ -28,6 +28,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.network.IPacket;
+import net.minecraft.network.play.client.CPlaceRecipePacket;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -62,17 +63,17 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final CPacketPlaceRecipe packet = context.getPacket();
+        final CPlaceRecipePacket packet = context.getPacket();
         final boolean shift = packet.shouldPlaceAll();
         RecipeManager recipeManager = context.getPacketPlayer().server.getRecipeManager();
-        final IRecipe recipe = recipeManager.getRecipe(packet.getRecipeId());
+        final IRecipe recipe = recipeManager.getRecipe(packet.getRecipeId()).orElse(null);
 
         final ServerPlayerEntity player = context.getPacketPlayer();
         ((TrackedContainerBridge)player.openContainer).bridge$detectAndSendChanges(true);
         ((TrackedInventoryBridge) player.openContainer).bridge$setCaptureInventory(false);
         ((TrackedContainerBridge) player.openContainer).bridge$setFirePreview(true);
 
-        final Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        final Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
             SpongeImpl.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return;

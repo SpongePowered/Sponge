@@ -33,7 +33,7 @@ public class GeneralDragonPhaseState implements IPhaseState<GeneralizedContext> 
 
     @Override
     public GeneralizedContext createPhaseContext(PhaseTracker server) {
-        return new GeneralizedContext(this, tracker).addCaptures();
+        return new GeneralizedContext(this, server).addCaptures();
     }
 
     @Override

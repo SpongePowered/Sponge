@@ -97,7 +97,7 @@ public final class PhasePrinter {
                         + "issue tracker on GitHub. Please provide the following information: ")
             .add()
             .add(" %s : %s", "Source position", pos)
-            .add(" %s : %s", "World", ((World<?>) worldServer).getProperties().getName())
+            .add(" %s : %s", "World", ((org.spongepowered.api.world.server.ServerWorld) worldServer).getProperties().getDirectoryName())
             .add(" %s : %s", "Source Block Recovered", blockIn)
             .add(" %s : %s", "Notified Position", otherPos).add();
 

@@ -26,11 +26,18 @@ package org.spongepowered.common.mixin.tracking.world;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.ITickList;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.UpgradeData;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
@@ -48,8 +55,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -64,6 +71,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -72,8 +80,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
 
     @Shadow @Final private World world;
-    @Shadow @Final public int x;
-    @Shadow @Final public int z;
+    @Shadow @Final private ChunkPos pos;
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
 
 
@@ -81,8 +88,10 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     private Map<Integer, PlayerTracker> trackerImpl$trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> trackerImpl$trackedShortBlockPositions = new HashMap<>();
 
-    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"))
-    private void tracker$setUpUserService(@Nullable final World worldIn, final int x, final int z, final CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/ChunkPos;[Lnet/minecraft/world/biome/Biome;Lnet/minecraft/world/chunk/UpgradeData;Lnet/minecraft/world/ITickList;Lnet/minecraft/world/ITickList;J[Lnet/minecraft/world/chunk/ChunkSection;Ljava/util/function/Consumer;)V", at = @At("RETURN"))
+    private void tracker$setUpUserService(World worldIn, ChunkPos p_i49946_2_, Biome[] p_i49946_3_, UpgradeData p_i49946_4_,
+            ITickList<Block> p_i49946_5_, ITickList<Fluid> p_i49946_6_, long p_i49946_7_, ChunkSection[] p_i49946_9_, Consumer<Chunk> p_i49946_10_,
+            CallbackInfo ci) {
         this.trackerImpl$userStorageService = worldIn != null && ((WorldBridge) worldIn).bridge$isFake()
                                   ? null
                                   : SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
@@ -99,7 +108,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             return;
         }
         // Don't track fake players
-        if (user instanceof EntityPlayerMP && SpongeImplHooks.isFakePlayer((EntityPlayerMP) user)) {
+        if (user instanceof ServerPlayerEntity && SpongeImplHooks.isFakePlayer((ServerPlayerEntity) user)) {
             return;
         }
         // Update TE tracking cache
@@ -263,7 +272,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         if (uuid.isPresent()) {
             final UUID userUniqueId = uuid.get();
             // get player if online
-            final EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
+            final PlayerEntity player = this.world.getPlayerByUuid(userUniqueId);
             if (player != null) {
                 return Optional.of((User) player);
             }
@@ -375,14 +384,14 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     private void trackerImpl$startLoad(final CallbackInfo callbackInfo) {
         final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
         if (!isFake) {
-            if (!SpongeImplHooks.isMainThread()) {
+            if (!SpongeImplHooks.onServerThread()) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
                     .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
                                 + " to the parented world for management. These operations are generally not"
                                 + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
                                 + " entities from another thread to the world is never ok.")
                     .add()
-                    .add(" %s : %d, %d", "Chunk Pos", this.x, this.z)
+                    .add(" %s : %s", "Chunk Pos", this.pos.toString())
                     .add()
                     .add(new Exception("Async Chunk Load Detected"))
                     .log(SpongeImpl.getLogger(), Level.ERROR)
@@ -402,7 +411,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void trackerImpl$endLoad(final CallbackInfo callbackInfo) {
-        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.isMainThread()) {
+        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.onServerThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }

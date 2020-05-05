@@ -192,7 +192,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
     }
 
     public SpawnType getEntitySpawnType(final P context) {
-        return SpawnTypes.PLACEMENT;
+        return SpawnTypes.PLACEMENT.get();
     }
 
     private final String desc = TrackingUtil.phaseStateToString("Packet", this);

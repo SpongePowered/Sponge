@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -56,7 +57,7 @@ public class WorldTickListenerContext extends ListenerPhaseContext<WorldTickList
         final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent);
         if (!((WorldBridge) this.getWorld()).bridge$isFake()) {
-            printer.add(s + "- %s: %s", "TickingWorld", ((org.spongepowered.api.world.World) this.getWorld()).getName());
+            printer.add(s + "- %s: %s", "TickingWorld", ((ServerWorld) this.getWorld()).getProperties().getDirectoryName());
         } else {
             printer.add(s + "- %s: %s", "Ticking World", "Pseudo Fake World?" + this.tickingWorld);
         }

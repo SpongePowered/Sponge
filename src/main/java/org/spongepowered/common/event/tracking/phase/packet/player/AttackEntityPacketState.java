@@ -85,7 +85,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
     @Override
     public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
         context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand()))
-            .handUsed(HandTypes.MAIN_HAND);
+            .handUsed(HandTypes.MAIN_HAND.get());
     }
 
 

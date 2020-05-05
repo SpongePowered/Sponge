@@ -37,6 +37,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.DyeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -244,7 +245,7 @@ public final class PacketPhaseUtil {
     public static DataParameter<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
         final Item item = stack.getItem();
 
-        if (item == Items.DYE) {
+        if (item instanceof DyeItem) {
             // ItemDye.itemInteractionForEntity
             if (entity instanceof SheepEntity) {
                 return SheepEntityAccessor.accessor$getDyeColor();

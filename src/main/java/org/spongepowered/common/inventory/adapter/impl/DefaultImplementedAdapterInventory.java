@@ -159,7 +159,7 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
     @SuppressWarnings("unchecked")
     @Override
     default <T extends Inventory> Optional<T> query(Class<T> inventoryType) {
-        Inventory result = this.query(QueryTypes.INVENTORY_TYPE.of(inventoryType));
+        Inventory result = this.query(QueryTypes.INVENTORY_TYPE.get().of(inventoryType));
         if (inventoryType.isAssignableFrom(result.getClass())) {
             return Optional.of((T) result);
         }

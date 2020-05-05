@@ -114,7 +114,7 @@ public final class UseItemPacketState extends BasicPacketState {
         final HandType hand = context.getHandUsed();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE,
-                itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
+                itemStack.getType() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
             context.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
@@ -125,7 +125,7 @@ public final class UseItemPacketState extends BasicPacketState {
                 boolean success = TrackingUtil.processBlockCaptures(context);
                 if (!success && snapshot.isEmpty()) {
                     Sponge.getCauseStackManager().pushCause(player);
-                    PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (Hand) (Object) hand);
+                    PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), (Hand) (Object) hand);
                 }
             }
         }

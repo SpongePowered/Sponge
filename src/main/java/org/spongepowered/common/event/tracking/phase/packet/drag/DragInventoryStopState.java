@@ -63,7 +63,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
         final ServerPlayerEntity player = context.getPacketPlayer();
         ((TrackedContainerBridge) player.openContainer).bridge$setFirePreview(true);
 
-        Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (craftInv instanceof CraftingInventory) {
             List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) player.openContainer).bridge$getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {

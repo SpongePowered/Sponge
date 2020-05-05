@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 
@@ -34,7 +35,7 @@ public class InteractionPacketContext extends PacketContext<InteractionPacketCon
     private BlockSnapshot targetBlock = BlockSnapshot.empty();
     private ItemStack activeItem = ItemStack.empty();
 
-    InteractionPacketContext(PacketState<? extends InteractionPacketContext> state) {
+    InteractionPacketContext(PacketState<? extends InteractionPacketContext> state, PhaseTracker tracker) {
         super(state, tracker);
         this.addCaptures();
         this.addEntityDropCaptures();

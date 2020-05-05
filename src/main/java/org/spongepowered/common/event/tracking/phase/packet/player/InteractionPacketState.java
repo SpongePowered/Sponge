@@ -28,6 +28,7 @@ import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ThrowableEntity;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.util.math.BlockPos;
@@ -75,7 +76,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
     @Override
     public InteractionPacketContext createNewContext(final PhaseTracker tracker) {
-        return new InteractionPacketContext(this);
+        return new InteractionPacketContext(this, tracker);
     }
 
     @Override
@@ -99,7 +100,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         } else {
             context.targetBlock(((TrackedWorldBridge) playerMP.world).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
-        context.handUsed(HandTypes.MAIN_HAND);
+        context.handUsed(HandTypes.MAIN_HAND.get());
     }
 
     @Override
@@ -154,7 +155,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
         
         final net.minecraft.item.ItemStack endActiveItem = player.getActiveItemStack();
-        ((LivingEntityAccessor) player).accessor$setActiveItemStack((net.minecraft.item.ItemStack) phaseContext.getActiveItem());
+        ((LivingEntityAccessor) player).accessor$setActiveItemStack(ItemStackUtil.toNative(phaseContext.getActiveItem()));
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
@@ -236,7 +237,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     if (entry.getKey().equals(player.getUniqueID())) {
                         this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                     } else {
-                        final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.world).getEntityFromUuid(entry.getKey());
+                        final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.world).getEntityByUuid(entry.getKey());
                         if (spawnedEntity != null) {
                             try (final CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 entityFrame.pushCause(spawnedEntity);
@@ -265,7 +266,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         for (final Entity entity : entities) {
             if (entity instanceof Projectile || entity instanceof ThrowableEntity) {
                 projectiles.add(entity);
-            } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
+            } else if (usedSnapshot.getType() instanceof SpawnEggItem) {
                 spawnEggs.add(entity);
             } else if (entity instanceof ItemEntity) {
                 items.add(entity);

@@ -89,12 +89,12 @@ public final class SpongeTexts {
 
     @SuppressWarnings("deprecation")
     public static Text fromLegacy(String legacy) {
-        return TextSerializers.LEGACY_FORMATTING_CODE.deserialize(legacy);
+        return TextSerializers.LEGACY_FORMATTING_CODE.get().deserialize(legacy);
     }
 
     @SuppressWarnings("deprecation")
     public static String toLegacy(Text text) {
-        return TextSerializers.LEGACY_FORMATTING_CODE.serialize(text);
+        return TextSerializers.LEGACY_FORMATTING_CODE.get().serialize(text);
     }
 
     public static String toLegacy(ITextComponent component) {

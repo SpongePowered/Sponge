@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.data;
 
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,25 +38,25 @@ import javax.annotation.Nullable;
 public abstract class SpongeUserMixin implements DataCompoundHolder {
 
     @Shadow public abstract boolean isInitialized();
-    @Shadow @Nullable private NBTTagCompound nbt;
+    @Shadow @Nullable private CompoundNBT nbt;
 
     @Override
     public boolean data$hasRootCompound() {
         if (this.nbt == null) {
             return false;
         }
-        return this.nbt.hasKey(Constants.Forge.FORGE_DATA);
+        return this.nbt.contains(Constants.Forge.FORGE_DATA);
     }
 
     @Override
-    public NBTTagCompound data$getRootCompound() {
+    public CompoundNBT data$getRootCompound() {
         if (this.nbt == null) {
-            return new NBTTagCompound();
+            return new CompoundNBT();
         }
-        NBTTagCompound forgeCompound = this.nbt.getCompoundTag(Constants.Forge.FORGE_DATA);
-        if (forgeCompound == null) {
-            forgeCompound = new NBTTagCompound();
-            this.nbt.setTag(Constants.Forge.FORGE_DATA, forgeCompound);
+        CompoundNBT forgeCompound = this.nbt.getCompound(Constants.Forge.FORGE_DATA);
+        if (forgeCompound == null) { // TODO this is currently never null
+            forgeCompound = new CompoundNBT();
+            this.nbt.put(Constants.Forge.FORGE_DATA, forgeCompound);
         }
         return forgeCompound;
     }

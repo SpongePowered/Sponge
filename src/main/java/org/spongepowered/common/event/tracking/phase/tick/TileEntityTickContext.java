@@ -39,9 +39,9 @@ public class TileEntityTickContext extends LocationBasedTickContext<TileEntityTi
         if (owner instanceof TrackableBridge) {
             final TrackableBridge mixinTileentity = (TrackableBridge) owner;
             this.setBlockEvents(mixinTileentity.bridge$allowsBlockEventCreation())
-                .setBulkBlockCaptures(mixinTileentity.bridge$allowsBlockBulkCapture())
+                .setBulkBlockCaptures(mixinTileentity.bridge$allowsBlockBulkCaptures())
                 .setEntitySpawnEvents(mixinTileentity.bridge$allowsEntityEventCreation())
-                .setBulkEntityCaptures(mixinTileentity.bridge$allowsEntityBulkCapture());
+                .setBulkEntityCaptures(mixinTileentity.bridge$allowsEntityBulkCaptures());
         }
         return this;
     }

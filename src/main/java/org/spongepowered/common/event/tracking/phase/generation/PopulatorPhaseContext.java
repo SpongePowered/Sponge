@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.world.gen.feature.Feature;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
@@ -34,7 +35,7 @@ public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseConte
 
     @Nullable private Feature type;
 
-    PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state) {
+    PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state, PhaseTracker tracker) {
         super(state, tracker);
     }
 

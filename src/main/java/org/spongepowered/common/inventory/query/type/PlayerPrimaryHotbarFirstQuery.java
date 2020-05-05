@@ -38,8 +38,8 @@ public class PlayerPrimaryHotbarFirstQuery extends AppendQuery implements QueryT
     private CatalogKey key = CatalogKey.sponge("player_primary_hotbar_first");
 
     public PlayerPrimaryHotbarFirstQuery() {
-        super(Arrays.asList(QueryTypes.INVENTORY_TYPE.of(Hotbar.class),
-                QueryTypes.INVENTORY_TYPE.of(PrimaryPlayerInventory.class)));
+        super(Arrays.asList(QueryTypes.INVENTORY_TYPE.get().of(Hotbar.class),
+                QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)));
     }
 
     @Override

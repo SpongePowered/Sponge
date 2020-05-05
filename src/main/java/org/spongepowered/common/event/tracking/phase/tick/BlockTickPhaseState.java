@@ -79,7 +79,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
 
     @Override
     public BlockTickContext createNewContext(final PhaseTracker tracker) {
-        return new BlockTickContext(this)
+        return new BlockTickContext(this, tracker)
                 .addCaptures();
     }
 
@@ -102,7 +102,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                 final BlockState state = transaction.getOriginal().getState();
                 final BlockType type = state.getType();
                 final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) state);
-                final BlockPos pos = VecHelper.toBlockPos(context.getSource(LocatableBlock.class).get().getPosition());
+                final BlockPos pos = VecHelper.toBlockPos(context.getSource(LocatableBlock.class).get().getBlockPosition());
                 final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
                 if (pos.equals(blockPos) && !transaction.isValid()) {
                     return true;
