@@ -52,23 +52,12 @@ import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerMPBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -81,9 +70,7 @@ import org.spongepowered.common.mixin.core.entity.passive.EntitySheepAccessor;
 import org.spongepowered.common.mixin.core.entity.passive.EntityWolfAccessor;
 import org.spongepowered.common.mixin.core.network.play.client.CPacketPlayerAccessor;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -288,5 +275,4 @@ public final class PacketPhaseUtil {
 
         return null;
     }
-
 }
