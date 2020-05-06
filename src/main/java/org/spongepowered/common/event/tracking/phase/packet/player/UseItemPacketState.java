@@ -146,8 +146,8 @@ public final class UseItemPacketState extends BasicPacketState {
                         SpongeCommonEventFactory.callSpawnEntity(entities, context);
                     }
 
-                    for (Projectile projectile : projectiles) {
-                        SpongeCommonEventFactory.callProjectileLaunchEvent(frame, player, projectile, context);
+                    if (!projectiles.isEmpty()) {
+                        SpongeCommonEventFactory.callProjectileLaunchEvent(frame, player, projectiles, context);
                     }
                 });
             if (!context.getCapturedBlockSupplier().isEmpty()) {

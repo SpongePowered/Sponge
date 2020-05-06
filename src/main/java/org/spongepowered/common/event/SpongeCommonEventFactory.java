@@ -1794,10 +1794,10 @@ public class SpongeCommonEventFactory {
      * This must be called in the main thread.
      *  @param frame a frame to populate the context and use for the event.
      * @param player the player who launched the projectiles.
-     * @param projectile the projectiles to fire.
-     * @param context the context in which this method is called
+     * @param projectiles the launched projectiles.
+     * @param context the context in which this method is called.
      */
-    public static void callProjectileLaunchEvent(CauseStackManager.StackFrame frame, EntityPlayerMP player, Projectile projectile,
+    public static void callProjectileLaunchEvent(CauseStackManager.StackFrame frame, EntityPlayerMP player, List<Projectile> projectiles,
             PhaseContext<?> context) {
         if (!Sponge.getServer().isMainThread()) {
             SpongeImpl.getLogger().error("callProjectileLaunchEvent called outside of the main thread");
@@ -1807,18 +1807,22 @@ public class SpongeCommonEventFactory {
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
         frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
 
-        LaunchProjectileEvent launchProjectileEvent =
-                SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectile);
-        if (SpongeImpl.postEvent(launchProjectileEvent)) {
-            TrackedInventoryBridge playerMixinContainer = (TrackedInventoryBridge) player.openContainer;
-            PacketPhaseUtil.handleSlotRestore(player, player.openContainer, playerMixinContainer.bridge$getCapturedSlotTransactions(), true);
+        for (Projectile projectile : projectiles) {
+            LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(frame.getCurrentCause(), projectile);
+            if (SpongeImpl.postEvent(event)) {
+                List<SlotTransaction> transactions = ((TrackedInventoryBridge) player.openContainer).bridge$getCapturedSlotTransactions();
+                PacketPhaseUtil.handleSlotRestore(player, player.openContainer, transactions, true);
+                // Since the event can't handle several plugins at once we interpret one cancel as a cancel of the others
+                return;
+            }
+        }
+
+        if (ShouldFire.SPAWN_ENTITY_EVENT) {
+            //noinspection unchecked,rawtypes
+            callSpawnEntity((List) projectiles, context);
         } else {
-            if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                List<Entity> entities = new ArrayList<>();
-                entities.add(projectile);
-                callSpawnEntity(entities, context);
-            } else {
-                Optional<User> creator = Optional.of((User) player);
+            Optional<User> creator = Optional.of((User) player);
+            for (Projectile projectile : projectiles) {
                 EntityUtil.processEntitySpawn(projectile, () -> creator);
             }
         }

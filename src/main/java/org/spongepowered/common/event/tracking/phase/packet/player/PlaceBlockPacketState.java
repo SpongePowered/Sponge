@@ -129,8 +129,6 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final ItemStack itemStack = context.getItemUsed();
         final SpongeItemStackSnapshot snapshot = context.getItemUsedSnapshot();
 
-//        ((ContainerBridge) player.inventoryContainer).bridge$detectAndSendChanges(false);
-
         boolean entityCaptured = !context.getCapturedEntities().isEmpty();
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
@@ -150,8 +148,8 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                         SpongeCommonEventFactory.callSpawnEntity(entities, context);
                     }
 
-                    for (Projectile projectile : projectiles) {
-                        SpongeCommonEventFactory.callProjectileLaunchEvent(frame, player, projectile, context);
+                    if (!projectiles.isEmpty()) {
+                        SpongeCommonEventFactory.callProjectileLaunchEvent(frame, player, projectiles, context);
                     }
                 }
             });

@@ -154,14 +154,21 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
                         if (tickingEntity instanceof ProjectileSource) {
                             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) tickingEntity);
-                            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-                            projectile.removeIf(proj ->
-                                    SpongeImpl.postEvent(SpongeEventFactory.createLaunchProjectileEvent(cause, (Projectile) proj)));
-                            frame.removeContext(EventContextKeys.PROJECTILE_SOURCE);
                         }
-                        SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
-                        frame.removeContext(EventContextKeys.SPAWN_TYPE);
+                        final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+                        boolean launchEventCancelled = false;
+                        for (Entity proj : projectile) {
+                            if (SpongeImpl.postEvent(SpongeEventFactory.createLaunchProjectileEvent(cause, (Projectile) proj))) {
+                                launchEventCancelled = true;
+                                break;
+                            }
+                        }
 
+                        if (!launchEventCancelled) {
+                            SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
+                        }
+                        frame.removeContext(EventContextKeys.PROJECTILE_SOURCE);
+                        frame.removeContext(EventContextKeys.SPAWN_TYPE);
                     }
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
                     SpongeCommonEventFactory.callSpawnEntity(nonExp, phaseContext);

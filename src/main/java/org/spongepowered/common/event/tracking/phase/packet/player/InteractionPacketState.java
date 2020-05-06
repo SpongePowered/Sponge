@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.math.BlockPos;
@@ -260,14 +259,14 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
     private void throwEntitySpawnEvents(final InteractionPacketContext phaseContext, final EntityPlayerMP player, final ItemStackSnapshot usedSnapshot,
         final BlockSnapshot firstBlockChange, final Collection<Entity> entities) {
-        final List<Entity> projectiles = new ArrayList<>(entities.size());
+        final List<Projectile> projectiles = new ArrayList<>(entities.size());
         final List<Entity> spawnEggs = new ArrayList<>(entities.size());
         final List<Entity> xpOrbs = new ArrayList<>(entities.size());
         final List<Entity> normalPlacement = new ArrayList<>(entities.size());
         final List<Entity> items = new ArrayList<>(entities.size());
         for (final Entity entity : entities) {
-            if (entity instanceof Projectile || entity instanceof EntityThrowable) {
-                projectiles.add(entity);
+            if (entity instanceof Projectile) {
+                projectiles.add((Projectile) entity);
             } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
                 spawnEggs.add(entity);
             } else if (entity instanceof EntityItem) {
@@ -279,14 +278,8 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             }
         }
         if (!projectiles.isEmpty()) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    for (Entity projectile : projectiles) {
-                        SpongeCommonEventFactory.callProjectileLaunchEvent(frame2, player, (Projectile) projectile, phaseContext);
-                    }
-                }
-            } else {
-                processEntities(player, projectiles);
+            try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                SpongeCommonEventFactory.callProjectileLaunchEvent(frame2, player, projectiles, phaseContext);
             }
         }
         if (!spawnEggs.isEmpty()) {
