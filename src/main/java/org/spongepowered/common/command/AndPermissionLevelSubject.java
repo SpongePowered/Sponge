@@ -27,13 +27,16 @@ package org.spongepowered.common.command;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ProxySource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.service.permission.base.FixedParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.SpongeBaseSubject;
 
@@ -93,4 +96,24 @@ public final class AndPermissionLevelSubject extends SpongeBaseSubject {
     public MemorySubjectData getTransientSubjectData() {
         return this.opLevelData;
     }
+
+    @Override
+    public boolean hasPermission(Set<Context> contexts, String permission) {
+        final Tristate value = getPermissionValue(contexts, permission);
+        if (value == Tristate.UNDEFINED) {
+            Subject target = this.delegate;
+            while (target instanceof ProxySource) {
+                if (target instanceof SpongeProxySource) {
+                    target = ((SpongeProxySource) target).getSubjectDelegate();
+                } else {
+                    target = ((ProxySource) target).getOriginalSource();
+                }
+            }
+            if (target instanceof SubjectBridge) {
+                return ((SubjectBridge) target).bridge$permDefault(permission).asBoolean();
+            }
+        }
+        return value.asBoolean();
+    }
+
 }
