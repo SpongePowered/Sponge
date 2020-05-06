@@ -102,12 +102,8 @@ public final class AndPermissionLevelSubject extends SpongeBaseSubject {
         final Tristate value = getPermissionValue(contexts, permission);
         if (value == Tristate.UNDEFINED) {
             Subject target = this.delegate;
-            while (target instanceof ProxySource) {
-                if (target instanceof SpongeProxySource) {
-                    target = ((SpongeProxySource) target).getSubjectDelegate();
-                } else {
-                    target = ((ProxySource) target).getOriginalSource();
-                }
+            while (target instanceof SpongeProxySource) {
+                target = ((SpongeProxySource) target).getSubjectDelegate();
             }
             if (target instanceof SubjectBridge) {
                 return ((SubjectBridge) target).bridge$permDefault(permission).asBoolean();
