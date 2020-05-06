@@ -24,17 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.block.DispenserBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleGridLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleGridLens;
 
 @Mixin(TileEntityDispenser.class)
-public abstract class TileEntityDispenserMixin extends TileEntityLockableLootMixin {
+public abstract class TileEntityDispenserMixin extends TileEntityLockableLootMixin implements DispenserBridge {
+
+    private @Nullable ItemStack originalStack;
+    private int originalStackSize;
 
     @Override
     public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
@@ -50,4 +56,16 @@ public abstract class TileEntityDispenserMixin extends TileEntityLockableLootMix
         return new SingleGridLens(0, 3, 3, (Class) TileEntityDispenser.class, slots);
     }
 
+    @Override
+    public void bridge$setDispensedItem(ItemStack dispensed) {
+        this.originalStack = dispensed;
+        this.originalStackSize = dispensed.getCount();
+    }
+
+    @Override
+    public void bridge$restoreDispensedItem(int count) {
+        if (originalStack != null) {
+            this.originalStack.setCount(this.originalStackSize + count);
+        }
+    }
 }

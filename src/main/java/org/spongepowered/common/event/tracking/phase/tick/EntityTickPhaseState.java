@@ -44,10 +44,14 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -148,6 +152,13 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     }
                     if (!projectile.isEmpty()) {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                        if (tickingEntity instanceof ProjectileSource) {
+                            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) tickingEntity);
+                            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+                            projectile.removeIf(proj ->
+                                    SpongeImpl.postEvent(SpongeEventFactory.createLaunchProjectileEvent(cause, (Projectile) proj)));
+                            frame.removeContext(EventContextKeys.PROJECTILE_SOURCE);
+                        }
                         SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
                         frame.removeContext(EventContextKeys.SPAWN_TYPE);
 

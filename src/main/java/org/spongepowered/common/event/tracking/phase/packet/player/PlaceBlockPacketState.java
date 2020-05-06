@@ -36,6 +36,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
@@ -48,6 +49,7 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -60,6 +62,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -87,7 +90,13 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
+    public boolean shouldCaptureEntity() {
+        return true;
+    }
+
+    @Override
     public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final BasicPacketContext context) {
+        ((TrackedInventoryBridge) playerMP.inventoryContainer).bridge$setCaptureInventory(true);
         final CPacketPlayerTryUseItemOnBlock placeBlock = (CPacketPlayerTryUseItemOnBlock) packet;
         final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
@@ -119,11 +128,31 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final EntityPlayerMP player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final SpongeItemStackSnapshot snapshot = context.getItemUsedSnapshot();
+
+//        ((ContainerBridge) player.inventoryContainer).bridge$detectAndSendChanges(false);
+
+        boolean entityCaptured = !context.getCapturedEntities().isEmpty();
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
                 try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                    List<Projectile> projectiles = new ArrayList<>();
+                    List<Entity> rest = new ArrayList<>();
+                    for (Entity entity : entities) {
+                        if (entity instanceof Projectile) {
+                            projectiles.add((Projectile) entity);
+                        } else {
+                            rest.add(entity);
+                        }
+                    }
+
+                    if (!rest.isEmpty() && ShouldFire.SPAWN_ENTITY_EVENT) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
+                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                    }
+
+                    for (Projectile projectile : projectiles) {
+                        SpongeCommonEventFactory.callProjectileLaunchEvent(frame, player, projectile, context);
+                    }
                 }
             });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
@@ -131,7 +160,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final EnumHand hand = (EnumHand) (Object) context.getHandUsed();
         final net.minecraft.item.ItemStack replaced = player.getHeldItem(hand);
         player.setHeldItem(hand, ItemStackUtil.toNative(itemStack.copy()));
-        if (!TrackingUtil.processBlockCaptures(context) && !snapshot.isNone()) {
+        if (!TrackingUtil.processBlockCaptures(context) && !snapshot.isNone() && !entityCaptured) {
             PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
         } else {
             player.setHeldItem(hand, replaced);
@@ -167,5 +196,10 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public boolean hasSpecificBlockProcess(final BasicPacketContext context) {
         return false;
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(BasicPacketContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
     }
 }

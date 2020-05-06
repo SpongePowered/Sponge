@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.block.DispenserBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -144,6 +145,7 @@ public abstract class BlockDispenserMixin extends BlockMixin {
     )
     private void impl$InjectToStoreOriginalItem(
         final World worldIn, final BlockPos pos, final CallbackInfo ci, final BlockSourceImpl source, final TileEntityDispenser dispenser, final int slotIndex, final ItemStack dispensedItem, final IBehaviorDispenseItem behavior) {
+        ((DispenserBridge) dispenser).bridge$setDispensedItem(dispensedItem);
         this.originalItem = ItemStackUtil.cloneDefensiveNative(dispensedItem);
     }
 

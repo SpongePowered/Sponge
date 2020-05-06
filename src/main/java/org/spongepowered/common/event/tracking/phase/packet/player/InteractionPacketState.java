@@ -50,6 +50,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -84,6 +85,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
     @Override
     public void populateContext(final EntityPlayerMP playerMP, final Packet<?> packet, final InteractionPacketContext context) {
+        ((TrackedInventoryBridge) playerMP.openContainer).bridge$setCaptureInventory(true);
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
             context.itemUsed(stack);
@@ -154,6 +156,8 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         
         final net.minecraft.item.ItemStack endActiveItem = player.getActiveItemStack();
         ((EntityLivingBaseAccessor) player).accessor$setActiveItemStack((net.minecraft.item.ItemStack) phaseContext.getActiveItem());
+
+        ((ContainerBridge) player.inventoryContainer).bridge$detectAndSendChanges(false);
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
@@ -277,9 +281,9 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         if (!projectiles.isEmpty()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT) {
                 try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
-                    frame2.pushCause(usedSnapshot);
-                    SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
+                    for (Entity projectile : projectiles) {
+                        SpongeCommonEventFactory.callProjectileLaunchEvent(frame2, player, (Projectile) projectile, phaseContext);
+                    }
                 }
             } else {
                 processEntities(player, projectiles);

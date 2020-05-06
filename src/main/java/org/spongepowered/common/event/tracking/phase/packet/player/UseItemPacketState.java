@@ -35,14 +35,19 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -54,6 +59,8 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 @SuppressWarnings("unchecked")
@@ -82,7 +89,13 @@ public final class UseItemPacketState extends BasicPacketState {
     }
 
     @Override
+    public boolean shouldCaptureEntity() {
+        return true;
+    }
+
+    @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+        ((TrackedInventoryBridge) playerMP.openContainer).bridge$setCaptureInventory(true);
         final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
         final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
@@ -111,12 +124,31 @@ public final class UseItemPacketState extends BasicPacketState {
         final ItemStack itemStack = context.getItemUsed();
         final SpongeItemStackSnapshot snapshot = context.getItemUsedSnapshot();
         final HandType hand = context.getHandUsed();
+
+        ((ContainerBridge) player.inventoryContainer).bridge$detectAndSendChanges(false);
+
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE,
                 itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
             context.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                    List<Projectile> projectiles = new ArrayList<>();
+                    List<Entity> rest = new ArrayList<>();
+                    for (Entity entity : entities) {
+                        if (entity instanceof Projectile) {
+                            projectiles.add((Projectile) entity);
+                        } else {
+                            rest.add(entity);
+                        }
+                    }
+
+                    if (!rest.isEmpty() && ShouldFire.SPAWN_ENTITY_EVENT) {
+                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                    }
+
+                    for (Projectile projectile : projectiles) {
+                        SpongeCommonEventFactory.callProjectileLaunchEvent(frame, player, projectile, context);
+                    }
                 });
             if (!context.getCapturedBlockSupplier().isEmpty()) {
                 // TODO - Determine if we need to pass the supplier or perform some parameterized
@@ -128,5 +160,9 @@ public final class UseItemPacketState extends BasicPacketState {
                 }
             }
         }
+
+        TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.inventoryContainer;
+        trackedInventory.bridge$setCaptureInventory(false);
+        trackedInventory.bridge$getCapturedSlotTransactions().clear();
     }
 }

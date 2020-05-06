@@ -25,15 +25,26 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.LocatableSnapshot;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.block.DispenserBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 final class DispensePhaseState extends BlockPhaseState {
 
@@ -58,8 +69,44 @@ final class DispensePhaseState extends BlockPhaseState {
             });
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-                SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+                List<Entity> projectiles = new ArrayList<>();
+                List<Entity> rest = new ArrayList<>();
+                for (Entity entity : entities) {
+                    if (entity instanceof Projectile) {
+                        projectiles.add(entity);
+                    } else {
+                        rest.add(entity);
+                    }
+                }
+
+                if (!rest.isEmpty()) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                    SpongeCommonEventFactory.callSpawnEntity(rest, phaseContext);
+                }
+
+                if (!projectiles.isEmpty()) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                        TileEntity tileEntity = phaseContext.getSource(BlockSnapshot.class)
+                                .flatMap(LocatableSnapshot::getLocation)
+                                .flatMap(Location::getTileEntity)
+                                .orElse(null);
+                        if (tileEntity instanceof ProjectileSource) {
+                            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((ProjectileSource) tileEntity));
+                        }
+
+                        int projectilesCount = projectiles.size();
+                        projectiles.removeIf(projectile ->
+                                SpongeImpl.postEvent(SpongeEventFactory.createLaunchProjectileEvent(frame.getCurrentCause(), (Projectile) projectile)));
+                        if (!projectiles.isEmpty()) {
+                            SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
+                        }
+
+                        if (projectilesCount != projectiles.size() && tileEntity instanceof DispenserBridge) {
+                            ((DispenserBridge) tileEntity).bridge$restoreDispensedItem(projectiles.size());
+                        }
+                    }
+                }
             });
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(drops -> {

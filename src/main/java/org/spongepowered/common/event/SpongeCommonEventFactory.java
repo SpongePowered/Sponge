@@ -88,6 +88,7 @@ import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
@@ -110,6 +111,7 @@ import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
+import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -1786,4 +1788,39 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
+    /**
+     * Common method to fire a LaunchProjectileEvent and populate its context, then calls SpawnEntityEvent.
+     *
+     * This must be called in the main thread.
+     *  @param frame a frame to populate the context and use for the event.
+     * @param player the player who launched the projectiles.
+     * @param projectile the projectiles to fire.
+     * @param context the context in which this method is called
+     */
+    public static void callProjectileLaunchEvent(CauseStackManager.StackFrame frame, EntityPlayerMP player, Projectile projectile,
+            PhaseContext<?> context) {
+        if (!Sponge.getServer().isMainThread()) {
+            SpongeImpl.getLogger().error("callProjectileLaunchEvent called outside of the main thread");
+            return;
+        }
+
+        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+        frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
+
+        LaunchProjectileEvent launchProjectileEvent =
+                SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectile);
+        if (SpongeImpl.postEvent(launchProjectileEvent)) {
+            TrackedInventoryBridge playerMixinContainer = (TrackedInventoryBridge) player.openContainer;
+            PacketPhaseUtil.handleSlotRestore(player, player.openContainer, playerMixinContainer.bridge$getCapturedSlotTransactions(), true);
+        } else {
+            if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                List<Entity> entities = new ArrayList<>();
+                entities.add(projectile);
+                callSpawnEntity(entities, context);
+            } else {
+                Optional<User> creator = Optional.of((User) player);
+                EntityUtil.processEntitySpawn(projectile, () -> creator);
+            }
+        }
+    }
 }
