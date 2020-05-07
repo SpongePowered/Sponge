@@ -47,6 +47,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     private static final ConfigurateTranslator instance = new ConfigurateTranslator();
     private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.of(ConfigurationNode.class);
+    private static final CatalogKey KEY = CatalogKey.sponge("configuration_node");
 
     private ConfigurateTranslator() {
     }
@@ -132,6 +133,6 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     @Override
     public CatalogKey getKey() {
-        return CatalogKey.sponge("configuration_node");
+        return KEY;
     }
 }
