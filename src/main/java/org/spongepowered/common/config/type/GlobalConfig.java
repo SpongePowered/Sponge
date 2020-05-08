@@ -94,7 +94,7 @@ public class GlobalConfig extends GeneralConfigBase {
     private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
 
     @Setting(value = "movement-checks",
-            comment = "Options related to minecraft'S movement checks, that can be enabled or disabled.")
+            comment = "Options related to minecraft's movement checks, that can be enabled or disabled.")
     private MovementChecksCategory movementChecks = new MovementChecksCategory();
 
     @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
