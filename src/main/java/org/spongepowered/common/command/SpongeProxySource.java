@@ -67,6 +67,10 @@ public class SpongeProxySource implements ProxySource, CommandSourceBridge {
         return this.messageSource;
     }
 
+    public Subject getSubjectDelegate() {
+        return this.subjectDelegate;
+    }
+
     @Override
     public String bridge$getIdentifier() {
         return this.subjectDelegate.getIdentifier();
