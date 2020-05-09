@@ -38,7 +38,7 @@ public class EntityActivationModCategory extends ConfigCategory {
     private boolean isEnabled = true;
     @Setting(value = "defaults", comment = "Default activation ranges used for mod entities unless overridden.")
     private Map<String, Integer> defaultRanges = new HashMap<>();
-    @Setting(value = "entities", comment = "???")
+    @Setting(value = "entities", comment = "The mod entities with their name as key and the range as value")
     private Map<String, Integer> entityList = new HashMap<>();
 
     public boolean isEnabled() {

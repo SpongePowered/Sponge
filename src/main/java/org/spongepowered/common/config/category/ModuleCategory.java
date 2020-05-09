@@ -30,10 +30,15 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class ModuleCategory extends ConfigCategory {
 
-    @Setting(value = "bungeecord", comment = "???")
+    @Setting(value = "bungeecord", comment = ""
+            + "The BungeeCord Module, allows Sponge to be used with a Proxy like Bungeecord or Velocity.\n"
+            + "Usually you want to also enable 'bungeecord.ip-forwarding' with this.")
     private boolean pluginBungeeCord = false;
 
-    @Setting(value = "entity-activation-range", comment = "???")
+    @Setting(value = "entity-activation-range", comment = ""
+            + "The entity activation module, allows you to tweak entity activation ranges,\n"
+            + "similarly to \"Entity Distance\" in the latest 1.16 snapshots but per mob.\n"
+            + "Essentially, it changes how far an entity can be away from a player, until it stops being updated (e.g. moving).")
     private boolean pluginEntityActivation = true;
 
     @Setting(value = "tileentity-activation", comment = ""
@@ -41,10 +46,13 @@ public class ModuleCategory extends ConfigCategory {
             + "Use with caution as this can break intended functionality.")
     private boolean pluginTileEntityActivation = false;
 
-    @Setting(value = "entity-collisions", comment = "???")
+    @Setting(value = "entity-collisions", comment = ""
+            + "Module that allows you to configure the maximum amount of entities a specific entity or block can collide with.")
     private boolean pluginEntityCollisions = true;
 
-    @Setting(value = "timings", comment = "???")
+    @Setting(value = "timings", comment = ""
+            + "Module to run Aikar's Timings, profile your server performance and get a sharable web result.\n"
+            + "https://github.com/aikar/timings#aikars-minecraft-timings-viewer-v2")
     private boolean pluginTimings = true;
 
     @Setting(value = "exploits", comment = ""
@@ -56,7 +64,7 @@ public class ModuleCategory extends ConfigCategory {
     @Setting(value = "optimizations")
     private boolean enableOptimizationPatches = true;
 
-    @Setting(value = "tracking", comment = "???")
+    @Setting(value = "tracking", comment = "Can be used to disable some parts of the tracking.")
     private boolean tracking = true;
 
     @Setting(value = "realtime", comment = "Use real (wall) time instead of ticks as much as possible")

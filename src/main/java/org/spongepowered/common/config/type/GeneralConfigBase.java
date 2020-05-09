@@ -78,7 +78,9 @@ public class GeneralConfigBase extends ConfigBase {
             comment = "Configuration options related to activation ranges of tile entities.")
     private TileEntityActivationCategory tileEntityActivationCategory = new TileEntityActivationCategory();
 
-    @Setting(comment = "???")
+    @Setting(comment = ""
+            + "Module to run Aikar's Timings, profile your server performance and get a sharable web result.\n"
+            + "https://github.com/aikar/timings#aikars-minecraft-timings-viewer-v2")
     private TimingsCategory timings = new TimingsCategory();
 
     @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")

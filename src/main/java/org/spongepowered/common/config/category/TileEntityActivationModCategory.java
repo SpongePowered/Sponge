@@ -36,13 +36,21 @@ public class TileEntityActivationModCategory extends ConfigCategory {
     @Setting(value = "enabled",
             comment = "If 'false', tileentity activation rules for this mod will be ignored and always tick.")
     private boolean isEnabled = true;
-    @Setting(value = "default-block-range", comment = "???")
+
+    @Setting(value = "default-block-range",
+            comment = "Default activation block range used for all tileentities unless overridden.")
     private Integer defaultBlockRange;
-    @Setting(value = "default-tick-rate", comment = "???")
+
+    @Setting(value = "default-tick-rate",
+            comment = "Default tick rate used for all tileentities unless overridden.")
     private Integer defaultTickRate;
-    @Setting(value = "block-range", comment = "???")
+
+    @Setting(value = "block-range",
+            comment = "A list of tile/block entities with block name as key and their range as value.")
     private Map<String, Integer> tileEntityRangeList = new HashMap<>();
-    @Setting(value = "tick-rate", comment = "???")
+
+    @Setting(value = "tick-rate",
+            comment = "A list of tile/block entities with block name as key and their tick rate as value")
     private Map<String, Integer> tileEntityTickRateList = new HashMap<>();
 
     public TileEntityActivationModCategory() {

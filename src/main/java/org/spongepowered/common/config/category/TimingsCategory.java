@@ -33,22 +33,24 @@ import java.util.List;
 @ConfigSerializable
 public class TimingsCategory extends ConfigCategory {
 
-    @Setting(comment = "???")
+    @Setting(comment = "Enables the verbose mode for the timings module.")
     private boolean verbose = false;
 
     @Setting(comment = "???")
     private boolean enabled = true;
 
-    @Setting(value = "server-name-privacy", comment = "???")
+    @Setting(value = "server-name-privacy", 
+            comment = "Hides the server name in the Airkar webviewer to no leak the l33t server you are running")
     private boolean serverNamePrivacy = false;
 
     @Setting(value = "hidden-config-entries", comment = "???")
     private List<String> hiddenConfigEntries = Lists.newArrayList("sponge.sql");
 
-    @Setting(value = "history-interval", comment = "???")
+    @Setting(value = "history-interval", 
+            comment = "Modulo value how often a tick should be pushed to the timings history")
     private int historyInterval = 300;
 
-    @Setting(value = "history-length", comment = "???")
+    @Setting(value = "history-length", comment = "How long the list of said history can get")
     private int historyLength = 3600;
 
     public boolean isVerbose() {

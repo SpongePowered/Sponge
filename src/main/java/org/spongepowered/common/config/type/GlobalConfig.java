@@ -67,7 +67,9 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting(value = "modules", comment = "Options related to optional modules, that can be enabled or disabled.")
     private ModuleCategory mixins = new ModuleCategory();
 
-    @Setting(value = "ip-sets", comment = "???")
+    @Setting(value = "ip-sets", comment = ""
+            + "Automatically assigns (permission) contexts to users that use any of the given ips.\n"
+            + "This can be used to restrict/grand permissions, based on the player's source or target ip.")
     private Map<String, List<IpSet>> ipSets = new HashMap<>();
 
     @Setting(value = "bungeecord", comment = "Configuration options related for server proxies, such as bungeecord")
