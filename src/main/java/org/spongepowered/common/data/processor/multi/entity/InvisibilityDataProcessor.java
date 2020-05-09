@@ -68,8 +68,8 @@ public class InvisibilityDataProcessor
         final boolean vanish = (Boolean) keyValues.get(Keys.VANISH);
         dataHolder.bridge$setInvisible(invis);
         dataHolder.bridge$setVanished(vanish);
-        dataHolder.bridge$setUncollideable(collision);
-        dataHolder.bridge$setUntargetable(untargetable);
+        dataHolder.bridge$setUncollideable(vanish && collision);
+        dataHolder.bridge$setUntargetable(vanish && untargetable);
         return true;
     }
 
