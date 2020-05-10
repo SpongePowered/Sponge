@@ -24,25 +24,37 @@
  */
 package org.spongepowered.common.data.translator;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.SimpleConfigurationNode;
+import ninja.leaping.configurate.gson.GsonConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.junit.Test;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
 public class ConfigurateDataViewTest {
+    static {
+        SpongeDataManager.areRegistrationsComplete(); // init class
+    }
 
     @Test
-    public void testNodeToData() {
-        ConfigurationNode node = SimpleConfigurationNode.root();
+    public void testNodeToData() throws IOException, ObjectMappingException {
+
+
+
+        ConfigurationNode node = ConfigurationNode.root();
         node.getNode("foo","int").setValue(1);
         node.getNode("foo", "double").setValue(10.0D);
         node.getNode("foo", "long").setValue(Long.MAX_VALUE);
@@ -55,7 +67,7 @@ public class ConfigurateDataViewTest {
         for (int i = 0; i < 100; i++) {
             dataList.add(new SimpleData(i, 10.0 + i, "String" + i, Collections.<String>emptyList()));
         }
-        node.getNode("foo", "nested", "Data").setValue(dataList);
+        node.getNode("foo", "nested", "Data").setValue(new TypeToken<List<SimpleData>>() {}, dataList);
 
         DataContainer manual = DataContainer.createNew();
         manual.set(DataQuery.of("foo", "int"), 1)
@@ -65,9 +77,18 @@ public class ConfigurateDataViewTest {
                 .set(DataQuery.of("foo", "nested", "Data"), dataList);
 
         DataView container = ConfigurateTranslator.instance().translate(node);
-        assertTrue(manual.equals(container));
+        assertEquals(manual, container);
         ConfigurationNode translated = ConfigurateTranslator.instance().translate(container);
-        // assertTrue(node.equals(translated)); // TODO Pending Configurate equals implementation
+
+        System.out.println(Paths.get("manual.json").toAbsolutePath());
+        GsonConfigurationLoader.builder()
+                .setPath(Paths.get("manual.json"))
+                .build().save(node);
+        GsonConfigurationLoader.builder()
+                .setPath(Paths.get("translated.json"))
+                .build().save(translated);
+        assertEquals(node, translated); // TODO Pending Configurate equals implementation
+
     }
 
 }

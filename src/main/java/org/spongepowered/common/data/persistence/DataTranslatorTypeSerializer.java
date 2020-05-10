@@ -44,17 +44,17 @@ public class DataTranslatorTypeSerializer<T> implements TypeSerializer<T> {
     @Override
     public T deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
         try {
-            return this.dataTranslator.translate(ConfigurateTranslator.instance().translateFrom(value));
+            return this.dataTranslator.translate(ConfigurateTranslator.instance().translate(value));
         } catch (InvalidDataException e) {
             // Since the value in the config node might be null, return null if an error occurs.
-            return null;
+            throw new ObjectMappingException(e);
         }
     }
 
     @Override
     public void serialize(TypeToken<?> type, T obj, ConfigurationNode value) throws ObjectMappingException {
         try {
-            ConfigurateTranslator.instance().translateContainerToData(value, this.dataTranslator.translate(obj));
+            ConfigurateTranslator.instance().translateDataToNode(value, this.dataTranslator.translate(obj));
         } catch (InvalidDataException e) {
             throw new ObjectMappingException("Could not serialize. Data was invalid.", e);
         }

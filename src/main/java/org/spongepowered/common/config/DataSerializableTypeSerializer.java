@@ -33,6 +33,7 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslators;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 
 /**
  * An implementation of {@link TypeSerializer} so that DataSerializables can be
@@ -47,7 +48,7 @@ public class DataSerializableTypeSerializer implements TypeSerializer<DataSerial
         }
         Class<?> clazz = type.getRawType();
         return Sponge.getDataManager()
-                .deserialize(clazz.asSubclass(DataSerializable.class), DataTranslators.CONFIGURATION_NODE.translate(value))
+                .deserialize(clazz.asSubclass(DataSerializable.class), ConfigurateTranslator.instance().translate(value))
                 .orElseThrow(() -> new ObjectMappingException("Could not translate DataSerializable of type: " + clazz.getName()));
     }
 
@@ -56,7 +57,7 @@ public class DataSerializableTypeSerializer implements TypeSerializer<DataSerial
         if (obj instanceof CatalogType) {
             new CatalogTypeTypeSerializer().serialize(type, (CatalogType) obj, value);
         } else {
-            value.setValue(DataTranslators.CONFIGURATION_NODE.translate(obj.toContainer()));
+            value.setValue(ConfigurateTranslator.instance().translate(obj.toContainer()));
         }
     }
 }
