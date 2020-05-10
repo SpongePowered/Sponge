@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.data.DataContainer;
@@ -74,7 +73,7 @@ public class HoconDataFormat extends SpongeCatalogType implements StringDataForm
                 .setSource(source)
                 .build();
         CommentedConfigurationNode node = loader.load();
-        return ConfigurateTranslator.instance().translateFrom(node);
+        return ConfigurateTranslator.instance().translate(node);
     }
 
     @Override
@@ -98,8 +97,9 @@ public class HoconDataFormat extends SpongeCatalogType implements StringDataForm
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
                 .setSink(sink)
                 .build();
-        ConfigurationNode node = ConfigurateTranslator.instance().translateData(data);
-        loader.save(node);
+        CommentedConfigurationNode ret = loader.createEmptyNode();
+        ConfigurateTranslator.instance().translateDataToNode(ret, data);
+        loader.save(ret);
     }
 
     private static BufferedReader createBufferedReader(Reader reader) {

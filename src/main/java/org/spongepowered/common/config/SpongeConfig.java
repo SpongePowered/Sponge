@@ -26,15 +26,11 @@ package org.spongepowered.common.config;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.Types;
-import ninja.leaping.configurate.ValueType;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.commented.SimpleCommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import ninja.leaping.configurate.util.ConfigurationNodeWalker;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.type.ConfigBase;
@@ -48,9 +44,6 @@ import org.spongepowered.common.util.IpSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
@@ -65,10 +58,10 @@ public class SpongeConfig<T extends ConfigBase> {
         DIMENSION(DimensionConfig.class),
         WORLD(WorldConfig.class);
 
-        final Class<? extends ConfigBase> type;
+        final TypeToken<?> type;
 
         Type(Class<? extends ConfigBase> type) {
-            this.type = type;
+            this.type = TypeToken.of(type);
         }
     }
 
@@ -81,9 +74,9 @@ public class SpongeConfig<T extends ConfigBase> {
             + "# Forums: https://forums.spongepowered.org/\n";
 
     private static final ConfigurationOptions LOADER_OPTIONS = ConfigurationOptions.defaults()
-            .setHeader(HEADER)
-            .setSerializers(TypeSerializers.getDefaultSerializers().newChild()
-                    .registerType(TypeToken.of(IpSet.class), new IpSet.IpSetSerializer())
+            .withHeader(HEADER)
+            .withSerializers( // we should use the lambda thing here but the compiler doesn't like it :(
+                TypeSerializerCollection.defaults().register(TypeToken.of(IpSet.class), new IpSet.IpSetSerializer())
             );
 
     /**
@@ -104,12 +97,12 @@ public class SpongeConfig<T extends ConfigBase> {
     /**
      * A node representation of "whats actually in the file".
      */
-    private CommentedConfigurationNode fileData = SimpleCommentedConfigurationNode.root(LOADER_OPTIONS);
+    private CommentedConfigurationNode fileData = CommentedConfigurationNode.root(LOADER_OPTIONS);
 
     /**
      * A node representation of {@link #fileData}, merged with the data of {@link #parent}.
      */
-    private CommentedConfigurationNode data = SimpleCommentedConfigurationNode.root(LOADER_OPTIONS);
+    private CommentedConfigurationNode data = CommentedConfigurationNode.root(LOADER_OPTIONS);
 
     /**
      * The mapper instance used to populate the config instance
@@ -131,7 +124,7 @@ public class SpongeConfig<T extends ConfigBase> {
         this.isDummy = true;
 
         try {
-            this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
+            this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forType(this.type.type).bindToNew();
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Failed to initialize dummy configuration", e);
         }
@@ -151,7 +144,7 @@ public class SpongeConfig<T extends ConfigBase> {
             }
 
             this.loader = HoconConfigurationLoader.builder().setPath(path).build();
-            this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
+            this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forType(this.type.type).bindToNew();
 
             // If load fails, avoid saving as this can mess up world configs.
             if (!load()) {
@@ -189,7 +182,7 @@ public class SpongeConfig<T extends ConfigBase> {
         }
         try {
             // save from the mapped object --> node
-            CommentedConfigurationNode saveNode = SimpleCommentedConfigurationNode.root(LOADER_OPTIONS);
+            CommentedConfigurationNode saveNode = CommentedConfigurationNode.root(LOADER_OPTIONS);
             this.configMapper.serialize(saveNode.getNode(this.modId));
 
             // before saving this config, remove any values already declared with the same value on the parent
@@ -277,51 +270,7 @@ public class SpongeConfig<T extends ConfigBase> {
         if (this.parent == null) {
             throw new IllegalStateException("parent is null");
         }
-
-        Iterator<ConfigurationNodeWalker.VisitedNode<CommentedConfigurationNode>> it = ConfigurationNodeWalker.DEPTH_FIRST_POST_ORDER.walkWithPath(root);
-        while (it.hasNext()) {
-            ConfigurationNodeWalker.VisitedNode<CommentedConfigurationNode> next = it.next();
-            CommentedConfigurationNode node = next.getNode();
-
-            // remove empty maps
-            if (node.hasMapChildren()) {
-                if (node.getChildrenMap().isEmpty()) {
-                    node.setValue(null);
-                }
-                continue;
-            }
-
-            // ignore list values
-            if (node.getParent() != null && node.getParent().getValueType() == ValueType.LIST) {
-                continue;
-            }
-
-            // if the node already exists in the parent config, remove it
-            CommentedConfigurationNode parentValue = this.parent.data.getNode(next.getPath().getArray());
-            if (Objects.equals(node.getValue(), parentValue.getValue())) {
-                node.setValue(null);
-            } else {
-                // Fix list bug
-                if (parentValue.getValue() == null) {
-                    if (node.getValueType() == ValueType.LIST) {
-                        final List<?> nodeList = (List<?>) node.getValue();
-                        if (nodeList.isEmpty()) {
-                            node.setValue(null);
-                        }
-                        continue;
-                    }
-                }
-                // Fix double bug
-                final Double nodeVal = node.getValue(Types::asDouble);
-                if (nodeVal != null) {
-                    Double parentVal = parentValue.getValue(Types::asDouble);
-                    if (parentVal == null && nodeVal.doubleValue() == 0 || (parentVal != null && nodeVal.doubleValue() == parentVal.doubleValue())) {
-                        node.setValue(null);
-                        continue;
-                    }
-                }
-            }
-        }
+        DuplicateRemovalVisitor.visit(root, this.parent.data);
     }
 
     public CompletableFuture<CommentedConfigurationNode> updateSetting(String key, Object value) {

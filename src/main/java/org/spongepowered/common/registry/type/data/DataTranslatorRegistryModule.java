@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
@@ -95,8 +96,8 @@ public class DataTranslatorRegistryModule implements AlternateCatalogRegistryMod
         }
         this.dataTranslatorMappings.put(dataTranslator.getId(), dataTranslator);
         this.dataTranslatorByClass.put(type, dataTranslator);
-        if (TypeSerializers.getDefaultSerializers().get(typeToken) == null) {
-            TypeSerializers.getDefaultSerializers().registerType(typeToken, DataTranslatorTypeSerializer.from(dataTranslator));
+        if (TypeSerializerCollection.defaults().get(typeToken) == null) {
+            TypeSerializerCollection.defaults().register(typeToken, DataTranslatorTypeSerializer.from(dataTranslator));
         }
     }
 

@@ -39,6 +39,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogType;
@@ -102,7 +103,6 @@ import org.spongepowered.common.text.selector.SpongeSelectorFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.LocaleCache;
-import org.spongepowered.common.util.SetSerializer;
 import org.spongepowered.common.util.graph.CyclicGraphException;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.DirectedGraph.DataNode;
@@ -138,11 +138,10 @@ public class SpongeGameRegistry implements GameRegistry {
     private static final boolean PRINT_CATALOG_TYPES = Boolean.parseBoolean(System.getProperty("sponge.print_all_catalog_types"));
 
     static {
-        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Text.class), new TextConfigSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(BookView.class), new BookViewDataBuilder());
-        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<?>>() { public static final long serialVersionUID = 1L; }, new SetSerializer());
+        TypeSerializerCollection.defaults().register(CatalogTypeTypeSerializer.TYPE, CatalogTypeTypeSerializer.INSTANCE)
+                .register(TypeToken.of(Text.class), new TextConfigSerializer())
+                .register(TypeToken.of(BookView.class), new BookViewDataBuilder())
+                .register(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
     }
 
     private RegistrationPhase phase = RegistrationPhase.PRE_REGISTRY; // Needed for module phase registrations
