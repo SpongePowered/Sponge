@@ -101,7 +101,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
     @Override
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(final Class<T> configClass) {
-        return typeSerializableConfig(configClass, TypeSerializers.getDefaultSerializers());
+        return typeSerializableConfig(configClass, TypeSerializerCollection.defaults());
     }
 
     @Override

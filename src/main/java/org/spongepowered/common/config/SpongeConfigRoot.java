@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.config;
 
-import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -65,7 +64,7 @@ public class SpongeConfigRoot implements ConfigRoot {
     public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
         return HoconConfigurationLoader.builder()
                 .setPath(getConfigPath())
-                .setDefaultOptions(ConfigurationOptions.defaults().setObjectMapperFactory(this.mapperFactory))
+                .setDefaultOptions(d -> d.withObjectMapperFactory(this.mapperFactory))
                 .build();
     }
 

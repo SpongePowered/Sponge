@@ -50,7 +50,6 @@ version = minecraftVersion + '-' + ext.apiSuffix + '.' + common.recommendedVersi
 
 ext.apiVersion = isSnapshot ? ext.fixedApiVersionWithDecreasedMinor : ext.apiReleaseVersion
 
-
 dependencies {
     compile(api) {
         exclude module: 'asm'

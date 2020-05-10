@@ -9,6 +9,18 @@ evaluationDependsOn api.path
 // Apply shared Gradle configuration in SpongeAPI
 apply from: api.file('gradle/sponge.gradle')
 
+repositories {
+    mavenLocal()
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.spongepowered:configurate-hocon:3.7-SNAPSHOT'
+        force 'org.spongepowered:configurate-gson:3.7-SNAPSHOT'
+        force 'org.spongepowered:configurate-yaml:3.7-SNAPSHOT'
+    }
+}
+
 // Apply ForgeGradle plugin
 apply plugin: forgeGradlePlugin
 

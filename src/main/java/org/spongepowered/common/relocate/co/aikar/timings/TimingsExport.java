@@ -60,6 +60,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.zip.GZIPOutputStream;
 
 class TimingsExport extends Thread {
@@ -88,7 +89,6 @@ class TimingsExport extends Thread {
     /**
      * Builds an XML report of the timings to be uploaded for parsing.
      *
-     * @param sender Who to report to
      */
     static void reportTimings() {
         if (requestingReport.isEmpty()) {
@@ -245,7 +245,7 @@ class TimingsExport extends Thread {
     }
 
     private static JsonElement serializeConfigNode(ConfigurationNode node) {
-        if (node.hasMapChildren()) {
+        if (node.isMap()) {
             JsonObject object = new JsonObject();
             for (Entry<Object, ? extends ConfigurationNode> entry : node.getChildrenMap().entrySet()) {
                 String fullPath = CONFIG_PATH_JOINER.join(entry.getValue().getPath());
@@ -256,7 +256,7 @@ class TimingsExport extends Thread {
             }
             return object;
         }
-        if (node.hasListChildren()) {
+        if (node.isList()) {
             JsonArray array = new JsonArray();
             for (ConfigurationNode child : node.getChildrenList()) {
                 array.add(serializeConfigNode(child));
