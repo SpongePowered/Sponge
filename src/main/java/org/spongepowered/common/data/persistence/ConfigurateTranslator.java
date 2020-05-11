@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.persistence;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.ConfigurationVisitor;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,11 +42,14 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A translator for translating {@link DataView}s into {@link ConfigurationNode} s.
@@ -55,7 +59,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     private static final ConfigurateTranslator instance = new ConfigurateTranslator();
     private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.of(ConfigurationNode.class);
     private static final ConfigurationOptions DEFAULT_OPTS = ConfigurationOptions.defaults()
-            .withAcceptedTypes(ImmutableSet.of(Map.class, List.class, Double.class,
+            .withNativeTypes(ImmutableSet.of(Map.class, List.class, Double.class,
                     Long.class, Integer.class, Boolean.class, String.class));
 
     /**
@@ -87,19 +91,49 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     // DataView -> ConfigurationNode
 
+    /**
+     * Given a node and a data view, replace data in the node with the data contained within the data view
+     *
+     * @param node destination node
+     * @param view source data view
+     */
     public void translateDataToNode(ConfigurationNode node, DataView view) {
         checkNotNull(node, "node");
         checkNotNull(view, "container");
+
+        final Map<Object, ? extends ConfigurationNode> originalMap = node.getChildrenMap();
+        if (originalMap.isEmpty()) {
+            node.setValue(ImmutableMap.of());
+        }
+
+        // Unvisited hijinks to preserve any comments that may be present
+        final Set<Object> unvisitedKeys = new HashSet<>(originalMap.keySet());
         for (DataQuery key : view.getKeys(false)) {
-            valueToNode(node.getNode(key.getParts()), view.get(key).get());
+            valueToNode(node.getNode(key.getParts()), view.get(key).orElse(null));
+            unvisitedKeys.remove(key.getParts().get(0));
+        }
+
+        for (Object unusedChild : unvisitedKeys) {
+            node.removeChild(unusedChild);
         }
     }
 
+    /**
+     * Convert between Configurate and SpongeData type models.
+     * <p>
+     * {@link ConfigurationNode} and {@link DataContainer} are two different semi-dynamic data structures that have type
+     * models just different enough to cause difficulty when trying to convert between the two. We do our best to shove
+     * the values from a DataView into a ConfigurationNode by inspecting the node's native types.
+     *
+     * @param node destination node
+     * @param value Source value
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void valueToNode(ConfigurationNode node, @Nullable Object value) {
         if (value instanceof DataView) {
             translateDataToNode(node, (DataView) value);
         } else if (value instanceof Collection<?>) {
+            node.setValue(ImmutableList.of());
             for (Object child : ((Collection<?>) value)) {
                 valueToNode(node.appendListNode(), child);
             }
@@ -110,7 +144,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
             if (node.getOptions().acceptsType(vClazz)) {
                 node.setValue(value);
             } else {
-                final TypeToken<?> token = TypeToken.of(vClazz);
+                final TypeToken<?> token = TypeToken.of(vClazz); // hey let's guess at a type
                 @Nullable TypeSerializer serial = node.getOptions().getSerializers().get(token);
                 if (serial != null) {
                     try {
@@ -118,6 +152,8 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
                     } catch (ObjectMappingException e) {
                         throw new IllegalArgumentException(e);
                     }
+                } else {
+                    throw new IllegalArgumentException("DataView value type of " + token + " is not supported by the provided ConfigurationNode");
                 }
             }
         }
@@ -170,13 +206,14 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
         @Override
         public void beginVisit(ConfigurationNode node, Deque<Object> state) {
-            if (!node.isVirtual() && !node.isMap()) {
+            if (!node.isEmpty() && !node.isMap()) {
                 throw new IllegalStateException("Only mapping nodes can be represented in DataViews");
             }
         }
 
         @Override
-        public void enterNode(ConfigurationNode node, Deque<Object> state) {}
+        public void enterNode(ConfigurationNode node, Deque<Object> state) {
+        }
 
         @Override
         @SuppressWarnings("unchecked")
