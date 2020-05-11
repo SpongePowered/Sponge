@@ -365,7 +365,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
 
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
     private List<Entity> onSpongeGetEntitiesWithinAABBExcludingEntity(final World world, Entity entityIn, AxisAlignedBB bb) {
-        if (this.bridge$isUncollideable()) {
+        if (this.bridge$isVanished() && this.bridge$isUncollideable()) {
             return Collections.emptyList();
         }
         return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
