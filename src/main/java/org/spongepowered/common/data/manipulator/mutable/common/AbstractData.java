@@ -44,6 +44,7 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -97,9 +98,9 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     // The largest issue was implementation. Since most fields are simple to get and
     // set, other values, such as ItemStacks require a bit of finer tuning.
     //
-    private final Map<Key<?>, Supplier<Value<?>>> keyValueMap = Maps.newHashMap();
-    private final Map<Key<?>, Supplier<?>> keyFieldGetterMap = Maps.newHashMap();
-    private final Map<Key<?>, Consumer<Object>> keyFieldSetterMap = Maps.newHashMap();
+    private final Map<Key<?>, Supplier<Value<?>>> keyValueMap = new IdentityHashMap<>();
+    private final Map<Key<?>, Supplier<?>> keyFieldGetterMap = new IdentityHashMap<>();
+    private final Map<Key<?>, Consumer<Object>> keyFieldSetterMap = new IdentityHashMap<>();
 
     protected AbstractData(Class<M> manipulatorClass) {
         this.manipulatorClass = checkNotNull(manipulatorClass);

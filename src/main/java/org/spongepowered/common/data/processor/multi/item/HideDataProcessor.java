@@ -38,6 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeHideData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.util.Constants;
 
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -85,7 +86,7 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
         if (!dataHolder.hasTagCompound()) {
             return Maps.newHashMap();
         }
-        Map<Key<?>, Boolean> map = Maps.newHashMap();
+        Map<Key<?>, Boolean> map = new IdentityHashMap<>();
         int flag = dataHolder.getTagCompound().getInteger(Constants.Item.ITEM_HIDE_FLAGS);
 
         map.put(Keys.HIDE_MISCELLANEOUS, (flag & Constants.Item.HIDE_MISCELLANEOUS_FLAG) != 0);

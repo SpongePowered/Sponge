@@ -38,6 +38,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeConnectedDirectionData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
 
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,7 +81,7 @@ public class TileConnectedDirectionDataProcessor
 
     @Override
     protected Map<Key<?>, ?> getValues(TileEntityChest chest) {
-        Map<Key<?>, Object> values = Maps.newHashMap();
+        Map<Key<?>, Object> values = new IdentityHashMap<>();
         Set<Direction> directions = Sets.newHashSet();
         values.put(Keys.CONNECTED_DIRECTIONS, directions);
 

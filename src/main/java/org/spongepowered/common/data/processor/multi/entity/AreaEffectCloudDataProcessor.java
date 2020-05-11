@@ -44,6 +44,7 @@ import org.spongepowered.common.mixin.core.entity.EntityAreaEffectCloudAccessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -98,7 +99,7 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityAreaEffectCloud dataHolder) {
-        final HashMap<Key<?>, Object> map = new HashMap<>();
+        final Map<Key<?>, Object> map = new IdentityHashMap<>();
         map.put(Keys.AREA_EFFECT_CLOUD_AGE, dataHolder.ticksExisted);
         map.put(Keys.AREA_EFFECT_CLOUD_COLOR, Color.ofRgb(dataHolder.getColor()));
         map.put(Keys.AREA_EFFECT_CLOUD_RADIUS, dataHolder.getRadius());

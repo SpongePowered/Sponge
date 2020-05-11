@@ -43,6 +43,7 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -92,8 +93,8 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     // The largest issue was implementation. Since most fields are simple to get and
     // set, other values, such as ItemStacks require a bit of finer tuning.
     //
-    private final Map<Key<?>, Supplier<ImmutableValue<?>>> keyValueMap = Maps.newHashMap();
-    private final Map<Key<?>, Supplier<?>> keyFieldGetterMap = Maps.newHashMap();
+    private final Map<Key<?>, Supplier<ImmutableValue<?>>> keyValueMap = new IdentityHashMap<>();
+    private final Map<Key<?>, Supplier<?>> keyFieldGetterMap = new IdentityHashMap<>();
 
     protected AbstractImmutableData(Class<I> immutableClass) {
         this.immutableClass = checkNotNull(immutableClass);
