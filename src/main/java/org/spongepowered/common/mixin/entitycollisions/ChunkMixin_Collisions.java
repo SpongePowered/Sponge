@@ -95,6 +95,10 @@ public abstract class ChunkMixin_Collisions {
                 return true;
             }
 
+            if (listToFill.size() < this.world.getGameRules().getInt("maxEntityCramming")) {
+                return true;
+            }
+
             final CollisionsCapability capability = (CollisionsCapability) source;
             if (capability.collision$requiresCollisionsCacheRefresh()) {
                 capability.collision$initializeCollisionState(this.world);
@@ -102,8 +106,7 @@ public abstract class ChunkMixin_Collisions {
             }
 
             return capability.collision$getMaxCollisions() < 0
-                    || listToFill.size() < capability.collision$getMaxCollisions()
-                    || listToFill.size() < this.world.getGameRules().getInt("maxEntityCramming");
+                    || listToFill.size() < capability.collision$getMaxCollisions();
         }
 
         return true;
