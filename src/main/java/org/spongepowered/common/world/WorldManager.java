@@ -33,6 +33,9 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -122,13 +125,13 @@ public final class WorldManager {
     private static final DirectoryStream.Filter<Path> LEVEL_AND_SPONGE =
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
-    private static final Int2ObjectMap<DimensionType> dimensionTypeByTypeId = new Int2ObjectOpenHashMap<>(3);
-    private static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
+    private static final Int2ReferenceMap<DimensionType> dimensionTypeByTypeId = new Int2ReferenceOpenHashMap<>(3);
+    private static final Int2ReferenceMap<DimensionType> dimensionTypeByDimensionId = new Int2ReferenceOpenHashMap<>(3);
     private static final Int2ObjectMap<Path> dimensionPathByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
-    private static final Map<Integer, String> worldFolderByDimensionId = new HashMap<>();
+    private static final Int2ObjectMap<String> worldFolderByDimensionId = new Int2ObjectOpenHashMap<>();
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
     private static final IntSet usedDimensionIds = new IntOpenHashSet();
     private static final Map<WorldServer, WorldServer> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
@@ -274,9 +277,9 @@ public final class WorldManager {
     }
 
     public static int[] getRegisteredDimensionIdsFor(final DimensionType type) {
-        return dimensionTypeByDimensionId.int2ObjectEntrySet().stream()
+        return dimensionTypeByDimensionId.int2ReferenceEntrySet().stream()
                 .filter(entry -> entry.getValue() == type)
-                .mapToInt(Int2ObjectMap.Entry::getIntKey)
+                .mapToInt(Int2ReferenceMap.Entry::getIntKey)
                 .toArray();
     }
 
@@ -294,9 +297,9 @@ public final class WorldManager {
     }
 
     private static Map<Integer, DimensionType> sortedDimensionMap() {
-        final Int2ObjectMap<DimensionType> copy = new Int2ObjectOpenHashMap<>(dimensionTypeByDimensionId);
+        final Int2ReferenceMap<DimensionType> copy = new Int2ReferenceOpenHashMap<>(dimensionTypeByDimensionId);
 
-        final HashMap<Integer, DimensionType> newMap = new LinkedHashMap<>();
+        final Int2ReferenceMap<DimensionType> newMap = new Int2ReferenceLinkedOpenHashMap<>();
 
         newMap.put(0, copy.remove(0));
 

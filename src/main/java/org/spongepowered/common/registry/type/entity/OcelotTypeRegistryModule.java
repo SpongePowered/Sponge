@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -43,7 +45,7 @@ import java.util.Optional;
 public class OcelotTypeRegistryModule implements CatalogRegistryModule<OcelotType> {
 
     public static final Map<String, OcelotType> OCELOT_TYPES = Maps.newHashMap();
-    public static final Map<Integer, OcelotType> OCELOT_IDMAP = Maps.newHashMap();
+    public static final Int2ObjectMap<OcelotType> OCELOT_IDMAP = new Int2ObjectOpenHashMap<>();
     // ocelot types
     public static final SpongeOcelotType WILD_OCELOT = new SpongeOcelotType(0, "WILD_OCELOT");
     public static final SpongeOcelotType BLACK_CAT = new SpongeOcelotType(1, "BLACK_CAT");
