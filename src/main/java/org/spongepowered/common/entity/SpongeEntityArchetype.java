@@ -43,6 +43,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.data.AbstractArchetype;
@@ -51,6 +52,7 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -147,21 +149,24 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         entities.add(spongeEntity);
         // We require spawn types. This is more of a sanity check to throw an IllegalStateException otherwise for the plugin developer to properly associate the type.
         final SpawnType require = Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        if (!event.isCancelled()) {
-            final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
-            entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
-            mixinWorldServer.bridge$forceSpawnEntity(entity);
-            if (entity instanceof EntityLiving) {
-                // This is ok to force spawn since we aren't considering custom items.
-                if (requiresInitialSpawn) {
-                    ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
-                }
-                ((EntityLiving) entity).spawnExplosionParticle();
+        if (ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM) {
+            final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return Optional.empty();
             }
-            return Optional.of(spongeEntity);
         }
-        return Optional.empty();
+        final WorldServerBridge mixinWorldServer = (WorldServerBridge) worldServer;
+        entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
+        mixinWorldServer.bridge$forceSpawnEntity(entity);
+        if (entity instanceof EntityLiving) {
+            // This is ok to force spawn since we aren't considering custom items.
+            if (requiresInitialSpawn) {
+                ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
+            }
+            ((EntityLiving) entity).spawnExplosionParticle();
+        }
+        return Optional.of(spongeEntity);
     }
 
     @Override
