@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.archetype;
 
-import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
