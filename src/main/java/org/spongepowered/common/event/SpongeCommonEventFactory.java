@@ -925,7 +925,7 @@ public class SpongeCommonEventFactory {
         final EntityTickContext context) {
 
         // Ignore movement event if entity is dead
-        if (entity.isDead || (!ShouldFire.MOVE_ENTITY_EVENT && !ShouldFire.MOVE_ENTITY_EVENT_POSITION && !ShouldFire.ROTATE_ENTITY_EVENT)) {
+        if (entity.isDead) {
             return null;
         }
 
@@ -957,12 +957,16 @@ public class SpongeCommonEventFactory {
                 final Transform<World> newTransform = new Transform<>(world, currentPositionVector, currentRotationVector, spongeEntity.getScale());
                 Event event  = null;
                 Transform<World> eventToTransform = null;
-                if (!oldPositionVector.equals(currentPositionVector) && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
-                    event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
-                    eventToTransform = ((MoveEntityEvent) event).getToTransform();
-                } else if (ShouldFire.ROTATE_ENTITY_EVENT) {
-                    event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
-                    eventToTransform = ((RotateEntityEvent) event).getToTransform();
+                if (!oldPositionVector.equals(currentPositionVector)) {
+                    if (ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
+                        event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                        eventToTransform = ((MoveEntityEvent) event).getToTransform();
+                    }
+                } else {
+                    if (ShouldFire.ROTATE_ENTITY_EVENT) {
+                        event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                        eventToTransform = ((RotateEntityEvent) event).getToTransform();
+                    }
                 }
 
                 if (event == null) {
