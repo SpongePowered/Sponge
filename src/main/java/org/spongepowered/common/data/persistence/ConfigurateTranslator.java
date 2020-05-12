@@ -57,8 +57,15 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     private static final ConfigurateTranslator INSTANCE = new ConfigurateTranslator();
     private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.of(ConfigurationNode.class);
     private static final ConfigurationOptions DEFAULT_OPTS = ConfigurationOptions.defaults()
-            .withNativeTypes(ImmutableSet.of(Map.class, List.class, Double.class,
-                    Long.class, Integer.class, Boolean.class, String.class));
+            .withNativeTypes(ImmutableSet.of(Map.class,
+                    List.class,
+                    Double.class,
+                    Long.class,
+                    Integer.class,
+                    Boolean.class,
+                    String.class
+                    )
+            );
 
     /**
      * Get the instance of this translator.

@@ -50,9 +50,36 @@ version = minecraftVersion + '-' + ext.apiSuffix + '.' + common.recommendedVersi
 
 ext.apiVersion = isSnapshot ? ext.fixedApiVersionWithDecreasedMinor : ext.apiReleaseVersion
 
+
 dependencies {
+    constraints {
+        compile("org.spongepowered:configurate-core") {
+            version {
+                strictly("3.7-SNAPSHOT")
+            }
+        }
+        compile("org.spongepowered:configurate-hocon") {
+            version {
+                strictly("3.7-SNAPSHOT")
+            }
+        }
+        compile("org.spongepowered:configurate-gson") {
+            version {
+                strictly("3.7-SNAPSHOT")
+            }
+        }
+        compile("org.spongepowered:configurate-yaml") {
+            version {
+                strictly("3.7-SNAPSHOT")
+            }
+        }
+    }
     compile(api) {
         exclude module: 'asm'
+        exclude module: 'configurate-core'
+        exclude module: 'configurate-gson'
+        exclude module: 'configurate-hocon'
+        exclude module: 'configurate-yaml'
     }
     compile(testPlugins) {
         exclude module: 'spongeapi'
@@ -71,6 +98,11 @@ dependencies {
     runtime 'org.mariadb.jdbc:mariadb-java-client:2.0.3'
     compile 'com.h2database:h2:1.4.196'
     runtime 'org.xerial:sqlite-jdbc:3.20.0'
+
+    // configurate (again)
+    compile 'org.spongepowered:configurate-hocon:3.7-SNAPSHOT'
+    compile 'org.spongepowered:configurate-gson:3.7-SNAPSHOT'
+    compile 'org.spongepowered:configurate-yaml:3.7-SNAPSHOT'
 
     forgeGradleMcDeps('net.minecraft:launchwrapper:1.11') {
         transitive = false

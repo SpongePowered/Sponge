@@ -34,8 +34,6 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.junit.Test;
 
-import javax.xml.stream.events.Comment;
-
 public class DuplicateRemovalVisitorTest {
 
     @Test
