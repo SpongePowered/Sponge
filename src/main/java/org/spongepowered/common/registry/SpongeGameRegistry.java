@@ -137,7 +137,7 @@ public class SpongeGameRegistry implements GameRegistry {
     private static final boolean PRINT_CATALOG_TYPES = Boolean.parseBoolean(System.getProperty("sponge.print_all_catalog_types"));
 
     static {
-        TypeSerializerCollection.defaults().register(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer())
+        TypeSerializerCollection.defaults().register(CatalogTypeTypeSerializer.TYPE, CatalogTypeTypeSerializer.INSTANCE)
                 .register(TypeToken.of(Text.class), new TextConfigSerializer())
                 .register(TypeToken.of(BookView.class), new BookViewDataBuilder())
                 .register(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());

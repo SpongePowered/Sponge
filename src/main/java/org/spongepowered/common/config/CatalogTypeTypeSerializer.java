@@ -37,6 +37,10 @@ import java.util.Optional;
  * A {@link TypeSerializer} implementation that allows CatalogType values to be used in object-mapped classes.
  */
 public class CatalogTypeTypeSerializer implements TypeSerializer<CatalogType> {
+    public static final TypeToken<CatalogType> TYPE = TypeToken.of(CatalogType.class);
+    public static final CatalogTypeTypeSerializer INSTANCE = new CatalogTypeTypeSerializer();
+
+    private CatalogTypeTypeSerializer() {}
 
     @Override
     public CatalogType deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {

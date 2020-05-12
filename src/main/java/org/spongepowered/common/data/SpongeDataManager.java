@@ -31,12 +31,9 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataRegistration;
@@ -71,15 +68,9 @@ import java.util.Optional;
 @Singleton
 public final class SpongeDataManager implements DataManager {
 
-    private static final TypeToken<CatalogType> catalogTypeToken = TypeToken.of(CatalogType.class);
-    private static final TypeToken<DataSerializable> dataSerializableTypeToken = TypeToken.of(DataSerializable.class);
-
     static {
-        TypeSerializerCollection.defaults().register(
-            // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
-            // See https://github.com/SpongePowered/SpongeCommon/issues/1348
-            x -> dataSerializableTypeToken.isSupertypeOf(x) && !catalogTypeToken.isSupertypeOf(x), new DataSerializableTypeSerializer()
-        );
+        // TODO: centralize registration
+        TypeSerializerCollection.defaults().register(DataSerializableTypeSerializer.predicate(), DataSerializableTypeSerializer.INSTANCE);
     }
 
     // Builders

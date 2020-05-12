@@ -35,18 +35,30 @@ import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 
+import java.util.function.Predicate;
+
 /**
  * An implementation of {@link TypeSerializer} so that DataSerializables can be
  * provided in {@link ObjectMapper}-using classes.
  */
 public class DataSerializableTypeSerializer implements TypeSerializer<DataSerializable> {
+    public static final DataSerializableTypeSerializer INSTANCE = new DataSerializableTypeSerializer();
+    public static final TypeToken<DataSerializable> TYPE = TypeToken.of(DataSerializable.class);
+
+    private DataSerializableTypeSerializer() {}
+
+    public static Predicate<TypeToken<DataSerializable>> predicate() {
+        // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
+        // See https://github.com/SpongePowered/SpongeCommon/issues/1348
+        return x -> TYPE.isSupertypeOf(x) && !CatalogTypeTypeSerializer.TYPE.isSupertypeOf(x);
+    }
 
     @Override
     public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        if (type.getRawType().isAssignableFrom(CatalogType.class)) {
-            return (DataSerializable) new CatalogTypeTypeSerializer().deserialize(type, value);
-        }
         Class<?> clazz = type.getRawType();
+        if (clazz.isAssignableFrom(CatalogType.class)) {
+            return (DataSerializable) CatalogTypeTypeSerializer.INSTANCE.deserialize(type, value);
+        }
         return Sponge.getDataManager()
                 .deserialize(clazz.asSubclass(DataSerializable.class), ConfigurateTranslator.instance().translate(value))
                 .orElseThrow(() -> new ObjectMappingException("Could not translate DataSerializable of type: " + clazz.getName()));
@@ -55,9 +67,9 @@ public class DataSerializableTypeSerializer implements TypeSerializer<DataSerial
     @Override
     public void serialize(TypeToken<?> type, DataSerializable obj, ConfigurationNode value) throws ObjectMappingException {
         if (obj instanceof CatalogType) {
-            new CatalogTypeTypeSerializer().serialize(type, (CatalogType) obj, value);
+            CatalogTypeTypeSerializer.INSTANCE.serialize(type, (CatalogType) obj, value);
         } else {
-            value.setValue(ConfigurateTranslator.instance().translate(obj.toContainer()));
+            ConfigurateTranslator.instance().translateDataToNode(value, obj.toContainer());
         }
     }
 }

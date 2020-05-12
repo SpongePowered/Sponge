@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.persistence;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -40,6 +41,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
@@ -48,15 +50,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Objects.requireNonNull;
-
 /**
  * A translator for translating {@link DataView}s into {@link ConfigurationNode} s.
  */
 public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
-
-    private static final ConfigurateTranslator instance = new ConfigurateTranslator();
+    private static final ConfigurateTranslator INSTANCE = new ConfigurateTranslator();
     private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.of(ConfigurationNode.class);
     private static final ConfigurationOptions DEFAULT_OPTS = ConfigurationOptions.defaults()
             .withNativeTypes(ImmutableSet.of(Map.class, List.class, Double.class,
@@ -68,7 +66,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
      * @return The instance of this translator
      */
     public static ConfigurateTranslator instance() {
-        return instance;
+        return INSTANCE;
     }
 
     private ConfigurateTranslator() {
@@ -98,8 +96,8 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
      * @param view source data view
      */
     public void translateDataToNode(ConfigurationNode node, DataView view) {
-        checkNotNull(node, "node");
-        checkNotNull(view, "container");
+        Preconditions.checkNotNull(node, "node");
+        Preconditions.checkNotNull(view, "container");
 
         final Map<Object, ? extends ConfigurationNode> originalMap = node.getChildrenMap();
         if (originalMap.isEmpty()) {
@@ -187,6 +185,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
 
     static class ToDataView implements ConfigurationVisitor.Safe<Deque<Object>, DataView> {
+
         static ToDataView INSTANCE = new ToDataView();
 
         private ToDataView() {
@@ -194,7 +193,10 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
         private DataQuery queryFrom(ConfigurationNode node) {
             final Object key = node.getKey();
-            return key == null ? DataQuery.of() : DataQuery.of(key.toString());
+            if (key == null) {
+                throw new IllegalArgumentException("Null keys are not supported in data views (at " + Arrays.toString(node.getPath()) + ")");
+            }
+            return DataQuery.of(key.toString());
         }
 
         @Override
@@ -207,16 +209,15 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
         @Override
         public void beginVisit(ConfigurationNode node, Deque<Object> state) {
             if (!node.isEmpty() && !node.isMap()) {
-                throw new IllegalStateException("Only mapping nodes can be represented in DataViews");
+                throw new IllegalArgumentException("Only mapping nodes can be represented in DataViews");
             }
         }
 
         @Override
-        public void enterNode(ConfigurationNode node, Deque<Object> state) {
-        }
+        public void enterNode(ConfigurationNode node, Deque<Object> state) {}
 
         @Override
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "rawtypes"})
         public void enterMappingNode(ConfigurationNode node, Deque<Object> state) {
             if (node.getKey() == null && node.getParent() == null) { // we're at root
                 state.addFirst(state.getFirst()); // keep things balanced
@@ -240,15 +241,9 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
             state.addFirst(new LinkedList<>());
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void enterScalarNode(ConfigurationNode node, Deque<Object> state) {
-            final Object peek = state.getFirst();
-            if (peek instanceof DataView) {
-                ((DataView) peek).set(queryFrom(node), node.getValue());
-            } else if (peek instanceof List<?>) {
-                ((List) peek).add(node.getValue());
-            }
+            addToFirst(state, node, node.getValue());
         }
 
         @Override
@@ -258,15 +253,19 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
             }
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void exitListNode(ConfigurationNode node, Deque<Object> state) {
             final Object popped = state.removeFirst();
-            final Object peek = state.getFirst();
+            addToFirst(state, node, popped);
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        private void addToFirst(Deque<Object> stack, ConfigurationNode keySource, Object value) {
+            final Object peek = stack.getFirst();
             if (peek instanceof DataView) {
-                ((DataView) peek).set(queryFrom(node), popped);
+                ((DataView) peek).set(queryFrom(keySource), value);
             } else if (peek instanceof List<?>) {
-                ((List) peek).add(popped);
+                ((List) peek).add(value);
             }
         }
 
