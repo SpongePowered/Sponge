@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -43,7 +44,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
     Object object;
     private CapturePlayer capturePlayer;
 
-    ListenerPhaseContext(final IPhaseState<L> state) {
+    ListenerPhaseContext(final IPhaseState<L> state, PhaseTracker tracker) {
         super(state, tracker);
     }
 

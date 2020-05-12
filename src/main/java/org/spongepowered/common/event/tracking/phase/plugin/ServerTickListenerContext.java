@@ -25,10 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class ServerTickListenerContext extends ListenerPhaseContext<ServerTickListenerContext> {
 
-    ServerTickListenerContext(final IPhaseState<ServerTickListenerContext> state) {
-        super(state);
+    ServerTickListenerContext(final IPhaseState<ServerTickListenerContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 }

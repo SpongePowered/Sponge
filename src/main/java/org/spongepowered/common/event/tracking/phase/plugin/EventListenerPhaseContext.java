@@ -29,8 +29,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class EventListenerPhaseContext extends ListenerPhaseContext<EventListenerPhaseContext> {
 
-    EventListenerPhaseContext(
-            final IPhaseState<EventListenerPhaseContext> state, PhaseTracker tracker) {
-        super(state);
+    EventListenerPhaseContext(final IPhaseState<EventListenerPhaseContext> state, PhaseTracker tracker) {
+        super(state, tracker);
     }
 }
