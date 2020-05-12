@@ -69,7 +69,7 @@ public interface SpongeDataHolder extends DataHolder {
 
     @Override
     default boolean supports(Key<?> key) {
-        return this.getProviderFor(key).isSupported(this);
+        return this.getProviderFor((Key) key).isSupported(this);
     }
 
     @Override
