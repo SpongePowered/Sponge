@@ -24,20 +24,27 @@
  */
 package org.spongepowered.common.config;
 
+import com.google.common.base.Preconditions;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationVisitor;
 import ninja.leaping.configurate.Types;
 
 import java.util.Objects;
 
+/**
+ * Given a configuration node, and a node at the same position in the tree of a parent configuration, remove values from the child node that don't
+ * change anything from the parent node.
+ */
 class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<ConfigurationNode, Void> {
+
     static DuplicateRemovalVisitor INSTANCE = new DuplicateRemovalVisitor();
 
-    private DuplicateRemovalVisitor() {}
+    private DuplicateRemovalVisitor() {
+    }
 
     @Override
     public ConfigurationNode newState() {
-        throw new UnsupportedOperationException("Cannot create a new parent!");
+        throw new IllegalArgumentException("A parent configuration must be provided as the state object to properly remove duplicates");
     }
 
     private boolean isListElement(ConfigurationNode node) {
@@ -45,10 +52,13 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<Configuration
     }
 
     @Override
-    public void beginVisit(ConfigurationNode node, ConfigurationNode parent) {}
+    public void beginVisit(ConfigurationNode node, ConfigurationNode parent) {
+        Preconditions.checkNotNull(parent, "A parent configuration must be provided!");
+    }
 
     @Override
-    public void enterNode(ConfigurationNode node, ConfigurationNode parent) {}
+    public void enterNode(ConfigurationNode node, ConfigurationNode parent) {
+    }
 
     @Override
     public void enterMappingNode(ConfigurationNode node, ConfigurationNode parent) {
@@ -56,12 +66,13 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<Configuration
 
     @Override
     public void enterListNode(ConfigurationNode node, ConfigurationNode parent) {
-        if (!isListElement(node) && node.equals(parent.getNode(node.getPath()))) {
+        if (!isListElement(node) && Objects.equals(node.getValue(), parent.getNode(node.getPath()).getValue())) {
             node.setValue(null);
         }
     }
 
     @Override
+    @SuppressWarnings("UnnecessaryUnboxing")
     public void enterScalarNode(ConfigurationNode node, ConfigurationNode parent) {
         // ignore list values
         if (isListElement(node)) {
@@ -78,7 +89,7 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<Configuration
         // Fix double bug
         final Double nodeVal = node.getValue(Types::asDouble);
         if (nodeVal != null) {
-            Double parentVal = parent.getValue(Types::asDouble);
+            Double parentVal = parentNode.getValue(Types::asDouble);
             if (parentVal == null && nodeVal.doubleValue() == 0 || (parentVal != null && nodeVal.doubleValue() == parentVal.doubleValue())) {
                 node.setValue(null);
             }
@@ -88,13 +99,14 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<Configuration
     @Override
     public void exitMappingNode(ConfigurationNode node, ConfigurationNode parent) {
         // remove empty maps
-        if (node.isEmpty()) {
+        if (node.isEmpty() && !isListElement(node)) {
             node.setValue(null);
         }
     }
 
     @Override
-    public void exitListNode(ConfigurationNode node, ConfigurationNode parent) {
+    public void exitListNode(ConfigurationNode node, ConfigurationNode parentRoot) {
+        ConfigurationNode parent = parentRoot.getNode(node.getPath());
         if (parent.isEmpty() && parent.getValue() == null) {
             if (node.isEmpty()) {
                 node.setValue(null);
@@ -106,4 +118,5 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<Configuration
     public Void endVisit(ConfigurationNode parent) {
         return null;
     }
+
 }
