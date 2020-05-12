@@ -22,38 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common.bridge.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
-import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
+import net.minecraft.item.DyeColor;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
 
-public class ItemStackDyeColorProvider extends ItemStackDataProvider<DyeColor> {
+public interface DyeColorBlockBridge {
 
-    public ItemStackDyeColorProvider() {
-        super(Keys.DYE_COLOR);
-    }
-
-    @Override
-    protected Optional<DyeColor> getFrom(ItemStack dataHolder) {
-        Item item = dataHolder.getItem();
-        if (item instanceof BlockItem) {
-            Block block = ((BlockItem) item).getBlock();
-            net.minecraft.item.DyeColor color = ((DyeColorBlockBridge) block).bridge$getDyeColor();
-            return Optional.ofNullable((DyeColor) (Object) color);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    protected boolean supports(Item item) {
-        return item instanceof BlockItem;
-    }
+    void bridge$setDyeColor(DyeColor dyeColor);
+    @Nullable DyeColor bridge$getDyeColor();
 }

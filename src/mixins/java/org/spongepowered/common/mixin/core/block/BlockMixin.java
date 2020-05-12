@@ -25,11 +25,8 @@
 package org.spongepowered.common.mixin.core.block;
 
 import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BeaconBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.EndGatewayBlock;
 import net.minecraft.block.EnderChestBlock;
@@ -37,59 +34,40 @@ import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.SpawnerBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.chunk.BlockStateContainer;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.CatalogKeyBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockTrackerCategory;
 import org.spongepowered.common.config.category.BlockTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.math.vector.Vector3d;
-import java.util.Arrays;
+
 import java.util.Locale;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -115,7 +93,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
 
     private CatalogKey impl$key;
 
-
     @Override
     public CatalogKey bridge$getKey() {
         return this.impl$key;
@@ -126,8 +103,14 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         this.impl$key = key;
     }
 
-
-
+    /**
+     * We captured the dye color when creating the Block.Properties.
+     * As the Properties objects are discarded we transfer it over to the Block itself now.
+     */
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$setUpSpongeFields(Block.Properties properties, CallbackInfo ci) {
+        ((DyeColorBlockBridge)this).bridge$setDyeColor(((DyeColorBlockBridge)properties).bridge$getDyeColor());
+    }
 
     @Inject(method = "spawnAsEntity",
             at = @At(value = "NEW", target = "net/minecraft/entity/item/ItemEntity"),

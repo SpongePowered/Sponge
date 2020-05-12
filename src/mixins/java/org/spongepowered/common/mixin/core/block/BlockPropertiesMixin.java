@@ -22,11 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.block;
+package org.spongepowered.common.mixin.core.block;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.item.DyeColor;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
-public interface DyeableBlockBridge {
+@Mixin(Block.Properties.class)
+public abstract class BlockPropertiesMixin {
 
-    void bridge$setDyeColor(DyeColor dyeColor);
+    @Inject(method = "create(Lnet/minecraft/block/material/Material;Lnet/minecraft/item/DyeColor;)Lnet/minecraft/block/Block$Properties;",
+            at = @At("RETURN"))
+    private static void impl$onCreate(Material material, DyeColor color, CallbackInfoReturnable<Block.Properties> cir) {
+        Block.Properties returnValue = cir.getReturnValue();
+        ((DyeColorBlockBridge) returnValue).bridge$setDyeColor(color);
+    }
+
 }
