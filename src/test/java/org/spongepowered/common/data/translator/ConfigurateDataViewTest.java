@@ -27,23 +27,34 @@ package org.spongepowered.common.data.translator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.junit.Test;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.api.item.FireworkEffect;
+import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
+import org.spongepowered.common.data.persistence.HoconDataFormat;
+import org.spongepowered.common.data.persistence.JsonDataFormat;
+import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
+import org.spongepowered.common.item.SpongeFireworkShape;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class ConfigurateDataViewTest {
-    static {
-        SpongeDataManager.areRegistrationsComplete(); // init class
-    }
+    private static final HoconDataFormat HOCON = new HoconDataFormat("hocon");
 
     @Test
     public void testNodeToData() {
@@ -71,7 +82,7 @@ public class ConfigurateDataViewTest {
 
         DataView container = ConfigurateTranslator.instance().translate(node);
         assertEquals(manual, container);
-        ConfigurationNode translated = ConfigurateTranslator.instance().translate(container);
+        ConfigurateTranslator.instance().translate(container);
         //assertEquals(node, translated); // TODO Test is broken, depends on quite a bit of init
     }
 
@@ -99,5 +110,95 @@ public class ConfigurateDataViewTest {
         ConfigurateTranslator.instance().translateDataToNode(destination, source);
 
         assertEquals(5, destination.getNode("i'm a short").getValue());
+    }
+
+    @Test
+    public void testColor() throws IOException {
+        Color color = Color.ofRgb(0x66, 0xCC, 0xFF);
+        DataContainer original = color.toContainer();
+
+        String serialized = HOCON.write(original);
+        DataContainer ret = HOCON.read(serialized);
+
+        assertEquals(original, ret);
+    }
+
+    @Test
+    public void testFireworkEffectData() throws IOException {
+        Color color = Color.ofRgb(0x66, 0xCC, 0xFF);
+        FireworkEffect fe = new SpongeFireworkEffectBuilder()
+                .colors(color, color, color)
+                .shape(new SpongeFireworkShape("ball", "Ball"))
+                .build();
+        DataContainer container = fe.toContainer();
+
+        String s = HOCON.write(container);
+        DataContainer dc = HOCON.read(s);
+
+        assertEquals(container, dc);
+    }
+
+    @Test
+    public void testRespawnLocationData() throws IOException {
+        Map<UUID, RespawnLocation> m = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            UUID uuid = UUID.randomUUID();
+            RespawnLocation loc = RespawnLocation.builder().world(uuid).position(Vector3d.ZERO).build();
+            m.put(uuid, loc);
+        }
+        DataContainer container = DataContainer.createNew().set(DataQuery.of("respawn_locations"), m);
+
+        ConfigurationNode node = ConfigurateTranslator.instance().translate(container);
+
+
+        DataContainer dc = ConfigurateTranslator.instance().translate(node);
+
+        assertEquals(container, dc);
+    }
+
+    @Test
+    public void testNumber() throws IOException {
+        DataContainer container = DataContainer.createNew().set(DataQuery.of("double"), 1.0);
+
+        ConfigurationNode node = ConfigurateTranslator.instance().translate(container);
+        assertEquals(1.0, node.getNode("double").getValue());
+
+        DataContainer dc = ConfigurateTranslator.instance().translate(node);
+
+        assertEquals(container, dc);
+    }
+
+    @Test
+    public void testMapInsideList() throws IOException {
+        JsonDataFormat json = new JsonDataFormat();
+
+        ConfigurationNode node = CommentedConfigurationNode.root();
+        Map<String, String> map = Collections.singletonMap("mkey", "mvalue");
+        List<Object> list = Arrays.asList("lelement", map);
+
+        node.getNode("foo").setValue("bar");
+        node.getNode("l").setValue(list);
+
+        DataContainer jc = json.read("{\"foo\":\"bar\",\"l\":[\"lelement\",{\"mkey\":\"mvalue\"}]}");
+        DataContainer hc = ConfigurateTranslator.instance().translate(node);
+
+        assertEquals(jc.getMap(DataQuery.of()), hc.getMap(DataQuery.of()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullRootKey() {
+        ConfigurateTranslator.instance().translate(ConfigurationNode.root().setValue("bar"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullMapKey() {
+        ConfigurationNode node = CommentedConfigurationNode.root();
+        Map<String, String> map = Collections.singletonMap(null, "v");
+        List<Object> list = Arrays.asList("e", map);
+
+        node.getNode("foo").setValue("bar");
+        node.getNode("l").setValue(list);
+
+        ConfigurateTranslator.instance().translate(node);
     }
 }
