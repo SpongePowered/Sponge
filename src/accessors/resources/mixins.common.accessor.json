@@ -65,6 +65,7 @@
     "entity.passive.horse.TraderLlamaEntityAccessor",
     "entity.player.PlayerAbilitiesAccessor",
     "entity.player.PlayerEntityAccessor",
+    "entity.player.ServerPlayerEntityAccessor",
     "entity.projectile.AbstractArrowEntityAccessor",
     "entity.projectile.ArrowEntityAccessor",
     "entity.projectile.DamagingProjectileEntityAccessor",
