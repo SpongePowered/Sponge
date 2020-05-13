@@ -81,7 +81,7 @@ public abstract class EffectInstanceMixin_API implements PotionEffect {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.Item.Potions.POTION_TYPE, this.getType().getId())
+                .set(Constants.Item.Potions.POTION_TYPE, this.getType().getKey().toString())
                 .set(Constants.Item.Potions.POTION_DURATION, this.duration)
                 .set(Constants.Item.Potions.POTION_AMPLIFIER, this.amplifier)
                 .set(Constants.Item.Potions.POTION_AMBIANCE, this.ambient)

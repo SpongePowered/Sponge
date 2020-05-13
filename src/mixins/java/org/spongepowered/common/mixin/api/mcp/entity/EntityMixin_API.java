@@ -30,6 +30,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
@@ -111,6 +112,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract boolean shadow$writeUnlessRemoved(CompoundNBT compound);
+    @Shadow @Nullable public abstract Team shadow$getTeam();
 
     // @formatter:on
 

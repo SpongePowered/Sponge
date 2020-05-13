@@ -42,7 +42,7 @@ public abstract class BannerTileEntityMixin_API extends TileEntityMixin_API impl
         values.add(this.displayName().asImmutable());
 
         values.add(this.baseColor().asImmutable());
-        values.add(this.patternsList().asImmutable());
+        values.add(this.patternLayers().asImmutable());
 
         return values;
     }

@@ -25,15 +25,20 @@
 package org.spongepowered.common.mixin.api.mcp.entity.merchant.villager;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.item.MerchantOffer;
+import net.minecraft.item.MerchantOffers;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.util.TradeOfferUtil;
 
 import javax.annotation.Nullable;
+
+import java.util.List;
 import java.util.Random;
 
 @Mixin(VillagerTrades.ITrade.class)

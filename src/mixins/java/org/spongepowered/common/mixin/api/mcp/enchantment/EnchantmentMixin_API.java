@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
@@ -56,7 +57,6 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean shadow$isTreasureEnchantment();
     @Shadow public abstract boolean shadow$isCurse();
-
 
     @Nullable private ResourceLocation api$id;
 
@@ -104,17 +104,12 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public boolean canBeAppliedToStack(ItemStack stack) {
-        return SpongeImplHooks.canEnchantmentBeAppliedToItem((Enchantment) (Object) this, (net.minecraft.item.ItemStack) stack);
+        return SpongeImplHooks.canEnchantmentBeAppliedToItem((Enchantment) (Object) this, ItemStackUtil.toNative(stack));
     }
 
     @Override
     public boolean isCompatibleWith(EnchantmentType ench) {
         return this.shadow$canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
-    }
-
-    @Intrinsic
-    public String enchantment$getName() {
-        return this.shadow$getName();
     }
 
     @Override

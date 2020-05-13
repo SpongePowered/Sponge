@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
+import net.minecraft.potion.Effect;
 import net.minecraft.tileentity.BeaconTileEntity;
 import org.spongepowered.api.block.entity.carrier.Beacon;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -34,12 +35,15 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 @Mixin(BeaconTileEntity.class)
 public abstract class BeaconTileEntityMixin_API extends TileEntityMixin_API implements Beacon {
 
     @Shadow private int levels;
 
-    @Shadow public abstract int getField(int id);
+    @Shadow @Nullable private Effect primaryEffect;
+    @Shadow @Nullable private Effect secondaryEffect;
 
     @Override
     public int getCompletedLevels() {
@@ -49,8 +53,8 @@ public abstract class BeaconTileEntityMixin_API extends TileEntityMixin_API impl
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.Beacon.PRIMARY, this.getField(1));
-        container.set(Constants.TileEntity.Beacon.SECONDARY, this.getField(2));
+        container.set(Constants.TileEntity.Beacon.PRIMARY, Effect.getId(this.primaryEffect));
+        container.set(Constants.TileEntity.Beacon.SECONDARY, Effect.getId(this.secondaryEffect));
         return container;
     }
 

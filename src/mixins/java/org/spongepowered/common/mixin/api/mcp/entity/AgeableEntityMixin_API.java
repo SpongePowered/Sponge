@@ -38,7 +38,7 @@ public abstract class AgeableEntityMixin_API extends CreatureEntityMixin_API imp
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.age().asImmutable());
+        values.add(this.babyTicks().asImmutable());
         values.add(this.adult().asImmutable());
 
         return values;

@@ -26,10 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.crafting.ICraftingRecipe;
+import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
+import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.item.crafting.ShapedRecipeAccessor;
 import org.spongepowered.common.accessor.item.crafting.ShapelessRecipeAccessor;
 
@@ -37,6 +40,11 @@ import java.util.Optional;
 
 @Mixin(ICraftingRecipe.class)
 public interface ICraftingRecipeMixin_API<C extends CraftingInventory> extends IRecipeMixin_API<C>, CraftingRecipe {
+
+    @Override
+    default RecipeType<? extends CraftingRecipe> getType() {
+        return (RecipeType<? extends CraftingRecipe>) this.shadow$getType();
+    }
 
     @Override
     default Optional<String> getGroup() {

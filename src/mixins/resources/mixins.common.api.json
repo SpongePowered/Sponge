@@ -197,7 +197,6 @@
       "mcp.item.ItemStackMixin_API",
       "mcp.item.ItemTierMixin_API",
       "mcp.item.MerchantOfferMixin_API",
-      "mcp.item.MerchantOffersMixin_API",
       "mcp.item.crafting.ICraftingRecipeMixin_API",
       "mcp.item.crafting.IngredientMixin_API",
       "mcp.item.crafting.IRecipeMixin_API",

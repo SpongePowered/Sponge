@@ -102,7 +102,7 @@ public interface IRecipeMixin_API<C extends IInventory> extends Recipe {
     }
 
     @Override
-    default RecipeType getType() {
+    default RecipeType<? extends Recipe> getType() {
         return (RecipeType) this.shadow$getType();
     }
 }
