@@ -73,16 +73,6 @@ public abstract class SpongeUserMixin_API implements User {
     }
 
     @Override
-    public boolean validateRawData(DataView container) {
-        throw new UnsupportedOperationException(); // TODO Data API
-    }
-
-    @Override
-    public void setRawData(DataView container) throws InvalidDataException {
-        throw new UnsupportedOperationException(); // TODO Data API
-    }
-
-    @Override
     public Vector3d getPosition() {
         return this.getPlayer()
             .map(User::getPosition)
