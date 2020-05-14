@@ -133,19 +133,18 @@ final class PhaseStack {
             return false;
         }
         final int totalCount = this.phases.size();
-        final PhaseContext<?>[] allContexts = new PhaseContext[totalCount];
-        int i = 0;
+        if (totalCount < 2) {
+            return false;
+        }
         // So first, we want to collect all the states into an array as they are pushed to the stack,
         // which means that we should see the re-entrant phase pretty soon.
-        for (PhaseContext<?> data : this.phases) {
-            allContexts[i++] = data;
-        }
+        final Object[] allContexts = this.phases.toArray();
         // Now we can actually iterate through the array
         for (int index = 0; index < allContexts.length; index++) {
             if (index < allContexts.length - 1) { // We can't go further than the length, cause that's the top of the stack
-                final PhaseContext<?> latestContext = allContexts[index];
+                final PhaseContext<?> latestContext = (PhaseContext<?>) allContexts[index];
                 final IPhaseState<?> latestState = latestContext.state;
-                if (latestState == allContexts[index + 1].state && latestState == state && (phaseContext == null || latestContext.isRunaway(phaseContext))) {
+                if (latestState == state && latestState == ((PhaseContext<?>) allContexts[index + 1]).state && (phaseContext == null || latestContext.isRunaway(phaseContext))) {
                     // Found a consecutive duplicate and can now print out
                     return true;
                 }
