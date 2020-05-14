@@ -31,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,13 +42,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class ProjectileDispenseBehaviorMixin extends DefaultDispenseItemBehavior {
 
     @Redirect(method = "dispenseStack", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
+            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"))
     private boolean impl$spawnEntityAndSetShooter(final World world, final Entity entity, final IBlockSource source, final ItemStack stack) {
         final TileEntity tileEntity = source.getBlockTileEntity();
         if (entity instanceof Projectile && tileEntity instanceof ProjectileSource) {
-            ((Projectile) entity).setShooter((ProjectileSource) tileEntity);
+            ((Projectile) entity).offer(Keys.SHOOTER, (ProjectileSource) tileEntity);
         }
-        return world.addEntity0(entity);
+        return world.addEntity(entity);
     }
 
 }
