@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.api.text;
+package org.spongepowered.common.mixin.invalid.core.api.text;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.text.ITextComponent;

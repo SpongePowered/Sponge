@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.api.text.title;
+package org.spongepowered.common.mixin.invalid.core.api.text.title;
 
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.title.Title;

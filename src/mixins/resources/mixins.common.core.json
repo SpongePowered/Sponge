@@ -7,11 +7,6 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-      "api.text.LiteralTextMixin",
-      "api.text.SelectorTextMixin",
-      "api.text.TextMixin",
-      "api.text.TranslatableTextMixin",
-      "api.text.title.TitleMixin",
       "api.world.LocationMixin",
       "authlib.PropertyMapMixin",
       "authlib.properties.PropertyMixin",

@@ -22,40 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.api.text;
+package org.spongepowered.common.mixin.invalid.core.api.text;
 
-import com.google.common.collect.ImmutableList;
+import net.minecraft.util.text.SelectorTextComponent;
 import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import org.spongepowered.api.text.TranslatableText;
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.text.SelectorText;
+import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.api.text.TextBridge;
 
-@Mixin(value = TranslatableText.class, remap = false)
-public abstract class TranslatableTextMixin extends TextMixin {
+@Mixin(value = SelectorText.class, remap = false)
+public abstract class SelectorTextMixin extends TextMixin {
 
-    @Shadow @Final Translation translation;
-    @Shadow @Final ImmutableList<Object> arguments;
+    @Shadow @Final Selector selector;
 
     @Override
     protected TextComponent createComponent() {
-        return new TranslationTextComponent(this.translation.getId(), this.unwrapArguments(this.arguments));
+        return new SelectorTextComponent(this.selector.toPlain());
     }
-
-    private Object[] unwrapArguments(final ImmutableList<Object> args) {
-        final Object[] result = new Object[args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            final Object arg = args.get(i);
-            if (arg instanceof TextBridge) {
-                result[i] = ((TextBridge) arg).bridge$toComponent();
-            } else {
-                result[i] = arg;
-            }
-        }
-        return result;
-    }
-
 }
