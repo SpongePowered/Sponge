@@ -26,31 +26,20 @@ package org.spongepowered.common.mixin.api.mcp.util;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
-import javax.annotation.Nullable;
 
 @Mixin(SoundEvent.class)
 public abstract class SoundEventMixin_API implements SoundType {
 
     @Shadow @Final private ResourceLocation name;
 
-    @Nullable private String id;
-
     @Override
-    public String getId() {
-        if (this.id == null) {
-            this.id = this.name.toString();
-        }
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name.getPath();
+    public CatalogKey getKey() {
+        return (CatalogKey) (Object) this.name;
     }
 
 }
