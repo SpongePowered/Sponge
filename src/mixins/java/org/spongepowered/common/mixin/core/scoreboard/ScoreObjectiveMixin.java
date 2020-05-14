@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,7 +63,7 @@ public abstract class ScoreObjectiveMixin implements ScoreObjectiveBridge {
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setDisplayName", at = @At("HEAD"), cancellable = true)
-    private void onSetDisplayName(final String name, final CallbackInfo ci) {
+    private void onSetDisplayName(final ITextComponent name, final CallbackInfo ci) {
         if (this.scoreboard != null && ((ScoreboardBridge) this.scoreboard).bridge$isClient()) {
             return; // Let the normal logic take over.
         }
@@ -72,7 +73,7 @@ public abstract class ScoreObjectiveMixin implements ScoreObjectiveBridge {
             ci.cancel();
             return;
         }
-        this.impl$spongeScoreboard.setDisplayName(SpongeTexts.fromLegacy(name));
+        this.impl$spongeScoreboard.setDisplayName(SpongeTexts.toText(name));
         ci.cancel();
     }
 
