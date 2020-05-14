@@ -40,7 +40,7 @@ public class DuplicateRemovalVisitorTest {
     public void testEmpty() {
         final ConfigurationNode parent = ConfigurationNode.root();
         final ConfigurationNode child = ConfigurationNode.root();
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
     }
 
     @Test
@@ -49,7 +49,7 @@ public class DuplicateRemovalVisitorTest {
         final ConfigurationNode child = ConfigurationNode.root();
         parent.setValue("test");
         child.setValue("test");
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
         assertNull(child.getValue());
     }
 
@@ -60,12 +60,12 @@ public class DuplicateRemovalVisitorTest {
 
         parent.setValue(3d);
         child.setValue(3d);
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
         assertEquals(3d, parent.getValue());
         assertNull(child.getValue());
 
         child.setValue(3);
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
         assertNull(child.getValue());
     }
 
@@ -77,7 +77,7 @@ public class DuplicateRemovalVisitorTest {
         parent.getNode("test").setValue(42);
         child.getNode("test").setValue(42d);
 
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
 
         assertTrue(child.isEmpty());
         assertNull(child.getNode("test").getValue());
@@ -94,7 +94,7 @@ public class DuplicateRemovalVisitorTest {
             n.getNode("test2").setValue("yikes");
         });
 
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
         assertTrue(child.getNode("test1").isVirtual());
         assertEquals("yikes", child.getNode("test2").getValue());
     }
@@ -113,7 +113,7 @@ public class DuplicateRemovalVisitorTest {
             n.appendListNode().setValue("red");
             n.appendListNode().setValue("green");
         });
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
         assertEquals(ImmutableList.of("one", "two", "red", "green"), child.getList(String::valueOf));
     }
 
@@ -141,7 +141,7 @@ public class DuplicateRemovalVisitorTest {
             });
             n.appendListNode().setValue("blue");
         });
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
         assertTrue(child.isEmpty());
         assertNull(child.getValue());
     }
@@ -170,7 +170,7 @@ public class DuplicateRemovalVisitorTest {
             });
             n.appendListNode().setValue("blue");
         });
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
 
         assertEquals(4, child.getChildrenList().size());
         assertNull(child.getNode(2, "cat").getValue());
@@ -202,7 +202,7 @@ public class DuplicateRemovalVisitorTest {
             n.appendListNode().setValue("green");
         });
 
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
 
         final ConfigurationNode expected = ConfigurationNode.root(n -> {
             n.appendListNode().setValue("one");
@@ -227,18 +227,13 @@ public class DuplicateRemovalVisitorTest {
         });
         final ConfigurationNode child = parent.copy();
 
-        child.visit(DuplicateRemovalVisitor.INSTANCE, parent);
+        DuplicateRemovalVisitor.visit(child, parent);
         assertTrue(child.isEmpty());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testVisitWithoutParentFails() {
-        ConfigurationNode.root().visit(DuplicateRemovalVisitor.INSTANCE);
     }
 
     @Test(expected = NullPointerException.class)
     public void testVisitWithNullParentFails() {
-        ConfigurationNode.root().visit(DuplicateRemovalVisitor.INSTANCE, null);
+        DuplicateRemovalVisitor.visit(ConfigurationNode.root(), null);
     }
 
 }

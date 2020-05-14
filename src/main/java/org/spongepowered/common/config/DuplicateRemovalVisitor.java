@@ -30,20 +30,28 @@ import ninja.leaping.configurate.ConfigurationVisitor;
 import ninja.leaping.configurate.Types;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Given a configuration node, and a node at the same position in the tree of a parent configuration, remove values from the child node that don't
  * change anything from the parent node.
+ *
+ * This operates in configurations with a parent-child hierarchy like Sponge's, where there is one global configuration, plus world- and
+ * dimension-specific configurations, each which only need to contain values that are different to the ones in their parent. By visiting each
+ * configuration before it's saved, any unnecessary values can be removed.
  */
-class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<ConfigurationNode, Void> {
-
-    static DuplicateRemovalVisitor INSTANCE = new DuplicateRemovalVisitor();
+class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReference<ConfigurationNode>, Void> {
+    private static final DuplicateRemovalVisitor INSTANCE = new DuplicateRemovalVisitor();
 
     private DuplicateRemovalVisitor() {
     }
 
+    public static void visit(ConfigurationNode child, ConfigurationNode parent) {
+        child.visit(INSTANCE, new AtomicReference<>(parent));
+    }
+
     @Override
-    public ConfigurationNode newState() {
+    public AtomicReference<ConfigurationNode> newState() {
         throw new IllegalArgumentException("A parent configuration must be provided as the state object to properly remove duplicates");
     }
 
@@ -52,35 +60,38 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<Configuration
     }
 
     @Override
-    public void beginVisit(ConfigurationNode node, ConfigurationNode parent) {
-        Preconditions.checkNotNull(parent, "A parent configuration must be provided!");
+    public void beginVisit(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+        Preconditions.checkNotNull(Preconditions.checkNotNull(parent, "parentRef").get(), "A parent configuration must be provided!");
     }
 
     @Override
-    public void enterNode(ConfigurationNode node, ConfigurationNode parent) {
+    public void enterNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+        if (node.getParent() != null) { // exclude root nodes
+            parent.set(parent.get().getNode(node.getKey()));
+        }
     }
 
     @Override
-    public void enterMappingNode(ConfigurationNode node, ConfigurationNode parent) {
+    public void enterMappingNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
     }
 
     @Override
-    public void enterListNode(ConfigurationNode node, ConfigurationNode parent) {
-        if (!isListElement(node) && Objects.equals(node.getValue(), parent.getNode(node.getPath()).getValue())) {
+    public void enterListNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+        if (!isListElement(node) && Objects.equals(node.getValue(), parent.get().getValue())) {
             node.setValue(null);
         }
     }
 
     @Override
     @SuppressWarnings("UnnecessaryUnboxing")
-    public void enterScalarNode(ConfigurationNode node, ConfigurationNode parent) {
+    public void enterScalarNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+        ConfigurationNode parentNode = popParent(parent);
         // ignore list values
         if (isListElement(node)) {
             return;
         }
 
         // if the node already exists in the parent config, remove it
-        ConfigurationNode parentNode = parent.getNode(node.getPath());
         if (Objects.equals(node.getValue(), parentNode.getValue())) {
             node.setValue(null);
             return;
@@ -97,7 +108,9 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<Configuration
     }
 
     @Override
-    public void exitMappingNode(ConfigurationNode node, ConfigurationNode parent) {
+    public void exitMappingNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+        popParent(parent);
+
         // remove empty maps
         if (node.isEmpty() && !isListElement(node)) {
             node.setValue(null);
@@ -105,18 +118,23 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<Configuration
     }
 
     @Override
-    public void exitListNode(ConfigurationNode node, ConfigurationNode parentRoot) {
-        ConfigurationNode parent = parentRoot.getNode(node.getPath());
-        if (parent.isEmpty() && parent.getValue() == null) {
-            if (node.isEmpty()) {
-                node.setValue(null);
-            }
+    public void exitListNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+        ConfigurationNode parentNode = popParent(parent);
+        if (parentNode.isEmpty() && node.isEmpty()) {
+            node.setValue(null);
         }
     }
 
     @Override
-    public Void endVisit(ConfigurationNode parent) {
+    public Void endVisit(AtomicReference<ConfigurationNode> parent) {
         return null;
     }
 
+    private ConfigurationNode popParent(AtomicReference<ConfigurationNode> parentRef) {
+        ConfigurationNode parent = parentRef.get();
+        if (parent.getParent() != null) {
+            parentRef.set(parent.getParent());
+        }
+        return parent;
+    }
 }

@@ -270,7 +270,7 @@ public class SpongeConfig<T extends ConfigBase> {
         if (this.parent == null) {
             throw new IllegalStateException("parent is null");
         }
-        root.visit(DuplicateRemovalVisitor.INSTANCE, this.parent.data);
+        DuplicateRemovalVisitor.visit(root, this.parent.data);
     }
 
     public CompletableFuture<CommentedConfigurationNode> updateSetting(String key, Object value) {
