@@ -15,6 +15,7 @@
     "block.BedBlockAccessor",
     "block.BlockAccessor",
     "block.FireBlockAccessor",
+    "block.JukeboxBlockAccessor",
     "block.PistonBlockAccessor",
     "block.RedstoneWireBlockAccessor",
     "crash.CrashReportAccessor",
