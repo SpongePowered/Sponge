@@ -141,8 +141,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
      * to the superclass and use {@link ArmorStandEntity#attackEntityFrom(DamageSource, float)}.
      */
     @Overwrite
-    @Override
-    public void shadow$onKillCommand() {
+    public void onKillCommand() {
         super.shadow$onKillCommand();
     }
 }
