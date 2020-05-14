@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.item.DyeColor;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
@@ -47,8 +47,8 @@ public abstract class DyeColorBlockPropertiesMixin implements DyeColorBlockBridg
     }
 
     @Override
-    public Optional<org.spongepowered.api.data.type.DyeColor> bridge$getDyeColor() {
-        return Optional.ofNullable((org.spongepowered.api.data.type.DyeColor) (Object) this.impl$dyeColor);
+    public Optional<DyeColor> bridge$getDyeColor() {
+        return Optional.ofNullable(this.impl$dyeColor);
     }
 
 }

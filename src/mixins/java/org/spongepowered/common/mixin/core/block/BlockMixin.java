@@ -109,7 +109,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
      */
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setUpSpongeFields(Block.Properties properties, CallbackInfo ci) {
-        ((DyeColorBlockBridge)this).bridge$setDyeColor(((DyeColorBlockBridge)properties).bridge$getDyeColor());
+        ((DyeColorBlockBridge)this).bridge$setDyeColor(((DyeColorBlockBridge)properties).bridge$getDyeColor().orElse(null));
     }
 
     @Inject(method = "spawnAsEntity",

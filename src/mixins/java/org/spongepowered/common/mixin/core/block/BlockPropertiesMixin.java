@@ -40,7 +40,7 @@ public abstract class BlockPropertiesMixin {
             at = @At("RETURN"))
     private static void impl$onCreate(Material material, DyeColor color, CallbackInfoReturnable<Block.Properties> cir) {
         final Block.Properties returnValue = cir.getReturnValue();
-        ((DyeColorBlockBridge) returnValue).bridge$setDyeColor(color);
+        ((DyeColorBlockBridge) returnValue).bridge$setDyeColor((org.spongepowered.api.data.type.DyeColor) (Object) color);
     }
 
 }
