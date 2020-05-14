@@ -635,7 +635,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
             if (!world.isRemote) {
                 final Transform transform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(initialX, initialY, initialZ));
-                org.spongepowered.api.world.World spongeWorld = ((org.spongepowered.api.entity.Entity) this).getWorld();
+                final org.spongepowered.api.world.World<?> spongeWorld = ((org.spongepowered.api.entity.Entity) this).getWorld();
                 final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, spongeWorld, spongeWorld);
                 if (event.isCancelled()) {
                     return false;

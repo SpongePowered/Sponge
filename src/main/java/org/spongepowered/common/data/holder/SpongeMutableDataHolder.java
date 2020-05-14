@@ -231,7 +231,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default DataTransactionResult remove(Key<?> key) {
-        return this.getProviderFor((Key)key).remove(this);
+        return this.getProviderFor((Key) key).remove(this);
     }
 
     @Override

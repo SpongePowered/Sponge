@@ -53,8 +53,8 @@ public abstract class GoalMixin_API<O extends Agent> implements Goal<O> {
 
     @Override
     public boolean canRunConcurrentWith(Goal<O> other) {
-        EnumSet<net.minecraft.entity.ai.goal.Goal.Flag> flagSet1 = this.shadow$getMutexFlags();
-        EnumSet<net.minecraft.entity.ai.goal.Goal.Flag> flagSet2 = ((net.minecraft.entity.ai.goal.Goal) other).getMutexFlags();
+        final EnumSet<net.minecraft.entity.ai.goal.Goal.Flag> flagSet1 = this.shadow$getMutexFlags();
+        final EnumSet<net.minecraft.entity.ai.goal.Goal.Flag> flagSet2 = ((net.minecraft.entity.ai.goal.Goal) other).getMutexFlags();
         return flagSet1.stream().noneMatch(flagSet2::contains);
     }
 

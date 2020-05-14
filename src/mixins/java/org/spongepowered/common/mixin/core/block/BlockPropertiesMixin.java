@@ -39,7 +39,7 @@ public abstract class BlockPropertiesMixin {
     @Inject(method = "create(Lnet/minecraft/block/material/Material;Lnet/minecraft/item/DyeColor;)Lnet/minecraft/block/Block$Properties;",
             at = @At("RETURN"))
     private static void impl$onCreate(Material material, DyeColor color, CallbackInfoReturnable<Block.Properties> cir) {
-        Block.Properties returnValue = cir.getReturnValue();
+        final Block.Properties returnValue = cir.getReturnValue();
         ((DyeColorBlockBridge) returnValue).bridge$setDyeColor(color);
     }
 

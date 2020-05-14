@@ -68,6 +68,7 @@ public interface SpongeDataHolder extends DataHolder {
     }
 
     @Override
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     default boolean supports(Key<?> key) {
         return this.getProviderFor((Key) key).isSupported(this);
     }

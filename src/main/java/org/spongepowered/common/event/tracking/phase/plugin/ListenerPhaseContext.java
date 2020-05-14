@@ -44,7 +44,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
     Object object;
     private CapturePlayer capturePlayer;
 
-    ListenerPhaseContext(final IPhaseState<L> state, PhaseTracker tracker) {
+    ListenerPhaseContext(final IPhaseState<L> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 

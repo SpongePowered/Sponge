@@ -51,7 +51,7 @@ public abstract class PropertyMixin_API<T extends Comparable<T>> implements Stat
     @Override
     public CatalogKey getKey() {
         if (this.api$catalogKey == null) {
-            String id = BlockPropertyIdProvider.getIdFor((IProperty<T>) this);
+            final String id = BlockPropertyIdProvider.getIdFor((IProperty<T>) this);
             this.api$catalogKey = (CatalogKey) (Object) new ResourceLocation(id);
         }
         return this.api$catalogKey;

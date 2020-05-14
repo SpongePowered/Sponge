@@ -26,10 +26,10 @@ package org.spongepowered.common.bridge.block;
 
 import net.minecraft.item.DyeColor;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 
 public interface DyeColorBlockBridge {
 
     void bridge$setDyeColor(DyeColor dyeColor);
-    @Nullable DyeColor bridge$getDyeColor();
+    Optional<org.spongepowered.api.data.type.DyeColor> bridge$getDyeColor();
 }

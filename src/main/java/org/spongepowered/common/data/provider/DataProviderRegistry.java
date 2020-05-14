@@ -100,11 +100,13 @@ public final class DataProviderRegistry {
         return this.buildDelegate((Key<Value<Object>>) key.key, provider -> filterHolderType(provider, key.holderType));
     }
 
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     private DataProviderLookup loadProviderLookup(Class<?> holderType) {
-        Stream<DataProvider> stream = this.dataProviders.keySet().stream()
+        final Stream<DataProvider> stream = this.dataProviders.keySet().stream()
                 .map(key -> this.getProvider((Key) key, holderType))
                 .filter(provider -> !(provider instanceof EmptyDataProvider));
-        return new DataProviderLookup(stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p)));
+        final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p));
+        return new DataProviderLookup(map);
     }
 
     /**
@@ -144,9 +146,10 @@ public final class DataProviderRegistry {
      */
     public DataProviderLookup buildLookup(Predicate<DataProvider<?,?>> predicate) {
         //noinspection unchecked,rawtypes
-        Stream<DataProvider> stream = this.dataProviders.keySet().stream()
+        final Stream<DataProvider> stream = this.dataProviders.keySet().stream()
                 .map(key -> buildDelegateProvider((Key) key, (List) this.dataProviders.get(key).stream().filter(predicate)));
-        return new DataProviderLookup(stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p)));
+        final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p));
+        return new DataProviderLookup(map);
     }
 
     /**

@@ -59,6 +59,7 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     default Optional<I> without(Key<?> key) {
         return this.getProviderFor((Key)key).without((I) this);
     }

@@ -29,6 +29,8 @@ import net.minecraft.item.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 @Mixin(value = {
@@ -44,9 +46,9 @@ public abstract class DyeColorBlockPropertiesMixin implements DyeColorBlockBridg
         this.impl$dyeColor = dyeColor;
     }
 
-    @Nullable @Override
-    public DyeColor bridge$getDyeColor() {
-        return this.impl$dyeColor;
+    @Override
+    public Optional<org.spongepowered.api.data.type.DyeColor> bridge$getDyeColor() {
+        return Optional.ofNullable((org.spongepowered.api.data.type.DyeColor) (Object) this.impl$dyeColor);
     }
 
 }

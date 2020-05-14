@@ -29,7 +29,7 @@ import net.minecraft.state.StateHolder;
 
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings(value = {"unchecked", "rawtypes"})
 public class StateHelper {
 
     public static <O, S extends StateHolder<O, S>> S copyStatesFrom(S original, StateHolder<?,?> from) {

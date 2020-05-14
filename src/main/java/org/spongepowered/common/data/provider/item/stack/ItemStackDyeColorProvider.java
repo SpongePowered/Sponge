@@ -45,9 +45,8 @@ public class ItemStackDyeColorProvider extends ItemStackDataProvider<DyeColor> {
     protected Optional<DyeColor> getFrom(ItemStack dataHolder) {
         Item item = dataHolder.getItem();
         if (item instanceof BlockItem) {
-            Block block = ((BlockItem) item).getBlock();
-            net.minecraft.item.DyeColor color = ((DyeColorBlockBridge) block).bridge$getDyeColor();
-            return Optional.ofNullable((DyeColor) (Object) color);
+            final Block block = ((BlockItem) item).getBlock();
+            return ((DyeColorBlockBridge) block).bridge$getDyeColor();
         }
         return Optional.empty();
     }

@@ -412,8 +412,8 @@ public final class EntityUtil {
         if (!((ServerPlayerEntityBridge) player).bridge$usesCustomClient()) {
 
             // Check if the world we're going to matches our provider type. if so, we need to send a fake respawn packet to clear chunks
-            DimensionType fromType = fromWorld.getDimension().getType();
-            DimensionType toType = toWorld.getDimension().getType();
+            final DimensionType fromType = fromWorld.getDimension().getType();
+            final DimensionType toType = toWorld.getDimension().getType();
 
             if (fromType == toType) {
                 final DimensionType fakeDim;
@@ -466,7 +466,7 @@ public final class EntityUtil {
         if (event instanceof MoveEntityEvent.Teleport.Portal) {
             CriteriaTriggers.CHANGED_DIMENSION.trigger(player, fromWorld.dimension.getType(), toWorld.dimension.getType());
 
-            Vec3d enteredNetherPosition = ((ServerPlayerEntityAccessor) player).accessor$getEnteredNetherPosition();
+            final Vec3d enteredNetherPosition = ((ServerPlayerEntityAccessor) player).accessor$getEnteredNetherPosition();
             if (fromWorld.dimension.getType() == DimensionType.THE_NETHER && toWorld.dimension.getType() == DimensionType.OVERWORLD
                 && enteredNetherPosition != null) {
                 CriteriaTriggers.NETHER_TRAVEL.trigger(player, enteredNetherPosition);
@@ -522,7 +522,7 @@ public final class EntityUtil {
 
         // Check if we're to use a different teleporter for this world
         if (teleporter.getClass().getName().equals("net.minecraft.world.Teleporter")) {
-            CatalogKey key = ((DimensionTypeBridge) toWorld.dimension.getType()).bridge$getKey();
+            final CatalogKey key = ((DimensionTypeBridge) toWorld.dimension.getType()).bridge$getKey();
             worldName = portalAgents.get("minecraft:default_" + key.getValue().toLowerCase(Locale.ENGLISH));
         } else {
             worldName = portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName());
@@ -654,7 +654,7 @@ public final class EntityUtil {
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final double posX, final double posY, final double posZ, final float yaw, final float pitch) {
-        World world = ((org.spongepowered.api.entity.Entity) entityIn).getWorld();
+        final World world = ((org.spongepowered.api.entity.Entity) entityIn).getWorld();
         final Transform fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
         final Transform toTransform = fromTransform.withPosition(new Vector3d(posX, posY, posZ)).withRotation(new Vector3d(pitch, yaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, world, world);

@@ -145,7 +145,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
         checkNotNull(this.connectionCache);
 
         jdbcConnection = this.getConnectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
-        ConnectionInfo info = ConnectionInfo.fromUrl(plugin, jdbcConnection);
+        final ConnectionInfo info = ConnectionInfo.fromUrl(plugin, jdbcConnection);
         try {
             return this.connectionCache.get(info);
         } catch (CompletionException e) {
