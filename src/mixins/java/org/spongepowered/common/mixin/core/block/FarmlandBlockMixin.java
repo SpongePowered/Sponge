@@ -43,7 +43,7 @@ public abstract class FarmlandBlockMixin extends BlockMixin {
     @Redirect(method = "onFallenUpon",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"
+            target = "Lnet/minecraft/block/FarmlandBlock;turnToDirt(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"
         )
     )
     private void impl$CheckIfGrieferCanGrief(final BlockState state, final World world, final BlockPos pos,
