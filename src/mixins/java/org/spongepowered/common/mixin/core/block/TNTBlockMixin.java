@@ -53,14 +53,14 @@ public abstract class TNTBlockMixin extends BlockMixin {
 
     private boolean primeCancelled;
 
-    private boolean impl$onRemove(World world, BlockPos pos) {
-        final boolean removed = !this.primeCancelled && world.removeBlock(pos, false);
+    private boolean impl$onRemove(World world, BlockPos pos, boolean isMoving) {
+        final boolean removed = !this.primeCancelled && world.removeBlock(pos, isMoving);
         this.primeCancelled = false;
         return removed;
     }
 
     @Inject(method = "explode(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/LivingEntity;)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
@@ -81,7 +81,7 @@ public abstract class TNTBlockMixin extends BlockMixin {
 
     @Inject(
         method = "onExplosionDestroy",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
@@ -98,19 +98,20 @@ public abstract class TNTBlockMixin extends BlockMixin {
 
     }
 
-    @Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean impl$removePostSetAir(final World world, final BlockPos pos) {
+    @Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"))
+    private boolean impl$removePostSetAir(final World world, final BlockPos pos, final boolean isMoving) {
         // Called when TNT is placed next to a charge
-        return this.impl$onRemove(world, pos);
+        return this.impl$onRemove(world, pos, isMoving);
     }
 
-    @Redirect(method = "neighborChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean impl$removeNeighbor(final World world, final BlockPos pos) {
+    @Redirect(method = "neighborChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"))
+    private boolean impl$removeNeighbor(final World world, final BlockPos pos, final boolean isMoving) {
         // Called when TNT receives charge
-        return this.impl$onRemove(world, pos);
+        return this.impl$onRemove(world, pos, isMoving);
     }
 
-    @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
+    @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
     private boolean impl$removeActivated(final World world, final BlockPos pos, final BlockState state, final int flag) {
         // Called when player manually ignites TNT
         final boolean removed = !this.primeCancelled && world.setBlockState(pos, state, flag);
@@ -118,10 +119,10 @@ public abstract class TNTBlockMixin extends BlockMixin {
         return removed;
     }
 
-    @Redirect(method = "onProjectileCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean impl$removeonCollide(final World world, final BlockPos pos) {
+    @Redirect(method = "onProjectileCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"))
+    private boolean impl$removeonCollide(final World world, final BlockPos pos, final boolean isMoving) {
         // Called when the TNT is hit with a flaming arrow
-        return this.impl$onRemove(world, pos);
+        return this.impl$onRemove(world, pos, isMoving);
     }
 
 }
