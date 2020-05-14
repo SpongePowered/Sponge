@@ -26,13 +26,21 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Set;
 
 @Mixin(AbstractFurnaceTileEntity.class)
 public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEntityMixin_API implements FurnaceBlockEntity {
+
+    @Shadow private int burnTime;
+    @Shadow private int recipesUsed;
+    @Shadow private int cookTime;
+    @Shadow private int cookTimeTotal;
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
@@ -44,6 +52,15 @@ public abstract class AbstractFurnaceTileEntityMixin_API extends LockableTileEnt
         values.add(this.maxCookTime().asImmutable());
 
         return values;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(Constants.TileEntity.Furnace.BURN_TIME, this.burnTime)
+            .set(Constants.TileEntity.Furnace.BURN_TIME_TOTAL, this.recipesUsed)
+            .set(Constants.TileEntity.Furnace.COOK_TIME, this.cookTime)
+            .set(Constants.TileEntity.Furnace.COOK_TIME_TOTAL, this.cookTimeTotal);
     }
 
 }

@@ -24,33 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.Furnace;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.Constants;
 
 @Mixin(FurnaceTileEntity.class)
 public abstract class FurnaceTileEntityMixin_API extends AbstractFurnaceTileEntityMixin_API implements Furnace {
-
-    @Shadow private String furnaceCustomName;
-    @Shadow public abstract int getField(int id);
-    @Shadow public abstract ItemStack getStackInSlot(int index);
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.Furnace.BURN_TIME, this.getField(0));
-        container.set(Constants.TileEntity.Furnace.BURN_TIME_TOTAL, this.getField(Constants.TileEntity.Furnace.PASSED_BURN_FIELD));
-        container.set(Constants.TileEntity.Furnace.COOK_TIME, this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD) - this.getField(
-            Constants.TileEntity.Furnace.PASSED_COOK_FIELD));
-        container.set(Constants.TileEntity.Furnace.COOK_TIME_TOTAL, this.getField(Constants.TileEntity.Furnace.MAX_COOKTIME_FIELD));
-        if (this.furnaceCustomName != null) {
-            container.set(Constants.TileEntity.CUSTOM_NAME, this.furnaceCustomName);
-        }
-        return container;
-    }
 
 }
