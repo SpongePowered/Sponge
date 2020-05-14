@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.world.Explosion.Mode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -62,30 +64,33 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
      * but, it is what it is.
      * @return
      */
-    @SuppressWarnings("deprecation")
     @Redirect(method = "onImpact",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"
+            target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"
         )
     )
-    @Override
     @Nullable
-    public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplode(final net.minecraft.world.World worldObj, @Nullable final Entity nil,
-        final double x, final double y, final double z, final float strength, final boolean flaming,
-        final boolean smoking) {
+    public net.minecraft.world.Explosion impl$throwExplosionEventAndExplode(final net.minecraft.world.World worldObj, @Nullable final Entity nil,
+        final double x, final double y, final double z, final float strength, final boolean flaming, final Mode mode) {
+        return this.bridge$throwExplosionEventAndExplode(worldObj, nil, x, y, z, strength, flaming, mode);
+    }
+
+    @Override
+    public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplode(net.minecraft.world.World worldObj, @Nullable Entity nil,
+            double x, double y, double z, float strength, boolean flaming, boolean smoking) {
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
+        final ProjectileSource shooter = ((Projectile) this).shooter().get();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, ((ExplosiveFireball) this).getShooter()); // TODO - Remove in 1.13/API 8
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((ExplosiveFireball) this).getShooter());
-            frame.pushCause(((Projectile) this).getShooter());
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
+            frame.pushCause(shooter);
             final Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
-                .sourceExplosive(((ExplosiveFireball) this))
-                .radius(strength)
-                .canCauseFire(flaming && griefer)
-                .shouldPlaySmoke(smoking && griefer)
-                .shouldBreakBlocks(smoking && griefer));
+                    .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
+                    .sourceExplosive(((ExplosiveFireball) this))
+                    .radius(strength)
+                    .canCauseFire(flaming && griefer)
+                    .shouldPlaySmoke(smoking && griefer)
+                    .shouldBreakBlocks(smoking && griefer));
 
             return ex.orElse(null);
         }
