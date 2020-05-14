@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai.goal;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPredicate;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
 import net.minecraft.util.EntityPredicates;
@@ -48,17 +51,14 @@ public abstract class LookAtGoalMixin extends Goal {
     @Redirect(method = "shouldExecute",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;findNearestEntityWithinAABB(Ljava/lang/Class;Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Lnet/minecraft/entity/Entity;"))
-    private net.minecraft.entity.Entity onFindNearestEntityWithinAABB(final World world, final Class clazz, final AxisAlignedBB aabb,
-        final net.minecraft.entity.Entity entity) {
-        net.minecraft.entity.Entity entity1 = null;
+            target = "Lnet/minecraft/world/World;func_225318_b(Ljava/lang/Class;Lnet/minecraft/entity/EntityPredicate;Lnet/minecraft/entity/LivingEntity;DDDLnet/minecraft/util/math/AxisAlignedBB;)Lnet/minecraft/entity/LivingEntity;"))
+    private LivingEntity onFindNearestEntityWithinAABB(final World world, final Class clazz, final EntityPredicate predicate, final LivingEntity living,
+            final double x, final double y, final double z, final AxisAlignedBB aabb) {
+        LivingEntity entity1 = null;
         double d0 = Double.MAX_VALUE;
-
-        for (final net.minecraft.entity.Entity foundEntity: (List< net.minecraft.entity.Entity>) world.getEntities(this.watchedClass,
-                EntityPredicates.NOT_SPECTATING)) {
-            if (foundEntity.getBoundingBox().intersects(aabb) && foundEntity != entity) {
-                final double d1 = entity.getDistanceSq(foundEntity);
-
+        for (final Entity foundEntity: (List<Entity>) world.getEntities(this.watchedClass, EntityPredicates.NOT_SPECTATING)) {
+            if (foundEntity.getBoundingBox().intersects(aabb) && foundEntity != living) {
+                final double d1 = living.getDistanceSq(foundEntity);
                 if (d1 <= d0)
                 {
                     entity1 = foundEntity;
