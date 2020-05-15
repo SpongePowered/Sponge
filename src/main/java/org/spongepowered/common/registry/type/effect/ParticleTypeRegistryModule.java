@@ -160,6 +160,7 @@ public final class ParticleTypeRegistryModule extends AbstractPrefixCheckCatalog
         this.addParticleType("sweep_attack", EnumParticleTypes.SWEEP_ATTACK, false, ImmutableMap.of(
                 ParticleOptions.SCALE, 1.0));
         this.addParticleType("town_aura", EnumParticleTypes.TOWN_AURA, true);
+        this.addParticleType("totem", EnumParticleTypes.TOTEM, true);
         this.addParticleType("water_bubble", EnumParticleTypes.WATER_BUBBLE, true);
         this.addParticleType("water_drop", EnumParticleTypes.WATER_DROP, false);
         this.addParticleType("water_splash", EnumParticleTypes.WATER_SPLASH, true);
