@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 @Mixin(World.class)
 public abstract class WorldMixin_RealTime implements RealTimeTrackingBridge {
 
-    @Shadow @Nullable public abstract MinecraftServer getMinecraftServer();
+    @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
 
     @Shadow protected WorldInfo worldInfo;
 
@@ -46,8 +46,8 @@ public abstract class WorldMixin_RealTime implements RealTimeTrackingBridge {
         if (((WorldBridge) this).bridge$isFake()) {
             return 1;
         }
-        if (this.getMinecraftServer() != null) {
-            return ((RealTimeTrackingBridge) this.getMinecraftServer()).realTimeBridge$getRealTimeTicks();
+        if (this.shadow$getServer() != null) {
+            return ((RealTimeTrackingBridge) this.shadow$getServer()).realTimeBridge$getRealTimeTicks();
         }
         return 1;
     }

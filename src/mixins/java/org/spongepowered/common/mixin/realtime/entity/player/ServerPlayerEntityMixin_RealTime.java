@@ -41,13 +41,13 @@ public abstract class ServerPlayerEntityMixin_RealTime extends PlayerEntityMixin
         method = "decrementTimeUntilPortal",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/player/EntityPlayerMP;timeUntilPortal:I",
+            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;timeUntilPortal:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/entity/player/EntityPlayerMP;invulnerableDimensionChange:Z",
+                target = "Lnet/minecraft/entity/player/ServerPlayerEntity;invulnerableDimensionChange:Z",
                 opcode = Opcodes.GETFIELD
             ),
             to = @At("RETURN")

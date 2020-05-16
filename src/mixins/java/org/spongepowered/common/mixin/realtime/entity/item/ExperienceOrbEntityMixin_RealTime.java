@@ -42,20 +42,20 @@ public abstract class ExperienceOrbEntityMixin_RealTime extends EntityMixin_Real
     @Shadow public int xpOrbAge;
 
     @Redirect(
-        method = "onUpdate",
+        method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/item/EntityXPOrb;delayBeforeCanPickup:I",
+            target = "Lnet/minecraft/entity/item/ExperienceOrbEntity;delayBeforeCanPickup:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/Entity;onUpdate()V"
+                target = "Lnet/minecraft/entity/Entity;tick()V"
             ),
             to = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/item/EntityXPOrb;hasNoGravity()Z"
+                target = "Lnet/minecraft/entity/item/ExperienceOrbEntity;hasNoGravity()Z"
             )
         )
     )
@@ -69,15 +69,15 @@ public abstract class ExperienceOrbEntityMixin_RealTime extends EntityMixin_Real
     }
 
     @Redirect(
-        method = "onUpdate",
+        method = "tick",
         at = @At(value = "FIELD",
-            target = "Lnet/minecraft/entity/item/EntityXPOrb;xpOrbAge:I",
+            target = "Lnet/minecraft/entity/item/ExperienceOrbEntity;xpOrbAge:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/entity/item/EntityXPOrb;xpColor:I",
+                target = "Lnet/minecraft/entity/item/ExperienceOrbEntity;xpColor:I",
                 opcode = Opcodes.PUTFIELD
             ),
             to = @At(

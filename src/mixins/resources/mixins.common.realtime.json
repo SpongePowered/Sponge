@@ -17,7 +17,7 @@
         "server.management.PlayerInteractionManagerMixin_RealTime",
         "server.MinecraftServerMixin_RealTime",
         "tileentity.BrewingStandTileEntityMixin_RealTime",
-        "tileentity.FurnaceTileEntityMixin_RealTime",
+        "tileentity.AbstractFurnaceTileEntityMixin_RealTime",
         "world.server.ServerWorldMixin_RealTime",
         "world.WorldMixin_RealTime"
     ],

@@ -42,8 +42,8 @@ public abstract class PlayerEntityMixin_RealTime extends LivingEntityMixin_RealT
     @Shadow public int xpCooldown;
     @Shadow private int sleepTimer;
 
-    @Redirect(method = "onUpdate",
-        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayer;xpCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
+    @Redirect(method = "tick",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerEntity;xpCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void realTimeImpl$adjustForRealTimeXpCooldown(final PlayerEntity self, final int modifier) {
         if (SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this) || ((WorldBridge) this.world).bridge$isFake()) {
             this.xpCooldown = modifier;
@@ -53,16 +53,16 @@ public abstract class PlayerEntityMixin_RealTime extends LivingEntityMixin_RealT
     }
 
     @Redirect(
-        method = "onUpdate",
+        method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/player/EntityPlayer;sleepTimer:I",
+            target = "Lnet/minecraft/entity/player/PlayerEntity;sleepTimer:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"
+                target = "Lnet/minecraft/entity/player/PlayerEntity;isSleeping()Z"
             ),
             to = @At(
                 value = "CONSTANT",

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.realtime.tileentity;
 
 import net.minecraft.tileentity.BrewingStandTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,17 +32,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.mixin.core.tileentity.TileEntityMixin;
 
 @Mixin(BrewingStandTileEntity.class)
-public abstract class BrewingStandTileEntityMixin_RealTime extends TileEntity {
+public abstract class BrewingStandTileEntityMixin_RealTime extends TileEntityMixin {
 
     @Shadow private int brewTime;
 
     @Redirect(
-        method = "update",
+        method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/tileentity/TileEntityBrewingStand;brewTime:I",
+            target = "Lnet/minecraft/tileentity/BrewingStandTileEntity;brewTime:I",
             opcode = Opcodes.PUTFIELD, ordinal = 0
         )
     )

@@ -40,7 +40,7 @@ public abstract class LivingEntityMixin_RealTime extends EntityMixin_RealTime {
     @Shadow protected int idleTime;
 
     @Redirect(method = "onDeathUpdate",
-        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;deathTime:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;deathTime:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void realTimeImpl$adjustForRealTimeDeathTime(final LivingEntity self, final int vanillaNewDeathTime) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             this.deathTime = vanillaNewDeathTime;
