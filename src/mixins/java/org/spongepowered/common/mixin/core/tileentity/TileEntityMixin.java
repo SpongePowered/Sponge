@@ -49,7 +49,7 @@ import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
-abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge, TrackableBridge {
+public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge, TrackableBridge {
 
     //@formatter:off
     @Shadow @Final private TileEntityType<?> type;
@@ -59,6 +59,8 @@ abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, 
 
     @Shadow public abstract BlockPos getPos();
     //@formatter:on
+
+    @Shadow public abstract BlockState getBlockState();
 
     @Nullable private Timing impl$timing;
     private boolean impl$isTicking = false;
