@@ -40,7 +40,7 @@ public abstract class EntityDamageSourceMixin extends DamageSourceMixin {
     public String toString() {
         return MoreObjects.toStringHelper("EntityDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.impl$damageType.getId())
+            .add("Type", this.impl$damageType.getKey().toString())
             .add("Source", this.damageSourceEntity)
             .toString();
     }
