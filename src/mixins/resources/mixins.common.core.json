@@ -144,7 +144,6 @@
       "util.IndirectEntityDamageSourceMixin",
       "util.math.BlockPos_MutableBlockPosMixin",
       "util.math.Vec3iMixin",
-      "util.registry.BootstrapMixin",
       "util.registry.RegistryMixin",
       "util.text.KeybindTextComponentMixin",
       "util.text.ScoreTextComponentMixin",
