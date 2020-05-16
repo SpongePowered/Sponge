@@ -32,7 +32,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ServerTickList;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
@@ -68,13 +67,11 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
@@ -116,7 +113,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      */
     @Redirect(method = "tick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/server/ServerWorld;func_217390_a(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"),
+                    target = "Lnet/minecraft/world/server/ServerWorld;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE",
                             target = "Lnet/minecraft/world/server/ServerWorld;resetUpdateEntityTick()V"),
@@ -127,7 +124,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     private void tracker$wrapGlobalEntityTicking(final ServerWorld serverWorld, final Consumer<Entity> consumer, final Entity entity) {
         final PhaseContext<?> currentContext = PhaseTracker.SERVER.getCurrentContext();
         if (currentContext.state.alreadyCapturingEntityTicks()) {
-            this.func_217390_a(consumer, entity);
+            this.shadow$guardEntityTick(consumer, entity);
             return;
         }
         TrackingUtil.tickkGlobalEntity(consumer, entity);
@@ -136,7 +133,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
     @Redirect(method = "tick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/server/ServerWorld;func_217390_a(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"),
+                    target = "Lnet/minecraft/world/server/ServerWorld;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/IProfiler;startSection(Ljava/lang/String;)V", args = "stringValue=tick"),
                     to = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/IProfiler;startSection(Ljava/lang/String;)V", args = "stringValue=remove")
@@ -145,7 +142,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerWorld serverWorld, final Consumer<Entity> entityUpdateConsumer, final Entity entity) {
         final IPhaseState<?> currentState = PhaseTracker.SERVER.getCurrentState();
         if (currentState.alreadyCapturingEntityTicks()) {
-            this.func_217390_a(entityUpdateConsumer, entity);
+            this.shadow$guardEntityTick(entityUpdateConsumer, entity);
             return;
         }
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);

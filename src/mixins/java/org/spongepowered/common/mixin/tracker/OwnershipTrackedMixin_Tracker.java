@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.tracker;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
@@ -173,8 +174,8 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
         if (this.tracker$owner != null && PlayerTracker.Type.OWNER == type) {
             return this.tracker$owner;
         }
-        if (this instanceof IEntityOwnable) {
-            final IEntityOwnable ownable = (IEntityOwnable) this;
+        if ((Object)this instanceof TameableEntity) {
+            final TameableEntity ownable = (TameableEntity) (Object) this;
             final Entity owner = ownable.getOwner();
             if (owner instanceof PlayerEntity) {
                 this.tracked$setTrackedUUID(PlayerTracker.Type.OWNER, owner.getUniqueID());

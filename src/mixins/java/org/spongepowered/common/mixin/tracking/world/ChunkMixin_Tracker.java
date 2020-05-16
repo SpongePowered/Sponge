@@ -135,7 +135,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
         final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().blockTrackLogging()) {
-            if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
+            if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().toString())) {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
             } else {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, false);
@@ -380,44 +380,5 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         this.trackerImpl$trackedShortBlockPositions = trackedPositions;
     }
 
-    @Inject(method = "onLoad", at = @At("HEAD"))
-    private void trackerImpl$startLoad(final CallbackInfo callbackInfo) {
-        final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
-        if (!isFake) {
-            if (!SpongeImplHooks.onServerThread()) {
-                final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
-                    .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
-                                + " to the parented world for management. These operations are generally not"
-                                + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
-                                + " entities from another thread to the world is never ok.")
-                    .add()
-                    .add(" %s : %s", "Chunk Pos", this.pos.toString())
-                    .add()
-                    .add(new Exception("Async Chunk Load Detected"))
-                    .log(SpongeImpl.getLogger(), Level.ERROR)
-                    ;
-                return;
-            }
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
-                return;
-            }
-            GenerationPhase.State.CHUNK_LOADING.createPhaseContext()
-                    .source(this)
-                    .world(this.world)
-                    .chunk((net.minecraft.world.chunk.Chunk) (Object) this)
-                    .buildAndSwitch();
-        }
-    }
-
-    @Inject(method = "onLoad", at = @At("RETURN"))
-    private void trackerImpl$endLoad(final CallbackInfo callbackInfo) {
-        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.onServerThread()) {
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
-                return;
-            }
-            // IF we're not on the main thread,
-            PhaseTracker.getInstance().getCurrentContext().close();
-        }
-    }
 
 }
