@@ -34,9 +34,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.mixin.core.entity.item.HangingEntityMixin;
 
 @Mixin(ItemFrameEntity.class)
-public abstract class ItemFrameEntityMixin_Optimization_Map {
+public abstract class ItemFrameEntityMixin_Optimization_Map extends HangingEntityMixin {
 
     @Shadow public abstract ItemStack getDisplayedItem();
 
@@ -46,10 +47,11 @@ public abstract class ItemFrameEntityMixin_Optimization_Map {
             return;
         }
 
+        final OptimizedMapDataBridge mapData = (OptimizedMapDataBridge) FilledMapItem.getMapData(stack, this.world);
         if (stack.getItem() instanceof FilledMapItem) {
-            ((OptimizedMapDataBridge) ((FilledMapItem) stack.getItem()).getMapData(stack, this.world)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) (Object) this);
+            mapData.mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) (Object) this);
         } else if (this.getDisplayedItem().getItem() instanceof FilledMapItem && stack.isEmpty()) {
-            ((OptimizedMapDataBridge) ((FilledMapItem) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).mapOptimizationBridge$removeItemFrame((ItemFrameEntity) (Object) this);
+            mapData.mapOptimizationBridge$removeItemFrame((ItemFrameEntity) (Object) this);
         }
     }
 
