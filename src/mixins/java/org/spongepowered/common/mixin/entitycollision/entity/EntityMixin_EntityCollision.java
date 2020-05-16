@@ -58,11 +58,6 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
     @Inject(method = "<init>", at = @At("RETURN"))
     private void collisions$InjectActivationInformation(net.minecraft.entity.EntityType<?> type, World world, CallbackInfo ci) {
         if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
-            final EntityType entityType = ((Entity) this).getType();
-            if (entityType == EntityTypes.UNKNOWN || !(entityType instanceof SpongeEntityType)) {
-                return;
-            }
-
             if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
                 final ItemEntity item = (ItemEntity) (Object) this;
                 final ItemStack itemstack = item.getItem();
