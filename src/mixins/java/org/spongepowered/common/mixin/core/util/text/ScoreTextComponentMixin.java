@@ -48,7 +48,7 @@ public abstract class ScoreTextComponentMixin extends TextComponentMixin {
         if (Sponge.isServerAvailable()) {
             final Optional<Objective> objective = Sponge.getServer().getServerScoreboard().get().getObjective(this.objective);
             if (objective.isPresent()) {
-                final Optional<Score> score = objective.get().getScore(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(this.name));
+                final Optional<Score> score = objective.get().getScore(TextSerializers.LEGACY_FORMATTING_CODE.get().deserialize(this.name));
                 if (score.isPresent()) {
                     return Text.builder(score.get());
                 }
