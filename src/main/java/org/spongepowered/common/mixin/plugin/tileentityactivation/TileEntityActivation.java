@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.plugin.tileentityactivation;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
@@ -51,6 +52,7 @@ import org.spongepowered.common.mixin.core.server.management.PlayerChunkMapEntry
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.List;
 import java.util.Map;
 
 public class TileEntityActivation {
@@ -131,14 +133,12 @@ public class TileEntityActivation {
     public static void activateTileEntities(final WorldServer world) {
         final PlayerChunkMap playerChunkMap = world.getPlayerChunkMap();
         for (final PlayerChunkMapEntry playerChunkMapEntry : ((PlayerChunkMapAccessor) playerChunkMap).accessor$getEntries()) {
-            for (final EntityPlayer player : ((PlayerChunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers()) {
-                final Chunk chunk = ((PlayerChunkMapEntryAccessor) playerChunkMapEntry).accessor$getChunk();
-                if (chunk == null || chunk.unloadQueued || ((ChunkBridge) chunk).bridge$isPersistedChunk()) {
-                    continue;
-                }
-
-                activateChunkTileEntities(player, chunk);
+            final Chunk chunk = ((PlayerChunkMapEntryAccessor) playerChunkMapEntry).accessor$getChunk();
+            if (chunk == null || chunk.unloadQueued || ((ChunkBridge) chunk).bridge$isPersistedChunk()) {
+                continue;
             }
+            final List<EntityPlayerMP> players = ((PlayerChunkMapEntryAccessor) playerChunkMapEntry).accessor$getPlayers();
+            activateChunkTileEntities(players, chunk);
         }
     }
 
@@ -148,8 +148,7 @@ public class TileEntityActivation {
      *
      * @param chunk Chunk to check for activation
      */
-    private static void activateChunkTileEntities(final EntityPlayer player, final Chunk chunk) {
-        final Vector3i playerPos = VecHelper.toVector3i(player.getPosition());
+    private static void activateChunkTileEntities(final List<EntityPlayerMP> players, final Chunk chunk) {
         final long currentTick = SpongeImpl.getServer().getTickCounter();
         for (final Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
             final TileEntity tileEntity = mapEntry.getValue();
@@ -177,9 +176,13 @@ public class TileEntityActivation {
                 }
 
                 final int bbActivationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
-                final int blockDistance = Math.round(tilePos.distance(playerPos));
-                if (blockDistance <= bbActivationRange) {
-                    ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
+                for (EntityPlayerMP player : players) {
+                    final Vector3i playerPos = VecHelper.toVector3i(player.getPosition());
+                    final int blockDistance = Math.round(tilePos.distance(playerPos));
+                    if (blockDistance <= bbActivationRange) {
+                        ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
+                        break;
+                    }
                 }
             }
         }
