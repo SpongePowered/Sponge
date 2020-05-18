@@ -175,10 +175,11 @@ public class TileEntityActivation {
                     spongeTileEntity.activation$requiresActivationCacheRefresh(false);
                 }
 
-                final int bbActivationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
+                final int activationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
+                final int bbActivationRange = (int) Math.pow(activationRange, 2);
                 for (EntityPlayerMP player : players) {
                     final Vector3i playerPos = VecHelper.toVector3i(player.getPosition());
-                    final int blockDistance = Math.round(tilePos.distance(playerPos));
+                    final int blockDistance = tilePos.distanceSquared(playerPos);
                     if (blockDistance <= bbActivationRange) {
                         ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
                         break;
