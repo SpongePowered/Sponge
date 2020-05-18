@@ -34,7 +34,6 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.api.text.TextMixin;
 
 import java.util.Optional;
 

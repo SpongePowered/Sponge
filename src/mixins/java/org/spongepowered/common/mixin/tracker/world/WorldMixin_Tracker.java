@@ -53,7 +53,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
 
     @Shadow public abstract Chunk shadow$getChunk(int chunkX, int chunkZ);
     @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
-    @Shadow public abstract void func_217390_a(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
+    @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
     @Shadow public abstract boolean setBlockState(BlockPos pos, BlockState state, int flags);
     @Shadow public static boolean shadow$isOutsideBuildHeight(final BlockPos pos) {
         throw new UnsupportedOperationException("Untransformed shadow");
@@ -67,7 +67,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
      *
      * @param tileEntity The tile entity
      */
-    @Redirect(method = "func_217391_K",
+    @Redirect(method = "tickBlockEntities",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/tileentity/ITickableTileEntity;tick()V"))
     protected void impl$wrapTileEntityTick(final ITickableTileEntity tileEntity) {

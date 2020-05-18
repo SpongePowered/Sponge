@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EyeOfEnderEntity;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
@@ -53,7 +54,7 @@ public abstract class EyeOfEnderEntityMixin extends EntityMixin implements Locat
     @Override
     public void impl$writeToSpongeCompound(CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, null);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, (Entity) null);
     }
 
     @Override

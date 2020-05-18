@@ -39,8 +39,8 @@ public class WorldTickListenerContext extends ListenerPhaseContext<WorldTickList
 
     @Nullable private World tickingWorld;
 
-    WorldTickListenerContext(final IPhaseState<WorldTickListenerContext> state, PhaseTracker tracker) {
-        super(state);
+    WorldTickListenerContext(final IPhaseState<WorldTickListenerContext> state, final PhaseTracker tracker) {
+        super(state, tracker);
     }
 
     public WorldTickListenerContext world(final World world) {

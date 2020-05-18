@@ -39,7 +39,7 @@ public abstract class AnimalEntityMixin_API extends AgeableEntityMixin_API imple
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.breedTime().asImmutable());
+        values.add(this.breedingCooldown().asImmutable());
         values.add(this.canBreed().asImmutable());
 
         this.breeder().map(Value::asImmutable).ifPresent(values::add);

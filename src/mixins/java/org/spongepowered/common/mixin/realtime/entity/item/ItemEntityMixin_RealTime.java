@@ -40,8 +40,8 @@ public abstract class ItemEntityMixin_RealTime extends EntityMixin_RealTime {
     @Shadow private int pickupDelay;
     @Shadow private int age;
 
-    @Redirect(method = "onUpdate",
-        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityItem;pickupDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
+    @Redirect(method = "tick",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/ItemEntity;pickupDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void realTimeImpl$adjustForRealTimePickupDelay(final ItemEntity self, final int modifier) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             this.pickupDelay = modifier;
@@ -51,8 +51,8 @@ public abstract class ItemEntityMixin_RealTime extends EntityMixin_RealTime {
         this.pickupDelay = Math.max(0, this.pickupDelay - ticks);
     }
 
-    @Redirect(method = "onUpdate",
-        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityItem;age:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
+    @Redirect(method = "tick",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/ItemEntity;age:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void realTimeImpl$adjustForRealTimeAge(final ItemEntity self, final int modifier) {
         if (((WorldBridge) this.world).bridge$isFake()) {
             this.age = modifier;

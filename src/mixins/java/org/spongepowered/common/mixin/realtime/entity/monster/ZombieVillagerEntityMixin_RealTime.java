@@ -41,20 +41,20 @@ public abstract class ZombieVillagerEntityMixin_RealTime extends LivingEntityMix
     @Shadow protected abstract int getConversionProgress();
 
     @Redirect(
-        method = "onUpdate",
+        method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/monster/EntityZombieVillager;getConversionProgress()I",
+            target = "Lnet/minecraft/entity/monster/ZombieVillagerEntity;getConversionProgress()I",
             ordinal = 0
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/monster/EntityZombieVillager;isConverting()Z"
+                target = "Lnet/minecraft/entity/monster/ZombieVillagerEntity;isConverting()Z"
             ),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/entity/monster/EntityZombieVillager;conversionTime:I",
+                target = "Lnet/minecraft/entity/monster/ZombieVillagerEntity;conversionTime:I",
                 opcode = Opcodes.GETFIELD
             )
         )

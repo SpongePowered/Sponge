@@ -45,13 +45,8 @@ public abstract class LookAtGoalMixin_API extends Goal implements LookAtGoal {
     @Shadow @Final @Mutable protected float maxDistance;
     @Shadow @Final @Mutable private float chance;
 
-    @Nullable private EntityType api$watchedType;
-
     @Override
     public Class<? extends Living> getWatchedClass() {
-        if (this.api$watchedType == null) {
-            this.api$watchedType = SpongeImpl.getRegistry().getTranslated(this.watchedClass, EntityType.class);
-        }
         return (Class<? extends Living>) this.watchedClass;
     }
 

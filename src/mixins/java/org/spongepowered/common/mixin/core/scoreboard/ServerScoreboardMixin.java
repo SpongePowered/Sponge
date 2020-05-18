@@ -36,6 +36,7 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.scoreboard.ServerScoreboard.Action;
 import net.minecraft.server.management.PlayerList;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -50,8 +51,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.accessor.scoreboard.ScorePlayerTeamAccessor;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
-import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
@@ -83,7 +84,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         return objective.getObjectiveFor(this);
     }
 
-    @Inject(method = "onScoreObjectiveAdded", at = @At("RETURN"))
+    @Inject(method = "onObjectiveAdded", at = @At("RETURN"))
     private void impl$UpdatePlayersScoreObjective(final ScoreObjective objective, final CallbackInfo ci) {
         this.bridge$sendToPlayers(new SScoreboardObjectivePacket(objective, Constants.Scoreboards.OBJECTIVE_PACKET_ADD));
     }
@@ -157,7 +158,8 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             for (final ScoreObjective objective: this.getScoreObjectives()) {
                 player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 0));
                 for (final Score score: this.getSortedScores(objective)) {
-                    player.connection.sendPacket(new SUpdateScorePacket(score));
+                    final SUpdateScorePacket packetIn = new SUpdateScorePacket(Action.CHANGE, score.getObjective().getName(), score.getPlayerName(), score.getScorePoints());
+                    player.connection.sendPacket(packetIn);
                 }
             }
 
@@ -194,25 +196,25 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
 
-    @Redirect(method = "onScoreUpdated",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "onScoreChanged",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void onUpdateScoreValue(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "onScoreUpdated", at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z", remap = false))
+    @Redirect(method = "onScoreChanged", at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z", remap = false))
     private boolean onUpdateScoreValue(final Set<?> set, final Object object) {
         return true;
     }
 
-    @Redirect(method = "broadcastScoreUpdate(Ljava/lang/String;)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "onPlayerRemoved",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnRemoval(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "broadcastScoreUpdate(Ljava/lang/String;Lnet/minecraft/scoreboard/ScoreObjective;)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "onPlayerScoreRemoved",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnRemovalOfObjective(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
@@ -223,49 +225,49 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }*/
 
     @Redirect(method = "addPlayerToTeam",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnPlayerAdd(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
     @Redirect(method = "removePlayerFromTeam",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnPlayerRemoval(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "onObjectiveDisplayNameChanged",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "onObjectiveChanged",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updatePlayersOnObjectiveDisplay(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "onObjectiveDisplayNameChanged",
+    @Redirect(method = "onObjectiveChanged",
         at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z", remap = false))
     private boolean impl$alwaysReturnTrueForObjectivesDisplayName(final Set<ScoreObjective> set, final Object object) {
         return true;
     }
 
-    @Redirect(method = "onScoreObjectiveRemoved",
+    @Redirect(method = "onObjectiveRemoved",
         at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z", remap = false))
     private boolean impl$alwaysReturnTrueForObjectiveRemoval(final Set<ScoreObjective> set, final Object object) {
         return true;
     }
 
-    @Redirect(method = "broadcastTeamCreated",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "onTeamAdded",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updateAllPlayersOnTeamCreation(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "broadcastTeamInfoUpdate",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "onTeamChanged",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updateAllPlayersOnTeamInfo(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "broadcastTeamRemove",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "onTeamRemoved",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private void impl$updateAllPlayersOnTeamRemoval(final PlayerList manager, final IPacket<?> packet) {
         this.bridge$sendToPlayers(packet);
     }

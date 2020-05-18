@@ -44,12 +44,14 @@ import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 @Mixin(AbstractArrowEntity.class)
 public abstract class AbstractArrowEntityMixin extends EntityMixin {
 
-    @Shadow public Entity shootingEntity;
+    @Shadow public UUID shootingEntity;
     @Shadow private int ticksInAir;
     @Shadow private double damage;
     @Shadow protected boolean inGround;

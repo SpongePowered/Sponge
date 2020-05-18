@@ -78,7 +78,7 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
     @Shadow public ServerPlayNetHandler connection;
 
     @Shadow public abstract void shadow$takeStat(Stat<?> stat);
-    @Shadow public abstract ServerWorld shadow$func_71121_q();
+    @Shadow public abstract ServerWorld shadow$getServerWorld();
     @Shadow public abstract boolean shadow$isSpectator();
     // @formatter:on
 
@@ -203,7 +203,7 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
             // Sponge end
 
             if (this.shadow$isSleeping()) {
-                this.shadow$func_71121_q().getChunkProvider().sendToTrackingAndSelf((ServerPlayerEntity) (Object) this, new SAnimateHandPacket((ServerPlayerEntity) (Object) this, 2));
+                this.shadow$getServerWorld().getChunkProvider().sendToTrackingAndSelf((ServerPlayerEntity) (Object) this, new SAnimateHandPacket((ServerPlayerEntity) (Object) this, 2));
             }
 
             super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);

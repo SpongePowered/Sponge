@@ -39,8 +39,8 @@ public abstract class MinecartCommandBlockEntityMixin_API extends AbstractMineca
     @Shadow public abstract CommandBlockLogic getCommandBlockLogic();
 
     @Override
-    public String getName() {
-        return this.getCommandBlockLogic().getName();
+    public String getIdentifier() {
+        return this.getCommandBlockLogic().getName().getString();
     }
 
     @Override

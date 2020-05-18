@@ -38,10 +38,10 @@ public abstract class SScoreboardObjectivePacketMixin {
         method = "<init>(Lnet/minecraft/scoreboard/ScoreObjective;I)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/IScoreCriteria;getRenderType()Lnet/minecraft/scoreboard/IScoreCriteria$EnumRenderType;"
+            target = "Lnet/minecraft/scoreboard/ScoreObjective;getRenderType()Lnet/minecraft/scoreboard/ScoreCriteria$RenderType;"
         )
     )
-    private ScoreCriteria.RenderType spongeImpl$UseScoreObjectiveRenderType(final ScoreCriteria iScoreCriteria, final ScoreObjective objective,
+    private ScoreCriteria.RenderType spongeImpl$UseScoreObjectiveRenderType(final ScoreObjective iScoreCriteria, final ScoreObjective objective,
         final int action) {
         return objective.getRenderType();
     }

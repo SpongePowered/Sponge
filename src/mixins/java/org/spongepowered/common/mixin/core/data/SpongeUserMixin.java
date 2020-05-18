@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.data;
 
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -37,11 +36,10 @@ import javax.annotation.Nullable;
 @Mixin(value = SpongeUser.class, remap = false)
 public abstract class SpongeUserMixin implements DataCompoundHolder {
 
-    @Shadow public abstract boolean isInitialized();
     @Shadow @Nullable private CompoundNBT nbt;
 
     @Override
-    public boolean data$hasRootCompound() {
+    public boolean data$hasSpongeCompound() {
         if (this.nbt == null) {
             return false;
         }
@@ -49,7 +47,7 @@ public abstract class SpongeUserMixin implements DataCompoundHolder {
     }
 
     @Override
-    public CompoundNBT data$getRootCompound() {
+    public CompoundNBT data$getSpongeCompound() {
         if (this.nbt == null) {
             return new CompoundNBT();
         }

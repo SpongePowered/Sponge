@@ -22,40 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.api.text;
+package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import org.spongepowered.api.text.TranslatableText;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.block.Block;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.api.text.TextBridge;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
-@Mixin(value = TranslatableText.class, remap = false)
-public abstract class TranslatableTextMixin extends TextMixin {
+import java.util.Optional;
 
-    @Shadow @Final Translation translation;
-    @Shadow @Final ImmutableList<Object> arguments;
+import javax.annotation.Nullable;
+
+@Mixin(value = {
+        Block.Properties.class,
+        Block.class
+})
+public abstract class DyeColorBlockPropertiesMixin implements DyeColorBlockBridge {
+
+    @Nullable private DyeColor impl$dyeColor;
 
     @Override
-    protected TextComponent createComponent() {
-        return new TranslationTextComponent(this.translation.getId(), this.unwrapArguments(this.arguments));
+    public void bridge$setDyeColor(DyeColor dyeColor) {
+        this.impl$dyeColor = dyeColor;
     }
 
-    private Object[] unwrapArguments(final ImmutableList<Object> args) {
-        final Object[] result = new Object[args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            final Object arg = args.get(i);
-            if (arg instanceof TextBridge) {
-                result[i] = ((TextBridge) arg).bridge$toComponent();
-            } else {
-                result[i] = arg;
-            }
-        }
-        return result;
+    @Override
+    public Optional<DyeColor> bridge$getDyeColor() {
+        return Optional.ofNullable(this.impl$dyeColor);
     }
 
 }

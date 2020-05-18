@@ -40,7 +40,7 @@ public abstract class ShulkerBulletEntityMixin extends EntityMixin {
     @Inject(method = "bulletHit", at = @At("HEAD"), cancellable = true)
     private void onBulletHitBlock(final RayTraceResult result, final CallbackInfo ci) {
         if (!this.world.isRemote) {
-            if (SpongeCommonEventFactory.handleCollideImpactEvent((net.minecraft.entity.Entity) (Object) this, ((Projectile) this).getShooter(), result)) {
+            if (SpongeCommonEventFactory.handleCollideImpactEvent((net.minecraft.entity.Entity) (Object) this, ((Projectile) this).shooter().get(), result)) {
                 ci.cancel();
             }
         }

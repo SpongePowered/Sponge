@@ -65,7 +65,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         this.bridge$setHandle(TextActions.showText(((TextComponentBridge) this.value).bridge$toText()));
                         break;
                     case SHOW_ITEM:
-                        this.bridge$setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(this.loadNbt()))));
+                        this.bridge$setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(net.minecraft.item.ItemStack.read(this.loadNbt()))));
                         break;
                     case SHOW_ENTITY:
                         CompoundNBT nbt = this.loadNbt();

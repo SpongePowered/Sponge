@@ -22,23 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.api.text;
+package org.spongepowered.common.bridge.block;
 
-import net.minecraft.util.text.SelectorTextComponent;
-import net.minecraft.util.text.TextComponent;
-import org.spongepowered.api.text.SelectorText;
-import org.spongepowered.api.text.selector.Selector;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.data.type.DyeColor;
 
-@Mixin(value = SelectorText.class, remap = false)
-public abstract class SelectorTextMixin extends TextMixin {
+import java.util.Optional;
 
-    @Shadow @Final Selector selector;
+public interface DyeColorBlockBridge {
 
-    @Override
-    protected TextComponent createComponent() {
-        return new SelectorTextComponent(this.selector.toPlain());
-    }
+    void bridge$setDyeColor(DyeColor dyeColor);
+    Optional<DyeColor> bridge$getDyeColor();
 }

@@ -131,6 +131,10 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::isUseActiveChunkForCollisions)
             .put("org.spongepowered.common.mixin.optimization.mcp.world.WorldServerMixin_UseActiveChunkForCollisions",
                     OptimizationCategory::isUseActiveChunkForCollisions)
+            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.ChestTileEntityMixin_Optimization_TileEntity",
+                    OptimizationCategory::isOptimizedTileEntityTicking)
+            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.EnderChestTileEntityMixin_Optimization_TileEntity",
+                    OptimizationCategory::isOptimizedTileEntityTicking)
             .build();
 
 }

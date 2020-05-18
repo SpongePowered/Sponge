@@ -112,6 +112,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected ItemStack activeItemStack;
     @Shadow private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
+    @Shadow protected boolean dead;
 
     @Shadow public abstract IAttributeInstance shadow$getAttribute(IAttribute attribute);
     @Shadow public abstract void shadow$setHealth(float health);
@@ -607,8 +608,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 if (!world.isRemote) {
                     final Transform fromTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(initialX, initialY, initialZ));
                     final Transform toTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(this.posX, this.posY, this.posZ));
-
-                    final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform);
+                    org.spongepowered.api.world.World spongeWorld = ((org.spongepowered.api.entity.Entity) this).getWorld();
+                    final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, spongeWorld, spongeWorld);
                     if (event.isCancelled()) {
                         this.posX = initialX;
                         this.posY = initialY;
@@ -635,7 +636,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
             if (!world.isRemote) {
                 final Transform transform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(initialX, initialY, initialZ));
-                final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform);
+                final org.spongepowered.api.world.World<?> spongeWorld = ((org.spongepowered.api.entity.Entity) this).getWorld();
+                final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, spongeWorld, spongeWorld);
                 if (event.isCancelled()) {
                     return false;
                 }

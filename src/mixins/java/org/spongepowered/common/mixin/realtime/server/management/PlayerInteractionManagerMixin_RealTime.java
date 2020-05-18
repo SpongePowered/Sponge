@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.realtime.server.management;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,16 +40,15 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 @Mixin(PlayerInteractionManager.class)
 public abstract class PlayerInteractionManagerMixin_RealTime {
 
-    @Shadow public World world;
-    @Shadow private int curblockDamage;
-
+    @Shadow public ServerWorld world;
+    @Shadow private int ticks;
     @Shadow public ServerPlayerEntity player;
 
     @Redirect(
-        method = "updateBlockRemoving",
+        method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/server/management/PlayerInteractionManager;curblockDamage:I",
+            target = "Lnet/minecraft/server/management/PlayerInteractionManager;ticks:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
@@ -63,11 +62,11 @@ public abstract class PlayerInteractionManagerMixin_RealTime {
     )
     private void realTimeImpl$adjustForRealTimeDiggingTime(final PlayerInteractionManager self, final int modifier) {
         if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.world).bridge$isFake()) {
-            this.curblockDamage = modifier;
+            this.ticks = modifier;
             return;
         }
         final int ticks = (int) ((RealTimeTrackingBridge) this.world.getServer()).realTimeBridge$getRealTimeTicks();
-        this.curblockDamage += ticks;
+        this.ticks += ticks;
     }
 
 }

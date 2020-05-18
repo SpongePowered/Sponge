@@ -77,7 +77,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
     @Override
     public void impl$writeToSpongeCompound(final CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.impl$projectileSource, null);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.impl$projectileSource, (Entity) null);
     }
 
     @Override

@@ -29,6 +29,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.Explosion.Mode;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -112,9 +114,11 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
             return;
         }
 
-        if (!((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_PRIMED && !this.bridge$shouldPrime()) {
+        final boolean isPrimed = this.shadow$getCreeperState() == Constants.Entity.Creeper.STATE_PRIMED;
+
+        if (!isPrimed && state == Constants.Entity.Creeper.STATE_PRIMED && !this.bridge$shouldPrime()) {
             ci.cancel();
-        } else if (((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_IDLE && !this.bridge$shouldDefuse()) {
+        } else if (isPrimed && state == Constants.Entity.Creeper.STATE_IDLE && !this.bridge$shouldDefuse()) {
             ci.cancel();
         } else if (this.shadow$getCreeperState() != state) {
             this.impl$stateDirty = true;
@@ -137,11 +141,10 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
         }
     }
 
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;createExplosion"
-                                                                      + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;"))
+    @Redirect(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"))
     @Nullable
     private net.minecraft.world.Explosion onExplode(final net.minecraft.world.World world, final Entity self, final double x,
-        final double y, final double z, final float strength, final boolean smoking) {
+        final double y, final double z, final float strength, final Mode mode) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(Location.of((World) world, new Vector3d(x, y, z)))
                 .sourceExplosive(((Creeper) this))
@@ -157,7 +160,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
     @Inject(method = "explode", at = @At("RETURN"))
     private void postExplode(final CallbackInfo ci) {
         if (this.impl$detonationCancelled) {
-            this.impl$detonationCancelled = this.isDead = false;
+            this.impl$detonationCancelled = this.dead = false;
         }
     }
 

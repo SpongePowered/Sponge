@@ -41,7 +41,7 @@ public abstract class MobEntityMixin_RealTime extends LivingEntityMixin_RealTime
         method = "updateEntityActionState",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/EntityLiving;idleTime:I",
+            target = "Lnet/minecraft/entity/MobEntity;idleTime:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
@@ -49,7 +49,6 @@ public abstract class MobEntityMixin_RealTime extends LivingEntityMixin_RealTime
             to = @At(
                 value = "CONSTANT",
                 args = "stringValue=checkDespawn"
-
             )
         )
     )

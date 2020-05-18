@@ -57,6 +57,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.accessor.inventory.container.SlotAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -142,8 +143,13 @@ public final class PacketPhaseUtil {
             slotId = (player.inventory.mainInventory.size() + PlayerInventory.getHotbarSize());
         } else {
             player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
-            final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
-            slotId = slot.slotNumber;
+            // TODO check if window id -2 and slotid = player.inventory.currentItem works instead of this:
+            for (Slot containerSlot : player.openContainer.inventorySlots) {
+                if (containerSlot.inventory == player.inventory && ((SlotAccessor) containerSlot).accessor$getSlotIndex() == player.inventory.currentItem) {
+                    slotId = containerSlot.slotNumber;
+                    break;
+                }
+            }
         }
 
         player.openContainer.detectAndSendChanges();

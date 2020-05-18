@@ -22,24 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.item.recipe.smelting;
+package org.spongepowered.common.mixin.invalid.core.api.text;
 
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import org.spongepowered.api.text.LiteralText;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.item.recipe.smelting.CustomSmeltingRecipeIds;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(value = SmeltingRecipe.class, remap = false)
-public interface SmeltingRecipeMixin extends CatalogType {
+@Mixin(value = LiteralText.class, remap = false)
+public abstract class LiteralTextMixin extends TextMixin {
 
-    /**
-     * @author Cybermaxke
-     * @reason Use id's from custom registry
-     */
-    @Overwrite(remap = false)
+    @Shadow @Final String content;
+
     @Override
-    default String getId() {
-        return CustomSmeltingRecipeIds.getDefaultId((SmeltingRecipe) this);
+    protected TextComponent createComponent() {
+        return new StringTextComponent(this.content);
     }
+
 }

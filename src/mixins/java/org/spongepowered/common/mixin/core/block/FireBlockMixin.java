@@ -49,7 +49,7 @@ public abstract class FireBlockMixin extends BlockMixin {
     @Redirect(method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z",
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z",
             ordinal = 1))
     private boolean impl$onFireSpread(final World world, final BlockPos pos, final BlockState state, final int updateFlag) {
         if (!((WorldBridge) world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
@@ -67,7 +67,7 @@ public abstract class FireBlockMixin extends BlockMixin {
     @Inject(method = "catchOnFire",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"),
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"),
         require = 0,
         expect = 0,
         cancellable = true)
@@ -83,7 +83,7 @@ public abstract class FireBlockMixin extends BlockMixin {
     @Inject(method = "catchOnFire",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"),
+            target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"),
         require = 0,
         expect = 0,
         cancellable = true)

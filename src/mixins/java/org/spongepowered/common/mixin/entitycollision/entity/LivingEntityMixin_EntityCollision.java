@@ -45,7 +45,7 @@ public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_Enti
 
     private boolean runningCollideWithNearby = false;
 
-    @Inject(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
+    @Inject(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;collideWithNearbyEntities()V"))
     private void collisions$canUpdateCollisions(CallbackInfo ci) {
         this.runningCollideWithNearby = true;
     }
@@ -53,7 +53,7 @@ public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_Enti
     @Inject(method = "livingTick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V",
+            target = "Lnet/minecraft/entity/LivingEntity;collideWithNearbyEntities()V",
             shift = Shift.AFTER))
     private void collisions$resetCanUpdateCollisions(CallbackInfo ci) {
         this.runningCollideWithNearby = false;

@@ -28,8 +28,6 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.common.launch.SpongeLaunch;
 
-import java.io.IOException;
-
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
 
@@ -108,6 +106,11 @@ public class OptimizationCategory extends ConfigCategory {
                                                                    + "chunks are loaded.")
     private boolean useActiveChunkForCollisions = false;
 
+    @Setting(value = "tileentity-ticking-optimization", comment = "Based on Paper's TileEntity Ticking optimization\n"
+                                                                + "setting this to 'true' prevents unnecessary ticking in Chests and EnderChests\n"
+                                                                + "See https://github.com/PaperMC/Paper/blob/bb4002d82e355f033906fc894cc2320f665ba72d/Spigot-Server-Patches/0022-Optimize-TileEntity-Ticking.patch")
+    private boolean optimizeTileEntityTicking = true;
+
     @Setting(value = "disable-failing-deserialization-log-spam", comment = "Occasionally, some built in advancements, \n" +
             "recipes, etc. can fail to deserialize properly\n" +
             "which ends up potentially spamming the server log\n" +
@@ -184,8 +187,11 @@ public class OptimizationCategory extends ConfigCategory {
         return this.useActiveChunkForCollisions;
     }
 
+    public boolean isOptimizedTileEntityTicking() {
+        return this.optimizeTileEntityTicking;
+    }
+
     public boolean disableFailingAdvancementDeserialization() {
         return this.disableFailingAdvancementDeserialization;
     }
-
 }

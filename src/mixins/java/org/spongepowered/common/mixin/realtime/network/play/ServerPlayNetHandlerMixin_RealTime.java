@@ -46,10 +46,10 @@ public abstract class ServerPlayNetHandlerMixin_RealTime {
     @Shadow public ServerPlayerEntity player;
 
     @Redirect(
-        method = "update",
+        method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/network/NetHandlerPlayServer;chatSpamThresholdCount:I",
+            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;chatSpamThresholdCount:I",
             opcode = Opcodes.PUTFIELD,
             ordinal = 0
         )
@@ -64,10 +64,10 @@ public abstract class ServerPlayNetHandlerMixin_RealTime {
     }
 
     @Redirect(
-        method = "update",
+        method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/network/NetHandlerPlayServer;itemDropThreshold:I",
+            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;itemDropThreshold:I",
             opcode = Opcodes.PUTFIELD, ordinal = 0
         )
     )

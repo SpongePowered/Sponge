@@ -22,33 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.item;
+package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.entity.merchant.IMerchant;
-import net.minecraft.item.MerchantOffer;
-import net.minecraft.item.MerchantOffers;
-import org.spongepowered.api.item.merchant.Merchant;
-import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.item.merchant.TradeOfferListMutator;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.item.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.util.TradeOfferUtil;
-import java.util.List;
-import java.util.Random;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
-@Mixin(MerchantOffers.class)
-public interface MerchantOffersMixin_API extends TradeOfferListMutator {
+@Mixin(Block.Properties.class)
+public abstract class BlockPropertiesMixin {
 
-    @Override
-    default void accept(final Merchant owner, final List<TradeOffer> tradeOffers, final Random random) {
-        final MerchantOffers tempList = new MerchantOffers();
-        for (final TradeOffer offer : tradeOffers) {
-            tempList.add(TradeOfferUtil.toNative(offer));
-        }
-        addMerchantRecipe((IMerchant) owner, tempList, random);
-        tradeOffers.clear();
-        for (final MerchantOffer recipe : tempList) {
-            tradeOffers.add(TradeOfferUtil.fromNative(recipe));
-        }
+    @Inject(method = "create(Lnet/minecraft/block/material/Material;Lnet/minecraft/item/DyeColor;)Lnet/minecraft/block/Block$Properties;",
+            at = @At("RETURN"))
+    private static void impl$onCreate(Material material, DyeColor color, CallbackInfoReturnable<Block.Properties> cir) {
+        final Block.Properties returnValue = cir.getReturnValue();
+        ((DyeColorBlockBridge) returnValue).bridge$setDyeColor((org.spongepowered.api.data.type.DyeColor) (Object) color);
     }
 
 }

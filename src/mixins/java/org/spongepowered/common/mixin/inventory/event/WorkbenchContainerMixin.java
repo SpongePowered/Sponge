@@ -98,7 +98,7 @@ public abstract class WorkbenchContainerMixin {
         List<SlotTransaction> craftPreviewTransactions = container.bridge$getPreviewTransactions();
         if (container.bridge$firePreview() && !craftPreviewTransactions.isEmpty()) {
             // TODO can we just check the craftingInventory variable?
-            final Inventory inv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+            final Inventory inv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
                 SpongeImpl.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.openContainer.getClass().getName());
                 return;

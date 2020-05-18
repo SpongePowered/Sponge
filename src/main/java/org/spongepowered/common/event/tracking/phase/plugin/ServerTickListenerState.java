@@ -46,7 +46,7 @@ final class ServerTickListenerState extends ListenerPhaseState<ServerTickListene
 
     @Override
     public ServerTickListenerContext createNewContext(final PhaseTracker tracker) {
-        return new ServerTickListenerContext(this).addCaptures().player();
+        return new ServerTickListenerContext(this, tracker).addCaptures().player();
     }
 
     @Override

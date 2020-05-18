@@ -41,6 +41,8 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 public class ProjectileSourceSerializer {
 
     // TODO Revisit when persistent containers are implemented.
@@ -50,7 +52,7 @@ public class ProjectileSourceSerializer {
         if (projectileSource instanceof Entity) {
             return new StringNBT(((Entity) projectileSource).getUniqueId().toString());
         }
-        if (projectileSource instanceof BlockProjectileSource) {
+        else if (projectileSource instanceof BlockProjectileSource) {
             return new LongNBT(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).toLong());
         }
         return null;
@@ -76,11 +78,23 @@ public class ProjectileSourceSerializer {
         return UnknownProjectileSource.UNKNOWN;
     }
 
-    public static void writeSourceToNbt(final CompoundNBT compound, ProjectileSource projectileSource, final net.minecraft.entity.Entity potentialEntity) {
+    public static void writeSourceToNbt(final CompoundNBT compound, @Nullable ProjectileSource projectileSource, final net.minecraft.entity.Entity potentialEntity) {
         if (projectileSource == null && potentialEntity instanceof ProjectileSource) {
             projectileSource = (ProjectileSource) potentialEntity;
         }
         final INBT projectileNbt = toNbt(projectileSource);
+        if (projectileNbt != null) {
+            compound.put(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE, projectileNbt);
+        }
+    }
+
+    public static void writeSourceToNbt(final CompoundNBT compound, final ProjectileSource projectileSource, final UUID entityUid) {
+        final INBT projectileNbt;
+        if (projectileSource == null && entityUid != null) {
+            projectileNbt = new StringNBT(entityUid.toString());
+        } else {
+            projectileNbt = toNbt(projectileSource);
+        }
         if (projectileNbt != null) {
             compound.put(Constants.Sponge.Entity.Projectile.PROJECTILE_SOURCE, projectileNbt);
         }

@@ -208,6 +208,18 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     }
 
     @Override
+    public Trigger.Builder<C> from(Trigger<C> value) {
+        this.id = value.getKey().getValue();
+        this.configType = value.getConfigurationType();
+        if (value instanceof SpongeTrigger) {
+            this.constructor = (Function<JsonObject, C>) ((SpongeTrigger) value).constructor;
+            this.eventHandler = (Consumer) ((SpongeTrigger) value).getEventHandler();
+            this.name = ((SpongeTrigger) value).getName();
+        }
+        return this;
+    }
+
+    @Override
     public Trigger.Builder<C> reset() {
         this.configType = null;
         this.constructor = null;

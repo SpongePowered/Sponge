@@ -36,10 +36,10 @@ import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 @Mixin(FilledMapItem.class)
 public abstract class FilledMapItem_Optimization_Map {
 
-    @Redirect(method = "onUpdate",
+    @Redirect(method = "inventoryTick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/storage/MapData;updateVisiblePlayers(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
+            target = "Lnet/minecraft/world/storage/MapData;updateVisiblePlayers(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/item/ItemStack;)V"))
     private void mapOptimization$onUpdateVisiblePlayers(final MapData mapData, final PlayerEntity player, final ItemStack itemStack) {
         ((OptimizedMapDataBridge) mapData).mapOptimizationBridge$updatePlayer(player, itemStack);
     }

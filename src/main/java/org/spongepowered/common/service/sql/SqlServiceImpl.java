@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
@@ -36,7 +37,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.config.SpongeConfigManager;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -50,6 +50,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
@@ -99,7 +100,8 @@ public class SqlServiceImpl implements SqlService, Closeable {
             if (origPath.isAbsolute()) {
                 return origPath.toString();
             }
-            return SpongeConfigManager.getPrivateRoot(plugin).getDirectory().resolve(orig).toAbsolutePath().toString();
+
+            return Sponge.getConfigManager().getPluginConfig(plugin).getDirectory().resolve(orig).toAbsolutePath().toString();
         });
     }
 
@@ -111,28 +113,27 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
     public void buildConnectionCache() {
         this.connectionCache = null;
-        this.connectionCache =
-            Caffeine.newBuilder()
-                    .removalListener(((key, value, cause) -> {
-                        HikariDataSource source = value;
-                        if (source != null) {
-                            source.close();
-                        }
-                    })).build((key) -> {
-                HikariConfig config = new HikariConfig();
-                config.setUsername(key.getUser());
-                config.setPassword(key.getPassword());
-                config.setDriverClassName(key.getDriverClassName());
-                // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing for info on pool sizing
-                config.setMaximumPoolSize((Runtime.getRuntime().availableProcessors() * 2) + 1);
-                config.setLeakDetectionThreshold(60 * 1000);
-                Properties driverSpecificProperties = PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
-                if (driverSpecificProperties != null) {
-                    config.setDataSourceProperties(driverSpecificProperties);
-                }
-                config.setJdbcUrl(key.getAuthlessUrl());
-                return new HikariDataSource(config);
-            });
+        this.connectionCache = Caffeine.newBuilder()
+                .removalListener((RemovalListener<ConnectionInfo, HikariDataSource>) ((key, value, cause) -> {
+                    if (value != null) {
+                        value.close();
+                    }
+                }))
+                .build((key) -> {
+                    HikariConfig config = new HikariConfig();
+                    config.setUsername(key.getUser());
+                    config.setPassword(key.getPassword());
+                    config.setDriverClassName(key.getDriverClassName());
+                    // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing for info on pool sizing
+                    config.setMaximumPoolSize((Runtime.getRuntime().availableProcessors() * 2) + 1);
+                    config.setLeakDetectionThreshold(60 * 1000);
+                    Properties driverSpecificProperties = PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
+                    if (driverSpecificProperties != null) {
+                        config.setDataSourceProperties(driverSpecificProperties);
+                    }
+                    config.setJdbcUrl(key.getAuthlessUrl());
+                    return new HikariDataSource(config);
+                });
     }
     @Override
     public DataSource getDataSource(String jdbcConnection) throws SQLException {
@@ -140,23 +141,14 @@ public class SqlServiceImpl implements SqlService, Closeable {
     }
 
     @Override
-    public DataSource getDataSource(@Nullable Object plugin, String jdbcConnection) throws SQLException {
+    public DataSource getDataSource(PluginContainer plugin, String jdbcConnection) throws SQLException {
         checkNotNull(this.connectionCache);
 
         jdbcConnection = this.getConnectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
-        PluginContainer container = null;
-        if (plugin != null) {
-            container = Sponge.getPluginManager().fromInstance(plugin).orElseThrow(() -> {
-                return new IllegalArgumentException(
-                        "The provided plugin object does not have an associated plugin container "
-                                + "(in other words, is 'plugin' actually your plugin object?");
-
-            });
-        }
-        ConnectionInfo info = ConnectionInfo.fromUrl(container, jdbcConnection);
+        final ConnectionInfo info = ConnectionInfo.fromUrl(plugin, jdbcConnection);
         try {
             return this.connectionCache.get(info);
-        } catch (ExecutionException e) {
+        } catch (CompletionException e) {
             throw new SQLException(e);
         }
     }

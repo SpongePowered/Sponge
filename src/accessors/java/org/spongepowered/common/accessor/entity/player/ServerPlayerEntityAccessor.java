@@ -22,23 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.block;
+package org.spongepowered.common.accessor.entity.player;
 
-import net.minecraft.block.BlockColored;
-import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.block.DyeableBlockBridge;
-import org.spongepowered.common.mixin.core.block.BlockMixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BlockColored.class)
-public abstract class BlockColoredMixin extends BlockMixin implements DyeableBlockBridge {
+@Mixin(ServerPlayerEntity.class)
+public interface ServerPlayerEntityAccessor {
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setColorPropertyOnConstruction(final Material material, final CallbackInfo ci) {
-        this.bridge$setDyeColor(BlockColored.COLOR);
-    }
-
+    @Accessor("enteredNetherPosition") Vec3d accessor$getEnteredNetherPosition();
 }

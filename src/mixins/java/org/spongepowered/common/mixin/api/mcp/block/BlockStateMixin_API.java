@@ -62,6 +62,6 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
     public DataContainer toContainer() {
         return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Block.BLOCK_STATE, this.getId());
+            .set(Constants.Block.BLOCK_STATE, this.getKey().toString());
     }
 }

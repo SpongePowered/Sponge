@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class DataProviderRegistry {
 
@@ -99,11 +100,13 @@ public final class DataProviderRegistry {
         return this.buildDelegate((Key<Value<Object>>) key.key, provider -> filterHolderType(provider, key.holderType));
     }
 
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     private DataProviderLookup loadProviderLookup(Class<?> holderType) {
-        return new DataProviderLookup(this.dataProviders.keySet().stream()
-                .map(key -> this.getProvider(key, holderType))
-                .filter(provider -> !(provider instanceof EmptyDataProvider))
-                .collect(Collectors.toMap(DataProvider::getKey, Function.identity())));
+        final Stream<DataProvider> stream = this.dataProviders.keySet().stream()
+                .map(key -> this.getProvider((Key) key, holderType))
+                .filter(provider -> !(provider instanceof EmptyDataProvider));
+        final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p));
+        return new DataProviderLookup(map);
     }
 
     /**
@@ -143,10 +146,10 @@ public final class DataProviderRegistry {
      */
     public DataProviderLookup buildLookup(Predicate<DataProvider<?,?>> predicate) {
         //noinspection unchecked,rawtypes
-        final Map<Key<?>, DataProvider<?,?>> dataProviders = this.dataProviders.keySet().stream()
-                .map(key -> buildDelegateProvider(key, (List) this.dataProviders.get(key).stream().filter(predicate)))
-                .collect(Collectors.toMap(DataProvider::getKey, Function.identity()));
-        return new DataProviderLookup(dataProviders);
+        final Stream<DataProvider> stream = this.dataProviders.keySet().stream()
+                .map(key -> buildDelegateProvider((Key) key, (List) this.dataProviders.get(key).stream().filter(predicate)));
+        final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p));
+        return new DataProviderLookup(map);
     }
 
     /**

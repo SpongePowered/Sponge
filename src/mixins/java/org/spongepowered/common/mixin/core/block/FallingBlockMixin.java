@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import jdk.internal.org.objectweb.asm.Opcodes;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -39,38 +40,30 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(FallingBlock.class)
 public abstract class FallingBlockMixin {
 
-    @Redirect(method = "checkFallable",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"
-        )
-    )
-    private boolean impl$CheckIfAreaIsLoadedAndIfThrownEventIsntCancelled(final World world, final BlockPos pos, final BlockPos to) {
-        if (world.isAreaLoaded(pos, to) && !((WorldBridge) world).bridge$isFake()) {
-
-            final BlockPos actualPos = pos.add(32, 32, 32);
-            final EntityType fallingBlock = EntityTypes.FALLING_BLOCK.get();
-            final Vector3d position = new Vector3d(actualPos.getX() + 0.5D, actualPos.getY(), actualPos.getZ() + 0.5D);
-            final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(snapshot);
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
-                final Transform worldTransform =Transform.of(position);
-                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), fallingBlock, worldTransform, (org.spongepowered.api.world.World) world);
-                SpongeImpl.postEvent(event);
-                return !event.isCancelled();
+    @Inject(method = "checkFallable", at = @At(value = "JUMP", opcode = Opcodes.IFNE), cancellable = true)
+    public void impl$checkFallable(World worldIn, BlockPos pos, CallbackInfo ci) {
+        final EntityType<org.spongepowered.api.entity.FallingBlock> fallingBlock = EntityTypes.FALLING_BLOCK.get();
+        final Vector3d position = new Vector3d(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
+        final org.spongepowered.api.world.World<?> spongeWorld = (org.spongepowered.api.world.World<?>) worldIn;
+        final BlockSnapshot snapshot = spongeWorld.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(snapshot);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
+            final Transform transform = Transform.of(position);
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), fallingBlock, transform, spongeWorld);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                ci.cancel();
             }
-
         }
-        return false;
     }
 
 }

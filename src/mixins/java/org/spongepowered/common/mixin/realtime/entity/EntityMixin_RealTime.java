@@ -43,7 +43,7 @@ public abstract class EntityMixin_RealTime {
     @Shadow protected int portalCounter;
     @Shadow public int timeUntilPortal;
 
-    @Redirect(method = "onEntityUpdate",
+    @Redirect(method = "baseTick",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/entity/Entity;rideCooldown:I",
@@ -52,7 +52,7 @@ public abstract class EntityMixin_RealTime {
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/Entity;dismountRidingEntity()V"
+                target = "Lnet/minecraft/entity/Entity;stopRiding()V"
             ),
             to = @At(
                 value = "FIELD",
@@ -70,7 +70,7 @@ public abstract class EntityMixin_RealTime {
         this.rideCooldown = Math.max(0, this.rideCooldown - ticks);
     }
 
-    @Redirect(method = "onEntityUpdate",
+    @Redirect(method = "updatePortal",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/entity/Entity;portalCounter:I",

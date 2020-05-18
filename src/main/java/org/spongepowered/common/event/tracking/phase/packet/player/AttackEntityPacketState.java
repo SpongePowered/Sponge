@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -102,7 +103,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
         if (entity instanceof OwnershipTrackedBridge) {
             ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) player);
         } else {
-            ((Entity) entity).setNotifier(player.getUniqueID());
+            ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
         }
 
         context.getCapturedItemsSupplier()

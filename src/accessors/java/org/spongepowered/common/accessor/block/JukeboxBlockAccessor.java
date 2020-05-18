@@ -22,27 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util.registry;
+package org.spongepowered.common.accessor.block;
 
-import net.minecraft.util.registry.Bootstrap;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.block.JukeboxBlock;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(Bootstrap.class)
-public abstract class BootstrapMixin {
+@Mixin(JukeboxBlock.class)
+public interface JukeboxBlockAccessor {
 
-    // TODO(kashike): remove me with 1.13
-    @Redirect(
-        method = "register",
-        at = @At(
-            value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;isDebugEnabled()Z",
-            remap = false
-        )
-    )
-    private static boolean no(final Logger logger) {
-        return false;
-    }
+    @Invoker("dropRecord") void accessor$dropRecord(World worldIn, BlockPos pos);
 }

@@ -74,9 +74,10 @@ abstract class SpongeDataManipulator implements DataManipulator {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public Set<Value.Immutable<?>> getValues() {
         return this.values.entrySet().stream()
-                .map(entry -> Value.immutableOf((Key) entry.getKey(), CopyHelper.copy(entry.getValue())).asImmutable())
+                .map(entry -> (Value.Immutable<?>)Value.immutableOf((Key) entry.getKey(), CopyHelper.copy(entry.getValue())).asImmutable())
                 .collect(ImmutableSet.toImmutableSet());
     }
     

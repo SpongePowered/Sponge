@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.block.entity.EnchantmentTable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -39,12 +40,12 @@ import java.util.Set;
 @Mixin(EnchantingTableTileEntity.class)
 public abstract class EnchantmentTableTileEntityMixin_API extends TileEntityMixin_API implements EnchantmentTable {
 
-    @Shadow private String customName;
+    @Shadow private ITextComponent customname;
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.CUSTOM_NAME, this.customName);
+        container.set(Constants.TileEntity.CUSTOM_NAME, this.customname.getString());
         return container;
     }
 
