@@ -88,6 +88,7 @@ import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
@@ -110,6 +111,7 @@ import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
+import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -292,7 +294,20 @@ public class SpongeCommonEventFactory {
         try {
             final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
             SpongeImpl.postEvent(event);
-            return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    if (entity instanceof Projectile) {
+                        LaunchProjectileEvent launchProjectileEvent =
+                                SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), ((Projectile) entity));
+                        SpongeImpl.postEvent(launchProjectileEvent);
+                        if (launchProjectileEvent.isCancelled()) {
+                            return false;
+                        }
+                    }
+                }
+                return EntityUtil.processEntitySpawnsFromEvent(context, event);
+            }
+            return false;
         } catch (final Exception e) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Exception trying to create a Spawn Event").centre().hr()
                 .addWrapped(
