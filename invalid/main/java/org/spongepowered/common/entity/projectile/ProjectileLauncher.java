@@ -71,12 +71,14 @@ import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -181,9 +183,9 @@ public class ProjectileLauncher {
     }
 
     static <P extends Projectile> Optional<P> doLaunch(World extent, P projectile) {
-        LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectile);
-        SpongeImpl.getGame().getEventManager().post(event);
-        if (!event.isCancelled() && extent.spawnEntity(projectile)) {
+        final SpawnEntityEvent spawnEvent = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), Collections.singletonList(projectile));
+        SpongeImpl.getGame().getEventManager().post(spawnEvent);
+        if (!spawnEvent.isCancelled() && extent.spawnEntity(projectile)) {
             return Optional.of(projectile);
         }
         return Optional.empty();
