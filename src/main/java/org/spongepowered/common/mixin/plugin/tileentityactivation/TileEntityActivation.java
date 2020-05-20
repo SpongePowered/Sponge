@@ -176,7 +176,7 @@ public class TileEntityActivation {
                 }
 
                 final int activationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
-                final int bbActivationRange = (int) Math.pow(activationRange, 2);
+                final int bbActivationRange = activationRange * activationRange;
                 for (EntityPlayerMP player : players) {
                     final Vector3i playerPos = VecHelper.toVector3i(player.getPosition());
                     final int blockDistance = tilePos.distanceSquared(playerPos);
