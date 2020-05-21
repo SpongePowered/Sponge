@@ -28,26 +28,26 @@ import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
 import java.util.List;
 import java.util.Optional;
 
-public class BannerTileEntityPatternsProvider extends GenericMutableDataProvider<BannerTileEntity, List<PatternLayer>> {
+public class BannerTileEntityPatternsProvider extends GenericMutableDataProvider<BannerTileEntity, List<BannerPatternLayer>> {
 
     public BannerTileEntityPatternsProvider() {
-        super(Keys.BANNER_PATTERNS);
+        super(Keys.BANNER_PATTERN_LAYERS);
     }
 
     @Override
-    protected Optional<List<PatternLayer>> getFrom(BannerTileEntity dataHolder) {
+    protected Optional<List<BannerPatternLayer>> getFrom(BannerTileEntity dataHolder) {
         return Optional.of(((BannerTileEntityBridge) dataHolder).bridge$getLayers());
     }
 
     @Override
-    protected boolean set(BannerTileEntity dataHolder, List<PatternLayer> value) {
+    protected boolean set(BannerTileEntity dataHolder, List<BannerPatternLayer> value) {
         @Nullable final World world = dataHolder.getWorld();
         if (world != null && !world.isRemote) { // This avoids a client crash because clientside.
             ((BannerTileEntityBridge) dataHolder).bridge$setLayers(value);
