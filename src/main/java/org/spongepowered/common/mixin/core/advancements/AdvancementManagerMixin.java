@@ -42,7 +42,9 @@ import java.util.Collection;
 @Mixin(AdvancementManager.class)
 public class AdvancementManagerMixin {
 
-    @Redirect(method = "loadCustomAdvancements", at = @At(value = "INVOKE", target = "Ljava/io/File;mkdirs()Z", remap = false))
+    @Redirect(method = "loadCustomAdvancements",
+            at = @At(value = "INVOKE", target = "Ljava/io/File;mkdirs()Z", remap = false)
+    )
     private boolean impl$createDirectory(File dir) {
         return WorldManager.mkdirsIfSaveable(dir);
     }
@@ -52,8 +54,12 @@ public class AdvancementManagerMixin {
         ((PlayerListBridge) SpongeImpl.getServer().getPlayerList()).bridge$reloadAdvancementProgress();
     }
 
-    @Redirect(method = "loadCustomAdvancements", at = @At(value = "INVOKE",
-            target = "Lorg/apache/commons/io/FileUtils;listFiles(Ljava/io/File;[Ljava/lang/String;Z)Ljava/util/Collection;", remap = false))
+    @Redirect(method = "loadCustomAdvancements",
+            at = @At(value = "INVOKE",
+                    target = "Lorg/apache/commons/io/FileUtils;listFiles(Ljava/io/File;[Ljava/lang/String;Z)Ljava/util/Collection;",
+                    remap = false
+            )
+    )
     private Collection<File> impl$listFilesIfDirectoryExists(File directory, String[] extensions, boolean recursive) {
         if (!directory.exists()) {
             return ImmutableSet.of();

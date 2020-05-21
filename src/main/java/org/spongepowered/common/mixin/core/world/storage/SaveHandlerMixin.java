@@ -88,8 +88,8 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/io/File;mkdirs()Z", remap = false))
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private boolean impl$createDirectoryIfSavingFiles(File dir) {
-        IPhaseState state = PhaseTracker.getInstance().getCurrentState();
+    private boolean impl$createDirectoryIfSavingFiles(final File dir) {
+        final IPhaseState state = PhaseTracker.getInstance().getCurrentState();
         if (!state.shouldCreateWorldDirectories(PhaseTracker.getInstance().getCurrentContext())) {
             this.impl$directoriesToCreate.add(dir);
             return false;
@@ -97,10 +97,14 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
         return dir.mkdirs();
     }
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveHandler;setSessionLock()V"))
+    @Redirect(method = "<init>",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/storage/SaveHandler;setSessionLock()V"
+        )
+    )
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void impl$setSessionLockIfCreatingFiles(SaveHandler self) {
-        IPhaseState state = PhaseTracker.getInstance().getCurrentState();
+    private void impl$setSessionLockIfCreatingFiles(final SaveHandler self) {
+        final IPhaseState state = PhaseTracker.getInstance().getCurrentState();
         if (state.shouldCreateWorldDirectories(PhaseTracker.getInstance().getCurrentContext())) {
             this.shadow$setSessionLock();
         }
@@ -108,9 +112,9 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
 
     @Redirect(method = "checkSessionLock",
         at = @At(value = "NEW", target = "java/io/FileInputStream", remap = false))
-    private FileInputStream impl$createSessionLockAndCreateDirectories(File file) throws FileNotFoundException {
+    private FileInputStream impl$createSessionLockAndCreateDirectories(final File file) throws FileNotFoundException {
         if (!file.exists()) {
-            WorldProperties props = Sponge.getServer().getWorldProperties(this.worldDirectory.getName()).get();
+            final WorldProperties props = Sponge.getServer().getWorldProperties(this.worldDirectory.getName()).get();
             if (props.getSerializationBehavior() == SerializationBehaviors.NONE) {
                 throw new IllegalStateException("Should not be saving with SerializationBehaviors.NONE");
             }

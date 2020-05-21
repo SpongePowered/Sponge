@@ -92,7 +92,6 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     @Shadow @Nullable public abstract Chunk loadChunk(int x, int z);
     @Shadow protected abstract void saveChunkExtraData(Chunk chunkIn);
     @Shadow protected abstract void saveChunkData(Chunk chunkIn);
-
     @Shadow public abstract boolean shadow$canSave();
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -254,8 +253,8 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     public boolean tick()
     {
         // Sponge start
-        final SerializationBehavior serializationBehavior = ((WorldProperties) this.world.getWorldInfo()).getSerializationBehavior();
-        if (serializationBehavior != SerializationBehaviors.AUTOMATIC) {
+        final SerializationBehavior behavior = ((WorldProperties) this.world.getWorldInfo()).getSerializationBehavior();
+        if (behavior != SerializationBehaviors.AUTOMATIC) {
             return false;
         }
         // Sponge end
@@ -346,8 +345,8 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
 
     @Inject(method = "saveChunks", at = @At("HEAD"), cancellable = true)
     public void impl$checkSerializationBehaviorForSaveChunks(CallbackInfoReturnable<Boolean> cir) {
-        SerializationBehavior serializationBehavior = ((WorldProperties) this.world.getWorldInfo()).getSerializationBehavior();
-        if (serializationBehavior == SerializationBehaviors.NONE || serializationBehavior == SerializationBehaviors.METADATA_ONLY) {
+        final SerializationBehavior behavior = ((WorldProperties) this.world.getWorldInfo()).getSerializationBehavior();
+        if (behavior == SerializationBehaviors.NONE || behavior == SerializationBehaviors.METADATA_ONLY) {
             cir.setReturnValue(true);
         }
     }

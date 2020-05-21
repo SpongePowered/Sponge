@@ -41,7 +41,7 @@ public abstract class RegionFileCacheMixin {
     @Shadow public static RegionFile getRegionFileIfExists(File worldDir, int chunkX, int chunkZ) {return null;}
 
     /**
-     * @author JBYoshi
+     * @author JBYoshi - January 2, 2020
      * @reason Support for ChunkSerializationBehaviors that don't save chunks:
      * uses getRegionFileIfExists instead of createOrLoadRegionFile to avoid
      * creating new files.

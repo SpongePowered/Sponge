@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-public class SaveHandlerCreationPhase extends GeneralState<SaveHandlerCreationContext> {
+import org.spongepowered.common.event.tracking.PooledPhaseState;
+
+public class SaveHandlerCreationPhase extends PooledPhaseState<SaveHandlerCreationContext> {
 
     @Override
     protected SaveHandlerCreationContext createNewContext() {
