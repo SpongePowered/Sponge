@@ -610,7 +610,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             damage = bridge$applyModDamage((EntityLivingBase) (Object) this, damageSource, damage);
             final float originalDamage = damage; // set after forge hook.
             if (damage <= 0) {
-                damage = 0;
+                return false;
             }
 
             final List<DamageFunction> originalFunctions = new ArrayList<>();
