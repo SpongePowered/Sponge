@@ -27,7 +27,6 @@ package org.spongepowered.common.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.Archetype;
@@ -213,7 +212,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(BaseValue::getKey)
-                .collect(Collectors.toCollection(ReferenceOpenHashSet::new));
+                .collect(Collectors.toSet());
     }
 
     @Override
