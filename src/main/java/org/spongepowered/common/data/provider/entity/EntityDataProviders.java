@@ -194,6 +194,8 @@ import org.spongepowered.common.data.provider.entity.base.EntityFireDamageDelayP
 import org.spongepowered.common.data.provider.entity.base.EntityFireTicksProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvulnerabilityTicksProvider;
 import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityTamedOwnerProvider;
+import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseColorProvider;
+import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseStyleProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityActiveItemProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityBodyRotationsProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityChestRotationProvider;
@@ -797,9 +799,8 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
     }
 
     private void registerHorseEntityData() {
-        throw new UnsupportedOperationException("Implement me");
-//        register(new HorseEntityHorseColorProvider());
-//        register(new HorseEntityHorseStyleProvider());
+        register(new HorseEntityHorseColorProvider());
+        register(new HorseEntityHorseStyleProvider());
     }
 
     private void registerAreaEffectCloudEntityData() {

@@ -25,31 +25,37 @@
 package org.spongepowered.common.data.provider.entity.horse;
 
 import net.minecraft.entity.passive.horse.HorseEntity;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.data.type.SpongeHorseColor;
-import org.spongepowered.common.data.type.SpongeHorseStyle;
-import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
-import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
+import org.spongepowered.common.registry.MappedRegistry;
 
 import java.util.Optional;
 
-public class HorseEntityHorseStyleProvider extends GenericMutableDataProvider<HorseEntity, HorseStyle> {
+public class HorseEntityHorseColorProvider extends GenericMutableDataProvider<HorseEntity, HorseColor> {
 
-    public HorseEntityHorseStyleProvider() {
-        super(Keys.HORSE_STYLE);
+    public HorseEntityHorseColorProvider() {
+        super(Keys.HORSE_COLOR);
     }
 
     @Override
-    protected Optional<HorseStyle> getFrom(HorseEntity dataHolder) {
-        return Optional.of(HorseStyleRegistryModule.getHorseStyle(dataHolder));
+    protected Optional<HorseColor> getFrom(HorseEntity dataHolder) {
+        final Registry<HorseColor> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(HorseColor.class);
+        return Optional.of(((MappedRegistry<HorseColor, Integer>)registry).getReverseMapping(getHorseColor(dataHolder)));
     }
 
     @Override
-    protected boolean set(HorseEntity dataHolder, HorseStyle value) {
-        final SpongeHorseColor color = (SpongeHorseColor) HorseColorRegistryModule.getHorseColor(dataHolder);
-        dataHolder.setHorseVariant((color.getBitMask() | ((SpongeHorseStyle) value).getBitMask()));
+    protected boolean set(HorseEntity dataHolder, HorseColor value) {
+        final int style = HorseEntityHorseStyleProvider.getHorseStyle(dataHolder);
+        dataHolder.setHorseVariant(((SpongeHorseColor) value).getMetadata() | style);
         return true;
     }
+
+    public static int getHorseColor(HorseEntity dataHolder) {
+        return dataHolder.getHorseVariant() & 0xFF;
+    }
+
 }
