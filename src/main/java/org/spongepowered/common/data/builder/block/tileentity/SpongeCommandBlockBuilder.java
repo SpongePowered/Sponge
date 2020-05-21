@@ -26,8 +26,7 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.CommandBlockLogic;
 import net.minecraft.tileentity.CommandBlockTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.CommandBlock;
+import org.spongepowered.api.block.entity.CommandBlock;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.text.SpongeTexts;
@@ -44,16 +43,16 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
     @Override
     protected Optional<CommandBlock> buildContent(final DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(commandBlock -> {
-            if (!container.contains(
-                Constants.TileEntity.CommandBlock.STORED_COMMAND, Constants.TileEntity.CommandBlock.SUCCESS_COUNT, Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT)) {
-                ((TileEntity) commandBlock).remove();
+            if (!container.contains(Constants.TileEntity.CommandBlock.STORED_COMMAND,
+                                    Constants.TileEntity.CommandBlock.SUCCESS_COUNT,
+                                    Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT)) {
                 return Optional.empty();
             }
             final CommandBlockLogic cmdBlockLogic = ((CommandBlockTileEntity) commandBlock).getCommandBlockLogic();
             cmdBlockLogic.setCommand(container.getString(Constants.TileEntity.CommandBlock.STORED_COMMAND).get());
             cmdBlockLogic.setSuccessCount(container.getInt(Constants.TileEntity.CommandBlock.SUCCESS_COUNT).get());
             cmdBlockLogic.setTrackOutput(container.getBoolean(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT).get());
-            if (cmdBlockLogic.shouldTrackOutput()) {
+            if (cmdBlockLogic.shouldReceiveErrors()) {
                 cmdBlockLogic.setLastOutput(SpongeTexts.toComponent(SpongeTexts.fromLegacy(
                         container.getString(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT).get())));
             }

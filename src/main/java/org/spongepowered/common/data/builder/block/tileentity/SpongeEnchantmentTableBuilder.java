@@ -24,38 +24,31 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.SignTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.block.entity.Sign;
-import org.spongepowered.api.data.Keys;
+import net.minecraft.tileentity.EnchantingTableTileEntity;
+import net.minecraft.tileentity.LockableTileEntity;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponent;
+import org.spongepowered.api.block.entity.EnchantmentTable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 
-import java.util.List;
 import java.util.Optional;
 
-public class SpongeSignBuilder extends AbstractTileBuilder<Sign> {
+public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<EnchantmentTable> {
 
-    public SpongeSignBuilder() {
-        super(Sign.class, 1);
+    public SpongeEnchantmentTableBuilder() {
+        super(EnchantmentTable.class, 1);
     }
 
     @Override
-    protected Optional<Sign> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).flatMap(sign1 -> {
-            if (!container.contains(Keys.SIGN_LINES.get().getQuery())) {
-                ((TileEntity) sign1).remove();
-                return Optional.empty();
-            }
-            List<String> rawLines = container.getStringList(Keys.SIGN_LINES.getQuery()).get();
-            List<Text> textLines = SpongeTexts.fromJson(rawLines);
-            for (int i = 0; i < 4; i++) {
-                ((SignTileEntity) sign1).signText[i] = SpongeTexts.toComponent(textLines.get(i));
-            }
-            ((SignTileEntity) sign1).validate();
-            return Optional.of(sign1);
+    protected Optional<EnchantmentTable> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(enchantmentTable -> {
+            final EnchantingTableTileEntity tileEntity = (EnchantingTableTileEntity) enchantmentTable;
+            container.getString(Constants.TileEntity.CUSTOM_NAME).ifPresent(name -> tileEntity.setCustomName(new StringTextComponent(name)));
+            tileEntity.validate();
+            return enchantmentTable;
         });
+
     }
 }

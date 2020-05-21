@@ -24,42 +24,25 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.BrewingStandTileEntity;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.entity.carrier.BrewingStand;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
-import org.spongepowered.api.data.persistence.DataQuery;
+import net.minecraft.tileentity.ChestTileEntity;
+import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStand> {
+public class SpongeChestBuilder extends SpongeLockableBuilder<Chest> {
 
-    public static final DataQuery BREW_TIME_QUERY = DataQuery.of("BrewTime");
-
-    public SpongeBrewingStandBuilder() {
-        super(BrewingStand.class, 1);
+    public SpongeChestBuilder() {
+        super(Chest.class, 1);
     }
 
     @Override
-    protected Optional<BrewingStand> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).map(brewingStand -> {
-            if (!container.contains(BREW_TIME_QUERY)) {
-                throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
-            }
-            // Have to consider custom names as an option
-            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((BrewingStandTileEntity) brewingStand).setName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
-            }
-
-            final BrewingStandData brewingData = Sponge.getDataManager().getManipulatorBuilder(BrewingStandData.class).get().create();
-            brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
-            brewingStand.offer(brewingData);
-
-            ((BrewingStandTileEntity) brewingStand).validate();
-            return brewingStand;
+    protected Optional<Chest> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(chest -> {
+            ((ChestTileEntity) chest).validate();
+            return chest;
         });
     }
 }

@@ -22,30 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.tileentity;
+package org.spongepowered.common.accessor.tileentity;
 
-import net.minecraft.tileentity.DispenserTileEntity;
-import org.spongepowered.api.block.entity.carrier.Dispenser;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.util.Constants;
+import net.minecraft.block.Block;
+import net.minecraft.tileentity.TileEntityType;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+import java.util.Set;
 
-public class SpongeDispenserBuilder extends SpongeLockableBuilder<Dispenser> {
+@Mixin(TileEntityType.class)
+public interface TileEntityTypeAccessor {
 
-    public SpongeDispenserBuilder() {
-        super(Dispenser.class, 1);
-    }
-
-    @Override
-    protected Optional<Dispenser> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).map(dispenser -> {
-            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((DispenserTileEntity) dispenser).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
-            }
-            ((DispenserTileEntity) dispenser).validate();
-            return dispenser;
-        });
-    }
+    @Accessor("validBlocks") Set<Block> accessor$getValidBlocks();
 }

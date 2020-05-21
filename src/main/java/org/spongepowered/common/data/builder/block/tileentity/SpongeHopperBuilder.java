@@ -24,29 +24,33 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.EnchantingTableTileEntity;
-import org.spongepowered.api.block.entity.EnchantmentTable;
+import net.minecraft.tileentity.HopperTileEntity;
+import net.minecraft.util.text.StringTextComponent;
+import org.spongepowered.api.block.entity.carrier.Hopper;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.common.accessor.tileentity.HopperTileEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<EnchantmentTable> {
+public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
 
-    public SpongeEnchantmentTableBuilder() {
-        super(EnchantmentTable.class, 1);
+    public SpongeHopperBuilder() {
+        super(Hopper.class, 1);
     }
 
     @Override
-    protected Optional<EnchantmentTable> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).map(enchantmentTable -> {
-            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((EnchantingTableTileEntity) enchantmentTable).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+    protected Optional<Hopper> buildContent(final DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(hopper -> {
+            Optional<Integer> transferCooldown = container.getInt(Constants.TileEntity.Hopper.TRANSFER_COOLDOWN);
+            if (!transferCooldown.isPresent()) {
+                return Optional.empty();
             }
-            ((EnchantingTableTileEntity) enchantmentTable).validate();
-            return enchantmentTable;
-        });
 
+            ((HopperTileEntityAccessor) hopper).accessor$setTransferCooldown(transferCooldown.get());
+            ((HopperTileEntity) hopper).validate();
+            return Optional.of(hopper);
+        });
     }
 }

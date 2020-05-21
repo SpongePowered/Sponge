@@ -27,11 +27,10 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import net.minecraft.potion.Effect;
 import net.minecraft.tileentity.BeaconTileEntity;
 import org.spongepowered.api.block.entity.carrier.Beacon;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -45,19 +44,17 @@ public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
     @SuppressWarnings("ConstantConditions")
     @Override
     protected Optional<Beacon> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).flatMap(beacon -> {
-            final BeaconData beaconData = new SpongeBeaconData();
+        return super.buildContent(container).map(beacon -> {
             container.getInt(Constants.TileEntity.Beacon.PRIMARY)
                 .map(Effect::get)
                 .map(potion -> (PotionEffectType) potion)
-                .ifPresent(potion -> beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of(potion)));
+                .ifPresent(potion -> beacon.offer(Keys.PRIMARY_EFFECT, potion));
             container.getInt(Constants.TileEntity.Beacon.SECONDARY)
                 .map(Effect::get)
                 .map(potion -> (PotionEffectType) potion)
-                .ifPresent(potion -> beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of(potion)));
-            beacon.offer(beaconData);
+                .ifPresent(potion -> beacon.offer(Keys.SECONDARY_EFFECT, potion));
             ((BeaconTileEntity) beacon).validate();
-            return Optional.of(beacon);
+            return beacon;
         });
     }
 }

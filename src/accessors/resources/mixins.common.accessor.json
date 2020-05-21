@@ -125,6 +125,7 @@
     "tileentity.MobSpawnerTileEntityAccessor",
     "tileentity.SkullTileEntityAccessor",
     "tileentity.StructureBlockTileEntityAccessor",
+    "tileentity.TileEntityTypeAccessor",
     "util.CombatEntryAccessor",
     "util.CombatTrackerAccessor",
     "util.CooldownTracker_CooldownAccessor",

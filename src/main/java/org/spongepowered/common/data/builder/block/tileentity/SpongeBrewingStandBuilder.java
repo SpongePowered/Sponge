@@ -24,31 +24,32 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityNote;
-import org.spongepowered.api.block.tileentity.Note;
+import net.minecraft.tileentity.BrewingStandTileEntity;
+import org.spongepowered.api.block.entity.carrier.BrewingStand;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpongeNoteBuilder extends AbstractTileBuilder<Note> {
+public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStand> {
 
-    public SpongeNoteBuilder() {
-        super(Note.class, 1);
+    public static final DataQuery BREW_TIME_QUERY = DataQuery.of("BrewTime");
+
+    public SpongeBrewingStandBuilder() {
+        super(BrewingStand.class, 1);
     }
 
     @Override
-    protected Optional<Note> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).flatMap(note1 -> {
-            if (!container.contains(Constants.TileEntity.NOTE_ID)) {
-                ((TileEntity) note1).remove();
-                return Optional.empty();
+    protected Optional<BrewingStand> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(brewingStand -> {
+            if (!container.contains(BREW_TIME_QUERY)) {
+                throw new InvalidDataException("The provided container does not contain the data to make a Brewingstand!");
             }
-            ((TileEntityNote) note1).note = container.getInt(Constants.TileEntity.NOTE_ID).get().byteValue();
-            ((TileEntityNote) note1).validate();
-            return Optional.of(note1);
+            brewingStand.offer(Keys.REMAINING_BREW_TIME, container.getInt(BREW_TIME_QUERY).get());
+            ((BrewingStandTileEntity) brewingStand).validate();
+            return brewingStand;
         });
     }
 }

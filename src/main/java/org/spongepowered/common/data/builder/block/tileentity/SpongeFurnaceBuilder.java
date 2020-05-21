@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.FurnaceTileEntity;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.common.accessor.tileentity.AbstractFurnaceTileEntityAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -42,25 +43,24 @@ public class SpongeFurnaceBuilder extends SpongeLockableBuilder<FurnaceBlockEnti
     @Override
     protected Optional<FurnaceBlockEntity> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(furnace -> {
-            final FurnaceTileEntity tileEntityFurnace = (FurnaceTileEntity) furnace;
-            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                tileEntityFurnace.setCustomInventoryName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
-            }
+            final AbstractFurnaceTileEntity furnaceTileEntity = (AbstractFurnaceTileEntity) furnace;
+            final AbstractFurnaceTileEntityAccessor accessor = (AbstractFurnaceTileEntityAccessor) furnace;
 
-            if (!container.contains(Keys.PASSED_BURN_TIME.getQuery(), Keys.MAX_BURN_TIME.getQuery(),
-                    Keys.PASSED_COOK_TIME.getQuery(), Keys.MAX_COOK_TIME.getQuery())) {
-                ((TileEntity) furnace).remove();
+            if (!container.contains(Constants.TileEntity.Furnace.BURN_TIME, Constants.TileEntity.Furnace.BURN_TIME_TOTAL,
+                                    Constants.TileEntity.Furnace.COOK_TIME, Constants.TileEntity.Furnace.COOK_TIME_TOTAL))
+            {
                 return Optional.empty();
             }
-            final int burnTime = container.getInt(Keys.PASSED_BURN_TIME.getQuery()).get();
-            final int maxBurnTime = container.getInt(Keys.MAX_BURN_TIME.getQuery()).get();
-            final int passedCookTime = container.getInt(Keys.PASSED_COOK_TIME.getQuery()).get();
-            final int maxCookTime = container.getInt(Keys.MAX_COOK_TIME.getQuery()).get();
-            tileEntityFurnace.setField(0, maxBurnTime - burnTime);
-            tileEntityFurnace.setField(1, maxBurnTime);
-            tileEntityFurnace.setField(2, passedCookTime);
-            tileEntityFurnace.setField(3, maxCookTime);
-            tileEntityFurnace.markDirty();
+
+            final int burnTime = container.getInt(Constants.TileEntity.Furnace.BURN_TIME).get();
+            final int maxBurnTime = container.getInt(Constants.TileEntity.Furnace.BURN_TIME_TOTAL).get();
+            final int passedCookTime = container.getInt(Constants.TileEntity.Furnace.COOK_TIME).get();
+            final int maxCookTime = container.getInt(Constants.TileEntity.Furnace.COOK_TIME_TOTAL).get();
+            accessor.accessor$setBurnTime(burnTime);
+            accessor.accessor$setRecipesUsed(maxBurnTime);
+            accessor.accessor$setCookTime(passedCookTime);
+            accessor.accessor$setCookTimeTotal(maxCookTime);
+            furnaceTileEntity.markDirty();
             return Optional.of(furnace);
         });
     }

@@ -24,28 +24,39 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.tileentity.DropperTileEntity;
-import org.spongepowered.api.block.entity.carrier.Dropper;
+import net.minecraft.tileentity.SignTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.block.entity.Sign;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
+import java.util.List;
 import java.util.Optional;
 
-public class SpongeDropperBuilder extends SpongeLockableBuilder<Dropper> {
+public class SpongeSignBuilder extends AbstractTileBuilder<Sign> {
 
-    public SpongeDropperBuilder() {
-        super(Dropper.class, 1);
+    public SpongeSignBuilder() {
+        super(Sign.class, 1);
     }
 
     @Override
-    protected Optional<Dropper> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).map(dropper -> {
-            if (container.contains(Constants.TileEntity.CUSTOM_NAME)) {
-                ((DropperTileEntity) dropper).setCustomName(container.getString(Constants.TileEntity.CUSTOM_NAME).get());
+    protected Optional<Sign> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(sign -> {
+            if (!container.contains(Constants.TileEntity.SIGN_LINES)) {
+                return Optional.empty();
             }
-            ((DropperTileEntity) dropper).validate();
-            return dropper;
+            final SignTileEntity tileEntity = (SignTileEntity) sign;
+            final List<String> rawLines = container.getStringList(Constants.TileEntity.SIGN_LINES).get();
+            final List<Text> textLines = SpongeTexts.fromJson(rawLines);
+            for (int i = 0; i < 4; i++) {
+                tileEntity.signText[i] = SpongeTexts.toComponent(textLines.get(i));
+            }
+            tileEntity.validate();
+            return Optional.of(sign);
         });
     }
 }

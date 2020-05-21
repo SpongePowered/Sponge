@@ -25,17 +25,21 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.inventory.IInventory;
+import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.block.entity.carrier.CarrierBlockEntity;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeLockableBuilder<T extends CarrierBlockEntity> extends AbstractTileBuilder<T> {
+public abstract class SpongeLockableBuilder<T extends CarrierBlockEntity> extends AbstractTileBuilder<T> {
 
     protected SpongeLockableBuilder(Class<T> clazz, int version) {
         super(clazz, version);
@@ -44,19 +48,19 @@ public class SpongeLockableBuilder<T extends CarrierBlockEntity> extends Abstrac
     @Override
     protected Optional<T> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(lockable -> {
-            if (!container.contains(Constants.TileEntity.ITEM_CONTENTS)) {
-                ((TileEntity) lockable).remove();
+            final Optional<List<DataView>> contents = container.getViewList(Constants.TileEntity.ITEM_CONTENTS);
+            if (!contents.isPresent()) {
                 return Optional.empty();
             }
-            List<DataView> contents = container.getViewList(Constants.TileEntity.ITEM_CONTENTS).get();
-            for (DataView content: contents) {
-                net.minecraft.item.ItemStack stack = (net.minecraft.item.ItemStack) content
-                        .getSerializable(Constants.TileEntity.SLOT_ITEM, ItemStack.class).get();
+
+            for (DataView content: contents.get()) {
+                net.minecraft.item.ItemStack stack = ItemStackUtil.toNative(content.getSerializable(Constants.TileEntity.SLOT_ITEM, ItemStack.class).get());
                 ((IInventory) lockable).setInventorySlotContents(content.getInt(Constants.TileEntity.SLOT).get(), stack);
             }
-            if (container.contains(Keys.LOCK_TOKEN.getQuery())) {
-                lockable.offer(Keys.LOCK_TOKEN, container.getString(Keys.LOCK_TOKEN.getQuery()).get());
-            }
+
+            container.getString(Constants.TileEntity.LOCK_CODE).ifPresent(token -> lockable.offer(Keys.LOCK_TOKEN, token));
+            container.getString(Constants.TileEntity.CUSTOM_NAME).ifPresent(name -> ((LockableTileEntity) lockable).setCustomName(new StringTextComponent(name)));
+
             return Optional.of(lockable);
         });
     }

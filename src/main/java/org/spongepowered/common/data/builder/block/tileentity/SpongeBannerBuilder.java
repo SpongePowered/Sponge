@@ -26,15 +26,14 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.Banner;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
-import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.block.entity.Banner;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.ListValue.Mutable;
-import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -48,30 +47,23 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
 
     @Override
     protected Optional<Banner> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).flatMap(banner1 -> {
+        return super.buildContent(container).flatMap(banner -> {
             if (!container.contains(Constants.TileEntity.Banner.BASE) || !container.contains(Constants.TileEntity.Banner.PATTERNS)) {
-                ((TileEntity) banner1).remove();
                 return Optional.empty();
             }
-            final BannerData bannerData = new SpongeBannerData(); // TODO when banner data is implemented.
 
-            String dyeColorId = container.getString(Constants.TileEntity.Banner.BASE).get();
-            Optional<DyeColor> colorOptional = Sponge.getRegistry().getType(DyeColor.class, dyeColorId);
+            final String dyeColorId = container.getString(Constants.TileEntity.Banner.BASE).get();
+            final Optional<DyeColor> colorOptional = Sponge.getRegistry().getCatalogRegistry().get(DyeColor.class, CatalogKey.resolve(dyeColorId));
             if (!colorOptional.isPresent()) {
                 throw new InvalidDataException("The provided container has an invalid dye color entry!");
             }
-            bannerData.set(Keys.BANNER_BASE_COLOR, colorOptional.get());
+            banner.offer(Keys.DYE_COLOR, colorOptional.get());
 
             // Now we have to get the patterns list
-            final List<PatternLayer> patternsList = container.getSerializableList(Constants.TileEntity.Banner.PATTERNS, PatternLayer.class).get();
-            final Mutable<PatternLayer> patternLayers = bannerData.patternsList();
-            patternsList.forEach(patternLayers::add);
-            bannerData.set(patternLayers);
-            banner1.offer(bannerData);
-            ((BannerTileEntity) banner1).validate();
-            return Optional.of(banner1);
+            final List<BannerPatternLayer> patternsList = container.getSerializableList(Constants.TileEntity.Banner.PATTERNS, BannerPatternLayer.class).get();
+            banner.offer(Keys.BANNER_PATTERN_LAYERS, patternsList);
+            ((BannerTileEntity) banner).validate();
+            return Optional.of(banner);
         });
-
-
     }
 }
