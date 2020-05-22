@@ -17,6 +17,7 @@
         "entity.item.EntityItemFrameMixin_MapOptimization",
         "item.ItemMapMixin_MapOptimization",
         "network.play.server.SPacketChunkDataMixin_Async_Lighting",
+        "pathfinding.PathNavigateMixin_ChunkLoadOptimizations",
         "server.MinecraftServerMixin_MapOptimization",
         "tileentity.TileEntityHopperMixin_HopperOptimization",
         "tileentity.TileEntityMixin_HopperOptimization",
