@@ -119,6 +119,13 @@ public class OptimizationCategory extends ConfigCategory {
             "suppress the exceptions printing out in the log.")
     private boolean disableFailingAdvancementDeserialization = true;
 
+    @Setting(value = "disable-pathfinding-chunk-loads", comment = "In vanilla, pathfinding may result in loading chunks.\n" +
+                    "You can disable that here, which may result in a\n" +
+                    "performance improvement. This may not work well\n" +
+                    "with mods."
+    )
+    private boolean disablePathFindingChunkLoads = false;
+
     public OptimizationCategory() {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -201,6 +208,10 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean disableFailingAdvancementDeserialization() {
         return this.disableFailingAdvancementDeserialization;
+    }
+
+    public boolean disablePathFindingChunkLoads() {
+        return this.disablePathFindingChunkLoads;
     }
 
 }

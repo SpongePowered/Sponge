@@ -139,6 +139,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::isUseActiveChunkForCollisions)
             .put("org.spongepowered.common.mixin.optimization.world.WorldServerMixin_UseActiveChunkForCollisions",
                     OptimizationCategory::isUseActiveChunkForCollisions)
+            .put("org.spongepowered.common.mixin.optimization.pathfinding.PathNavigateMixin_ChunkLoadOptimizations",
+                    OptimizationCategory::disablePathFindingChunkLoads)
             .build();
 
 }
