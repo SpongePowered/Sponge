@@ -229,7 +229,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {
                 ((LivingEntity)targetEntity).knockBack((MobEntity) (Object) this, (float) knockbackModifier * 0.5F,
                     MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F)), -MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F)));
-                this.setMotion(this.getMotion().mul(0.6D, 1.0D, 0.6D));
+                this.shadow$setMotion(this.shadow$getMotion().mul(0.6D, 1.0D, 0.6D));
             }
 
             int j = EnchantmentHelper.getFireAspectModifier((MobEntity) (Object) this);
@@ -251,7 +251,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
                 }
             }
 
-            this.applyEnchantments((MobEntity) (Object) this, targetEntity);
+            this.shadow$applyEnchantments((MobEntity) (Object) this, targetEntity);
         }
 
         return attackSucceeded;

@@ -136,6 +136,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public DimensionType dimension;
     @Shadow private boolean invulnerable;
     @Shadow public float prevRotationYaw;
+    @Shadow protected int portalCounter;
+    @Shadow public boolean forceSpawn;
 
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
@@ -161,8 +163,9 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract boolean shadow$isPassenger();
     @Shadow public abstract void shadow$setPositionAndUpdate(double x, double y, double z);
     @Shadow public abstract int shadow$getMaxAir();
+    @Shadow protected abstract void shadow$applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);
 
-    @Shadow protected int portalCounter;@Shadow protected abstract void applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);@Shadow public abstract void setMotion(Vec3d motionIn);@Shadow public abstract Vec3d getMotion();@Shadow public boolean forceSpawn;private boolean impl$isConstructing = true;
+    private boolean impl$isConstructing = true;
     @Nullable private Text impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
     private boolean impl$trackedInWorld = false;
