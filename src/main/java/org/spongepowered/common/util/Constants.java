@@ -1359,4 +1359,10 @@ public final class Constants {
             }
         }
     }
+
+    public static class GZip {
+        public static final int GZIP_BYTE_1 = 0x1F;
+        public static final int GZIP_BYTE_2 = 0x8B;
+    }
+
 }
