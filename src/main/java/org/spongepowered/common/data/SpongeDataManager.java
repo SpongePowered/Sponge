@@ -38,6 +38,7 @@ import net.minecraft.util.registry.Registry;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManager;
@@ -55,6 +56,8 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
@@ -98,10 +101,13 @@ public final class SpongeDataManager implements DataManager {
     // Content updaters
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap = new IdentityHashMap<>();
 
-
     static boolean allowRegistrations = true;
     private List<DataContentUpdater> customDataUpdaters = new ArrayList<>();
 
+    private final Map<PluginContainer, List<SpongeDataRegistration>> pluginRegistrations = new IdentityHashMap<>();
+    private final Map<Key<?>, SpongeDataRegistration> registrationByKey = new HashMap<>();
+    private final Map<String, SpongeDataRegistration> legacyRegistrations = new HashMap<>();
+    private List<KeyBasedDataListener<?>> keyListeners = new ArrayList<>();
 
     public static SpongeDataManager getInstance() {
         return INSTANCE;
@@ -207,7 +213,18 @@ public final class SpongeDataManager implements DataManager {
 
     public static void finalizeRegistration() {
         allowRegistrations = false;
-        registerKeyListeners();
+        SpongeDataManager.getInstance().registerKeyListeners();
+    }
+
+    private void registerKeyListeners() {
+        this.keyListeners.forEach(this::registerKeyListener0);
+        this.keyListeners.clear();
+        this.keyListeners = null;
+    }
+
+    private void registerKeyListener0(KeyBasedDataListener<?> listener) {
+        final EventManager eventManager = Sponge.getEventManager();
+        eventManager.registerListener(listener.getOwner(), ChangeDataHolderEvent.ValueChange.class, listener);
     }
 
     @Override
@@ -250,23 +267,25 @@ public final class SpongeDataManager implements DataManager {
     void validateRegistration(SpongeDataRegistration registration) {
         Preconditions.checkState(allowRegistrations);
 
-        CatalogKey key = registration.key;
-        PluginContainer plugin = registration.plugin;
+        // TODO do we want this?
+        Preconditions.checkState(registration.key.getNamespace().equals(registration.plugin.getId()), "Registration namespace not matchin plugin id");
 
-        Map<Key, DataProvider> dataProviderMap = registration.dataProviderMap;
-        Map<TypeToken, DataStore> dataStoreMap = registration.dataStoreMap;
-        List<Key<?>> keys = registration.keys;
-
-        // TODO
+        // Make sure the Keys are not already registered
+        Preconditions.checkState(Collections.disjoint(this.registrationByKey.keySet(), registration.keys), "Duplicate key registration");
+        Preconditions.checkState(Collections.disjoint(this.registrationByKey.keySet(), registration.dataProviderMap.keySet()), "Duplicate key registration");
     }
 
     public static boolean areRegistrationsComplete() {
         return !allowRegistrations;
     }
 
-    private final Map<PluginContainer, List<SpongeDataRegistration>> pluginRegistrations = new IdentityHashMap<>();
-    private final Map<Key<?>, SpongeDataRegistration> registrationByKey = new HashMap<>();
-    private final Map<String, SpongeDataRegistration> legacyRegistrations = new HashMap<>();
+    public <E extends DataHolder> void registerKeyListener(KeyBasedDataListener<E> keyListener) {
+        if (areRegistrationsComplete()) { // TODO do we need actually to wait for listener registration?
+            this.registerKeyListener(keyListener);
+        } else {
+            this.keyListeners.add(keyListener);
+        }
+    }
 
     public void registerDataRegistration(SpongeDataRegistration registration) {
         this.validateRegistration(registration);
@@ -377,6 +396,5 @@ public final class SpongeDataManager implements DataManager {
             }
         }
     }
-
 
 }
