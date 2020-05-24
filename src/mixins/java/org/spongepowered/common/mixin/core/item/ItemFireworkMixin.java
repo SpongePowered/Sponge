@@ -22,20 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.item;
+package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemFirework;
+import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
@@ -57,8 +58,8 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.math.vector.Vector3d;
 
-@Mixin(ItemFirework.class)
-public abstract class ItemFireworkMixin extends Item {
+@Mixin(FireworkRocketItem.class)
+public abstract class ItemFireworkMixin {
 
     /**
      * @author gabizou - June 10th, 2019 - 1.12.2
@@ -79,7 +80,7 @@ public abstract class ItemFireworkMixin extends Item {
         method = "onItemRightClick",
         at = @At(
             value = "NEW",
-            target = "net/minecraft/entity/item/EntityFireworkRocket"
+            target = "net/minecraft/entity/item/FireworkRocketEntity"
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
@@ -101,28 +102,16 @@ public abstract class ItemFireworkMixin extends Item {
      * make sure to notify the player at the end of the packet being
      * processed.
      *
-     * @param player The player using the item
-     * @param worldIn The world
-     * @param pos The block position
-     * @param hand The hand
-     * @param facing The block face being clicked on
-     * @param hitX The hit position
-     * @param hitY The hit position
-     * @param hitZ The hit position
+     * @param context The player using the item
      * @param cir The callback
-     * @param stack The ItemStack used from the hand
      */
     @Inject(method = "onItemUse",
-        at = @At(value = "NEW", target = "net/minecraft/entity/item/EntityFireworkRocket"),
-        locals = LocalCapture.CAPTURE_FAILSOFT,
-        cancellable = true
-    )
-    private void spongeImpl$ThrowPrimeEventsIfCancelled(PlayerEntity player, World worldIn, BlockPos pos, Hand hand, Direction facing,
-        float hitX, float hitY, float hitZ, CallbackInfoReturnable<ActionResultType> cir, ItemStack stack) {
-        if (this.spongeImpl$ThrowConstructPreEvent(worldIn, player, stack)) {
+        at = @At(value = "NEW", target = "net/minecraft/entity/item/FireworkRocketEntity"),
+        cancellable = true)
+    private void spongeImpl$ThrowPrimeEventsIfCancelled(ItemUseContext context, CallbackInfoReturnable<ActionResultType> cir) {
+        if (this.spongeImpl$ThrowConstructPreEvent(context.getWorld(), context.getPlayer(), context.getItem())) {
             cir.setReturnValue(ActionResultType.SUCCESS);
         }
-
     }
 
     /**
@@ -153,19 +142,17 @@ public abstract class ItemFireworkMixin extends Item {
     }
 
     @Inject(method = "onItemUse",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
-    private void spongeImpl$InjectPrimeEventAndCancel(PlayerEntity player, World worldIn, BlockPos pos, Hand hand, Direction facing, float hitX,
-        float hitY, float hitZ, CallbackInfoReturnable<ActionResultType> cir, ItemStack usedItem, FireworkRocketEntity rocket) {
-        if (this.spongeImpl$ThrowPrimeEventAndGetCancel(worldIn, player, rocket, usedItem)) {
+    private void spongeImpl$InjectPrimeEventAndCancel(ItemUseContext context, CallbackInfoReturnable<ActionResultType> cir, ItemStack usedItem, Vec3d vec3d, FireworkRocketEntity rocket) {
+        if (this.spongeImpl$ThrowPrimeEventAndGetCancel(context.getWorld(), context.getPlayer(), rocket, usedItem)) {
             cir.setReturnValue(ActionResultType.SUCCESS);
         }
     }
-
     @Inject(method = "onItemRightClick",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
@@ -194,7 +181,7 @@ public abstract class ItemFireworkMixin extends Item {
         if (((WorldBridge) world).bridge$isFake() ) {
             return false;
         }
-        ((FireworkRocket) rocket).setShooter((Player) player);
+        ((FireworkRocket) rocket).offer(Keys.SHOOTER, (Player) player);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));

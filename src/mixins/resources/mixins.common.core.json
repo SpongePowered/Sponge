@@ -95,6 +95,7 @@
       "entity.projectile.WitherSkullEntityMixin",
       "item.EnderEyeItemMixin",
       "item.FishingRodItemMixin",
+      "item.ItemFireworkMixin",
       "item.ItemMixin",
       "nbt.CompoundNBTMixin",
       "network.LegacyPingHandlerMixin",
