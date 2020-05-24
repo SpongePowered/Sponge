@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 @Mixin({TileEntity.class, Entity.class, SpongeUser.class})
 public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
 
+    // TODO data is never added
     private List<Mutable> impl$manipulators = Lists.newArrayList();
     private List<DataView> impl$failedData = Lists.newArrayList();
 

@@ -722,9 +722,7 @@ public class MemoryDataView implements DataView {
             }
         }
 
-        return this.getUnsafeView(path).flatMap(view -> Sponge.getDataManager().getBuilder(clazz)
-            .flatMap(builder -> builder.build(view))
-        );
+        return this.getUnsafeView(path).flatMap(view -> Sponge.getDataManager().getBuilder(clazz).flatMap(builder -> builder.build(view)));
     }
 
     @SuppressWarnings("unchecked")

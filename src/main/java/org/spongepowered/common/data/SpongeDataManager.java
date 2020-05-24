@@ -24,42 +24,50 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.registry.Registry;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.api.data.DataManipulator.Immutable;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.DataManipulator.Mutable.Factory;
+import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.ImmutableDataBuilder;
-import org.spongepowered.api.data.ImmutableDataHolder;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataSerializable;
+import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
-import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
-import org.spongepowered.common.registry.type.data.KeyRegistryModule;
+import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.registry.MappedRegistry;
+import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +75,7 @@ import java.util.Optional;
 
 @Singleton
 public final class SpongeDataManager implements DataManager {
+    private static final SpongeDataManager INSTANCE = new SpongeDataManager();
 
     private static final TypeToken<CatalogType> catalogTypeToken = TypeToken.of(CatalogType.class);
     private static final TypeToken<DataSerializable> dataSerializableTypeToken = TypeToken.of(DataSerializable.class);
@@ -80,18 +89,10 @@ public final class SpongeDataManager implements DataManager {
     }
 
     // Builders
-    private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
+    private final Map<Class<?>, DataBuilder<?>> builders = new IdentityHashMap<>();
 
 
-    final Map<Class<? extends Mutable<?, ?>>, Factory<?, ?>> builderMap = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
-
-    private final Map<Class<? extends Immutable<?, ?>>, Factory<?, ?>> immutableBuilderMap = new MapMaker()
-        .concurrencyLevel(4)
-        .makeMap();
-
-    private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> immutableDataBuilderMap = new MapMaker()
+    private final Map<Class<? extends DataHolder.Immutable<?>>, DataHolderBuilder.Immutable<?, ?>> immutableDataBuilderMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
     // Content updaters
@@ -99,9 +100,11 @@ public final class SpongeDataManager implements DataManager {
 
 
     static boolean allowRegistrations = true;
+    private List<DataContentUpdater> customDataUpdaters = new ArrayList<>();
 
 
     public static SpongeDataManager getInstance() {
+        return INSTANCE;
     }
 
     @Inject
@@ -111,33 +114,33 @@ public final class SpongeDataManager implements DataManager {
     public <T extends DataSerializable> void registerBuilder(Class<T> clazz, DataBuilder<T> builder) {
         Preconditions.checkNotNull(clazz);
         Preconditions.checkNotNull(builder);
-        if (!this.builders.containsKey(clazz)) {
-            if (!(builder instanceof AbstractDataBuilder || builder instanceof SpongeDataManipulatorBuilder || builder instanceof SpongeImmutableDataManipulatorBuilder)) {
-                SpongeImpl.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
-                                            + "the custom data builder does extend it to gain automated content versioning updates and maintain "
-                                            + "simplicity. The offending builder's class is: {}", builder.getClass());
-            }
-            this.builders.put(clazz, builder);
-        } else {
+        DataBuilder<?> previousBuilder = this.builders.putIfAbsent(clazz, builder);
+        if (previousBuilder != null) {
             SpongeImpl.getLogger().warn("A DataBuilder has already been registered for {}. Attempted to register {} instead.", clazz,
                     builder.getClass());
+        } else if (!(builder instanceof AbstractDataBuilder)) {
+            SpongeImpl.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
+                    + "the custom data builder does extend it to gain automated content versioning updates and maintain "
+                    + "simplicity. The offending builder's class is: {}", builder.getClass());
         }
     }
 
     @Override
     public <T extends DataSerializable> void registerContentUpdater(Class<T> clazz, DataContentUpdater updater) {
         Preconditions.checkNotNull(updater, "DataContentUpdater was null!");
-        if (!this.updatersMap.containsKey(Preconditions.checkNotNull(clazz, "DataSerializable class was null!"))) {
-            this.updatersMap.put(clazz, new ArrayList<>());
-        }
-        final List<DataContentUpdater> updaters = this.updatersMap.get(clazz);
+        Preconditions.checkNotNull(clazz, "DataSerializable class was null!");
+
+        final List<DataContentUpdater> updaters = this.updatersMap.computeIfAbsent(clazz, k -> new ArrayList<>());
         updaters.add(updater);
         Collections.sort(updaters, Constants.Functional.DATA_CONTENT_UPDATER_COMPARATOR);
     }
 
+    public void registerCustomDataContentUpdater(DataContentUpdater updater) {
+        this.customDataUpdaters.add(updater);
+    }
+
     @Override
-    public <T extends DataSerializable> Optional<DataContentUpdater> getWrappedContentUpdater(Class<T> clazz, final int fromVersion,
-            final int toVersion) {
+    public <T extends DataSerializable> Optional<DataContentUpdater> getWrappedContentUpdater(Class<T> clazz, final int fromVersion, final int toVersion) {
         Preconditions.checkArgument(fromVersion != toVersion, "Attempting to convert to the same version!");
         Preconditions.checkArgument(fromVersion < toVersion, "Attempting to backwards convert data! This isn't supported!");
         final List<DataContentUpdater> updaters = this.updatersMap.get(
@@ -145,6 +148,10 @@ public final class SpongeDataManager implements DataManager {
         if (updaters == null) {
             return Optional.empty();
         }
+        return getWrappedContentUpdater(clazz, fromVersion, toVersion, updaters);
+    }
+
+    private static Optional<DataContentUpdater> getWrappedContentUpdater(Class<?> clazz, int fromVersion, int toVersion, List<DataContentUpdater> updaters) {
         ImmutableList.Builder<DataContentUpdater> builder = ImmutableList.builder();
         int version = fromVersion;
         for (DataContentUpdater updater : updaters) {
@@ -167,25 +174,15 @@ public final class SpongeDataManager implements DataManager {
         return Optional.of(new DataUpdaterDelegate(builder.build(), fromVersion, toVersion));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"}) <T extends DataSerializable> void registerBuilderAndImpl(Class<T> clazz,
-      Class<? extends T> implClass, DataBuilder<T> builder) {
-        this.registerBuilder(clazz, builder);
-        this.registerBuilder((Class<T>) implClass, builder);
-    }
-
     @Override
-    @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
+    @SuppressWarnings({"unchecked"})
     public <T extends DataSerializable> Optional<DataBuilder<T>> getBuilder(Class<T> clazz) {
         Preconditions.checkNotNull(clazz);
-        if (this.builders.containsKey(clazz)) {
-            return Optional.of((DataBuilder<T>) this.builders.get(clazz));
-        } else if (this.builderMap.containsKey(clazz)) {
-            return Optional.of((DataBuilder<T>) this.builderMap.get(clazz));
-        } else if (this.immutableDataBuilderMap.containsKey(clazz)) {
-            return Optional.of((DataBuilder<T>) this.immutableDataBuilderMap.get(clazz));
-        } else {
-            return Optional.empty();
+        DataBuilder<?> dataBuilder = this.builders.get(clazz);
+        if (dataBuilder != null) {
+            return Optional.of((DataBuilder<T>) dataBuilder);
         }
+        return Optional.ofNullable((DataBuilder<T>) this.immutableDataBuilderMap.get(clazz));
     }
 
     @Override
@@ -195,64 +192,49 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @Override
-    public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> void register(Class<T> holderClass, B builder) {
-        if (!this.immutableDataBuilderMap.containsKey(Preconditions.checkNotNull(holderClass))) {
-            this.immutableDataBuilderMap.put(holderClass, Preconditions.checkNotNull(builder));
-        } else {
+    public <T extends DataHolder.Immutable<T>, B extends DataHolderBuilder.Immutable<T, B>> void register(Class<T> holderClass, B builder) {
+        final DataHolderBuilder.Immutable<?, ?> previous = this.immutableDataBuilderMap.putIfAbsent(Preconditions.checkNotNull(holderClass), Preconditions.checkNotNull(builder));
+        if (previous != null) {
             throw new IllegalStateException("Already registered the DataUtil for " + holderClass.getCanonicalName());
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ImmutableDataHolder<T>, B extends ImmutableDataBuilder<T, B>> Optional<B> getImmutableBuilder(Class<T> holderClass) {
+    public <T extends DataHolder.Immutable<T>, B extends DataHolderBuilder.Immutable<T, B>> Optional<B> getImmutableBuilder(Class<T> holderClass) {
         return Optional.ofNullable((B) this.immutableDataBuilderMap.get(Preconditions.checkNotNull(holderClass)));
     }
 
     public static void finalizeRegistration() {
         allowRegistrations = false;
-        SpongeManipulatorRegistry.getInstance().bake();
-        KeyRegistryModule.getInstance().registerKeyListeners();
+        registerKeyListeners();
     }
 
     @Override
-    public void registerLegacyManipulatorIds(String legacyId, DataRegistration<?, ?> registration) {
+    public void registerLegacyManipulatorIds(String legacyId, DataRegistration registration) {
         Preconditions.checkState(allowRegistrations);
-        SpongeManipulatorRegistry.getInstance().registerLegacyId(legacyId, registration);
+        final SpongeDataRegistration previous = this.legacyRegistrations.putIfAbsent(legacyId, (SpongeDataRegistration) registration);
+        if (previous != null) {
+            throw new IllegalStateException("Legacy registration id already registered: id" + legacyId + " for registration: " + registration);
+        }
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Mutable<T, I>, I extends Immutable<I, T>> Optional<Factory<T, I>>
-    getManipulatorBuilder(Class<T> manipulatorClass) {
-        return Optional.ofNullable((Factory<T, I>) this.builderMap.get(Preconditions.checkNotNull(manipulatorClass)));
+    public Optional<DataRegistration> getRegistrationForLegacyId(String id) {
+        return Optional.ofNullable(this.legacyRegistrations.get(id));
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Mutable<T, I>, I extends Immutable<I, T>> Optional<Factory<T, I>>
-    getImmutableManipulatorBuilder(Class<I> immutableManipulatorClass) {
-        return Optional.ofNullable((Factory<T, I>) this.immutableBuilderMap.get(Preconditions.checkNotNull(immutableManipulatorClass)));
-    }
-
-    @Deprecated
-    @Override
-    public <T> void registerTranslator(Class<T> objectClass, DataTranslator<T> translator) {
-        Preconditions.checkState(allowRegistrations, "Registrations are no longer allowed");
-        Preconditions.checkArgument(translator.getToken().isSupertypeOf(objectClass),
-                "DataTranslator is not compatible with the target object class: %s", objectClass);
-        DataTranslatorRegistryModule.getInstance().registerAdditionalCatalog(translator);
-    }
-
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     @Override
     public <T> Optional<DataTranslator<T>> getTranslator(Class<T> objectClass) {
-        return DataTranslatorRegistryModule.getInstance().getByClass(objectClass);
+        final Registry<DataTranslator> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(DataTranslator.class);
+        final DataTranslator reverseMapping = ((MappedRegistry<DataTranslator, Class>) registry).getReverseMapping(objectClass);
+        return Optional.ofNullable(reverseMapping);
     }
 
     @Override
-    public Collection<Class<? extends Mutable<?, ?>>> getAllRegistrationsFor(PluginContainer container) {
-        return SpongeManipulatorRegistry.getInstance().getRegistrations(container);
+    public Collection<DataRegistration> getAllRegistrationsFor(PluginContainer container) {
+
+        return Collections.unmodifiableCollection(this.pluginRegistrations.getOrDefault(container, Collections.emptyList()));
     }
 
     @Override
@@ -265,54 +247,136 @@ public final class SpongeDataManager implements DataManager {
         return new MemoryDataContainer(safety);
     }
 
-    public Optional<Factory<?, ?>> getWildManipulatorBuilder(Class<? extends Mutable<?, ?>> manipulatorClass) {
-        return Optional.ofNullable(this.builderMap.get(Preconditions.checkNotNull(manipulatorClass)));
-    }
-
-    public Optional<Factory<?, ?>> getWildBuilderForImmutable(Class<? extends Immutable<?, ?>> immutable) {
-        return Optional.ofNullable(this.immutableBuilderMap.get(Preconditions.checkNotNull(immutable)));
-    }
-
-    <M extends Mutable<M, I>, I extends Immutable<I, M>> void validateRegistration(
-      SpongeDataRegistrationBuilder<M, I> builder) {
+    void validateRegistration(SpongeDataRegistration registration) {
         Preconditions.checkState(allowRegistrations);
-        final Class<M> manipulatorClass = builder.manipulatorClass;
-        final Class<? extends M> implementationClass = builder.implementationData;
-        final Class<I> immutableClass = builder.immutableClass;
-        final Class<? extends I> immutableImplementation = builder.immutableImplementation;
-        final Factory<M, I> manipulatorBuilder = builder.manipulatorBuilder;
-        Preconditions.checkState(!this.builders.containsKey(manipulatorClass), "DataManipulator already registered!");
-        Preconditions.checkState(!this.builderMap.containsKey(manipulatorClass), "DataManipulator already registered!");
-        Preconditions.checkState(!this.builderMap.containsValue(manipulatorBuilder), "DataManipulatorBuilder already registered!");
-        Preconditions.checkState(!this.builders.containsKey(immutableClass), "ImmutableDataManipulator already registered!");
-        Preconditions.checkState(!this.immutableBuilderMap.containsKey(immutableClass), "ImmutableDataManipulator already registered!");
-        Preconditions.checkState(!this.immutableBuilderMap.containsValue(manipulatorBuilder), "DataManipulatorBuilder already registered!");
 
-        if (implementationClass != null) {
-            Preconditions.checkState(!this.builders.containsKey(implementationClass), "DataManipulator implementation already registered!");
-            Preconditions.checkState(!this.builderMap.containsKey(implementationClass), "DataManipulator implementation already registered!");
-        }
-        if (immutableImplementation != null) {
-            Preconditions.checkState(!this.builders.containsKey(immutableImplementation), "ImmutableDataManipulator implementation already registered!");
-            Preconditions.checkState(!this.immutableBuilderMap.containsKey(immutableImplementation), "ImmutableDataManipulator implementation already registered!");
-        }
+        CatalogKey key = registration.key;
+        PluginContainer plugin = registration.plugin;
+
+        Map<Key, DataProvider> dataProviderMap = registration.dataProviderMap;
+        Map<TypeToken, DataStore> dataStoreMap = registration.dataStoreMap;
+        List<Key<?>> keys = registration.keys;
+
+        // TODO
     }
 
     public static boolean areRegistrationsComplete() {
         return !allowRegistrations;
     }
 
-    <M extends Mutable<M, I>, I extends Immutable<I, M>> void registerInternally(
-      SpongeDataRegistration<M, I> registration) {
-        this.builders.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
-        this.builderMap.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
-        if (!registration.getImplementationClass().equals(registration.getManipulatorClass())) {
-            this.builders.put(registration.getImplementationClass(), registration.getDataManipulatorBuilder());
-            this.builderMap.put(registration.getImplementationClass(), registration.getDataManipulatorBuilder());
-        }
-        this.immutableBuilderMap.put(registration.getImmutableManipulatorClass(), registration.getDataManipulatorBuilder());
-        if (!registration.getImmutableImplementationClass().equals(registration.getImmutableManipulatorClass())) {
-            this.immutableBuilderMap.put(registration.getImmutableImplementationClass(), registration.getDataManipulatorBuilder());
+    private final Map<PluginContainer, List<SpongeDataRegistration>> pluginRegistrations = new IdentityHashMap<>();
+    private final Map<Key<?>, SpongeDataRegistration> registrationByKey = new HashMap<>();
+    private final Map<String, SpongeDataRegistration> legacyRegistrations = new HashMap<>();
+
+    public void registerDataRegistration(SpongeDataRegistration registration) {
+        this.validateRegistration(registration);
+
+        this.pluginRegistrations.computeIfAbsent(registration.getPluginContainer(), k -> new ArrayList<>()).add(registration);
+        for (Key<?> key : registration.getKeys()) {
+            this.registrationByKey.put(key, registration);
         }
     }
+
+    private Optional<SpongeDataRegistration> getDataRegistration(Key<?> key) {
+        return Optional.ofNullable(this.registrationByKey.get(key));
+    }
+
+    public Optional<DataProvider<?, ?>> getDataProvider(Key<?> key) {
+        SpongeDataRegistration registration = registrationByKey.get(key);
+        if (registration != null) {
+            return (Optional) registration.getProviderFor(key);
+        }
+        return Optional.empty();
+    }
+
+    public void serializeCustomData(CompoundNBT compound, Object object) {
+        if (object instanceof CustomDataHolderBridge) {
+            final Collection<Mutable> manipulators = ((CustomDataHolderBridge) object).bridge$getCustomManipulators();
+            if (!manipulators.isEmpty()) {
+                final DataHolder dataHolder = (DataHolder) object;
+                final ListNBT manipulatorTagList = new ListNBT();
+                for (DataManipulator.Mutable manipulator : manipulators) {
+// TODO dataproviders?
+//                    manipulator.getKeys().stream().map(this::getDataProvider)
+//                            .filter(Optional::isPresent).map(Optional::get).distinct()
+//                            .forEach(provider -> provider.offer((DataHolder.Mutable) dataHolder, manipulator.get(provider.getKey()).orElse(null)));
+
+                    // Get all data registrations for the keys in the manipulator (this usually should be only one)
+                    manipulator.getKeys().stream().map(this::getDataRegistration)
+                            .filter(Optional::isPresent).map(Optional::get).distinct().forEach(registration -> {
+                    // For each registration attempt to serialize using the datastore for the dataholder
+                        registration.getDataStore(TypeToken.of(dataHolder.getClass())).ifPresent(dataStore -> {
+                            final DataView serialized = dataStore.serialize(manipulator);
+                            if (!serialized.isEmpty()) { // Omit if the datastore did not serialize anything
+                                final DataContainer container = DataContainer.createNew();
+                                // Add Metadata
+                                container.set(Queries.CONTENT_VERSION, Constants.Sponge.CURRENT_CUSTOM_DATA)
+                                         .set(Constants.Sponge.DATA_ID, registration.getKey().toString())
+                                         .set(Constants.Sponge.INTERNAL_DATA, serialized);
+                                manipulatorTagList.add(NbtTranslator.getInstance().translateData(container));
+                            }
+                        });
+                    });
+                }
+                compound.put(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+            } else {
+                compound.remove(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
+            }
+
+            final List<DataView> failedData = ((CustomDataHolderBridge) object).bridge$getFailedData();
+            if (!failedData.isEmpty()) {
+                final ListNBT failedList = new ListNBT();
+                for (final DataView failedDatum : failedData) {
+                    failedList.add(NbtTranslator.getInstance().translateData(failedDatum));
+                }
+                compound.put(Constants.Sponge.FAILED_CUSTOM_DATA, failedList);
+            } else {
+                compound.remove(Constants.Sponge.FAILED_CUSTOM_DATA);
+            }
+        }
+    }
+
+    private DataView updateDataViewForDataManipulator(final DataView dataView) {
+        final int version = dataView.getInt(Queries.CONTENT_VERSION).orElse(1);
+        if (version != Constants.Sponge.CURRENT_CUSTOM_DATA) {
+            final DataContentUpdater contentUpdater = getWrappedContentUpdater(DataManipulator.Mutable.class, version, Constants.Sponge.CURRENT_CUSTOM_DATA, this.customDataUpdaters)
+                    .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " + version));
+            return contentUpdater.update(dataView);
+        }
+        return dataView;
+    }
+
+    public void deserializeCustomData(CompoundNBT compound, Object object) {
+        if (object instanceof CustomDataHolderBridge) {
+            if (compound.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
+                final ListNBT list = compound.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
+                if (!list.isEmpty()) {
+                    final DataHolder dataHolder = (DataHolder) object;
+                    final ImmutableList.Builder<DataView> failed = ImmutableList.builder();
+                    for (INBT inbt : list) {
+                        final DataView dataContainer = this.updateDataViewForDataManipulator(NbtTranslator.getInstance().translate((CompoundNBT) inbt));
+                        final SpongeCatalogRegistry catalogRegistry = SpongeImpl.getRegistry().getCatalogRegistry();
+                        // Then find the registration for deserialization
+                        final Optional<DataRegistration> registration = dataContainer.getString(Constants.Sponge.DATA_ID)
+                                .flatMap(registrationId -> catalogRegistry.get(DataRegistration.class, CatalogKey.resolve(registrationId)));
+                        // Find and attempt to deserialize with the datastore for this dataholder
+                        final Optional<DataStore> dataStore = registration.flatMap(r -> r.getDataStore(TypeToken.of(dataHolder.getClass())));
+                        if (dataStore.isPresent()) {
+                            final DataView internalData = dataContainer.getView(Constants.Sponge.INTERNAL_DATA).orElse(DataContainer.createNew());
+                            final Mutable mutable = dataStore.get().deserialize(internalData);
+                            // Offer all deserialized data to the custom data holder
+                            for (Key k : mutable.getKeys()) {
+                                ((CustomDataHolderBridge) object).bridge$offerCustom(k, mutable.get(k).orElse(null));
+                            }
+                        } else { // If no registration/datastore was found add this to failed data
+                            failed.add(dataContainer);
+                        }
+                    }
+                    ((CustomDataHolderBridge) object).bridge$addFailedData(failed.build());
+                }
+            }
+        }
+    }
+
+
 }

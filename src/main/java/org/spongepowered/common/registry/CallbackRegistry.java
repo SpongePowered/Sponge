@@ -22,39 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.util;
+package org.spongepowered.common.registry;
 
-import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.util.Constants;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.SimpleRegistry;
 
-import java.util.Optional;
+import java.util.function.BiConsumer;
 
-public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
+public class CallbackRegistry<T> extends SimpleRegistry<T> {
 
-    @Override
-    public int getInputVersion() {
-        return Constants.Sponge.CLASS_BASED_CUSTOM_DATA;
+    private final BiConsumer<ResourceLocation, T> callback;
+
+    public CallbackRegistry(BiConsumer<ResourceLocation, T> callback) {
+        this.callback = callback;
     }
 
-    @Override
-    public int getOutputVersion() {
-        return Constants.Sponge.CUSTOM_DATA_WITH_DATA_IDS;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public DataView update(DataView content) {
-        final String className = content.getString(Constants.Sponge.DATA_CLASS).get();
-
-        final Optional<DataRegistration> registration = SpongeDataManager.getInstance().getRegistrationForLegacyId(className);
-        if (!registration.isPresent()) {
-            return content;
-        }
-        content.set(Constants.Sponge.DATA_ID, registration.get().getKey().toString());
-        content.remove(Constants.Sponge.DATA_CLASS);
-        return content;
+    @Override public <V extends T> V register(int id, ResourceLocation name, V instance) {
+        V value = super.register(id, name, instance);
+        callback.accept(name, instance);
+        return value;
     }
 }

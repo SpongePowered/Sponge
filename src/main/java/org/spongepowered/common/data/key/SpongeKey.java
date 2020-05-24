@@ -89,12 +89,6 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
         return this.elementIncludesTester;
     }
 
-    @Override
-    public <H extends DataHolder> void registerEvent(final Class<H> holderFilter,
-        final EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-        // TODO
-    }
-
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
             .add("key", this.key)

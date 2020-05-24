@@ -24,135 +24,75 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataAlreadyRegisteredException;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.DataManipulator.Mutable.Factory;
+import com.google.common.base.Preconditions;
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.DuplicateDataStoreException;
+import org.spongepowered.api.data.DuplicateProviderException;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.annotation.Nullable;
+public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<DataRegistration, DataRegistration.Builder> implements DataRegistration.Builder{
 
-public final class SpongeDataRegistrationBuilder<M extends Mutable<M, I>, I extends Immutable<I, M>>
-        extends SpongeCatalogBuilder<DataRegistration<M, I>, DataRegistration.Builder<M, I>> implements DataRegistration.Builder<M, I> {
-
-    @Nullable Class<M> manipulatorClass;
-    @Nullable Class<I> immutableClass;
-    @Nullable Factory<M, I> manipulatorBuilder;
-    @Nullable PluginContainer container;
-    @Nullable Class<? extends M> implementationData;
-    @Nullable Class<? extends I> immutableImplementation;
-    // These are used internally, not necessarily refactored yet, but will be used to enhance the DataRegistrar.
-    private DataProcessor<M, I> dataProcessor;
-    private List<Key<?>> keys = new ArrayList<>();
-    private AbstractSingleDataSingleTargetProcessor<?, ?, ?, M, I> dualProcessor;
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public  <D extends Mutable<D, C>, C extends Immutable<C, D>> SpongeDataRegistrationBuilder<D, C> dataClass(Class<D> manipulatorClass) {
-        this.manipulatorClass = (Class<M>) Preconditions.checkNotNull(manipulatorClass, "DataManipulator class cannot be null!");
-        return (SpongeDataRegistrationBuilder<D, C>) this;
-    }
+    Map<Key, DataProvider> dataProviderMap = new HashMap<>();
+    Map<TypeToken, DataStore> dataStoreMap = new IdentityHashMap<>();
+    List<Key<?>> keys = new ArrayList<>();
 
     @Override
-    public SpongeDataRegistrationBuilder<M, I> immutableClass(Class<I> immutableDataClass) {
-        Preconditions.checkState(this.manipulatorClass != null, "DataManipulator class must be set prior to setting the immutable variant!");
-        this.immutableClass = Preconditions.checkNotNull(immutableDataClass, "ImmutableDataManipulator class cannot be null!");
+    public DataRegistration.Builder store(DataStore store) throws DuplicateDataStoreException {
+        this.dataStoreMap.put(store.getSupportedToken(), store);
         return this;
     }
 
     @Override
-    public SpongeDataRegistrationBuilder<M, I> builder(Factory<M, I> builder) {
-        this.manipulatorBuilder = Preconditions.checkNotNull(builder, "ManipulatorBuilder cannot be null!");
+    public DataRegistration.Builder provider(DataProvider<?, ?> provider) throws DuplicateProviderException {
+        this.dataProviderMap.put(provider.getKey(), provider);
         return this;
     }
 
     @Override
-    public SpongeDataRegistrationBuilder<M, I> dataImplementation(Class<? extends M> implementation) {
-        Preconditions.checkState(this.manipulatorClass != null, "DataManipulator class must be set prior to setting the immutable variant!");
-        Preconditions.checkArgument(this.manipulatorClass.isAssignableFrom(implementation),
-                "Manipulator implementation class must be a subtype of the manipulator interface!");
-        this.implementationData = implementation;
+    public DataRegistration.Builder key(Key<?> key) {
+        this.keys.add(key);
         return this;
     }
 
     @Override
-    public SpongeDataRegistrationBuilder<M, I> immutableImplementation(Class<? extends I> immutable) {
-        Preconditions.checkState(this.immutableClass != null, "ImmutableDataManipulator class must be set prior to setting the immutable variant!");
-        Preconditions.checkArgument(this.immutableClass.isAssignableFrom(immutable),
-                "Immutable manipulator implementation class must be a subtype of the immutable manipulator interface!");
-        this.immutableImplementation = Preconditions.checkNotNull(immutable);
+    public DataRegistration.Builder key(Key<?> key, Key<?>... others) {
+        this.keys.add(key);
+        Collections.addAll(this.keys, others);
         return this;
-    }
-
-    SpongeDataRegistrationBuilder<M, I> dataProcessor(DataProcessor<M, I> processor) {
-        Preconditions.checkState(this.implementationData != null, "Must be called after an implementation class has been set!");
-        this.dataProcessor = Preconditions.checkNotNull(processor);
-        return this;
-    }
-
-    public SpongeDataRegistrationBuilder<M, I> dualProcessor(AbstractSingleDataSingleTargetProcessor<?, ?, ?, M, I> processor) {
-        Preconditions.checkState(this.implementationData != null, "Must be called after an implementation class has been set!");
-        this.dualProcessor = Preconditions.checkNotNull(processor);
-        return this;
-    }
-
-    SpongeDataRegistrationBuilder<M, I> key(Key<?> key) {
-        Preconditions.checkState(this.implementationData != null, "Must be called after an implementation class has been set!");
-        // TODO - when registration is refactored to expose the sponge provided stuff.
-        return this;
-    }
-
-    SpongeDataRegistrationBuilder<M, I> valueProcessor(ValueProcessor<?, ?> processor) {
-        // TODO - when registration is refactored to expose the sponge provided stuff.
-        return this;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public SpongeDataRegistrationBuilder<M, I> from(DataRegistration<M, I> value) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Cannot set a builder with already created DataRegistrations!");
     }
 
     @Override
-    protected DataRegistration<M, I> build(PluginContainer plugin, String id, Translation name)
-            throws IllegalStateException, IllegalArgumentException, DataAlreadyRegisteredException {
-        Preconditions.checkState(!SpongeDataManager.areRegistrationsComplete(), "Registrations cannot take place at this time!");
-        Preconditions.checkState(this.manipulatorBuilder != null, "ManipulatorBuilder cannot be null!");
-        Preconditions.checkState(this.manipulatorClass != null, "DataManipulator class cannot be null!");
-        Preconditions.checkState(this.immutableClass != null, "ImmutableDataManipulator class cannot be null!");
-        id = plugin.getId() + ':' + id;
-        SpongeManipulatorRegistry.getInstance().validateRegistrationId(id);
-        SpongeDataManager.getInstance().validateRegistration(this);
-        this.container = Sponge.getPluginManager().getPlugin(plugin.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Unknown plugin id: " + plugin.getId()));
-        final SpongeDataRegistration<M, I> registration = new SpongeDataRegistration<>(id, name, this);
-        SpongeDataManager.getInstance().registerInternally(registration);
-        SpongeManipulatorRegistry.getInstance().register(registration);
-        return registration;
+    public DataRegistration.Builder key(Iterable<Key<?>> keys) {
+        keys.forEach(this.keys::add);
+        return this;
     }
 
     @Override
-    public SpongeDataRegistrationBuilder<M, I> reset() {
+    protected DataRegistration build(CatalogKey key) {
+        // TODO restrictions?
+        return new SpongeDataRegistration(key, SpongeImplHooks.getActiveModContainer(), this);
+    }
+
+    @Override
+    public SpongeDataRegistrationBuilder reset() {
         super.reset();
-        this.manipulatorClass = null;
-        this.immutableClass = null;
-        this.manipulatorBuilder = null;
-        this.container = null;
-        this.id = null;
-        this.name = null;
+        this.dataProviderMap = new HashMap<>();
+        this.dataStoreMap = new IdentityHashMap<>();
+        this.keys = new ArrayList<>();
         return this;
     }
 }

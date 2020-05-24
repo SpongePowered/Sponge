@@ -24,116 +24,73 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.DataManipulator.Mutable.Factory;
+import com.google.common.reflect.TypeToken;
+import com.google.inject.internal.cglib.proxy.$Factory;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.UnregisteredKeyException;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.util.Constants;
 
-public final class SpongeDataRegistration<M extends Mutable<M, I>, I extends Immutable<I, M>>
-    implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+public final class SpongeDataRegistration implements DataRegistration {
 
-    private final Class<M> manipulatorClass;
-    private final Class<? extends M> implementationClass;
-    private final Class<I> immutableClass;
-    private final Class<? extends I> immutableImplementationClass;
-    private final Factory<M, I> manipulatorBuilder;
-    private final PluginContainer container;
-    private final String id;
-    private final Translation name;
+    final CatalogKey key;
+    final List<Key<?>> keys;
+    final Map<TypeToken, DataStore> dataStoreMap;
+    final Map<Key, DataProvider> dataProviderMap;
+    final PluginContainer plugin;
 
-    SpongeDataRegistration(String id, Translation name, SpongeDataRegistrationBuilder<M, I> builder) {
-        this.manipulatorClass = Preconditions.checkNotNull(builder.manipulatorClass, "DataManipulator class is null!");
-        this.immutableClass = Preconditions.checkNotNull(builder.immutableClass, "ImmutableDataManipulator class is null!");
-        this.implementationClass = builder.implementationData == null ? this.manipulatorClass : builder.implementationData;
-        this.immutableImplementationClass = builder.immutableImplementation == null ? this.immutableClass : builder.immutableImplementation;
-        this.manipulatorBuilder = Preconditions.checkNotNull(builder.manipulatorBuilder, "DataManipulatorBuilder is null!");
-        this.container = Preconditions.checkNotNull(builder.container, "PluginContainer is null!");
-        this.id = id;
-        this.name = name;
+    SpongeDataRegistration(CatalogKey key, PluginContainer plugin, SpongeDataRegistrationBuilder builder) {
+        this.key = key;
+        this.keys = builder.keys;
+        this.dataStoreMap = builder.dataStoreMap;
+        this.dataProviderMap = builder.dataProviderMap;
+        this.plugin = plugin;
     }
 
     @Override
-    public Class<M> getManipulatorClass() {
-        return this.manipulatorClass;
+    public <V extends Value<E>, E> Optional<DataProvider<V, E>> getProviderFor(Key<V> key) throws UnregisteredKeyException {
+        return Optional.ofNullable(this.dataProviderMap.get(key));
     }
 
     @Override
-    public Class<? extends M> getImplementationClass() {
-        return this.implementationClass;
+    public Optional<DataStore> getDataStore(TypeToken<? extends DataHolder> token) {
+        DataStore dataStore = this.dataStoreMap.get(token);
+        if (dataStore != null) {
+            return Optional.of(dataStore);
+        }
+        for (Map.Entry<TypeToken, DataStore> entry : this.dataStoreMap.entrySet()) {
+            if (entry.getKey().isSupertypeOf(token)) {
+                this.dataStoreMap.put(token, entry.getValue());
+                return Optional.of(entry.getValue());
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
-    public Class<I> getImmutableManipulatorClass() {
-        return this.immutableClass;
+    public Iterable<Key<?>> getKeys() {
+        return this.keys;
     }
 
     @Override
-    public Class<? extends I> getImmutableImplementationClass() {
-        return this.immutableImplementationClass;
-    }
-
-    @Override
-    public Factory<M, I> getDataManipulatorBuilder() {
-        return this.manipulatorBuilder;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
     public PluginContainer getPluginContainer() {
-        return this.container;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name.get();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-        SpongeDataRegistration<?, ?> that = (SpongeDataRegistration<?, ?>) o;
-        return Objects.equal(this.manipulatorClass, that.manipulatorClass)
-               && Objects.equal(this.immutableClass, that.immutableClass)
-               && Objects.equal(this.manipulatorBuilder, that.manipulatorBuilder)
-               && Objects.equal(this.container, that.container)
-               && Objects.equal(this.id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.manipulatorClass, this.immutableClass, this.manipulatorBuilder, this.container, this.id);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("id", this.id)
-            .add("name", this.name)
-            .add("manipulatorClass", this.manipulatorClass)
-            .add("immutableClass", this.immutableClass)
-            .add("manipulatorBuilder", this.manipulatorBuilder)
-            .add("container", this.container)
-            .toString();
-    }
-
-    @Override
-    public int compareTo(SpongeDataRegistration<?, ?> o) {
-        return this.getId().compareTo(o.getId());
+        return this.plugin;
     }
 }

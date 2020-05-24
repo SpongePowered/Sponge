@@ -44,6 +44,7 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import javax.annotation.Nullable;
@@ -93,7 +94,7 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
      * @param compound The SpongeData compound to write to
      */
     protected void bridge$writeToSpongeCompound(final CompoundNBT compound) {
-        throw new UnsupportedOperationException("Implement me");
+        SpongeDataManager.getInstance().serializeCustomData(compound, this);
     }
 
 

@@ -26,6 +26,8 @@
       "block.NoteBlockMixin",
       "block.TNTBlockMixin",
       "common.entity.player.SpongeUserMixin",
+      "data.CustomDataHolderMixin",
+      "data.SpongeUserMixin",
       "dispenser.ProjectileDispenseBehaviorMixin",
       "enchantment.EnchantmentMixin",
       "entity.ActiveChunkReferentMixin",
