@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.data;
+package org.spongepowered.common.mixin.core.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
