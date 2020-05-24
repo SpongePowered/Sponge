@@ -490,11 +490,10 @@ public class SpongeImplHooks {
 
     /**
      * Used in game dictionaries
-     * @param id
-     * @param textualID
+     * @param key
      * @param item
      */
-    public static void registerItemForSpongeRegistry(final int id, final ResourceLocation textualID, final Item item) {
+    public static void registerItemForSpongeRegistry(final ResourceLocation key, final Item item) {
         // todo
     }
 

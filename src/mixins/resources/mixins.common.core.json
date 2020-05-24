@@ -97,6 +97,7 @@
       "item.FishingRodItemMixin",
       "item.ItemFireworkMixin",
       "item.ItemMixin",
+      "item.ItemsMixin",
       "nbt.CompoundNBTMixin",
       "network.LegacyPingHandlerMixin",
       "network.NetworkManagerMixin",
