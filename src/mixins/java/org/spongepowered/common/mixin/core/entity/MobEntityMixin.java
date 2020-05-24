@@ -35,6 +35,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -52,12 +53,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -256,4 +261,56 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
 
         return attackSucceeded;
     }
+
+    @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 16384.0D))
+    private double getHardDespawnRange(final double value) {
+        if (!this.world.isRemote) {
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
+        }
+        return value;
+    }
+
+    // Note that this should inject twice.
+    @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 1024.0D), expect = 2)
+    private double getSoftDespawnRange(final double value) {
+        if (!this.world.isRemote) {
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
+        }
+        return value;
+    }
+
+    @ModifyConstant(method = "checkDespawn", constant = @Constant(intValue = 600))
+    private int getMinimumLifetime(final int value) {
+        if (!this.world.isRemote) {
+            return ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
+        }
+        return value;
+    }
+
+    @Nullable
+    @Redirect(
+            method = "checkDespawn",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/World;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
+    private PlayerEntity impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entity, final double distance) {
+        double bestDistance = -1.0D;
+        PlayerEntity result = null;
+
+        for (final PlayerEntity player : world.getPlayers()) {
+            if (player == null || player.removed || !((PlayerEntityBridge) player).bridge$affectsSpawning()) {
+                continue;
+            }
+
+            final double playerDistance = player.getDistanceSq(entity.posX, entity.posY, entity.posZ);
+
+            if ((distance < 0.0D || playerDistance < distance * distance) && (bestDistance == -1.0D || playerDistance < bestDistance)) {
+                bestDistance = playerDistance;
+                result = player;
+            }
+        }
+
+        return result;
+    }
+
 }
