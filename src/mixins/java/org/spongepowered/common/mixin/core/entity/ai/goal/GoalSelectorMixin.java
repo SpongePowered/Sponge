@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.entity.ai.goal;
+package org.spongepowered.common.mixin.core.entity.ai.goal;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.ai.goal.GoalSelector.EntityAITaskEntry;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.living.Agent;
@@ -47,50 +47,39 @@ import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
 import org.spongepowered.common.event.ShouldFire;
 
-import javax.annotation.Nullable;
-import java.util.Iterator;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @Mixin(GoalSelector.class)
 public abstract class GoalSelectorMixin implements GoalSelectorBridge {
 
-    @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> taskEntries;
-    @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> executingTaskEntries;
-
+    @Shadow @Final private Set<PrioritizedGoal> goals;
     @Nullable private MobEntity owner;
     @Nullable private GoalExecutorType type;
     private boolean initialized;
 
-    @Override
-    public Set<GoalSelector.EntityAITaskEntry> bridge$getTasksUnsafe() {
-        return this.taskEntries;
-    }
-
     /**
      * @author gabizou - February 1st, 2016
+     *
      * Purpose: Rewrites the overwrite to use a redirect when an entry is being added
      * to the task entries. We throw an event for plugins to potentially cancel.
-     *
-     * @param entry
-     * @param priority
-     * @param base
-     * @return
      */
-    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
-    private boolean onAddEntityTask(final Set<GoalSelector.EntityAITaskEntry> set, final Object entry, final int priority, final net.minecraft.entity.ai.goal.Goal base) {
+    @Redirect(method = "addGoal", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
+    private boolean onAddEntityTask(final Set<PrioritizedGoal> goals, final Object task, final int priority, final Goal base) {
         ((GoalBridge) base).bridge$setGoalExecutor((GoalExecutor<?>) this);
         if (!ShouldFire.A_I_TASK_EVENT_ADD || this.owner == null || ((EntityBridge) this.owner).bridge$isConstructing()) {
             // Event is fired in bridge$fireConstructors
-            return set.add(((GoalSelector) (Object) this).new EntityAITaskEntry(priority, base));
+            return goals.add(new PrioritizedGoal(priority, base));
         }
-        final GoalEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(), priority, priority,
-                (GoalExecutor<?>) this, (Agent) this.owner, (Goal<?>) base);
+        final GoalEvent.Add event = SpongeEventFactory.createGoalEventAdd(Sponge.getCauseStackManager().getCurrentCause(), priority, priority,
+                (Agent) this.owner, (GoalExecutor<?>) this, (org.spongepowered.api.entity.ai.goal.Goal<?>) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ((GoalBridge) base).bridge$setGoalExecutor(null);
             return false;
         }
-        return set.add(((GoalSelector) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
+        return goals.add(new PrioritizedGoal(event.getPriority(), base));
     }
 
     @Override
@@ -113,44 +102,34 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
         this.type = type;
     }
 
-
     /**
      * @author Zidane - November 30th, 2015
+     * @author Faithcaio - 2020-05-24 update to 1.14
+     *
      * @reason Integrate Sponge events into the AI task removal.
      *
-     * @param aiBase the base
+     * @param task the base
      */
     @SuppressWarnings({"rawtypes"})
     @Overwrite
-    public void removeTask(final net.minecraft.entity.ai.goal.Goal aiBase) {
-        final Iterator iterator = this.taskEntries.iterator();
-
-        while (iterator.hasNext()) {
-            final GoalSelector.EntityAITaskEntry entityaitaskentry = (GoalSelector.EntityAITaskEntry)iterator.next();
-            final net.minecraft.entity.ai.goal.Goal otherAiBase = entityaitaskentry.action;
-
-            // Sponge start
-            if (otherAiBase.equals(aiBase)) {
-                GoalEvent.Remove event = null;
+    public void removeGoal(final Goal task) {
+        this.goals.removeIf(prioritizedGoal -> {
+            if (prioritizedGoal.getGoal() == task) {
                 if (ShouldFire.A_I_TASK_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
-                    event = SpongeEventFactory.createAITaskEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
-                            (GoalExecutor) this, (Agent) this.owner, (Goal) otherAiBase, entityaitaskentry.priority);
+                    GoalEvent.Remove event = SpongeEventFactory.createGoalEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
+                            (Agent) this.owner, (GoalExecutor) this, (org.spongepowered.api.entity.ai.goal.Goal) task, prioritizedGoal.getPriority());
                     SpongeImpl.postEvent(event);
-                }
-                if (event == null || !event.isCancelled()) {
-
-                    if (entityaitaskentry.using) {
-                        entityaitaskentry.using = false;
-                        otherAiBase.resetTask();
-                        this.executingTaskEntries.remove(entityaitaskentry);
+                    if (event.isCancelled()) {
+                        return false;
                     }
-
-                    iterator.remove();
-                    return;
                 }
+                if (prioritizedGoal.isRunning()) {
+                    prioritizedGoal.resetTask();
+                }
+                return true;
             }
-            // Sponge end
-        }
+            return false;
+        });
     }
 
     /**
@@ -159,12 +138,13 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
      *
      * @param taskEntry1 The task entry to check compatibility
      * @param taskEntry2 The second entry to check compatibility
-     * @return Whehter the two tasks are compatible or "can run at the same time"
+     * @return Whether the two tasks are compatible or "can run at the same time"
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
-    private boolean areTasksCompatible(final GoalSelector.EntityAITaskEntry taskEntry1, final GoalSelector.EntityAITaskEntry taskEntry2) {
-        return (((Goal) taskEntry2.action).canRunConcurrentWith((Goal) taskEntry1.action));
+    // TODO this no longer works
+    private boolean areTasksCompatible(final PrioritizedGoal taskEntry1, final PrioritizedGoal taskEntry2) {
+        return (((org.spongepowered.api.entity.ai.goal.Goal) taskEntry2.getGoal()).canRunConcurrentWith((org.spongepowered.api.entity.ai.goal.Goal) taskEntry1.getGoal()));
     }
 
     @Override
