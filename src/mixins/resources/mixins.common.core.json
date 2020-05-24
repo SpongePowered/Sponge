@@ -35,6 +35,7 @@
       "entity.GrieferBridgeMixin",
       "entity.LivingEntityMixin",
       "entity.MobEntityMixin",
+      "entity.ai.brain.task.FarmTaskMixin",
       "entity.ai.goal.BreakDoorGoalMixin",
       "entity.ai.goal.BreedGoalMixin",
       "entity.ai.goal.EatGrassGoalMixin",

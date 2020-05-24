@@ -22,47 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.entity.ai;
+package org.spongepowered.common.mixin.core.entity.ai.brain.task;
 
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.ai.EntityAIHarvestFarmland;
-import net.minecraft.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.entity.ai.brain.task.FarmTask;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(net.minecraft.entity.ai.EntityAIHarvestFarmland.class)
-public abstract class EntityAIHarvestFarmlandMixin extends MoveToBlockGoal {
-
-    @Shadow @Final private VillagerEntity villager;
-
-    public EntityAIHarvestFarmlandMixin(final CreatureEntity creature, final double a, final int b) {
-        super(creature, a, b);
-    }
+@Mixin(FarmTask.class)
+public abstract class FarmTaskMixin {
 
     /**
      * @author gabizou - April 13th, 2018
      * @reason Forge changes the gamerule method calls, so the old injection/redirect
      * would fail in forge environments. This changes the injection to a predictable
      * place where we still can forcibly call things but still cancel as needed.
-     * 
-     * @param cir
      */
-    @Inject(
-        method = "shouldExecute",
-        at = @At(value = "HEAD"),
-        cancellable = true
-    )
-    private void onCanGrief(final CallbackInfoReturnable<Boolean> cir) {
-        if (this.runDelay <= 0) {
-            if (!((GrieferBridge) this.villager).bridge$canGrief()) {
-                cir.setReturnValue(false);
-            }
+    @Inject(method = "shouldExecute", at = @At(value = "HEAD"), cancellable = true)
+    private void onCanGrief(final CallbackInfoReturnable<Boolean> cir, ServerWorld worldIn, VillagerEntity owner) {
+        if (!((GrieferBridge) owner).bridge$canGrief()) {
+            cir.setReturnValue(false);
         }
     }
 }
