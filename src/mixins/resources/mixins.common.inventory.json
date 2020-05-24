@@ -37,6 +37,7 @@
       "api.inventory.SlotMixin_API",
       "api.viewable.ViewableInventoryMixin_API",
       "event.ContainerMixin",
+      "event.CraftingResultSlotMixin",
       "event.DropperBlockMixin",
       "event.EnchantmentContainerMixin",
       "event.HopperTileEntityMixin",

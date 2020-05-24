@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.inventory.event;
+package org.spongepowered.common.mixin.inventory.event;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -37,9 +37,9 @@ import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.NonNullList;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
@@ -59,12 +59,12 @@ import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridg
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.inventory.event.ContainerMixin;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(CraftingResultSlot.class)
 public abstract class CraftingResultSlotMixin extends Slot {
@@ -96,8 +96,8 @@ public abstract class CraftingResultSlotMixin extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void beforeTake(final PlayerEntity thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
-        if (this.impl$lastRecipe == null || !((IRecipe) this.impl$lastRecipe).matches(this.craftMatrix, thePlayer.world)) {
-            this.impl$lastRecipe = ((CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world));
+        if (this.impl$lastRecipe == null || !((IRecipe) this.impl$lastRecipe).matches(this.field_75239_a, thePlayer.world)) {
+            this.impl$lastRecipe = ((CraftingRecipe) thePlayer.world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, this.field_75239_a, thePlayer.world).orElse(null));
         }
         if (((TrackedContainerBridge) thePlayer.openContainer).bridge$isShiftCrafting()) {
             ((TrackedContainerBridge) thePlayer.openContainer).bridge$detectAndSendChanges(true);
@@ -141,7 +141,7 @@ public abstract class CraftingResultSlotMixin extends Slot {
         ((TrackedInventoryBridge) thePlayer.openContainer).bridge$setCaptureInventory(false);
 
         final Container container = thePlayer.openContainer;
-        final Inventory craftInv = ((Inventory) container).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        final Inventory craftInv = ((Inventory) container).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
             SpongeImpl.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return;
@@ -152,7 +152,7 @@ public abstract class CraftingResultSlotMixin extends Slot {
         final List<SlotTransaction> capturedTransactions = ((TrackedInventoryBridge) container).bridge$getCapturedSlotTransactions();
         for (final Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
             final SlotTransaction trans = iterator.next();
-            Optional<Integer> slotIndex = trans.getSlot().getProperty(InventoryProperties.SLOT_INDEX);
+            Optional<Integer> slotIndex = trans.getSlot().get(Keys.SLOT_INDEX);
             if (slotIndex.isPresent() && slotIndex.get() == 0) {
                 iterator.remove();
                 if (first == null) {
