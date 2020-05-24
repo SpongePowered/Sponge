@@ -127,6 +127,7 @@
       "state.EnumPropertyMixin",
       "state.IntegerPropertyMixin",
       "state.PropertyMixin",
+      "tileentity.BannerTileEntityMixin",
       "tileentity.BeaconTileEntityMixin",
       "tileentity.DispenserTileEntityMixin",
       "tileentity.HopperTileEntityMixin",

@@ -88,20 +88,16 @@ public class ItemStackShieldBannerPatternsProvider extends ItemStackDataProvider
         return true;
     }
 
-    private static BannerPatternLayer layerFromNbt(CompoundNBT layerCompound) {
-        final BannerPatternShape shape = SHAPE_BY_HASHNAME.get(
-                layerCompound.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID));
-        final DyeColor dyeColor = DyeColor.byId(
-                layerCompound.getInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR));
+    public static BannerPatternLayer layerFromNbt(CompoundNBT nbt) {
+        final BannerPatternShape shape = SHAPE_BY_HASHNAME.get(nbt.getString(Constants.TileEntity.Banner.BANNER_PATTERN_ID));
+        final DyeColor dyeColor = DyeColor.byId(nbt.getInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR));
         return BannerPatternLayer.of(shape, (org.spongepowered.api.data.type.DyeColor) (Object) dyeColor);
     }
 
-    private static CompoundNBT layerToNbt(BannerPatternLayer layer) {
-        final CompoundNBT layerCompound = new CompoundNBT();
-        layerCompound.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID,
-                ((BannerPattern) (Object) layer.getShape()).getHashname());
-        layerCompound.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR,
-                ((DyeColor) (Object) layer.getColor()).getId());
-        return layerCompound;
+    public static CompoundNBT layerToNbt(BannerPatternLayer layer) {
+        final CompoundNBT nbt = new CompoundNBT();
+        nbt.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).getHashname());
+        nbt.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((DyeColor) (Object) layer.getColor()).getId());
+        return nbt;
     }
 }

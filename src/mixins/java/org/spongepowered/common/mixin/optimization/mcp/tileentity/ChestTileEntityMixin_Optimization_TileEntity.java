@@ -64,7 +64,7 @@ public abstract class ChestTileEntityMixin_Optimization_TileEntity extends Locka
 
     @Inject(method = "playSound", at = @At("HEAD"), cancellable = true)
     private void impl$onPlaySound(SoundEvent soundIn, CallbackInfo ci) {
-        if (!this.getBlockState().has(ChestBlock.TYPE)) {
+        if (!this.shadow$getBlockState().has(ChestBlock.TYPE)) {
             ci.cancel();
         }
     }
