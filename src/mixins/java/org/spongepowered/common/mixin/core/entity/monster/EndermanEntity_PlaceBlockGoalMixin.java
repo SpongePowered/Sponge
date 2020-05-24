@@ -22,19 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.entity.monster;
+package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockReader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,9 +45,10 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.util.VecHelper;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 @Mixin(targets = "net/minecraft/entity/monster/EndermanEntity$PlaceBlockGoal")
 public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
@@ -80,35 +81,32 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
 
     /**
      * @author gabizou - July 26th, 2018\
-     * @author i509VCB - February 11th, 2020 - 1.14.4 TODO: This needs to be looked at with another eye to make sure this injection isn't stupidly made
+     * @author i509VCB - February 11th, 2020 - 1.14.4
+     * @author Faithcaio - 2020-05-24 - update for 1.14
+     *
      * @reason Makes enderman check for block changes before they can place their blocks.
      * This allows plugins to cancel the event regardless without issue.
      *
      * @param blockState The block state being placed
      * @param world The world
      * @param pos the position
-     * @param toPlace The block being placed
-     * @param old The old state
-     * @param state The new state
+
      * @return True if the state is a full cube, and the event didnt get cancelled
      */
-    @Redirect(method = "func_220836_a",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockState;isNormalCube(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"
-        )
-    )
-    private boolean impl$onPlaceBlockCancel(final BlockState blockState, final World world, final BlockPos pos, final Block toPlace,
-            final BlockState old, final BlockState state) {
-        if (state.isNormalCube(world, pos)) {
+    @Redirect(method = "func_220836_a", at = @At(value = "INVOKE",
+              target = "Lnet/minecraft/block/BlockState;func_224756_o(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"))
+    private boolean impl$onPlaceBlockCancel(final BlockState blockState, final IBlockReader world, final BlockPos pos) {
+        if (blockState.func_224756_o(world, pos)) {
+            // Sponge start
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-                final Location<org.spongepowered.api.world.World> location =
-                    new Location<org.spongepowered.api.world.World>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos));
-                final List<Location<org.spongepowered.api.world.World>> list = new ArrayList<>(1);
+                final Location location = Location.of((World<?>) world, VecHelper.toVector3i(pos));
+                final List<Location> list = new ArrayList<>(1);
                 list.add(location);
                 final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
                 final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list);
                 return !SpongeImpl.postEvent(event);
             }
+            // Sponge end
             return true;
         }
         return false;

@@ -109,7 +109,7 @@
       "network.play.server.SSendResourcePackPacketMixin",
       "network.play.server.SWorldBorderPacketMixin",
       "network.status.ServerStatusNetHandlerMixin",
-      "org.spongepowered.common.mixin.invalid.core.entity.monster.EndermanEntity_PlaceBlockGoalMixin",
+      "entity.monster.EndermanEntity_PlaceBlockGoalMixin",
       "scoreboard.ScoreboardMixin",
       "scoreboard.ScoreMixin",
       "scoreboard.ScoreObjectiveMixin",
@@ -170,7 +170,7 @@
       "world.server.ChunkManagerMixin",
       "world.server.ServerWorldMixin",
       "world.storage.SaveHandlerMixin",
-      "world.storage.WorldInfoMixin"
+      "world.storage.WorldInfoMixin",
     ],
     "server": [
         "network.rcon.ClientThreadMixin",
