@@ -25,6 +25,9 @@
 package org.spongepowered.common.data.fixer.entity.player;
 
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.DataFix;
+import com.mojang.datafixers.TypeRewriteRule;
+import com.mojang.datafixers.schemas.Schema;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.datafix.IFixableData;
@@ -35,12 +38,13 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.Map;
 import java.util.UUID;
 
-public class PlayerRespawnData implements IFixableData {
+// TODO this is actually doing nothing?
+public class PlayerRespawnData extends DataFix {
 
-    @Override
-    public int getFixVersion() {
-        return Constants.Sponge.PlayerData.RESPAWN_DATA_1_9_VERSION;
+    public PlayerRespawnData(Schema outputSchema, boolean changesType) {
+        super(outputSchema, changesType);
     }
+    FixTypes.PLAYER,
 
     @Override
     public CompoundNBT fixTagCompound(CompoundNBT compound) {
@@ -70,5 +74,10 @@ public class PlayerRespawnData implements IFixableData {
 //            }
         }
         return compound;
+    }
+
+    @Override
+    protected TypeRewriteRule makeRule() {
+        return null;
     }
 }
