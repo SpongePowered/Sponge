@@ -37,17 +37,16 @@ import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridInventoryLens {
 
     protected List<LensHandle> rows;
     protected List<LensHandle> cols;
 
     public GridInventoryLensImpl(int base, int width, int height, SlotProvider slots) {
-        this(base, width, height, 1, GridInventoryAdapter.class, slots);
+        this(base, width, height, width, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    protected GridInventoryLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
         this(base, width, height, width, adapterType, slots);
     }
 
@@ -55,15 +54,15 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
         this(base, width, height, rowStride, 0, 0, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    protected GridInventoryLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider slots) {
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, SlotProvider slots) {
+    protected GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, SlotProvider slots) {
         this(base, width, height, rowStride, xBase, yBase, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    protected GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, width, height, rowStride, xBase, yBase, adapterType, slots);
     }
 

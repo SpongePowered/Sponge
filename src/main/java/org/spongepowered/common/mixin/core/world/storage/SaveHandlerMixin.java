@@ -88,6 +88,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
     private void impl$saveLevelSpongeDataFile(final WorldInfo worldInformation, final NBTTagCompound tagCompound, final CallbackInfo ci) {
+        boolean performChecks = SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().isCheckFileWhenSavingSpongeDataFile();
         try {
             // If the returned NBT is empty, then we should warn the user.
             NBTTagCompound spongeRootLevelNBT = ((WorldInfoBridge) worldInformation).bridge$getSpongeRootLevelNbt();
@@ -121,27 +122,104 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
                 CompressedStreamTools.writeCompressed(spongeRootLevelNBT, stream);
             }
 
-            // Before we continue, is the file zero length?
-            if (newDataFile.length() == 0) {
-                Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
-                String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
-                // Then we just delete the file and tell the user that we didn't save properly.
-                new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", worldInformation.getWorldName()).centre().hr()
-                        .add("When saving the data file for the world %s, a zero length file was written. Sponge has discarded this file.",
-                                worldInformation.getWorldName())
-                        .add()
-                        .add("The following information may be useful in debugging:")
-                        .add()
-                        .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getAssignedId())
-                        .add("Dimension ID: ", dimensionIdString)
-                        .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsMod())
-                        .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
-                        .add()
-                        .add("Stack trace:")
-                        .add(new Exception())
-                        .print(System.err);
-                newDataFile.delete();
-                return;
+            if (performChecks) {
+                // Before we continue, is the file zero length?
+                if (newDataFile.length() == 0) {
+                    Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
+                    String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
+                    // Then we just delete the file and tell the user that we didn't save properly.
+                    new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", worldInformation.getWorldName()).centre().hr()
+                            .add("When saving the data file for the world %s, a zero length file was written. Sponge has discarded this file.",
+                                    worldInformation.getWorldName())
+                            .add()
+                            .add("The following information may be useful in debugging:")
+                            .add()
+                            .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getAssignedId())
+                            .add("Dimension ID: ", dimensionIdString)
+                            .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsMod())
+                            .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
+                            .add()
+                            .add("Stack trace:")
+                            .add(new Exception())
+                            .print(System.err);
+                    newDataFile.delete();
+                    return;
+                }
+
+                // Check the file starts with 0x1F 0x8B - it must be gzipped
+                boolean shouldDelete = false;
+                try (final InputStream reader = Files.newInputStream(newDataFile.toPath())) {
+                    int byte1 = reader.read();
+                    int byte2 = reader.read();
+                    if (byte1 != Constants.GZip.GZIP_BYTE_1 || byte2 != Constants.GZip.GZIP_BYTE_2) {
+                        // The file is not a gzip file, and is therefore not a valid file.
+                        shouldDelete = true;
+                        int next = 1;
+                        if (byte1 == 0 && byte2 == 0) {
+                            // We might as well check to see if it's zero filled.
+                            do {
+                                next = reader.read();
+                            } while (next == 0);
+                        }
+
+                        // If we get next = -1, the entire file is zeroes. Else, we encountered a non-zero entry. We'll keep that as a corrupted
+                        // file and if someone reports it, we can ask for it.
+                        //
+                        // If it's zero filled, we'll just delete it - we have no use for it.
+                        Integer dimensionId = ((WorldInfoBridge) worldInformation).bridge$getDimensionId();
+                        String dimensionIdString = dimensionId == null ? "unknown" : String.valueOf(dimensionId);
+                        String copyText = null;
+                        if (next != -1) {
+                            try {
+                                Path dataFilePath = newDataFile.toPath();
+                                Path corrupted = dataFilePath.resolveSibling(newDataFile.getName() + ".corrupted-" +
+                                        DateTimeFormatter.ISO_INSTANT.format(Instant.now()).replaceAll(":", "") + ".dat");
+                                Files.copy(dataFilePath, corrupted);
+                                copyText =
+                                        String.format(
+                                                "We have backed up the corrupted file to %s. Please keep hold of this, it may be useful to Sponge "
+                                                        + "developers.", corrupted.getFileName());
+                            } catch (IOException e) {
+                                // could not copy, that's okay
+                            }
+
+                        }
+
+                        // Then we just delete the file and tell the user that we didn't save properly.
+                        PrettyPrinter prettyPrinter = new PrettyPrinter(100)
+                                .add("Badly formatted level_sponge.dat file was created for %s!", worldInformation.getWorldName())
+                                .centre()
+                                .hr()
+                                .addWrapped(
+                                        "When saving the data file for the world %s, the file was not saved with the correct magic header. Sponge "
+                                                + "has discarded this file.", worldInformation.getWorldName())
+                                .add();
+
+                        if (copyText != null) {
+                            prettyPrinter.addWrapped(copyText).add();
+                        }
+
+                        prettyPrinter.add("The following information may be useful in debugging:")
+                                .add()
+                                .add("Magic header: %x %x (expected %x %x)", byte1, byte2, Constants.GZip.GZIP_BYTE_1, Constants.GZip.GZIP_BYTE_2)
+                                .add("File size: %d bytes", newDataFile.length())
+                                .add("UUID: ", ((WorldInfoBridge) worldInformation).bridge$getAssignedId())
+                                .add("Dimension ID: ", dimensionIdString)
+                                .add("Is Modded: ", ((WorldInfoBridge) worldInformation).bridge$getIsMod())
+                                .add("Valid flag: ", ((WorldInfoBridge) worldInformation).bridge$isValid())
+                                .add()
+                                .add("Stack trace:")
+                                .add(new Exception())
+                                .print(System.err);
+                    }
+                }
+
+                // The delete call is here because we've closed the file stream
+                // for said file by this point.
+                if (shouldDelete) {
+                    newDataFile.delete();
+                    return;
+                }
             }
 
             if (dataFile.exists()) {

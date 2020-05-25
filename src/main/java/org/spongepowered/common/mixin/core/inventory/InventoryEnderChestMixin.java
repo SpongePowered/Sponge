@@ -29,13 +29,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleGridLens;
 
 @Mixin(InventoryEnderChest.class)
 public abstract class InventoryEnderChestMixin extends InventoryBasicMixin {
 
     @Override
     public Lens bridge$rootLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return new GridInventoryLensImpl(0, 9, 3, 9, adapter.bridge$getSlotProvider());
+        return new SingleGridLens(0, 9, 3, (Class)InventoryEnderChest.class, adapter.bridge$getSlotProvider());
     }
 }

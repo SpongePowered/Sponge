@@ -22,23 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.comp;
+package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
+import net.minecraft.inventory.ContainerChest;
+import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.bridge.item.inventory.InventoryBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.RealLens;
+import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.mixin.core.inventory.InventoryLargeChestAccessor;
 
-public class CraftingGridInventoryLensImpl extends GridInventoryLensImpl implements CraftingGridInventoryLens {
+/**
+ * A lens for a part of a double chest inventory
+ */
+public class ChestPartLens extends RealLens {
 
-    public CraftingGridInventoryLensImpl(int base, int width, int height, SlotProvider slots) {
-        super(base, width, height, slots);
+    private boolean upper;
+
+    public ChestPartLens(int base, int width, int height, SlotProvider slots, boolean upper) {
+        super(base, width * height, (Class) TileEntityChest.class);
+        this.upper = upper;
+        this.addSpanningChild(new GridInventoryLensImpl(base, width, height, slots));
     }
 
     @Override
     public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
-        return new CraftingGridInventoryAdapter(fabric, this, parent);
+        if (fabric instanceof ContainerChest) {
+            fabric = fabric.fabric$get(this.base).bridge$getAdapter().bridge$getFabric();
+        }
+        if (fabric instanceof InventoryLargeChest) {
+            if (this.upper) {
+                return (InventoryAdapter) ((InventoryLargeChestAccessor) fabric).accessor$getUpperChest();
+            } else {
+                return (InventoryAdapter) ((InventoryLargeChestAccessor) fabric).accessor$getLowerChest();
+            }
+        }
+        return super.getAdapter(fabric, parent);
     }
 }

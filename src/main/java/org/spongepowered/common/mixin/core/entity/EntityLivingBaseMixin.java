@@ -179,6 +179,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     @Shadow private boolean checkTotemDeathProtection(final DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
+    @Shadow protected abstract void shadow$collideWithNearbyEntities();
 
     private int impl$deathEventsPosted;
     private int impl$maxAir = Constants.Sponge.Entity.DEFAULT_MAX_AIR;
@@ -609,7 +610,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             damage = bridge$applyModDamage((EntityLivingBase) (Object) this, damageSource, damage);
             final float originalDamage = damage; // set after forge hook.
             if (damage <= 0) {
-                damage = 0;
+                return false;
             }
 
             final List<DamageFunction> originalFunctions = new ArrayList<>();
@@ -927,12 +928,12 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
 
                 slotAdapter = slotLens.getAdapter(((InventoryAdapter) inventory).bridge$getFabric(), (Inventory) inventory);
             } else {
-                if (this.slotLens.isEmpty()) {
-                    for (final EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
-                        this.slotLens.put(slot, new SlotLensImpl(slot.getSlotIndex()));
-                    }
+                SlotLens lens = this.slotLens.get(entityEquipmentSlot);
+                if (lens == null) {
+                    lens =  new SlotLensImpl(entityEquipmentSlot.getSlotIndex());
+                    this.slotLens.put(entityEquipmentSlot, lens);
                 }
-                slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter((Fabric) this, null);
+                slotAdapter = lens.getAdapter((Fabric) this, null);
             }
             final ChangeEntityEquipmentEvent event = SpongeCommonEventFactory.callChangeEntityEquipmentEvent(entity,
                     ItemStackUtil.snapshotOf(before), ItemStackUtil.snapshotOf(after), (SlotAdapter) slotAdapter);
@@ -1169,5 +1170,17 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
     }
 
     // End implementation of UseItemStackEvent
+
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
+    private void impl$runCollisions(EntityLivingBase self) {
+        if (((WorldBridge) this.world).bridge$isFake()) {
+            this.shadow$collideWithNearbyEntities();
+        } else {
+            try (PhaseContext<?> ignored = EntityPhase.State.COLLISION.createPhaseContext()
+                    .source(this).buildAndSwitch()) {
+                this.shadow$collideWithNearbyEntities();
+            }
+        }
+    }
 
 }

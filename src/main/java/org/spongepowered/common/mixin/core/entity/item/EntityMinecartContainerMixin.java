@@ -35,8 +35,8 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleOrderedLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
 import javax.annotation.Nullable;
 
@@ -71,7 +71,7 @@ public abstract class EntityMinecartContainerMixin extends EntityMinecartMixin i
     public Lens bridge$generateLens(SlotProvider slots) {
         return this.getSizeInventory() == 0
                 ? new DefaultEmptyLens(this)
-                : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+                : new SingleOrderedLens(0, this.getSizeInventory(), (Class) this.getClass(), slots);
     }
 
 }

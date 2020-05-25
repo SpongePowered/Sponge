@@ -36,7 +36,6 @@ import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -89,6 +88,7 @@ import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
@@ -111,6 +111,7 @@ import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
+import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -293,7 +294,20 @@ public class SpongeCommonEventFactory {
         try {
             final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
             SpongeImpl.postEvent(event);
-            return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    if (entity instanceof Projectile) {
+                        LaunchProjectileEvent launchProjectileEvent =
+                                SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), ((Projectile) entity));
+                        SpongeImpl.postEvent(launchProjectileEvent);
+                        if (launchProjectileEvent.isCancelled()) {
+                            return false;
+                        }
+                    }
+                }
+                return EntityUtil.processEntitySpawnsFromEvent(context, event);
+            }
+            return false;
         } catch (final Exception e) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Exception trying to create a Spawn Event").centre().hr()
                 .addWrapped(
@@ -926,7 +940,7 @@ public class SpongeCommonEventFactory {
         final EntityTickContext context) {
 
         // Ignore movement event if entity is dead
-        if (entity.isDead || (!ShouldFire.MOVE_ENTITY_EVENT && !ShouldFire.MOVE_ENTITY_EVENT_POSITION && !ShouldFire.ROTATE_ENTITY_EVENT)) {
+        if (entity.isDead) {
             return null;
         }
 
@@ -958,12 +972,16 @@ public class SpongeCommonEventFactory {
                 final Transform<World> newTransform = new Transform<>(world, currentPositionVector, currentRotationVector, spongeEntity.getScale());
                 Event event  = null;
                 Transform<World> eventToTransform = null;
-                if (!oldPositionVector.equals(currentPositionVector) && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
-                    event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
-                    eventToTransform = ((MoveEntityEvent) event).getToTransform();
-                } else if (ShouldFire.ROTATE_ENTITY_EVENT) {
-                    event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
-                    eventToTransform = ((RotateEntityEvent) event).getToTransform();
+                if (!oldPositionVector.equals(currentPositionVector)) {
+                    if (ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
+                        event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                        eventToTransform = ((MoveEntityEvent) event).getToTransform();
+                    }
+                } else {
+                    if (ShouldFire.ROTATE_ENTITY_EVENT) {
+                        event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                        eventToTransform = ((RotateEntityEvent) event).getToTransform();
+                    }
                 }
 
                 if (event == null) {
@@ -1520,6 +1538,15 @@ public class SpongeCommonEventFactory {
         ((TrackedInventoryBridge) container).bridge$setCaptureInventory(false);
         // handle slot-transactions
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
+        List<SlotTransaction> currentShiftCraftTransactions = ((ContainerBridge) container).bridge$getCurrentShiftCraftTransactions();
+        if (event.isCancelled() && !currentShiftCraftTransactions.isEmpty()) {
+            List<SlotTransaction> shiftTransactions = new ArrayList<>(currentShiftCraftTransactions);
+            if (!shiftTransactions.isEmpty()) {
+                Collections.reverse(shiftTransactions); // These are accumulated Transactions we need to revert in reverse order
+                PacketPhaseUtil.handleSlotRestore(player, container, shiftTransactions, event.isCancelled());
+                currentShiftCraftTransactions.clear();
+            }
+        }
         if (event.isCancelled() || !event.getCursorTransaction().isValid() || event.getCursorTransaction().getCustom().isPresent()) {
             // handle cursor-transaction
             final ItemStackSnapshot newCursor = event.isCancelled() || !event.getCursorTransaction().isValid() ? event.getCursorTransaction().getOriginal() : event.getCursorTransaction().getFinal();

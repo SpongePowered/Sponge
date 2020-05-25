@@ -60,7 +60,6 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.slot.InputSlot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
@@ -235,7 +234,7 @@ public final class ContainerUtil {
                             itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
                 } else if (subInventory instanceof InventoryCrafting) { // InventoryCrafting has width and height and is Input
                     final InventoryCrafting craftGrid = (InventoryCrafting) subInventory;
-                    lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), InputSlot.class, slots);
+                    lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), slots);
                 } else if (slotCount == 1) { // Unknown - A single Slot
                     lens = new SlotLensImpl(index);
                 }
@@ -244,15 +243,15 @@ public final class ContainerUtil {
                     switch (subInventory.getName()) {
                         case "Enchant": // Container InputSlots
                         case "Repair": // Container InputSlots
-                            lens = new OrderedInventoryLensImpl(index, slotCount, 1, InputSlot.class, slots);
+                            lens = new OrderedInventoryLensImpl(index, slotCount, slots);
                             break;
                         default: // Unknown
-                            lens = new OrderedInventoryLensImpl(index, slotCount, 1, slots);
+                            lens = new OrderedInventoryLensImpl(index, slotCount, slots);
                     }
                 }
                 else {
                     // Unknown - fallback to OrderedInventory
-                    lens = new OrderedInventoryLensImpl(index, slotCount, 1, slots);
+                    lens = new OrderedInventoryLensImpl(index, slotCount, slots);
                 }
             }
             lenses.add(lens);
@@ -265,7 +264,7 @@ public final class ContainerUtil {
             if (crafting.out != null && crafting.base != null && crafting.grid != null) {
                 additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
             } else if (crafting.base != null && crafting.grid != null) {
-                additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), crafting.grid.getWidth(), slots));
+                additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
             }
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);

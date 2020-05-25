@@ -27,7 +27,6 @@ package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 import static org.spongepowered.api.item.ItemTypes.BLAZE_POWDER;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.slot.OutputSlot;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
@@ -55,7 +54,7 @@ public class BrewingStandInventoryLens extends RealLens {
 
     protected void init(final SlotProvider slots) {
 
-        this.potions = new OrderedInventoryLensImpl(0, 3, 1, OutputSlot.class, slots);
+        this.potions = new OrderedInventoryLensImpl(0, 3, slots);
         this.ingredient = new InputSlotLensImpl(3, (i) -> true, (i) -> true); // TODO filter PotionIngredients
         this.fuel = new FuelSlotLensImpl(4, (i) -> BLAZE_POWDER.equals(i.getType()), BLAZE_POWDER::equals);
 

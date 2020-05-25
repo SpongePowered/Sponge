@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -47,7 +48,7 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.Collisi
 import java.util.List;
 
 @Mixin(net.minecraft.world.chunk.Chunk.class)
-public class ChunkMixin_Collisions {
+public abstract class ChunkMixin_Collisions {
 
     @Shadow @Final private World world;
 
@@ -57,11 +58,7 @@ public class ChunkMixin_Collisions {
     private void collisionsImpl$checkForCollisionRules(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         final Predicate<? super Entity> predicate, final CallbackInfo ci) {
         // ignore players and entities with parts (ex. EnderDragon)
-        if (this.world.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
-            return;
-        }
-        // Run hook in EntityLivingBase to support maxEntityCramming
-        if (entityIn != null && entityIn instanceof EntityLivingBase && ((CollisionsCapability) entityIn).collision$isRunningCollideWithNearby()) {
+        if (((WorldBridge) this.world).bridge$isFake() || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
             return;
         }
 
@@ -88,38 +85,28 @@ public class ChunkMixin_Collisions {
 
     private <T extends Entity> boolean collisionsImpl$allowEntityCollision(final List<T> listToFill) {
         if (this.world instanceof WorldServerBridge) {
-            if (PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
-                // allow explosions
+            if (!PhaseTracker.getInstance().getCurrentState().isCollision()) {
                 return true;
             }
 
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
             final Object source = phaseContext.getSource();
-            if (source == null) {
+            if (!(source instanceof CollisionsCapability)) {
                 return true;
             }
 
-            if (source instanceof LocatableBlock) {
-                final LocatableBlock locatable = (LocatableBlock) source;
-                final BlockType blockType =locatable.getLocation().getBlockType();
-                final CollisionsCapability spongeBlock = (CollisionsCapability) blockType;
-                if (spongeBlock.collision$requiresCollisionsCacheRefresh()) {
-                    spongeBlock.collision$initializeCollisionState(this.world);
-                    spongeBlock.collision$requiresCollisionsCacheRefresh(false);
-                }
-
-                return !((spongeBlock.collision$getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.collision$getMaxCollisions()));
-            } else if (source instanceof CollisionsCapability) {
-                final CollisionsCapability spongeEntity = (CollisionsCapability) source;
-                if (spongeEntity.collision$requiresCollisionsCacheRefresh()) {
-                    spongeEntity.collision$initializeCollisionState(this.world);
-                    spongeEntity.collision$requiresCollisionsCacheRefresh(false);
-                }
-
-                return !((spongeEntity.collision$getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.collision$getMaxCollisions()));
+            if (listToFill.size() < this.world.getGameRules().getInt("maxEntityCramming")) {
+                return true;
             }
 
-            return true;
+            final CollisionsCapability capability = (CollisionsCapability) source;
+            if (capability.collision$requiresCollisionsCacheRefresh()) {
+                capability.collision$initializeCollisionState(this.world);
+                capability.collision$requiresCollisionsCacheRefresh(false);
+            }
+
+            return capability.collision$getMaxCollisions() < 0
+                    || listToFill.size() < capability.collision$getMaxCollisions();
         }
 
         return true;

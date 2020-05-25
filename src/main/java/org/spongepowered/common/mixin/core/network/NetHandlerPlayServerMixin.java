@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import com.flowpowered.math.vector.Vector3d;
 import io.netty.util.collection.LongObjectHashMap;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -268,6 +269,12 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         }
         Sponge.getCauseStackManager().popCause();
         return ZERO_LENGTH_ARRAY; // will bypass the for loop after this method.
+    }
+
+    @Redirect(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntitySign;markDirty()V"))
+    private void impl$setPlayer(TileEntitySign tileentitysign) {
+        tileentitysign.markDirty();
+        tileentitysign.setPlayer(null);
     }
 
     /**

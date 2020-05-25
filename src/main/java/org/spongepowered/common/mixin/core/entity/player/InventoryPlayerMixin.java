@@ -53,8 +53,8 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleOrderedLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -126,7 +126,7 @@ public abstract class InventoryPlayerMixin implements InventoryPlayerBridge, Inv
         if ((Class<?>) this.getClass() == InventoryPlayer.class) { // Build Player Lens
             return new PlayerInventoryLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slots);
         }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+        return new SingleOrderedLens(0, this.getSizeInventory(), (Class)this.getClass(), slots);
     }
 
     @Override

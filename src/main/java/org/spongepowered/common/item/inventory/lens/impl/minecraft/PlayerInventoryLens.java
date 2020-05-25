@@ -137,7 +137,7 @@ public class PlayerInventoryLens extends AbstractLens {
         // Additional Slots for bigger modded inventories
         int additionalSlots = this.size - base;
         if (additionalSlots > 0) {
-            this.addSpanningChild(new OrderedInventoryLensImpl(base, additionalSlots, 1, slots));
+            this.addSpanningChild(new OrderedInventoryLensImpl(base, additionalSlots, slots));
         }
     }
 

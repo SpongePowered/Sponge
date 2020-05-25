@@ -49,11 +49,11 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
         this(base, width, height, width, Inventory2DAdapter.class, slots);
     }
 
-    public Inventory2DLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    protected Inventory2DLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
         this(base, width, height, width, adapterType, slots);
     }
 
-    public Inventory2DLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    protected Inventory2DLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider slots) {
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
 

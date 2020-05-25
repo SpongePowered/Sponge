@@ -100,7 +100,6 @@ public abstract class SlotCraftingMixin extends Slot {
         }
         if (((ContainerBridge) thePlayer.openContainer).bridge$isShiftCrafting()) {
             ((ContainerBridge) thePlayer.openContainer).bridge$detectAndSendChanges(true);
-            ((ContainerBridge) thePlayer.openContainer).bridge$setShiftCrafting(false);
         }
         ((ContainerBridge) thePlayer.openContainer).bridge$setFirePreview(false);
 

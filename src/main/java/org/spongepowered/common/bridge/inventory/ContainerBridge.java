@@ -72,6 +72,8 @@ public interface ContainerBridge {
 
     List<SlotTransaction> bridge$getPreviewTransactions();
 
+    List<SlotTransaction> bridge$getCurrentShiftCraftTransactions();
+
     @Nullable Location<World> bridge$getOpenLocation();
 
     void bridge$setOpenLocation(@Nullable Location<World> loc);

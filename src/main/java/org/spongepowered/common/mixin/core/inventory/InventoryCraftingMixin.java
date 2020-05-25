@@ -58,7 +58,7 @@ public abstract class InventoryCraftingMixin implements IInventory, InventoryAda
         if (this.stackList.size() == 0) {
             return new DefaultEmptyLens(this);
         }
-        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.inventoryWidth, slots);
+        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, slots);
     }
 
 }

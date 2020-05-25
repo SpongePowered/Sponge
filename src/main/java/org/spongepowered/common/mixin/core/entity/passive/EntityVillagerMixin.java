@@ -52,8 +52,8 @@ import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleOrderedLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.mixin.core.entity.EntityAgeableMixin;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
@@ -89,7 +89,7 @@ public abstract class EntityVillagerMixin extends EntityAgeableMixin implements 
 
     @Override
     public Lens bridge$generateLens(SlotProvider slots) {
-        return new OrderedInventoryLensImpl(0, 8, 1, slots);
+        return new SingleOrderedLens(0, 8, (Class) InventoryBasic.class, slots);
     }
 
     @Override

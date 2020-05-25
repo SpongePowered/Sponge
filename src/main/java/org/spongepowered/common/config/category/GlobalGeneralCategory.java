@@ -34,11 +34,25 @@ public class GlobalGeneralCategory extends GeneralCategory {
             comment = "If 'true', sleeping between chunk saves will be enabled, beware of memory issues.")
     private boolean fileIOThreadSleep = false;
 
+    @Setting(value = "check-file-when-saving-sponge-data-file", comment = ""
+            + "If 'true', Sponge will try to ensure that its data is on disk\n"
+            + "when saving the 'level_sponge.dat' file,\n"
+            + "but this may cause a slight performance hit.\n\n"
+            + "Setting this to 'false' will mean Sponge does not\n"
+            + "perform any consistency checks, but you may end up\n"
+            + "with corrupt data if an unexpected failure occurs on your server,\n"
+            + "requiring restoring this file from backup.")
+    private boolean checkFileWhenSavingSpongeDataFile = true;
+
     public GlobalGeneralCategory() {
     }
 
     public boolean getFileIOThreadSleep() {
         return this.fileIOThreadSleep;
+    }
+
+    public boolean isCheckFileWhenSavingSpongeDataFile() {
+        return this.checkFileWhenSavingSpongeDataFile;
     }
 
 }

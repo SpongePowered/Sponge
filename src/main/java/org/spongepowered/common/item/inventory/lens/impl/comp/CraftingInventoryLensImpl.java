@@ -48,11 +48,11 @@ public class CraftingInventoryLensImpl extends OrderedInventoryLensImpl implemen
         this(outputSlotIndex, gridBase, width, height, CraftingInventoryAdapter.class, slots);
     }
 
-    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    private CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(gridBase, width * height, 1, adapterType, slots);
         this.outputSlotIndex = outputSlotIndex;
         this.outputSlot = (CraftingOutputSlotLens)slots.getSlot(this.outputSlotIndex);
-        this.craftingGrid = new CraftingGridInventoryLensImpl(this.base, width, height, width, slots);
+        this.craftingGrid = new CraftingGridInventoryLensImpl(this.base, width, height, slots);
         this.size += 1; // output slot
         // Avoid the init() method in the superclass calling our init() too early
         this.initOther();

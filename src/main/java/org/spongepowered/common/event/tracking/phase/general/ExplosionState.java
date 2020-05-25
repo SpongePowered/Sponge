@@ -90,11 +90,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean ignoresEntityCollisions() {
-        return true;
-    }
-
-    @Override
     public void unwind(final ExplosionContext context) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.

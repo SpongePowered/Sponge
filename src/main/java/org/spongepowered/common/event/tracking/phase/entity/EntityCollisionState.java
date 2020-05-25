@@ -22,32 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.tileentity;
+package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.tileentity.TileEntityShulkerBox;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.SingleGridLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-
-@Mixin(TileEntityShulkerBox.class)
-public abstract class TileEntityShulkerBoxMixin extends TileEntityLockableLootMixin {
+public final class EntityCollisionState extends EntityPhaseState<BasicEntityContext> {
 
     @Override
-    public ReusableLens<?> bridge$generateReusableLens(final Fabric fabric, final InventoryAdapter adapter) {
-        return ReusableLens.getLens(SingleGridLens.class, this, this::impl$generateSlotProvider, this::impl$generateRootLens);
+    protected BasicEntityContext createNewContext() {
+        return new BasicEntityContext(this);
     }
 
-    private SlotProvider impl$generateSlotProvider() {
-        return new SlotCollection.Builder().add(27).build();
+    @Override
+    public boolean isCollision() {
+        return true;
     }
-
-    @SuppressWarnings("unchecked")
-    private SingleGridLens impl$generateRootLens(final SlotProvider slots) {
-        return new SingleGridLens(0, 9, 3, (Class) TileEntityShulkerBox.class, slots);
-    }
-
 }

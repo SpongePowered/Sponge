@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
-import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -64,12 +63,12 @@ public class LargeChestInventoryLens extends RealLens {
     private void initLargeChest(final SlotProvider slots) {
         // add grids
         int base = 0;
-        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, (Class) TileEntityChest.class, slots));
+        this.addSpanningChild(new ChestPartLens(base, 9, this.upperChest / 9, slots, true));
         base += this.upperChest;
-        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.lowerChest / 9, 9, (Class) TileEntityChest.class, slots));
+        this.addSpanningChild(new ChestPartLens(base, 9, this.lowerChest / 9, slots, false));
         base += this.lowerChest;
 
-        this.addChild(new GridInventoryLensImpl(0, 9, (this.upperChest + this.lowerChest) / 9, 9, slots));
+        this.addChild(new GridInventoryLensImpl(0, 9, (this.upperChest + this.lowerChest) / 9, slots));
 
         // add slot childs for grids
         for (int ord = 0, slot = this.base; ord < base; ord++, slot ++) {
