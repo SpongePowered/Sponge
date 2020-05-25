@@ -360,7 +360,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$readSpongeNbt(final NBTTagCompound nbt) {
         final UUID nbtUniqueId = nbt.getUniqueId(Constants.UUID);
-        if (UUID.fromString("00000000-0000-0000-0000-000000000000").equals(nbtUniqueId)) {
+        if (Constants.World.INVALID_WORLD_UUID.equals(nbtUniqueId)) {
             return;
         }
         this.impl$uuid = nbtUniqueId;
