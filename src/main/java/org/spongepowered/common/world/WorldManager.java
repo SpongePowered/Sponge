@@ -452,7 +452,6 @@ public final class WorldManager {
         if (dimensionId != null) {
             ((WorldInfoBridge) worldInfo).bridge$setDimensionId(dimensionId);
         } else if (((WorldInfoBridge) worldInfo).bridge$getDimensionId() == null
-                //|| ((WorldInfoBridge) worldInfo).bridge$bridge$getDimensionId() == Integer.MIN_VALUE // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
                 || getWorldByDimensionId(((WorldInfoBridge) worldInfo).bridge$getDimensionId()).isPresent()) {
             // DimensionID is null or 0 or the dimensionID is already assigned to a loaded world
             ((WorldInfoBridge) worldInfo).bridge$setDimensionId(WorldManager.getNextFreeDimensionId());
@@ -643,7 +642,7 @@ public final class WorldManager {
 
         Integer dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionId();
 
-        if (dimensionId == null || dimensionId == Integer.MIN_VALUE) {
+        if (dimensionId == null) {
             dimensionId = getNextFreeDimensionId();
             ((WorldInfoBridge) properties).bridge$setDimensionId(dimensionId);
         }
@@ -953,8 +952,7 @@ public final class WorldManager {
         checkNotNull(properties);
 
         UUID uuid;
-        if (properties.getUniqueId() == null || properties.getUniqueId().equals
-                (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+        if (properties.getUniqueId() == null || properties.getUniqueId().equals(Constants.World.INVALID_WORLD_UUID)) {
             // Check if Bukkit's uid.dat file is here and use it
             final Path uidPath = savesRoot.resolve(properties.getWorldName()).resolve("uid.dat");
             if (Files.notExists(uidPath)) {
@@ -1012,10 +1010,6 @@ public final class WorldManager {
                 final int dimensionId = spongeDataCompound.getInteger(Constants.Sponge.World.DIMENSION_ID);
                 // We do not handle Vanilla dimensions, skip them
                 if (dimensionId == 0 || dimensionId == -1 || dimensionId == 1) {
-                    continue;
-                }
-
-                if (dimensionId == Integer.MIN_VALUE) {
                     continue;
                 }
 
@@ -1222,11 +1216,13 @@ public final class WorldManager {
             final WorldInfo info = new WorldInfo(this.oldInfo);
             info.setWorldName(this.newName);
 
-            ((WorldInfoBridge) info).bridge$setDimensionId(Integer.MIN_VALUE);
-            ((WorldInfoBridge) info).bridge$setUniqueId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            ((WorldInfoBridge) info).bridge$setDimensionId(WorldManager.getNextFreeDimensionId());
+            ((WorldInfoBridge) info).bridge$setUniqueId(UUID.randomUUID());
 
+            ((WorldInfoBridge) info).bridge$createWorldConfig();
             new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), this.newName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer())
                     .saveWorldInfo(info);
+            registerWorldProperties((WorldProperties) info);
 
             return Optional.of((WorldProperties) info);
         }
