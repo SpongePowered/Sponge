@@ -36,17 +36,21 @@ public class TimingsCategory extends ConfigCategory {
     @Setting(comment = "Enables the verbose mode for the timings module.")
     private boolean verbose = false;
 
-    @Setting(comment = "???")
+    @Setting(comment = "Enables the timing module")
     private boolean enabled = true;
 
-    @Setting(value = "server-name-privacy", 
+    @Setting(value = "server-name-privacy",
             comment = "Hides the server name in the Aikar webviewer to no leak the l33t server you are running")
     private boolean serverNamePrivacy = false;
 
-    @Setting(value = "hidden-config-entries", comment = "???")
+    @Setting(value = "hidden-config-entries", comment = ""
+            + "These configuration entries/paths/sections are removed before the report is sent.\n"
+            + "This is to prevent credentials from being leaked unintentionally.\n"
+            + "Note: The 'sponge.sql' section is always ignored\n"
+            + "and thus is never sent to the webviewer regardless of this config.")
     private List<String> hiddenConfigEntries = Lists.newArrayList("sponge.sql");
 
-    @Setting(value = "history-interval", 
+    @Setting(value = "history-interval",
             comment = "Modulo value how often a tick should be pushed to the timings history")
     private int historyInterval = 300;
 
