@@ -134,16 +134,13 @@ public class GlobalConfig extends GeneralConfigBase {
     }
 
     public Map<String, Predicate<InetAddress>> getIpSets() {
-        return ImmutableMap
-                .copyOf(Maps.transformValues(this.ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
-
-                    @Nullable
-                    @Override
-                    public Predicate<InetAddress> apply(List<IpSet> input) {
-                        return Predicates.and(input);
-                    }
-
-                }));
+        return ImmutableMap.copyOf(Maps.transformValues(this.ipSets, new Function<List<IpSet>, Predicate<InetAddress>>() {
+            @Nullable
+            @Override
+            public Predicate<InetAddress> apply(List<IpSet> input) {
+                return Predicates.and(input);
+            }
+        }));
     }
 
     public ExploitCategory getExploits() {

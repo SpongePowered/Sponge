@@ -34,17 +34,17 @@ import java.util.Map;
 public class CollisionModCategory extends ConfigCategory {
 
     @Setting(value = "enabled", comment = "If 'false', entity collision rules for this mod will be ignored.")
-    private final boolean isEnabled = true;
+    private boolean isEnabled = true;
     @Setting(value = "defaults", comment = "Default maximum collisions used for all entities unless overridden.")
-    private final Map<String, Integer> defaultMaxCollisions = new HashMap<>();
+    private Map<String, Integer> defaultMaxCollisions = new HashMap<>();
     @Setting(value = "entities")
-    private final Map<String, Integer> entityList = new HashMap<>();
+    private Map<String, Integer> entityList = new HashMap<>();
 
     public CollisionModCategory() {
         this.defaultMaxCollisions.put("entities", 8);
     }
 
-    public CollisionModCategory(final String modId) {
+    public CollisionModCategory(String modId) {
     }
 
     public boolean isEnabled() {
