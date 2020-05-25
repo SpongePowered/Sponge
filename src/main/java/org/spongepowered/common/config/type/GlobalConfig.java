@@ -102,9 +102,7 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
     private BrokenModCategory brokenMods = new BrokenModCategory();
 
-    @Setting(value = "metrics", comment = ""
-            + "Configuration options related to metric collection.\n"
-            + "Metric collection is disabled by default.")
+    @Setting(value = "metrics", comment = "Configuration options related to metric collection.")
     private MetricsCategory metricsCategory = new MetricsCategory();
 
     public GlobalConfig() {

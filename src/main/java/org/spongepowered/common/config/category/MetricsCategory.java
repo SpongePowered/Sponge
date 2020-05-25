@@ -32,7 +32,6 @@ import org.spongepowered.api.util.Tristate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @ConfigSerializable
 public class MetricsCategory {

@@ -40,7 +40,7 @@ public class TimingsCategory extends ConfigCategory {
     private boolean enabled = true;
 
     @Setting(value = "server-name-privacy", 
-            comment = "Hides the server name in the Airkar webviewer to no leak the l33t server you are running")
+            comment = "Hides the server name in the Aikar webviewer to no leak the l33t server you are running")
     private boolean serverNamePrivacy = false;
 
     @Setting(value = "hidden-config-entries", comment = "???")
