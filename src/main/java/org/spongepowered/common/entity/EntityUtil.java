@@ -98,6 +98,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -531,7 +532,13 @@ public final class EntityUtil {
         if (worldName != null) {
             for (final WorldProperties properties : Sponge.getServer().getWorldManager().getAllProperties()) {
                 if (properties.getDirectoryName().equalsIgnoreCase(worldName)) {
-                    final Optional<org.spongepowered.api.world.server.ServerWorld> spongeWorld = Sponge.getServer().getWorldManager().loadWorld(properties);
+                    Optional<org.spongepowered.api.world.server.ServerWorld> spongeWorld;
+                    try {
+                        spongeWorld = Sponge.getServer().getWorldManager().loadWorld(properties).join();
+                    } catch (IOException e) {
+                        SpongeImpl.getLogger().error("Error while loading target world " + worldName, e);
+                        spongeWorld = Optional.empty();
+                    }
                     if (spongeWorld.isPresent()) {
                         toWorld = (ServerWorld) spongeWorld.get();
                         teleporter = (ForgeITeleporterBridge) toWorld.getDefaultTeleporter();
