@@ -475,7 +475,7 @@ public abstract class BlockTransaction {
             }
 
             TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, newBlockSnapshot,
-                ((ServerWorldBridge) serverWorld), targetPosition, this.newState, this.blockChangeFlag);
+                ((ServerWorldBridge) serverWorld), targetPosition, this.originalState, this.newState, this.blockChangeFlag);
             // And perform any more additional spawns.
             TrackingUtil.performBlockEntitySpawns(phaseState, phaseContext, this.original, targetPosition);
         }

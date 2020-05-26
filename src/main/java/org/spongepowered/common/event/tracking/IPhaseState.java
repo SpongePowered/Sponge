@@ -710,13 +710,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * information. Overridden in world generation states to reduce chunk lookup costs and since
      * world generation does not track owners/notifiers.
      *
-     * @param mixinWorld The world reference
+     * @param world The world reference
      * @param pos The position being updated
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(final ServerWorldBridge mixinWorld, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
-        final Chunk chunk = ((ServerWorld) mixinWorld).getChunkAt(pos);
+    default void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
+        final Chunk chunk = world.getChunkAt(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.bridge$getBlockOwner(pos).ifPresent(phaseContext::owner);

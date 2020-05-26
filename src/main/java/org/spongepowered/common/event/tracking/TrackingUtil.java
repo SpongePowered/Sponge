@@ -42,6 +42,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.server.ServerWorld;
@@ -293,7 +294,7 @@ public final class TrackingUtil {
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState<?> currentState = currentContext.state;
-        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, currentContext, phaseContext);
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
         // Now actually switch to the new phase
 
         try (final PhaseContext<?> context = phaseContext;
@@ -330,7 +331,7 @@ public final class TrackingUtil {
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState<?> currentState = currentContext.state;
-        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, currentContext, phaseContext);
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
         // Now actually switch to the new phase
         try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
@@ -694,7 +695,7 @@ public final class TrackingUtil {
                 world.notifyBlockUpdate(pos, originalState, newState, originalChangeFlag.getRawFlag());
             }
 
-            TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, newBlockSnapshot, mixinWorld, pos, newState, originalChangeFlag);
+            TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, newBlockSnapshot, mixinWorld, pos, originalState, newState, originalChangeFlag);
         }
         net.minecraft.block.BlockState previousIntermediary = originalState;
         boolean processedOriginal = false;
@@ -709,7 +710,7 @@ public final class TrackingUtil {
                 if (originalChangeFlag.notifyClients()) {
                     world.notifyBlockUpdate(pos, originalState, intermediaryState, originalChangeFlag.getRawFlag());
                 }
-                TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, intermediary, mixinWorld, pos, intermediaryState, originalChangeFlag);
+                TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, intermediary, mixinWorld, pos, originalState, intermediaryState, originalChangeFlag);
                 processedOriginal = true;
             }
             // Then, we can process the intermediary to final potentially if there is only the original -> intermediary -> final,
@@ -720,7 +721,7 @@ public final class TrackingUtil {
             if (intermediaryChangeFlag.notifyClients()) {
                 world.notifyBlockUpdate(pos, isFinal ? intermediaryState :  previousIntermediary, isFinal ? newState : intermediaryState, intermediaryChangeFlag.getRawFlag());
             }
-            TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, isFinal ? newBlockSnapshot : intermediary, mixinWorld, pos, isFinal ? newState : intermediaryState, intermediaryChangeFlag);
+            TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, isFinal ? newBlockSnapshot : intermediary, mixinWorld, pos, originalState, isFinal ? newState : intermediaryState, intermediaryChangeFlag);
             if (isFinal) {
                 return;
             }
@@ -733,14 +734,15 @@ public final class TrackingUtil {
         final Block newBlock = newState.getBlock();
         if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics()
             && (!SpongeImplHooks.hasBlockTileEntity(newState))) {
-            newBlock.onBlockAdded(world, pos, newState);
+            newBlock.onBlockAdded(newState, world, pos, originalState, changeFlag.isBlockMoving());
             ((IPhaseState) phaseContext.state).performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
         }
     }
 
     public static void performNeighborAndClientNotifications(final PhaseContext<?> phaseContext, final int currentDepth,
                                                              final SpongeBlockSnapshot newBlockSnapshot, final ServerWorldBridge mixinWorld, final BlockPos pos,
-                                                             final net.minecraft.block.BlockState newState, final SpongeBlockChangeFlag changeFlag) {
+                                                             final net.minecraft.block.BlockState originalState, final net.minecraft.block.BlockState newState,
+                                                             final SpongeBlockChangeFlag changeFlag) {
         final Block newBlock = newState.getBlock();
         final IPhaseState phaseState = phaseContext.state;
         if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
@@ -751,15 +753,17 @@ public final class TrackingUtil {
             final BlockSnapshot previousNeighbor = context.neighborNotificationSource;
             context.neighborNotificationSource = newBlockSnapshot;
             if (changeFlag.updateNeighbors()) {
-                ((ServerWorld) mixinWorld).notifyNeighborsRespectDebug(pos, newState.getBlock(), changeFlag.notifyObservers());
-
+                ((ServerWorld) mixinWorld).notifyNeighbors(pos, originalState.getBlock());
                 if (newState.hasComparatorInputOverride()) {
-                    ((ServerWorld) mixinWorld).updateComparatorOutputLevel(pos, newState.getBlock());
+                    ((ServerWorld) mixinWorld).updateComparatorOutputLevel(pos, newBlock);
                 }
             }
             context.neighborNotificationSource = previousNeighbor;
         } else if (changeFlag.notifyObservers()) {
-            ((net.minecraft.world.World) mixinWorld).updateObservingBlocksAt(pos, newBlock);
+            final int i = changeFlag.getRawFlag() & -2;
+            originalState.updateDiagonalNeighbors((IWorld) mixinWorld, pos, i);
+            newState.updateNeighbors((IWorld) mixinWorld, pos, i);
+            newState.updateDiagonalNeighbors((IWorld) mixinWorld, pos, i);
         }
 
         phaseState.performPostBlockNotificationsAndNeighborUpdates(phaseContext, newState, changeFlag, currentDepth + 1);

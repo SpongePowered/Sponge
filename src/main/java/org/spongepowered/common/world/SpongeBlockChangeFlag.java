@@ -147,6 +147,10 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         return this.forceReRender;
     }
 
+    public boolean isBlockMoving() {
+        return this.blockMoving;
+    }
+
     public String getName() {
         return this.name;
     }
