@@ -194,6 +194,19 @@ public class SpongeHooks {
         }
     }
 
+    public static void logChunkQueueLoad(final World world, final Vector3i chunkPos) {
+        if (world.isRemote) {
+            return;
+        }
+
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.getConfig().getLogging().chunkLoadLogging()) {
+            logInfo("Queue Chunk At [{0}] ({1}, {2})", ((WorldServerBridge) world).bridge$getDimensionId(), chunkPos.getX(),
+                    chunkPos.getZ());
+            logStack(configAdapter);
+        }
+    }
+
     public static void logChunkLoad(final World world, final Vector3i chunkPos) {
         if (world.isRemote) {
             return;
