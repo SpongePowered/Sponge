@@ -34,7 +34,7 @@ import org.spongepowered.api.entity.EntityType;
 import java.util.stream.Collectors;
 
 final class TimingsPls {
-    private static final Object2IntMap<EntityType> ENTITY_IDS = new Object2IntOpenHashMap<>();
+    private static final Object2IntMap<EntityType<?>> ENTITY_IDS = new Object2IntOpenHashMap<>();
     private static final Object2IntMap<BlockEntityType> TILE_ENTITY_IDS = new Object2IntOpenHashMap<>();
     private static final int NOT_FOUND = Integer.MIN_VALUE;
     private static int nextEntityId = 56991891; // Some random number
@@ -48,7 +48,7 @@ final class TimingsPls {
         }
     }
 
-    public static int getEntityId(final EntityType type) {
+    public static int getEntityId(final EntityType<?> type) {
         int fake;
         if ((fake = ENTITY_IDS.getInt(type)) == NOT_FOUND) {
             fake = nextEntityId++;

@@ -41,7 +41,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
@@ -71,13 +70,13 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.accessor.world.WorldAccessor;
 
 import java.util.Collection;
 
@@ -261,11 +260,6 @@ public class SpongeImplHooks {
 
     public static boolean canConnectRedstone(final Block block, final BlockState state, final IWorldReader world, final BlockPos pos, @Nullable final Direction side) {
         return state.canProvidePower() && side != null;
-    }
-    // Crafting
-
-    public static void register(final ResourceLocation name, final IRecipe recipe) {
-//        CraftingManager.register(name, recipe);
     }
 
     public static PluginContainer getActiveModContainer() {

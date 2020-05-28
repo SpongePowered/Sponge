@@ -57,7 +57,7 @@ public class PlayerInventoryLens extends AbstractLens {
     private SlotLens offhand;
     private final boolean isContainer;
 
-    public PlayerInventoryLens(int size, Class adapter, SlotLensProvider slots) {
+    public PlayerInventoryLens(int size, Class<? extends Inventory> adapter, SlotLensProvider slots) {
         super(0, size, adapter);
         this.isContainer = false;
         this.init(slots);

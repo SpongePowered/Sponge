@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.lens.impl.slot;
 
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
@@ -33,7 +34,7 @@ public abstract class DelegatingSlotLens extends AbstractLens implements SlotLen
 
     private final SlotLens delegate;
 
-    public DelegatingSlotLens(SlotLens lens, Class adapter) {
+    public DelegatingSlotLens(SlotLens lens, Class<? extends Inventory> adapter) {
         super(0, 1, adapter);
         this.addSpanningChild(lens);
         this.delegate = lens;

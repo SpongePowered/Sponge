@@ -30,18 +30,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class InventoryTranslators {
-    private static final Map<Class, InventoryTranslator> fabricTranslators = new HashMap<>();
+    private static final Map<Class<?>, InventoryTranslator<?>> fabricTranslators = new HashMap<>();
 
     static {
         register(IInventory.class, new IInventoryTranslator());
     }
 
-    public static void register(Class inventoryInterface, InventoryTranslator translator) {
+    public static void register(Class<?> inventoryInterface, InventoryTranslator<?> translator) {
         fabricTranslators.put(inventoryInterface, translator);
     }
 
+    @SuppressWarnings("rawtypes")
     public static InventoryTranslator getTranslator(Class clazz) {
-        for (Class registered : fabricTranslators.keySet()) {
+        for (Class<?> registered : fabricTranslators.keySet()) {
             if (registered.isAssignableFrom(clazz)) {
                 return fabricTranslators.get(registered);
             }

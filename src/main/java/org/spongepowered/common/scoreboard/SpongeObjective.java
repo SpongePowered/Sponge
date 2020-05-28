@@ -110,9 +110,8 @@ public class SpongeObjective implements Objective {
     }
 
     @Override
-    @SuppressWarnings({"unchecked"})
     public Map<Text, Score> getScores() {
-        return new HashMap(this.scores);
+        return new HashMap<>(this.scores);
     }
 
     @Override

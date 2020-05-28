@@ -54,7 +54,7 @@ public abstract class AbstractLens implements Lens {
 
     protected List<Lens> spanningChildren = new ArrayList<>();
     protected List<Lens> children = new ArrayList<>();
-    protected Map<Lens, Map<Key, Object>> handleMap = new HashMap<>();
+    protected Map<Lens, Map<Key<?>, Object>> handleMap = new HashMap<>();
 
     protected int size;
 
@@ -103,7 +103,7 @@ public abstract class AbstractLens implements Lens {
     }
 
     private void addKeyValuePairs(Lens lens, KeyValuePair[] keyValuePairs) {
-        Map<Key, Object> map = this.handleMap.computeIfAbsent(lens, l -> new HashMap<>());
+        Map<Key<?>, Object> map = this.handleMap.computeIfAbsent(lens, l -> new HashMap<>());
         for (KeyValuePair pair : keyValuePairs) {
             map.put(pair.getKey(), pair.getValue());
         }
@@ -183,12 +183,12 @@ public abstract class AbstractLens implements Lens {
     }
 
     @Override
-    public Map<Key, Object> getDataAt(final int index) {
+    public Map<Key<?>, Object> getDataAt(final int index) {
         return this.getDataFor(this.getLens(index));
     }
 
     @Override
-    public Map<Key, Object> getDataFor(final Lens child) {
+    public Map<Key<?>, Object> getDataFor(final Lens child) {
         if (!this.has(child)) {
             throw new NoSuchElementException("Specified child lens is not a direct descendant this lens");
         }

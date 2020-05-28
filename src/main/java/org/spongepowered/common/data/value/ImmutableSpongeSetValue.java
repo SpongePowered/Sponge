@@ -44,8 +44,8 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SpongeKey<? extends SetValue<E>, Set<E>> getKey() {
-        //noinspection unchecked
         return (SpongeKey<? extends SetValue<E>, Set<E>>) super.getKey();
     }
 

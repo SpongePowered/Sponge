@@ -42,8 +42,8 @@ public final class MutableSpongeListValue<E> extends MutableSpongeCollectionValu
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SpongeKey<? extends ListValue<E>, List<E>> getKey() {
-        //noinspection unchecked
         return (SpongeKey<? extends ListValue<E>, List<E>>) super.getKey();
     }
 

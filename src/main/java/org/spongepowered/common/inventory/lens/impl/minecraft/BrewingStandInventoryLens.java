@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
@@ -43,7 +44,7 @@ public class BrewingStandInventoryLens extends RealLens {
     }
 
     @SuppressWarnings("unchecked")
-    public BrewingStandInventoryLens(int size, Class clazz, final SlotLensProvider slots) {
+    public BrewingStandInventoryLens(int size, Class<? extends Inventory> clazz, final SlotLensProvider slots) {
         super(0, size, clazz);
         this.init(slots);
     }

@@ -56,7 +56,7 @@ public abstract class BlockStateContainerMixin implements BlockStateContainerBri
     }
 
     @Override
-    public IBlockStatePalette bridge$getPalette() {
+    public IBlockStatePalette<?> bridge$getPalette() {
         return this.palette;
     }
 

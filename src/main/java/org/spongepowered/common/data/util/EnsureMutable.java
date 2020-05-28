@@ -50,6 +50,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public final class EnsureMutable {
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <E> Collection<E> ensureMutable(Collection<E> collection) {
         if (collection instanceof List) {
             return ensureMutable((List<E>) collection);
@@ -58,7 +59,6 @@ public final class EnsureMutable {
             return ensureMutable((Set<E>) collection);
         }
         if (collection instanceof WeightedTable) {
-            //noinspection unchecked,rawtypes
             return ensureMutable((WeightedTable) collection);
         }
         return new ArrayList<>(collection);

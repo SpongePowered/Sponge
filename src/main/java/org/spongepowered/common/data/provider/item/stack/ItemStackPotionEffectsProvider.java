@@ -52,12 +52,12 @@ public class ItemStackPotionEffectsProvider extends ItemStackDataProvider<List<P
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected Optional<List<PotionEffect>> getFrom(final ItemStack dataHolder) {
         final List<net.minecraft.potion.EffectInstance> effects = PotionUtils.getEffectsFromStack(dataHolder);
         if (effects.isEmpty()) {
             return Optional.empty();
         }
-        //noinspection unchecked
         return Optional.of((List<PotionEffect>) (List<?>) effects);
     }
 

@@ -58,10 +58,10 @@ public abstract class DataProviderRegistryBuilder {
         this.register(target, key.get(), getter);
     }
 
+    @SuppressWarnings("unchecked")
     protected static <E, H> Function<H, Optional<E>> toOptionalGetter(Key<? extends Value<E>> key, Function<H, E> getter) {
         // Optimize boolean optionals
         if (key.getElementToken().getRawType() == Boolean.class) {
-            //noinspection unchecked
             return dataHolder -> (Optional<E>) OptBool.of((Boolean) getter.apply(dataHolder));
         } else {
             return dataHolder -> Optional.ofNullable(getter.apply(dataHolder));

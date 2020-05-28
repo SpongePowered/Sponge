@@ -51,6 +51,7 @@ import net.minecraft.tileentity.ShulkerBoxTileEntity;
 import net.minecraft.tileentity.SmokerTileEntity;
 import net.minecraft.tileentity.TrappedChestTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
@@ -81,9 +82,9 @@ import java.util.function.Predicate;
 public class LensRegistrar {
 
     // Class of Inventory -> Size -> Lens
-    private static Map<Class, Int2ObjectMap<Lens>> lenses = new HashMap<>();
+    private static Map<Class<?>, Int2ObjectMap<Lens>> lenses = new HashMap<>();
 
-    private static Map<Class, LensFactory> lensFactories = new HashMap<>();
+    private static Map<Class<?>, LensFactory> lensFactories = new HashMap<>();
 
 
     static {
@@ -135,8 +136,8 @@ public class LensRegistrar {
         return slotLensProvider.getSlotLens(0);
     }
 
-    public static void register(LensFactory lensFactory, Class... classes) {
-        for (Class clazz : classes) {
+    public static void register(LensFactory lensFactory, Class<?>... classes) {
+        for (Class<?> clazz : classes) {
             lensFactories.put(clazz, lensFactory);
         }
     }
@@ -154,7 +155,7 @@ public class LensRegistrar {
         return getLenses(inventory.getClass()).computeIfAbsent(size, k -> generateLens(inventory, size, slotLensProvider));
     }
 
-    private static Int2ObjectMap<Lens> getLenses(Class inventory) {
+    private static Int2ObjectMap<Lens> getLenses(Class<?> inventory) {
         return lenses.computeIfAbsent(inventory, k -> new Int2ObjectOpenHashMap<>());
     }
 
@@ -162,6 +163,7 @@ public class LensRegistrar {
         @Nullable Lens apply(Object inventory, int size, SlotLensProvider slotLensProvider);
     }
 
+    @SuppressWarnings("unchecked")
     private static Lens generateLens(Object inventory, int size, SlotLensProvider slotLensProvider) {
         LensFactory lensFactory = lensFactories.get(inventory.getClass());
         if (size == 0) {
@@ -182,46 +184,51 @@ public class LensRegistrar {
         if (lens != null) {
             return lens;
         }
-        return new SingleIndexedLens(0, size, (Class) inventory.getClass(), slotLensProvider);
+        return new SingleIndexedLens(0, size, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider);
     }
 
     @Nullable
+    @SuppressWarnings("unchecked")
     private static Lens lensGrid(Object inventory, int size, int width, int height, SlotLensProvider slotLensProvider) {
         if (size != width * height) {
             return null; // Wrong size
         }
-        return new SingleGridLens(0, width, height, (Class) inventory.getClass(), slotLensProvider);
+        return new SingleGridLens(0, width, height, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider);
     }
 
+    @SuppressWarnings("unchecked")
     private static Lens lensBrewingStandTileEntity(Object inventory, int size, SlotLensProvider slotLensProvider) {
-        return new BrewingStandInventoryLens(size, inventory.getClass(), slotLensProvider);
+        return new BrewingStandInventoryLens(size, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider);
     }
 
+    @SuppressWarnings("unchecked")
     private static Lens lensFurnace(Object inventory, int size, SlotLensProvider slotLensProvider) {
-        return new FurnaceInventoryLens(size, inventory.getClass(), slotLensProvider);
+        return new FurnaceInventoryLens(size, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider);
     }
-
+    @SuppressWarnings("unchecked")
     private static Lens lensDoubleSided(Object inventory, int size, SlotLensProvider slotLensProvider) {
-        return new LargeChestInventoryLens(size, inventory.getClass(), slotLensProvider);
+        return new LargeChestInventoryLens(size, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider);
     }
 
+    @SuppressWarnings("unchecked")
     private static Lens lensRepairContainer(Object inventory, int size, SlotLensProvider slotLensProvider) {
         final List<Lens> lenses = new ArrayList<>();
         lenses.add(new DefaultIndexedLens(0, 3, slotLensProvider));
         lenses.add(new PrimaryPlayerInventoryLens(3, slotLensProvider, true));
-        return new ContainerLens(size, inventory.getClass(), slotLensProvider, lenses);
+        return new ContainerLens(size, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider, lenses);
     }
 
+    @SuppressWarnings("unchecked")
     private static Lens lensWorkbenchContainer(Object inventory, int size, SlotLensProvider slotLensProvider) {
         final List<Lens> lenses = new ArrayList<>();
         lenses.add(new CraftingInventoryLens(0, 1, 3, 3, slotLensProvider));
         lenses.add(new PrimaryPlayerInventoryLens(3 * 3 + 1, slotLensProvider, true));
-        return new ContainerLens(size, inventory.getClass(), slotLensProvider, lenses);
+        return new ContainerLens(size, (Class<? extends Inventory>)  inventory.getClass(), slotLensProvider, lenses);
     }
 
-
+    @SuppressWarnings("unchecked")
     private static Lens lensPlayerContainer(Object inventory, int size, SlotLensProvider slotLensProvider) {
-        return new ContainerPlayerInventoryLens(size, inventory.getClass(), slotLensProvider);
+        return new ContainerPlayerInventoryLens(size, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider);
     }
 
     public static class BasicSlotLensProvider implements SlotLensProvider {

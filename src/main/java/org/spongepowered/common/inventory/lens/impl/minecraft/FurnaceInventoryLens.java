@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
@@ -45,7 +46,7 @@ public class FurnaceInventoryLens extends RealLens {
         this.init(sp);
     }
 
-    public FurnaceInventoryLens(int size, Class clazz, SlotLensProvider slotLensProvider) {
+    public FurnaceInventoryLens(int size, Class<? extends Inventory> clazz, SlotLensProvider slotLensProvider) {
         super(0, size, clazz);
         this.init(slotLensProvider);
     }

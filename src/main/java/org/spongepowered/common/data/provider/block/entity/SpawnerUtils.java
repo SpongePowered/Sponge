@@ -49,7 +49,7 @@ public class SpawnerUtils {
         final int weight = ((WeightedRandom_ItemAccessor) logic.accessor$getSpawnData()).accessor$getItemWeight();
 
         String resourceLocation = logic.accessor$getSpawnData().getNbt().getString(Constants.Entity.ENTITY_TYPE_ID);
-        EntityType type = Registry.ENTITY_TYPE.getValue(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
+        EntityType<?> type = Registry.ENTITY_TYPE.getValue(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
         final CompoundNBT data = logic.accessor$getSpawnData().getNbt();
 
@@ -79,7 +79,7 @@ public class SpawnerUtils {
             final CompoundNBT nbt = weightedEntity.getNbt();
 
             String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
-            final EntityType type = Registry.ENTITY_TYPE.getValue(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
+            final EntityType<?> type = Registry.ENTITY_TYPE.getValue(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
             final EntityArchetype archetype = EntityArchetype.builder()
                     .type(type)

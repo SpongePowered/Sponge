@@ -64,7 +64,7 @@ public class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
 
         CompoundLens lens = CompoundLens.builder().add(adapter.inventoryAdapter$getRootLens()).build(slotProvider);
 
-        return (Inventory) lens.getAdapter(adapter.inventoryAdapter$getFabric(), (Inventory) inventory);
+        return lens.getAdapter(adapter.inventoryAdapter$getFabric(), (Inventory) inventory);
     }
 
     @Override

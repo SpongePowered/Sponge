@@ -43,8 +43,8 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>> getKey() {
-        //noinspection unchecked
         return (SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>>) super.getKey();
     }
 

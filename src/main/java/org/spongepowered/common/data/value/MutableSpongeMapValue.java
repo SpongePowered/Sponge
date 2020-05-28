@@ -45,8 +45,8 @@ public final class MutableSpongeMapValue<K, V> extends AbstractMutableSpongeValu
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SpongeKey<? extends MapValue<K, V>, Map<K, V>> getKey() {
-        //noinspection unchecked
         return (SpongeKey<? extends MapValue<K, V>, Map<K, V>>) super.getKey();
     }
 

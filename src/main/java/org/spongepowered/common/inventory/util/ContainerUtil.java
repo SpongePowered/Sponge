@@ -44,9 +44,20 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.accessor.inventory.container.AbstractFurnaceContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.BeaconContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.BrewingStandContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.ContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.CraftingResultSlotAccessor;
+import org.spongepowered.common.accessor.inventory.container.DispenserContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.HopperContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.HorseInventoryContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.MerchantContainerAccessor;
+import org.spongepowered.common.accessor.inventory.container.RepairContainerAccessor;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -65,16 +76,6 @@ import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryL
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.accessor.inventory.container.AbstractFurnaceContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.BeaconContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.BrewingStandContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.ContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.CraftingResultSlotAccessor;
-import org.spongepowered.common.accessor.inventory.container.DispenserContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.HopperContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.HorseInventoryContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.MerchantContainerAccessor;
-import org.spongepowered.common.accessor.inventory.container.RepairContainerAccessor;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -211,7 +212,7 @@ public final class ContainerUtil {
 
 
         // Lens containing/delegating to other lenses
-        return new ContainerLens(container.inventorySlots.size(), container.getClass(), slots, lenses, additional);
+        return new ContainerLens(container.inventorySlots.size(), (Class<? extends Inventory>) container.getClass(), slots, lenses, additional);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

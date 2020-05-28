@@ -47,7 +47,7 @@ public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
 
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory) this.container;
+        return (CarriedInventory<? extends Carrier>) this.container;
 
     }
 }

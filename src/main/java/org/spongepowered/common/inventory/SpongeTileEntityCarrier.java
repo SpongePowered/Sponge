@@ -46,10 +46,11 @@ public class SpongeTileEntityCarrier implements DefaultSingleBlockCarrier {
     @Override
     public Location getLocation() {
         final BlockPos pos = this.inventory.getPos();
-        return Location.of(((World) this.inventory.getWorld()), pos.getX(), pos.getY(), pos.getZ());
+        return Location.of(((World<?>) this.inventory.getWorld()), pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public CarriedInventory<? extends Carrier> getInventory() {
         return (CarriedInventory) this.container;
 

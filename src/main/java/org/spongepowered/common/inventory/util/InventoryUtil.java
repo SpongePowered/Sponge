@@ -68,6 +68,7 @@ public final class InventoryUtil {
     }
 
 
+    @SuppressWarnings("unchecked")
     public static <C extends IInventory> C toNativeInventory(Inventory inv) {
         Fabric fabric = ((CraftingGridInventoryAdapter) inv).inventoryAdapter$getFabric();
         for (Object inventory : fabric.fabric$allInventories()) {

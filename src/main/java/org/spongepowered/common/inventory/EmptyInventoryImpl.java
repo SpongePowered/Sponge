@@ -159,6 +159,7 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends Inventory> Optional<T> query(Class<T> inventoryType) {
         if (EmptyInventory.class == inventoryType) {
             return Optional.of((T) this);

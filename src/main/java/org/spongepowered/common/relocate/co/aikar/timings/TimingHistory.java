@@ -24,27 +24,17 @@
  */
 package org.spongepowered.common.relocate.co.aikar.timings;
 
-import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.Counter;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.MinuteReport;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.PingRecord;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.RegionData;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.RegionData.RegionId;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.TicksRecord;
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
-import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
-import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
+import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
+import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
 
 import java.lang.management.ManagementFactory;
 import java.util.Collection;
@@ -71,7 +61,7 @@ public class TimingHistory {
 
     final TimingHistoryEntry[] entries;
     final Set<BlockEntityType> tileEntityTypeSet = Sets.newHashSet();
-    final Set<EntityType> entityTypeSet = Sets.newHashSet();
+    final Set<EntityType<?>> entityTypeSet = Sets.newHashSet();
 //    final JsonObject worlds;
 
     TimingHistory() {
@@ -161,7 +151,7 @@ public class TimingHistory {
 
         }
 
-        final Map<EntityType, Counter> entityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
+        final Map<EntityType<?>, Counter> entityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
         final Map<BlockEntityType, Counter> tileEntityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
 
         @Override

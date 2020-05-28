@@ -142,7 +142,7 @@ class TimingsExport extends Thread {
                 })));
 
         Set<BlockEntityType> tileEntityTypeSet = Sets.newHashSet();
-        Set<EntityType> entityTypeSet = Sets.newHashSet();
+        Set<EntityType<?>> entityTypeSet = Sets.newHashSet();
 
         int size = TimingsManager.HISTORY.size();
         TimingHistory[] history = new TimingHistory[size + 1];

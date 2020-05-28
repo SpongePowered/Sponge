@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.entity.horse;
 
 import net.minecraft.entity.passive.horse.HorseEntity;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.common.SpongeImpl;
@@ -43,8 +42,8 @@ public class HorseEntityHorseStyleProvider extends GenericMutableDataProvider<Ho
 
     @Override
     protected Optional<HorseStyle> getFrom(HorseEntity dataHolder) {
-        final Registry<HorseStyle> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(HorseStyle.class);
-        return Optional.of(((MappedRegistry<HorseStyle, Integer>)registry).getReverseMapping(getHorseStyle(dataHolder)));
+        final MappedRegistry<HorseStyle, Integer> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(HorseStyle.class);
+        return Optional.of(registry.getReverseMapping(getHorseStyle(dataHolder)));
     }
 
     @Override

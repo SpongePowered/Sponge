@@ -100,6 +100,7 @@ public interface SpongeDataHolder extends DataHolder {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     default Set<Value.Immutable<?>> getValues() {
         return this.getAllProviders().stream()
                 .map(provider -> provider.getValue(this).map(Value::asImmutable).orElse(null))

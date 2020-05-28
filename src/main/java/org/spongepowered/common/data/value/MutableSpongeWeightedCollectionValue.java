@@ -44,8 +44,8 @@ public final class MutableSpongeWeightedCollectionValue<E> extends MutableSponge
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>> getKey() {
-        //noinspection unchecked
         return (SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>>) super.getKey();
     }
 

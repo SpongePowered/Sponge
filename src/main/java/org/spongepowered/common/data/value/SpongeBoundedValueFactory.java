@@ -31,21 +31,25 @@ import org.spongepowered.common.data.key.SpongeKey;
 public class SpongeBoundedValueFactory implements BoundedValue.Factory {
 
     @Override
+    @SuppressWarnings("unchecked")
     public <V extends BoundedValue<E>, E> V mutableOf(Key<V> key, E element, E minimum, E maximum) {
         return ((BoundedValueConstructor<V, E>) ((SpongeKey<V, E>) key).getValueConstructor()).getMutable(element, minimum, maximum);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <V extends BoundedValue<E>, E> V mutableOf(Key<V> key, E element) {
         return ((SpongeKey<V, E>) key).getValueConstructor().getMutable(element);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <V extends BoundedValue<E>, E> V immutableOf(Key<V> key, E element, E minimum, E maximum) {
         return ((BoundedValueConstructor<V, E>) ((SpongeKey<V, E>) key).getValueConstructor()).getImmutable(element, minimum, maximum);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <V extends BoundedValue<E>, E> V immutableOf(Key<V> key, E element) {
         return ((SpongeKey<V, E>) key).getValueConstructor().getImmutable(element);
     }

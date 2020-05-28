@@ -50,11 +50,13 @@ public class ArmorStandEntityRotationProvider<G, S> extends GenericMutableDataPr
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected Optional<Vector3d> getFrom(ArmorStandEntity dataHolder) {
         return Optional.of(VecHelper.toVector3d(this.getter.apply((G) dataHolder)));
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected boolean set(ArmorStandEntity dataHolder, Vector3d value) {
         this.setter.accept((S) dataHolder, VecHelper.toRotation(value));
         return true;

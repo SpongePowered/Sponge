@@ -108,7 +108,7 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public Map<Key, Object> getDataAt(int index) {
+    public Map<Key<?>, Object> getDataAt(int index) {
         return Collections.emptyMap();
     }
 

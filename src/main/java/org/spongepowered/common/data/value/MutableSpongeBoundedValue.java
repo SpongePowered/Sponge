@@ -46,8 +46,8 @@ public final class MutableSpongeBoundedValue<E> extends AbstractMutableSpongeVal
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public BoundedKey<? extends BoundedValue<E>, E> getKey() {
-        //noinspection unchecked
         return (BoundedKey<? extends BoundedValue<E>, E>) super.getKey();
     }
 

@@ -39,11 +39,11 @@ public class ContainerLens extends RealLens {
     protected List<Lens> viewedInventories;
     private List<Lens> additonal;
 
-    public ContainerLens(int size, Class adapter, SlotLensProvider slots, List<Lens> lenses) {
+    public ContainerLens(int size, Class<? extends Inventory> adapter, SlotLensProvider slots, List<Lens> lenses) {
         this(size, adapter, slots, lenses, Collections.emptyList());
     }
 
-    public ContainerLens(int size, Class adapter, SlotLensProvider slots, List<Lens> lenses, List<Lens> additonal) {
+    public ContainerLens(int size, Class<? extends Inventory> adapter, SlotLensProvider slots, List<Lens> lenses, List<Lens> additonal) {
         this(size, adapter);
         this.viewedInventories = lenses;
         this.additonal = additonal;

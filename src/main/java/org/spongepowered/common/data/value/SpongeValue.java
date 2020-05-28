@@ -34,8 +34,8 @@ public abstract class SpongeValue<E> implements Value<E> {
     protected final SpongeKey<? extends Value<E>, E> key;
     protected E element;
 
+    @SuppressWarnings("unchecked")
     public SpongeValue(Key<? extends Value<E>> key, E element) {
-        //noinspection unchecked
         this.key = (SpongeKey<? extends Value<E>, E>) key;
         this.element = element;
     }

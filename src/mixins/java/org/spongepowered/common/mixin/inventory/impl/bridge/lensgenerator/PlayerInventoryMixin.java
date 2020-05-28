@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.bridge.lensgenerator;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
@@ -44,11 +45,11 @@ public abstract class PlayerInventoryMixin implements LensGeneratorBridge {
         return new LensRegistrar.BasicSlotLensProvider(this.getSizeInventory());
     }
 
-    @SuppressWarnings({"Unchecked"})
     @Override
+    @SuppressWarnings("unchecked")
     public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
         if ((Class<?>) this.getClass() == net.minecraft.entity.player.PlayerInventory.class) { // Build Player Lens
-            return new PlayerInventoryLens(this.getSizeInventory(), this.getClass(), slotLensProvider);
+            return new PlayerInventoryLens(this.getSizeInventory(), (Class<? extends Inventory>) this.getClass(), slotLensProvider);
         }
         return new DefaultIndexedLens(0, this.getSizeInventory(), slotLensProvider);
     }

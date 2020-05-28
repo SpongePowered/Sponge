@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -118,6 +117,7 @@ public final class DataProviderRegistry {
      * @param <E> The element type
      * @return The delegate data provider
      */
+    @SuppressWarnings("unchecked")
     private static <V extends Value<E>, E> DataProvider<V, E> buildDelegateProvider(Key<V> key, List<DataProvider<V, E>> providers) {
         if (providers.isEmpty()) {
             return ((SpongeKey<V, E>) key).getEmptyDataProvider();
@@ -144,8 +144,8 @@ public final class DataProviderRegistry {
      * @param predicate The predicate to filter data providers
      * @return The built lookup
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public DataProviderLookup buildLookup(Predicate<DataProvider<?,?>> predicate) {
-        //noinspection unchecked,rawtypes
         final Stream<DataProvider> stream = this.dataProviders.keySet().stream()
                 .map(key -> buildDelegateProvider((Key) key, (List) this.dataProviders.get(key).stream().filter(predicate)));
         final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p));
@@ -201,8 +201,8 @@ public final class DataProviderRegistry {
      * @param <E> The element type of the value
      * @return The delegate data provider
      */
+    @SuppressWarnings({"unchecked"})
     public <V extends Value<E>, E> DataProvider<V, E> getProvider(Key<V> key, Class<?> dataHolderType) {
-        // noinspection unchecked
         return (DataProvider<V, E>) this.dataProviderCache.computeIfAbsent(new LookupKey(dataHolderType, key), this::loadProvider);
     }
 

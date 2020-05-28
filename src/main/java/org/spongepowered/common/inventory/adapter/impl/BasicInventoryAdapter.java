@@ -107,7 +107,7 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
     }
 
     public static Optional<Slot> forSlot(final Fabric fabric, final SlotLens slotLens, final Inventory parent) {
-        return slotLens == null ? Optional.empty() : Optional.ofNullable((Slot) slotLens.getAdapter(fabric, parent));
+        return slotLens == null ? Optional.empty() : Optional.ofNullable(slotLens.getAdapter(fabric, parent));
     }
 
     @Override

@@ -31,7 +31,7 @@ public interface BlockStateContainerBridge {
 
     int bridge$getBits();
 
-    IBlockStatePalette bridge$getPalette();
+    IBlockStatePalette<?> bridge$getPalette();
 
     BitArray bridge$getStorage();
 }

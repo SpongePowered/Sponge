@@ -58,8 +58,8 @@ public final class DataProviderLookup {
      * @param <E> The element type
      * @return The delegate provider
      */
+    @SuppressWarnings("unchecked")
     public <V extends Value<E>, E> DataProvider<V, E> getProvider(Key<V> key) {
-        //noinspection unchecked
         return (DataProvider<V, E>) this.providerMap.getOrDefault(key, ((SpongeKey<V, E>) key).getEmptyDataProvider());
     }
 }

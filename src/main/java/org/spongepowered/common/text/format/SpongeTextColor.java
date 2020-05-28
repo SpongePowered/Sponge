@@ -27,12 +27,10 @@ package org.spongepowered.common.text.format;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.util.registry.SimpleRegistry;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.MappedRegistry;
@@ -40,8 +38,8 @@ import org.spongepowered.common.registry.MappedRegistry;
 public final class SpongeTextColor implements TextColor {
 
     public static SpongeTextColor of(TextFormatting formatting) {
-        final SimpleRegistry<TextColor> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
-        TextColor color = ((MappedRegistry<TextColor, TextFormatting>) registry).getReverseMapping(formatting);
+        final MappedRegistry<TextColor, TextFormatting> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
+        TextColor color = registry.getReverseMapping(formatting);
         if (color == null) {
             color = TextColors.NONE.get();
         }
@@ -50,8 +48,8 @@ public final class SpongeTextColor implements TextColor {
     }
 
     public static TextFormatting of(TextColor color) {
-        final SimpleRegistry<TextColor> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
-        TextFormatting formatting = ((MappedRegistry<TextColor, TextFormatting>) registry).getMapping(color);
+        final MappedRegistry<TextColor, TextFormatting> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
+        TextFormatting formatting = registry.getMapping(color);
         if (formatting == null) {
             formatting = TextFormatting.WHITE;
         }

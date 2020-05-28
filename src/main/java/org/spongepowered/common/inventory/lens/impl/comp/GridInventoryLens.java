@@ -42,7 +42,7 @@ public class GridInventoryLens extends Inventory2DLens {
         this(base, width, height, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLens(int base, int width, int height, Class adapterType, SlotLensProvider slots) {
+    public GridInventoryLens(int base, int width, int height, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
         super(base, width, height, 1, 0, 0, adapterType, slots);
         this.init(slots);
     }

@@ -104,7 +104,7 @@ public final class SpongeTimings {
      * @param entity The entity type
      * @return The timing
      */
-    public static Timing getEntityTiming(EntityType entity) {
+    public static Timing getEntityTiming(EntityType<?> entity) {
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + ((CatalogKeyBridge) entity).bridge$getKey().getFormatted());
     }
 

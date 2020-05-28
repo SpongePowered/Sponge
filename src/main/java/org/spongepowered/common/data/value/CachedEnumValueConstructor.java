@@ -35,7 +35,7 @@ final class CachedEnumValueConstructor<V extends Value<E>, E extends Enum<E>> im
     public CachedEnumValueConstructor(ValueConstructor<V, E> original, Class<E> enumType) {
         this.original = original;
         final E[] constants = enumType.getEnumConstants();
-        this.immutableValues = (V[]) new Value[constants.length];
+        this.immutableValues = (V[]) new Value<?>[constants.length];
         for (int i = 0; i < constants.length; i++) {
             this.immutableValues[i] = this.original.getImmutable(constants[i]);
         }

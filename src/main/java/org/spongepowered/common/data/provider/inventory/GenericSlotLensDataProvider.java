@@ -51,7 +51,7 @@ public class GenericSlotLensDataProvider<D> extends GenericImmutableDataProvider
 
         Lens parentLens = ((InventoryBridge) parent).bridge$getAdapter().inventoryAdapter$getRootLens();
         Lens childLens = ((InventoryBridge) child).bridge$getAdapter().inventoryAdapter$getRootLens();
-        Map<Key, Object> dataMap = parentLens.getDataFor(childLens);
+        Map<Key<?>, Object> dataMap = parentLens.getDataFor(childLens);
         D data = (D) dataMap.get(this.getKey());
         return Optional.ofNullable(data);
     }

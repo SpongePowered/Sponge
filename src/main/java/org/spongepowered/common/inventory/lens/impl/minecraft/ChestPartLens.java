@@ -41,8 +41,9 @@ public class ChestPartLens extends RealLens {
 
     private boolean upper;
 
+    @SuppressWarnings("unchecked")
     public ChestPartLens(int base, int width, int height, SlotLensProvider slots, boolean upper) {
-        super(base, width * height, (Class) ChestTileEntity.class);
+        super(base, width * height, (Class<? extends Inventory>) (Class) ChestTileEntity.class);
         this.upper = upper;
         this.addSpanningChild(new GridInventoryLens(base, width, height, slots));
     }

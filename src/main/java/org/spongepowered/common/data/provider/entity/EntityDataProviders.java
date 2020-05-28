@@ -108,6 +108,7 @@ import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.MooshroomType;
 import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.api.data.type.ParrotType;
@@ -334,7 +335,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         }, (e, v) -> e.setRabbitType(((SpongeRabbitType)v).getMetadata()));
         register(LlamaEntity.class, Keys.LLAMA_TYPE, e -> {
             int type = e.getVariant();
-            return Sponge.getRegistry().getCatalogRegistry().getAllOf(SpongeLlamaType.class)
+            return Sponge.getRegistry().getCatalogRegistry().getAllOf(LlamaType.class)
                     .filter(t -> ((SpongeLlamaType)t).getMetadata() == type)
                     .findFirst().orElse(null);
         }, (e, v) -> e.setVariant(((SpongeLlamaType)v).getMetadata()));

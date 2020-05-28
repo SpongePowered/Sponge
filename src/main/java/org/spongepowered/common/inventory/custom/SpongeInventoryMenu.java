@@ -200,15 +200,17 @@ public class SpongeInventoryMenu implements InventoryMenu {
                                 return this.keySwapHandler.handle(cause, container, slot.get(), slotId, ClickTypes.KEY_SWAP.get(), slot2.get());
                             }
                         }
-                        return true;
+                        break;
                     case CLONE:
                         if (this.slotClickHandler != null) {
                             return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.CLICK_MIDDLE.get());
                         }
+                        break;
                     case PICKUP_ALL:
                         if (this.slotClickHandler != null) {
                             return this.slotClickHandler.handle(cause, container, slot.get(), slotId, ClickTypes.DOUBLE_CLICK.get());
                         }
+                        break;
                     default:
                         if (this.slotClickHandler != null) {
                             if (dragType == 0) {
@@ -218,8 +220,8 @@ public class SpongeInventoryMenu implements InventoryMenu {
                             }
                             // else unknown drag-type
                         }
-                        return true;
                 }
+                return true;
             }
             // else no slot present
             switch (clickTypeIn) {
@@ -260,6 +262,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
                 if (this.clickHandler != null) {
                     return this.clickHandler.handle(cause, container, ClickTypes.DRAG_START.get());
                 }
+                break;
             case 1: // add drag
                 Optional<org.spongepowered.api.item.inventory.Slot> slot = container.getSlot(slotId);
                 if (slot.isPresent() && this.slotClickHandler != null) {
@@ -277,6 +280,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
                 if (this.clickHandler != null) {
                     return this.clickHandler.handle(cause, container, ClickTypes.DRAG_END.get());
                 }
+                break;
         }
         return true;
     }
