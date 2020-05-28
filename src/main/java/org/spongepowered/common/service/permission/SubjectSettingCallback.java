@@ -30,11 +30,11 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.mixin.core.service.permission.SubjectMixin;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 /**
  * {@link SubjectMixin} helper class to apply the appropriate subject to the

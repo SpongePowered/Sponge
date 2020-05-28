@@ -26,13 +26,11 @@ package org.spongepowered.common.service.permission;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.Collection;
@@ -45,22 +43,19 @@ import java.util.function.Function;
 public class DataFactoryCollection extends SpongeSubjectCollection {
     private final SpongePermissionService service;
     private final ConcurrentMap<String, SpongeSubject> subjects = new ConcurrentHashMap<>();
-    private final Function<String, MemorySubjectData> dataFactory;
-    final Function<String, CommandSource> commandSourceFunction;
+    private final Function<Subject, MemorySubjectData> dataFactory;
 
-    protected DataFactoryCollection(String identifier, SpongePermissionService service, Function<String, MemorySubjectData> dataFactory,
-                                    Function<String, CommandSource> commandSourceFunction) {
+    protected DataFactoryCollection(String identifier, SpongePermissionService service, Function<Subject, MemorySubjectData> dataFactory) {
         super(identifier, service);
         this.service = service;
         this.dataFactory = dataFactory;
-        this.commandSourceFunction = commandSourceFunction;
     }
 
     @Override
     public SpongeSubject get(String identifier) {
         checkNotNull(identifier, "identifier");
         if (!this.subjects.containsKey(identifier)) {
-            this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory.apply(identifier)));
+            this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory));
         }
         return this.subjects.get(identifier);
     }
@@ -80,9 +75,9 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         private final String identifier;
         private final MemorySubjectData data;
 
-        protected DataFactorySubject(String identifier, MemorySubjectData data) {
+        protected DataFactorySubject(String identifier, Function<Subject, MemorySubjectData> dataFactory) {
             this.identifier = identifier;
-            this.data = data;
+            this.data = dataFactory.apply(this);
         }
 
         @Override
@@ -92,12 +87,8 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
 
         @Override
         public Optional<String> getFriendlyIdentifier() {
-            return this.getCommandSource().map(CommandSource::getName);
-        }
-
-        @Override
-        public Optional<CommandSource> getCommandSource() {
-            return Optional.ofNullable(DataFactoryCollection.this.commandSourceFunction.apply(this.getIdentifier()));
+            // TODO provide friendly identifier if possible
+            return Optional.empty();
         }
 
         @Override
@@ -108,11 +99,6 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         @Override
         public PermissionService getService() {
             return DataFactoryCollection.this.service;
-        }
-
-        @Override
-        public SubjectReference asSubjectReference() {
-            return DataFactoryCollection.this.service.newSubjectReference(DataFactoryCollection.this.getIdentifier(), this.getIdentifier());
         }
 
         @Override

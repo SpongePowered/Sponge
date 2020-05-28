@@ -24,44 +24,48 @@
  */
 package org.spongepowered.common.service.permission;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-public class SpongeSubjectReference implements SubjectReference {
-    private final SpongePermissionService service;
-    private final String collectionId;
-    private final String subjectId;
+/**
+ * Implementation that forces a single parent to always be part of the parents.
+ */
+public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
+    private final SubjectReference forcedParent;
 
-    @Nullable
-    private SpongeSubject cache = null;
-
-    public SpongeSubjectReference(SpongePermissionService service, String collectionId, String subjectId) {
-        this.service = service;
-        this.collectionId = collectionId;
-        this.subjectId = subjectId;
+    /**
+     * Creates a new subject data instance, using the provided service to request instances of permission subjects.
+     */
+    public FixedParentMemorySubjectData(Subject subject, SubjectReference parent) {
+        super(subject);
+        this.forcedParent = parent;
     }
 
     @Override
-    public String getCollectionIdentifier() {
-        return this.collectionId;
+    public List<SubjectReference> getParents(Set<Context> contexts) {
+        return ImmutableList.<SubjectReference>builder().add(this.forcedParent).addAll(super.getParents(contexts)).build();
     }
 
     @Override
-    public String getSubjectIdentifier() {
-        return this.subjectId;
-    }
-
-    @Override
-    public synchronized CompletableFuture<Subject> resolve() {
-        // lazily load
-        if (this.cache == null) {
-            this.cache = this.service.get(this.collectionId).get(this.subjectId);
+    public CompletableFuture<Boolean> addParent(Set<Context> contexts, SubjectReference parent) {
+        if (Objects.equal(this.forcedParent, parent) && contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(true);
         }
-
-        return CompletableFuture.completedFuture(this.cache);
+        return super.addParent(contexts, parent);
     }
 
+    @Override
+    public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
+        if (Objects.equal(this.forcedParent, parent)) {
+            return CompletableFuture.completedFuture(false);
+        }
+        return super.removeParent(contexts, parent);
+    }
 }

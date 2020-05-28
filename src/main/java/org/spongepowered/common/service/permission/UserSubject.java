@@ -49,7 +49,7 @@ public class UserSubject extends SpongeSubject {
 
     public UserSubject(final GameProfile player, final UserCollection users) {
         this.player = player;
-        this.data = new SingleParentMemorySubjectData(users.getService()) {
+        this.data = new SingleParentMemorySubjectData(this) {
             @Override
             public SubjectReference getParent() {
                 return users.getService().getGroupForOpLevel(UserSubject.this.getOpLevel()).asSubjectReference();

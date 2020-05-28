@@ -26,20 +26,17 @@ package org.spongepowered.common.service.permission;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.common.command.CommandPermissions;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public class OpLevelCollection extends SpongeSubjectCollection {
@@ -84,7 +81,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         public OpLevelSubject(final SpongePermissionService service, final int level) {
             this.service = service;
             this.level = level;
-            this.data = new GlobalMemorySubjectData(service) {
+            this.data = new GlobalMemorySubjectData(this) {
 
                 @Override
                 public List<SubjectReference> getParents(Set<Context> contexts) {
@@ -98,6 +95,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
                     }
                 }
             };
+            // TODO
             CommandPermissions.populateNonCommandPermissions(this.data, (permLevel, name) -> level == permLevel);
         }
 
@@ -111,16 +109,6 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Optional<String> getFriendlyIdentifier() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<CommandSource> getCommandSource() {
-            return Optional.empty();
-        }
-
-        @Override
         public SubjectCollection getContainingCollection() {
             return this.service.getGroupSubjects();
         }
@@ -128,11 +116,6 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         @Override
         public PermissionService getService() {
             return this.service;
-        }
-
-        @Override
-        public SubjectReference asSubjectReference() {
-            return this.service.newSubjectReference(this.getContainingCollection().getIdentifier(), this.getIdentifier());
         }
 
         @Override

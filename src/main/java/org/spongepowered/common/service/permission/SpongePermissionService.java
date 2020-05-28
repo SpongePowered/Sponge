@@ -40,7 +40,6 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.SpongeImpl;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,6 +50,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 /**
  * Permission service representing the vanilla operator permission structure.
  *
@@ -58,7 +59,6 @@ import java.util.function.Predicate;
  */
 public class SpongePermissionService implements PermissionService {
     private static final String SUBJECTS_DEFAULT = "default";
-//    private static final Function<String, CommandSource> NO_COMMAND_SOURCE = s -> null;
 
     private final Game game;
     private final Map<String, PermissionDescription> descriptionMap = new LinkedHashMap<>();
@@ -72,12 +72,13 @@ public class SpongePermissionService implements PermissionService {
         this.subjects.put(SUBJECTS_DEFAULT, (this.defaultCollection = this.newCollection(SUBJECTS_DEFAULT)));
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
-//
-//        this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
-//                s -> new FixedParentMemorySubjectData(this, this.getGroupForOpLevel(2).asSubjectReference()), NO_COMMAND_SOURCE));
 
-//        this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
-//                s -> new FixedParentMemorySubjectData(this, this.getGroupForOpLevel(4).asSubjectReference()),
+        this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
+                s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(2).asSubjectReference())));
+
+        this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
+                s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(4).asSubjectReference())
+//                ,
 //                s -> {
 //                    if (s.equals("Server")) {
 //                        return SpongeImpl.getGame().getServer().getConsole();
@@ -85,7 +86,8 @@ public class SpongePermissionService implements PermissionService {
 //                        TODO: Implement RCON API?
 //                    }*/
 //                    return null;
-//                }));
+//                }
+                ));
 
         this.defaultData = this.getDefaultCollection().get(SUBJECTS_DEFAULT);
     }
@@ -113,8 +115,7 @@ public class SpongePermissionService implements PermissionService {
     }
 
     private SpongeSubjectCollection newCollection(String identifier) {
-        throw new UnsupportedOperationException("implement me");
-//        return new DataFactoryCollection(identifier, this, s -> new GlobalMemorySubjectData(SpongePermissionService.this), NO_COMMAND_SOURCE);
+        return new DataFactoryCollection(identifier, this, GlobalMemorySubjectData::new);
     }
 
     public SpongeSubjectCollection get(String identifier) {
