@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockWall;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
@@ -45,23 +44,13 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.util.Constants;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 @Mixin(BlockWall.class)
 public abstract class BlockWallMixin extends BlockMixin {
-
-    private static final Map<Direction, PropertyBool> impl$DIRECTION_TO_PROPERTY_MAPPING;
-
-    static {
-        ImmutableMap.Builder<Direction, PropertyBool> directionToPropertyMappingBuilder = ImmutableMap.builder();
-        directionToPropertyMappingBuilder.put(Direction.NORTH, BlockWall.NORTH);
-        directionToPropertyMappingBuilder.put(Direction.SOUTH, BlockWall.SOUTH);
-        directionToPropertyMappingBuilder.put(Direction.WEST, BlockWall.WEST);
-        directionToPropertyMappingBuilder.put(Direction.EAST, BlockWall.EAST);
-        impl$DIRECTION_TO_PROPERTY_MAPPING = directionToPropertyMappingBuilder.build();
-    }
 
     @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
@@ -74,6 +63,22 @@ public abstract class BlockWallMixin extends BlockMixin {
         return ImmutableWallData.class.isAssignableFrom(immutable) || ImmutableConnectedDirectionData.class.isAssignableFrom(immutable);
     }
 
+    private IBlockState impl$applyConnectedDirections(final IBlockState blockState, final Set<Direction> directions) {
+        final Map<PropertyBool, Boolean> facingStates = new HashMap<>();
+        for (PropertyBool property : Constants.DirectionFunctions.Wall.ALL_DIRECTION_PROPERTIES) {
+            facingStates.put(property, false);
+        }
+        for (Direction connectedDirection : directions) {
+            final Optional<PropertyBool> facingPropertyBox = Constants.DirectionFunctions.Wall.getPropertyFromDirection(connectedDirection);
+            facingPropertyBox.ifPresent(facingProperty -> facingStates.put(facingProperty, true));
+        }
+        IBlockState resultBlockState = blockState;
+        for (PropertyBool property : facingStates.keySet()) {
+            resultBlockState = resultBlockState.withProperty(property, facingStates.get(property));
+        }
+        return resultBlockState;
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
@@ -83,8 +88,7 @@ public abstract class BlockWallMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             final ImmutableConnectedDirectionData connectedDirectionData = (ImmutableConnectedDirectionData) manipulator;
-            return Optional.of((BlockState) Constants.DirectionFunctions.applyConnectedDirections(blockState, impl$DIRECTION_TO_PROPERTY_MAPPING,
-                (sourceBlockState, property) -> true, (sourceBlockState, property) -> false, connectedDirectionData.connectedDirections().get()));
+            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, connectedDirectionData.connectedDirections().get()));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
@@ -97,8 +101,7 @@ public abstract class BlockWallMixin extends BlockMixin {
             return Optional.of((BlockState) blockState.withProperty(BlockWall.VARIANT, wallType));
         }
         if (key.equals(Keys.CONNECTED_DIRECTIONS)) {
-            return Optional.of((BlockState) Constants.DirectionFunctions.applyConnectedDirections(blockState, impl$DIRECTION_TO_PROPERTY_MAPPING,
-                (sourceBlockState, property) -> true, (sourceBlockState, property) -> false, (Set<Direction>) value));
+            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, (Set<Direction>) value));
         } else if (key.equals(Keys.CONNECTED_EAST)) {
             return Optional.of((BlockState) blockState.withProperty(BlockWall.EAST, (Boolean) value));
         } else if (key.equals(Keys.CONNECTED_NORTH)) {

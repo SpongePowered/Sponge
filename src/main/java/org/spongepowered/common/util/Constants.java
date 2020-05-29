@@ -30,10 +30,17 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockLever;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockPane;
+import net.minecraft.block.BlockRedstoneWire;
+import net.minecraft.block.BlockTripWire;
+import net.minecraft.block.BlockVine;
+import net.minecraft.block.BlockWall;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.nbt.NBTTagCompound;
@@ -108,12 +115,10 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiFunction;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -1358,24 +1363,130 @@ public final class Constants {
             }
         }
 
-        public static <V extends Comparable<V>, P extends IProperty<V>> IBlockState applyConnectedDirections(IBlockState blockState,
-                        Map<Direction, P> mapping, BiFunction<IBlockState, P, V> setValueResolver, BiFunction<IBlockState, P, V> resetValueResolver,
-                        Set<Direction> directions) {
-            Map<P, V> facingStates = new HashMap<>();
-            for (P property : mapping.values()) {
-                facingStates.put(property, resetValueResolver.apply(blockState, property));
-            }
-            for (Direction connectedDirection : directions) {
-                if (connectedDirection.isCardinal()) {
-                    P facingProperty = mapping.get(connectedDirection);
-                    facingStates.put(facingProperty, setValueResolver.apply(blockState, facingProperty));
+        public static final class Fence {
+
+            public static final Set<PropertyBool> ALL_DIRECTION_PROPERTIES =
+                    ImmutableSet.of(BlockFence.NORTH, BlockFence.SOUTH, BlockFence.WEST, BlockFence.EAST);
+
+            public static Optional<PropertyBool> getPropertyFromDirection(final Direction direction) {
+                switch (direction) {
+                    case NORTH:
+                        return Optional.of(BlockFence.NORTH);
+                    case SOUTH:
+                        return Optional.of(BlockFence.SOUTH);
+                    case WEST:
+                        return Optional.of(BlockFence.WEST);
+                    case EAST:
+                        return Optional.of(BlockFence.EAST);
+                    default:
+                        return Optional.empty();
                 }
             }
-            IBlockState resultBlockState = blockState;
-            for (P property : facingStates.keySet()) {
-                resultBlockState = resultBlockState.withProperty(property, facingStates.get(property));
+        }
+
+        public static final class Pane {
+
+            public static final Set<PropertyBool> ALL_DIRECTION_PROPERTIES =
+                    ImmutableSet.of(BlockPane.NORTH, BlockPane.SOUTH, BlockPane.WEST, BlockPane.EAST);
+
+            public static Optional<PropertyBool> getPropertyFromDirection(final Direction direction) {
+                switch (direction) {
+                    case NORTH:
+                        return Optional.of(BlockPane.NORTH);
+                    case SOUTH:
+                        return Optional.of(BlockPane.SOUTH);
+                    case WEST:
+                        return Optional.of(BlockPane.WEST);
+                    case EAST:
+                        return Optional.of(BlockPane.EAST);
+                    default:
+                        return Optional.empty();
+                }
             }
-            return resultBlockState;
+        }
+
+        public static final class RedstoneWire {
+
+            public static final Set<PropertyEnum<BlockRedstoneWire.EnumAttachPosition>> ALL_DIRECTION_PROPERTIES =
+                    ImmutableSet.of(BlockRedstoneWire.NORTH, BlockRedstoneWire.SOUTH, BlockRedstoneWire.WEST, BlockRedstoneWire.EAST);
+
+            public static Optional<PropertyEnum<BlockRedstoneWire.EnumAttachPosition>> getPropertyFromDirection(final Direction direction) {
+                switch (direction) {
+                    case NORTH:
+                        return Optional.of(BlockRedstoneWire.NORTH);
+                    case SOUTH:
+                        return Optional.of(BlockRedstoneWire.SOUTH);
+                    case WEST:
+                        return Optional.of(BlockRedstoneWire.WEST);
+                    case EAST:
+                        return Optional.of(BlockRedstoneWire.EAST);
+                    default:
+                        return Optional.empty();
+                }
+            }
+        }
+
+        public static final class TripWire {
+
+            public static final Set<PropertyBool> ALL_DIRECTION_PROPERTIES =
+                    ImmutableSet.of(BlockTripWire.NORTH, BlockTripWire.SOUTH, BlockTripWire.WEST, BlockTripWire.EAST);
+
+            public static Optional<PropertyBool> getPropertyFromDirection(final Direction direction) {
+                switch (direction) {
+                    case NORTH:
+                        return Optional.of(BlockTripWire.NORTH);
+                    case SOUTH:
+                        return Optional.of(BlockTripWire.SOUTH);
+                    case WEST:
+                        return Optional.of(BlockTripWire.WEST);
+                    case EAST:
+                        return Optional.of(BlockTripWire.EAST);
+                    default:
+                        return Optional.empty();
+                }
+            }
+        }
+
+        public static final class Vine {
+
+            public static final Set<PropertyBool> ALL_DIRECTION_PROPERTIES =
+                    ImmutableSet.of(BlockVine.NORTH, BlockVine.SOUTH, BlockVine.WEST, BlockVine.EAST);
+
+            public static Optional<PropertyBool> getPropertyFromDirection(final Direction direction) {
+                switch (direction) {
+                    case NORTH:
+                        return Optional.of(BlockVine.NORTH);
+                    case SOUTH:
+                        return Optional.of(BlockVine.SOUTH);
+                    case WEST:
+                        return Optional.of(BlockVine.WEST);
+                    case EAST:
+                        return Optional.of(BlockVine.EAST);
+                    default:
+                        return Optional.empty();
+                }
+            }
+        }
+
+        public static final class Wall {
+
+            public static final Set<PropertyBool> ALL_DIRECTION_PROPERTIES =
+                    ImmutableSet.of(BlockWall.NORTH, BlockWall.SOUTH, BlockWall.WEST, BlockWall.EAST);
+
+            public static Optional<PropertyBool> getPropertyFromDirection(final Direction direction) {
+                switch (direction) {
+                    case NORTH:
+                        return Optional.of(BlockWall.NORTH);
+                    case SOUTH:
+                        return Optional.of(BlockWall.SOUTH);
+                    case WEST:
+                        return Optional.of(BlockWall.WEST);
+                    case EAST:
+                        return Optional.of(BlockWall.EAST);
+                    default:
+                        return Optional.empty();
+                }
+            }
         }
     }
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
@@ -49,24 +48,13 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 @Mixin(BlockRedstoneWire.class)
 public abstract class BlockRedstoneWireMixin extends BlockMixin {
-
-    private static final Map<Direction, PropertyEnum<BlockRedstoneWire.EnumAttachPosition>> impl$DIRECTION_TO_PROPERTY_MAPPING;
-
-    static {
-        ImmutableMap.Builder<Direction, PropertyEnum<BlockRedstoneWire.EnumAttachPosition>> directionToPropertyMappingBuilder;
-        directionToPropertyMappingBuilder = ImmutableMap.builder();
-        directionToPropertyMappingBuilder.put(Direction.NORTH, BlockRedstoneWire.NORTH);
-        directionToPropertyMappingBuilder.put(Direction.SOUTH, BlockRedstoneWire.SOUTH);
-        directionToPropertyMappingBuilder.put(Direction.WEST, BlockRedstoneWire.WEST);
-        directionToPropertyMappingBuilder.put(Direction.EAST, BlockRedstoneWire.EAST);
-        impl$DIRECTION_TO_PROPERTY_MAPPING = directionToPropertyMappingBuilder.build();
-    }
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
@@ -79,6 +67,23 @@ public abstract class BlockRedstoneWireMixin extends BlockMixin {
                 || ImmutableWireAttachmentData.class.isAssignableFrom(immutable);
     }
 
+    private IBlockState impl$applyConnectedDirections(final IBlockState blockState, final Set<Direction> directions) {
+        final Map<PropertyEnum<BlockRedstoneWire.EnumAttachPosition>, BlockRedstoneWire.EnumAttachPosition> facingStates = new HashMap<>();
+        for (PropertyEnum<BlockRedstoneWire.EnumAttachPosition> property : Constants.DirectionFunctions.RedstoneWire.ALL_DIRECTION_PROPERTIES) {
+            facingStates.put(property, BlockRedstoneWire.EnumAttachPosition.NONE);
+        }
+        for (Direction connectedDirection : directions) {
+            final Optional<PropertyEnum<BlockRedstoneWire.EnumAttachPosition>> facingPropertyBox =
+                    Constants.DirectionFunctions.RedstoneWire.getPropertyFromDirection(connectedDirection);
+            facingPropertyBox.ifPresent(facingProperty -> facingStates.put(facingProperty, blockState.getValue(facingProperty)));
+        }
+        IBlockState resultBlockState = blockState;
+        for (PropertyEnum<BlockRedstoneWire.EnumAttachPosition> property : facingStates.keySet()) {
+            resultBlockState = resultBlockState.withProperty(property, facingStates.get(property));
+        }
+        return resultBlockState;
+    }
+
     @Override
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableRedstonePoweredData) {
@@ -86,9 +91,7 @@ public abstract class BlockRedstoneWireMixin extends BlockMixin {
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             final ImmutableConnectedDirectionData connectedDirectionData = (ImmutableConnectedDirectionData) manipulator;
-            return Optional.of((BlockState) Constants.DirectionFunctions.applyConnectedDirections(blockState, impl$DIRECTION_TO_PROPERTY_MAPPING,
-                (sourceBlockState, property) -> sourceBlockState.getValue(property),
-                (sourceBlockState, property) -> BlockRedstoneWire.EnumAttachPosition.NONE, connectedDirectionData.connectedDirections().get()));
+            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, connectedDirectionData.connectedDirections().get()));
         }
         if (manipulator instanceof ImmutableWireAttachmentData) {
             return Optional.of((BlockState) blockState);
@@ -107,9 +110,7 @@ public abstract class BlockRedstoneWireMixin extends BlockMixin {
             return Optional.of((BlockState) blockState);
         }
         if (key.equals(Keys.CONNECTED_DIRECTIONS)) {
-            return Optional.of((BlockState) Constants.DirectionFunctions.applyConnectedDirections(blockState, impl$DIRECTION_TO_PROPERTY_MAPPING,
-                (sourceBlockState, property) -> sourceBlockState.getValue(property),
-                (sourceBlockState, property) -> BlockRedstoneWire.EnumAttachPosition.NONE, (Set<Direction>) value));
+            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, (Set<Direction>) value));
         } else if (key.equals(Keys.CONNECTED_EAST)) {
             return Optional.of((BlockState) blockState.withProperty(BlockRedstoneWire.EAST, blockState.getValue(BlockRedstoneWire.EAST)));
         } else if (key.equals(Keys.CONNECTED_NORTH)) {
