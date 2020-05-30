@@ -22,24 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mcp.world;
+package org.spongepowered.common.accessor.world.raid;
 
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.World;
+import net.minecraft.world.raid.Raid;
+import net.minecraft.world.raid.RaidManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(value = World.class, priority = 1500)
-public abstract class WorldMixin_Optimization_Collision {
+import java.util.Map;
 
-    @Shadow public boolean isFlammableWithin(final AxisAlignedBB bb) { return false; } // shadow
+@Mixin(RaidManager.class)
+public interface RaidManagerAccessor {
 
-    @Redirect(method = "isFlammableWithin", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIII)Z"))
-    private boolean activeCollision$IgnoreIsAreaLoaded(final World world, final int xStart, final int yStart, final int zStart,
-        final int xEnd, final int yEnd, final int zEnd) {
-        return true;
-    }
+    @Accessor("byId") Map<Integer, Raid> accessor$getById();
 
 }

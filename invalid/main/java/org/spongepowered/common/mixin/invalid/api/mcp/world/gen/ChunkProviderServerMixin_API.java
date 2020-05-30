@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.invalid.api.mcp.world.gen;
 
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ChunkLoader;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
@@ -48,8 +47,6 @@ public abstract class ChunkProviderServerMixin_API implements WorldStorage {
 
     @Shadow @Final private ServerWorld world;
     @Shadow @Final private ChunkLoader chunkLoader;
-
-    @Shadow public abstract Chunk loadChunk(int x, int z);
 
     @Override
     public ChunkDataStream getGeneratedChunks() {

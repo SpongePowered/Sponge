@@ -54,11 +54,14 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.accessor.world.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.GameRules_RuleValueAccessor;
+import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
@@ -482,4 +485,23 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
         return apiRules;
     }
+
+    @Override
+    public int getViewDistance() {
+        // TODO ChunkManager#viewDistance
+        // originates from ServerPlayNetHandler#getViewDistance()
+    }
+
+    @Override
+    public void setViewDistance(int viewDistance) {
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter();
+        // don't use the parameter, use the field that has been clamped
+        configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapBridge) this.playerChunkMap).accessor$getViewDistance());
+        configAdapter.save();
+        // TODO ChunkManager#setViewDistance();
+        throw new UnsupportedOperationException();
+    }
+
+    // TODO resetViewDistance? this.setViewDistance(this.server.getPlayerList().getViewDistance());
+
 }

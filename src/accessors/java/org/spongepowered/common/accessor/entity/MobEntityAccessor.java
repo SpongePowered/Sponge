@@ -26,6 +26,7 @@ package org.spongepowered.common.accessor.entity;
 
 import net.minecraft.entity.MobEntity;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.world.DifficultyInstance;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -42,4 +43,6 @@ public interface MobEntityAccessor {
     @Invoker("isAIDisabled") boolean accessor$isAIDisabled();
 
     @Invoker("setNoAI") void accessor$setNoAI(boolean noAi);
+
+    @Invoker("setEquipmentBasedOnDifficulty") void accessor$setEquipmentBasedOnDifficulty(DifficultyInstance difficulty);
 }
