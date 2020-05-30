@@ -37,13 +37,13 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.Collection;
+
 public class BookFaker {
 
     public static final int WINDOW_PLAYER_INVENTORY = 0;
 
-    public static void fakeBookView(BookView bookView, Player player) {
-        ServerPlayerEntity mcPlayer = (ServerPlayerEntity) player;
-        ServerPlayNetHandler receiver = mcPlayer.connection;
+    public static void fakeBookView(BookView bookView, Collection<? extends Player> players) {
 
         // First we need to send a fake a Book ItemStack with the BookView's
         // contents to the player's hand
@@ -52,16 +52,21 @@ public class BookFaker {
         item.offer(Keys.AUTHOR, bookView.getAuthor());
         item.offer(Keys.PAGES, bookView.getPages());
 
-        PlayerInventory inventory = mcPlayer.inventory;
-        int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
-        receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
+        for (Player player : players) {
+            ServerPlayerEntity mcPlayer = (ServerPlayerEntity) player;
+            ServerPlayNetHandler receiver = mcPlayer.connection;
 
-        // Next we tell the client to open the Book GUI
-        receiver.sendPacket(new SOpenBookWindowPacket(Hand.MAIN_HAND));
+            PlayerInventory inventory = mcPlayer.inventory;
+            int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
+            receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
-        // Now we can remove the fake Book since it's contents will have already
-        // been transferred to the GUI
-        receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
+            // Next we tell the client to open the Book GUI
+            receiver.sendPacket(new SOpenBookWindowPacket(Hand.MAIN_HAND));
+
+            // Now we can remove the fake Book since it's contents will have already
+            // been transferred to the GUI
+            receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
+        }
     }
 
 }

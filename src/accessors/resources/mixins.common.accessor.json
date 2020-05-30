@@ -152,6 +152,7 @@
     "world.end.DragonFightManagerAccessor",
     "world.gen.feature.DungeonsFeatureAccessor",
     "world.raid.RaidAccessor",
+    "world.raid.RaidManagerAccessor",
     "world.server.ChunkManagerAccessor",
     "world.server.EntityTrackerAccessor",
     "world.server.ServerWorldAccessor",

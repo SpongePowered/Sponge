@@ -45,6 +45,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
@@ -67,12 +68,13 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     @Shadow int shadow$getSeaLevel();
     @Shadow boolean shadow$isCollisionBoxesEmpty(net.minecraft.entity.Entity p_195586_1_, AxisAlignedBB p_195586_2_);
     @Shadow boolean shadow$hasWater(BlockPos p_201671_1_);
-    @Deprecated @Shadow boolean shadow$isBlockLoaded(BlockPos p_175667_1_);
-    @Deprecated @Shadow boolean shadow$isAreaLoaded(BlockPos p_175707_1_, BlockPos p_175707_2_);
     @Deprecated @Shadow boolean shadow$isAreaLoaded(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
     @Shadow net.minecraft.world.dimension.Dimension shadow$getDimension();
+    @Shadow boolean shadow$containsAnyLiquid(AxisAlignedBB bb);
 
     //@formatter:on
+
+    // ReadableRegion
 
     @Override
     default Dimension getDimension() {
@@ -100,6 +102,13 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     }
 
     @Override
+    default boolean containsAnyLiquids(AABB aabb) {
+        final Vector3d max = aabb.getMax();
+        final Vector3d min = aabb.getMin();
+        return this.shadow$containsAnyLiquid(new AxisAlignedBB(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ()));
+    }
+
+    @Override
     default int getSkylightSubtracted() {
         return this.shadow$getSkylightSubtracted();
     }
@@ -120,6 +129,8 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
         return this.shadow$isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd);
     }
 
+    // RandomProvider
+
     /**
      * Generates a random for usage, specific cases where randoms are being stored,
      * will override this appropriately.
@@ -130,6 +141,8 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     default Random getRandom() {
         return new Random();
     }
+
+    // ReadableEntityVolume
 
     @Override
     default Optional<Entity> getEntity(final UUID uuid) {
@@ -156,6 +169,8 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
             "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
+    // ChunkVolume
+
     @Override
     default ProtoChunk<?> getChunk(final int x, final int y, final int z) {
         return (ProtoChunk<?>) this.shadow$getChunk(x >> 4, z >> 4, ChunkStatus.EMPTY, true);
@@ -176,8 +191,11 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
         return this.shadow$chunkExists(position.getX() >> 4, position.getZ() >> 4);
     }
 
+    // HeightAwareVolume
+
     @Override
     default int getHeight(final HeightType type, final int x, final int z) {
         return this.shadow$getHeight((Heightmap.Type) (Object) type, x, z);
     }
+
 }
