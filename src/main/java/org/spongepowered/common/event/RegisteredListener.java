@@ -35,6 +35,8 @@ import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.plugin.PluginContainer;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -105,17 +107,13 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
         private final List<RegisteredListener<?>> listeners;
         private final EnumMap<Order, List<RegisteredListener<?>>> listenersByOrder;
 
-        private static final Order[] ORDERS = Order.values();
-
         Cache(List<RegisteredListener<?>> listeners) {
             this.listeners = listeners;
 
-            this.listenersByOrder = Maps.newEnumMap(Order.class);
-            for (Order order : ORDERS) {
-                this.listenersByOrder.put(order, Lists.<RegisteredListener<?>>newArrayList());
-            }
+            this.listenersByOrder = new EnumMap<>(Order.class);
             for (RegisteredListener<?> handler : listeners) {
-                this.listenersByOrder.get(handler.getOrder()).add(handler);
+                final List<RegisteredListener<?>> list = this.listenersByOrder.computeIfAbsent(handler.getOrder(), order -> new ArrayList<>());
+                list.add(handler);
             }
         }
 
@@ -124,7 +122,11 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
         }
 
         public List<RegisteredListener<?>> getListenersByOrder(Order order) {
-            return this.listenersByOrder.get(checkNotNull(order, "order"));
+            final List<RegisteredListener<?>> list = this.listenersByOrder.get(checkNotNull(order, "order"));
+            if (list == null) {
+                return Collections.emptyList();
+            }
+            return list;
         }
 
     }
