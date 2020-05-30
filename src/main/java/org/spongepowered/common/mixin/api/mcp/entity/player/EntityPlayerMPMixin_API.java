@@ -139,6 +139,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -231,7 +232,7 @@ public abstract class EntityPlayerMPMixin_API extends EntityPlayerMixin_API impl
             // Don't bother sending messages to fake players
             return;
         }
-        BookFaker.fakeBookView(bookView, this);
+        BookFaker.fakeBookView(bookView, Collections.singletonList(this));
     }
 
     @Override
