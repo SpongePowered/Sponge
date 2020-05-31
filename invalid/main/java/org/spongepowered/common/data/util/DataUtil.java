@@ -43,15 +43,7 @@ import java.util.function.Supplier;
 
 public class DataUtil {
 
-
-    public static final DataFixer spongeDataFixer = new DataFixer(Constants.Sponge.SPONGE_DATA_VERSION);
     private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
-
-    static {
-        spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
-        spongeDataFixer.registerFix(FixTypes.ENTITY, new EntityTrackedUser());
-        spongeDataFixer.registerFix(FixTypes.PLAYER, new PlayerRespawnData());
-    }
 
     @SuppressWarnings("rawtypes")
     public static <T> T getData(final DataView dataView, final Key<? extends Value<T>> key) throws InvalidDataException {

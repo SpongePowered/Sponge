@@ -27,13 +27,16 @@ package org.spongepowered.common.data;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.DataFixerBuilder;
+import com.mojang.datafixers.schemas.Schema;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.Util;
 import net.minecraft.util.registry.Registry;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogKey;
@@ -62,6 +65,9 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
+import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
+import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
+import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
@@ -89,6 +95,16 @@ public final class SpongeDataManager implements DataManager {
             // See https://github.com/SpongePowered/SpongeCommon/issues/1348
             x -> dataSerializableTypeToken.isSupertypeOf(x) && !catalogTypeToken.isSupertypeOf(x), new DataSerializableTypeSerializer()
         );
+    }
+
+
+    public static final DataFixer spongeDataFixer = addFixers(new DataFixerBuilder(Constants.Sponge.SPONGE_DATA_VERSION)).build(Util.getServerExecutor());
+
+    static DataFixerBuilder addFixers(DataFixerBuilder builder) {
+        builder.addFixer(new SpongeLevelFixer(builder.addSchema(Constants.Legacy.World.WORLD_UUID_1_9_VERSION, Schema::new), true));
+        builder.addFixer(new EntityTrackedUser(builder.addSchema(Constants.Legacy.Entity.TRACKER_ID_VERSION, Schema::new), true));
+// TODO this fixer did nothing       builder.addFixer(new PlayerRespawnData(builder.addSchema( Constants.Sponge.PlayerData.RESPAWN_DATA_1_9_VERSION, Schema::new), true));
+        return builder;
     }
 
     // Builders
