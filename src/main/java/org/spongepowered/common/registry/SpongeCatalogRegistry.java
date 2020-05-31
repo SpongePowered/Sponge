@@ -65,6 +65,8 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
+import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.CatType;
@@ -124,6 +126,9 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeDataRegistration;
+import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
@@ -168,6 +173,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -302,13 +308,26 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
+    private <T extends CatalogType> SpongeCatalogRegistry registerCallbackRegistry(Class<T> catalogClass, CatalogKey key, BiConsumer<ResourceLocation, T> callback) {
+        checkNotNull(catalogClass);
+        checkNotNull(key);
+
+        final Registry<CatalogType> registry = this.registries.putIfAbsent(key, (Registry<CatalogType>) new CallbackRegistry<>(callback));
+        if (registry != null) {
+            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered!", catalogClass));
+        }
+        this.registriesByType.put((Class<CatalogType>) catalogClass, registry);
+
+        return this;
+    }
+
     private <T extends CatalogType, U> SpongeCatalogRegistry registerMappedRegistry(Class<T> catalogClass, CatalogKey key,
         @Nullable Supplier<Set<Tuple<T, U>>> defaultsSupplier, boolean generateSuppliers) {
 
         checkNotNull(catalogClass);
         checkNotNull(key);
 
-        if (this.registries.get(key) != null) {
+        if (this.registries.containsKey(key)) {
             throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered!", catalogClass));
         }
 
@@ -429,7 +448,11 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateMappedRegistry(NotePitch.class, CatalogKey.minecraft("note_pitch"), NotePitchStreamGenerator.stream(), true)
             .generateMappedRegistry(ParrotType.class, CatalogKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true)
             .generateMappedRegistry(RabbitType.class, CatalogKey.minecraft("rabbit_type"), RabbitTypeStreamGenerator.stream(), true)
+            .generateMappedRegistry(DataTranslator.class, CatalogKey.sponge("data_translator"), DataSerializers.stream(), true)
         ;
+
+        this.registerCallbackRegistry(DataRegistration.class, CatalogKey.sponge("data_registration"),
+                (resourceLocation, value) -> SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) value));
     }
 
     /**
@@ -466,4 +489,5 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         this.registerMappedRegistry(catalogClass, key, () -> valueStream.collect(Collectors.toSet()), generateSuppliers);
         return this;
     }
+
 }

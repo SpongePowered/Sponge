@@ -30,6 +30,7 @@ import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.block.entity.Skull;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -176,7 +177,7 @@ public final class DataRegistrar {
         dataManager.registerContentUpdater(ItemStackSnapshot.class, new ItemStackSnapshotDuplicateManipulatorUpdater());
 
         // Content Updaters for Custom Data
-        dataManager.registerContentUpdater(Mutable.class, new LegacyCustomDataClassContentUpdater());
+        dataManager.registerCustomDataContentUpdater(new LegacyCustomDataClassContentUpdater());
 
     }
 

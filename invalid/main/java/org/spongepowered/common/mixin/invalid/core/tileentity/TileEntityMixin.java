@@ -55,9 +55,7 @@ public class TileEntityMixin {
      */
     @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     private void impl$WriteSpongeDataToCompound(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
-        if (!((CustomDataHolderBridge) this).bridge$getCustomManipulators().isEmpty()) {
-            this.bridge$writeToSpongeCompound(this.data$getSpongeDataCompound());
-        }
+        this.bridge$writeToSpongeCompound(this.data$getSpongeDataCompound());
     }
 
     /**

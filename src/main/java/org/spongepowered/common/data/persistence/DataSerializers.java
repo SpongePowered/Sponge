@@ -25,13 +25,14 @@
 package org.spongepowered.common.data.persistence;
 
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.imaginary.Complexd;
 import org.spongepowered.math.imaginary.Complexf;
@@ -61,6 +62,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public final class DataSerializers {
 
@@ -91,6 +93,7 @@ public final class DataSerializers {
     static {
         UUID_DATA_SERIALIZER = new DataTranslator<UUID>() {
 
+            final CatalogKey key = CatalogKey.sponge("uuid");
             final TypeToken<UUID> token = TypeToken.of(UUID.class);
 
             @Override
@@ -120,17 +123,13 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:uuid";
-            }
-
-            @Override
-            public String getName() {
-                return "UuidTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_2_D_DATA_SERIALIZER = new DataTranslator<Vector2d>() {
 
+            final CatalogKey key = CatalogKey.sponge("vector_2_d");
             final TypeToken<Vector2d> token = TypeToken.of(Vector2d.class);
 
             @Override
@@ -159,17 +158,13 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_2_d";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector2dTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_2_F_DATA_SERIALIZER = new DataTranslator<Vector2f>() {
 
+            final CatalogKey key = CatalogKey.sponge("vector_2_f");
             final TypeToken<Vector2f> token = TypeToken.of(Vector2f.class);
 
             @Override
@@ -198,17 +193,13 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_2_f";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector2fTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_2_I_DATA_SERIALIZER = new DataTranslator<Vector2i>() {
 
+            final CatalogKey key = CatalogKey.sponge("vector_2_i");
             final TypeToken<Vector2i> token = TypeToken.of(Vector2i.class);
 
             @Override
@@ -238,17 +229,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_2_i";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector2iTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_2_L_DATA_SERIALIZER = new DataTranslator<Vector2l>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_2_l");
             final TypeToken<Vector2l> token = TypeToken.of(Vector2l.class);
 
             @Override
@@ -277,17 +263,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_2_l";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector2lTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_3_D_DATA_SERIALIZER = new DataTranslator<Vector3d>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_3_d");
             final TypeToken<Vector3d> token = TypeToken.of(Vector3d.class);
 
             @Override
@@ -320,17 +301,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_3_d";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector3dTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_3_F_DATA_SERIALIZER = new DataTranslator<Vector3f>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_3_f");
             final TypeToken<Vector3f> token = TypeToken.of(Vector3f.class);
 
             @Override
@@ -363,17 +339,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_3_f";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector3fTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_3_I_DATA_SERIALIZER = new DataTranslator<Vector3i>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_3_i");
             final TypeToken<Vector3i> token = TypeToken.of(Vector3i.class);
 
             @Override
@@ -406,17 +377,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_3_i";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector3iTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_3_L_DATA_SERIALIZER = new DataTranslator<Vector3l>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_3_l");
             final TypeToken<Vector3l> token = TypeToken.of(Vector3l.class);
 
             @Override
@@ -449,17 +415,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_3_l";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector3lTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_4_F_DATA_SERIALIZER = new DataTranslator<Vector4f>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_4_f");
             final TypeToken<Vector4f> token = TypeToken.of(Vector4f.class);
 
             @Override
@@ -495,17 +456,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_4_f";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector4fTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_4_I_DATA_SERIALIZER = new DataTranslator<Vector4i>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_4_i");
             final TypeToken<Vector4i> token = TypeToken.of(Vector4i.class);
 
             @Override
@@ -541,17 +497,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_4_i";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector4iTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_4_L_DATA_SERIALIZER = new DataTranslator<Vector4l>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_4_l");
             final TypeToken<Vector4l> token = TypeToken.of(Vector4l.class);
 
             @Override
@@ -587,17 +538,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_4_l";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector4lTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         VECTOR_4_D_DATA_SERIALIZER = new DataTranslator<Vector4d>() {
-
+            final CatalogKey key = CatalogKey.sponge("vector_4_d");
             final TypeToken<Vector4d> token = TypeToken.of(Vector4d.class);
 
             @Override
@@ -633,17 +579,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_4_d";
-            }
-
-            @Override
-            public String getName() {
-                return "Vector4dTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         COMPLEXD_DATA_SERIALIZER = new DataTranslator<Complexd>() {
-
+            final CatalogKey key = CatalogKey.sponge("complexd");
             final TypeToken<Complexd> token = TypeToken.of(Complexd.class);
 
             @Override
@@ -673,17 +614,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:complexd";
-            }
-
-            @Override
-            public String getName() {
-                return "ComplexDTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         COMPLEXF_DATA_SERIALIZER = new DataTranslator<Complexf>() {
-
+            final CatalogKey key = CatalogKey.sponge("complexf");
             final TypeToken<Complexf> token = TypeToken.of(Complexf.class);
 
             @Override
@@ -712,17 +648,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:complexf";
-            }
-
-            @Override
-            public String getName() {
-                return "ComplexFTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         QUATERNIOND_DATA_SERIALIZER = new DataTranslator<Quaterniond>() {
-
+            final CatalogKey key = CatalogKey.sponge("quaterniond");
             final TypeToken<Quaterniond> token = TypeToken.of(Quaterniond.class);
 
             @Override
@@ -757,17 +688,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:quaterniond";
-            }
-
-            @Override
-            public String getName() {
-                return "QuaternionDTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         QUATERNIONF_DATA_SERIALIZER = new DataTranslator<Quaternionf>() {
-
+            final CatalogKey key = CatalogKey.sponge("quaternionf");
             final TypeToken<Quaternionf> token = TypeToken.of(Quaternionf.class);
 
             @Override
@@ -802,17 +728,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:quaternionf";
-            }
-
-            @Override
-            public String getName() {
-                return "QuaternionFTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         LOCAL_TIME_DATA_SERIALIZER = new DataTranslator<LocalTime>() {
-
+            final CatalogKey key = CatalogKey.sponge("local_time");
             final TypeToken<LocalTime> token = TypeToken.of(LocalTime.class);
 
             @Override
@@ -861,17 +782,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:local_time";
-            }
-
-            @Override
-            public String getName() {
-                return "LocalTimeTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         LOCAL_DATE_DATA_SERIALIZER = new DataTranslator<LocalDate>() {
-
+            final CatalogKey key = CatalogKey.sponge("local_date");
             final TypeToken<LocalDate> token = TypeToken.of(LocalDate.class);
 
             @Override
@@ -912,17 +828,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:local_date";
-            }
-
-            @Override
-            public String getName() {
-                return "LocalDateTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         LOCAL_DATE_TIME_DATA_SERIALIZER = new DataTranslator<LocalDateTime>() {
-
+            final CatalogKey key = CatalogKey.sponge("local_date_time");
             final TypeToken<LocalDateTime> token = TypeToken.of(LocalDateTime.class);
 
             @Override
@@ -989,17 +900,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:local_date_time";
-            }
-
-            @Override
-            public String getName() {
-                return "LocalDateTimeTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         ZONED_DATE_TIME_DATA_SERIALIZER = new DataTranslator<ZonedDateTime>() {
-
+            final CatalogKey key = CatalogKey.sponge("zoned_date_time");
             final TypeToken<ZonedDateTime> token = TypeToken.of(ZonedDateTime.class);
 
             @Override
@@ -1073,17 +979,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:zoned_date_time";
-            }
-
-            @Override
-            public String getName() {
-                return "ZonedDateTimeTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         INSTANT_DATA_SERIALIZER = new DataTranslator<Instant>() {
-
+            final CatalogKey key = CatalogKey.sponge("instant");
             final TypeToken<Instant> token = TypeToken.of(Instant.class);
 
             @Override
@@ -1152,17 +1053,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:instant";
-            }
-
-            @Override
-            public String getName() {
-                return "JavaInstantTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
         MONTH_DATA_SERIALIZER = new DataTranslator<Month>() {
-
+            final CatalogKey key = CatalogKey.sponge("month");
             final TypeToken<Month> token = TypeToken.of(Month.class);
 
             @Override
@@ -1190,13 +1086,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:month";
-            }
-
-            @Override
-            public String getName() {
-                return "JavaMonthTranslator";
+            public CatalogKey getKey() {
+                return this.key;
             }
         };
 
@@ -1208,30 +1099,30 @@ public final class DataSerializers {
         };
     }
 
-    public static void registerSerializers(DataTranslatorRegistryModule registry) {
-        registry.registerAdditionalCatalog(UUID_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_2_D_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_2_F_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_2_I_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_2_L_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_3_D_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_3_F_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_3_I_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_3_L_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_4_D_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_4_F_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_4_I_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(VECTOR_4_L_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(COMPLEXD_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(COMPLEXF_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(QUATERNIOND_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(QUATERNIONF_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(MONTH_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(LOCAL_TIME_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(LOCAL_DATE_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(LOCAL_DATE_TIME_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(ZONED_DATE_TIME_DATA_SERIALIZER);
-        registry.registerAdditionalCatalog(INSTANT_DATA_SERIALIZER);
+    public static Stream<Tuple<DataTranslator, Class>> stream() {
+        return Stream.of(
+            Tuple.of(UUID_DATA_SERIALIZER, UUID.class),
+            Tuple.of(VECTOR_2_D_DATA_SERIALIZER, Vector2d.class),
+            Tuple.of(VECTOR_2_F_DATA_SERIALIZER, Vector2f.class),
+            Tuple.of(VECTOR_2_I_DATA_SERIALIZER, Vector2i.class),
+            Tuple.of(VECTOR_2_L_DATA_SERIALIZER, Vector2l.class),
+            Tuple.of(VECTOR_3_D_DATA_SERIALIZER, Vector3d.class),
+            Tuple.of(VECTOR_3_F_DATA_SERIALIZER, Vector3f.class),
+            Tuple.of(VECTOR_3_I_DATA_SERIALIZER, Vector3i.class),
+            Tuple.of(VECTOR_3_L_DATA_SERIALIZER, Vector3l.class),
+            Tuple.of(VECTOR_4_D_DATA_SERIALIZER, Vector4d.class),
+            Tuple.of(VECTOR_4_F_DATA_SERIALIZER, Vector4f.class),
+            Tuple.of(VECTOR_4_I_DATA_SERIALIZER, Vector4i.class),
+            Tuple.of(VECTOR_4_L_DATA_SERIALIZER, Vector4l.class),
+            Tuple.of(COMPLEXD_DATA_SERIALIZER, Complexd.class),
+            Tuple.of(COMPLEXF_DATA_SERIALIZER, Complexf.class),
+            Tuple.of(QUATERNIOND_DATA_SERIALIZER, Quaterniond.class),
+            Tuple.of(QUATERNIONF_DATA_SERIALIZER, Quaternionf.class),
+            Tuple.of(MONTH_DATA_SERIALIZER, LocalTime.class),
+            Tuple.of(LOCAL_TIME_DATA_SERIALIZER, LocalDate.class),
+            Tuple.of(LOCAL_DATE_DATA_SERIALIZER, LocalDateTime.class),
+            Tuple.of(LOCAL_DATE_TIME_DATA_SERIALIZER, Instant.class),
+            Tuple.of(ZONED_DATE_TIME_DATA_SERIALIZER, ZonedDateTime.class),
+            Tuple.of(INSTANT_DATA_SERIALIZER, Month.class));
     }
-
 }

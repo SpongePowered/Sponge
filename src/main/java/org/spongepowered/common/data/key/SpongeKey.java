@@ -27,11 +27,15 @@ package org.spongepowered.common.data.key;
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.EmptyDataProvider;
 import org.spongepowered.common.data.value.ValueConstructor;
 import org.spongepowered.common.data.value.ValueConstructorFactory;
@@ -89,16 +93,16 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
         return this.elementIncludesTester;
     }
 
-    @Override
-    public <H extends DataHolder> void registerEvent(final Class<H> holderFilter,
-        final EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-        // TODO
-    }
-
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
             .add("key", this.key)
             .add("valueToken", this.valueToken);
+    }
+
+    @Override
+    public <E extends DataHolder> void registerEvent(Class<E> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
+        final PluginContainer currentContainer = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).orElse(SpongeImpl.getMinecraftPlugin());
+        SpongeDataManager.getInstance().registerKeyListener(new KeyBasedDataListener<>(holderFilter, this, listener, currentContainer));
     }
 
     @Override

@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.SerializableDataHolder;
@@ -57,13 +58,13 @@ public interface CustomDataHolderBridge {
 
     <E, V extends Value<E>> Optional<V> bridge$getCustomValue(Key<V> key);
 
-    Collection<SerializableDataHolder.Mutable> bridge$getCustomManipulators();
+    Collection<DataManipulator.Mutable> bridge$getCustomManipulators();
 
     <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value);
 
     DataTransactionResult bridge$removeCustom(Key<?> key);
 
-    void bridge$removeCustomFromNBT(SerializableDataHolder.Mutable manipulator);
+    void bridge$removeCustomFromNBT(DataManipulator.Mutable manipulator);
 
     void bridge$addFailedData(ImmutableList<DataView> failedData);
 

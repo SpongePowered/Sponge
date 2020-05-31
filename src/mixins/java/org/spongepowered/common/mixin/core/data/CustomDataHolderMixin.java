@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.data;
+package org.spongepowered.common.mixin.core.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 @Mixin({TileEntity.class, Entity.class, SpongeUser.class})
 public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
 
+    // TODO data is never added
     private List<Mutable> impl$manipulators = Lists.newArrayList();
     private List<DataView> impl$failedData = Lists.newArrayList();
 

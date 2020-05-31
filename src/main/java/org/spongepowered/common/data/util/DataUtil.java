@@ -74,8 +74,5 @@ public final class DataUtil {
         return () -> new InvalidDataException("not found");
     }
 
-    public static DataRegistration getRegistrationFor(final Mutable manipulator) {
-        throw new UnsupportedOperationException("Implement me");
-    }
 
 }
