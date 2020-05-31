@@ -898,6 +898,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
+    /**
+     * When false, prevents directories from being created during the creation
+     * of an {@link net.minecraft.world.chunk.storage.AnvilSaveHandler}. Used
+     * for {@link org.spongepowered.api.world.SerializationBehaviors#NONE}.
+     *
+     * @param phaseContext The appropriate phase context
+     * @return True if directories can be created; false otherwise
+     */
+    default boolean shouldCreateWorldDirectories(final C phaseContext) {
+        return true;
+    }
+
     default boolean isConvertingMaps() {
         return false;
     }
