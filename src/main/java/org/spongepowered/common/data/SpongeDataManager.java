@@ -82,7 +82,7 @@ public final class SpongeDataManager implements DataManager {
     }
 
     // Builders
-    private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
+    private final Map<Class<?>, DataBuilder<?>> builders = new IdentityHashMap<>();
 
 
     final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> builderMap = new MapMaker()

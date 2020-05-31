@@ -43,6 +43,7 @@ import org.spongepowered.common.data.persistence.SchematicTranslator;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +57,7 @@ public class DataTranslatorRegistryModule implements AlternateCatalogRegistryMod
 
     @RegisterCatalog(DataTranslators.class)
     private final Map<String, DataTranslator> dataTranslatorMappings = new HashMap<>();
-    private final Map<Class<?>, DataTranslator> dataTranslatorByClass = new HashMap<>();
+    private final Map<Class<?>, DataTranslator> dataTranslatorByClass = new IdentityHashMap<>();
 
     @Override
     public Map<String, DataTranslator> provideCatalogMap() {

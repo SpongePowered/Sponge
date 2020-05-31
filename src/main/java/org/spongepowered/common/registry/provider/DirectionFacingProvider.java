@@ -26,6 +26,7 @@ package org.spongepowered.common.registry.provider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.EnumBiMap;
 import com.google.common.collect.ImmutableBiMap;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.util.Direction;
@@ -39,14 +40,15 @@ public final class DirectionFacingProvider implements TypeProvider<Direction, En
         return Holder.INSTANCE;
     }
 
-    public static final ImmutableBiMap<Direction, EnumFacing> directionMap = ImmutableBiMap.<Direction, EnumFacing>builder()
-        .put(Direction.NORTH, EnumFacing.NORTH)
-        .put(Direction.EAST, EnumFacing.EAST)
-        .put(Direction.SOUTH, EnumFacing.SOUTH)
-        .put(Direction.WEST, EnumFacing.WEST)
-        .put(Direction.UP, EnumFacing.UP)
-        .put(Direction.DOWN, EnumFacing.DOWN)
-        .build();
+    public static final EnumBiMap<Direction, EnumFacing> directionMap = EnumBiMap.create(Direction.class, EnumFacing.class);
+    static {
+        directionMap.put(Direction.NORTH, EnumFacing.NORTH);
+        directionMap.put(Direction.EAST, EnumFacing.EAST);
+        directionMap.put(Direction.SOUTH, EnumFacing.SOUTH);
+        directionMap.put(Direction.WEST, EnumFacing.WEST);
+        directionMap.put(Direction.UP, EnumFacing.UP);
+        directionMap.put(Direction.DOWN, EnumFacing.DOWN);
+    }
 
     @Override
     public Optional<EnumFacing> get(Direction key) {

@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +76,7 @@ public abstract class BlockPaneMixin extends BlockMixin {
     }
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final IBlockState blockState) {
-        final Set<Direction> directions = new HashSet<>();
+        final Set<Direction> directions = EnumSet.noneOf(Direction.class);
         final Boolean north = blockState.getValue(BlockPane.NORTH);
         final Boolean east = blockState.getValue(BlockPane.EAST);
         final Boolean west = blockState.getValue(BlockPane.WEST);

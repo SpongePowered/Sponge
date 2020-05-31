@@ -27,6 +27,8 @@ package org.spongepowered.common.registry.type.entity;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -42,7 +44,7 @@ import java.util.Map;
 public class HorseColorRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<HorseColor> {
 
 
-    public static final Map<Integer, HorseColor> HORSE_COLOR_IDMAP = Maps.newHashMap();
+    public static final Int2ObjectMap<HorseColor> HORSE_COLOR_IDMAP = new Int2ObjectOpenHashMap<>();
     // horse colors
     public static final SpongeHorseColor WHITE = new SpongeHorseColor(0, "minecraft:white", "WHITE");
     public static final SpongeHorseColor CREAMY = new SpongeHorseColor(1, "minecraft:creamy", "CREAMY");

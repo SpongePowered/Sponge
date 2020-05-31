@@ -28,6 +28,8 @@ import com.flowpowered.math.GenericMath;
 import com.google.gson.stream.JsonWriter;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -73,7 +75,7 @@ class ChunkSaveHelper {
 
                     final Object2IntMap<ChunkPos> chunkEntityCounts = new Object2IntOpenHashMap<>();
                     chunkEntityCounts.defaultReturnValue(0);
-                    final Object2IntMap<Class> classEntityCounts = new Object2IntOpenHashMap<>();
+                    final Reference2IntMap<Class> classEntityCounts = new Reference2IntOpenHashMap<>();
                     classEntityCounts.defaultReturnValue(0);
                     final Object2IntMap<Entity> entityCollisionCounts = new Object2IntOpenHashMap<>();
                     final Set<BlockPos> collidingCoords = new HashSet<>();
@@ -99,7 +101,7 @@ class ChunkSaveHelper {
 
                     final Object2IntMap<ChunkPos> chunkTileCounts = new Object2IntOpenHashMap<>();
                     chunkTileCounts.defaultReturnValue(0);
-                    final Object2IntMap<Class> classTileCounts = new Object2IntOpenHashMap<>();
+                    final Reference2IntMap<Class> classTileCounts = new Reference2IntOpenHashMap<>();
                     classTileCounts.defaultReturnValue(0);
                     writer.name("tiles").beginArray();
                     for (int i = 0; i < world.loadedTileEntityList.size(); i++) {
@@ -146,7 +148,32 @@ class ChunkSaveHelper {
 
     private static <T> void writeChunkCounts(final JsonWriter writer, final String name, final Object2IntMap<T> map, final int max) throws IOException {
         final List<T> sortedCoords = new ArrayList<>(map.keySet());
-        Collections.sort(sortedCoords, (s1, s2) -> map.get(s2) - map.get(s1));
+        sortedCoords.sort((s1, s2) -> map.getInt(s2) - map.getInt(s1));
+
+        int i = 0;
+        writer.name(name).beginArray();
+        for (final T key : sortedCoords) {
+            if ((max > 0) && (i++ > max)) {
+                break;
+            }
+            if (map.get(key) < 5) {
+                continue;
+            }
+            writer.beginObject();
+            writer.name("key").value(key.toString());
+            writer.name("count").value(map.get(key));
+            writer.endObject();
+        }
+        writer.endArray();
+    }
+
+    private static <T> void writeChunkCounts(final JsonWriter writer, final String name, final Reference2IntMap<T> map) throws IOException {
+        writeChunkCounts(writer, name, map, 0);
+    }
+
+    private static <T> void writeChunkCounts(final JsonWriter writer, final String name, final Reference2IntMap<T> map, final int max) throws IOException {
+        final List<T> sortedCoords = new ArrayList<>(map.keySet());
+        sortedCoords.sort((s1, s2) -> map.getInt(s2) - map.getInt(s1));
 
         int i = 0;
         writer.name(name).beginArray();

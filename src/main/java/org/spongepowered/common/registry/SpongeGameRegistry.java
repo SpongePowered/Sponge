@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
@@ -151,8 +152,8 @@ public class SpongeGameRegistry implements GameRegistry {
 
     private static List<Class<? extends RegistryModule>> ORDERED_MODULES = new ArrayList<>();
     private static Map<Class<? extends RegistryModule>, RegistryModule> REGISTRY_CLASS_MAP = new IdentityHashMap<>();
-    private static Map<CatalogRegistryModule<?>, Class<? extends CatalogType>> REGISTRY_CATALOG_MAP = new HashMap<>();
-    private static Set<RegistryModule> REGISTRIES = new HashSet<>();
+    private static Map<CatalogRegistryModule<?>, Class<? extends CatalogType>> REGISTRY_CATALOG_MAP = new IdentityHashMap<>();
+    private static Set<RegistryModule> REGISTRIES = new ReferenceOpenHashSet<>();
 
     private static List<Class<? extends RegistryModule>> MODULES = new ArrayList<>();
 

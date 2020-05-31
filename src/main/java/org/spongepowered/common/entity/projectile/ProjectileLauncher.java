@@ -86,6 +86,7 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -94,8 +95,8 @@ import javax.annotation.Nullable;
 
 public class ProjectileLauncher {
 
-    private static final Map<Class<? extends Projectile>, ProjectileLogic<?>> projectileLogic = Maps.newHashMap();
-    private static final Map<Class<? extends ProjectileSource>, ProjectileSourceLogic<?>> projectileSourceLogic = Maps.newHashMap();
+    private static final Map<Class<? extends Projectile>, ProjectileLogic<?>> projectileLogic = new IdentityHashMap<>();
+    private static final Map<Class<? extends ProjectileSource>, ProjectileSourceLogic<?>> projectileSourceLogic = new IdentityHashMap<>();
 
     public static <T extends Projectile> Optional<T> launch(Class<T> projectileClass, ProjectileSource source, @Nullable Vector3d vel) {
         ProjectileLogic<T> logic = getLogic(projectileClass);
