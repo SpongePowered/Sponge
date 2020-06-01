@@ -398,6 +398,7 @@ public final class Constants {
         public static final int MAX_CHUNK_UNLOADS = 100;
         public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
         public static final int CHUNK_UNLOAD_DELAY = 30000;
+        public static final int OVERWORLD_DIMENSION_ID = 0;
         public static final int END_DIMENSION_ID = 1;
 
         public static final class Teleporter {
@@ -1138,6 +1139,29 @@ public final class Constants {
         public static final DataQuery COUNT = of("Count");
         public static final DataQuery TYPE = of("ItemType");
         public static final DataQuery DAMAGE_VALUE = of("UnsafeDamage");
+    }
+
+    public static final class Map {
+        public static final DataQuery MAP_ID = of("UnsafeMapId");
+        public static final DataQuery MAP_DATA = of("MapData");
+
+        // This need to be what they are to be easily convertable to MC NBT
+        public static final DataQuery DECORATION_TYPE = of("type");
+        public static final DataQuery DECORATION_ID = of("id");
+        public static final DataQuery DECORATION_X = of("x");
+        public static final DataQuery DECORATION_Y = of("z"); // This isn't a mistake
+        public static final DataQuery DECORATION_ROTATION = of("rot");
+
+        // This needs to be "locked" for improved 1.14 compatibility,
+        // where it becomes a vanilla feature
+        public static final String LOCKED_KEY = "locked";
+        // Sponge's way to save decorations, to ensure persistence
+        public static final String DECORATIONS_KEY = "Decorations";
+        // Key in the map for getting the highest map number
+        public static final String ID_COUNTS_KEY = "map";
+
+        // Doesn't particulary matter what this is, just something that identifies it
+        public static final String DECORATION_KEY_PREFIX = "sponge-";
 
         // Filled maps
         public static final int DEFAULT_MAP_SCALE = 0;
@@ -1145,7 +1169,7 @@ public final class Constants {
         public static final int MAX_MAP_SCALE = Byte.MAX_VALUE;
         public static final boolean DEFAULT_TRACKS_PLAYERS = true;
         public static final boolean DEFAULT_UNLIMITED_TRACKING = false;
-        public static final boolean DEFAULT_MAP_AUTO_UPDATE = true;
+        public static final boolean DEFAULT_MAP_LOCKED = false;
         public static final String MAP_PREFIX = "map_";
         public static final int MAP_SIZE = 16384;
         public static final int MAP_MAX_INDEX = 127;

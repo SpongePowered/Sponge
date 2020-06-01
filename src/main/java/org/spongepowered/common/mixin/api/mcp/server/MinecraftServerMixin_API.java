@@ -63,6 +63,7 @@ import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -70,6 +71,7 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -334,9 +336,10 @@ public abstract class MinecraftServerMixin_API implements Server, ConsoleSource 
 
     @Override
     public Optional<MapStorage> getMapStorage() {
-        return WorldManager.getWorldByDimensionId(0)
-                .map(world -> (World)world)
-                .flatMap(World::getMapStorage);
+        return WorldManager.getWorldByDimensionId(Constants.World.OVERWORLD_DIMENSION_ID)
+                .map(world -> (net.minecraft.world.World)world)
+                .map(net.minecraft.world.World::getMapStorage)
+                .map(mapStorage -> (MapStorage)mapStorage);
     }
 
     @Override

@@ -24,58 +24,54 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
-import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.map.SpongeMapByteCanvas;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
+import org.spongepowered.common.map.MapUtil;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.WorldManager;
 
-import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Mixin(MapStorage.class)
 public abstract class MapStorageMixin_API implements org.spongepowered.api.world.map.MapStorage {
-    @Shadow
+
     @Final
+    @Shadow
     private Map<String, Short> idCounts;
 
     @Shadow
-    @Nullable
     public abstract WorldSavedData getOrLoadData(Class<? extends WorldSavedData> clazz, String dataIdentifier);
 
     @Override
-    public Optional<Integer> getHighestMapId() {
-        Number num = idCounts.get("map");
-        if (num == null) {
-            return Optional.empty();
-        }
-        return Optional.of(num.intValue());
+    public Set<MapInfo> getAllMapInfos() {
+        int highestId = idCounts.get(Constants.Map.ID_COUNTS_KEY).intValue(); // Prefer intValue() as it means max map ids can be changed to int/long without breaking this
+        return Stream.iterate(0, i -> i + 1)
+                .limit(highestId + 1) // limit is < but we want <=
+                .map(id -> Constants.Map.MAP_PREFIX + id)
+                .map(s -> getOrLoadData(MapData.class, s))
+                .filter(Objects::nonNull) // if we have missing map between 0 and highest map .getOrLoadData() returns null so filter out
+                .map(worldSavedData -> (MapInfo)worldSavedData)
+                .collect(Collectors.toSet());
     }
 
     @Override
-    public Optional<MapItemData> getMapData(int id) {
-        MapData mapData = (MapData)getOrLoadData(MapData.class, Constants.ItemStack.MAP_PREFIX + id);
-        if (mapData == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new SpongeMapItemData(
-                new Vector2i(mapData.xCenter, mapData.zCenter),
-                (World) WorldManager.getWorldByDimensionId(mapData.dimension).get(),
-                mapData.trackingPosition,
-                mapData.unlimitedTracking,
-                mapData.scale,
-                new SpongeMapByteCanvas(mapData.colors),
-                ((MapDataBridge)mapData).shouldSelfUpdate()
-        ));
+    public MapInfo createNewMapInfo() {
+        return MapUtil.fireCreateMapEvent(new SpongeMapInfoData(), SpongeImpl.getCauseStackManager().getCurrentCause())
+                .orElseThrow(() -> new IllegalStateException("Map creation was cancelled!"));
     }
 }

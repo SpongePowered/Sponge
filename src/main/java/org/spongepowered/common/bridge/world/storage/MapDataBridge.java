@@ -34,8 +34,4 @@ public interface MapDataBridge {
     void updateMap(int x, int y);
 
     void updateWholeMap();
-
-    boolean shouldSelfUpdate();
-
-    void setShouldSelfUpdate(boolean shouldSelfUpdate);
 }

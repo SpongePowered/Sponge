@@ -22,15 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.map;
+package org.spongepowered.common.map.color;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.map.MapColor;
-import org.spongepowered.api.map.MapColorType;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
 
 import javax.annotation.Nullable;

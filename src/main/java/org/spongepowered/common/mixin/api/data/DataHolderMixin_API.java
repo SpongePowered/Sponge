@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import org.spongepowered.api.entity.living.player.User;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -59,7 +56,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 899)
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
+@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class, MapData.class}, priority = 899)
 public abstract class DataHolderMixin_API implements DataHolder {
 
     @SuppressWarnings("unchecked")

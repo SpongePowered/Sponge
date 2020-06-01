@@ -22,24 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.item;
+package org.spongepowered.common.map.decoration;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemMap;
-import net.minecraft.world.World;
-import net.minecraft.world.storage.MapData;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.map.SpongeMapInfo;
+import net.minecraft.world.storage.MapDecoration;
+import org.spongepowered.api.map.decoration.MapDecorationType;
 
-@Mixin(ItemMap.class)
-public class ItemMapMixin_API {
-    @Inject(method = "updateMapData", at = @At(value = "HEAD"), cancellable = true)
-    public void cancelUpdateIfShouldntUpdate(World worldIn, Entity viewer, MapData data, CallbackInfo ci) {
-        if (((SpongeMapInfo)data).isLocked()) {
-            ci.cancel();
-        }
+public class SpongeMapDecorationType implements MapDecorationType {
+    private MapDecoration.Type type;
+    private String id;
+    private String name;
+
+    public SpongeMapDecorationType(MapDecoration.Type mapDecorationType, String id, String name) {
+        type = mapDecorationType;
+        this.id = id;
+        this.name = name;
+    }
+
+    public MapDecoration.Type getType() {
+        return type;
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 }

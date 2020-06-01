@@ -22,24 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.item;
+package org.spongepowered.common.map;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemMap;
-import net.minecraft.world.World;
-import net.minecraft.world.storage.MapData;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.map.SpongeMapInfo;
+import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.map.decoration.MapDecoration;
 
-@Mixin(ItemMap.class)
-public class ItemMapMixin_API {
-    @Inject(method = "updateMapData", at = @At(value = "HEAD"), cancellable = true)
-    public void cancelUpdateIfShouldntUpdate(World worldIn, Entity viewer, MapData data, CallbackInfo ci) {
-        if (((SpongeMapInfo)data).isLocked()) {
-            ci.cancel();
-        }
-    }
+import java.util.Set;
+
+// This represents a MapData, and has nothing to do with MapData.MapInfo
+public interface SpongeMapInfo extends MapInfo {
+    int getMapId();
+
+    boolean isLocked();
+
+    void setLocked(boolean locked);
+
+    /**
+     * Sets the Decorations for this MapInfo
+     * @param newDecorations {@link MapDecoration}s to set
+     */
+    void setDecorations(Set<MapDecoration> newDecorations);
+
+    Set<MapDecoration> getDecorations();
 }

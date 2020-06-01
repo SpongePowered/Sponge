@@ -22,33 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.item;
+package org.spongepowered.common.data.manipulator.mutable;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMapInfoData;
+import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.map.MapCanvas;
+import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeMapItemData;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeMapInfoData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.map.SpongeMapByteCanvas;
+import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
+import org.spongepowered.common.map.SpongeMapInfo;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @ImplementationRequiredForTest
-public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapItemData> implements MapItemData {
+public class SpongeMapInfoData extends AbstractData<MapInfoData, ImmutableMapInfoData> implements MapInfoData {
 
     private Vector2i center;
     private World world;
@@ -56,30 +65,32 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
     private boolean unlimitedTracking;
     private int scale;
     private MapCanvas canvas;
-    private boolean autoUpdate;
+    private boolean locked;
+    private Set<MapDecoration> decorations;
 
-    public SpongeMapItemData() {
+    public SpongeMapInfoData() {
         this(Vector2i.ZERO,
                 (World)WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get(),
-                Constants.ItemStack.DEFAULT_TRACKS_PLAYERS,
-                Constants.ItemStack.DEFAULT_UNLIMITED_TRACKING, Constants.ItemStack.DEFAULT_MAP_SCALE,
-                MapCanvas.blank(), Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE);
+                Constants.Map.DEFAULT_TRACKS_PLAYERS,
+                Constants.Map.DEFAULT_UNLIMITED_TRACKING, Constants.Map.DEFAULT_MAP_SCALE,
+                MapCanvas.blank(), Constants.Map.DEFAULT_MAP_LOCKED, Sets.newHashSet());
     }
 
-    public SpongeMapItemData(Vector2i center, World world, boolean trackingPosition, boolean unlimitedTracking, int scale, MapCanvas canvas, boolean autoUpdate) {
-        super(MapItemData.class);
+    public SpongeMapInfoData(Vector2i center, World world, boolean trackingPosition, boolean unlimitedTracking, int scale, MapCanvas canvas, boolean locked, Set<MapDecoration> mapDecorations) {
+        super(MapInfoData.class);
         this.center = center;
         this.world = world;
         this.trackingPosition = trackingPosition;
         this.unlimitedTracking = unlimitedTracking;
         this.scale = scale;
         this.canvas = canvas;
-        this.autoUpdate = autoUpdate;
+        this.locked = locked;
+        this.decorations = mapDecorations;
 
         registerGettersAndSetters();
     }
 
-    public SpongeMapItemData(MapData mapData) {
+    public SpongeMapInfoData(MapData mapData) {
         this(
                 new Vector2i(mapData.xCenter, mapData.zCenter),
                 (org.spongepowered.api.world.World)WorldManager
@@ -88,7 +99,10 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
                 mapData.unlimitedTracking,
                 mapData.scale,
                 new SpongeMapByteCanvas(mapData.colors),
-                ((MapDataBridge)mapData).shouldSelfUpdate()
+                ((SpongeMapInfo)mapData).isLocked(),
+                mapData.mapDecorations.values().stream()
+                    .map(value -> (MapDecoration)value)
+                    .collect(Collectors.toSet())
         );
     }
 
@@ -106,22 +120,22 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
     @Override
     public Value<Boolean> trackPosition() {
         return new SpongeValue<>(Keys.MAP_TRACKS_PLAYERS,
-                Constants.ItemStack.DEFAULT_TRACKS_PLAYERS, this.trackingPosition);
+                Constants.Map.DEFAULT_TRACKS_PLAYERS, this.trackingPosition);
     }
 
     @Override
     public Value<Boolean> unlimitedTracking() {
         return new SpongeValue<>(Keys.MAP_UNLIMITED_TRACKING,
-                Constants.ItemStack.DEFAULT_UNLIMITED_TRACKING, this.unlimitedTracking);
+                Constants.Map.DEFAULT_UNLIMITED_TRACKING, this.unlimitedTracking);
     }
 
     @Override
     public MutableBoundedValue<Integer> scale() {
         return new SpongeValueFactory.SpongeBoundedValueBuilder<>(Keys.MAP_SCALE)
-                .defaultValue(Constants.ItemStack.DEFAULT_MAP_SCALE)
+                .defaultValue(Constants.Map.DEFAULT_MAP_SCALE)
                 .actualValue(this.scale)
-                .minimum(Constants.ItemStack.MIN_MAP_SCALE)
-                .maximum(Constants.ItemStack.MAX_MAP_SCALE)
+                .minimum(Constants.Map.MIN_MAP_SCALE)
+                .maximum(Constants.Map.MAX_MAP_SCALE)
                 .build();
     }
 
@@ -131,8 +145,13 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
     }
 
     @Override
-    public Value<Boolean> autoUpdate() {
-        return new SpongeValue<>(Keys.MAP_AUTO_UPDATE, Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE, this.autoUpdate);
+    public SetValue<MapDecoration> decorations() {
+        return new SpongeSetValue<>(Keys.MAP_DECORATIONS, this.decorations);
+    }
+
+    @Override
+    public Value<Boolean> locked() {
+        return new SpongeValue<>(Keys.MAP_LOCKED, Constants.Map.DEFAULT_MAP_LOCKED, this.locked);
     }
 
     @Override
@@ -144,18 +163,20 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
                 .set(Keys.MAP_UNLIMITED_TRACKING, this.unlimitedTracking)
                 .set(Keys.MAP_SCALE, this.scale)
                 .set(Keys.MAP_CANVAS, this.canvas)
-                .set(Keys.MAP_AUTO_UPDATE, this.autoUpdate);
+                .set(Keys.MAP_LOCKED, this.locked)
+                .set(Keys.MAP_DECORATIONS, this.decorations);
     }
 
     @Override
     protected void registerGettersAndSetters() {
-        registerKeyValue(Keys.MAP_LOCATION, SpongeMapItemData.this::location);
-        registerKeyValue(Keys.MAP_WORLD, SpongeMapItemData.this::world);
-        registerKeyValue(Keys.MAP_TRACKS_PLAYERS, SpongeMapItemData.this::trackPosition);
-        registerKeyValue(Keys.MAP_UNLIMITED_TRACKING, SpongeMapItemData.this::unlimitedTracking);
-        registerKeyValue(Keys.MAP_SCALE, SpongeMapItemData.this::scale);
-        registerKeyValue(Keys.MAP_CANVAS, SpongeMapItemData.this::canvas);
-        registerKeyValue(Keys.MAP_AUTO_UPDATE, SpongeMapItemData.this::autoUpdate);
+        registerKeyValue(Keys.MAP_LOCATION, SpongeMapInfoData.this::location);
+        registerKeyValue(Keys.MAP_WORLD, SpongeMapInfoData.this::world);
+        registerKeyValue(Keys.MAP_TRACKS_PLAYERS, SpongeMapInfoData.this::trackPosition);
+        registerKeyValue(Keys.MAP_UNLIMITED_TRACKING, SpongeMapInfoData.this::unlimitedTracking);
+        registerKeyValue(Keys.MAP_SCALE, SpongeMapInfoData.this::scale);
+        registerKeyValue(Keys.MAP_CANVAS, SpongeMapInfoData.this::canvas);
+        registerKeyValue(Keys.MAP_LOCKED, SpongeMapInfoData.this::locked);
+        registerKeyValue(Keys.MAP_DECORATIONS, SpongeMapInfoData.this::decorations);
 
         registerFieldGetter(Keys.MAP_LOCATION, () -> this.center);
         registerFieldGetter(Keys.MAP_WORLD, () -> this.world);
@@ -163,7 +184,8 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
         registerFieldGetter(Keys.MAP_UNLIMITED_TRACKING, () -> this.unlimitedTracking);
         registerFieldGetter(Keys.MAP_SCALE, () -> this.scale);
         registerFieldGetter(Keys.MAP_CANVAS, () -> this.canvas);
-        registerFieldGetter(Keys.MAP_AUTO_UPDATE, () -> this.autoUpdate);
+        registerFieldGetter(Keys.MAP_LOCKED, () -> this.locked);
+        registerFieldGetter(Keys.MAP_DECORATIONS, () -> this.decorations);
 
         registerFieldSetter(Keys.MAP_LOCATION, location -> this.center = checkNotNull(location));
         registerFieldSetter(Keys.MAP_WORLD, world -> this.world = checkNotNull(world));
@@ -171,20 +193,21 @@ public class SpongeMapItemData extends AbstractData<MapItemData, ImmutableMapIte
         registerFieldSetter(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking -> this.unlimitedTracking = checkNotNull(unlimitedTracking));
         registerFieldSetter(Keys.MAP_SCALE, scale -> this.scale = checkNotNull(scale));
         registerFieldSetter(Keys.MAP_CANVAS, canvas -> this.canvas = checkNotNull(canvas));
-        registerFieldSetter(Keys.MAP_AUTO_UPDATE, autoUpdate -> this.autoUpdate = checkNotNull(autoUpdate));
+        registerFieldSetter(Keys.MAP_LOCKED, locked -> this.locked = checkNotNull(locked));
+        registerFieldSetter(Keys.MAP_DECORATIONS, decorations -> this.decorations = checkNotNull(decorations));
     }
 
     @Override
-    public MapItemData copy() {
-        return new SpongeMapItemData(this.center, this.world,
+    public MapInfoData copy() {
+        return new SpongeMapInfoData(this.center, this.world,
                 this.trackingPosition, this.unlimitedTracking, this.scale,
-                this.canvas, this.autoUpdate);
+                this.canvas, this.locked, this.decorations);
     }
 
     @Override
-    public ImmutableMapItemData asImmutable() {
-        return new ImmutableSpongeMapItemData(this.center, this.world,
+    public ImmutableMapInfoData asImmutable() {
+        return new ImmutableSpongeMapInfoData(this.center, this.world,
                 this.trackingPosition, this.unlimitedTracking, this.scale,
-                this.canvas, this.autoUpdate);
+                this.canvas, this.locked, ImmutableSet.copyOf(this.decorations));
     }
 }

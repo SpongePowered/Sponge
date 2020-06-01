@@ -22,44 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.map;
-
-import net.minecraft.block.material.MapColor;
-import net.minecraft.item.ItemMap;
-import org.spongepowered.api.map.MapColorType;
-import org.spongepowered.api.util.Color;
-
-public class SpongeMapColorType implements MapColorType {
-    private String id;
-    private String name;
-    private int colorIndex;
-
-    public SpongeMapColorType(String id, String name, int colorIndex) {
-        this.id = id;
-        this.name = name;
-        this.colorIndex = colorIndex;
-    }
-
-    public int getBaseColor() {
-        return colorIndex;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setColorIndex(int colorIndex) {
-        this.colorIndex = colorIndex;
-    }
-
-    @Override
-    public Color getColor() {
-        return Color.of(new java.awt.Color(MapColor.COLORS[colorIndex].colorValue));
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.map.decoration;

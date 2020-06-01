@@ -439,11 +439,6 @@ public abstract class WorldServerMixin_API extends WorldMixin_API {
     }
 
     @Override
-    public Optional<MapStorage> getMapStorage() {
-        return Optional.ofNullable((MapStorage)mapStorage);
-    }
-
-    @Override
     public PortalAgent getPortalAgent() {
         return (PortalAgent) this.worldTeleporter;
     }

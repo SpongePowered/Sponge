@@ -38,4 +38,10 @@ public interface MapStorageBridge {
      * @param id int To set highest map number to.
      */
     void bridge$setHighestMapId(short id);
+
+    /**
+     * Gets the highest known map id
+     * @return Highest map id, if present
+     */
+    Optional<Integer> bridge$getHighestMapId();
 }

@@ -24,15 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,12 +35,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.world.WorldManager;
-
-import javax.annotation.Nullable;
-import java.util.Map;
-import java.util.Optional;
 
 @Mixin(MapStorage.class)
 public abstract class MapStorageMixin {

@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.map;
+package org.spongepowered.common.map.canvas;
 
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.map.MapCanvas;
-import org.spongepowered.api.map.MapColor;
-import org.spongepowered.api.map.MapColorTypes;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.color.MapColorTypes;
 import org.spongepowered.common.util.Constants;
 
 import java.awt.*;
@@ -50,12 +50,12 @@ public class SpongeEmptyCanvas implements SpongeMapCanvas {
 
     @Override
     public Image toImage() {
-        return new BufferedImage(Constants.ItemStack.MAP_PIXELS, Constants.ItemStack.MAP_PIXELS, BufferedImage.TYPE_INT_RGB);
+        return new BufferedImage(Constants.Map.MAP_PIXELS, Constants.Map.MAP_PIXELS, BufferedImage.TYPE_INT_RGB);
     }
 
     @Override
     public Image toImage(Color color) {
-        BufferedImage image = new BufferedImage(Constants.ItemStack.MAP_PIXELS, Constants.ItemStack.MAP_PIXELS, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(Constants.Map.MAP_PIXELS, Constants.Map.MAP_PIXELS, BufferedImage.TYPE_INT_RGB);
         Graphics graphics = image.getGraphics();
         graphics.setColor(color);
         graphics.drawRect(0,0, image.getWidth(), image.getHeight());
@@ -74,7 +74,7 @@ public class SpongeEmptyCanvas implements SpongeMapCanvas {
 
     @Override
     public DataContainer toContainer() {
-        byte[] canvas = new byte[Constants.ItemStack.MAP_SIZE];
+        byte[] canvas = new byte[Constants.Map.MAP_SIZE];
         //Arrays.fill(canvas, Byte.MIN_VALUE);
         return DataContainer.createNew().set(DataQuery.of("MapColors"), Arrays.asList(canvas));
     }

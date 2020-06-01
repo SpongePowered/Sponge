@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,13 +45,24 @@ public abstract class MapStorageBridgeMixin implements MapStorageBridge {
 
     @Shadow public abstract WorldSavedData getOrLoadData(Class<? extends WorldSavedData> clazz, String dataIdentifier);
 
+    @Nonnull
     @Override
     public Optional<MapData> bridge$getMinecraftMapData(int id) {
-        return Optional.ofNullable((MapData)getOrLoadData(MapData.class, Constants.ItemStack.MAP_PREFIX + id));
+        return Optional.ofNullable((MapData)getOrLoadData(MapData.class, Constants.Map.MAP_PREFIX + id));
     }
 
     @Override
     public void bridge$setHighestMapId(short id) {
         idCounts.put("map", id);
+    }
+
+    @Nonnull
+    @Override
+    public Optional<Integer> bridge$getHighestMapId() {
+        Short num = idCounts.get("map");
+        if (num == null) {
+            return Optional.empty();
+        }
+        return Optional.of(num.intValue());
     }
 }

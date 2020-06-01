@@ -24,70 +24,59 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapInfoItemData;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.map.SpongeMapInfo;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemMapUnlimitedTrackingValueProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, MapItemData, ImmutableMapItemData> {
-
-    public ItemMapUnlimitedTrackingValueProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
-                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_UNLIMITED_TRACKING);
+public class ItemMapInfoValueProcessor extends AbstractSpongeValueProcessor<ItemStack, MapInfo, Value<MapInfo>> {
+    public ItemMapInfoValueProcessor() {
+        super(ItemStack.class, Keys.MAP_INFO);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.MAP_UNLIMITED_TRACKING,
-                Constants.ItemStack.DEFAULT_UNLIMITED_TRACKING, actualValue);
+    protected Value<MapInfo> constructValue(MapInfo actualValue) {
+        return new SpongeValue<>(Keys.MAP_INFO, SpongeMapInfoItemData.getDefaultMapInfo(), actualValue);
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, Boolean value) {
-        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        if (!mapData.isPresent()) {
+    protected boolean set(ItemStack container, MapInfo value) {
+        if (container.getType() != ItemTypes.FILLED_MAP) {
             return false;
         }
-        mapData.get().unlimitedTracking = value;
-        mapData.get().markDirty();
+        container.toContainer().set(Constants.ItemStack.DAMAGE_VALUE, ((SpongeMapInfo)value).getMapId());
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(ItemStack dataHolder) {
+    protected Optional<MapInfo> getVal(ItemStack container) {
         return Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> mapData.unlimitedTracking);
+                .map(mapStorage -> (MapStorageBridge)mapStorage)
+                .flatMap(bridge -> bridge.bridge$getMinecraftMapData((int)container.toContainer().get(Constants.ItemStack.DAMAGE_VALUE).get()))
+                .map(mapData -> (MapInfo)mapData);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<MapInfo> constructImmutableValue(MapInfo value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    protected MapItemData createManipulator() {
-        return new SpongeMapItemData();
     }
 }

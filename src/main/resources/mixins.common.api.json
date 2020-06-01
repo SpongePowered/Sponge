@@ -237,6 +237,8 @@
         "mcp.item.crafting.IRecipeMixin_API",
         "mcp.item.crafting.ShapedRecipesMixin_API",
         "mcp.item.crafting.ShapelessRecipesMixin_API",
+        "mcp.map.MapInfoMixin_API",
+        "mcp.map.MapDecorationMixin_API",
         "mcp.network.NetHandlerPlayServerMixin_API",
         "mcp.network.NetworkManagerMixin_API",
         "mcp.network.PacketBufferMixin_API",

@@ -22,58 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.item;
+package org.spongepowered.common.data.processor.value.mapinfo;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMapInfoData;
+import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemMapTracksPlayersValueProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, MapItemData, ImmutableMapItemData> {
+public class MapInfoTracksPlayersValueProcessor extends AbstractSingleDataSingleTargetProcessor<MapInfo, Boolean, Value<Boolean>, MapInfoData, ImmutableMapInfoData> {
 
-    public ItemMapTracksPlayersValueProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
-                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_TRACKS_PLAYERS);
+    public MapInfoTracksPlayersValueProcessor() {
+        super(Keys.MAP_TRACKS_PLAYERS, MapInfo.class);
     }
 
     @Override
     protected Value<Boolean> constructValue(Boolean actualValue) {
         return new SpongeValue<>(Keys.MAP_TRACKS_PLAYERS,
-                Constants.ItemStack.DEFAULT_TRACKS_PLAYERS, actualValue);
+                Constants.Map.DEFAULT_TRACKS_PLAYERS, actualValue);
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, Boolean value) {
-        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        if (!mapData.isPresent()) {
-            return false;
-        }
-        mapData.get().trackingPosition = value;
-        mapData.get().markDirty();
+    protected boolean set(MapInfo mapInfo, Boolean value) {
+        MapData mapData = (MapData)mapInfo;
+        mapData.trackingPosition = value;
+        mapData.markDirty();
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(ItemStack dataHolder) {
-        return Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> mapData.trackingPosition);
+    protected Optional<Boolean> getVal(MapInfo mapInfo) {
+        MapData mapData = (MapData)mapInfo;
+        return Optional.of(mapData.trackingPosition);
     }
 
     @Override
@@ -87,7 +77,7 @@ public class ItemMapTracksPlayersValueProcessor extends AbstractItemSingleDataPr
     }
 
     @Override
-    protected MapItemData createManipulator() {
-        return new SpongeMapItemData();
+    protected MapInfoData createManipulator() {
+        return new SpongeMapInfoData();
     }
 }

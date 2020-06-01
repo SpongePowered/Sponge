@@ -22,13 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.map;
-
-import net.minecraft.world.storage.MapData;
-import org.spongepowered.api.map.MapCanvas;
-
-// This interface means that both canvases backed by a byte array
-// and the empty version can be applied
-public interface SpongeMapCanvas extends MapCanvas {
-    void applyToMapData(MapData mapData);
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.api.mcp.map;

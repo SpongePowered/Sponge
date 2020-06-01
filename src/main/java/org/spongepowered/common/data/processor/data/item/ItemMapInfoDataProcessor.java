@@ -22,60 +22,66 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.item;
+package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapInfoItemData;
+import org.spongepowered.api.data.manipulator.mutable.item.MapInfoItemData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapInfoItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.map.SpongeMapInfo;
 
 import java.util.Optional;
 
-public class ItemMapAutoUpdateProcessor extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, MapItemData, ImmutableMapItemData> {
-    public ItemMapAutoUpdateProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack)itemStack)
-                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_AUTO_UPDATE);
+public class ItemMapInfoDataProcessor extends AbstractItemSingleDataProcessor<MapInfo, Value<MapInfo>, MapInfoItemData, ImmutableMapInfoItemData> {
+    protected ItemMapInfoDataProcessor() {
+        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack)itemStack).getType() == ItemTypes.FILLED_MAP
+                && Sponge.getServer().getMapStorage()
+                    .map(mapStorage -> (MapStorageBridge)mapStorage)
+                    .flatMap(bridge -> bridge.bridge$getMinecraftMapData(itemStack.getMetadata()))
+                .isPresent(),
+                Keys.MAP_INFO);
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, Boolean value) {
-        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        if (!mapData.isPresent()) {
+    protected boolean set(ItemStack dataHolder, MapInfo value) {
+        if (((org.spongepowered.api.item.inventory.ItemStack)dataHolder).getType() != ItemTypes.FILLED_MAP) {
             return false;
         }
-        ((MapDataBridge)mapData.get()).setShouldSelfUpdate(value);
+        dataHolder.setItemDamage(((SpongeMapInfo)value).getMapId());
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(ItemStack dataHolder) {
+    protected Optional<MapInfo> getVal(ItemStack dataHolder) {
+        if (((org.spongepowered.api.item.inventory.ItemStack)dataHolder).getType() != ItemTypes.FILLED_MAP) {
+            return Optional.empty();
+        }
         return Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> ((MapDataBridge)mapData).shouldSelfUpdate());
+                .map(mapStorage -> (MapStorageBridge)mapStorage)
+                .flatMap(mapStorageBridge -> mapStorageBridge.bridge$getMinecraftMapData(dataHolder.getMetadata()))
+                .map(mapData -> (MapInfo)mapData);
+
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+    protected ImmutableValue<MapInfo> constructImmutableValue(MapInfo value) {
         return constructValue(value).asImmutable();
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.MAP_AUTO_UPDATE, Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE, actualValue);
+    protected Value<MapInfo> constructValue(MapInfo actualValue) {
+        return new SpongeValue<>(Keys.MAP_INFO, SpongeMapInfoItemData.getDefaultMapInfo(), actualValue);
     }
 
     @Override
@@ -84,7 +90,7 @@ public class ItemMapAutoUpdateProcessor extends AbstractItemSingleDataProcessor<
     }
 
     @Override
-    protected MapItemData createManipulator() {
-        return new SpongeMapItemData();
+    protected MapInfoItemData createManipulator() {
+        return new SpongeMapInfoItemData();
     }
 }

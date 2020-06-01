@@ -22,53 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.item;
+package org.spongepowered.common.data.processor.value.mapinfo;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMapInfoData;
+import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemMapScaleValueProcessor extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, MapItemData, ImmutableMapItemData> {
+public class MapInfoScaleValueProcessor extends AbstractSingleDataSingleTargetProcessor<MapInfo, Integer, MutableBoundedValue<Integer>, MapInfoData, ImmutableMapInfoData> {
 
 
-    public ItemMapScaleValueProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack)itemStack)
-                        .getType() == ItemTypes.FILLED_MAP, Keys.MAP_SCALE);
+    public MapInfoScaleValueProcessor() {
+        super(Keys.MAP_SCALE, MapInfo.class);
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, Integer value) {
-        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        if (!mapData.isPresent()) {
-            return false;
-        }
-        mapData.get().scale = value.byteValue();
-        mapData.get().markDirty();
+    protected boolean set(MapInfo mapInfo, Integer value) {
+        MapData mapData = (MapData)mapInfo;
+        mapData.scale = value.byteValue();
+        mapData.markDirty();
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(ItemStack dataHolder) {
-        return Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> (int)mapData.scale);
+    protected Optional<Integer> getVal(MapInfo mapInfo) {
+        MapData mapData = (MapData)mapInfo;
+        return Optional.of((int)mapData.scale);
     }
 
     @Override
@@ -79,10 +69,10 @@ public class ItemMapScaleValueProcessor extends AbstractItemSingleDataProcessor<
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.MAP_SCALE)
-                .defaultValue(Constants.ItemStack.DEFAULT_MAP_SCALE)
+                .defaultValue(Constants.Map.DEFAULT_MAP_SCALE)
                 .actualValue(actualValue)
-                .minimum(Constants.ItemStack.MIN_MAP_SCALE)
-                .maximum(Constants.ItemStack.MAX_MAP_SCALE)
+                .minimum(Constants.Map.MIN_MAP_SCALE)
+                .maximum(Constants.Map.MAX_MAP_SCALE)
                 .build();
     }
 
@@ -92,7 +82,7 @@ public class ItemMapScaleValueProcessor extends AbstractItemSingleDataProcessor<
     }
 
     @Override
-    protected MapItemData createManipulator() {
-        return new SpongeMapItemData();
+    protected MapInfoData createManipulator() {
+        return new SpongeMapInfoData();
     }
 }

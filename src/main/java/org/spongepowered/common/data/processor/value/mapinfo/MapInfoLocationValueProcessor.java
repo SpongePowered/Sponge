@@ -22,54 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.item;
+package org.spongepowered.common.data.processor.value.mapinfo;
 
 import com.flowpowered.math.vector.Vector2i;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMapInfoData;
+import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemMapLocationValueProcessor extends AbstractItemSingleDataProcessor<Vector2i, Value<Vector2i>, MapItemData, ImmutableMapItemData> {
+public class MapInfoLocationValueProcessor extends AbstractSingleDataSingleTargetProcessor<MapInfo, Vector2i, Value<Vector2i>, MapInfoData, ImmutableMapInfoData> {
 
-    public ItemMapLocationValueProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
-                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_LOCATION);
+    public MapInfoLocationValueProcessor() {
+        super(Keys.MAP_LOCATION, MapInfo.class);
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, Vector2i value) {
-        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        if (!mapData.isPresent()) {
-            return false;
-        }
+    protected boolean set(MapInfo mapInfo, Vector2i value) {
+        MapData mapData = (MapData)mapInfo;
         // This also sets xCenter and zCenter.
-        mapData.get().calculateMapCenter(value.getX(), value.getX(), mapData.get().scale);
-        mapData.get().markDirty();
+        mapData.calculateMapCenter(value.getX(), value.getX(), mapData.scale);
+        mapData.markDirty();
         return true;
     }
 
     @Override
-    protected Optional<Vector2i> getVal(ItemStack dataHolder) {
-        return Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> new Vector2i(mapData.xCenter, mapData.zCenter));
+    protected Optional<Vector2i> getVal(MapInfo mapInfo) {
+        MapData mapData = (MapData)mapInfo;
+        return Optional.of(new Vector2i(mapData.xCenter, mapData.zCenter));
     }
 
     @Override
@@ -88,7 +77,7 @@ public class ItemMapLocationValueProcessor extends AbstractItemSingleDataProcess
     }
 
     @Override
-    protected MapItemData createManipulator() {
-        return new SpongeMapItemData();
+    protected MapInfoData createManipulator() {
+        return new SpongeMapInfoData();
     }
 }

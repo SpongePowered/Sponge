@@ -94,8 +94,10 @@ import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.item.recipe.crafting.*;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.map.MapCanvas;
-import org.spongepowered.api.map.MapColor;
-import org.spongepowered.api.map.MapColorType;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.decoration.MapDecoration;
+import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
@@ -174,8 +176,9 @@ import org.spongepowered.common.item.recipe.crafting.SpongeIngredientBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeShapedCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
-import org.spongepowered.common.map.SpongeMapCanvasBuilder;
-import org.spongepowered.common.map.SpongeMapColorBuilder;
+import org.spongepowered.common.map.canvas.SpongeMapCanvasBuilder;
+import org.spongepowered.common.map.color.SpongeMapColorBuilder;
+import org.spongepowered.common.map.decoration.SpongeMapDecorationBuilder;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
@@ -191,6 +194,7 @@ import org.spongepowered.common.registry.type.event.*;
 import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
 import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
+import org.spongepowered.common.registry.type.map.MapDecorationRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.*;
 import org.spongepowered.common.registry.type.text.PlaceholderParserRegistryModule;
 import org.spongepowered.common.registry.type.statistic.StatisticRegistryModule;
@@ -345,6 +349,7 @@ public final class CommonModuleRegistry {
                 .registerBuilderSupplier(PlaceholderContext.Builder.class, SpongePlaceholderContextBuilder::new)
                 .registerBuilderSupplier(MapColor.Builder.class, SpongeMapColorBuilder::new)
                 .registerBuilderSupplier(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
+                .registerBuilderSupplier(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
         ;
     }
 
@@ -485,6 +490,7 @@ public final class CommonModuleRegistry {
                 .registerModule(HandPreference.class, HandPreferenceRegistryModule.getInstance())
                 .registerModule(PlaceholderParser.class, new PlaceholderParserRegistryModule())
                 .registerModule(MapColorType.class, MapColorRegistryModule.getInstance())
+                .registerModule(MapDecorationType.class, MapDecorationRegistryModule.getInstance())
                 // Miscellaneous Registries
                 .registerModule(DungeonMobRegistryModule.getInstance())
         ;

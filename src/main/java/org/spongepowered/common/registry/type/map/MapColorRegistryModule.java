@@ -25,11 +25,11 @@
 package org.spongepowered.common.registry.type.map;
 
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.map.MapColorType;
-import org.spongepowered.api.map.MapColorTypes;
+import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapColorTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.map.SpongeMapColorType;
+import org.spongepowered.common.map.color.SpongeMapColorType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -133,7 +133,7 @@ public class MapColorRegistryModule implements CatalogRegistryModule<MapColorTyp
         return Optional.empty();
     }
 
-    MapColorRegistryModule() {
+    private MapColorRegistryModule() {
     }
 
     static final class Holder {

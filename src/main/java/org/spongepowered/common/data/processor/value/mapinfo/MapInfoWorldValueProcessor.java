@@ -22,36 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.item;
+package org.spongepowered.common.data.processor.value.mapinfo;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMapInfoData;
+import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
 
-public class ItemMapWorldValueProcessor extends AbstractItemSingleDataProcessor<World, Value<World>, MapItemData, ImmutableMapItemData> {
+public class MapInfoWorldValueProcessor extends AbstractSingleDataSingleTargetProcessor<MapInfo, World, Value<World>, MapInfoData, ImmutableMapInfoData> {
 
-    public ItemMapWorldValueProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack)
-                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_WORLD);
+    public MapInfoWorldValueProcessor() {
+        super(Keys.MAP_WORLD, MapInfo.class);
     }
 
     @Override
@@ -61,24 +57,18 @@ public class ItemMapWorldValueProcessor extends AbstractItemSingleDataProcessor<
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, World value) {
-        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        if (!mapData.isPresent()) {
-            return false;
-        }
-        MapDataBridge mapDataBridge = (MapDataBridge)mapData.get();
+    protected boolean set(MapInfo mapInfo, World value) {
+        MapData mapData = (MapData)mapInfo;
+        MapDataBridge mapDataBridge = (MapDataBridge)mapData;
         mapDataBridge.bridge$setDimensionId(((WorldServerBridge)value).bridge$getDimensionId());
-        mapData.get().markDirty();
+        mapData.markDirty();
         return true;
     }
 
     @Override
-    protected Optional<World> getVal(ItemStack dataHolder) {
-        return Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> (MapDataBridge)mapData)
-                .flatMap(bridge -> WorldManager.getWorldByDimensionId(bridge.bridge$getDimensionId()))
+    protected Optional<World> getVal(MapInfo mapInfo) {
+        MapData mapData = (MapData)mapInfo;
+        return WorldManager.getWorldByDimensionId(((MapDataBridge)mapData).bridge$getDimensionId())
                 .map(worldServer -> (World)worldServer);
     }
 
@@ -93,7 +83,7 @@ public class ItemMapWorldValueProcessor extends AbstractItemSingleDataProcessor<
     }
 
     @Override
-    protected MapItemData createManipulator() {
-        return new SpongeMapItemData();
+    protected MapInfoData createManipulator() {
+        return new SpongeMapInfoData();
     }
 }

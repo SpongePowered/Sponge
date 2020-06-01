@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.item;
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
@@ -35,13 +34,13 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.map.MapCanvas;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.world.map.MapStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,15 +48,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
+import org.spongepowered.common.map.MapUtil;
+import org.spongepowered.common.map.SpongeMapInfo;
+
+import java.util.Optional;
 
 @Mixin(net.minecraft.item.ItemEmptyMap.class)
 public abstract class ItemEmptyMapMixin_API {
@@ -74,57 +71,27 @@ public abstract class ItemEmptyMapMixin_API {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.PLAYER, player);
+            HandType handType = (HandType)(Object)handIn;
+            frame.addContext(EventContextKeys.USED_HAND, handType);
+            frame.addContext(EventContextKeys.USED_ITEM,
+                    player.getItemInHand(handType)
+                            .map(org.spongepowered.api.item.inventory.ItemStack::createSnapshot)
+                            .orElse(ItemStackSnapshot.NONE));
 
-            int id = Sponge.getServer().getMapStorage().flatMap(MapStorage::getHighestMapId).orElse(-1);
-            id++;
-
-            org.spongepowered.api.item.inventory.ItemStack newMap = (org.spongepowered.api.item.inventory.ItemStack)new ItemStack(Items.FILLED_MAP, 1, id);
-            HandType handType = (HandType) (Object) handIn;
-            // We have to do a call to this ourselves due to the order of methods.
-            // (its called straight after in main method body)
-            org.spongepowered.api.item.inventory.ItemStack heldItem = player.getItemInHand(handType).get();
-
-            MapItemData mapItemData = new SpongeMapItemData(
-                    calculateMapCenter(x,z,scale), (org.spongepowered.api.world.World)worldIn,
-                    trackPosition, unlimitedTracking, scale, MapCanvas.blank(), Constants.ItemStack.DEFAULT_MAP_AUTO_UPDATE);
-
-            CreateMapEvent event = SpongeCommonEventFactory.callCreateMapEvent(
-                    frame.getCurrentCause(), player, mapItemData,
-                    (org.spongepowered.api.world.World) worldIn, handType,
-                    newMap.createSnapshot(), heldItem.createSnapshot(), id);
-            if (event.isCancelled()) {
-                return ItemStack.EMPTY; // Injection checks for this
-            }
-            World targetWorld;
-            if (worldIn.isRemote) {
-                targetWorld = worldIn;
-            }
-            else {
-                targetWorld = WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get();
-            }
-            // Call getUniqueDataId to advance the map ids.
-            int mcId = targetWorld.getUniqueDataId("map");
-            if (id != mcId) {
-                // Short has overflown.
-                SpongeImpl.getLogger().warn("Map size corruption, vanilla only allows " + Short.MAX_VALUE + "! Expected next number was not equal to the true next number.");
-                SpongeImpl.getLogger().warn("Expected: " + id + ". Got: " + mcId);
-                SpongeImpl.getLogger().warn("Automatically cancelling map creation");
-                ((MapStorageBridge)Sponge.getServer().getMapStorage().get()).bridge$setHighestMapId((short)(id - 1));
+            MapStorage mapStorage = Sponge.getServer().getMapStorage().orElseThrow(() -> new IllegalStateException("MapStorage was not present while a player was creating a new map"));
+            //MapInfo mapInfo = mapStorage.createNewMapInfo();
+            MapInfoData mapInfoData = new SpongeMapInfoData();
+            Optional<MapInfo> optMapInfo = MapUtil.fireCreateMapEvent(mapInfoData, frame.getCurrentCause());
+            // Event Cancelled
+            if (!optMapInfo.isPresent()) {
                 return ItemStack.EMPTY;
             }
-            String s = Constants.ItemStack.MAP_PREFIX + id;
-            MapData mapData = new MapData(s);
-            if (worldIn.isRemote) {
-                worldIn.setData(s, mapData);
-            }
-            else {
-                targetWorld.setData(s, mapData);
-            }
-            setMapData(mapData, mapItemData);
-            newMap.offer(mapItemData);
+
+            org.spongepowered.api.item.inventory.ItemStack newMap = (org.spongepowered.api.item.inventory.ItemStack)new ItemStack(Items.FILLED_MAP, 1, ((SpongeMapInfo)optMapInfo.get()).getMapId());
             return (ItemStack) newMap;
         }
     }
+
     @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", ordinal = 2),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     protected void checkIfShouldReturn(World worldIn, EntityPlayer player, EnumHand handIn, CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack itemStack, ItemStack itemStack1) {
@@ -134,23 +101,4 @@ public abstract class ItemEmptyMapMixin_API {
         }
     }
 
-    public void setMapData(MapData mapData, MapItemData mapItemData) {
-        Vector2i loc = mapItemData.location().get();
-        mapData.xCenter = loc.getX();
-        mapData.zCenter = loc.getY();
-        mapData.dimension = (byte)((WorldServerBridge)mapItemData.world().get()).bridge$getDimensionId();
-        mapData.scale = mapItemData.scale().get().byteValue();
-        mapData.trackingPosition = mapItemData.trackPosition().get();
-        mapData.unlimitedTracking = mapItemData.unlimitedTracking().get();
-        ((MapDataBridge)mapData).setShouldSelfUpdate(mapItemData.autoUpdate().get());
-    }
-
-    // Based off minecraft's code MapData.calculateMapCenter to ensure
-    // that they work the same
-    public Vector2i calculateMapCenter(double x, double z, int mapScale) {
-        int i = 128 * (1 << mapScale);
-        int j = (int)Math.floor((x + 64.0D) / (double)i);
-        int k = (int)Math.floor((z + 64.0D) / (double)i);
-        return new Vector2i(j * i + i / 2 - 64, k * i + i / 2 - 64);
-    }
 }

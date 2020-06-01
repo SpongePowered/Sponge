@@ -22,16 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.map;
+package org.spongepowered.common.map.canvas;
 
+import com.google.common.primitives.Bytes;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.map.MapCanvas;
-import org.spongepowered.api.map.MapColor;
-import org.spongepowered.api.map.MapColorType;
-import org.spongepowered.api.map.MapColorTypes;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapColorTypes;
+import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
 import org.spongepowered.common.util.Constants;
 
@@ -47,7 +48,7 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
     public byte[] canvas;
 
     SpongeMapByteCanvas() {
-        this.canvas = new byte[Constants.ItemStack.MAP_SIZE];
+        this.canvas = new byte[Constants.Map.MAP_SIZE];
         //Arrays.fill(canvas, Byte.MIN_VALUE);
     }
 
@@ -70,10 +71,9 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
         checkState(isInRange(endY), "endY out of bounds");
 
         byte color = ((SpongeMapColor)mapColor).getMCColor();
-        int pos = startY * Constants.ItemStack.MAP_PIXELS + startX;
-        for (int y = startY; y <= endY; y++, pos += Constants.ItemStack.MAP_PIXELS) {
-            for (int x = startX; x <= endX; x++, pos++) {
-                canvas[pos] = color;
+        for (int x = startX; x <= endX; x++) {
+            for (int y = startY; y <= endY; y++) {
+                canvas[x + (y * Constants.Map.MAP_PIXELS)] = color;
             }
         }
     }
@@ -84,7 +84,7 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
      * @return if this would not be out of bounds
      */
     private boolean isInRange(int i) {
-        return 0 <= i && i <= Constants.ItemStack.MAP_MAX_INDEX;
+        return 0 <= i && i <= Constants.Map.MAP_MAX_INDEX;
     }
 
     public void applyToMapData(MapData mapData) {
@@ -98,14 +98,14 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
 
     @Override
     public DataContainer toContainer() {
-        return DataContainer.createNew().set(DataQuery.of("MapColors"), Arrays.asList(canvas));
+        return DataContainer.createNew().set(DataQuery.of("MapColors"), Bytes.asList(canvas));
     }
 
     @Override
     public MapColor getColor(int x, int y) {
         checkState(isInRange(x), "x is out of bounds");
         checkState(isInRange(y), "y is out of bounds");
-        return getColor(y * Constants.ItemStack.MAP_PIXELS + x);
+        return getColor(y * Constants.Map.MAP_PIXELS + x);
     }
 
     public MapColor getColor(int pos) {
@@ -115,18 +115,18 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
         if (color < 0) {
             intColor += 256; // Undo byte wrap around.
         }
-        int shade = intColor % Constants.ItemStack.MAP_SHADES;
-        int colorIndex = (intColor - shade)/Constants.ItemStack.MAP_SHADES;
+        int shade = intColor % Constants.Map.MAP_SHADES;
+        int colorIndex = (intColor - shade)/Constants.Map.MAP_SHADES;
         MapColorType mapColorType = MapColorRegistryModule.getByColorValue(colorIndex).orElseThrow(() -> new IllegalStateException("Tried to get a color from a map that didn't exist!"));
         return new SpongeMapColor(mapColorType, shade);
     }
 
     @Override
     public Image toImage() {
-        BufferedImage image = new BufferedImage(Constants.ItemStack.MAP_PIXELS, Constants.ItemStack.MAP_PIXELS, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(Constants.Map.MAP_PIXELS, Constants.Map.MAP_PIXELS, BufferedImage.TYPE_INT_RGB);
         int pos = 0;
-        for (int y = 0; y < Constants.ItemStack.MAP_PIXELS; y++, pos += Constants.ItemStack.MAP_PIXELS) {
-            for (int x = 0; x < Constants.ItemStack.MAP_PIXELS; x++, pos++) {
+        for (int y = 0; y < Constants.Map.MAP_PIXELS; y++, pos += Constants.Map.MAP_PIXELS) {
+            for (int x = 0; x < Constants.Map.MAP_PIXELS; x++, pos++) {
                 image.setRGB(x, y, getColor(x,y).getColor().getRgb());
             }
         }
@@ -135,10 +135,10 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
 
     @Override
     public Image toImage(Color color) {
-        BufferedImage image = new BufferedImage(Constants.ItemStack.MAP_PIXELS, Constants.ItemStack.MAP_PIXELS, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(Constants.Map.MAP_PIXELS, Constants.Map.MAP_PIXELS, BufferedImage.TYPE_INT_ARGB);
         int pos = 0;
-        for (int y = 0; y < Constants.ItemStack.MAP_PIXELS; y++, pos += Constants.ItemStack.MAP_PIXELS) {
-            for (int x = 0; x < Constants.ItemStack.MAP_PIXELS; x++, pos++) {
+        for (int y = 0; y < Constants.Map.MAP_PIXELS; y++, pos += Constants.Map.MAP_PIXELS) {
+            for (int x = 0; x < Constants.Map.MAP_PIXELS; x++, pos++) {
                 MapColor foundColor = getColor(x,y);
                 Color paintColor = foundColor.getType() == MapColorTypes.AIR ? color
                         : foundColor.getColor().asJavaColor();

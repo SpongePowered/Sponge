@@ -22,34 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.item;
+package org.spongepowered.common.data.processor.value.mapinfo;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.MapData;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMapInfoData;
+import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.map.MapCanvas;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.map.SpongeMapByteCanvas;
-import org.spongepowered.common.map.SpongeMapCanvas;
+import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
+import org.spongepowered.common.map.canvas.SpongeMapCanvas;
 
 import java.util.Optional;
 
-public class ItemMapCanvasValueProcessor extends AbstractItemSingleDataProcessor<MapCanvas, Value<MapCanvas>, MapItemData, ImmutableMapItemData> {
-    public ItemMapCanvasValueProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack)itemStack)
-                .getType() == ItemTypes.FILLED_MAP, Keys.MAP_CANVAS);
+public class MapInfoCanvasValueProcessor extends AbstractSingleDataSingleTargetProcessor<MapInfo, MapCanvas, Value<MapCanvas>, MapInfoData, ImmutableMapInfoData> {
+    public MapInfoCanvasValueProcessor() {
+        super(Keys.MAP_CANVAS, MapInfo.class);
     }
 
     @Override
@@ -58,27 +54,23 @@ public class ItemMapCanvasValueProcessor extends AbstractItemSingleDataProcessor
     }
 
     @Override
-    protected MapItemData createManipulator() {
-        return new SpongeMapItemData();
+    protected MapInfoData createManipulator() {
+        return new SpongeMapInfoData();
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, MapCanvas value) {
-        Optional<MapData> mapData = Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()));
-        if (!mapData.isPresent()) {
-            return false;
-        }
-        ((SpongeMapCanvas)value).applyToMapData(mapData.get());
-        ((MapDataBridge)mapData.get()).updateWholeMap();
+    protected boolean set(MapInfo mapInfo, MapCanvas value) {
+        MapData mapData = (MapData)mapInfo;
+
+        ((SpongeMapCanvas)value).applyToMapData(mapData);
+        ((MapDataBridge)mapData).updateWholeMap();
         return true;
     }
 
     @Override
-    protected Optional<MapCanvas> getVal(ItemStack dataHolder) {
-        return Sponge.getServer().getMapStorage()
-                .flatMap(mapStorage -> ((MapStorageBridge)mapStorage).bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> new SpongeMapByteCanvas(mapData.colors));
+    protected Optional<MapCanvas> getVal(MapInfo mapInfo) {
+        MapData mapData = (MapData)mapInfo;
+        return Optional.of(new SpongeMapByteCanvas(mapData.colors));
     }
 
     @Override

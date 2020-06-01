@@ -22,24 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.item;
+package org.spongepowered.common.map.color;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemMap;
-import net.minecraft.world.World;
-import net.minecraft.world.storage.MapData;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.map.SpongeMapInfo;
+import net.minecraft.block.material.MapColor;
+import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.util.Color;
 
-@Mixin(ItemMap.class)
-public class ItemMapMixin_API {
-    @Inject(method = "updateMapData", at = @At(value = "HEAD"), cancellable = true)
-    public void cancelUpdateIfShouldntUpdate(World worldIn, Entity viewer, MapData data, CallbackInfo ci) {
-        if (((SpongeMapInfo)data).isLocked()) {
-            ci.cancel();
-        }
+public class SpongeMapColorType implements MapColorType {
+    private String id;
+    private String name;
+    private int colorIndex;
+
+    public SpongeMapColorType(String id, String name, int colorIndex) {
+        this.id = id;
+        this.name = name;
+        this.colorIndex = colorIndex;
+    }
+
+    public int getBaseColor() {
+        return colorIndex;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setColorIndex(int colorIndex) {
+        this.colorIndex = colorIndex;
+    }
+
+    @Override
+    public Color getColor() {
+        return Color.of(new java.awt.Color(MapColor.COLORS[colorIndex].colorValue));
     }
 }

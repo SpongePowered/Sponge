@@ -67,7 +67,6 @@ import org.spongepowered.api.block.tileentity.Jukebox;
 import org.spongepowered.api.block.tileentity.Note;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -131,6 +130,7 @@ import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
@@ -1818,9 +1818,8 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static CreateMapEvent callCreateMapEvent(final Cause cause, final Player player, MapItemData mapData, final World world, HandType handType, ItemStackSnapshot oldItemStack, ItemStackSnapshot newItemStack, int id) {
-        final Transaction<ItemStackSnapshot> transaction = new Transaction<>(oldItemStack, newItemStack);
-        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapData.asImmutable(), mapData, player, transaction, handType, world, id + 1);
+    public static CreateMapEvent callCreateMapEvent(final Cause cause, MapInfo mapInfo) {
+        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
         SpongeImpl.postEvent(event);
         return event;
     }
