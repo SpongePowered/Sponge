@@ -64,39 +64,44 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting(comment = "Configuration options related to permissions and permission handling")
     private PermissionCategory permission = new PermissionCategory();
 
-    @Setting(value = "modules", comment = "Options related to optional modules, that can be enabled or disabled.")
+    @Setting(value = "modules", comment = ""
+            + "Sponge provides a number of modules that allow for enabling or disabling\n"
+            + "certain specific features. These may be enabled or disabled below.\n\n"
+            + "Any changes here require a server restart as modules are applied at startup.")
     private ModuleCategory mixins = new ModuleCategory();
 
     @Setting(value = "ip-sets", comment = ""
             + "Automatically assigns (permission) contexts to users that use any of the given ips.\n"
-            + "This can be used to restrict/grand permissions, based on the player's source or target ip.")
+            + "This can be used to restrict/grant permissions, based on the player's source or target ip.")
     private Map<String, List<IpSet>> ipSets = new HashMap<>();
 
-    @Setting(value = "bungeecord", comment = "Configuration options related for server proxies, such as bungeecord")
+    @Setting(value = "bungeecord", comment = ""
+            + "Controls how Sponge interacts with server proxies, such as BungeeCord and Velocity.\n"
+            + "Requires that the 'bungeecord' module is enabled.")
     private BungeeCordCategory bungeeCord = new BungeeCordCategory();
 
     @Setting(comment = "Configuration option related to sponge provided exploit patches")
     private ExploitCategory exploits = new ExploitCategory();
 
-    @Setting(value = "optimizations",
-            comment = "Configuration options related to sponge provided performance optimizations.")
+    @Setting(value = "optimizations", comment = ""
+            + "Configuration options related to sponge provided performance optimizations.")
     private OptimizationCategory optimizations = new OptimizationCategory();
 
-    @Setting(
-            comment = "Contains general configuration options for Sponge that don't fit into a specific classification")
+    @Setting(comment = ""
+            + "Contains general configuration options for Sponge that don't fit into a specific classification")
     protected GlobalGeneralCategory general = new GlobalGeneralCategory();
 
     @Setting(comment = "Configuration options that will affect all worlds.")
     protected GlobalWorldCategory world = new GlobalWorldCategory();
 
-    @Setting(value = "cause-tracker", comment = "Options related to Sponge's cause tracking system")
+    @Setting(value = "cause-tracker", comment = "Configuration options related to Sponge's cause tracking system")
     private PhaseTrackerCategory causeTracker = new PhaseTrackerCategory();
 
     @Setting(value = "teleport-helper", comment = "Blocks to blacklist for safe teleportation.")
     private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
 
-    @Setting(value = "movement-checks",
-            comment = "Options related to minecraft's movement checks, that can be enabled or disabled.")
+    @Setting(value = "movement-checks", comment = ""
+            + "Configuration options related to minecraft's movement checks, that can be enabled or disabled.")
     private MovementChecksCategory movementChecks = new MovementChecksCategory();
 
     @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
