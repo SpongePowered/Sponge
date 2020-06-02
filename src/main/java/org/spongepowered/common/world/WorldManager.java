@@ -33,6 +33,10 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -53,7 +57,6 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
@@ -80,13 +83,16 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.server.MinecraftServerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
@@ -107,6 +113,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -122,13 +129,13 @@ public final class WorldManager {
     private static final DirectoryStream.Filter<Path> LEVEL_AND_SPONGE =
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
-    private static final Int2ObjectMap<DimensionType> dimensionTypeByTypeId = new Int2ObjectOpenHashMap<>(3);
-    private static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
+    private static final Int2ReferenceMap<DimensionType> dimensionTypeByTypeId = new Int2ReferenceOpenHashMap<>(3);
+    private static final Int2ReferenceMap<DimensionType> dimensionTypeByDimensionId = new Int2ReferenceOpenHashMap<>(3);
     private static final Int2ObjectMap<Path> dimensionPathByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
-    private static final Map<Integer, String> worldFolderByDimensionId = new HashMap<>();
+    private static final Int2ObjectMap<String> worldFolderByDimensionId = new Int2ObjectOpenHashMap<>();
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
     private static final IntSet usedDimensionIds = new IntOpenHashSet();
     private static final Map<WorldServer, WorldServer> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
@@ -165,33 +172,30 @@ public final class WorldManager {
 
     public static void registerDimensionType(final DimensionType type) {
         checkNotNull(type);
-        final Optional<Integer> optNextDimensionTypeId = getNextFreeDimensionTypeId();
+        final OptionalInt optNextDimensionTypeId = getNextFreeDimensionTypeId();
         optNextDimensionTypeId.ifPresent(integer -> registerDimensionType(integer, type));
 
     }
 
     public static void registerDimensionType(final int dimensionTypeId, final DimensionType type) {
         checkNotNull(type);
-        if (dimensionTypeByTypeId.containsKey(dimensionTypeId)) {
-            return;
-        }
-
-        dimensionTypeByTypeId.put(dimensionTypeId, type);
+        dimensionTypeByTypeId.putIfAbsent(dimensionTypeId, type);
     }
 
-    private static Optional<Integer> getNextFreeDimensionTypeId() {
+    private static OptionalInt getNextFreeDimensionTypeId() {
         Integer highestDimensionTypeId = null;
 
-        for (final Integer dimensionTypeId : dimensionTypeByTypeId.keySet()) {
+        for (IntIterator iterator = dimensionTypeByTypeId.keySet().iterator(); iterator.hasNext();) {
+            final int dimensionTypeId = iterator.nextInt();
             if (highestDimensionTypeId == null || highestDimensionTypeId < dimensionTypeId) {
                 highestDimensionTypeId = dimensionTypeId;
             }
         }
 
         if (highestDimensionTypeId != null && highestDimensionTypeId < 127) {
-            return Optional.of(++highestDimensionTypeId);
+            return OptionalInt.of(++highestDimensionTypeId);
         }
-        return Optional.empty();
+        return OptionalInt.empty();
     }
 
     public static Integer getNextFreeDimensionId() {
@@ -216,22 +220,20 @@ public final class WorldManager {
             return;
         }
 
-        if (dimensionTypeByDimensionId.containsKey(dimensionId)) {
+        final DimensionType previous = dimensionTypeByDimensionId.putIfAbsent(dimensionId, type);
+        if (previous != null) {
             return;
         }
-
-        dimensionTypeByDimensionId.put(dimensionId, type);
         if (dimensionId >= 0) {
             usedDimensionIds.add(dimensionId);
         }
     }
 
     public static void unregisterDimension(final int dimensionId) {
-        if (!dimensionTypeByDimensionId.containsKey(dimensionId))
-        {
+        final DimensionType previous = dimensionTypeByDimensionId.remove(dimensionId);
+        if (previous == null) {
             throw new IllegalArgumentException("Failed to unregister dimension [" + dimensionId + "] as it is not registered!");
         }
-        dimensionTypeByDimensionId.remove(dimensionId);
     }
 
     private static void registerVanillaDimensionPaths(final Path savePath) {
@@ -274,9 +276,9 @@ public final class WorldManager {
     }
 
     public static int[] getRegisteredDimensionIdsFor(final DimensionType type) {
-        return dimensionTypeByDimensionId.int2ObjectEntrySet().stream()
+        return dimensionTypeByDimensionId.int2ReferenceEntrySet().stream()
                 .filter(entry -> entry.getValue() == type)
-                .mapToInt(Int2ObjectMap.Entry::getIntKey)
+                .mapToInt(Int2ReferenceMap.Entry::getIntKey)
                 .toArray();
     }
 
@@ -293,10 +295,10 @@ public final class WorldManager {
         return dimensionTypeByDimensionId.containsKey(dimensionId);
     }
 
-    private static Map<Integer, DimensionType> sortedDimensionMap() {
-        final Int2ObjectMap<DimensionType> copy = new Int2ObjectOpenHashMap<>(dimensionTypeByDimensionId);
+    private static Int2ReferenceMap<DimensionType> sortedDimensionMap() {
+        final Int2ReferenceMap<DimensionType> copy = new Int2ReferenceOpenHashMap<>(dimensionTypeByDimensionId);
 
-        final HashMap<Integer, DimensionType> newMap = new LinkedHashMap<>();
+        final Int2ReferenceMap<DimensionType> newMap = new Int2ReferenceLinkedOpenHashMap<>();
 
         newMap.put(0, copy.remove(0));
 
@@ -432,7 +434,13 @@ public final class WorldManager {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        final ISaveHandler saveHandler;
+        try (PhaseContext<?> ignore = GeneralPhase.State.SAVE_HANDLER_CREATION.createPhaseContext()
+                .createFiles(!archetype.getSerializationBehavior().equals(SerializationBehaviors.NONE))
+                .buildAndSwitch()) {
+            saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true,
+                    ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        }
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
         if (worldInfo == null) {
@@ -464,7 +472,9 @@ public final class WorldManager {
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(), archetype,
                 (WorldProperties) worldInfo));
 
-        saveHandler.saveWorldInfoWithPlayer(worldInfo, SpongeImpl.getServer().getPlayerList().getHostPlayerData());
+        if (archetype.getSerializationBehavior() != SerializationBehaviors.NONE) {
+            saveHandler.saveWorldInfoWithPlayer(worldInfo, SpongeImpl.getServer().getPlayerList().getHostPlayerData());
+        }
 
         return (WorldProperties) worldInfo;
 
@@ -623,12 +633,18 @@ public final class WorldManager {
         }
 
         final Path worldFolder = currentSavesDir.resolve(worldName);
-        if (!Files.isDirectory(worldFolder)) {
+        if (!Files.isDirectory(worldFolder) && properties.getSerializationBehavior() != SerializationBehaviors.NONE) {
             SpongeImpl.getLogger().error("Unable to load world [{}]. We cannot find its folder under [{}].", worldFolder, currentSavesDir);
             return Optional.empty();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        final ISaveHandler saveHandler;
+        try (PhaseContext<?> ignore = GeneralPhase.State.SAVE_HANDLER_CREATION.createPhaseContext()
+                .createFiles(!properties.getSerializationBehavior().equals(SerializationBehaviors.NONE))
+                .buildAndSwitch()) {
+            saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true,
+                    ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
+        }
 
         // We weren't given a properties, see if one is cached
         if (properties == null) {
@@ -676,9 +692,7 @@ public final class WorldManager {
     public static void loadAllWorlds(final long defaultSeed, final WorldType defaultWorldType, final String generatorOptions) {
         final MinecraftServer server = SpongeImpl.getServer();
 
-        // We cannot call getCurrentSavesDirectory here as that would generate a savehandler and trigger a session lock.
-        // We'll go ahead and make the directories for the save name here so that the migrator won't fail
-        final Path currentSavesDir = ((MinecraftServerAccessor) server).accessor$getAnvilFile().toPath().resolve(server.getFolderName());
+        final Path currentSavesDir = getCurrentSavesDirectory().get();
         try {
             // Symlink needs special handling
             if (Files.isSymbolicLink(currentSavesDir)) {
@@ -705,9 +719,9 @@ public final class WorldManager {
 
         registerExistingSpongeDimensions(currentSavesDir);
 
-        for (final Map.Entry<Integer, DimensionType> entry: sortedDimensionMap().entrySet()) {
+        for (final Int2ReferenceMap.Entry<DimensionType> entry: sortedDimensionMap().int2ReferenceEntrySet()) {
 
-            final int dimensionId = entry.getKey();
+            final int dimensionId = entry.getIntKey();
             final DimensionType dimensionType = entry.getValue();
             final org.spongepowered.api.world.DimensionType apiDimensionType = (org.spongepowered.api.world.DimensionType) (Object) dimensionType;
             // Skip all worlds besides dimension 0 if multi-world is disabled
@@ -891,6 +905,43 @@ public final class WorldManager {
         } finally {
             ((ChunkProviderServerBridge) worldServer.getChunkProvider()).bridge$setForceChunkRequests(false);
         }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static boolean mkdirsIfSaveable(File dir) {
+        if (PhaseTracker.getInstance().getSidedThread() == Thread.currentThread()) {
+            IPhaseState state = PhaseTracker.getInstance().getCurrentState();
+            if (!state.shouldCreateWorldDirectories(PhaseTracker.getInstance().getCurrentContext())) {
+                return false;
+            }
+        }
+        Path path = dir.toPath();
+        Optional<Path> savesDirOpt = getCurrentSavesDirectory();
+        if (!savesDirOpt.isPresent()) {
+            return dir.mkdirs();
+        }
+        Path savesDir = savesDirOpt.get();
+        if (path.startsWith(savesDir) && !path.equals(savesDir)) {
+            Path worldName = savesDir.relativize(path).getName(0);
+            WorldProperties props;
+            if (worldPropertiesByFolderName.containsKey(worldName.toString())) {
+                props = worldPropertiesByFolderName.get(worldName.toString());
+            } else if (worldPropertiesByWorldUuid.size() == 1) {
+                // Happens while creating the WorldServer object for the main
+                // world: getDefaultWorld() doesn't work until afterwards
+                props = worldPropertiesByWorldUuid.values().iterator().next();
+            } else {
+                Optional<WorldProperties> overworld = Sponge.getServer().getDefaultWorld();
+                if (!overworld.isPresent()) {
+                    return dir.mkdirs();
+                }
+                props = overworld.get();
+            }
+            if (props.getSerializationBehavior() == SerializationBehaviors.NONE) {
+                return false;
+            }
+        }
+        return dir.mkdirs();
     }
 
     /**
@@ -1269,7 +1320,12 @@ public final class WorldManager {
         lastUsedDimensionId = 0;
 
         if (compound == null) {
-            dimensionTypeByDimensionId.keySet().stream().filter(dimensionId -> dimensionId >= 0).forEach(usedDimensionIds::add);
+            for (IntIterator iterator = dimensionTypeByDimensionId.keySet().iterator(); iterator.hasNext();) {
+                final int dimensionId = iterator.nextInt();
+                if (dimensionId >= 0) {
+                    usedDimensionIds.add(dimensionId);
+                }
+            }
         } else {
             for (final int id : compound.getIntArray(Constants.Forge.USED_DIMENSION_IDS)) {
                 usedDimensionIds.add(id);
@@ -1299,8 +1355,8 @@ public final class WorldManager {
         if (optWorldServer.isPresent()) {
             return Optional.of(optWorldServer.get().getSaveHandler().getWorldDirectory().toPath());
         } else if (SpongeImpl.getGame().getState().ordinal() >= GameState.SERVER_ABOUT_TO_START.ordinal()) {
-            final SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(SpongeImpl.getServer().getFolderName(), false);
-            return Optional.of(saveHandler.getWorldDirectory().toPath());
+            final MinecraftServer server = SpongeImpl.getServer();
+            return Optional.of(((MinecraftServerAccessor) server).accessor$getAnvilFile().toPath().resolve(server.getFolderName()));
         }
 
         return Optional.empty();

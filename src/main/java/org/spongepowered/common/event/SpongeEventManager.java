@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -72,6 +73,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -94,8 +96,8 @@ public class SpongeEventManager implements EventManager {
     protected final Logger logger;
     private final PluginManager pluginManager;
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
-    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders = Maps.newHashMap();
-    private final Set<Object> registeredListeners = Sets.newHashSet();
+    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders = new IdentityHashMap<>();
+    private final Set<Object> registeredListeners = new ReferenceOpenHashSet<>();
 
     public final ListenerChecker checker = new ListenerChecker(ShouldFire.class);
 

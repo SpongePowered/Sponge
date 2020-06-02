@@ -34,6 +34,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -91,6 +92,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     @Shadow @Nullable public abstract Chunk loadChunk(int x, int z);
     @Shadow protected abstract void saveChunkExtraData(Chunk chunkIn);
     @Shadow protected abstract void saveChunkData(Chunk chunkIn);
+    @Shadow public abstract boolean shadow$canSave();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setUpCommonFields(
@@ -250,7 +252,14 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     @Overwrite
     public boolean tick()
     {
-        if (!this.world.disableLevelSaving && !((WorldBridge) this.world).bridge$isFake())
+        // Sponge start
+        final SerializationBehavior behavior = ((WorldProperties) this.world.getWorldInfo()).getSerializationBehavior();
+        if (behavior != SerializationBehaviors.AUTOMATIC) {
+            return false;
+        }
+        // Sponge end
+
+        if (this.shadow$canSave() && !((WorldBridge) this.world).bridge$isFake())
         {
             ((WorldServerBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
             final Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
@@ -324,5 +333,21 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
 
         this.loadedChunks.remove(ChunkPos.asLong(chunk.x, chunk.z));
         ((ChunkBridge) chunk).bridge$setScheduledForUnload(-1);
+    }
+
+    // This still returns true for METADATA_ONLY because other places (e.g. WorldServer) use it.
+    @Inject(method = "canSave", at = @At("HEAD"), cancellable = true)
+    public void impl$checkSerializationBehaviorForCanSave(CallbackInfoReturnable<Boolean> cir) {
+        if (((WorldProperties) this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+            cir.setReturnValue(false);
+        }
+    }
+
+    @Inject(method = "saveChunks", at = @At("HEAD"), cancellable = true)
+    public void impl$checkSerializationBehaviorForSaveChunks(CallbackInfoReturnable<Boolean> cir) {
+        final SerializationBehavior behavior = ((WorldProperties) this.world.getWorldInfo()).getSerializationBehavior();
+        if (behavior == SerializationBehaviors.NONE || behavior == SerializationBehaviors.METADATA_ONLY) {
+            cir.setReturnValue(true);
+        }
     }
 }

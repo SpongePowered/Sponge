@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.inventory;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -123,7 +124,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     private List<SlotTransaction> impl$capturedCraftShiftTransactions = new ArrayList<>();
     private List<SlotTransaction> impl$capturedCraftPreviewTransactions = new ArrayList<>();
     private boolean impl$isLensInitialized;
-    @Nullable private Map<Integer, SlotAdapter> impl$adapters;
+    @Nullable private Int2ObjectMap<SlotAdapter> impl$adapters;
     @Nullable private InventoryArchetype impl$archetype;
     @Nullable private Carrier impl$carrier;
     @Nullable Predicate<EntityPlayer> impl$canInteractWithPredicate;
@@ -161,7 +162,7 @@ public abstract class ContainerMixin implements ContainerBridge, InventoryAdapte
     }
 
     @SuppressWarnings("ConstantConditions")
-    private Map<Integer, SlotAdapter> impl$getAdapters() {
+    private Int2ObjectMap<SlotAdapter> impl$getAdapters() {
         if (this.impl$adapters == null) {
             this.impl$adapters = new Int2ObjectArrayMap<>();
             // If we know the lens, we can cache the adapters now

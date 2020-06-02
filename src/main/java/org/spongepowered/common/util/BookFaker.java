@@ -39,33 +39,38 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
+import java.util.Collection;
+
 public class BookFaker {
 
     public static final int WINDOW_PLAYER_INVENTORY = 0;
 
-    public static void fakeBookView(BookView bookView, Player player) {
-        EntityPlayerMP mcPlayer = (EntityPlayerMP) player;
-        NetHandlerPlayServer receiver = mcPlayer.connection;
+    public static void fakeBookView(BookView bookView, Collection<Player> players) {
 
         // First we need to send a fake a Book ItemStack with the BookView's
         // contents to the player's hand
-        ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK, 1);
+        final ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK, 1);
         item.offer(Keys.DISPLAY_NAME, bookView.getTitle());
         item.offer(Keys.BOOK_AUTHOR, bookView.getAuthor());
         item.offer(Keys.BOOK_PAGES, bookView.getPages());
 
-        InventoryPlayer inventory = mcPlayer.inventory;
-        int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
-        receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
+        for (Player player : players) {
+            final EntityPlayerMP mcPlayer = (EntityPlayerMP) player;
+            final NetHandlerPlayServer receiver = mcPlayer.connection;
 
-        // Next we tell the client to open the Book GUI
-        PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
-        packetbuffer.writeEnumValue(EnumHand.MAIN_HAND);
-        receiver.sendPacket(new SPacketCustomPayload("MC|BOpen", packetbuffer));
+            final InventoryPlayer inventory = mcPlayer.inventory;
+            final int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
+            receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
-        // Now we can remove the fake Book since it's contents will have already
-        // been transferred to the GUI
-        receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
+            // Next we tell the client to open the Book GUI
+            final PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
+            packetbuffer.writeEnumValue(EnumHand.MAIN_HAND);
+            receiver.sendPacket(new SPacketCustomPayload("MC|BOpen", packetbuffer));
+
+            // Now we can remove the fake Book since it's contents will have already
+            // been transferred to the GUI
+            receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
+        }
     }
 
 }

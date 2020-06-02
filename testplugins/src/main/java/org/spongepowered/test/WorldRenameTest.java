@@ -131,7 +131,7 @@ public class WorldRenameTest {
                                 throw new CommandException(Text.of("CommandSource must be a player"));
                             }
 
-                            ((Player) source).setLocation(Sponge.getServer().getWorld(context.<WorldProperties>getOne(worldKey).get().getUniqueId())
+                            ((Player) source).setLocationSafely(Sponge.getServer().getWorld(context.<WorldProperties>getOne(worldKey).get().getUniqueId())
                                     .orElseThrow(() -> new CommandException(Text.of(TextColors.RED, "That world doesn't seem to be loaded.")))
                                     .getSpawnLocation());
                             return CommandResult.success();

@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -43,7 +45,7 @@ import java.util.Optional;
 public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitType> {
 
     public static final Map<String, RabbitType> RABBIT_TYPES = Maps.newHashMap();
-    public static final Map<Integer, RabbitType> RABBIT_IDMAP = Maps.newHashMap();
+    public static final Int2ObjectMap<RabbitType> RABBIT_IDMAP = new Int2ObjectOpenHashMap<>();
     // rabbit types
     public static final SpongeRabbitType BROWN_RABBIT = new SpongeRabbitType(0, "BROWN");
     public static final RabbitType WHITE_RABBIT = new SpongeRabbitType(1, "WHITE");

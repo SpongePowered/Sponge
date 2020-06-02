@@ -93,8 +93,11 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
+import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
@@ -126,6 +129,7 @@ import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.mixin.core.network.play.server.SPacketBlockChangeAccessor;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeDimension;
@@ -532,9 +536,27 @@ public abstract class WorldMixin_API implements World {
         checkNotNull(type, "type");
         checkNotNull(message, "message");
 
-        for (Player player : this.getPlayers()) {
-            player.sendMessage(type, message);
+        this.getMessageChannel().send(message, type);
+    }
+
+    @Override
+    public void sendMessage(Text message) {
+        this.sendMessage(ChatTypes.CHAT, message);
+    }
+
+    private MessageChannel impl$messageChannel;
+
+    @Override
+    public MessageChannel getMessageChannel() {
+        if (this.impl$messageChannel == null) {
+            return MessageChannel.fixed(this.getPlayers());
         }
+        return this.impl$messageChannel;
+    }
+
+    @Override
+    public void setMessageChannel(MessageChannel channel) {
+        this.impl$messageChannel = channel;
     }
 
     @Override
@@ -544,6 +566,12 @@ public abstract class WorldMixin_API implements World {
         for (Player player : getPlayers()) {
             player.sendTitle(title);
         }
+    }
+
+    @Override
+    public void sendBookView(BookView bookView) {
+        checkNotNull(bookView, "bookView");
+        BookFaker.fakeBookView(bookView, this.getPlayers());
     }
 
     @Override
@@ -1150,4 +1178,6 @@ public abstract class WorldMixin_API implements World {
     public void setRawData(int x, int y, int z, DataView container) throws InvalidDataException {
         throw new UnsupportedOperationException(); // TODO Data API
     }
+
 }
+

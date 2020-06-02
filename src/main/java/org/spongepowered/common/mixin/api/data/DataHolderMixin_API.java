@@ -119,9 +119,6 @@ public abstract class DataHolderMixin_API implements DataHolder {
             final T manipulator = (T) builder.get().create();
             // Basically at this point, it's up to plugins to validate whether it's supported
             final Optional<T> other = manipulator.fill(holder).map(customManipulator -> (T) customManipulator);
-            if (isUser) {
-                ((SpongeUser) holder).markDirty();
-            }
             SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return other;
@@ -162,9 +159,6 @@ public abstract class DataHolderMixin_API implements DataHolder {
             final DataManipulator<?, ?> manipulator = builder.get().create();
             // Basically at this point, it's up to plugins to validate whether it's supported
             final boolean present = manipulator.fill(holder).isPresent();
-            if (isUser) {
-                ((SpongeUser) holder).markDirty();
-            }
             SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return present;

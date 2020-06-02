@@ -44,6 +44,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDisarmedData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -117,7 +118,7 @@ public abstract class BlockTripWireMixin extends BlockMixin {
     }
 
     private ImmutableConnectedDirectionData impl$getConnectedDirectionData(final IBlockState blockState) {
-        final Set<Direction> directions = new HashSet<>();
+        final Set<Direction> directions = EnumSet.noneOf(Direction.class);
         final Boolean north = blockState.getValue(BlockTripWire.NORTH);
         final Boolean east = blockState.getValue(BlockTripWire.EAST);
         final Boolean west = blockState.getValue(BlockTripWire.WEST);

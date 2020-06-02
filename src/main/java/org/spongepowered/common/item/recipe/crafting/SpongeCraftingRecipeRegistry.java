@@ -34,10 +34,13 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipes;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,6 +54,7 @@ import java.util.stream.Collectors;
  * Proxy for {@link CraftingManager}
  */
 @RegisterCatalog(CraftingRecipes.class)
+@RegistrationDependency({KeyRegistryModule.class, SpongeManipulatorRegistry.class}) // We want to make sure custom data is registered beforehand
 public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<CraftingRecipe>,
         AlternateCatalogRegistryModule<CraftingRecipe> {
 

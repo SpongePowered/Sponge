@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.advancements;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.advancements.AdvancementManager;
+import net.minecraft.advancements.FunctionManager;
 import org.apache.commons.io.FileUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,26 +39,18 @@ import org.spongepowered.common.world.WorldManager;
 import java.io.File;
 import java.util.Collection;
 
-@Mixin(AdvancementManager.class)
-public class AdvancementManagerMixin {
-
-    @Redirect(method = "loadCustomAdvancements",
-            at = @At(value = "INVOKE", target = "Ljava/io/File;mkdirs()Z", remap = false)
-    )
+@Mixin(FunctionManager.class)
+public abstract class FunctionManagerMixin {
+    @Redirect(method = "loadFunctions", at = @At(value = "INVOKE", target = "Ljava/io/File;mkdirs()Z", remap = false))
     private boolean impl$createDirectory(File dir) {
         return WorldManager.mkdirsIfSaveable(dir);
     }
 
-    @Inject(method = "reload", at = @At("RETURN"))
-    private void impl$reloadAdvancementProgressforPlayerList(final CallbackInfo ci) {
-        ((PlayerListBridge) SpongeImpl.getServer().getPlayerList()).bridge$reloadAdvancementProgress();
-    }
-
-    @Redirect(method = "loadCustomAdvancements",
-            at = @At(value = "INVOKE",
-                    target = "Lorg/apache/commons/io/FileUtils;listFiles(Ljava/io/File;[Ljava/lang/String;Z)Ljava/util/Collection;",
-                    remap = false
-            )
+    @Redirect(method = "loadFunctions",
+        at = @At(value = "INVOKE",
+            target = "Lorg/apache/commons/io/FileUtils;listFiles(Ljava/io/File;[Ljava/lang/String;Z)Ljava/util/Collection;",
+            remap = false
+        )
     )
     private Collection<File> impl$listFilesIfDirectoryExists(File directory, String[] extensions, boolean recursive) {
         if (!directory.exists()) {

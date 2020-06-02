@@ -22,32 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.fabric;
+package org.spongepowered.common.event.tracking.phase.general;
 
-import net.minecraft.inventory.IInventory;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
+public class SaveHandlerCreationPhase extends PooledPhaseState<SaveHandlerCreationContext> {
 
-public class InventoryTranslators {
-    private static final Map<Class, InventoryTranslator> fabricTranslators = new IdentityHashMap<>();
-
-    static {
-        register(IInventory.class, new IInventoryTranslator());
+    @Override
+    protected SaveHandlerCreationContext createNewContext() {
+        return new SaveHandlerCreationContext(this);
     }
 
-    public static void register(Class inventoryInterface, InventoryTranslator translator) {
-        fabricTranslators.put(inventoryInterface, translator);
+    @Override
+    public void unwind(SaveHandlerCreationContext phaseContext) {
     }
 
-    public static InventoryTranslator getTranslator(Class clazz) {
-        for (Class registered : fabricTranslators.keySet()) {
-            if (registered.isAssignableFrom(clazz)) {
-                return fabricTranslators.get(registered);
-            }
-        }
-        throw new IllegalArgumentException("No Fabric Translator found for " + clazz);
+    @Override
+    public boolean shouldCreateWorldDirectories(SaveHandlerCreationContext phaseContext) {
+        return phaseContext.isCreateFiles();
     }
-
 }

@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.data.type.ParrotVariant;
 import org.spongepowered.api.data.type.ParrotVariants;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -43,7 +45,7 @@ import java.util.Optional;
 public class ParrotVariantRegistryModule implements CatalogRegistryModule<ParrotVariant> {
 
     public static final Map<String, ParrotVariant> PARROT_VARIANTS = Maps.newHashMap();
-    public static final Map<Integer, ParrotVariant> PARROT_VARIANT_IDMAP = Maps.newHashMap();
+    public static final Int2ObjectMap<ParrotVariant> PARROT_VARIANT_IDMAP = new Int2ObjectOpenHashMap<>();
 
     public static final SpongeParrotVariant RED_PARROT = new SpongeParrotVariant(0, "RED");
     public static final SpongeParrotVariant BLUE_PARROT = new SpongeParrotVariant(1, "BLUE");
