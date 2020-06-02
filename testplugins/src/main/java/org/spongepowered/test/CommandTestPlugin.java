@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
@@ -34,6 +35,8 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -42,8 +45,11 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -151,6 +157,37 @@ public class CommandTestPlugin {
                             return CommandResult.success();
                         })).build(),
                 "user-parse");
+
+        Sponge.getCommandManager().register(this.pluginContainer, CommandSpec.builder()
+                .arguments(GenericArguments.allOf(GenericArguments.player(Text.of("player"))))
+                .executor((src, args) -> {
+                    Collection<Player> playerCollection = args.getAll("player");
+                    src.sendMessage(Text.of("Selected players: ", playerCollection
+                            .stream()
+                            .map(User::getName)
+                            .collect(Collectors.joining(", "))));
+                    return CommandResult.success();
+                })
+                .build(), "allofplayers");
+
+        final Collection<String> choices = ImmutableList.of("bacon", "eggs", "sausages", "beans", "spam", "sponge");
+        Sponge.getCommandManager().register(this.pluginContainer, CommandSpec.builder()
+                .arguments(GenericArguments.allOf(GenericArguments.choices(
+                                    Text.of("choices"),
+                                    () -> choices,
+                                    input -> {
+                                        if (choices.contains(input.toLowerCase())) {
+                                            return input;
+                                        }
+                                        return null;
+                                    }
+                                )))
+                .executor((src, args) -> {
+                    Collection<String> playerCollection = args.getAll("choices");
+                    src.sendMessage(Text.of("Selected choices: ", String.join(", ", playerCollection)));
+                    return CommandResult.success();
+                })
+                .build(), "allofchoices");
 
         CommandSpec cmd = CommandSpec.builder()
                 .arguments(
