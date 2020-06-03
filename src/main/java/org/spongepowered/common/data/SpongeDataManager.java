@@ -47,7 +47,6 @@ import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -314,14 +313,6 @@ public final class SpongeDataManager implements DataManager {
 
     private Optional<SpongeDataRegistration> getDataRegistration(Key<?> key) {
         return Optional.ofNullable(this.registrationByKey.get(key));
-    }
-
-    public Optional<DataProvider<?, ?>> getDataProvider(Key<?> key) {
-        SpongeDataRegistration registration = registrationByKey.get(key);
-        if (registration != null) {
-            return (Optional) registration.getProviderFor(key);
-        }
-        return Optional.empty();
     }
 
     public void serializeCustomData(CompoundNBT compound, Object object) {

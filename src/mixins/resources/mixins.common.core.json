@@ -42,7 +42,6 @@
       "entity.ai.goal.BreedGoalMixin",
       "entity.ai.goal.EatGrassGoalMixin",
       "entity.ai.goal.GoalMixin",
-      "entity.ai.goal.LookAtGoalMixin",
       "entity.ai.goal.RunAroundLikeCrazyGoalMixin",
       "entity.ai.goal.SwimGoalMixin",
       "entity.boss.dragon.EnderDragonEntityMixin",
