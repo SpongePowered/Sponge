@@ -45,18 +45,19 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.PrettyPrinter;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
     @Nullable private Set<Mutable<?, ?>> itemDataSet;
@@ -156,19 +157,15 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         checkNotNull(snapshot, "The snapshot was null!");
         this.itemType(snapshot.getType());
         this.quantity(snapshot.getQuantity());
-//        for (final Immutable<?, ?> manipulator : snapshot.getContainers()) {
-//            this.itemData(manipulator);
-//        }
-//        if (snapshot instanceof SpongeItemStackSnapshot) {
-//            final Optional<CompoundNBT> compoundOptional = ((SpongeItemStackSnapshot) snapshot).getCompound();
-//            if (compoundOptional.isPresent()) {
-//                this.compound = compoundOptional.get();
-//            } else {
-//                this.compound = null;
-//            }
-//
-//        }
-        throw new UnsupportedOperationException("implement me");
+
+        for (Value.Immutable<?> value : snapshot.getValues()) {
+            this.add(value);
+        }
+
+        if (snapshot instanceof SpongeItemStackSnapshot) {
+            this.compound = ((SpongeItemStackSnapshot) snapshot).getCompound().orElse(null);
+        }
+
         return this;
     }
 

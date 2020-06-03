@@ -32,10 +32,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -46,11 +50,12 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public class SpongeItemStackSnapshot implements ItemStackSnapshot {
@@ -58,7 +63,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final ItemType itemType;
     private final int quantity;
     private final int damageValue;
-    private final ImmutableList<Immutable> manipulators;
+    private final ImmutableList<DataManipulator.Immutable> manipulators;
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> values;
@@ -68,7 +73,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "ConstantConditions"})
     public SpongeItemStackSnapshot(final ItemStack itemStack) {
         checkNotNull(itemStack);
-        if (itemStack == net.minecraft.item.ItemStack.EMPTY) {
+        if (ItemStackUtil.toNative(itemStack) == net.minecraft.item.ItemStack.EMPTY) {
             this.itemType = (ItemType) null; // Empty itemstack has an invalid item type that we have to have null.
             this.quantity = 0;
             this.damageValue = 0;
@@ -81,20 +86,21 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         }
         this.itemType = itemStack.getType();
         this.quantity = itemStack.getQuantity();
-        final ImmutableList.Builder<Immutable> builder = ImmutableList.builder();
+        final ImmutableList.Builder<DataManipulator.Immutable> builder = ImmutableList.builder();
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
-        for (final Mutable manipulator : ((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators()) {
+        for (final DataManipulator.Mutable manipulator : ((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators()) {
             builder.add(manipulator.asImmutable());
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
         }
-        this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getDamage();
+        this.damageValue = ItemStackUtil.toNative(itemStack).getDamage();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
-        @Nullable CompoundNBT compound = ((net.minecraft.item.ItemStack) this.privateStack).getTag();
+
+        @Nullable CompoundNBT compound = ItemStackUtil.toNative(this.privateStack).getTag();
         if (compound != null) {
             compound = compound.copy();
         }
@@ -118,15 +124,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     public SpongeItemStackSnapshot(final ItemType itemType,
                                    final int quantity,
-                                   final ImmutableList<Immutable> manipulators,
+                                   final ImmutableList<DataManipulator.Immutable> manipulators,
                                    @Nullable final CompoundNBT compound) {
         this.itemType = checkNotNull(itemType);
         this.quantity = quantity;
         this.manipulators = checkNotNull(manipulators);
-        this.privateStack = (ItemStack) (Object) new net.minecraft.item.ItemStack((Item) this.itemType, this.quantity);
+        this.privateStack = ItemStackUtil.fromNative(new net.minecraft.item.ItemStack((Item) this.itemType, this.quantity));
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
-        for (final Immutable manipulator : this.manipulators) {
+        for (final DataManipulator.Immutable manipulator : this.manipulators) {
             this.privateStack.copyFrom(manipulator);
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
@@ -134,6 +140,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
         this.compound = compound == null ? null : compound.copy();
+        this.damageValue = 0;
     }
 
     @Override
@@ -166,7 +173,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if(this.compound != null) {
             nativeStack.setTag(this.compound.copy());
         }
-        for (final Immutable manipulator : this.manipulators) {
+        for (final DataManipulator.Immutable manipulator : this.manipulators) {
             ((ItemStack) (Object) nativeStack).copyFrom(manipulator);
         }
         return ItemStackUtil.fromNative(nativeStack);
@@ -276,6 +283,36 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if (uuid != null) {
             this.creatorUniqueId = uuid;
         }
+    }
+
+    @Override
+    public ItemStackSnapshot withRawData(DataView container) throws InvalidDataException {
+        final ItemStack copy = this.privateStack.copy();
+        copy.setRawData(container);
+        return copy.createSnapshot();
+    }
+
+    @Override
+    public Optional<ItemStackSnapshot> without(Key<?> key) {
+        final ItemStack copy = this.privateStack.copy();
+        final DataTransactionResult result = copy.remove(key);
+        if (result.getType() != DataTransactionResult.Type.SUCCESS) {
+            return Optional.empty();
+        }
+        return Optional.of(copy.createSnapshot());
+    }
+
+    @Override
+    public ItemStackSnapshot mergeWith(ItemStackSnapshot that, MergeFunction function) {
+        final ItemStack copy = this.privateStack.copy();
+        copy.copyFrom(that, function);
+        return copy.createSnapshot();
+    }
+
+    @Override
+    public boolean validateRawData(DataView container) {
+        final ItemStack copy = this.privateStack.copy();
+        return copy.validateRawData(container);
     }
 
     @Override
