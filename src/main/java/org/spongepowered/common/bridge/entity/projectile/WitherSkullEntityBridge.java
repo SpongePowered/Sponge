@@ -32,5 +32,5 @@ public interface WitherSkullEntityBridge {
 
     @Nullable
     Explosion bridge$CreateAndProcessExplosionEvent(net.minecraft.world.World worldObj, Entity self, double x,
-        double y, double z, float strength, boolean flaming, boolean smoking);
+        double y, double z, float strength, boolean flaming, Explosion.Mode mode);
 }

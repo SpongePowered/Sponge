@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.GameRules;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +42,9 @@ public abstract class FireballEntityMixin_API extends AbstractFireballEntityMixi
 
     @Override
     public void detonate() {
-        ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
+        final boolean flag = this.world.getGameRules().getBoolean(GameRules.MOB_GRIEFING);
+        final Explosion.Mode mode = flag ? Explosion.Mode.DESTROY : Explosion.Mode.NONE;
+        ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, flag, mode);
         this.shadow$remove();
     }
 

@@ -77,7 +77,7 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
 
     @Override
     public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplode(net.minecraft.world.World worldObj, @Nullable Entity nil,
-            double x, double y, double z, float strength, boolean flaming, boolean smoking) {
+            double x, double y, double z, float strength, boolean flaming, net.minecraft.world.Explosion.Mode mode) {
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
         final ProjectileSource shooter = ((Projectile) this).shooter().get();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -85,12 +85,12 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
             frame.pushCause(shooter);
             final Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                    .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
+                    .location(Location.of((World<?>) worldObj, new Vector3d(x, y, z)))
                     .sourceExplosive(((ExplosiveFireball) this))
                     .radius(strength)
                     .canCauseFire(flaming && griefer)
-                    .shouldPlaySmoke(smoking && griefer)
-                    .shouldBreakBlocks(smoking && griefer));
+                    .shouldPlaySmoke(mode != Mode.NONE && griefer)
+                    .shouldBreakBlocks(mode != Mode.NONE && griefer));
 
             return ex.orElse(null);
         }

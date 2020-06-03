@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.Location;
@@ -148,11 +146,11 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         // TODO Check coordinates and if world is loaded here.
         Preconditions.checkState(this.location != null, "Location is null!");
 
-        World world = this.location.getWorld();
-        Vector3d origin = this.location.getPosition();
+        final World<?> world = this.location.getWorld();
+        final Vector3d origin = this.location.getPosition();
         final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) world,
                 (Entity) this.sourceExplosive, origin.getX(), origin.getY(), origin.getZ(), this.radius,
-                this.canCauseFire, this.shouldSmoke);
+                this.canCauseFire, this.shouldSmoke ? net.minecraft.world.Explosion.Mode.DESTROY : net.minecraft.world.Explosion.Mode.NONE);
         ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
         ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
         ((ExplosionBridge) explosion).bridge$setResolution(this.resolution);

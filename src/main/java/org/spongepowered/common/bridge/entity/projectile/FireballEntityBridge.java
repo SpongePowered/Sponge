@@ -33,5 +33,5 @@ public interface FireballEntityBridge {
 
     @Nullable
     Explosion bridge$throwExplosionEventAndExplode(World worldObj, @Nullable Entity nil,
-        double x, double y, double z, float strength, boolean flaming, boolean smoking);
+        double x, double y, double z, float strength, boolean flaming, Explosion.Mode mode);
 }

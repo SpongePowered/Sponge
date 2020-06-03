@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
 import net.minecraft.entity.projectile.WitherSkullEntity;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.GameRules;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +39,8 @@ public abstract class WitherSkullEntityMixin_API extends DamagingProjectileEntit
 
     @Override
     public void detonate() {
-        ((WitherSkullEntityBridge) this).bridge$CreateAndProcessExplosionEvent(this.world, (WitherSkullEntity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
+        final Explosion.Mode mode = this.world.getGameRules().getBoolean(GameRules.MOB_GRIEFING) ? Explosion.Mode.DESTROY : Explosion.Mode.NONE;
+        ((WitherSkullEntityBridge) this).bridge$CreateAndProcessExplosionEvent(this.world, (WitherSkullEntity) (Object) this, this.posX, this.posY, this.posZ, 1.0F, false, mode);
         this.shadow$remove();
     }
 

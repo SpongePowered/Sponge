@@ -110,7 +110,7 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
     @Override
     public net.minecraft.world.Explosion bridge$CreateAndProcessExplosionEvent(
             final net.minecraft.world.World worldObj, final Entity self,
-            final double x, final double y, final double z, final float strength, final boolean flaming, final boolean smoking) {
+            final double x, final double y, final double z, final float strength, final boolean flaming, final net.minecraft.world.Explosion.Mode mode) {
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
@@ -122,8 +122,8 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
                     .sourceExplosive(((WitherSkull) this))
                     .radius(this.impl$explosionRadius)
                     .canCauseFire(flaming)
-                    .shouldPlaySmoke(smoking && griefer)
-                    .shouldBreakBlocks(smoking && griefer))
+                    .shouldPlaySmoke(mode != Mode.NONE && griefer)
+                    .shouldBreakBlocks(mode != Mode.NONE && griefer))
                     .orElse(null);
         }
     }
