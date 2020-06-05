@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +49,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 @Mixin(IEntityReader.class)
 public interface IEntityReaderMixin_API extends ReadableEntityVolume {
@@ -142,21 +143,20 @@ public interface IEntityReaderMixin_API extends ReadableEntityVolume {
         return Collections.unmodifiableCollection((List<? extends Player>) (List<?>) this.shadow$getPlayers());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     @Override
     default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
-        return (Collection<? extends Entity>) this
+        return (Collection) this
                 .shadow$getEntitiesInAABBexcluding(null, VecHelper.toMinecraftAABB(box), entity -> entity instanceof Entity && filter.test((Entity) entity));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     @Override
     default <E extends Entity> Collection<? extends E> getEntities(final Class<? extends E> entityClass, final AABB box, @Nullable
     final Predicate<? super E> predicate) {
         final Predicate<? super net.minecraft.entity.Entity> filter = entity -> predicate == null || (entityClass.isInstance(entity) && predicate.test((E) entity));
-        final List<net.minecraft.entity.Entity>
-            ts =
-                this.shadow$getEntitiesWithinAABB((Class<net.minecraft.entity.Entity>) (Class<?>) entityClass, VecHelper.toMinecraftAABB(box), filter);
-        return (Collection<? extends E>) ts;
+        final List<net.minecraft.entity.Entity> ts = this.shadow$getEntitiesWithinAABB((Class<net.minecraft.entity.Entity>) (Class<?>) entityClass,
+                VecHelper.toMinecraftAABB(box), filter);
+        return (Collection) ts;
     }
 }
