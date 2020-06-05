@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import net.minecraft.util.Tuple;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 
 import java.util.HashMap;

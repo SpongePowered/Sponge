@@ -404,7 +404,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(ComparatorMode.class, CatalogKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true)
             .generateRegistry(Difficulty.class, CatalogKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true)
             .generateRegistry(DismountType.class, CatalogKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true)
-            .generateMappedRegistry(DisplaySlot.class, CatalogKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true)
             .generateRegistry(DragonPhaseType.class, CatalogKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true)
             .generateRegistry(DyeColor.class, CatalogKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
             .generateRegistry(FoxType.class, CatalogKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
@@ -449,6 +448,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateMappedRegistry(ParrotType.class, CatalogKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true)
             .generateMappedRegistry(RabbitType.class, CatalogKey.minecraft("rabbit_type"), RabbitTypeStreamGenerator.stream(), true)
             .generateMappedRegistry(DataTranslator.class, CatalogKey.sponge("data_translator"), DataSerializers.stream(), true)
+            .generateMappedRegistry(DisplaySlot.class, CatalogKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true)
         ;
 
         this.registerCallbackRegistry(DataRegistration.class, CatalogKey.sponge("data_registration"),
