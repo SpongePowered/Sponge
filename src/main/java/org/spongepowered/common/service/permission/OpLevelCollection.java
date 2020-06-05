@@ -95,8 +95,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
                     }
                 }
             };
-            // TODO
-            CommandPermissions.populateNonCommandPermissions(this.data, (permLevel, name) -> level == permLevel);
+            SpongePermissions.populateNonCommandPermissions(this.data, (permLevel, name) -> level == permLevel);
         }
 
         public int getOpLevel() {
