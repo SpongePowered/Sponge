@@ -39,6 +39,8 @@ import java.nio.file.Files;
 
 public final class SpongeResourcePackFactory implements ResourcePack.Factory {
 
+    public static final ResourcePack.Factory INSTANCE = new SpongeResourcePackFactory();
+
     @Override
     public ResourcePack fromUri(URI uri) throws FileNotFoundException {
         checkNotNull(uri, "uri");
