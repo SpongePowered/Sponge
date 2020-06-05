@@ -29,8 +29,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.block.entity.Skull;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -70,7 +68,7 @@ import org.spongepowered.common.data.builder.block.tileentity.SpongeMobSpawnerBu
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSignBuilder;
 import org.spongepowered.common.data.builder.block.tileentity.SpongeSkullBuilder;
 import org.spongepowered.common.data.builder.item.SpongeFireworkEffectDataBuilder;
-import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotBuilder;
+import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
@@ -131,7 +129,7 @@ public final class DataRegistrar {
 
         // ItemStack stuff
         dataManager.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
-        dataManager.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotBuilder());
+        dataManager.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotDataBuilder());
         dataManager.registerBuilder(Enchantment.class, new SpongeEnchantmentBuilder());
         dataManager.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class,
                 new ImmutableItemEnchantmentDataBuilder());

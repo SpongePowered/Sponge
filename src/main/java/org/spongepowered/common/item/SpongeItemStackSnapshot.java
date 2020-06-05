@@ -192,6 +192,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             .set(Constants.ItemStack.COUNT, this.quantity)
             .set(Constants.ItemStack.DAMAGE_VALUE, this.damageValue);
         if (!this.manipulators.isEmpty()) {
+//     TODO       container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
         }
         if (this.compound != null) {
             container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));

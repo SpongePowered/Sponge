@@ -122,8 +122,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     public ItemStack.Builder fromContainer(final DataView container) {
         checkNotNull(container);
-        if (!container.contains(Constants.ItemStack.TYPE) || !container.contains(Constants.ItemStack.COUNT)
-            || !container.contains(Constants.ItemStack.DAMAGE_VALUE)) {
+        if (!container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
             return this;
         }
         this.reset();
@@ -131,7 +130,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         final int count = container.getInt(Constants.ItemStack.COUNT).get();
         this.quantity(count);
 
-        final ItemType itemType = container.getCatalogType(org.spongepowered.common.util.Constants.ItemStack.TYPE, ItemType.class).get();
+        final ItemType itemType = container.getCatalogType(Constants.ItemStack.TYPE, ItemType.class).get();
         this.itemType(itemType);
 
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
@@ -216,8 +215,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     protected Optional<ItemStack> buildContent(final DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(Constants.ItemStack.TYPE) || !container.contains(Constants.ItemStack.COUNT) || !container.contains(
-            Constants.ItemStack.DAMAGE_VALUE)) {
+        if (!container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
             return Optional.empty();
         }
         final int count = container.getInt(Constants.ItemStack.COUNT).get();
