@@ -42,6 +42,8 @@ import javax.annotation.Nullable;
 
 public class SpongeTimingsFactory implements TimingsFactory {
 
+    public static final TimingsFactory INSTANCE = new SpongeTimingsFactory().init();
+
     private final int MAX_HISTORY_FRAMES = 12;
     public final Timing NULL_HANDLER = new NullTimingHandler();
     private boolean timingsEnabled = false;
@@ -54,7 +56,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
         this.moduleEnabled = SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().usePluginTimings();
     }
 
-    public void init() {
+    public TimingsFactory init() {
         final TimingsCategory category = SpongeImpl.getGlobalConfigAdapter().getConfig().getTimings();
         TimingsManager.privacy = category.isServerNamePrivate();
         TimingsManager.hiddenConfigs.addAll(category.getHiddenConfigEntries());
@@ -67,6 +69,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
                                     " - Verbose: " + this.verboseEnabled +
                                     " - Interval: " + timeSummary(this.historyInterval / 20) +
                                     " - Length: " + timeSummary(this.historyLength / 20));
+        return this;
     }
 
     private static String timeSummary(int seconds) {

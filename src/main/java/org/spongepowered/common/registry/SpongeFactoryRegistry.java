@@ -26,6 +26,7 @@ package org.spongepowered.common.registry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.TimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -34,6 +35,7 @@ import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 
 import java.util.Map;
@@ -74,5 +76,6 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
     public void registerDefaultFactories() {
         this.registerFactory(TextSerializers.Factory.class, SpongeTextSerializerFactory.INSTANCE);
         this.registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE);
+        this.registerFactory(TimingsFactory.class, SpongeTimingsFactory.INSTANCE);
     }
 }
