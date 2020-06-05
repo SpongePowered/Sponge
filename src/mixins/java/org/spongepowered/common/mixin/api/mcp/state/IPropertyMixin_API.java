@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.state;
 
 import net.minecraft.state.IProperty;
+import net.minecraft.state.Property;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Functional;
@@ -32,15 +34,16 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * This default implements the {@link BlockTrait} methods directly
+ * This default implements the {@link StateProperty} methods directly
  * into {@link IProperty} such that regardless of whether a mod extends
- * {@link PropertyHelper} or only implements {@link IProperty}, we can
+ * {@link Property} or only implements {@link IProperty}, we can
  * still cast back and forth between the implementation interface and
  * API interface. Of course, this is Java 8 only functionality, but
  * still, as with all other Mixin classes, this mixin class cannot be
@@ -53,7 +56,8 @@ import java.util.function.Predicate;
 public interface IPropertyMixin_API<T extends Comparable<T>> extends IProperty<T> {
 
     default CatalogKey state$getKey() {
-        return BlockTypeRegistryModule.getInstance().getIdFor(this);
+        final String id = BlockPropertyIdProvider.getIdFor(this);
+        return (CatalogKey) (Object) new ResourceLocation(id);
     }
 
     @Intrinsic

@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 
 /**
  * This is retained solely for simplification not having to perform any
- * lookups to the {@link BlockTypeRegistryModule#getIdFor(IProperty)}.
+ * lookups to the {@link BlockPropertyIdProvider#getIdFor(IProperty)}.
  *
  * @param <T> The type of comparable
  */
