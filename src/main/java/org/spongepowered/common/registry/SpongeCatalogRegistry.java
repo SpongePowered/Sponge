@@ -130,6 +130,7 @@ import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.persistence.DataSerializers;
+import org.spongepowered.common.inventory.query.SpongeQueryTypes;
 import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
@@ -481,6 +482,9 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         SoundEventSupplier.registerSuppliers(this);
         TileEntityTypeSupplier.registerSuppliers(this);
         VillagerProfessionSupplier.registerSuppliers(this);
+
+        // Inventory
+        SpongeQueryTypes.registerSuppliers(this);
     }
 
     private <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(Class<T> catalogClass, CatalogKey key, Stream<E> valueStream, boolean generateSuppliers) {

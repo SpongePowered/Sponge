@@ -24,28 +24,36 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.KeyValueMatcher;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.data.property.store.common.InventoryPropertyProvider;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.query.SpongeDepthQuery;
 
-import java.util.Optional;
+@SuppressWarnings("unchecked")
+public final class KeyValueMatcherQuery<T> extends SpongeDepthQuery {
 
-public final class InventoryTranslationQuery extends SpongeDepthQuery {
+    private final KeyValueMatcher<T> matcher;
 
-    private final Translation translation;
-
-    public InventoryTranslationQuery(Translation translation) {
-        this.translation = translation;
+    public KeyValueMatcherQuery(KeyValueMatcher<T> matcher) {
+        this.matcher = matcher;
     }
 
     @Override
     public boolean matches(Lens lens, Lens parent, Inventory inventory) {
-        Optional<Text> title = InventoryPropertyProvider.getRootProperty(inventory, InventoryProperties.TITLE);
-        return false; // TODO translation or title?
+        if (parent == null) {
+            return false;
+        }
+
+        final Key<? extends Value<T>> key = this.matcher.getKey();
+        if (this.matcher.matches(inventory.get(key).orElse(null))) {
+            return true;
+        }
+
+        // Check for lens properties
+        final Object value = parent.getDataFor(lens).get(key);
+        return this.matcher.matches((T) value);
     }
 
 }

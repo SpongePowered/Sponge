@@ -28,6 +28,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
 import org.spongepowered.common.inventory.custom.CustomInventory;
