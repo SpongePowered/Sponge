@@ -24,30 +24,22 @@
  */
 package org.spongepowered.common.fluid;
 
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.data.value.MergeFunction;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.fluid.FluidTypes;
+import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
+public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmutableDataHolder<FluidStackSnapshot> {
 
     public static final FluidStackSnapshot DEFAULT = new SpongeFluidStackSnapshotBuilder()
         .fluid(FluidTypes.WATER).volume(1000).build();
@@ -60,6 +52,12 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
         this.fluidType = builder.fluidType;
         this.volume = builder.volume;
         this.extraData = builder.container == null ? null : builder.container.copy();
+    }
+
+    private SpongeFluidStackSnapshot(FluidType fluidType, int volume, @Nullable DataContainer extraData) {
+        this.fluidType = fluidType;
+        this.volume = volume;
+        this.extraData = extraData == null ? null : extraData.copy();
     }
 
     @Override
@@ -78,11 +76,6 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     }
 
     @Override
-    public List<Immutable<?, ?>> getManipulators() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public int getContentVersion() {
         return 1;
     }
@@ -91,112 +84,12 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     public DataContainer toContainer() {
         DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Fluids.FLUID_TYPE, this.fluidType.getId())
+            .set(Constants.Fluids.FLUID_TYPE, this.fluidType.getKey().toString())
             .set(Constants.Fluids.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
             container.set(Constants.Sponge.UNSAFE_NBT, this.extraData);
         }
         return container;
-    }
-
-    @Override
-    public <T extends Immutable<?, ?>> Optional<T> get(Class<T> containerClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <T extends Immutable<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(Class<? extends Immutable<?, ?>> containerClass) {
-        return false;
-    }
-
-    @Override
-    public <E> Optional<FluidStackSnapshot> transform(Key<? extends Value<E>> key, Function<E, E> function) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <E> Optional<FluidStackSnapshot> with(Key<? extends Value<E>> key, E value) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<FluidStackSnapshot> with(Value<?> value) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<FluidStackSnapshot> with(Immutable<?, ?> valueContainer) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<FluidStackSnapshot> with(Iterable<Immutable<?, ?>> valueContainers) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<FluidStackSnapshot> without(Class<? extends Immutable<?, ?>> containerClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public FluidStackSnapshot merge(FluidStackSnapshot that) {
-        return this;
-    }
-
-    @Override
-    public FluidStackSnapshot merge(FluidStackSnapshot that, MergeFunction function) {
-        return this;
-    }
-
-    @Override
-    public List<Immutable<?, ?>> getContainers() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return this.fluidType.getProperty(propertyClass);
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return this.fluidType.getApplicableProperties();
-    }
-
-    @Override
-    public <E> Optional<E> get(Key<? extends Value<E>> key) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(Key<?> key) {
-        return false;
-    }
-
-    @Override
-    public FluidStackSnapshot copy() {
-        return this;
-    }
-
-    @Override
-    public Set<Key<?>> getKeys() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<org.spongepowered.api.data.value.Value.Immutable<?>> getValues() {
-        return Collections.emptySet();
     }
 
     @Override
@@ -217,4 +110,22 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
                && Objects.equals(this.volume, other.volume)
                && Objects.equals(this.extraData, other.extraData);
     }
+
+    @Override
+    public FluidStackSnapshot copy() {
+        return new SpongeFluidStackSnapshot(this.fluidType, this.volume, this.extraData);
+    }
+
+    @Override
+    public boolean validateRawData(DataView container) {
+        return container.contains(Queries.CONTENT_VERSION, Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME);
+    }
+
+    @Override
+    public FluidStackSnapshot withRawData(DataView container) throws InvalidDataException {
+        final FluidStack stack = this.createStack();
+        stack.setRawData(container);
+        return stack.createSnapshot();
+    }
+
 }

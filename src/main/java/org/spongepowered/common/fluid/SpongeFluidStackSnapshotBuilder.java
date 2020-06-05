@@ -27,20 +27,21 @@ package org.spongepowered.common.fluid;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.common.util.Constants;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -50,6 +51,7 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     FluidType fluidType;
     int volume;
     @Nullable DataView container;
+    @Nullable LinkedHashMap<Key<?>, Object> keyValues;
 
     public SpongeFluidStackSnapshotBuilder() {
         super(FluidStackSnapshot.class, 1);
@@ -80,21 +82,6 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     }
 
     @Override
-    public FluidStackSnapshot.Builder add(Mutable<?, ?> manipulator) {
-        return this;
-    }
-
-    @Override
-    public FluidStackSnapshot.Builder add(Immutable<?, ?> manipulator) {
-        return this;
-    }
-
-    @Override
-    public <V> FluidStackSnapshot.Builder add(Key<? extends Value<V>> key, V value) {
-        return this;
-    }
-
-    @Override
     public FluidStackSnapshot.Builder from(FluidStackSnapshot holder) {
         checkNotNull(holder, "FluidStackSnapshot cannot be null!");
         this.fluidType = checkNotNull(holder.getFluid(), "Invalid FluidStackSnapshot! FluidType cannot be null!");
@@ -102,10 +89,17 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     }
 
     @Override
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public FluidStackSnapshot build() {
         checkState(this.fluidType != null, "FluidType cannot be null!");
         checkState(this.volume >= 0, "The fluid volume must be at least 0!");
-        return new SpongeFluidStackSnapshot(this);
+        SpongeFluidStackSnapshot snapshot = new SpongeFluidStackSnapshot(this);
+        if (this.keyValues != null) {
+            final FluidStack stack = snapshot.createStack();
+            this.keyValues.forEach((k, v) -> stack.offer((Key) k, v));
+            return stack.createSnapshot();
+        }
+        return snapshot;
     }
 
     @Override
@@ -113,7 +107,7 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
         try {
             if (container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
                 final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
-                final Optional<FluidType> type = Sponge.getRegistry().getType(FluidType.class, fluidId);
+                final Optional<FluidType> type = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, CatalogKey.resolve(fluidId));
                 if (!type.isPresent()) {
                     throw new InvalidDataException("Unknown fluid id found: " + fluidId);
                 }
@@ -138,6 +132,15 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
         this.fluidType = null;
         this.volume = 0;
         this.container = null;
+        return this;
+    }
+
+    @Override
+    public <V> FluidStackSnapshot.Builder add(Key<? extends Value<V>> key, V value) {
+        if (this.keyValues == null) {
+            this.keyValues = new LinkedHashMap<>();
+        }
+        this.keyValues.put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
         return this;
     }
 }

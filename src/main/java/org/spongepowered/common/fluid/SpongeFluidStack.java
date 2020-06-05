@@ -26,41 +26,43 @@ package org.spongepowered.common.fluid;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.data.value.MergeFunction;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public class SpongeFluidStack implements FluidStack {
+public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
 
     private FluidType fluidType;
     private int volume;
     @Nullable private DataContainer extraData;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     SpongeFluidStack(SpongeFluidStackBuilder builder) {
         this.fluidType = builder.fluidType;
         this.volume = builder.volume;
         this.extraData = builder.extra == null ? null : builder.extra.copy();
+        if (builder.keyValues != null) {
+            builder.keyValues.forEach((k, v) -> this.offer((Key) k, v));
+        }
+    }
+
+    private SpongeFluidStack(FluidType fluidType, int volume, @Nullable DataContainer extraData) {
+        this.fluidType = fluidType;
+        this.volume = volume;
+        this.extraData = extraData == null ? null : extraData.copy();
     }
 
     @Override
@@ -99,7 +101,7 @@ public class SpongeFluidStack implements FluidStack {
             }
             final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
             final int volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();
-            final Optional<FluidType> fluidType = Sponge.getRegistry().getType(FluidType.class, fluidId);
+            final Optional<FluidType> fluidType = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, CatalogKey.resolve(fluidId));
             if (!fluidType.isPresent()) {
                 throw new InvalidDataException("Unknown FluidType found! Requested: " + fluidId + "but got none.");
             }
@@ -114,56 +116,6 @@ public class SpongeFluidStack implements FluidStack {
     }
 
     @Override
-    public <T extends Mutable<?, ?>> Optional<T> get(Class<T> containerClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <T extends Mutable<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(Class<? extends Mutable<?, ?>> holderClass) {
-        return false;
-    }
-
-    @Override
-    public <E> DataTransactionResult offer(Key<? extends Value<E>> key, E value) {
-        return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offer(Mutable<?, ?> valueContainer, MergeFunction function) {
-        return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult remove(Class<? extends Mutable<?, ?>> containerClass) {
-        return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult remove(Key<?> key) {
-        return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult undo(DataTransactionResult result) {
-        return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(DataHolder that, MergeFunction function) {
-        return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    public Collection<Mutable<?, ?>> getContainers() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public int getContentVersion() {
         return 1;
     }
@@ -172,7 +124,7 @@ public class SpongeFluidStack implements FluidStack {
     public DataContainer toContainer() {
         DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Fluids.FLUID_TYPE, this.fluidType.getId())
+            .set(Constants.Fluids.FLUID_TYPE, this.fluidType.getKey().toString())
             .set(Constants.Fluids.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
             container.set(Constants.Sponge.UNSAFE_NBT, this.extraData);
@@ -181,42 +133,8 @@ public class SpongeFluidStack implements FluidStack {
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return Optional.empty();
+    public FluidStack copy() {
+        return new SpongeFluidStack(this.fluidType, this.volume, this.extraData);
     }
 
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public <E> Optional<E> get(Key<? extends Value<E>> key) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean supports(Key<?> key) {
-        return false;
-    }
-
-    @Override
-    public DataHolder copy() {
-        return FluidStack.builder().from(this).build();
-    }
-
-    @Override
-    public Set<Key<?>> getKeys() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<Immutable<?>> getValues() {
-        return Collections.emptySet();
-    }
 }

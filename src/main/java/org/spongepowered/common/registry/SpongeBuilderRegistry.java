@@ -58,6 +58,8 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.fluid.FluidStack;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -115,6 +117,8 @@ import org.spongepowered.common.event.damage.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.damage.SpongeEntityDamageSourceBuilder;
 import org.spongepowered.common.event.damage.SpongeFallingBlockDamgeSourceBuilder;
 import org.spongepowered.common.event.damage.SpongeIndirectEntityDamageSourceBuilder;
+import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
+import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
@@ -208,8 +212,8 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(BannerPatternLayer.Builder.class, SpongePatternLayerBuilder::new)
             .register(Task.Builder.class, SpongeTaskBuilder::new)
             .register(Ban.Builder.class, SpongeBanBuilder::new)
-//            .register(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
-//            .register(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
+            .register(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
+            .register(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
             .register(TabListEntry.Builder.class, TabListEntryBuilder::new)
             .register(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)

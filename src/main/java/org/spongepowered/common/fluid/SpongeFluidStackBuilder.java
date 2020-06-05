@@ -28,16 +28,20 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.fluid.FluidStack;
-import org.spongepowered.api.fluid.FluidStackSnapshot;
-import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.fluid.FluidStack;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
+import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.common.util.Constants;
 
+import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -47,6 +51,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
     FluidType fluidType;
     int volume = 1;
     @Nullable DataContainer extra; // we have to retain this information
+    @Nullable LinkedHashMap<Key<?>, Object> keyValues;
 
     public SpongeFluidStackBuilder() {
         super(FluidStack.class, 1);
@@ -102,7 +107,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
         }
         this.reset();
         final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
-        final Optional<FluidType> fluidType = Sponge.getRegistry().getType(FluidType.class, fluidId);
+        final Optional<FluidType> fluidType = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, CatalogKey.resolve(fluidId));
         if (!fluidType.isPresent()) {
             throw new InvalidDataException("Invalid fluid id found: " + fluidId);
         }
@@ -123,4 +128,14 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
         this.extra = null;
         return this;
     }
+
+    @Override
+    public <V> FluidStack.Builder add(Key<? extends Value<V>> key, V value) {
+        if (this.keyValues == null) {
+            this.keyValues = new LinkedHashMap<>();
+        }
+        this.keyValues.put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
+        return this;
+    }
+
 }
