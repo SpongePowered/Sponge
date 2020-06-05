@@ -25,8 +25,10 @@
 package org.spongepowered.common.event.damage;
 
 import net.minecraft.entity.Entity;
+import org.spongepowered.accessor.util.EntityDamageSourceAccessor;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
+import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 import org.spongepowered.common.accessor.util.IndirectEntityDamageSourceAccessor;
 
 /*
@@ -52,11 +54,11 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        this.damageType = type;
+        ((DamageSourceAccessor) this).accessor$setDamageType(type);
     }
 
     public void setEntitySource(final Entity entitySource) {
-        this.damageSourceEntity = entitySource;
+        ((EntityDamageSourceAccessor) this).accessor$setDamageSourceEntity(entitySource);
     }
 
     public void setIndirectSource(final Entity entity) {
