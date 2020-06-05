@@ -24,34 +24,28 @@
  */
 package org.spongepowered.common.text.serializer;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
 import org.spongepowered.common.bridge.api.text.TextBridge;
 
 public final class SpongeFormattingCodeTextSerializer implements FormattingCodeTextSerializer {
 
-    private final String id;
-    private final String name;
     private final char formattingChar;
+    private final CatalogKey key;
 
     public SpongeFormattingCodeTextSerializer(char formattingChar) {
-        this("sponge:formatting_code_" + formattingChar, "Formatting Codes (" + formattingChar + ")", formattingChar);
+        this(CatalogKey.sponge("formatting_code_" + formattingChar), formattingChar);
     }
 
-    public SpongeFormattingCodeTextSerializer(String id, String name, char formattingChar) {
-        this.id = id;
-        this.name = name;
+    public SpongeFormattingCodeTextSerializer(CatalogKey key, char formattingChar) {
+        this.key = key;
         this.formattingChar = formattingChar;
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

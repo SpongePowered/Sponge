@@ -22,48 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.serializer;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import com.google.gson.JsonParseException;
-import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializer;
-import org.spongepowered.common.bridge.api.text.TextBridge;
-import org.spongepowered.common.bridge.util.text.TextComponentBridge;
+import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.serializer.JsonTextSerializer;
+import org.spongepowered.common.text.serializer.PlainTextSerializer;
+import org.spongepowered.common.text.serializer.SpongeFormattingCodeTextSerializer;
 
-/**
- * TextSerializer implementation for the json format.
- */
-public final class JsonTextSerializer implements TextSerializer {
+import java.util.stream.Stream;
 
-    @Override
-    public String getId() {
-        return "minecraft:json";
+public final class TextSertializerStreamGenerator {
+
+    private TextSertializerStreamGenerator() {
     }
 
-    @Override
-    public String getName() {
-        return "JSON";
+    public static Stream<TextSerializer> stream() {
+        return Stream.of(
+                new PlainTextSerializer(),
+                new JsonTextSerializer(),
+                new SpongeFormattingCodeTextSerializer("sponge:formatting_code", "Formatting Codes", '&'),
+                new SpongeFormattingCodeTextSerializer("minecraft:legacy_formatting_code", "Legacy Formatting Codes", SpongeTexts.COLOR_CHAR));
     }
-
-    @Override
-    public String serialize(Text text) {
-        return ((TextBridge) text).bridge$toJson();
-    }
-
-    @Override
-    public Text deserialize(String input) throws TextParseException {
-        try {
-            ITextComponent component = ITextComponent.Serializer.fromJson(input);
-            if (component == null) {
-                return Text.EMPTY;
-            }
-
-            return ((TextComponentBridge) component).bridge$toText();
-        } catch (JsonParseException e) {
-            throw new TextParseException("Failed to parse JSON", e);
-        }
-    }
-
 }

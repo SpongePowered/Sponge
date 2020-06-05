@@ -24,34 +24,18 @@
  */
 package org.spongepowered.common.text.serializer;
 
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.SafeTextSerializer;
+import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
-public final class PlainTextSerializer implements SafeTextSerializer {
+public final class SpongeTextSerializerFactory implements TextSerializers.Factory {
 
-    @Override
-    public String getId() {
-        return "minecraft:plain";
+    public static final TextSerializers.Factory INSTANCE = new SpongeTextSerializerFactory();
+
+    private SpongeTextSerializerFactory() {
     }
 
     @Override
-    public String getName() {
-        return "Plain Text";
+    public FormattingCodeTextSerializer createFormattingCodeSerializer(char formattingChar) {
+        return new SpongeFormattingCodeTextSerializer(formattingChar);
     }
-
-    @Override
-    public String serialize(Text text) {
-        return text.toPlain();
-    }
-
-    @Override
-    public String serializeSingle(Text text) {
-        return text.toPlainSingle();
-    }
-
-    @Override
-    public Text deserialize(String input) {
-        return Text.of(input);
-    }
-
 }
