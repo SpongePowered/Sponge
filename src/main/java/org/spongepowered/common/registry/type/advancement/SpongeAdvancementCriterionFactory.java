@@ -22,26 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.registry.type.advancement;
 
-import org.spongepowered.api.text.serializer.TextSerializer;
-import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.text.serializer.JsonTextSerializer;
-import org.spongepowered.common.text.serializer.PlainTextSerializer;
-import org.spongepowered.common.text.serializer.SpongeFormattingCodeTextSerializer;
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.common.advancement.SpongeCriterionBuilder;
+import org.spongepowered.common.advancement.SpongeEmptyCriterion;
 
-import java.util.stream.Stream;
+public final class SpongeAdvancementCriterionFactory implements AdvancementCriterion.Factory {
 
-public final class TextSertializerStreamGenerator {
+    public static final AdvancementCriterion.Factory INSTANCE = new SpongeAdvancementCriterionFactory();
 
-    private TextSertializerStreamGenerator() {
+    private SpongeAdvancementCriterionFactory() {
     }
 
-    public static Stream<TextSerializer> stream() {
-        return Stream.of(
-                new PlainTextSerializer(),
-                new JsonTextSerializer(),
-                new SpongeFormattingCodeTextSerializer("sponge:formatting_code", "Formatting Codes", '&'),
-                new SpongeFormattingCodeTextSerializer("minecraft:legacy_formatting_code", "Legacy Formatting Codes", SpongeTexts.COLOR_CHAR));
+    @Override
+    public AdvancementCriterion empty() {
+        return SpongeEmptyCriterion.INSTANCE;
+    }
+
+    @Override
+    public AdvancementCriterion dummy() {
+        return new SpongeCriterionBuilder().name("dummy").build();
     }
 }

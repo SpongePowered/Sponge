@@ -24,50 +24,17 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.ICriterionTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.api.advancement.criteria.trigger.Triggers;
-import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 
-@SuppressWarnings("rawtypes")
-@RegisterCatalog(Triggers.class)
-public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Trigger>
-        implements AdditionalCatalogRegistryModule<Trigger> {
+public class TriggerTypeRegistryModule {
 
-    public static TriggerTypeRegistryModule getInstance() {
-        return Holder.INSTANCE;
-    }
-
-    TriggerTypeRegistryModule() {
-        super("minecraft");
-    }
-
-    @Override
-    public void register(final Trigger triggerType) {
-        super.register(triggerType);
-    }
-
-    @Override
     public void registerAdditionalCatalog(final Trigger triggerType) {
+        // TODO register CriteriaTrigger in minecraft map
+
         // Register on CriterionTriggers, that register method will
         // delegate to the register method within this module
         CriteriaTriggersAccessor.accessor$register((ICriterionTrigger) triggerType);
     }
 
-    @Override
-    public void registerDefaults() {
-        // Force the vanilla trigger types to load
-        CriteriaTriggers.getAll();
-    }
-
-    private static final class Holder {
-        static final TriggerTypeRegistryModule INSTANCE = new TriggerTypeRegistryModule();
-        static {
-            // Just need to class initialize
-            CriteriaTriggers.getAll();
-        }
-    }
 }

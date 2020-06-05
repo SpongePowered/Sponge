@@ -28,10 +28,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 
 import java.util.Map;
@@ -71,5 +73,6 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
 
     public void registerDefaultFactories() {
         this.registerFactory(TextSerializers.Factory.class, SpongeTextSerializerFactory.INSTANCE);
+        this.registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE);
     }
 }

@@ -22,19 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.advancement;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.registry.RegistryModule;
-import org.spongepowered.common.advancement.SpongeCriterionBuilder;
-import org.spongepowered.common.advancement.SpongeEmptyCriterion;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.text.serializer.TextSerializer;
+import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.serializer.JsonTextSerializer;
+import org.spongepowered.common.text.serializer.PlainTextSerializer;
+import org.spongepowered.common.text.serializer.SpongeFormattingCodeTextSerializer;
 
-public final class CriterionRegistryModule implements RegistryModule {
+import java.util.stream.Stream;
 
-    @Override
-    public void registerDefaults() {
-        RegistryHelper.setFinalStatic(AdvancementCriterion.class, "EMPTY", SpongeEmptyCriterion.INSTANCE);
-        RegistryHelper.setFinalStatic(AdvancementCriterion.class, "DUMMY",
-                new SpongeCriterionBuilder().name("dummy").build());
+public final class TextSerializerStreamGenerator {
+
+    private TextSerializerStreamGenerator() {
+    }
+
+    public static Stream<TextSerializer> stream() {
+        return Stream.of(
+                new PlainTextSerializer(),
+                new JsonTextSerializer(),
+                new SpongeFormattingCodeTextSerializer(CatalogKey.sponge("formatting_code"), '&'),
+                new SpongeFormattingCodeTextSerializer(CatalogKey.minecraft("legacy_formatting_code"), SpongeTexts.COLOR_CHAR));
     }
 }
