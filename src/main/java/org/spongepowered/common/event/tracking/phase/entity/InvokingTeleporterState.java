@@ -24,10 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import net.minecraft.entity.effect.LightningBoltEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.SpongeHooks;
 
 public final class InvokingTeleporterState extends EntityPhaseState<InvokingTeleporterContext> {
 
@@ -53,9 +58,20 @@ public final class InvokingTeleporterState extends EntityPhaseState<InvokingTele
     @Override
     public boolean spawnEntityOrCapture(final InvokingTeleporterContext context, final Entity entity) {
         final ServerWorld worldServer = context.getTargetWorld();
-        // Allowed to use the force spawn because it's the same "entity"
-        ((ServerWorldBridge) worldServer).bridge$forceSpawnEntity((net.minecraft.entity.Entity) entity);
-        return true;
+        if (!((WorldBridge)worldServer).bridge$isFake() && SpongeImplHooks.onServerThread()) {
+            SpongeHooks.logEntitySpawn((net.minecraft.entity.Entity) entity);
+        }
+        if (entity instanceof ServerPlayerEntity) {
+            worldServer.addNewPlayer((ServerPlayerEntity) entity);
+            return true;
+        }
+
+        if (entity instanceof LightningBoltEntity) {
+            worldServer.addLightningBolt((LightningBoltEntity) entity);
+            return true;
+        }
+
+        return worldServer.addEntity((net.minecraft.entity.Entity) entity);
     }
 
     @Override
