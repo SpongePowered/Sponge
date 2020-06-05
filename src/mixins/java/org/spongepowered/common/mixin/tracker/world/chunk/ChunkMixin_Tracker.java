@@ -67,13 +67,15 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 @Mixin(Chunk.class)
 public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
@@ -195,6 +197,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             this.world.getChunkProvider().getLightManager().func_215567_a(pos, isSectionEmpty);
         }
 
+        final boolean blockMoving = ((SpongeBlockChangeFlag) flag).isBlockMoving();
         if (!this.world.isRemote) {
             // Sponge Start - If we're throwing events, need to register transactions and capture.
             // blockstate.onReplaced(this.world, pos, newState, isMoving); // Vanilla
@@ -219,7 +222,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                         transaction.queueBreak = true;
                         transaction.enqueueChanges(trackedWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                     }
-                    oldState.onReplaced(this.world, pos, newState, flag.isMoving());
+                    oldState.onReplaced(this.world, pos, newState, blockMoving);
                 }
                 if (existing != null && SpongeImplHooks.shouldRefresh(existing, this.world, pos, currentState, newState)) {
                     // And likewise, we want to queue the tile entity being removed, while
@@ -240,7 +243,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                 transaction = null;
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (oldBlock != newBlock && (state == null || !state.isRestoring())) { // cache the block break in the event we're capturing tiles
-                    oldState.onReplaced(this.world, pos, currentState, flag.isMoving());
+                    oldState.onReplaced(this.world, pos, currentState, blockMoving);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
                 // still work by themselves in vanilla. In all intents and purposes, the remove tile entity could
@@ -249,7 +252,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                     this.world.removeTileEntity(pos);
                 }
             }
-            oldState.onReplaced(this.world, pos, newState, flag.isMoving());
+            oldState.onReplaced(this.world, pos, newState, blockMoving);
             // Sponge End
 
             // } else if (oldBlock != newBlock && oldBlock instanceof ITileEntityProvider) { // Vanilla
@@ -314,7 +317,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                 if (transaction != null) {
                     transaction.queueOnAdd = true;
                 } else if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newState)) {
-                    newState.onBlockAdded(this.world, pos, oldState, flag.isMoving());
+                    newState.onBlockAdded(this.world, pos, oldState, blockMoving);
                 }
             }
             // Sponge end

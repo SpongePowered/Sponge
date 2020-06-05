@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import jdk.internal.org.objectweb.asm.Opcodes;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntityType;

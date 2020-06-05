@@ -25,19 +25,15 @@
 package org.spongepowered.common.data;
 
 import com.google.common.reflect.TypeToken;
-import com.google.inject.internal.cglib.proxy.$Factory;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.UnregisteredKeyException;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataStore;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Map;

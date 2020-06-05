@@ -27,10 +27,8 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.CreeperEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.Explosion.Mode;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -47,6 +45,7 @@ import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -149,8 +148,8 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
                 .location(Location.of((World) world, new Vector3d(x, y, z)))
                 .sourceExplosive(((Creeper) this))
                 .radius(strength)
-                .shouldPlaySmoke(smoking)
-                .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$canGrief()))
+                .shouldPlaySmoke(mode != Mode.NONE)
+                .shouldBreakBlocks(mode != Mode.NONE && ((GrieferBridge) this).bridge$canGrief()))
                 .orElseGet(() -> {
                     this.impl$detonationCancelled = true;
                     return null;
