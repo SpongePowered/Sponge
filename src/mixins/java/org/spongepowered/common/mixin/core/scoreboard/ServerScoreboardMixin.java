@@ -38,6 +38,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.ServerScoreboard.Action;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -54,6 +55,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.accessor.scoreboard.ScorePlayerTeamAccessor;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.text.SpongeTexts;
@@ -77,9 +79,10 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public ScoreObjective addScoreObjective(final String name, final ScoreCriteria criteria) {
+    public ScoreObjective addObjective(final String name, final ScoreCriteria criteria, ITextComponent text, ScoreCriteria.RenderType type) {
         final SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
-        objective.setDisplayMode((ObjectiveDisplayMode) (Object) criteria.getRenderType());
+        objective.setDisplayMode((ObjectiveDisplayMode) (Object) type);
+        objective.setDisplayName((Text) text);
         ((org.spongepowered.api.scoreboard.Scoreboard) this).addObjective(objective);
         return objective.getObjectiveFor(this);
     }
@@ -100,7 +103,8 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Overwrite
     public void setObjectiveInDisplaySlot(final int slot, @Nullable final ScoreObjective objective) {
         final Objective apiObjective = objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
-        final DisplaySlot displaySlot = DisplaySlotRegistryModule.getInstance().getForIndex(slot).get();
+        final MappedRegistry<DisplaySlot, Integer> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(DisplaySlot.class);
+        final DisplaySlot displaySlot = registry.getReverseMapping(slot);
         ((org.spongepowered.api.scoreboard.Scoreboard) this).updateDisplaySlot(apiObjective, displaySlot);
     }
 

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
+import net.minecraft.util.Tuple;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -39,12 +40,12 @@ public final class DisplaySlotStreamGenerator {
     private DisplaySlotStreamGenerator() {
     }
 
-    public static Stream<DisplaySlot> stream() {
-        final Stream.Builder<DisplaySlot> builder = Stream.builder();
-        builder.add(new SpongeDisplaySlot(CatalogKey.minecraft("below_name"), 0));
-        builder.add(new SpongeDisplaySlot(CatalogKey.minecraft("list"), 1));
+    public static Stream<Tuple<DisplaySlot, Integer>> stream() {
+        final Stream.Builder<Tuple<DisplaySlot, Integer>> builder = Stream.builder();
+        builder.add(new Tuple<>(new SpongeDisplaySlot(CatalogKey.minecraft("below_name"), 0), 0));
+        builder.add(new Tuple<>(new SpongeDisplaySlot(CatalogKey.minecraft("list"), 1), 1));
 
-        final Map<TextFormatting, DisplaySlot> sidebarByColor = new HashMap<>();
+        final Map<TextFormatting, SpongeDisplaySlot> sidebarByColor = new HashMap<>();
         final Function<TextFormatting, DisplaySlot> sidebarWithColor = sidebarByColor::get;
 
         sidebarByColor.put(TextFormatting.RESET, new SpongeDisplaySlot(CatalogKey.minecraft("sidebar"), 2, null, sidebarWithColor));
@@ -55,7 +56,7 @@ public final class DisplaySlotStreamGenerator {
             }
         }
 
-        sidebarByColor.values().forEach(builder::add);
+        sidebarByColor.values().forEach(slot -> new Tuple<>(slot, slot.getIndex()));
         return builder.build();
     }
 }
