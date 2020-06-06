@@ -53,6 +53,7 @@
       "mcp.entity.ai.goal.SwimGoalMixin_API",
       "mcp.entity.ai.goal.TargetGoalMixin_API",
       "mcp.entity.boss.WitherEntityMixin_API",
+      "mcp.entity.effect.LightningBoltEntityMixin_API",
       "mcp.entity.boss.dragon.EnderDragonEntityMixin_API",
       "mcp.entity.boss.dragon.EnderDragonPartEntityMixin_API",
       "mcp.entity.boss.dragon.phase.IPhaseMixin_API",

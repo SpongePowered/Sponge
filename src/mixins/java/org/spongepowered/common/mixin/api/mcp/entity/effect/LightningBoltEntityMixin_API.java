@@ -22,41 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.entity.effect;
+package org.spongepowered.common.mixin.api.mcp.entity.effect;
 
-import com.google.common.collect.Lists;
 import net.minecraft.entity.effect.LightningBoltEntity;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.weather.LightningBolt;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
-import java.util.List;
 import java.util.Set;
 
 @Mixin(LightningBoltEntity.class)
 public abstract class LightningBoltEntityMixin_API extends EntityMixin_API implements LightningBolt {
-
-    private final List<Entity> api$struckEntities = Lists.newArrayList();
-    private final List<Transaction<BlockSnapshot>> api$struckBlocks = Lists.newArrayList();
-    private boolean api$effect = false;
-
-    @Override
-    public boolean isEffect() {
-        return this.api$effect;
-    }
-
-    @Override
-    public void setEffect(boolean effect) {
-        this.api$effect = effect;
-        if (effect) {
-            this.api$struckBlocks.clear();
-            this.api$struckEntities.clear();
-        }
-    }
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
