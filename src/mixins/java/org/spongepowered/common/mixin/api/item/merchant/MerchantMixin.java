@@ -22,24 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.item.merchant;
+package org.spongepowered.common.mixin.api.item.merchant;
 
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
+import net.minecraft.item.MerchantOffer;
+import net.minecraft.item.MerchantOffers;
 import net.minecraft.world.World;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.util.VecHelper;
+
+import java.util.Collections;
 
 import javax.annotation.Nullable;
 
@@ -59,15 +58,15 @@ public interface MerchantMixin extends Merchant {
     }
 
     @Nullable
-    default MerchantRecipeList imerchant$getRecipes(final PlayerEntity player) {
-        final MerchantRecipeList merchantRecipes = new MerchantRecipeList();
-        for (final TradeOffer tradeOffer : getTradeOfferData().tradeOffers()) {
-            merchantRecipes.add((MerchantRecipe) tradeOffer);
+    default MerchantOffers imerchant$getOffers() {
+        final MerchantOffers merchantRecipes = new MerchantOffers();
+        for (TradeOffer tradeOffer : this.get(Keys.TRADE_OFFERS).orElse(Collections.emptyList())) {
+            merchantRecipes.add((MerchantOffer) tradeOffer);
         }
         return merchantRecipes;
     }
 
-    default void imerchant$useRecipe(final MerchantRecipe recipe) {
+    default void imerchant$onTrade(final MerchantOffer recipe) {
 
     }
 
@@ -75,15 +74,7 @@ public interface MerchantMixin extends Merchant {
 
     }
 
-    default ITextComponent imerchant$getDisplayName() {
-        return new StringTextComponent("nitwit");
-    }
-
     default World imerchant$getWorld() {
         return ((World) this.getLocation().getWorld());
-    }
-
-    default BlockPos imerchant$getPos() {
-        return VecHelper.toBlockPos(this.getLocation());
     }
 }

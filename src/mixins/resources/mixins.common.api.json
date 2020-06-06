@@ -19,6 +19,7 @@
       "event.cause.entity.damage.source.common.AbstractDamageSourceMixin_API",
       "event.cause.entity.damage.source.common.AbstractEntityDamageSourceMixin_API",
       "event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSourceMixin_API",
+      "item.merchant.MerchantMixin",
       "mcp.advancements.AdvancementMixin_API",
       "mcp.advancements.AdvancementProgressMixin_API",
       "mcp.advancements.CriterionMixin_API",
