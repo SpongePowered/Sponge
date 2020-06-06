@@ -22,21 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.potion;
+package org.spongepowered.common.mixin.api.mcp.potion;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.potion.Effect;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -44,36 +46,43 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
 public abstract class EffectMixin_API implements PotionEffectType {
 
-    @Shadow @Final public static SimpleRegistry<ResourceLocation, Effect> REGISTRY;
+    private static final Map<String, String> potionMapping = ImmutableMap.<String, String>builder()
+            .put("effect.damageBoost", "effect.strength")
+            .put("effect.fireResistance", "effect.fire_resistance")
+            .put("effect.harm", "effect.harming")
+            .put("effect.heal", "effect.healing")
+            .put("effect.invisibility", "effect.invisibility")
+            .put("effect.jump", "effect.leaping")
+            .put("effect.luck", "effect.luck")
+            .put("effect.moveSlowdown", "effect.slowness")
+            .put("effect.moveSpeed", "effect.swiftness")
+            .put("effect.nightVision", "effect.night_vision")
+            .put("effect.poison", "effect.poison")
+            .put("effect.regeneration", "effect.regeneration")
+            .put("effect.waterBreathing", "effect.water_breathing")
+            .put("effect.weakness", "effect.weakness")
+            .build();
+
 
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean shadow$isInstant();
 
     @Nullable private Translation api$translation;
     @Nullable private Translation api$potionTranslation;
-    @Nullable private String spongeResourceID;
+    private CatalogKey impl$key;
 
-    @Intrinsic
-    public String potion$getId() {
-        if (this.spongeResourceID == null) {
-            final ResourceLocation location = REGISTRY.getKey((Effect) (Object) this);
-            if (location == null) {
-                this.spongeResourceID = "unknown";
-            } else {
-                this.spongeResourceID = location.toString();
-            }
+    @Override
+    public CatalogKey getKey() {
+        if (this.impl$key == null) {
+            final ResourceLocation location = Registry.EFFECTS.getKey((Effect) (Object) this);
+            this.impl$key = (CatalogKey) (Object) location;
         }
-        return this.spongeResourceID;
+        return this.impl$key;
     }
 
     @Intrinsic
     public boolean potion$isInstant() {
         return this.shadow$isInstant();
-    }
-
-    @Intrinsic
-    public String potion$getName() {
-        return this.shadow$getName();
     }
 
     @Override
@@ -86,11 +95,12 @@ public abstract class EffectMixin_API implements PotionEffectType {
     }
 
     // TODO: Remove this from the API or change return type to Optional
+    // TODO: potionMapping is not up to date
     @Override
     public Translation getPotionTranslation() {
         if (this.api$potionTranslation == null) {
             String name = this.shadow$getName();
-            final String potionId = "potion." + PotionEffectTypeRegistryModule.potionMapping.getOrDefault(name, "effect.missing");
+            final String potionId = "potion." + potionMapping.getOrDefault(name, "effect.missing");
             this.api$potionTranslation = new SpongeTranslation(potionId);
         }
         return this.api$potionTranslation;

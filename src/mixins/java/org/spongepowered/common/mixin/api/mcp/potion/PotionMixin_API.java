@@ -22,45 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.potion;
+package org.spongepowered.common.mixin.api.mcp.potion;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.DefaultedRegistry;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 @Mixin(net.minecraft.potion.Potion.class)
 public abstract class PotionMixin_API implements PotionType {
 
-    @Shadow @Final public static DefaultedRegistry<ResourceLocation, net.minecraft.potion.Potion> REGISTRY;
     @Shadow @Final private ImmutableList<net.minecraft.potion.EffectInstance> effects;
 
-    @Nullable private String spongeResourceID;
+    private CatalogKey impl$key;
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public List<PotionEffect> getEffects() {
         return ((List) this.effects); // PotionEffect is mixed into
     }
 
     @Override
-    public String getId() {
-        if (this.spongeResourceID == null) {
-            this.spongeResourceID = REGISTRY.getKey((net.minecraft.potion.Potion) (Object) this).toString();
+    public CatalogKey getKey() {
+        if (this.impl$key == null) {
+            final ResourceLocation location = Registry.POTION.getKey((Potion) (Object) this);
+            this.impl$key = (CatalogKey) (Object) location;
         }
-        return this.spongeResourceID;
-    }
-
-    @Override
-    public String getName() {
-        return this.getId();
+        return this.impl$key;
     }
 
 }

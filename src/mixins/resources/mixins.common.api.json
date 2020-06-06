@@ -218,6 +218,8 @@
       "mcp.network.ServerStatusResponseMixin_API",
       "mcp.network.play.ServerPlayNetHandlerMixin_API",
       "mcp.potion.EffectInstanceMixin_API",
+      "mcp.potion.EffectMixin_API",
+      "mcp.potion.PotionMixin_API",
       "mcp.scoreboard.ScoreCriteria_RenderTypeMixin_API",
       "mcp.scoreboard.ScorePlayerTeamMixin_API",
       "mcp.scoreboard.ServerScoreboardMixin_API",
