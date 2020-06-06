@@ -22,24 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.tileentity;
+package org.spongepowered.common.accessor.inventory.container;
 
-import net.minecraft.item.crafting.AbstractCookingRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.container.PlayerContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AbstractFurnaceTileEntity.class)
-public interface AbstractFurnaceTileEntityAccessor {
+@Mixin(PlayerContainer.class)
+public interface PlayerContainerAccessor {
 
-    @Accessor("burnTime") int accessor$getBurnTime();
-    @Accessor("burnTime") void accessor$setBurnTime(int burnTime);
-    @Accessor("recipesUsed") int accessor$getRecipesUsed();
-    @Accessor("recipesUsed") void accessor$setRecipesUsed(int recipesUsed);
-    @Accessor("cookTime") int accessor$getCookTime();
-    @Accessor("cookTime") void accessor$setCookTime(int cookTime);
-    @Accessor("cookTimeTotal") int accessor$getCookTimeTotal();
-    @Accessor("cookTimeTotal") void accessor$setCookTimeTotal(int cookTimeTotal);
-    @Accessor("recipeType") IRecipeType<? extends AbstractCookingRecipe> accessor$getRecipeType();
+    @Accessor("field_75181_e") CraftingInventory accessor$getCraftingInventory();
 }

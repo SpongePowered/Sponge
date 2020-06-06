@@ -85,6 +85,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
 
     @Override
+    // TODO remove cause from API call?
     public void setWorldBorder(@Nullable final WorldBorder border, final Cause cause) {
         if (this.api$worldBorder == border) {
             return; //do not fire an event since nothing would have changed
