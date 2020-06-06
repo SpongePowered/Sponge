@@ -22,10 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.entity.ai.goal;
+package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.ai.goal.GoalSelector;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
@@ -34,20 +35,19 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 @Mixin(GoalSelector.class)
 public abstract class GoalSelectorMixin_API<O extends Agent> implements GoalExecutor<O> {
 
-    @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> taskEntries;
-    @Shadow @Final private Set<GoalSelector.EntityAITaskEntry> executingTaskEntries;
+    @Shadow @Final private Set<PrioritizedGoal> goals;
 
-    @Shadow public abstract void shadow$addTask(int priority, net.minecraft.entity.ai.goal.Goal task);
-    @Shadow public abstract void shadow$removeTask(net.minecraft.entity.ai.goal.Goal task);
+    @Shadow public abstract void shadow$addGoal(int priority, net.minecraft.entity.ai.goal.Goal task);
+    @Shadow public abstract void shadow$removeGoal(net.minecraft.entity.ai.goal.Goal task);
 
     @SuppressWarnings("unchecked")
     @Override
@@ -62,66 +62,40 @@ public abstract class GoalSelectorMixin_API<O extends Agent> implements GoalExec
 
     @Override
     public GoalExecutor<O> addGoal(final int priority, final Goal<? extends O> task) {
-        this.shadow$addTask(priority, (net.minecraft.entity.ai.goal.Goal) task);
+        this.shadow$addGoal(priority, (net.minecraft.entity.ai.goal.Goal) task);
         return this;
     }
 
     @Override
     public GoalExecutor<O> removeGoal(final Goal<? extends O> goal) {
-        this.shadow$removeTask((net.minecraft.entity.ai.goal.Goal) goal);
+        this.shadow$removeGoal((net.minecraft.entity.ai.goal.Goal) goal);
         return  this;
     }
 
     @Override
     public GoalExecutor<O> removeGoals(final GoalType type) {
-        final Iterator<GoalSelector.EntityAITaskEntry> iterator = this.taskEntries.iterator();
-
-        while (iterator.hasNext()) {
-            final GoalSelector.EntityAITaskEntry entityaitaskentry = iterator.next();
-            final net.minecraft.entity.ai.goal.Goal otherAiBase = entityaitaskentry.action;
-            final Goal<?> otherTask = (Goal<?>) otherAiBase;
-
-            if (otherTask.getType().equals(type)) {
-                if (this.executingTaskEntries.contains(entityaitaskentry)) {
-                    otherAiBase.resetTask();
-                    this.executingTaskEntries.remove(entityaitaskentry);
-                }
-
-                iterator.remove();
-            }
-        }
-
+        this.goals.removeIf(goal -> ((GoalBridge)goal.getGoal()).bridge$getType() == type);
         return this;
     }
 
     @Override
     public List<? super Goal<? extends O>> getTasksByType(final GoalType type) {
         final ImmutableList.Builder<Goal<?>> tasks = ImmutableList.builder();
-
-        for (final GoalSelector.EntityAITaskEntry entry : this.taskEntries) {
-            final Goal<?> task = (Goal<?>) entry.action;
-
-            if (task.getType().equals(type)) {
-                tasks.add(task);
-            }
-        }
-
+        this.goals.stream().map(PrioritizedGoal::getGoal).map(Goal.class::cast)
+                .filter(goal -> goal.getType() == type)
+                .forEach(tasks::add);
         return tasks.build();
     }
 
     @Override
     public List<? super Goal<? extends O>> getTasks() {
         final ImmutableList.Builder<Goal<?>> tasks = ImmutableList.builder();
-        for (final Object o : this.taskEntries) {
-            final GoalSelector.EntityAITaskEntry entry = (GoalSelector.EntityAITaskEntry) o;
-
-            tasks.add((Goal<?>) entry.action);
-        }
+        this.goals.stream().map(PrioritizedGoal::getGoal).map(Goal.class::cast).forEach(tasks::add);
         return tasks.build();
     }
 
     @Override
     public void clear() {
-        this.taskEntries.clear();
+        this.goals.clear();
     }
 }

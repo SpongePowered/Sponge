@@ -42,6 +42,7 @@
       "mcp.entity.MobEntityMixin_API",
       "mcp.entity.ai.goal.AvoidLivingGoalMixin_API",
       "mcp.entity.ai.goal.GoalMixin_API",
+      "mcp.entity.ai.goal.GoalSelectorMixin_API",
       "mcp.entity.ai.goal.LookAtGoalMixin_API",
       "mcp.entity.ai.goal.LookRandomlyGoalMixin_API",
       "mcp.entity.ai.goal.MeleeAttackGoalMixin_API",
