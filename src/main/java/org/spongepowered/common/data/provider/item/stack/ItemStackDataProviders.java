@@ -122,7 +122,7 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
         register(new ItemStackMusicDiscProvider());
         register(new ItemStackMaxDurabilityProvider());
         register(new ItemStackToolTypeProvider());
-//        register(new ItemStackArmorTypeProvider());
+        register(new ItemStackArmorTypeProvider());
         register(new ItemStackEquipmentTypeProvider());
         register(new ItemStackDamageAbsorptionProvider());
         register(new ItemStackContainerProvider());

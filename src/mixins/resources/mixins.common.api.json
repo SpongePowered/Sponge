@@ -196,6 +196,7 @@
       "mcp.item.BlockItemMixin_API",
       "mcp.item.DyeColorMixin_API",
       "mcp.item.FireworkRocketItem_ShapeMixin_API",
+      "mcp.item.ItemArmorMaterialMixin_API",
       "mcp.item.ItemMixin_API",
       "mcp.item.ItemStackMixin_API",
       "mcp.item.ItemTierMixin_API",

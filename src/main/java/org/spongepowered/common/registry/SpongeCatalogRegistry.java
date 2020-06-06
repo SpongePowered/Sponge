@@ -153,6 +153,7 @@ import org.spongepowered.common.registry.builtin.sponge.TextColorStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.TextSerializerStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.TextStyleTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.ArmorTypeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.CriteriaTriggersSupplier;
@@ -468,6 +469,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         // TODO 1.14 - Stats are stupid, need to handle them manually
 
         // Class based/Likely for mods to override
+        ArmorTypeSupplier.registerSuppliers(this);
         BiomeSupplier.registerSuppliers(this);
         ContainerTypeSupplier.registerSuppliers(this);
         CriteriaTriggersSupplier.registerSuppliers(this);

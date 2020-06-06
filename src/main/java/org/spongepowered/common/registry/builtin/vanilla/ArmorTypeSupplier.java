@@ -22,41 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common.registry.builtin.vanilla;
 
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.IArmorMaterial;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Keys;
+import net.minecraft.item.ArmorMaterial;
 import org.spongepowered.api.data.type.ArmorType;
-import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
+import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
-import java.util.Optional;
+public final class ArmorTypeSupplier {
 
-// TODO add ArmorType back to API - IArmorMaterial/ArmorMaterial exists e138911acad1eedfaf927483804587891213a887
-public class ItemStackArmorTypeProvider extends ItemStackDataProvider<ArmorType> {
-
-    public ItemStackArmorTypeProvider() {
-        super(Keys.ARMOR_TYPE);
+    private ArmorTypeSupplier() {
     }
 
-    @Override
-    protected Optional<ArmorType> getFrom(ItemStack dataHolder) {
-        Item item = dataHolder.getItem();
-        if (item instanceof ArmorItem) {
-            IArmorMaterial armor = ((ArmorItem) item).getArmorMaterial();
-            if (armor instanceof ArmorType) {
-                return Optional.of((ArmorType)armor);
-            }
+    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+        for (ArmorMaterial material : ArmorMaterial.values()) {
+            ArmorType type = (ArmorType) (Object) material;
+            registry.registerSupplier(ArmorType.class, type.getKey().getValue(), () -> type);
         }
-        return Optional.empty();
     }
-
-
-    @Override
-    protected boolean supports(Item item) {
-        return item instanceof ArmorItem;
-    }
-
 }

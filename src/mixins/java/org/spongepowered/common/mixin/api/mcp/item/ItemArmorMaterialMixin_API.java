@@ -22,42 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.item;
+package org.spongepowered.common.mixin.api.mcp.item;
 
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
-import org.spongepowered.api.item.ItemType;
+import net.minecraft.item.ArmorMaterial;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.ArmorType;
+import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
-import java.util.Locale;
 import java.util.Optional;
 
-@Mixin(ArmorItem.ArmorMaterial.class)
+@Mixin(ArmorMaterial.class)
 @Implements(@Interface(iface = ArmorType.class, prefix = "apiArmor$"))
 public abstract class ItemArmorMaterialMixin_API implements ArmorType {
+    // TODO support modded using IArmorMaterial
 
     @Shadow @Final private String name;
-    @Nullable @Shadow public abstract Item shadow$getRepairItem(); // This can return null for modded cases
+    @Shadow public abstract net.minecraft.item.crafting.Ingredient shadow$getRepairMaterial();
+
+    private CatalogKey impl$key;
 
     @Override
-    public String getId() {
-        return "minecraft:" + this.name;
-    }
-
-    @Intrinsic
-    public String apiArmor$getName() {
-        return this.name.toUpperCase(Locale.ENGLISH);
+    public CatalogKey getKey() {
+        if (this.impl$key == null) {
+            this.impl$key = CatalogKey.minecraft(this.name);
+        }
+        return this.impl$key;
     }
 
     @Override
-    public Optional<ItemType> getRepairItemType() {
-        return Optional.ofNullable((ItemType) this.shadow$getRepairItem());
+    public Optional<Ingredient> getRepairIngredient() {
+        final net.minecraft.item.crafting.Ingredient repairMaterial = this.shadow$getRepairMaterial();
+        return Optional.ofNullable(((Ingredient) (Object) repairMaterial));
     }
 
 }
