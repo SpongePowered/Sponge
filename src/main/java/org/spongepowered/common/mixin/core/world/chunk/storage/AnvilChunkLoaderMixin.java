@@ -307,7 +307,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
 
     @Inject(method = "writeChunkData", at = @At("RETURN"))
     private void impl$callSaveChunkEventPost(ChunkPos pos, NBTTagCompound compound, CallbackInfo ci) {
-        if (ShouldFire.SAVE_CHUNK_EVENT || ShouldFire.SAVE_CHUNK_EVENT_POST) {
+        if (ShouldFire.SAVE_CHUNK_EVENT_POST) {
             final Cause cause = Cause.of(EventContext.empty(), Collections.singleton(SpongeImpl.getServer()));
             SpongeImpl.postEvent(SpongeEventFactory.createSaveChunkEventPost(cause, VecHelper.toVec3i(pos)));
         }

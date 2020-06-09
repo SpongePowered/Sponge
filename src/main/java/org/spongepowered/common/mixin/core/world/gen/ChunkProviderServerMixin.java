@@ -354,7 +354,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
 
     @Inject(method = "saveChunkData", at = @At("HEAD"), cancellable = true)
     private void impl$callSaveChunkEventPre(Chunk chunkIn, CallbackInfo ci) {
-        if (ShouldFire.SAVE_CHUNK_EVENT || ShouldFire.SAVE_CHUNK_EVENT_PRE) {
+        if (ShouldFire.SAVE_CHUNK_EVENT_PRE) {
             final org.spongepowered.api.world.Chunk apiChunk = (org.spongepowered.api.world.Chunk) chunkIn;
             if (SpongeImpl.postEvent(SpongeEventFactory.createSaveChunkEventPre(SpongeImpl.getCauseStackManager().getCurrentCause(),
                 apiChunk.getPosition(), apiChunk))) {
