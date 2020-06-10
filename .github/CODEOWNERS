@@ -1,15 +1,15 @@
 # https://help.github.com/articles/about-codeowners/
 # please keep this file in the same order as packages
 
-.travis.yml @Minecrell
-*gradle* @Minecrell
-Jenkinsfile @Minecrell
+.travis.yml @gabizou
+*gradle* @gabizou
+Jenkinsfile @gabizou
 
 src/main/java/org/spongepowered/common/boss/** @kashike
 src/main/java/org/spongepowered/common/command/** @kashike
 src/main/java/org/spongepowered/common/data/** @gabizou
 src/main/java/org/spongepowered/common/effect/** @gabizou
-src/main/java/org/spongepowered/common/event/** @gabizou @Deamon5550
+src/main/java/org/spongepowered/common/event/** @gabizou
 src/main/java/org/spongepowered/common/inject/** @kashike
 src/main/java/org/spongepowered/common/item/inventory/** @Faithcaio
 src/main/java/org/spongepowered/common/item/recipe/** @Faithcaio
@@ -32,8 +32,8 @@ src/main/java/org/spongepowered/common/mixin/core/item/recipe/** @Faithcaio
 src/main/java/org/spongepowered/common/mixin/core/nbt/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/potion/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/text/** @kashike
-src/main/java/org/spongepowered/common/mixin/core/world/biome/** @Deamon5550
-src/main/java/org/spongepowered/common/mixin/core/world/gen/** @Deamon5550
+src/main/java/org/spongepowered/common/mixin/core/world/biome/** @gabizou
+src/main/java/org/spongepowered/common/mixin/core/world/gen/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/world/MixinBossInfo.java @kashike
 src/main/java/org/spongepowered/common/mixin/core/world/MixinBossInfoServer.java @kashike
 src/main/java/org/spongepowered/common/mixin/core/world/MixinWorld.java @gabizou
@@ -47,9 +47,9 @@ src/main/java/org/spongepowered/common/registry/** @gabizou
 src/main/java/org/spongepowered/common/registry/type/text/** @kashike
 src/main/java/org/spongepowered/common/text/** @kashike
 src/main/java/org/spongepowered/common/util/ReflectionUtil.java @gabizou
-src/main/java/org/spongepowered/common/world/biome/** @Deamon5550
-src/main/java/org/spongepowered/common/world/gen/** @Deamon5550
-src/main/java/org/spongepowered/common/world/schematic/** @Deamon5550
+src/main/java/org/spongepowered/common/world/biome/** @gabizou
+src/main/java/org/spongepowered/common/world/gen/** @gabizou
+src/main/java/org/spongepowered/common/world/schematic/** @gabizou
 
 src/main/resources/org/spongepowered/common/service/pagination/font-sizes.json @kashike
 
