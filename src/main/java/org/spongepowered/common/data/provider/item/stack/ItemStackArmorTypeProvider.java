@@ -29,24 +29,24 @@ import net.minecraft.item.IArmorMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ArmorType;
+import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 
 import java.util.Optional;
 
-public class ItemStackArmorTypeProvider extends ItemStackDataProvider<ArmorType> {
+public class ItemStackArmorTypeProvider extends ItemStackDataProvider<ArmorMaterial> {
 
     public ItemStackArmorTypeProvider() {
         super(Keys.ARMOR_TYPE);
     }
 
     @Override
-    protected Optional<ArmorType> getFrom(ItemStack dataHolder) {
+    protected Optional<ArmorMaterial> getFrom(ItemStack dataHolder) {
         Item item = dataHolder.getItem();
         if (item instanceof ArmorItem) {
             IArmorMaterial armor = ((ArmorItem) item).getArmorMaterial();
-            if (armor instanceof ArmorType) {
-                return Optional.of((ArmorType)armor);
+            if (armor instanceof ArmorMaterial) {
+                return Optional.of((ArmorMaterial)armor);
             }
         }
         return Optional.empty();

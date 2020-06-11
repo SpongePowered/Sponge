@@ -24,19 +24,17 @@
  */
 package org.spongepowered.common.registry.builtin.vanilla;
 
-import net.minecraft.item.ArmorMaterial;
-import org.spongepowered.api.data.type.ArmorType;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import org.spongepowered.api.data.type.ArmorMaterial;
 
-public final class ArmorTypeSupplier {
+import java.util.Arrays;
+import java.util.stream.Stream;
 
-    private ArmorTypeSupplier() {
+public final class ArmorMaterialStreamGenerator {
+
+    private ArmorMaterialStreamGenerator() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
-        for (ArmorMaterial material : ArmorMaterial.values()) {
-            ArmorType type = (ArmorType) (Object) material;
-            registry.registerSupplier(ArmorType.class, type.getKey().getValue(), () -> type);
-        }
+    public static Stream<ArmorMaterial> stream() {
+        return Arrays.stream(net.minecraft.item.ArmorMaterial.values()).map(ArmorMaterial.class::cast);
     }
 }

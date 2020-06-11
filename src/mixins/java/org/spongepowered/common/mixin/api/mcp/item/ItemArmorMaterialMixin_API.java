@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
-import net.minecraft.item.ArmorMaterial;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.ArmorType;
+import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -36,9 +35,9 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Optional;
 
-@Mixin(ArmorMaterial.class)
-@Implements(@Interface(iface = ArmorType.class, prefix = "apiArmor$"))
-public abstract class ItemArmorMaterialMixin_API implements ArmorType {
+@Mixin(net.minecraft.item.ArmorMaterial.class)
+@Implements(@Interface(iface = ArmorMaterial.class, prefix = "apiArmor$"))
+public abstract class ItemArmorMaterialMixin_API implements ArmorMaterial {
     // TODO support modded using IArmorMaterial
 
     @Shadow @Final private String name;

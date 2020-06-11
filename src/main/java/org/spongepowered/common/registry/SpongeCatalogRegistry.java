@@ -67,6 +67,7 @@ import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.CatType;
@@ -153,7 +154,7 @@ import org.spongepowered.common.registry.builtin.sponge.TextColorStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.TextSerializerStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.TextStyleTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.vanilla.ArmorTypeSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.ArmorMaterialStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.CriteriaTriggersSupplier;
@@ -439,6 +440,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(SpawnType.class, CatalogKey.sponge("spawn_type"), SpawnTypeStreamGenerator.stream(), true)
             .generateRegistry(EventContextKey.class, CatalogKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true)
             .generateRegistry(DamageType.class, CatalogKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true)
+            .generateRegistry(ArmorMaterial.class, CatalogKey.sponge("armor_material"), ArmorMaterialStreamGenerator.stream(), true)
             .registerRegistry(Currency.class, CatalogKey.sponge("currency"))
         ;
 
@@ -469,7 +471,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         // TODO 1.14 - Stats are stupid, need to handle them manually
 
         // Class based/Likely for mods to override
-        ArmorTypeSupplier.registerSuppliers(this);
         BiomeSupplier.registerSuppliers(this);
         ContainerTypeSupplier.registerSuppliers(this);
         CriteriaTriggersSupplier.registerSuppliers(this);
