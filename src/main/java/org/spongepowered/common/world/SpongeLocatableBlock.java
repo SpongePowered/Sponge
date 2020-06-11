@@ -31,8 +31,9 @@ import com.google.common.base.Objects;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
@@ -41,14 +42,13 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 public class SpongeLocatableBlock implements LocatableBlock {
 
@@ -59,10 +59,10 @@ public class SpongeLocatableBlock implements LocatableBlock {
     @Nullable private Location location;
 
     SpongeLocatableBlock(SpongeLocatableBlockBuilder builder) {
-        this.blockState = checkNotNull(builder.blockState, "blockstate");
-        this.position = checkNotNull(builder.position, "position");
-        this.worldId = checkNotNull(builder.worldId, "worldid");
-        this.worldReference = checkNotNull(builder.worldReference, "reference");
+        this.blockState = checkNotNull(builder.blockState.get(), "blockstate");
+        this.position = checkNotNull(builder.position.get(), "position");
+        this.worldId = checkNotNull(builder.worldId.get(), "worldid");
+        this.worldReference = checkNotNull(builder.worldReference.get(), "reference");
     }
 
     @Override
@@ -79,16 +79,6 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return this.blockState.getProperty(propertyClass);
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return this.blockState.getApplicableProperties();
-    }
-
-    @Override
     public int getContentVersion() {
         return 1;
     }
@@ -102,11 +92,6 @@ public class SpongeLocatableBlock implements LocatableBlock {
                 .set(Queries.POSITION_Y, this.position.getY())
                 .set(Queries.POSITION_Z, this.position.getZ())
                 .set(Constants.Block.BLOCK_STATE, this.blockState);
-    }
-
-    @Override
-    public List<Immutable<?, ?>> getManipulators() {
-        return this.blockState.getManipulators();
     }
 
     @Override
@@ -140,83 +125,39 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public <T extends Immutable<?, ?>> Optional<T> get(Class<T> containerClass) {
-        return this.blockState.get(containerClass);
-    }
-
-    @Override
-    public <T extends Immutable<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        return this.blockState.getOrCreate(containerClass);
-    }
-
-    @Override
-    public boolean supports(Class<? extends Immutable<?, ?>> containerClass) {
-        return this.blockState.supports(containerClass);
-    }
-
-    @Override
     public <E> Optional<LocatableBlock> transform(Key<? extends Value<E>> key, Function<E, E> function) {
-        return this.blockState.transform(key, function)
-                .map(state -> LocatableBlock.builder()
-                        .from(this)
-                        .state(state)
-                        .build());
+        return this.blockState.transform(key, function).map(state -> LocatableBlock.builder().from(this).state(state).build());
     }
 
     @Override
     public <E> Optional<LocatableBlock> with(Key<? extends Value<E>> key, E value) {
-        return this.blockState.with(key, value)
-                .map(state -> LocatableBlock.builder()
-                        .from(this)
-                        .state(state)
-                        .build());
+        return this.blockState.with(key, value).map(state -> LocatableBlock.builder().from(this).state(state).build());
     }
 
     @Override
     public Optional<LocatableBlock> with(Value<?> value) {
-        return this.blockState.with(value)
-                .map(state -> LocatableBlock.builder()
-                        .from(this)
-                        .state(state)
-                        .build());
+        return this.blockState.with(value).map(state -> LocatableBlock.builder().from(this).state(state).build());
     }
 
     @Override
-    public Optional<LocatableBlock> with(Immutable<?, ?> valueContainer) {
-        return this.blockState.with(valueContainer)
-                .map(state -> LocatableBlock.builder()
-                        .from(this)
-                        .state(state)
-                        .build());
+    public Optional<LocatableBlock> without(Key<?> key) {
+        return this.blockState.without(key).map(state -> LocatableBlock.builder().from(this).state(state).build());
     }
 
     @Override
-    public Optional<LocatableBlock> with(Iterable<Immutable<?, ?>> valueContainers) {
-        return this.blockState.with(valueContainers)
-                .map(state -> LocatableBlock.builder()
-                        .from(this)
-                        .state(state)
-                        .build());
+    public LocatableBlock withRawData(DataView container) throws InvalidDataException {
+        return LocatableBlock.builder().from(this).state(this.blockState.withRawData(container)).build();
     }
 
     @Override
-    public Optional<LocatableBlock> without(Class<? extends Immutable<?, ?>> containerClass) {
-        return Optional.empty();
+    public LocatableBlock mergeWith(LocatableBlock that, MergeFunction function) {
+
+        return LocatableBlock.builder().from(this).state(this.blockState.mergeWith(that.getBlockState(), function)).build();
     }
 
     @Override
-    public LocatableBlock merge(LocatableBlock that) {
-        return that;
-    }
-
-    @Override
-    public LocatableBlock merge(LocatableBlock that, MergeFunction function) {
-        return that;
-    }
-
-    @Override
-    public List<Immutable<?, ?>> getContainers() {
-        return this.blockState.getContainers();
+    public boolean validateRawData(DataView container) {
+        return this.blockState.validateRawData(container);
     }
 
     @Override
@@ -224,7 +165,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
         return MoreObjects.toStringHelper(this)
                 .add("blockState", this.blockState)
                 .add("position", this.position)
-                .add("worldReference", this.worldReference.get() == null ? "null" : this.worldReference.get().getName())
+                .add("worldReference", this.worldReference.get() == null ? "null" : this.worldReference.get().getProperties().getDirectoryName())
                 .toString();
     }
 
