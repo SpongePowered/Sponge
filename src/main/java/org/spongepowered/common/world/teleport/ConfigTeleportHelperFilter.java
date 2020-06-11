@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.teleport;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -31,11 +32,12 @@ import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
 
@@ -57,35 +59,40 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
         if (floorBlockTypes == null) {
             TeleportHelperCategory teleportHelperCat = SpongeImpl.getGlobalConfigAdapter().getConfig().getTeleportHelper();
             floorBlockTypes = teleportHelperCat.getUnsafeFloorBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockType.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
+                    .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             floorBlockStates = teleportHelperCat.getUnsafeFloorBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockState.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
+                    .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockState.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             bodyBlockTypes = teleportHelperCat.getUnsafeBodyBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockType.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
+                    .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             bodyBlockStates = teleportHelperCat.getUnsafeBodyBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockState.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
+                    .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockState.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
     }
 
-    @Override
-    public String getId() {
-        return "sponge:config";
+    private final CatalogKey key;
+
+    public ConfigTeleportHelperFilter() {
+        this.key = CatalogKey.sponge("config");
     }
 
     @Override
-    public String getName() {
-        return "Config Teleport Helper filter";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

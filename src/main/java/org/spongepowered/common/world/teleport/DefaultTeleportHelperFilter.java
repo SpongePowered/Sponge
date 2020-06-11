@@ -32,6 +32,9 @@ import net.minecraft.block.FenceBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.block.material.Material;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EmptyBlockReader;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 
@@ -42,14 +45,19 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
     // Materials it is NOT safe to put players on top of.
     private static final Set<Material> NOT_SAFE_FLOOR = ImmutableSet.of(Material.AIR, Material.CACTUS, Material.FIRE, Material.LAVA);
 
-    @Override
-    public String getId() {
-        return "sponge:default";
+    private final CatalogKey key;
+
+    public DefaultTeleportHelperFilter() {
+        this.key = CatalogKey.sponge("default");
+    }
+
+    public DefaultTeleportHelperFilter(CatalogKey key) {
+        this.key = key;
     }
 
     @Override
-    public String getName() {
-        return "Default Teleport Helper filter";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -63,7 +71,7 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
         Material material = state.getMaterial();
 
         // Deny blocks that suffocate
-        if (state.causesSuffocation()) {
+        if (state.causesSuffocation(EmptyBlockReader.INSTANCE, BlockPos.ZERO)) {
             return false;
         }
         // Deny dangerous lava

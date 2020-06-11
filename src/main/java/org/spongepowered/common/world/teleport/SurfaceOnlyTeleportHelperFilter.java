@@ -24,11 +24,16 @@
  */
 package org.spongepowered.common.world.teleport;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.World;
 import org.spongepowered.math.vector.Vector3i;
 
 public class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelperFilter {
+
+    public SurfaceOnlyTeleportHelperFilter() {
+        super(CatalogKey.sponge("surface_only"));
+    }
 
     @Override
     public Tristate isValidLocation(World world, Vector3i position) {
@@ -38,16 +43,6 @@ public class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelperFilter
         }
 
         return Tristate.UNDEFINED;
-    }
-
-    @Override
-    public String getId() {
-        return "sponge:surface_only";
-    }
-
-    @Override
-    public String getName() {
-        return "Surface Only Teleport Helper filter";
     }
 
 }

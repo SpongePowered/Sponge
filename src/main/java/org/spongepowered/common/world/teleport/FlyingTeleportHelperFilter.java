@@ -25,27 +25,18 @@
 package org.spongepowered.common.world.teleport;
 
 import net.minecraft.block.material.Material;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 
-public class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
+public class FlyingTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
-    @Override
-    public String getId() {
-        return "sponge:no_portal";
-    }
-
-    @Override
-    public String getName() {
-        return "No Portal Teleport Helper filter";
+    public FlyingTeleportHelperFilter() {
+        super(CatalogKey.sponge("flying"));
     }
 
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return ((net.minecraft.block.BlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeFloorMaterial(blockState);
+        return ((net.minecraft.block.BlockState) blockState).getMaterial() != Material.CACTUS;
     }
 
-    @Override
-    public boolean isSafeBodyMaterial(BlockState blockState) {
-        return ((net.minecraft.block.BlockState) blockState).getMaterial() != Material.PORTAL && super.isSafeBodyMaterial(blockState);
-    }
 }
