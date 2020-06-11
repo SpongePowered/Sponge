@@ -26,19 +26,25 @@ package org.spongepowered.common.mixin.api.mcp.state;
 
 import net.minecraft.state.IProperty;
 import net.minecraft.state.StateHolder;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.state.State;
 import org.spongepowered.api.state.StateProperty;
+import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Mixin(StateHolder.class)
-public abstract class StateHolderMixin_API<S extends State<S>, C> implements IStateHolderMixin_API<S> {
+public abstract class StateHolderMixin_API<S extends State<S>, C> implements IStateHolderMixin_API<S>, SpongeImmutableDataHolder<S> {
 
     @Shadow public abstract <V extends Comparable<V>> boolean shadow$has(IProperty<V> property);
     @Shadow public abstract <T extends Comparable<T>, V extends T> C shadow$with(IProperty<T> property, V value);
     @Shadow public abstract <T extends Comparable<T>> C shadow$cycle(IProperty<T> property);
+    @Shadow public abstract Collection<IProperty<?>> shadow$getProperties();
 
     @Override
     public <T extends Comparable<T>> Optional<T> getStateProperty(StateProperty<T> stateProperty) {
@@ -72,10 +78,17 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements ISt
         return Optional.of((S) this.shadow$cycle((IProperty) stateProperty));
     }
 
-    /* TODO: This needs to be implemented within the data API
     @Override
     public <T extends Cycleable<T>> Optional<S> cycleValue(Key<? extends Value<T>> key) {
+        Optional<T> optionalValue = this.get(key);
+        if (optionalValue.isPresent()) {
+            if (optionalValue.get() instanceof Cycleable) {
+                T next = optionalValue.get().cycleNext();
+                return this.with(key, next);
+            }
+        }
         return Optional.empty();
     }
-    */
+
+
 }
