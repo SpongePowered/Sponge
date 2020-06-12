@@ -158,9 +158,9 @@ public final class NetworkUtil {
         final SpongeUser user = (SpongeUser) ((EntityPlayerMPBridge) playerIn).bridge$getUserObject();
         if (SpongeUser.dirtyUsers.contains(user)) {
             user.save();
-        } else {
-            user.invalidate();
         }
+
+        user.invalidate();
         // Sponge end
 
         final NBTTagCompound nbttagcompound = playerList.readPlayerDataFromFile(playerIn);

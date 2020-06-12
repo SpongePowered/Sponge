@@ -91,6 +91,7 @@ class UserDiscoverer {
         final SpongeUser user = (SpongeUser) userCache.getIfPresent(profile.getId());
         if (user != null && SpongeUser.dirtyUsers.contains(user)) {
             user.save();
+            user.invalidate(); // we're forcing the recreation so we need to ensure nothing will save to it now.
         }
         return create(profile);
     }
