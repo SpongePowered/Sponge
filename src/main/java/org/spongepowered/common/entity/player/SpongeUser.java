@@ -89,6 +89,7 @@ import javax.annotation.Nullable;
 public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier, BedLocationsBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
+    public static final Set<SpongeUser> initializedUsers = ConcurrentHashMap.newKeySet();
 
     private final User self = (User) this; // convenient access
     private final GameProfile profile;
@@ -146,9 +147,12 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) this).bridge$getCustomManipulators()) {
             ((CustomDataHolderBridge) this).bridge$removeCustom((Class<? extends DataManipulator<?, ?>>) manipulator.getClass());
         }
+
+        initializedUsers.remove(this);
     }
 
     public void initialize() {
+        initializedUsers.add(this);
         this.nbt = new NBTTagCompound();
         Optional<WorldServer> worldServer = WorldManager.getWorldByDimensionId(0);
         if (!worldServer.isPresent()) {
@@ -593,7 +597,13 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         if (this.isConstructing) {
             return;
         }
-        dirtyUsers.add(this);
+        if (!this.isInitialized()) {
+            SpongeImpl.getLogger()
+                    .warn("Unable to mark user data for [{}] as dirty, data is not initialized! Any changes may be lost.",
+                            this.profile.getId());
+        } else {
+            dirtyUsers.add(this);
+        }
     }
 
     public void save() {
@@ -611,7 +621,6 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(tag, out);
             dirtyUsers.remove(this);
-            invalidate();
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
