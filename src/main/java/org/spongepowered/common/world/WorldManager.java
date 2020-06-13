@@ -631,21 +631,28 @@ public final class WorldManager {
             return Optional.empty();
         }
 
+        // If the world has a world properties but there is no serialization, then we won't have a world directory.
+        // However, the WorldProperties might be null because we just weren't supplied them. If we weren't supplied
+        // them, then we try to get the properties from storage, which will mean that something is serialized and
+        // therefore the serialization behavior will not be NONE.
+        final boolean filesShouldExist = properties == null || properties.getSerializationBehavior() != SerializationBehaviors.NONE;
         final Path worldFolder = currentSavesDir.resolve(worldName);
-        if (!Files.isDirectory(worldFolder) && properties.getSerializationBehavior() != SerializationBehaviors.NONE) {
+        if (!Files.isDirectory(worldFolder) && filesShouldExist) {
             SpongeImpl.getLogger().error("Unable to load world [{}]. We cannot find its folder under [{}].", worldFolder, currentSavesDir);
             return Optional.empty();
         }
 
         final ISaveHandler saveHandler;
+
+        // Don't attempt to create files if the world properties exists and indicates nothing should be saved.
         try (PhaseContext<?> ignore = GeneralPhase.State.SAVE_HANDLER_CREATION.createPhaseContext()
-                .createFiles(!properties.getSerializationBehavior().equals(SerializationBehaviors.NONE))
+                .createFiles(filesShouldExist)
                 .buildAndSwitch()) {
             saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true,
                     ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer());
         }
 
-        // We weren't given a properties, see if one is cached
+        // We weren't given a properties, see if one is cached on the file system
         if (properties == null) {
             properties = (WorldProperties) saveHandler.loadWorldInfo();
 
