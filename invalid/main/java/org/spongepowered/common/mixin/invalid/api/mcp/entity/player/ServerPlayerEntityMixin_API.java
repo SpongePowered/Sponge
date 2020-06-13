@@ -83,31 +83,4 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         }
     }
 
-
-    @Override
-    // TODO remove cause from API call?
-    public void setWorldBorder(@Nullable final WorldBorder border, final Cause cause) {
-        if (this.api$worldBorder == border) {
-            return; //do not fire an event since nothing would have changed
-        }
-        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause,
-            Optional.ofNullable(this.api$worldBorder), Optional.ofNullable(border), this))) {
-            if (this.api$worldBorder != null) { //is the world border about to be unset?
-                ((WorldBorderBridge) this.api$worldBorder).accessor$getListeners().remove(
-                    ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
-            }
-            this.api$worldBorder = border;
-            if (this.api$worldBorder != null) {
-                ((net.minecraft.world.border.WorldBorder) this.api$worldBorder).addListener(
-                    ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
-                this.connection.sendPacket(
-                    new SWorldBorderPacket((net.minecraft.world.border.WorldBorder) this.api$worldBorder,
-                        SWorldBorderPacket.Action.INITIALIZE));
-            } else { //unset the border if null
-                this.connection.sendPacket(
-                    new SWorldBorderPacket(this.world.getWorldBorder(), SWorldBorderPacket.Action.INITIALIZE));
-            }
-        }
-    }
-
 }

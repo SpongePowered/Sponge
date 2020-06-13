@@ -22,18 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.world.border;
+package org.spongepowered.common.mixin.api.mcp.world.border;
 
-import org.spongepowered.api.world.ChunkPreGenerate;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.world.pregen.SpongeChunkPreGenerateTask;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.time.Duration;
 
 @Mixin(net.minecraft.world.border.WorldBorder.class)
 @Implements(@Interface(iface = WorldBorder.class, prefix = "apiBorder$"))
@@ -48,8 +48,8 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     @Shadow public abstract double getDamageBuffer();
     @Shadow public abstract void setDamageBuffer(double buffer);
     @Shadow public abstract void shadow$setCenter(double x, double z);
-    @Shadow public abstract double shadow$getDamageAmount();
-    @Shadow public abstract void shadow$setDamageAmount(double amount);
+    @Shadow public abstract double shadow$getDamagePerBlock();
+    @Shadow public abstract void shadow$setDamagePerBlock(double amount);
     @Shadow public abstract int shadow$getWarningTime();
     @Shadow public abstract void shadow$setWarningTime(int time);
     @Shadow public abstract int shadow$getWarningDistance();
@@ -57,23 +57,23 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     @Shadow public abstract double shadow$getDiameter();
 
     @Intrinsic
-    public int apiBorder$getWarningTime() {
-        return this.shadow$getWarningTime();
+    public Duration apiBorder$getWarningTime() {
+        return Duration.of(this.shadow$getWarningTime(), TemporalUnits.MILLIS);
     }
 
     @Intrinsic
-    public void apiBorder$setWarningTime(final int time) {
-        this.shadow$setWarningTime(time);
+    public void apiBorder$setWarningTime(final Duration time) {
+        this.shadow$setWarningTime((int) time.toMillis());
     }
 
     @Intrinsic
-    public int apiBorder$getWarningDistance() {
+    public double apiBorder$getWarningDistance() {
         return this.shadow$getWarningDistance();
     }
 
     @Intrinsic
-    public void apiBorder$setWarningDistance(final int distance) {
-        this.shadow$setWarningDistance(distance);
+    public void apiBorder$setWarningDistance(final double distance) {
+        this.shadow$setWarningDistance((int) distance);
     }
 
     @Override
@@ -92,18 +92,18 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Override
-    public void setDiameter(final double diameter, final long time) {
-        this.setTransition(this.getDiameter(), diameter, time);
+    public void setDiameter(final double diameter, final Duration time) {
+        this.setTransition(this.getDiameter(), diameter, time.toMillis());
     }
 
     @Override
-    public void setDiameter(final double startDiameter, final double endDiameter, final long time) {
-        this.setTransition(startDiameter, endDiameter, time);
+    public void setDiameter(final double startDiameter, final double endDiameter, final Duration time) {
+        this.setTransition(startDiameter, endDiameter, time.toMillis());
     }
 
     @Override
-    public long getTimeRemaining() {
-        return this.getTimeUntilTarget();
+    public Duration getTimeRemaining() {
+        return Duration.of(this.getTimeUntilTarget(), TemporalUnits.MILLIS);
     }
 
     @Override
@@ -128,16 +128,12 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
 
     @Intrinsic
     public double apiBorder$getDamageAmount() {
-        return this.shadow$getDamageAmount();
+        return this.shadow$getDamagePerBlock();
     }
 
     @Intrinsic
     public void apiBorder$setDamageAmount(final double damage) {
-        this.shadow$setDamageAmount(damage);
+        this.shadow$setDamagePerBlock(damage);
     }
 
-    @Override
-    public ChunkPreGenerate.Builder newChunkPreGenerate(final World world) {
-        return new SpongeChunkPreGenerateTask.Builder(world, this.getCenter(), this.getNewDiameter());
-    }
 }

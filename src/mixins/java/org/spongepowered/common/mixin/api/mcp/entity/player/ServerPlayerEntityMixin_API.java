@@ -36,6 +36,7 @@ import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundPacket;
 import net.minecraft.network.play.server.SSendResourcePackPacket;
 import net.minecraft.network.play.server.SStopSoundPacket;
+import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.ResourceLocation;
@@ -75,10 +76,8 @@ import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -89,6 +88,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
+import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.api.text.title.TitleBridge;
@@ -99,7 +100,6 @@ import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPack
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
@@ -109,8 +109,6 @@ import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -119,6 +117,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(ServerPlayerEntity.class)
 @Implements(@Interface(iface = Player.class, prefix = "player$"))
@@ -433,6 +433,32 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public Collection<AdvancementTree> getUnlockedAdvancementTrees() {
         return ((PlayerAdvancementsBridge) this.advancements).bridge$getAdvancementTrees();
+    }
+
+    // TODO remove cause from API call?
+    @Override
+    public void setWorldBorder(@Nullable WorldBorder border, Cause cause) {
+        if (this.api$worldBorder == border) {
+            return; //do not fire an event since nothing would have changed
+        }
+        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause,
+                Optional.ofNullable(this.api$worldBorder), this, Optional.ofNullable(border)))) {
+            if (this.api$worldBorder != null) { //is the world border about to be unset?
+                ((WorldBorderAccessor) this.api$worldBorder).accessor$getListeners().remove(
+                        ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
+            }
+            this.api$worldBorder = border;
+            if (this.api$worldBorder != null) {
+                ((net.minecraft.world.border.WorldBorder) this.api$worldBorder).addListener(
+                        ((ServerPlayerEntityBridge) this).bridge$getWorldBorderListener());
+                this.connection.sendPacket(
+                        new SWorldBorderPacket((net.minecraft.world.border.WorldBorder) this.api$worldBorder,
+                                SWorldBorderPacket.Action.INITIALIZE));
+            } else { //unset the border if null
+                this.connection.sendPacket(
+                        new SWorldBorderPacket(this.world.getWorldBorder(), SWorldBorderPacket.Action.INITIALIZE));
+            }
+        }
     }
 
     @Override
