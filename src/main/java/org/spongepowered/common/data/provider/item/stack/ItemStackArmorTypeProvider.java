@@ -37,7 +37,7 @@ import java.util.Optional;
 public class ItemStackArmorTypeProvider extends ItemStackDataProvider<ArmorMaterial> {
 
     public ItemStackArmorTypeProvider() {
-        super(Keys.ARMOR_TYPE);
+        super(Keys.ARMOR_MATERIAL);
     }
 
     @Override
