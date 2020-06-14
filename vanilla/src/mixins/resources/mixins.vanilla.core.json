@@ -7,29 +7,7 @@
     "compatibilityLevel": "JAVA_8",
     "priority": 1111,
     "server": [
-        "BootstrapMixin_Vanilla",
-        "advancement.AdvancementManagerMixin_Vanilla",
-        "command.EntitySelectorMixin_Vanilla",
-        "common.SpongeImplHooksMixin_Vanilla",
-        "crash.CrashReportMixin_Vanilla",
-        "entity.EntityMixin_Vanilla",
-        "entity.item.EntityMinecartMixin_Vanilla",
-        "entity.player.EntityPlayerMixin_Vanilla",
-        "entity.player.EntityPlayerMPMixin_Vanilla",
-        "entity.player.InventoryPlayerMixin_Vanilla",
-        "item.crafting.CraftingManagerMixin_Vanilla",
-        "network.NetHandlerPlayServerMixin_Vanilla",
-      "org.spongepowered.server.accessors.server.MinecraftServerAccessor_Vanilla",
-        "server.MinecraftServerMixin_Vanilla",
-        "server.dedicated.DedicatedServer$2Mixin_Vanilla",
-        "server.dedicated.DedicatedServerMixin_Vanilla",
-        "server.management.PlayerListMixin_Vanilla",
-        "tileentity.TileEntityMixin_Vanilla",
-        "world.WorldMixin_Vanilla",
-        "world.WorldServerMixin_Vanilla",
-        "world.chunk.gen.ChunkProviderServerMixin_Vanilla",
-      "org.spongepowered.server.accessor.world.chunk.storage.AnvilChunkLoaderAccessor_Vanilla",
-        "world.storage.SaveHandlerMixin_Vanilla"
+
     ],
     "injectors": {
         "defaultRequire": 1

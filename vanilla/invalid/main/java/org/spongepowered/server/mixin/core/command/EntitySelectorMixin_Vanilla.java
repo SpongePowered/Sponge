@@ -26,6 +26,7 @@ package org.spongepowered.server.mixin.core.command;
 
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.arguments.EntitySelector;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

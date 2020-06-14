@@ -24,18 +24,14 @@
  */
 package org.spongepowered.server.mixin.core.entity.player;
 
-import com.flowpowered.math.vector.Vector3d;
 import io.netty.util.internal.ConcurrentSet;
-import net.minecraft.block.BlockBed;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -49,22 +45,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
-import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.mixin.core.entity.EntityLivingBaseMixin;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nullable;
-
-@Mixin(EntityPlayer.class)
-public abstract class EntityPlayerMixin_Vanilla extends EntityLivingBaseMixin implements EntityPlayerBridge {
+@Mixin(PlayerEntity.class)
+public abstract class PlayerEntityMixin_Vanilla extends LivingEntityMixin implements PlayerEntityBridge {
 
     @Shadow protected boolean sleeping;
     @Shadow @Nullable public BlockPos bedLocation;
@@ -101,24 +96,24 @@ public abstract class EntityPlayerMixin_Vanilla extends EntityLivingBaseMixin im
     }
 
     @Override
-    public boolean bridge$isSpawnForced(int dimension) {
-        return dimension == 0 ? this.spawnForced : this.vanilla$spawnForcedSet.contains(dimension);
+    public boolean bridge$isSpawnForced(DimensionType dimension) {
+        return dimension != DimensionType.OVERWORLD ? this.spawnForced : this.vanilla$spawnForcedSet.contains(dimension);
     }
 
     @Inject(method = "setSpawnPoint", at = @At("HEAD"), cancellable = true)
     private void vanilla$onSetSpawnPoint(BlockPos pos, boolean forced, CallbackInfo ci) {
-        if (this.dimension != 0) {
+        if (this.dimension != DimensionType.OVERWORLD) {
             vanilla$setSpawnChunk(pos, forced, this.world);
             ci.cancel();
         }
     }
 
     private void vanilla$setSpawnChunk(@Nullable BlockPos pos, boolean forced, net.minecraft.world.World dimension) {
-        final Integer dimensionId = ((WorldInfoBridge) dimension.getWorldInfo()).bridge$getDimensionId();
+        final DimensionType dimensionId = ((WorldInfoBridge) dimension.getWorldInfo()).bridge$getDimensionType();
         if (dimensionId == null) {
             return;
         }
-        final UUID id = ((World) dimension).getUniqueId();
+        final UUID id = ((World) dimension).getProperties().getUniqueId();
         if (pos != null) {
             this.vanilla$spawnChunkMap.put(id, pos);
             if (forced) {
@@ -132,15 +127,15 @@ public abstract class EntityPlayerMixin_Vanilla extends EntityLivingBaseMixin im
         }
     }
 
-    @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
-    private void onReadEntityFromNBT(NBTTagCompound tagCompound, CallbackInfo ci) {
-        final NBTTagList spawnList = tagCompound.getTagList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < spawnList.tagCount(); i++) {
-            final NBTTagCompound spawnData = spawnList.getCompoundTagAt(i);
+    @Inject(method = "readAdditional", at = @At("RETURN"))
+    private void onReadEntityFromNBT(CompoundNBT tagCompound, CallbackInfo ci) {
+        final ListNBT spawnList = tagCompound.getList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < spawnList.size(); i++) {
+            final CompoundNBT spawnData = spawnList.getCompound(i);
             UUID spawnDim = spawnData.getUniqueId(Constants.UUID);
-            final int x = spawnData.getInteger(Constants.Sponge.User.USER_SPAWN_X);
-            final int y = spawnData.getInteger(Constants.Sponge.User.USER_SPAWN_Y);
-            final int z = spawnData.getInteger(Constants.Sponge.User.USER_SPAWN_Z);
+            final int x = spawnData.getInt(Constants.Sponge.User.USER_SPAWN_X);
+            final int y = spawnData.getInt(Constants.Sponge.User.USER_SPAWN_Y);
+            final int z = spawnData.getInt(Constants.Sponge.User.USER_SPAWN_Z);
             this.vanilla$spawnChunkMap.put(spawnDim, new BlockPos(x, y, z));
             if (spawnData.getBoolean(Constants.Sponge.User.USER_SPAWN_FORCED)) {
                 this.vanilla$spawnForcedSet.add(spawnDim);
@@ -148,35 +143,35 @@ public abstract class EntityPlayerMixin_Vanilla extends EntityLivingBaseMixin im
         }
     }
 
-    @Inject(method = "writeEntityToNBT", at = @At("RETURN"))
-    private void vanilla$onWriteEntityToNBT(NBTTagCompound tagCompound, CallbackInfo ci) {
-        final NBTTagList spawnList = new NBTTagList();
+    @Inject(method = "writeAdditional", at = @At("RETURN"))
+    private void vanilla$onWriteEntityToNBT(CompoundNBT tagCompound, CallbackInfo ci) {
+        final ListNBT spawnList = new ListNBT();
 
         for (Map.Entry<UUID, BlockPos> entry : this.vanilla$spawnChunkMap.entrySet()) {
             UUID dim = entry.getKey();
             BlockPos spawn = entry.getValue();
 
-            NBTTagCompound spawnData = new NBTTagCompound();
-            spawnData.setUniqueId(Constants.UUID, dim);
-            spawnData.setInteger(Constants.Sponge.User.USER_SPAWN_X, spawn.getX());
-            spawnData.setInteger(Constants.Sponge.User.USER_SPAWN_Y, spawn.getY());
-            spawnData.setInteger(Constants.Sponge.User.USER_SPAWN_Z, spawn.getZ());
-            spawnData.setBoolean(Constants.Sponge.User.USER_SPAWN_FORCED, this.vanilla$spawnForcedSet.contains(dim));
-            spawnList.appendTag(spawnData);
+            CompoundNBT spawnData = new CompoundNBT();
+            spawnData.putUniqueId(Constants.UUID, dim);
+            spawnData.putInt(Constants.Sponge.User.USER_SPAWN_X, spawn.getX());
+            spawnData.putInt(Constants.Sponge.User.USER_SPAWN_Y, spawn.getY());
+            spawnData.putInt(Constants.Sponge.User.USER_SPAWN_Z, spawn.getZ());
+            spawnData.putBoolean(Constants.Sponge.User.USER_SPAWN_FORCED, this.vanilla$spawnForcedSet.contains(dim));
+            spawnList.add(spawnData);
         }
 
-        tagCompound.setTag(Constants.Sponge.User.USER_SPAWN_LIST, spawnList);
+        tagCompound.put(Constants.Sponge.User.USER_SPAWN_LIST, spawnList);
     }
 
     // Event injectors
 
     @Inject(method = "trySleep", at = @At("HEAD"), cancellable = true)
-    private void vanilla$onTrySleep(BlockPos bedPos, CallbackInfoReturnable<EntityPlayer.SleepResult> ci) {
+    private void vanilla$onTrySleep(BlockPos bedPos, CallbackInfoReturnable<PlayerEntity.SleepResult> ci) {
         Sponge.getCauseStackManager().pushCause(this);
         SleepingEvent.Pre event = SpongeEventFactory.createSleepingEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 ((org.spongepowered.api.world.World) this.world).createSnapshot(bedPos.getX(), bedPos.getY(), bedPos.getZ()), (Player) this);
         if (SpongeImpl.postEvent(event)) {
-            ci.setReturnValue(EntityPlayer.SleepResult.OTHER_PROBLEM);
+            ci.setReturnValue(PlayerEntity.SleepResult.OTHER_PROBLEM);
         }
         Sponge.getCauseStackManager().popCause();
     }

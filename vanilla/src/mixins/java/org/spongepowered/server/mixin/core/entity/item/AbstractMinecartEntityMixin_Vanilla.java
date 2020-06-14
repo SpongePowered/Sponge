@@ -25,37 +25,41 @@
 package org.spongepowered.server.mixin.core.entity.item;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
+import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.common.bridge.entity.item.EntityMinecartBridge;
+import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
 import org.spongepowered.common.util.Constants;
 
-@Mixin(EntityMinecart.class)
-public abstract class EntityMinecartMixin_Vanilla extends Entity {
+@Mixin(AbstractMinecartEntity.class)
+public abstract class AbstractMinecartEntityMixin_Vanilla extends Entity {
 
-    public EntityMinecartMixin_Vanilla(World worldIn) {
-        super(worldIn);
+    public AbstractMinecartEntityMixin_Vanilla(EntityType<?> entityTypeIn, World worldIn) {
+        super(entityTypeIn, worldIn);
     }
 
     @ModifyConstant(method = "moveDerailedMinecart",
         constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, ordinal = 0))
     private double onAirX(double defaultValue) {
-        return ((EntityMinecartBridge) this).bridge$getAirboneVelocityModifier().getX();
+        return ((MinecartEntityBridge) this).bridge$getAirboneVelocityModifier().getX();
     }
 
     @ModifyConstant(method = "moveDerailedMinecart",
         constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, ordinal = 1))
     private double onAirY(double defaultValue) {
-        return ((EntityMinecartBridge) this).bridge$getAirboneVelocityModifier().getY();
+        return ((MinecartEntityBridge) this).bridge$getAirboneVelocityModifier().getY();
     }
 
     @ModifyConstant(method = "moveDerailedMinecart",
         constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, ordinal = 2))
     private double onAirZ(double defaultValue) {
-        return ((EntityMinecartBridge) this).bridge$getAirboneVelocityModifier().getZ();
+        return ((MinecartEntityBridge) this).bridge$getAirboneVelocityModifier().getZ();
     }
 
 }

@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.AdvancementManager;
-import net.minecraft.util.JsonUtils;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.FilenameUtils;
 import org.spongepowered.api.Sponge;
@@ -54,7 +54,7 @@ public class AdvancementManagerMixin_Vanilla {
 
     @Shadow @Final private static Gson GSON;
 
-    @Redirect(method = "reload", at = @At(value = "INVOKE", target =
+    @Redirect(method = "apply", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/advancements/AdvancementList;loadAdvancements(Ljava/util/Map;)V"))
     private void vanilla$LoadUpAdvancements(AdvancementList advancementList,
             Map<ResourceLocation, Advancement.Builder> advancements) {
@@ -98,7 +98,7 @@ public class AdvancementManagerMixin_Vanilla {
                         if (!advancements.containsKey(resourceLocation)) {
                             try (BufferedReader reader = Files.newBufferedReader(path)) {
                                 final Advancement.Builder advancementBuilder =
-                                        JsonUtils.fromJson(GSON, reader, Advancement.Builder.class);
+                                        JSONUtils.fromJson(GSON, reader, Advancement.Builder.class);
                                 advancements.put(resourceLocation, advancementBuilder);
                             } catch (IOException e) {
                                 SpongeImpl.getLogger().error("Failed to read advancement "

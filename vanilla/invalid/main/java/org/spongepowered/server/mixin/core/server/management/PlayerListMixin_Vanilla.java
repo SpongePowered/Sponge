@@ -26,10 +26,12 @@ package org.spongepowered.server.mixin.core.server.management;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -50,7 +52,7 @@ public abstract class PlayerListMixin_Vanilla {
      * net handler play server....
      */
     @Overwrite
-    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn) {
+    public void initializeConnectionToPlayer(NetworkManager netManager, ServerPlayerEntity playerIn) {
         NetworkUtil.initializeConnectionToPlayer((PlayerList) (Object) this, netManager, playerIn, null);
     }
 
@@ -59,7 +61,7 @@ public abstract class PlayerListMixin_Vanilla {
      * @reason Re-route to the common hook
      */
     @Overwrite
-    public void changePlayerDimension(EntityPlayerMP player, int dimensionIn) {
+    public void changePlayerDimension(ServerPlayerEntity player, int dimensionIn) {
         final WorldServer world = this.server.getWorld(dimensionIn);
         EntityUtil.transferPlayerToWorld(player, null, world, (ForgeITeleporterBridge) world.getDefaultTeleporter());
     }
@@ -69,7 +71,7 @@ public abstract class PlayerListMixin_Vanilla {
      * @reason Re-route to the common hook
      */
     @Overwrite
-    public void transferEntityToWorld(Entity entityIn, int lastDimension, WorldServer oldWorldIn, WorldServer toWorldIn) {
+    public void transferEntityToWorld(Entity entityIn, int lastDimension, ServerWorld oldWorldIn, ServerWorld toWorldIn) {
         EntityUtil.transferEntityToWorld(entityIn, null, toWorldIn, (ForgeITeleporterBridge) toWorldIn.getDefaultTeleporter(), false);
     }
 }

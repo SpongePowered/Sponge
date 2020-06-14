@@ -26,8 +26,10 @@ package org.spongepowered.server.mixin.core.entity.player;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SPacketChangeGameState;
 import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.server.MinecraftServer;
@@ -48,13 +50,13 @@ import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityPlayerMP.class)
-public abstract class EntityPlayerMPMixin_Vanilla extends EntityPlayerMixin_Vanilla {
+@Mixin(ServerPlayerEntity.class)
+public abstract class ServerPlayerEntityMixin_Vanilla extends PlayerEntityMixin_Vanilla {
 
     @Shadow public boolean invulnerableDimensionChange;
     @Shadow private Vec3d enteredNetherPosition;
     @Shadow public boolean queuedEndExit;
-    @Shadow public NetHandlerPlayServer connection;
+    @Shadow public ServerPlayNetHandler connection;
     @Shadow public boolean seenCredits;
     @Shadow @Final public MinecraftServer server;
     @Shadow public int lastExperience;
@@ -63,9 +65,9 @@ public abstract class EntityPlayerMPMixin_Vanilla extends EntityPlayerMixin_Vani
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "copyFrom", at = @At("RETURN"))
-    private void vanilla$initializeFieldsOnCopy(EntityPlayerMP oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
-        this.vanilla$spawnChunkMap = ((EntityPlayerMPMixin_Vanilla) (Object) oldPlayer).vanilla$spawnChunkMap;
-        this.vanilla$spawnForcedSet = ((EntityPlayerMPMixin_Vanilla) (Object) oldPlayer).vanilla$spawnForcedSet;
+    private void vanilla$initializeFieldsOnCopy(ServerPlayerEntity oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
+        this.vanilla$spawnChunkMap = ((ServerPlayerEntityMixin_Vanilla) (Object) oldPlayer).vanilla$spawnChunkMap;
+        this.vanilla$spawnForcedSet = ((ServerPlayerEntityMixin_Vanilla) (Object) oldPlayer).vanilla$spawnForcedSet;
 
         if (((DataCompoundHolder) oldPlayer).data$hasRootCompound()) {
             final NBTTagCompound old = ((DataCompoundHolder) oldPlayer).data$getRootCompound();

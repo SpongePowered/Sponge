@@ -80,7 +80,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer {
         ServerStatusResponse statusResponse = getServerStatusResponse();
         statusResponse.setServerDescription(new TextComponentString(this.getMotd()));
         statusResponse.setVersion(
-                new ServerStatusResponse.Version(MINECRAFT_VERSION.getName(), MINECRAFT_VERSION.getProtocol()));
+                new ServerStatusResponse.Version(SpongeImpl.MINECRAFT_VERSION.getName(), SpongeImpl.MINECRAFT_VERSION.getProtocol()));
         this.applyServerIconToResponse(statusResponse);
     }
 
