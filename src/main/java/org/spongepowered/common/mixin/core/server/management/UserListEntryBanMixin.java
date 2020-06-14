@@ -40,6 +40,7 @@ import org.spongepowered.common.bridge.server.management.BanUserListEntryBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -51,19 +52,17 @@ public abstract class UserListEntryBanMixin<T> extends UserListEntryMixin<T> imp
 
     @Nullable private Text bridge$reason;
     @Nullable private Text bridge$source;
-    @Nullable private CommandSource bridge$commandSrc;
+    private Supplier<CommandSource> bridge$commandSrc;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void bridge$initializeFields(final CallbackInfo ci) { // Prevent this from being overriden in UserListIPBansEntryMixin
         this.bridge$reason = this.reason == null ? null : SpongeTexts.fromLegacy(this.reason);
         this.bridge$source = SpongeTexts.fromLegacy(this.bannedBy);
 
-        final Optional<Player> user;
-
         if ("Server".equals(this.bannedBy)) { // There could be a user called Server, but of course Mojang doesn't care...
-            this.bridge$commandSrc = SpongeImpl.getGame().getServer().getConsole();
-        } else if ((user = Sponge.getGame().getServer().getPlayer(this.bannedBy)).isPresent()) {
-            this.bridge$commandSrc = user.get();
+            this.bridge$commandSrc = () -> SpongeImpl.getGame().getServer().getConsole();
+        } else {
+            this.bridge$commandSrc = () -> Sponge.getGame().getServer().getPlayer(this.bannedBy).orElse(null);
         }
     }
 
@@ -79,7 +78,7 @@ public abstract class UserListEntryBanMixin<T> extends UserListEntryMixin<T> imp
 
     @Override
     public Optional<CommandSource> bridge$getCmdSource() {
-        return Optional.ofNullable(this.bridge$commandSrc);
+        return Optional.ofNullable(this.bridge$commandSrc.get());
     }
 
 }
