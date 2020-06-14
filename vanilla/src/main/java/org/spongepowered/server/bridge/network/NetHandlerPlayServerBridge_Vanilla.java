@@ -24,8 +24,10 @@
  */
 package org.spongepowered.server.bridge.network;
 
+import net.minecraft.util.ResourceLocation;
+
 public interface NetHandlerPlayServerBridge_Vanilla {
 
-    boolean vanillaBridge$supportsChannel(String name);
+    boolean vanillaBridge$supportsChannel(ResourceLocation name);
 
 }

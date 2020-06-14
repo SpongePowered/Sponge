@@ -26,9 +26,11 @@ package org.spongepowered.server.network;
 
 import com.google.common.collect.Sets;
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.network.ChannelBinding;
@@ -47,8 +49,8 @@ public final class VanillaRawDataChannel extends VanillaChannelBinding implement
 
     private final Set<RawDataListener> listeners = Sets.newIdentityHashSet();
 
-    public VanillaRawDataChannel(ChannelRegistrar registrar, String name, PluginContainer owner) {
-        super(registrar, name, owner);
+    public VanillaRawDataChannel(ChannelRegistrar registrar, CatalogKey registration, PluginContainer owner) {
+        super(registrar, registration, owner);
     }
 
     @Override
@@ -77,22 +79,22 @@ public final class VanillaRawDataChannel extends VanillaChannelBinding implement
             try {
                 listener.handlePayload(buf, connection, Platform.Type.SERVER);
             } catch (Throwable e) {
-                getOwner().getLogger().error("Could not pass payload on channel '{}' to {}", getName(), getOwner(), e);
+                getOwner().getLogger().error("Could not pass payload on channel '{}' to {}", getKey(), getOwner(), e);
             }
         }
     }
 
-    private SPacketCustomPayload createPacket(Consumer<ChannelBuf> consumer) {
+    private SCustomPayloadPlayPacket createPacket(Consumer<ChannelBuf> consumer) {
         PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
         consumer.accept((ChannelBuf) buffer);
-        return new SPacketCustomPayload(getName(), buffer);
+        return new SCustomPayloadPlayPacket((ResourceLocation) (Object) getKey(), buffer);
     }
 
     @Override
     public void sendTo(Player player, Consumer<ChannelBuf> payload) {
         validate();
-        final EntityPlayerMP playerMP = (EntityPlayerMP) player;
-        if (((NetHandlerPlayServerBridge_Vanilla) playerMP.connection).vanillaBridge$supportsChannel(getName())) {
+        final ServerPlayerEntity playerMP = (ServerPlayerEntity) player;
+        if (((NetHandlerPlayServerBridge_Vanilla) playerMP.connection).vanillaBridge$supportsChannel((ResourceLocation) (Object) getKey())) {
             playerMP.connection.sendPacket(createPacket(payload));
         }
     }
@@ -106,10 +108,9 @@ public final class VanillaRawDataChannel extends VanillaChannelBinding implement
     @Override
     public void sendToAll(Consumer<ChannelBuf> payload) {
         validate();
-        final String name = getName();
-        SPacketCustomPayload packet = null;
-        for (EntityPlayerMP player : SpongeImpl.getServer().getPlayerList().getPlayers()) {
-            if (((NetHandlerPlayServerBridge_Vanilla) player.connection).vanillaBridge$supportsChannel(name)) {
+        SCustomPayloadPlayPacket packet = null;
+        for (ServerPlayerEntity player : SpongeImpl.getServer().getPlayerList().getPlayers()) {
+            if (((NetHandlerPlayServerBridge_Vanilla) player.connection).vanillaBridge$supportsChannel((ResourceLocation) (Object) getKey())) {
                 if (packet == null) {
                     packet = createPacket(payload);
                 }

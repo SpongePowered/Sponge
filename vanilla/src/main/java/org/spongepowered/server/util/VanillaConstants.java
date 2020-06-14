@@ -24,17 +24,11 @@
  */
 package org.spongepowered.server.util;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.common.mixin.core.world.storage.SaveHandlerMixin;
-
 public class VanillaConstants {
 
     /**
      * Used by SpongeVanilla to load the Forge dimension data information.
      * See {@link Forge#FORGE_DIMENSION_ID_MAP}
-     * usage in {@link SaveHandlerMixin#bridge$loadDimensionAndOtherData(SaveHandler, WorldInfo, NBTTagCompound)}.
      */
     public static final String VANILLA_DIMENSION_DATA = "Data";
 
