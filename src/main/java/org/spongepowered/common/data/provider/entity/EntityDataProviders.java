@@ -112,6 +112,7 @@ import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.data.type.MooshroomType;
 import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.api.data.type.ParrotType;
+import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.RabbitType;
@@ -539,7 +540,10 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 e -> ((MooshroomType) (Object) e.getMooshroomType()),
                 (e, t) -> ((MooshroomEntityAccessor)e).accessor$setMooshroomType((MooshroomEntity.Type) (Object) t));
 
-        register(PhantomEntityAccessor.class, Keys.PHANTOM_PHASE, PhantomEntityAccessor::accessor$getAttackPhase, PhantomEntityAccessor::accessor$setAttackPhase);
+        //noinspection ConstantConditions
+        register(PhantomEntityAccessor.class, Keys.PHANTOM_PHASE,
+            e -> ((PhantomPhase) (Object) e.accessor$getAttackPhase()),
+            (e, phase) -> e.accessor$setAttackPhase((PhantomEntity.AttackPhase) (Object) phase));
         register(PhantomEntity.class, Keys.SIZE, PhantomEntity::getPhantomSize, PhantomEntity::setPhantomSize);
 
         register(AbstractArrowEntity.class, Keys.SHOOTER, e -> (ProjectileSource) e.getShooter(), (e, s) -> e.setShooter((Entity) s)); // TODO other ProjectileSources

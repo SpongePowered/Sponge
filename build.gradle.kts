@@ -32,26 +32,26 @@ spongeDev {
     api(apiProject)
     common(commonProject)
     addedSourceSets {
-        register("mixins") {
-            sourceType.set(SourceType.Mixin)
-            configurations += arrayOf("launch", "mixins", "minecraft")
+        register("launch") {
+            sourceType.set(SourceType.Launch)
+            configurations += "launch"
         }
         register("accessors") {
             sourceType.set(SourceType.Accessor)
             configurations += arrayOf("launch", "mixins", "minecraft")
-
-        }
-        register("launch") {
-            sourceType.set(SourceType.Launch)
-            configurations += "launch"
         }
         register("modlauncher") {
             dependsOn += "launch"
             configurations += arrayOf("launch", "modlauncher")
         }
+        register("mixins") {
+            sourceType.set(SourceType.Mixin)
+            configurations += arrayOf("launch", "mixins", "minecraft")
+        }
+
         register("invalid") {
             sourceType.set(SourceType.Invalid)
-            configurations += arrayOf("launch", "mixins")
+            configurations += arrayOf("launch", "mixins", "minecraft")
         }
     }
 }
@@ -68,13 +68,16 @@ minecraft {
             }
         }
     }
-//    project.sourceSets["main"].resources
-//            .filter { it.name.endsWith("_at.cfg") }
-//            .files
-//            .forEach {
-//                accessTransformer(it)
-//                parent?.minecraft?.accessTransformer(it)
-//            }
+    project.sourceSets["main"].resources
+            .filter { it.name.endsWith("_at.cfg") }
+            .files
+            .forEach {
+                accessTransformer(it)
+                subprojects {
+
+                }
+                parent?.minecraft?.accessTransformer(it)
+            }
 }
 
 tasks {
@@ -132,6 +135,11 @@ dependencies {
     modlauncher("org.ow2.asm:asm-commons:6.2")
     modlauncher("cpw.mods:grossjava9hacks:1.1.+")
     modlauncher("net.minecraftforge:accesstransformers:1.0.+:shadowed")
+    // Annotation Processor
+    "accessorsAnnotationProcessor"(launch)
+    "mixinsAnnotationProcessor"(launch)
+    "accessorsAnnotationProcessor"("org.spongepowered:mixin:0.8")
+    "mixinsAnnotationProcessor"("org.spongepowered:mixin:0.8")
 }
 
 allprojects {
@@ -170,11 +178,11 @@ project("SpongeVanilla") {
             }
             register("launch") {
                 sourceType.set(SourceType.Launch)
-                configurations += "launch"
+                configurations += "vanillaLaunch"
             }
             register("modlauncher") {
                 dependsOn += "launch"
-                configurations += "launch"
+                configurations += "vanillaLaunch"
             }
             register("invalid") {
                 sourceType.set(SourceType.Invalid)
@@ -182,7 +190,8 @@ project("SpongeVanilla") {
         }
     }
 
-    val launch by vanillaProject.configurations.creating
+    val vanillaLaunch by vanillaProject.configurations.creating
+    vanillaLaunch.extendsFrom(launch)
 
     configure<net.minecraftforge.gradle.userdev.UserDevExtension> {
         mappings(mcpType, mcpMappings)
@@ -196,6 +205,12 @@ project("SpongeVanilla") {
                 }
             }
         }
+        commonProject.sourceSets["main"].resources
+                .filter { it.name.endsWith("_at.cfg") }
+                .files
+                .forEach {
+                    accessTransformer(it)
+                }
 
         vanillaProject.sourceSets["main"].resources
                 .filter { it.name.endsWith("_at.cfg") }
@@ -210,9 +225,36 @@ project("SpongeVanilla") {
             exclude(group = "net.minecraft", module = "server")
         }
 
-        launch("net.sf.jopt-simple:jopt-simple:5.0.4")
-        launch(group = "org.spongepowered", name = "plugin-meta", version = "0.4.1")
+        // Invalid set
+        "invalidImplementation"(project(commonProject.path)) {
+            exclude(group = "net.minecraft", module = "server")
+        }
+
+        // Launch Dependencies - Needed to bootstrap the engine(s)
+        vanillaLaunch("org.spongepowered:mixin:0.8")
+        vanillaLaunch("org.checkerframework:checker-qual:2.8.1")
+        vanillaLaunch("com.google.guava:guava:25.1-jre") {
+            exclude(group ="com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
+            exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+            exclude(group = "com.google.j2objc", module = "j2objc-annotations")
+            exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
+            exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+        }
+        vanillaLaunch("com.google.code.gson:gson:2.2.4")
+        vanillaLaunch("org.ow2.asm:asm-tree:6.2")
+        vanillaLaunch("org.ow2.asm:asm-util:6.2")
+        vanillaLaunch("org.apache.logging.log4j:log4j-api:2.8.1")
+        vanillaLaunch("org.spongepowered:configurate-core:3.6.1")
+        vanillaLaunch("org.spongepowered:configurate-hocon:3.6.1")
+        vanillaLaunch("net.sf.jopt-simple:jopt-simple:5.0.4")
         "mixinsImplementation"(commonProject)
+
+
+        // Annotation Processor
+        "accessorsAnnotationProcessor"(vanillaLaunch)
+        "mixinsAnnotationProcessor"(vanillaLaunch)
+        "accessorsAnnotationProcessor"("org.spongepowered:mixin:0.8")
+        "mixinsAnnotationProcessor"("org.spongepowered:mixin:0.8")
     }
 
 }

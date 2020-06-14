@@ -25,12 +25,11 @@
 package org.spongepowered.common.accessor.entity.monster;
 
 import net.minecraft.entity.monster.PhantomEntity;
-import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(PhantomEntity.class)
 public interface PhantomEntityAccessor {
-    @Accessor("attackPhase") PhantomPhase accessor$getAttackPhase();
-    @Accessor("attackPhase") void accessor$setAttackPhase(PhantomPhase phase);
+    @Accessor("attackPhase") PhantomEntity.AttackPhase accessor$getAttackPhase();
+    @Accessor("attackPhase") void accessor$setAttackPhase(PhantomEntity.AttackPhase phase);
 }
