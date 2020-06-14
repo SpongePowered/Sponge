@@ -44,6 +44,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.world.ExplosionEvent;
@@ -146,10 +147,23 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 final IBlockState iblockstate = this.world.getBlockState(blockpos);
 
                                 if (iblockstate.getMaterial() != Material.AIR) {
-                                    final float f2 = this.exploder != null
-                                               ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
+                                    float f2 = this.exploder != null
+                                            ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
                                             , this.world, blockpos, iblockstate)
-                                               : iblockstate.getBlock().getExplosionResistance((Entity) null);
+                                            : iblockstate.getBlock().getExplosionResistance((Entity) null);
+
+                                    //Sponge Start
+                                    if (ShouldFire.EXPLOSION_EVENT_FETCH_BLOCK_EXPLOSION_RESISTANCE) {
+                                        final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+                                        ExplosionEvent.FetchBlockExplosionResistance event =
+                                                SpongeEventFactory.createExplosionEventFetchBlockExplosionResistance(cause, (BlockState) iblockstate, (Explosion) this, new Location<>((World) this.world, d4, d6, d8), (World) this.world, f2);
+
+                                        Sponge.getEventManager().post(event);
+
+                                        f2 = event.getResistance();
+                                    }
+                                    //Sponge End
+
                                     f -= (f2 + 0.3F) * 0.3F;
                                 }
 
