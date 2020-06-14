@@ -34,9 +34,9 @@ import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 
 import java.util.Optional;
 
-public class ItemStackArmorTypeProvider extends ItemStackDataProvider<ArmorMaterial> {
+public class ItemStackArmorMaterialProvider extends ItemStackDataProvider<ArmorMaterial> {
 
-    public ItemStackArmorTypeProvider() {
+    public ItemStackArmorMaterialProvider() {
         super(Keys.ARMOR_MATERIAL);
     }
 
