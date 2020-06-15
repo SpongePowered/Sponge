@@ -198,11 +198,15 @@ project("SpongeVanilla") {
         runs {
             create("server") {
                 workingDirectory(vanillaProject.file("./run"))
-                mods {
-                    create("sponge") {
-                        source(vanillaProject.sourceSets["main"])
-                    }
-                }
+                args.addAll(listOf("nogui", "--launchTarget", "sponge_server_dev"))
+                main = "org.spongepowered.modlauncher.Main"
+            }
+
+            create("client") {
+                environment("target", "client")
+                workingDirectory(vanillaProject.file("./run"))
+                args.addAll(listOf("--launchTarget", "sponge_client_dev", "--version", "1.14.4", "--accessToken", "0"))
+                main = "org.spongepowered.modlauncher.Main"
             }
         }
         commonProject.sourceSets["main"].resources
@@ -232,7 +236,7 @@ project("SpongeVanilla") {
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         vanillaLaunch("org.spongepowered:mixin:0.8")
-        vanillaLaunch("org.checkerframework:checker-qual:2.8.1")
+        vanillaLaunch("org.checkerframework:checker-qual:3.4.1")
         vanillaLaunch("com.google.guava:guava:25.1-jre") {
             exclude(group ="com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
             exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
@@ -247,6 +251,7 @@ project("SpongeVanilla") {
         vanillaLaunch("org.spongepowered:configurate-core:3.6.1")
         vanillaLaunch("org.spongepowered:configurate-hocon:3.6.1")
         vanillaLaunch("net.sf.jopt-simple:jopt-simple:5.0.4")
+        vanillaLaunch("cpw.mods:grossjava9hacks:1.1.+")
         "mixinsImplementation"(commonProject)
 
 

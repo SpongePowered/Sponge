@@ -173,7 +173,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API implements org
     @Shadow public abstract LongSet shadow$getForcedChunks();
     @Shadow public abstract boolean shadow$forceChunk(int p_217458_1_, int p_217458_2_, boolean p_217458_3_);
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
-    @Shadow public abstract void shadow$func_217393_a(BlockPos p_217393_1_, BlockState p_217393_2_, BlockState p_217393_3_);
+    @Shadow public abstract void shadow$onBlockStateChange(BlockPos p_217393_1_, BlockState p_217393_2_, BlockState p_217393_3_);
     @Shadow public abstract PointOfInterestManager shadow$getPointOfInterestManager();
     @Shadow public abstract boolean shadow$func_217483_b_(BlockPos p_217483_1_);
     @Shadow public abstract boolean shadow$func_222887_a(SectionPos p_222887_1_);
