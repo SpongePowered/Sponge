@@ -35,6 +35,7 @@
       "api.inventory.ContainerMixin_API",
       "api.inventory.IInventoryMixin_API",
       "api.inventory.SlotMixin_API",
+      "api.viewable.DoubleSidedInventoryMixin_API",
       "api.viewable.ViewableInventoryMixin_API",
       "event.ContainerMixin",
       "event.CraftingResultSlotMixin",

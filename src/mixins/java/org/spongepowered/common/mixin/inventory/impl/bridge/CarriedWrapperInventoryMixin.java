@@ -39,7 +39,7 @@ import java.util.Optional;
 @Mixin(CarriedWrapperInventory.class)
 public abstract class CarriedWrapperInventoryMixin implements InventoryAdapter {
 
-    @Shadow public InventoryBridge shadow$getWrapped() {
+    @Shadow(remap = false) public InventoryBridge shadow$getWrapped() {
         throw new AbstractMethodError("Shadow");
     }
 

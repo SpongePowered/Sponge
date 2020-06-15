@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.mixin.inventory.api.viewable;
 
-import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.INamedContainerProvider;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -38,11 +37,8 @@ import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import java.util.Collections;
 import java.util.Set;
 
-@Mixin(value = {
-        INamedContainerProvider.class,
-        IMerchant.class
-}, priority = 999)
-public interface ViewableInventoryMixin_API extends ViewableInventory {
+@Mixin(value = DoubleSidedInventory.class, priority = 999)
+public interface DoubleSidedInventoryMixin_API extends ViewableInventory {
 
     @Override
     default Set<Player> getViewers() {

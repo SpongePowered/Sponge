@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.inventory.impl.bridge;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.AbstractFurnaceContainer;
 import net.minecraft.inventory.container.BeaconContainer;
 import net.minecraft.inventory.container.BrewingStandContainer;
 import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.DispenserContainer;
 import net.minecraft.inventory.container.EnchantmentContainer;
-import net.minecraft.inventory.container.FurnaceContainer;
 import net.minecraft.inventory.container.HopperContainer;
 import net.minecraft.inventory.container.HorseInventoryContainer;
 import net.minecraft.inventory.container.MerchantContainer;
@@ -52,7 +52,7 @@ import java.util.function.Predicate;
         ChestContainer.class,
         HopperContainer.class,
         DispenserContainer.class,
-        FurnaceContainer.class,
+        AbstractFurnaceContainer.class,
         EnchantmentContainer.class,
         RepairContainer.class,
         BrewingStandContainer.class,
