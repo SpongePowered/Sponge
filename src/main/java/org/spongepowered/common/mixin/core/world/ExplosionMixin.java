@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
+import javafx.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -68,12 +70,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
@@ -122,6 +119,35 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     public void doExplosionA() {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
         if (this.impl$shouldBreakBlocks) {
+            HashSet<BlockPos> blockPositions = getBlocksInRadius();
+            HashMap<Vector3i, Pair<BlockState, Float>> blocks = new HashMap<>();
+
+            for (BlockPos blockPos : blockPositions) {
+                final IBlockState iblockstate = this.world.getBlockState(blockPos);
+
+                float resistance = 0;
+                if (iblockstate.getMaterial() != Material.AIR) {
+                    resistance = this.exploder != null
+                            ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
+                            , this.world, blockPos, iblockstate)
+                            : iblockstate.getBlock().getExplosionResistance((Entity) null);
+                }
+
+                Pair<BlockState, Float> pair = new Pair<>((BlockState) iblockstate, resistance);
+
+                blocks.put(new Vector3i(blockPos.getX(), blockPos.getY(), blockPos.getZ()), pair);
+            }
+
+            if (ShouldFire.EXPLOSION_EVENT_BLOCK_RESISTANCE) {
+                final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+                final ExplosionEvent.BlockResistance blockResistance =
+                        SpongeEventFactory.createExplosionEventBlockResistance(cause, blocks, (Explosion) this, (World) this.world);
+
+                SpongeImpl.postEvent(blockResistance);
+
+                blocks = blockResistance.getBlocks();
+            }
+
             final Set<BlockPos> set = Sets.<BlockPos>newHashSet();
 
             for (int j = 0; j < impl$resolution; ++j) {
@@ -143,33 +169,24 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             double d8 = this.z;
 
                             for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
+                                final Vector3i vectorPos = new Vector3i(d4, d6, d8);
                                 final BlockPos blockpos = new BlockPos(d4, d6, d8);
-                                final IBlockState iblockstate = this.world.getBlockState(blockpos);
 
-                                if (iblockstate.getMaterial() != Material.AIR) {
-                                    float f2 = this.exploder != null
-                                            ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
-                                            , this.world, blockpos, iblockstate)
-                                            : iblockstate.getBlock().getExplosionResistance((Entity) null);
+                                if (blocks.containsKey(vectorPos)) {
 
-                                    //Sponge Start
-                                    if (ShouldFire.EXPLOSION_EVENT_FETCH_BLOCK_EXPLOSION_RESISTANCE) {
-                                        final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-                                        ExplosionEvent.FetchBlockExplosionResistance event =
-                                                SpongeEventFactory.createExplosionEventFetchBlockExplosionResistance(cause, (BlockState) iblockstate, (Explosion) this, new Location<>((World) this.world, d4, d6, d8), (World) this.world, f2);
+                                    final IBlockState iblockstate = (IBlockState) blocks.get(vectorPos).getKey();
 
-                                        Sponge.getEventManager().post(event);
-
-                                        f2 = event.getResistance();
+                                    if (iblockstate.getMaterial() != Material.AIR) {
+                                        final float f2 = blocks.get(vectorPos).getValue();
+                                        f -= (f2 + 0.3F) * 0.3F;
                                     }
-                                    //Sponge End
 
-                                    f -= (f2 + 0.3F) * 0.3F;
-                                }
-
-                                if (f > 0.0F && (this.exploder == null || this.exploder
-                                        .canExplosionDestroyBlock((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
-                                    set.add(blockpos);
+                                    if (f > 0.0F && (this.exploder == null || this.exploder
+                                            .canExplosionDestroyBlock((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
+                                        set.add(blockpos);
+                                    }
+                                } else {
+                                    break;
                                 }
 
                                 d4 += d0 * 0.30000001192092896D;
@@ -193,8 +210,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         // Sponge Start - Check if this explosion should damage entities
         final List<Entity> list = this.impl$shouldDamageEntities
-                            ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
-                            : Collections.emptyList();
+                ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
+                : Collections.emptyList();
         // Now we can throw our Detonate Event
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
             final List<Location<World>> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
@@ -210,7 +227,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             }
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             final ExplosionEvent.Detonate detonate =
-                SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities, (Explosion) this, (World) this.world);
+                    SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities, (Explosion) this, (World) this.world);
             SpongeImpl.postEvent(detonate);
             // Clear the positions so that they can be pulled from the event
             this.affectedBlockPositions.clear();
@@ -281,6 +298,44 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                 }
             }
         }
+    }
+
+    private HashSet<BlockPos> getBlocksInRadius() {
+        HashSet<BlockPos> blocks = new HashSet<>();
+
+        //    f =   radius  * ( 1   + (([random between 0 and 0.6] - 0.3) * [randomness]))
+        float maxF = this.size * (1.0F + (0.3f * impl$randomness));
+
+        for (int j = 0; j < impl$resolution; ++j) {
+            for (int k = 0; k < impl$resolution; ++k) {
+                for (int l = 0; l < impl$resolution; ++l) {
+                    if (j == 0 || j == impl$resolution - 1 || k == 0 || k == impl$resolution - 1 || l == 0 || l == impl$resolution - 1) {
+                        double d0 = (double) ((float) j / (float)(impl$resolution - 1) * 2.0F - 1.0F);
+                        double d1 = (double) ((float) k / (float)(impl$resolution - 1) * 2.0F - 1.0F);
+                        double d2 = (double) ((float) l / (float)(impl$resolution - 1) * 2.0F - 1.0F);
+                        final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                        d0 = d0 / d3;
+                        d1 = d1 / d3;
+                        d2 = d2 / d3;
+                        float f = maxF;
+                        //Sponge End
+                        double d4 = this.x;
+                        double d6 = this.y;
+                        double d8 = this.z;
+
+                        for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
+                            blocks.add(new BlockPos(d4, d6, d8));
+
+                            d4 += d0 * 0.30000001192092896D;
+                            d6 += d1 * 0.30000001192092896D;
+                            d8 += d2 * 0.30000001192092896D;
+                        }
+                    }
+                }
+            }
+        }
+
+        return blocks;
     }
 
     /**
