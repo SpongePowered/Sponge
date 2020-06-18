@@ -41,8 +41,8 @@ import java.util.Map;
 public final class ChunkRegenerateFlagRegistryModule implements RegistryModule {
 
     @RegisterCatalog(ChunkRegenerateFlags.class)
-    private final Map<String, SpongeChunkRegenerateFlag> flags = new LinkedHashMap<>();
-    private final Int2ObjectMap<SpongeChunkRegenerateFlag> maskedFlags = new Int2ObjectLinkedOpenHashMap<>(70);
+    private final Map<String, SpongeChunkRegenerateFlag> flags = new LinkedHashMap<>(4);
+    private final Int2ObjectMap<SpongeChunkRegenerateFlag> maskedFlags = new Int2ObjectLinkedOpenHashMap<>(4);
     private static ChunkRegenerateFlagRegistryModule INSTANCE = new ChunkRegenerateFlagRegistryModule();
 
     public static ChunkRegenerateFlagRegistryModule getInstance() {
