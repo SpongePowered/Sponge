@@ -99,28 +99,28 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
         for (int i = 0; i < 64; i++) { // 64 because we get to the 6th bit of possible combinations
             final StringJoiner builder = new StringJoiner("|");
             if ((i & Constants.BlockChangeFlags.NEIGHBOR_MASK) != 0) {
-                builder.add(Flag.NOTIFY_NEIGHBOR.name);
+                builder.add("NEIGHBOR");
             }
             if ((i & Constants.BlockChangeFlags.NOTIFY_CLIENTS) != 0) {
                 // We don't want to confuse that there are going to be multiple flags
                 // but with slight differences because of the notify flag
-                builder.add(Flag.NOTIFY_CLIENTS.name);
+                builder.add("NOTIFY_CLIENTS");
             }
             if ((i & Constants.BlockChangeFlags.IGNORE_RENDER) != 0) {
                 // We don't want to confuse that there are going to be multiple flags
                 // but with a slight difference because of the ignore render flag
-                builder.add(Flag.IGNORE_RENDER.name);
+                builder.add("IGNORE_RENDER");
             }
             if ((i & Constants.BlockChangeFlags.FORCE_RE_RENDER) != 0) {
                 // We don't want to confuse that there are going to be multiple flags
                 // but with a slight difference due to the client only flag.
-                builder.add(Flag.FORCE_RE_RENDER.name);
+                builder.add("FORCE_RE_RENDER");
             }
             if ((i & Constants.BlockChangeFlags.OBSERVER_MASK) == 0) {
-                builder.add(Flag.IGNORE_OBSERVER.name);
+                builder.add("OBSERVER");
             }
             if ((i & Constants.BlockChangeFlags.PHYSICS_MASK) == 0) {
-                builder.add(Flag.IGNORE_PHYSICS.name);
+                builder.add("PHYSICS");
             }
             if (Constants.BlockChangeFlags.NONE == i) {
                 register(new SpongeBlockChangeFlag("NONE".toLowerCase(Locale.ENGLISH), i));
@@ -153,31 +153,6 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
 
     public Collection<SpongeBlockChangeFlag> getValues() {
         return Collections.unmodifiableCollection(this.flags.values());
-    }
-
-    public static final class Flag {
-
-        public static final Flag NOTIFY_NEIGHBOR = new Flag("NEIGHBOR", Constants.BlockChangeFlags.NEIGHBOR_MASK);
-        public static final Flag NOTIFY_CLIENTS = new Flag("NOTIFY_CLIENTS", Constants.BlockChangeFlags.NOTIFY_CLIENTS);
-        public static final Flag IGNORE_RENDER = new Flag("IGNORE_RENDER", Constants.BlockChangeFlags.IGNORE_RENDER);
-        public static final Flag FORCE_RE_RENDER = new Flag("FORCE_RE_RENDER", Constants.BlockChangeFlags.FORCE_RE_RENDER);
-        public static final Flag IGNORE_OBSERVER = new Flag("OBSERVER", Constants.BlockChangeFlags.OBSERVER_MASK);
-        public static final Flag IGNORE_PHYSICS = new Flag("PHYSICS", Constants.BlockChangeFlags.PHYSICS_MASK);
-
-        private static final ImmutableList<Flag> flags = ImmutableList.of(NOTIFY_NEIGHBOR, NOTIFY_CLIENTS, IGNORE_RENDER, FORCE_RE_RENDER, IGNORE_OBSERVER, IGNORE_PHYSICS);
-
-        private final String name;
-        private final int mask;
-
-        public static Collection<Flag> values() {
-            return flags;
-        }
-
-        private Flag(String name, int mask) {
-            this.name = name;
-            this.mask = mask;
-        }
-
     }
 
 }
