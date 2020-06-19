@@ -45,7 +45,7 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
 
     @RegisterCatalog(org.spongepowered.api.world.BlockChangeFlags.class)
     private final Map<String, SpongeBlockChangeFlag> flags = new LinkedHashMap<>();
-    private final Int2ObjectMap<SpongeBlockChangeFlag> maskedFlags = new Int2ObjectLinkedOpenHashMap<>(70);
+    private final SpongeBlockChangeFlag[] maskedFlags = new SpongeBlockChangeFlag[64];
     private static BlockChangeFlagRegistryModule INSTANCE = new BlockChangeFlagRegistryModule();
 
     public static BlockChangeFlagRegistryModule getInstance() {
@@ -59,7 +59,7 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
         if (flag == 2) {
             return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.PHYSICS_OBSERVER;
         }
-        final SpongeBlockChangeFlag spongeBlockChangeFlag = getInstance().maskedFlags.get(flag);
+        final SpongeBlockChangeFlag spongeBlockChangeFlag = getInstance().maskedFlags[flag];
         if (spongeBlockChangeFlag != null) {
             return spongeBlockChangeFlag;
         }
@@ -147,7 +147,7 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
     }
 
     private void register(SpongeBlockChangeFlag flag) {
-        this.maskedFlags.put(flag.getRawFlag(), flag);
+        this.maskedFlags[flag.getRawFlag()] = flag;
         this.flags.put(flag.getName(), flag);
     }
 
