@@ -143,7 +143,6 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
                 register(new SpongeBlockChangeFlag(builder.toString().toLowerCase(Locale.ENGLISH), i));
             }
         }
-        RegistryHelper.mapFields(org.spongepowered.api.world.BlockChangeFlags.class, this.flags);
     }
 
     private void register(SpongeBlockChangeFlag flag) {
