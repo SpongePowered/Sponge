@@ -1,5 +1,5 @@
 /*
- * This file is part of Sponge, licensed under the MIT License (MIT).
+ * This file is part of plugin-spi, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,21 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.launch.plugin.config.section;
 
-import org.apache.logging.log4j.Logger;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.function.Supplier;
+import java.net.URL;
 
-public interface InternalLaunchService {
+@ConfigSerializable
+public final class LinksSection {
 
-    void addJreExtensionsToClassPath();
+    @Setting(value = "homepage")
+    private URL homepage;
 
-    void registerSuperclassModification(final String targetClass, final String newSuperClass);
+    @Setting(value = "source")
+    private URL source;
 
-    Supplier<? extends IExitHandler> getExitHandler();
+    @Setting(value = "issues")
+    private URL issues;
 
-    Supplier<? extends Logger> getLaunchLogger();
+    public URL getHomepage() {
+        return this.homepage;
+    }
 
-    boolean isVanilla();
+    public URL getSource() {
+        return this.source;
+    }
+
+    public URL getIssues() {
+        return this.issues;
+    }
 }

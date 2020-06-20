@@ -9,12 +9,10 @@ buildscript {
     }
 }
 
-repositories {
-    maven("https://files.minecraftforge.net/maven")
-}
 plugins {
     id("org.spongepowered.gradle.sponge.common")
     id("net.minecraftforge.gradle")
+    `maven-publish`
 }
 
 apply {
@@ -100,6 +98,10 @@ dependencies {
 
     runtime("org.apache.logging.log4j:log4j-slf4j-impl:2.8.1")
 
+    // api
+    api("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+    api("org.spongepowered:plugin-meta:0.6.0-SNAPSHOT")
+
     // Database stuffs... likely needs to be looked at
     implementation("com.zaxxer:HikariCP:2.6.3")
     implementation("org.mariadb.jdbc:mariadb-java-client:2.0.3")
@@ -144,10 +146,62 @@ dependencies {
 
 allprojects {
 
+    apply(plugin = "maven-publish")
+
     afterEvaluate {
         tasks {
             compileJava {
                 options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "sponge v2"
+            setUrl("https://repo-new.spongepowered.org/repository/maven-public/")
+        }
+    }
+    val spongeSnapshotRepo: String? by project
+    val spongeReleaseRepo: String? by project
+    tasks {
+
+//    withType<PublishToMavenRepository>().configureEach {
+//        onlyIf {
+//            (repository == publishing.repositories["GitHubPackages"] &&
+//                    !publication.version.endsWith("-SNAPSHOT")) ||
+//                    (!spongeSnapshotRepo.isNullOrBlank()
+//                            && !spongeReleaseRepo.isNullOrBlank()
+//                            && repository == publishing.repositories["spongeRepo"]
+//                            && publication == publishing.publications["sponge"])
+//
+//        }
+//    }
+    }
+
+    publishing {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                this.setUrl(uri("https://maven.pkg.github.com/spongepowered/plugin-meta"))
+                credentials {
+                    username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME")
+                    password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+                }
+            }
+            // Set by the build server
+            maven {
+                name = "spongeRepo"
+                val repoUrl = if ((version as String).endsWith("-SNAPSHOT")) spongeSnapshotRepo else spongeReleaseRepo
+                repoUrl?.apply {
+                    setUrl(uri(this))
+                }
+                val spongeUsername: String? by project
+                val spongePassword: String? by project
+                credentials {
+                    username = spongeUsername ?: System.getenv("ORG_GRADLE_PROJECT_spongeUsername")
+                    password = spongePassword ?: System.getenv("ORG_GRADLE_PROJECT_spongePassword")
+                }
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * This file is part of Sponge, licensed under the MIT License (MIT).
+ * This file is part of plugin-spi, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,30 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.launch;
+package org.spongepowered.common.launch;
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.spongepowered.lwts.AbstractTestTweaker;
+public final class LauncherConstants {
 
-import java.io.File;
-
-public class TestTweaker extends AbstractTestTweaker {
-
-    @Override
-    public void injectIntoClassLoader(LaunchClassLoader loader) {
-        super.injectIntoClassLoader(loader);
-        VanillaServerTweaker.configureLaunchClassLoader(loader);
-
-        registerAccessTransformer("META-INF/common_at.cfg");
-
-        SpongeLaunch.initPaths(new File("."));
-
-        VanillaServerTweaker.configureMixinEnvironment();
+    private LauncherConstants() {
     }
 
-    @Override
-    public String getLaunchTarget() {
-        return "org.spongepowered.server.test.TestMain";
+    public static final class Manifest {
+
+        private Manifest() {
+        }
+
+        public static final class Attributes {
+
+            public static final String LOADER = "Loader";
+            public static final String MIXIN_CONFIGS = "MixinConfigs";
+
+            private Attributes() {
+            }
+        }
     }
 
+    public static final class Plugin {
+
+        private Plugin() {
+        }
+
+        public static final class Metadata {
+
+            public static final String FILENAME = "META-INF/plugin.meta";
+
+            private Metadata() {
+            }
+        }
+    }
 }

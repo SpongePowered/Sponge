@@ -1,5 +1,5 @@
 /*
- * This file is part of Sponge, licensed under the MIT License (MIT).
+ * This file is part of plugin-spi, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,30 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.launch;
+package org.spongepowered.common.launch.plugin.config.section;
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.spongepowered.lwts.AbstractTestTweaker;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.io.File;
+@ConfigSerializable
+public final class DependencySection {
 
-public class TestTweaker extends AbstractTestTweaker {
+    @Setting("id")
+    private String id;
 
-    @Override
-    public void injectIntoClassLoader(LaunchClassLoader loader) {
-        super.injectIntoClassLoader(loader);
-        VanillaServerTweaker.configureLaunchClassLoader(loader);
+    @Setting("version")
+    private String version;
 
-        registerAccessTransformer("META-INF/common_at.cfg");
-
-        SpongeLaunch.initPaths(new File("."));
-
-        VanillaServerTweaker.configureMixinEnvironment();
+    public String getId() {
+        return this.id;
     }
 
-    @Override
-    public String getLaunchTarget() {
-        return "org.spongepowered.server.test.TestMain";
+    public String getVersion() {
+        return this.version;
     }
-
 }

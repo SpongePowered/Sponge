@@ -26,7 +26,6 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.spongepowered.common.launch.SpongeLaunch;
 
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {

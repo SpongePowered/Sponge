@@ -1,5 +1,5 @@
 /*
- * This file is part of Sponge, licensed under the MIT License (MIT).
+ * This file is part of plugin-spi, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,30 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.launch;
+package org.spongepowered;
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.spongepowered.lwts.AbstractTestTweaker;
+import net.minecraft.server.MinecraftServer;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 
-public class TestTweaker extends AbstractTestTweaker {
+public final class ServerLauncher extends Launcher {
 
-    @Override
-    public void injectIntoClassLoader(LaunchClassLoader loader) {
-        super.injectIntoClassLoader(loader);
-        VanillaServerTweaker.configureLaunchClassLoader(loader);
-
-        registerAccessTransformer("META-INF/common_at.cfg");
-
-        SpongeLaunch.initPaths(new File("."));
-
-        VanillaServerTweaker.configureMixinEnvironment();
+    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
+        Launcher.populateBlackboard(pluginSpiVersion, baseDirectory, pluginDirectories);
+        Launcher.loadPlugins();
+        Launcher.getLogger().info("Loading Minecraft Server, please wait...");
+        MinecraftServer.main(args);
     }
-
-    @Override
-    public String getLaunchTarget() {
-        return "org.spongepowered.server.test.TestMain";
-    }
-
 }

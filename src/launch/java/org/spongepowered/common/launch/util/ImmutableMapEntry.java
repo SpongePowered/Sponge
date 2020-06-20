@@ -1,5 +1,5 @@
 /*
- * This file is part of Sponge, licensed under the MIT License (MIT).
+ * This file is part of plugin-spi, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,30 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.launch;
+package org.spongepowered.common.launch.util;
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.spongepowered.lwts.AbstractTestTweaker;
+import java.util.Map;
 
-import java.io.File;
+public final class ImmutableMapEntry<K, V> implements Map.Entry<K, V> {
 
-public class TestTweaker extends AbstractTestTweaker {
+    private final K key;
+    private final V value;
 
-    @Override
-    public void injectIntoClassLoader(LaunchClassLoader loader) {
-        super.injectIntoClassLoader(loader);
-        VanillaServerTweaker.configureLaunchClassLoader(loader);
+    private ImmutableMapEntry(final K key, final V value) {
+        this.key = key;
+        this.value = value;
+    }
 
-        registerAccessTransformer("META-INF/common_at.cfg");
-
-        SpongeLaunch.initPaths(new File("."));
-
-        VanillaServerTweaker.configureMixinEnvironment();
+    public static <K, V> ImmutableMapEntry<K, V> of(final K key, final V value) {
+        return new ImmutableMapEntry<>(key, value);
     }
 
     @Override
-    public String getLaunchTarget() {
-        return "org.spongepowered.server.test.TestMain";
+    public K getKey() {
+        return this.key;
     }
 
+    @Override
+    public V getValue() {
+        return this.value;
+    }
+
+    @Override
+    public V setValue(V v) {
+        throw new IllegalStateException("Cannot modify value!");
+    }
 }

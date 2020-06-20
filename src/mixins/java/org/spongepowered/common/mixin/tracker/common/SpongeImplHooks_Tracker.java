@@ -44,7 +44,7 @@ public class SpongeImplHooks_Tracker {
      * @param world The world object
      * @return True if the tracker is currently working on that world and restoring
      */
-    @Overwrite
+    @Overwrite(remap = false)
     @SuppressWarnings("unused") // overridden to be used in MixinSpongeImplHooks.
     public static boolean isRestoringBlocks(World world) {
         if (((WorldBridge) world).bridge$isFake()) {

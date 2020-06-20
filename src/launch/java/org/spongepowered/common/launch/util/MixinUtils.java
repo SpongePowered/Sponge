@@ -1,5 +1,5 @@
 /*
- * This file is part of Sponge, licensed under the MIT License (MIT).
+ * This file is part of plugin-spi, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,30 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.launch;
+package org.spongepowered.common.launch.util;
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.spongepowered.lwts.AbstractTestTweaker;
+import org.spongepowered.launch.LauncherConstants;
 
-import java.io.File;
+import java.util.Optional;
+import java.util.jar.Manifest;
 
-public class TestTweaker extends AbstractTestTweaker {
+public final class MixinUtils {
 
-    @Override
-    public void injectIntoClassLoader(LaunchClassLoader loader) {
-        super.injectIntoClassLoader(loader);
-        VanillaServerTweaker.configureLaunchClassLoader(loader);
-
-        registerAccessTransformer("META-INF/common_at.cfg");
-
-        SpongeLaunch.initPaths(new File("."));
-
-        VanillaServerTweaker.configureMixinEnvironment();
+    private MixinUtils() {
     }
 
-    @Override
-    public String getLaunchTarget() {
-        return "org.spongepowered.server.test.TestMain";
+    public static Optional<String> getMixinConfigs(final Manifest manifest) {
+        return Optional.ofNullable(manifest.getMainAttributes().getValue(LauncherConstants.Manifest.Attributes.MIXIN_CONFIGS));
     }
-
 }
