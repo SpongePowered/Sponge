@@ -53,6 +53,9 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
     }
 
     public static SpongeBlockChangeFlag fromNativeInt(int flag) {
+        if (flag >= getInstance().maskedFlags.length) {
+            return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.ALL;
+        }
         if (flag == 3) {
             return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.ALL;
         }
@@ -60,10 +63,7 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
             return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.PHYSICS_OBSERVER;
         }
         final SpongeBlockChangeFlag spongeBlockChangeFlag = getInstance().maskedFlags[flag];
-        if (spongeBlockChangeFlag != null) {
-            return spongeBlockChangeFlag;
-        }
-        return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.ALL;
+        return spongeBlockChangeFlag;
     }
 
     public static BlockChangeFlag andNotifyClients(BlockChangeFlag flag) {
