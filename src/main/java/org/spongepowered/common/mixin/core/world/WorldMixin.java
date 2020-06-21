@@ -493,6 +493,11 @@ public abstract class WorldMixin implements WorldBridge {
         )
     )
     private Chunk impl$returnEmptyChunk(final World world, final int chunkX, final int chunkZ) {
+        return getEmptyChunk();
+    }
+
+    @Override
+    public SpongeEmptyChunk getEmptyChunk() {
         if (this.impl$emptyChunk == null) {
             this.impl$emptyChunk = new SpongeEmptyChunk((World) (Object) this, 0, 0);
         }

@@ -78,7 +78,6 @@ import javax.annotation.Nullable;
 @Mixin(ChunkProviderServer.class)
 public abstract class ChunkProviderServerMixin implements ChunkProviderServerBridge, ChunkProviderBridge {
 
-    @Nullable private SpongeEmptyChunk impl$EMPTY_CHUNK;
     private boolean impl$denyChunkRequests = true;
     private boolean impl$forceChunkRequests = false;
     private long impl$chunkUnloadDelay = Constants.World.DEFAULT_CHUNK_UNLOAD_DELAY;
@@ -101,7 +100,6 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
         if (((WorldBridge) worldObjIn).bridge$isFake()) {
             return;
         }
-        this.impl$EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
         final WorldCategory worldCategory = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld();
 
         ((WorldServerBridge) worldObjIn).bridge$updateConfigCache();
@@ -147,7 +145,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
 
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null && this.impl$canDenyChunkRequest()) {
-            return this.impl$EMPTY_CHUNK;
+            return ((WorldBridge) this.world).getEmptyChunk();
         }
 
         if (chunk == null) {
