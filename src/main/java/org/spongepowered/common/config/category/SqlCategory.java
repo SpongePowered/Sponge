@@ -39,4 +39,5 @@ public class SqlCategory extends ConfigCategory {
     public Map<String, String> getAliases() {
         return this.aliases;
     }
+
 }

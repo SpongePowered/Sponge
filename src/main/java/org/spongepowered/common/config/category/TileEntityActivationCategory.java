@@ -33,9 +33,11 @@ import java.util.Map;
 @ConfigSerializable
 public class TileEntityActivationCategory extends ConfigCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered tileentities will be added to this config with default settings.")
+    @Setting(value = "auto-populate",
+            comment = "If 'true', newly discovered tileentities will be added to this config with default settings.")
     private boolean autoPopulate = false;
-    @Setting(value = "default-block-range", comment = "Default activation block range used for all tileentities unless overridden.")
+    @Setting(value = "default-block-range",
+            comment = "Default activation block range used for all tileentities unless overridden.")
     private int defaultBlockRange = 64;
     @Setting(value = "default-tick-rate", comment = "Default tick rate used for all tileentities unless overridden.")
     private int defaultTickRate = 1;
@@ -60,4 +62,5 @@ public class TileEntityActivationCategory extends ConfigCategory {
     public Map<String, TileEntityActivationModCategory> getModList() {
         return this.modList;
     }
+
 }

@@ -30,32 +30,41 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class ModuleCategory extends ConfigCategory {
 
-    @Setting(value = "bungeecord")
+    @Setting(value = "bungeecord", comment = ""
+            + "The BungeeCord Module, allows Sponge to be used with a Proxy like Bungeecord or Velocity.\n"
+            + "Usually you want to also enable 'bungeecord.ip-forwarding' with this.")
     private boolean pluginBungeeCord = false;
 
-    @Setting(value = "entity-activation-range")
+    @Setting(value = "entity-activation-range", comment = ""
+            + "The entity activation module, allows you to tweak entity activation ranges,\n"
+            + "similarly to \"Entity Distance\" in the latest 1.16 snapshots but per mob.\n"
+            + "Essentially, it changes how far an entity can be away from a player, until it stops being updated (e.g. moving).")
     private boolean pluginEntityActivation = true;
 
-    @Setting(value = "tileentity-activation", comment = "Controls block range and tick rate of tileentities. \n"
-                                                      + "Use with caution as this can break intended functionality.")
+    @Setting(value = "tileentity-activation", comment = ""
+            + "Controls block range and tick rate of tileentities.\n"
+            + "Use with caution as this can break intended functionality.")
     private boolean pluginTileEntityActivation = false;
 
-    @Setting(value = "entity-collisions")
+    @Setting(value = "entity-collisions", comment = ""
+            + "Module that allows you to configure the maximum amount of entities a specific entity or block can collide with.")
     private boolean pluginEntityCollisions = true;
 
-    @Setting("timings")
+    @Setting(value = "timings", comment = ""
+            + "Module to run Aikar's Timings, profile your server performance and get a sharable web result.\n"
+            + "https://github.com/aikar/timings#aikars-minecraft-timings-viewer-v2")
     private boolean pluginTimings = true;
 
-    @Setting(value = "exploits", comment = "Controls whether any exploit patches are applied.\n"
-                                           + "If there are issues with any specific exploits, please\n"
-                                           + "test in the exploit category first, before disabling all\n"
-                                           + "exploits with this toggle.")
+    @Setting(value = "exploits", comment = ""
+            + "Controls whether any exploit patches are applied.\n"
+            + "If there are issues with any specific exploits, please test in the exploit category first,\n"
+            + "before disabling all exploits with this toggle.")
     private boolean enableExploitPatches = true;
 
-    @Setting("optimizations")
+    @Setting(value = "optimizations")
     private boolean enableOptimizationPatches = true;
 
-    @Setting("tracking")
+    @Setting(value = "tracking", comment = "Can be used to disable some parts of the tracking.")
     private boolean tracking = true;
 
     @Setting(value = "realtime", comment = "Use real (wall) time instead of ticks as much as possible")
@@ -138,4 +147,5 @@ public class ModuleCategory extends ConfigCategory {
     public void setPluginRealTime(boolean state) {
         this.pluginRealTime = state;
     }
+
 }

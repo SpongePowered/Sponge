@@ -44,7 +44,8 @@ public class LoggingCategory extends ConfigCategory {
     private boolean chunkLoadLogging = false;
     @Setting(value = "chunk-unload", comment = "Log when chunks are unloaded")
     private boolean chunkUnloadLogging = false;
-    @Setting(value = "chunk-gc-queue-unload", comment = "Log when chunks are queued to be unloaded by the chunk garbage collector.")
+    @Setting(value = "chunk-gc-queue-unload",
+            comment = "Log when chunks are queued to be unloaded by the chunk garbage collector.")
     private boolean chunkGCQueueUnloadLogging = false;
     @Setting(value = "entity-spawn", comment = "Log when living entities are spawned")
     private boolean entitySpawnLogging = false;
@@ -52,11 +53,15 @@ public class LoggingCategory extends ConfigCategory {
     private boolean entityDespawnLogging = false;
     @Setting(value = "entity-death", comment = "Log when living entities are destroyed")
     private boolean entityDeathLogging = false;
-    @Setting(value = "exploit-sign-command-updates", comment = "Log when server receives exploited packet to update a sign containing commands from player with no permission.")
+    @Setting(value = "exploit-sign-command-updates", comment = ""
+            + "Log when server receives exploited packet to update a sign containing commands\n"
+            + "from player with no permission.")
     public boolean logExploitSignCommandUpdates = false;
-    @Setting(value = "exploit-itemstack-name-overflow", comment = "Log when server receives exploited packet with itemstack name exceeding string limit.")
+    @Setting(value = "exploit-itemstack-name-overflow",
+            comment = "Log when server receives exploited packet with itemstack name exceeding string limit.")
     public boolean logExploitItemStackNameOverflow = false;
-    @Setting(value = "exploit-respawn-invisibility", comment = "Log when player attempts to respawn invisible to surrounding players.")
+    @Setting(value = "exploit-respawn-invisibility",
+            comment = "Log when player attempts to respawn invisible to surrounding players.")
     public boolean logExploitRespawnInvisibility = false;
     @Setting(value = "log-stacktraces", comment = "Add stack traces to dev logging")
     private boolean logWithStackTraces = false;
@@ -64,7 +69,9 @@ public class LoggingCategory extends ConfigCategory {
     private boolean logEntityCollisionChecks = false;
     @Setting(value = "entity-speed-removal", comment = "Whether to log entity removals due to speed")
     private boolean logEntitySpeedRemoval = false;
-    @Setting(value = "world-auto-save", comment = "Log when a world auto-saves its chunk data. Note: This may be spammy depending on the auto-save-interval configured for world.")
+    @Setting(value = "world-auto-save", comment = ""
+            + "Log when a world auto-saves its chunk data.\n"
+            + "Note: This may be spammy depending on the auto-save-interval configured for world.")
     private boolean logWorldAutomaticSaving = false;
 
     public boolean blockBreakLogging() {
@@ -182,4 +189,5 @@ public class LoggingCategory extends ConfigCategory {
     public boolean logWorldAutomaticSaving() {
         return this.logWorldAutomaticSaving;
     }
+
 }

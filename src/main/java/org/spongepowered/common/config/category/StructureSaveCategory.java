@@ -33,19 +33,22 @@ import java.util.Map;
 @ConfigSerializable
 public class StructureSaveCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', disables the modification to prevent certain structures\n"
-                                          + "from saving to the world's data folder. If you wish to prevent certain\n"
-                                          + "structures from saving, leave this \"enabled=true\". When \'true\', the\n"
-                                          + "modification allows for specific \'named\' structures to NOT be saved to\n"
-                                          + "disk. Examples of some structures that are costly and somewhat irrelivent\n"
-                                          + "is 'mineshaft's, as they build several structures and save, even after\n"
-                                          + "finished generating.")
+    @Setting(value = "enabled", comment = ""
+            + "Global switch to enable sponge's changes to the structure saving mechansim.\n"
+            + "By default, this option is disabled, i.e. saving structures is not affected.\n"
+            + "If you want to prevent that a certain \"named\" structure is saved to the world's folder,\n"
+            + "you have to enable this module/setting and disable the structure in the further settings.\n"
+            + "An example of a structure that is costly and somewhat irrelevant is 'mineshaft',\n"
+            + "as they build and save several structures even after the mine shafts have been completely generated.\n"
+            + "However, this has the disadvantage that these structures may no longer be locatable by some mods.")
     private boolean isEnabled = false;
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered structures will be added to this config\n"
-                                                + "with a default value of \'true\'. This is useful for finding out\n"
-                                                + "potentially what structures are being saved from various mods, and\n"
-                                                + "allowing those structures to be selectively disabled.")
+
+    @Setting(value = "auto-populate", comment = ""
+            + "If 'true', newly discovered structures will be added to this config with a default value of 'true'.\n"
+            + "This is useful for finding out potentially what structures are being saved from various mods,\n"
+            + "and allowing those structures to be selectively disabled.")
     private boolean autoPopulate = false;
+
     @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, StructureModCategory> modList = new HashMap<>();
 
@@ -64,4 +67,5 @@ public class StructureSaveCategory extends ConfigCategory {
     public Map<String, StructureModCategory> getModList() {
         return this.modList;
     }
+
 }

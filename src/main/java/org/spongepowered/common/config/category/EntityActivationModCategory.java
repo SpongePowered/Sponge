@@ -33,11 +33,12 @@ import java.util.Map;
 @ConfigSerializable
 public class EntityActivationModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', entity activation rules for this mod will be ignored and always tick.")
+    @Setting(value = "enabled",
+            comment = "If 'false', entity activation rules for this mod will be ignored and always tick.")
     private boolean isEnabled = true;
-    @Setting(value = "defaults")
+    @Setting(value = "defaults", comment = "Default activation ranges used for mod entities unless overridden.")
     private Map<String, Integer> defaultRanges = new HashMap<>();
-    @Setting(value = "entities")
+    @Setting(value = "entities", comment = "The mod entities with their name as key and the range as value")
     private Map<String, Integer> entityList = new HashMap<>();
 
     public boolean isEnabled() {
@@ -48,7 +49,8 @@ public class EntityActivationModCategory extends ConfigCategory {
         return this.defaultRanges;
     }
 
-    public Map<String, Integer>  getEntityList() {
+    public Map<String, Integer> getEntityList() {
         return this.entityList;
     }
+
 }

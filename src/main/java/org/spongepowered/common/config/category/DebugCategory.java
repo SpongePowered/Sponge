@@ -30,15 +30,18 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class DebugCategory extends ConfigCategory {
 
-    @Setting(value = "thread-contention-monitoring", comment = "If 'true', Java's thread contention monitoring for thread dumps is enabled.")
+    @Setting(value = "thread-contention-monitoring", comment = ""
+            + "If 'true', Java's thread contention monitoring for thread dumps is enabled.")
     private boolean enableThreadContentionMonitoring = false;
 
-    @Setting(value = "concurrent-entity-checks", comment = "Detect and prevent certain attempts to use entities concurrently. \n"
-                                                         + "WARNING: May drastically decrease server performance. Only set this to 'true' "
-                                                         + "to debug a pre-existing issue.")
+    @Setting(value = "concurrent-entity-checks", comment = ""
+            + "Detect and prevent certain attempts to use entities concurrently.\n"
+            + "WARNING: May drastically decrease server performance.\n"
+            + "Only set this to 'true' to debug a pre-existing issue.")
     private boolean concurrentEntityChecks = false;
 
-    @Setting(value = "concurrent-chunk-map-checks", comment = "Detect and prevent parts of PlayerChunkMap being called off the main thread.\n"
+    @Setting(value = "concurrent-chunk-map-checks", comment = ""
+            + "Detect and prevent parts of PlayerChunkMap being called off the main thread.\n"
             + "This may decrease sever preformance, so you should only enable it when debugging a specific issue.")
     private boolean concurrentChunkMapChecks = false;
 
@@ -57,4 +60,5 @@ public class DebugCategory extends ConfigCategory {
     public void setEnableThreadContentionMonitoring(boolean enableThreadContentionMonitoring) {
         this.enableThreadContentionMonitoring = enableThreadContentionMonitoring;
     }
+
 }

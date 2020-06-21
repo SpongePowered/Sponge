@@ -34,21 +34,24 @@ import java.util.UUID;
 @ConfigSerializable
 public class GlobalWorldCategory extends WorldCategory {
 
-    @Setting(value = "auto-player-save-interval", comment = "The auto-save tick interval used when saving global player data. (Default: 900) \n"
-                                                          + "Note: 20 ticks is equivalent to 1 second. Set to 0 to disable.")
+    @Setting(value = "auto-player-save-interval", comment = ""
+            + "The auto-save tick interval used when saving global player data. (Default: 900)\n"
+            + "Note: 20 ticks is equivalent to 1 second. Set to 0 to disable.")
     private int autoPlayerSaveInterval = 900;
 
     @Setting(value = "leaf-decay", comment = "If 'true', natural leaf decay is allowed.")
     private boolean leafDecay = true;
 
-    @Setting(value = "gameprofile-lookup-task-interval", comment = "The interval, in seconds, used by the GameProfileQueryTask to process queued GameProfile requests. (Default: 4) \n"
-                                                                 + "Note: This setting should be raised if you experience the following error: \n"
-                                                                 + "\"The client has sent too many requests within a certain amount of time\". \n"
-                                                                 + "Finally, if set to 0 or less, the default interval will be used.")
+    @Setting(value = "gameprofile-lookup-task-interval", comment = ""
+            + "The interval, in seconds, used by the GameProfileQueryTask to process queued GameProfile requests. (Default: 4)\n"
+            + "Note: This setting should be raised if you experience the following error:\n"
+            + "\"The client has sent too many requests within a certain amount of time\".\n"
+            + "Finally, if set to 0 or less, the default interval will be used.")
     private int gameProfileQueryTaskInterval = 4;
 
-    @Setting(value = "invalid-lookup-uuids", comment = "The list of uuid's that should never perform a lookup against Mojang's session server. \n"
-                                                     + "Note: If you are using SpongeForge, make sure to enter any mod fake player's UUID to this list.")
+    @Setting(value = "invalid-lookup-uuids", comment = ""
+            + "The list of uuid's that should never perform a lookup against Mojang's session server.\n"
+            + "Note: If you are using SpongeForge, make sure to enter any mod fake player's UUID to this list.")
     private List<UUID> invalidLookupUuids = new ArrayList<>();
 
     public GlobalWorldCategory() {
@@ -79,4 +82,5 @@ public class GlobalWorldCategory extends WorldCategory {
     public List<UUID> getInvalidLookupUuids() {
         return this.invalidLookupUuids;
     }
+
 }

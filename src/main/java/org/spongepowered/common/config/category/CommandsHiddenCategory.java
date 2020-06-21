@@ -31,7 +31,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 public class CommandsHiddenCategory extends ConfigCategory {
 
     @Setting(value = "hide-on-discovery-attempt",
-             comment = "If this is true, when a user tries to tab complete a command, or use \"/sponge which\" or \n"
+             comment = "If this is true, when a user tries to tab complete a command, or use \"/sponge which\" or\n"
                      + "\"/sponge:help\" this prevents commands a user does not have permission for from being completed.\n\n"
                      + "Note that some commands may not show up during tab complete if a user does not have permission\n"
                      + "regardless of this setting.")

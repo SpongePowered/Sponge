@@ -29,28 +29,30 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 @ConfigSerializable
 public class GeneralCategory extends ConfigCategory {
-    
-    @Setting(value = "plugins-dir", comment = "Additional directory to search for plugins, relative to the \n"
-                                            + "execution root or specified as an absolute path. \n"
-                                            + "Note that the default: \"${CANONICAL_MODS_DIR}/plugins\" \n"
-                                            + "is going to search for a plugins folder in the mods directory. \n"
-                                            + "If you wish for the plugins folder to reside in the root game \n"
-                                            + "directory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
+
+    @Setting(value = "plugins-dir", comment = ""
+            + "Additional directory to search for plugins, relative to the\n"
+            + "execution root or specified as an absolute path.\n"
+            + "Note that the default: '${CANONICAL_MODS_DIR}/plugins'\n"
+            + "is going to search for a plugins folder in the mods directory.\n"
+            + "If you wish for the plugins folder to reside in the root game\n"
+            + "directory, change the value to '${CANONICAL_GAME_DIR}/plugins'.")
     private String pluginsDir = "${CANONICAL_MODS_DIR}/plugins";
-    @Setting(value = "config-dir", comment = "The directory for Sponge plugin configurations, relative to the  \n"
-                                           + "execution root or specified as an absolute path. \n"
-                                           + "Note that the default: \"${CANONICAL_GAME_DIR}/config\" \n"
-                                           + "is going to use the \"config\" directory in the root game directory. \n"
-                                           + "If you wish for plugin configs to reside within a child of the configuration \n"
-                                           + "directory, change the value to, for example, \"${CANONICAL_CONFIG_DIR}/sponge/plugins\". \n"
-                                           + "Note: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is \n"
-                                           + "a possibility that plugin configurations can conflict the Sponge core configurations. \n")
+    @Setting(value = "config-dir", comment = ""
+            + "The directory for Sponge plugin configurations, relative to the\n"
+            + "execution root or specified as an absolute path.\n"
+            + "Note that the default: '${CANONICAL_GAME_DIR}/config'\n"
+            + "is going to use the 'config' directory in the root game directory.\n"
+            + "If you wish for plugin configs to reside within a child of the configuration\n"
+            + "directory, change the value to, for example, '${CANONICAL_CONFIG_DIR}/sponge/plugins'.\n"
+            + "Note: It is not recommended to set this to '${CANONICAL_CONFIG_DIR}/sponge', as there is\n"
+            + "a possibility that plugin configurations can conflict the Sponge core configurations.\n")
     private String configDir = "${CANONICAL_GAME_DIR}/config";
-    
+
     public String pluginsDir() {
         return this.pluginsDir;
     }
-    
+
     public void setPluginsDir(String pluginsDir) {
         this.pluginsDir = pluginsDir;
     }
@@ -62,4 +64,5 @@ public class GeneralCategory extends ConfigCategory {
     public void setConfigDir(String configDir) {
         this.configDir = configDir;
     }
+
 }

@@ -33,11 +33,13 @@ import java.util.List;
 @ConfigSerializable
 public class PlayerBlockTracker extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If 'true', adds player tracking support for block positions. \n"
-                                        + "Note: This should only be disabled if you do not care who caused a block to change.")
+    @Setting(value = "enabled", comment = ""
+            + "If 'true', adds player tracking support for block positions.\n"
+            + "Note: This should only be disabled if you do not care who caused a block to change.")
     private boolean enabled = true;
 
-    @Setting(value = "block-blacklist", comment = "Block IDs that will be blacklisted for player block placement tracking.")
+    @Setting(value = "block-blacklist",
+            comment = "Block IDs that will be blacklisted for player block placement tracking.")
     private List<String> blockBlacklist = new ArrayList<>();
 
     public boolean isEnabled() {
@@ -51,4 +53,5 @@ public class PlayerBlockTracker extends ConfigCategory {
     public List<String> getBlockBlacklist() {
         return this.blockBlacklist;
     }
+
 }

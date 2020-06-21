@@ -33,15 +33,17 @@ import java.util.Map;
 @ConfigSerializable
 public class StructureModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', this mod will never save its structures. This may\n"
-                                          + "break some mod functionalities when requesting to locate their\n"
-                                          + "structures in a World. If true, allows structures not overridden\n"
-                                          + "in the section below to be saved by default. If you wish to find\n"
-                                          + "a structure to prevent it being saved, enable 'auto-populate' and\n"
-                                          + "restart the server/world instance.")
+    @Setting(value = "enabled", comment = ""
+            + "Global flag, whether this mod's structures will be saved.\n"
+            + "If 'false', this mod will never save its structures.\n"
+            + "If 'true', it will check the 'structureList' for disabled structures.")
     private boolean isEnabled = true;
-    @Setting(value = "structures", comment = "Per structure override. Having the value of 'false' will prevent\n"
-                                             + "that specific named structure from saving.")
+
+    @Setting(value = "structures", comment = ""
+            + "The configuration for each struture.\n"
+            + "A value of 'false' prevents that struture from being saved.\n"
+            + "Entries that are either missing in this list or have the value 'true' will still be saved,\n"
+            + "unless the structure saving of the mod is globally disabled.")
     private Map<String, Boolean> structureList = new HashMap<>();
 
     public StructureModCategory() {
@@ -57,7 +59,8 @@ public class StructureModCategory extends ConfigCategory {
         return this.isEnabled;
     }
 
-    public Map<String, Boolean>  getStructureList() {
+    public Map<String, Boolean> getStructureList() {
         return this.structureList;
     }
+
 }

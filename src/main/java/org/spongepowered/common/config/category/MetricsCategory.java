@@ -32,16 +32,17 @@ import org.spongepowered.api.util.Tristate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @ConfigSerializable
 public class MetricsCategory {
 
-    @Setting(value = "global-state", comment = "The global collection state that should be respected by all plugins that have no specified "
-      + "collection state. If undefined then it is treated as disabled.")
+    @Setting(value = "global-state", comment = ""
+            + "The global collection state that should be respected by all plugins that have no specified "
+            + "collection state. If 'undefined' then it is treated as disabled.")
     private Tristate globalState = Tristate.UNDEFINED;
 
-    @Setting(value = "plugin-states", comment = "Plugin-specific collection states that override the global collection state.")
+    @Setting(value = "plugin-states",
+            comment = "Plugin-specific collection states that override the global collection state.")
     private final Map<String, Tristate> pluginStates = new HashMap<>();
 
     public Tristate getGlobalCollectionState() {
@@ -49,10 +50,11 @@ public class MetricsCategory {
     }
 
     public Tristate getCollectionState(PluginContainer container) {
-        return Optional.ofNullable(this.pluginStates.get(container.getId())).orElse(Tristate.UNDEFINED);
+        return this.pluginStates.getOrDefault(container.getId(), Tristate.UNDEFINED);
     }
 
     public Map<String, Tristate> getCollectionStates() {
         return Collections.unmodifiableMap(this.pluginStates);
     }
+
 }

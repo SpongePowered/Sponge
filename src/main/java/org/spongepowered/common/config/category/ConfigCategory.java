@@ -26,6 +26,9 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
+/**
+ * Base class for all config categories.
+ */
 @ConfigSerializable
 public abstract class ConfigCategory {
 

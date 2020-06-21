@@ -55,7 +55,8 @@ public class CollisionModCategory extends ConfigCategory {
         return this.defaultMaxCollisions;
     }
 
-    public Map<String, Integer>  getEntityList() {
+    public Map<String, Integer> getEntityList() {
         return this.entityList;
     }
+
 }

@@ -28,16 +28,16 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @ConfigSerializable
 public class BrokenModCategory extends ConfigCategory {
 
-    @Setting(value = "broken-network-handler-mods", comment = "A list of mod ids that have broken network handlers (they interact with the game from a Netty handler thread).\n"
+    @Setting(value = "broken-network-handler-mods", comment = ""
+            + "A list of mod ids that have broken network handlers (they interact with the game from a Netty handler thread).\n"
             + "All network handlers from a forcibly scheduled to run on the main thread.\n"
-            + "Note that this setting should be considered a last resort, and should only be used as a stopgap measure while waiting for a mod to properly fix the issue.")
+            + "Note that this setting should be considered a last resort, and should only be used as a stopgap measure\n"
+            + "while waiting for a mod to properly fix the issue.")
     private List<String> brokenNetworkHandlerMods = new ArrayList<>();
 
     public List<String> getBrokenNetworkHandlerMods() {
