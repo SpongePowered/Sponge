@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
-import javafx.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -45,6 +44,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
+import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -120,7 +120,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
         if (this.impl$shouldBreakBlocks) {
             HashSet<BlockPos> blockPositions = getBlocksInRadius();
-            HashMap<Vector3i, Pair<BlockState, Float>> blocks = new HashMap<>();
+            HashMap<Vector3i, org.apache.commons.lang3.tuple.Pair<BlockState, Float>> blocks = new HashMap<>();
 
             for (BlockPos blockPos : blockPositions) {
                 final IBlockState iblockstate = this.world.getBlockState(blockPos);
@@ -133,7 +133,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             : iblockstate.getBlock().getExplosionResistance((Entity) null);
                 }
 
-                Pair<BlockState, Float> pair = new Pair<>((BlockState) iblockstate, resistance);
+                org.apache.commons.lang3.tuple.Pair<BlockState, Float> pair = Pair.of((BlockState) iblockstate, resistance);
 
                 blocks.put(new Vector3i(blockPos.getX(), blockPos.getY(), blockPos.getZ()), pair);
             }
