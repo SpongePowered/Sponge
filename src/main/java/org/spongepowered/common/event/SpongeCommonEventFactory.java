@@ -177,6 +177,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
@@ -1060,6 +1061,9 @@ public class SpongeCommonEventFactory {
             // Check the event isn't cancelled either. If it is, then don't spawn the message.
             if (!event.isCancelled() && !event.isMessageCancelled() && !message.isEmpty()) {
                 event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
+            }
+            if (!event.isCancelled()) {
+                SpongeHooks.logEntityDeath(entity);
             }
             return Optional.of(event);
         }
