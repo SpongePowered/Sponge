@@ -421,7 +421,7 @@ public final class CommonModuleRegistry {
                 .registerModule(ShrubType.class, new ShrubTypeRegistryModule())
                 .registerModule(SkullType.class, new SkullTypeRegistryModule())
                 .registerModule(SlabType.class, new SlabTypeRegistryModule())
-                .registerModule(SoundType.class, new SoundRegistryModule())
+                .registerModule(SoundType.class, SoundRegistryModule.inst())
                 .registerModule(SpawnType.class, new SpawnTypeRegistryModule())
                 .registerModule(SoundCategory.class, new SoundCategoryRegistryModule())
                 .registerModule(StairShape.class, new StairShapeRegistryModule())
