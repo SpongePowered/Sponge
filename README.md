@@ -1,8 +1,6 @@
 SpongeCommon [![Build Status](https://travis-ci.org/SpongePowered/SpongeCommon.svg?branch=master)](https://travis-ci.org/SpongePowered/SpongeCommon)
 =============
 
-**Currently not stable and under heavy development!**  
-
 Common code for official SpongeAPI implementations. It is licensed under the [MIT License]. 
 
 * [Homepage]

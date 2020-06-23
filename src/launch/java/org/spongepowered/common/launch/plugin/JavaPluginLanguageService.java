@@ -25,12 +25,12 @@
 package org.spongepowered.common.launch.plugin;
 
 import com.google.inject.Injector;
-import org.spongepowered.launch.LauncherConstants;
-import org.spongepowered.launch.plugin.config.PluginMetadataConfiguration;
-import org.spongepowered.launch.plugin.config.section.ContributorSection;
-import org.spongepowered.launch.plugin.config.section.DependencySection;
-import org.spongepowered.launch.plugin.config.section.LinksSection;
-import org.spongepowered.launch.plugin.config.section.PluginSection;
+import org.spongepowered.common.launch.LauncherConstants;
+import org.spongepowered.common.launch.plugin.config.PluginMetadataConfiguration;
+import org.spongepowered.common.launch.plugin.config.section.ContributorSection;
+import org.spongepowered.common.launch.plugin.config.section.DependencySection;
+import org.spongepowered.common.launch.plugin.config.section.LinksSection;
+import org.spongepowered.common.launch.plugin.config.section.PluginSection;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
