@@ -247,6 +247,9 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
                 SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
             }
 
+            final WorldServerBridge worldServer = (WorldServerBridge) this.world;
+            worldServer.bridge$incrementChunkLoadCount();
+
             SpongeHooks.logChunkLoad(this.world, ((Chunk) this).getPosition());
         }
     }
