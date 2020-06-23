@@ -8,16 +8,9 @@ pluginManagement {
         mavenLocal()
         mavenCentral()
         maven("https://files.minecraftforge.net/maven")
+        maven("https://repo-new.spongepowered.org/repository/maven-public")
         maven("https://repo.spongepowered.org/maven")
         gradlePluginPortal()
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.startsWith("org.spongepowered.gradle.")) {
-                val version = requested.version ?: "0.11.5"
-                useModule("org.spongepowered:SpongeGradle:$version")
-            }
-        }
     }
 
 }

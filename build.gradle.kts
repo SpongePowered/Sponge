@@ -1,8 +1,11 @@
-import org.spongepowered.gradle.dev.SourceType
-
 buildscript {
     repositories {
+        mavenLocal()
+        maven("https://files.minecraftforge.net/maven")
+        maven("https://repo-new.spongepowered.org/repository/maven-public")
         maven("https://repo.spongepowered.org/maven")
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
@@ -10,10 +13,13 @@ buildscript {
 }
 
 plugins {
-    id("org.spongepowered.gradle.sponge.common")
     id("net.minecraftforge.gradle")
     `maven-publish`
+    `java-library`
+    idea
+    eclipse
 }
+
 
 apply {
     plugin("org.spongepowered.mixin")
@@ -26,44 +32,12 @@ val mcpMappings: String by project
 val minecraftDep: String by project
 val minecraftVersion: String by project
 
-spongeDev {
-    api(apiProject)
-    common(commonProject)
-    addedSourceSets {
-        register("launch") {
-            sourceType.set(SourceType.Launch)
-            configurations += "launch"
-        }
-        register("accessors") {
-            sourceType.set(SourceType.Accessor)
-            configurations += arrayOf("launch", "mixins", "minecraft")
-        }
-        register("modlauncher") {
-            dependsOn += "launch"
-            configurations += arrayOf("launch", "modlauncher")
-        }
-        register("mixins") {
-            sourceType.set(SourceType.Mixin)
-            configurations += arrayOf("launch", "mixins", "minecraft")
-        }
-
-        register("invalid") {
-            sourceType.set(SourceType.Invalid)
-            configurations += arrayOf("launch", "mixins", "minecraft")
-        }
-    }
-}
-
 minecraft {
     mappings(mcpType, mcpMappings)
     runs {
         create("server") {
-            workingDirectory( project.file("../run"))
-            mods {
-                create("sponge") {
-                    source(project.sourceSets["main"])
-                }
-            }
+            workingDirectory(project.file("../run"))
+
         }
     }
     project.sourceSets["main"].resources
@@ -84,14 +58,26 @@ tasks {
     }
 }
 
-val launch by configurations.creating
-val mixins by configurations.creating
-val modlauncher by configurations.creating
-mixins.extendsFrom(launch)
+// create the sourcesets
+val mixins by sourceSets.registering
+val accessors by sourceSets.registering
+val launch by sourceSets.registering
+val modlauncher by sourceSets.registering
+val invalid by sourceSets.registering
 
-configure<org.spongepowered.asm.gradle.plugins.MixinExtension>() {
-    add(sourceSets["mixins"], "mixins.common.refmap.json")
-    add(sourceSets["accessors"], "mixins.common.accessors.refmap.json")
+val launchConfig = configurations.register("launch")
+val mixinsConfig = configurations.register("mixins") {
+    extendsFrom(launchConfig.get())
+}
+val modlauncherConfig = configurations.register("modlauncher")
+
+
+//configure<org.spongepowered.asm.gradle.plugins.MixinExtension>() {
+////    add(sourceSet = mixins, refMapName = "mixins.common.refmap.json")
+////    add(sourceSet = accessors, refMapName = "mixins.common.accessors.refmap.json")
+//}
+repositories {
+    maven("https://files.minecraftforge.net/maven")
 }
 dependencies {
     minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
@@ -113,33 +99,39 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:6.2")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
-    launch("org.spongepowered:mixin:0.8")
-    launch("org.checkerframework:checker-qual:2.8.1")
-    launch("com.google.guava:guava:25.1-jre") {
-        exclude(group ="com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
-        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
-        exclude(group = "com.google.j2objc", module = "j2objc-annotations")
-        exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
-        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+    launchConfig.configure {
+        add(this.name, "org.spongepowered:mixin:0.8")
+        add(this.name, "org.checkerframework:checker-qual:2.8.1")
+        add(this.name, "com.google.guava:guava:25.1-jre") {
+            exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
+            exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+            exclude(group = "com.google.j2objc", module = "j2objc-annotations")
+            exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
+            exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+        }
+        add(this.name, "com.google.code.gson:gson:2.2.4")
+        add(this.name, "org.ow2.asm:asm-tree:6.2")
+        add(this.name, "org.ow2.asm:asm-util:6.2")
+        add(this.name, "org.apache.logging.log4j:log4j-api:2.8.1")
+        add(this.name, "org.spongepowered:configurate-core:3.6.1")
+        add(this.name, "org.spongepowered:configurate-hocon:3.6.1")
     }
-    launch("com.google.code.gson:gson:2.2.4")
-    launch("org.ow2.asm:asm-tree:6.2")
-    launch("org.ow2.asm:asm-util:6.2")
-    launch("org.apache.logging.log4j:log4j-api:2.8.1")
-    launch("org.spongepowered:configurate-core:3.6.1")
-    launch("org.spongepowered:configurate-hocon:3.6.1")
+
 
     // Mixins needs to be able to target api classes
-    mixins(spongeDev.api.get())
+//    mixins(spongeDev.api.get())
 
     // The ModLauncher compatibility launch layer
-    modlauncher("cpw.mods:modlauncher:4.1.+")
-    modlauncher("org.ow2.asm:asm-commons:6.2")
-    modlauncher("cpw.mods:grossjava9hacks:1.1.+")
-    modlauncher("net.minecraftforge:accesstransformers:1.0.+:shadowed")
+    modlauncherConfig.configure {
+        add(this.name, "cpw.mods:modlauncher:4.1.+")
+        add(this.name, "org.ow2.asm:asm-commons:6.2")
+        add(this.name, "cpw.mods:grossjava9hacks:1.1.+")
+        add(this.name, "net.minecraftforge:accesstransformers:1.0.+:shadowed")
+    }
+
     // Annotation Processor
-    "accessorsAnnotationProcessor"(launch)
-    "mixinsAnnotationProcessor"(launch)
+    "accessorsAnnotationProcessor"(launchConfig.get())
+    "mixinsAnnotationProcessor"(launchConfig.get())
     "accessorsAnnotationProcessor"("org.spongepowered:mixin:0.8")
     "mixinsAnnotationProcessor"("org.spongepowered:mixin:0.8")
 }
@@ -161,6 +153,7 @@ allprojects {
             name = "sponge v2"
             setUrl("https://repo-new.spongepowered.org/repository/maven-public/")
         }
+        maven("https://repo.spongepowered.org/maven")
     }
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
@@ -212,40 +205,29 @@ val accessors by sourceSets
 project("SpongeVanilla") {
     val vanillaProject = this
     apply {
-        plugin("org.spongepowered.gradle.sponge.impl")
         plugin("net.minecraftforge.gradle")
         plugin("org.spongepowered.mixin")
+        plugin("java-library")
+        plugin("maven-publish")
+        plugin("idea")
+        plugin("eclipse")
     }
 
     description = "The SpongeAPI implementation for Vanilla Minecraft"
 
-    configure<org.spongepowered.gradle.dev.SpongeImpl> {
-        common(commonProject)
-        api(apiProject)
-        addForgeFlower.set(true)
-        addedSourceSets {
-            register("mixins") {
-                sourceType.set(SourceType.Mixin)
-            }
-            register("accessors") {
-                sourceType.set(SourceType.Accessor)
-            }
-            register("launch") {
-                sourceType.set(SourceType.Launch)
-                configurations += "vanillaLaunch"
-            }
-            register("modlauncher") {
-                dependsOn += "launch"
-                configurations += "vanillaLaunch"
-            }
-            register("invalid") {
-                sourceType.set(SourceType.Invalid)
-            }
-        }
+    val vanillaLaunch = vanillaProject.configurations.register("vanillaLaunch")
+    vanillaLaunch.configure {
+        extendsFrom(launchConfig.get())
     }
 
-    val vanillaLaunch by vanillaProject.configurations.creating
-    vanillaLaunch.extendsFrom(launch)
+    val vanillaInvalid by sourceSets.register("invalid")
+    val vanillaMixins by sourceSets.register("mixins")
+    val vanillaAccessors by sourceSets.register("accessors")
+
+    val vanillaInvalidImplementation by configurations.named("invalidImplementation")
+    val vanillaAccessorsAnnotationProcessor by configurations.named("accessorsAnnotationProcessor")
+    val vanillaMixinsImplementation by configurations.named("mixinsImplementation")
+    val vanillaMixinsAnnotationProcessor by configurations.named("mixinsAnnotationProcessor")
 
     configure<net.minecraftforge.gradle.userdev.UserDevExtension> {
         mappings(mcpType, mcpMappings)
@@ -284,38 +266,38 @@ project("SpongeVanilla") {
         }
 
         // Invalid set
-        "invalidImplementation"(project(commonProject.path)) {
+        vanillaInvalidImplementation(project(commonProject.path)) {
             exclude(group = "net.minecraft", module = "server")
         }
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
-        vanillaLaunch("org.spongepowered:mixin:0.8")
-        vanillaLaunch("org.checkerframework:checker-qual:3.4.1")
-        vanillaLaunch("com.google.guava:guava:25.1-jre") {
-            exclude(group ="com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
-            exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
-            exclude(group = "com.google.j2objc", module = "j2objc-annotations")
-            exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
-            exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+        vanillaLaunch.configure {
+            add(this.name, "org.spongepowered:mixin:0.8")
+            add(this.name, "org.spongepowered:mixin:0.8")
+            add(this.name, "org.checkerframework:checker-qual:3.4.1")
+            add(this.name, "com.google.guava:guava:25.1-jre") {
+                exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
+                exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+                exclude(group = "com.google.j2objc", module = "j2objc-annotations")
+                exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
+                exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+            }
+            add(this.name, "com.google.code.gson:gson:2.2.4")
+            add(this.name, "org.ow2.asm:asm-tree:6.2")
+            add(this.name, "org.ow2.asm:asm-util:6.2")
+            add(this.name, "org.apache.logging.log4j:log4j-api:2.8.1")
+            add(this.name, "org.spongepowered:configurate-core:3.6.1")
+            add(this.name, "org.spongepowered:configurate-hocon:3.6.1")
+            add(this.name, "net.sf.jopt-simple:jopt-simple:5.0.4")
+            add(this.name, "cpw.mods:grossjava9hacks:1.1.+")
         }
-        vanillaLaunch("com.google.code.gson:gson:2.2.4")
-        vanillaLaunch("org.ow2.asm:asm-tree:6.2")
-        vanillaLaunch("org.ow2.asm:asm-util:6.2")
-        vanillaLaunch("org.apache.logging.log4j:log4j-api:2.8.1")
-        vanillaLaunch("org.spongepowered:configurate-core:3.6.1")
-        vanillaLaunch("org.spongepowered:configurate-hocon:3.6.1")
-        vanillaLaunch("net.sf.jopt-simple:jopt-simple:5.0.4")
-        vanillaLaunch("cpw.mods:grossjava9hacks:1.1.+")
         "mixinsImplementation"(commonProject)
 
 
         // Annotation Processor
-        "accessorsAnnotationProcessor"(vanillaLaunch)
-        "mixinsAnnotationProcessor"(vanillaLaunch)
-        "accessorsAnnotationProcessor"("org.spongepowered:mixin:0.8")
-        "mixinsAnnotationProcessor"("org.spongepowered:mixin:0.8")
+        vanillaAccessorsAnnotationProcessor(vanillaLaunch.get())
+        vanillaMixinsAnnotationProcessor(vanillaLaunch.get())
+        vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:0.8")
+        vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:0.8")
     }
-
 }
-
-
