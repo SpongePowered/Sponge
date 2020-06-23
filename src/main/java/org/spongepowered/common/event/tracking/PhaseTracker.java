@@ -52,6 +52,7 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -1087,7 +1088,7 @@ public final class PhaseTracker {
         // will not actively capture entity spawns, but will still throw events for them. Some phases
         // capture all entities until the phase is marked for completion.
         if (!isForced) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT
+            if (ShouldFire.SPAWN_ENTITY_EVENT || entity instanceof Projectile
                 || (ShouldFire.CHANGE_BLOCK_EVENT
                     // This bottom part of the if is due to needing to be able to capture block entity spawns
                     // while block events are being listened to
