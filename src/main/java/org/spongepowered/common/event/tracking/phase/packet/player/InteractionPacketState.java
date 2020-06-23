@@ -275,14 +275,11 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             }
         }
         if (!projectiles.isEmpty()) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
-                    frame2.pushCause(usedSnapshot);
-                    SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
-                }
-            } else {
-                processEntities(player, projectiles);
+            // TODO add ShouldFire.SPAWN_ENTITY_EVENT once LaunchProjectileEvent is removed
+            try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                frame2.pushCause(usedSnapshot);
+                SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
             }
         }
         if (!spawnEggs.isEmpty()) {
