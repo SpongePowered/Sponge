@@ -44,12 +44,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
-import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -120,7 +120,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
         if (this.impl$shouldBreakBlocks) {
             HashSet<BlockPos> blockPositions = getBlocksInRadius();
-            HashMap<Vector3i, org.apache.commons.lang3.tuple.Pair<BlockState, Float>> blocks = new HashMap<>();
+            HashMap<Vector3i, Tuple<BlockState, Float>> blocks = new HashMap<>();
 
             for (BlockPos blockPos : blockPositions) {
                 final IBlockState iblockstate = this.world.getBlockState(blockPos);
@@ -133,9 +133,9 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             : iblockstate.getBlock().getExplosionResistance((Entity) null);
                 }
 
-                org.apache.commons.lang3.tuple.Pair<BlockState, Float> pair = Pair.of((BlockState) iblockstate, resistance);
+                Tuple<BlockState, Float> tuple = Tuple.of((BlockState) iblockstate, resistance);
 
-                blocks.put(new Vector3i(blockPos.getX(), blockPos.getY(), blockPos.getZ()), pair);
+                blocks.put(new Vector3i(blockPos.getX(), blockPos.getY(), blockPos.getZ()), tuple);
             }
 
             if (ShouldFire.EXPLOSION_EVENT_BLOCK_RESISTANCE) {
@@ -174,10 +174,10 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
                                 if (blocks.containsKey(vectorPos)) {
 
-                                    final IBlockState iblockstate = (IBlockState) blocks.get(vectorPos).getKey();
+                                    final IBlockState iblockstate = (IBlockState) blocks.get(vectorPos).getFirst();
 
                                     if (iblockstate.getMaterial() != Material.AIR) {
-                                        final float f2 = blocks.get(vectorPos).getValue();
+                                        final float f2 = blocks.get(vectorPos).getSecond();
                                         f -= (f2 + 0.3F) * 0.3F;
                                     }
 
