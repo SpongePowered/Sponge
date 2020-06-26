@@ -29,17 +29,13 @@ import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(DoorHingeSide.class)
 public abstract class DoorHingeSideMixin_API implements Hinge {

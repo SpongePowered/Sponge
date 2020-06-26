@@ -41,7 +41,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.game.state.GameStateEvent;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
@@ -54,6 +53,7 @@ import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.server.SpongeWorldManager;
+import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;

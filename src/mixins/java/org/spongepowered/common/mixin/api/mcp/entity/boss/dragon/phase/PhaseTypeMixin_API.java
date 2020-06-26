@@ -25,16 +25,15 @@
 package org.spongepowered.common.mixin.api.mcp.entity.boss.dragon.phase;
 
 import net.minecraft.entity.boss.dragon.phase.IPhase;
+import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
-
-import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(PhaseType.class)
 public abstract class PhaseTypeMixin_API implements DragonPhaseType {

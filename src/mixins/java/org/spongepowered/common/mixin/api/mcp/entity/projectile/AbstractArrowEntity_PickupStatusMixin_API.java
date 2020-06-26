@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.projectile;
 
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
-
-import net.minecraft.entity.projectile.AbstractArrowEntity;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(AbstractArrowEntity.PickupStatus.class)
 public abstract class AbstractArrowEntity_PickupStatusMixin_API implements PickupRule {

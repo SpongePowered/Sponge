@@ -28,13 +28,13 @@ import net.minecraft.item.ItemTier;
 import net.minecraft.item.crafting.Ingredient;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ToolType;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.function.Supplier;
 

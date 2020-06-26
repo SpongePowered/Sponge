@@ -28,14 +28,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
 import com.google.common.collect.Sets;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
+import org.spongepowered.plugin.PluginContainer;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -48,8 +49,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
 
 public abstract class SpongeScheduler implements Scheduler {
 

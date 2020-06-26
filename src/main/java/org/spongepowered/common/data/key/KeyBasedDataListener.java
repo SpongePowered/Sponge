@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
-import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.plugin.PluginContainer;
 
 public final class KeyBasedDataListener<E extends DataHolder> implements EventListener<ChangeDataHolderEvent.ValueChange> {
 

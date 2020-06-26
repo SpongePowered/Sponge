@@ -32,8 +32,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,12 +72,12 @@ public class SpongePlatform implements Platform {
         this.minecraftVersion = checkNotNull(minecraftVersion, "minecraftVersion");
 
         this.platformMap.put("Type", this.getType());
-        this.platformMap.put("ApiName", this.api.getName());
-        this.platformMap.put("ApiVersion", this.api.getVersion());
-        this.platformMap.put("CommonName", this.common.getName());
-        this.platformMap.put("CommonVersion", this.common.getVersion());
-        this.platformMap.put("ImplementationName", this.impl.getName());
-        this.platformMap.put("ImplementationVersion", this.impl.getVersion());
+        this.platformMap.put("ApiName", this.api.getMetadata().getName());
+        this.platformMap.put("ApiVersion", this.api.getMetadata().getVersion());
+        this.platformMap.put("CommonName", this.common.getMetadata().getName());
+        this.platformMap.put("CommonVersion", this.common.getMetadata().getVersion());
+        this.platformMap.put("ImplementationName", this.impl.getMetadata().getName());
+        this.platformMap.put("ImplementationVersion", this.impl.getMetadata().getVersion());
         this.platformMap.put("MinecraftVersion", this.getMinecraftVersion());
     }
 

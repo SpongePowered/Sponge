@@ -25,7 +25,7 @@
 package org.spongepowered.common.plugin;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.plugin.PluginContainer;
 
 public abstract class AbstractPluginContainer implements PluginContainer {
 

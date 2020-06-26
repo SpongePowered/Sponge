@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
 

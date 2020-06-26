@@ -33,7 +33,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.UnregisteredKeyException;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;
 import java.util.Map;

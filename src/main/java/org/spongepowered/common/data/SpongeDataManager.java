@@ -60,7 +60,6 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
@@ -71,6 +70,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.mcp.util;
 
+import net.minecraft.util.Hand;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
-
-import net.minecraft.util.Hand;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(Hand.class)
 public abstract class HandMixin_API implements HandType {

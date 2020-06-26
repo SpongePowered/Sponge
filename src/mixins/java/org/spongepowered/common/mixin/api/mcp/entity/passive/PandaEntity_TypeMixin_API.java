@@ -27,13 +27,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 import net.minecraft.entity.passive.PandaEntity;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.PandaGene;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(PandaEntity.Type.class)
 public abstract class PandaEntity_TypeMixin_API implements PandaGene {

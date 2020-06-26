@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.entity.player;
 
 import net.minecraft.entity.player.ChatVisibility;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(ChatVisibility.class)
 public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.text.chat.ChatVisibility {

@@ -26,15 +26,14 @@ package org.spongepowered.common.scheduler;
 
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
-
-import java.time.Duration;
-import java.util.function.Consumer;
+import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
+import java.time.Duration;
+import java.util.function.Consumer;
 
 public final class SpongeTask implements Task {
 

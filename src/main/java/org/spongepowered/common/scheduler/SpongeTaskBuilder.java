@@ -29,10 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.TemporalUnits;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.time.Duration;
 import java.time.temporal.TemporalUnit;

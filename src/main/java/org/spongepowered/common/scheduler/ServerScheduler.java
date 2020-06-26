@@ -27,12 +27,12 @@ package org.spongepowered.common.scheduler;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.plugin.PluginContainer;
 
 public final class ServerScheduler extends SyncScheduler {
 

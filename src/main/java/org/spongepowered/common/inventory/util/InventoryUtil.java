@@ -39,7 +39,6 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
@@ -51,10 +50,10 @@ import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
-
-import java.util.Optional;
+import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public final class InventoryUtil {
 

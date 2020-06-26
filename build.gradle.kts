@@ -78,13 +78,17 @@ val modlauncherConfig by configurations.register("modLauncher") {
 }
 
 // create the sourcesets
+val main by sourceSets
+
 val launch by sourceSets.registering {
     project.dependencies {
         mixinsConfig(this@registering.output)
     }
-}
+    project.dependencies {
+        implementation(this@registering.output)
+    }
 
-val main by sourceSets
+}
 
 val accessors by sourceSets.registering {
     val thisAccessor = this
@@ -161,7 +165,7 @@ val invalid by sourceSets.registering {
 }
 
 
-configure<org.spongepowered.asm.gradle.plugins.MixinExtension>() {
+configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
 //    add(sourceSet = mixins, refMapName = "mixins.common.refmap.json")
 //    add(sourceSet = accessors, refMapName = "mixins.common.accessors.refmap.json")
 }
@@ -279,7 +283,7 @@ allprojects {
         repositories {
             maven {
                 name = "GitHubPackages"
-                this.setUrl(uri("https://maven.pkg.github.com/spongepowered/${project.name}"))
+                this.url = uri("https://maven.pkg.github.com/spongepowered/${project.name}")
                 credentials {
                     username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME")
                     password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
@@ -290,7 +294,7 @@ allprojects {
                 name = "spongeRepo"
                 val repoUrl = if ((version as String).endsWith("-SNAPSHOT")) spongeSnapshotRepo else spongeReleaseRepo
                 repoUrl?.apply {
-                    setUrl(uri(this))
+                    url = uri(this)
                 }
                 val spongeUsername: String? by project
                 val spongePassword: String? by project

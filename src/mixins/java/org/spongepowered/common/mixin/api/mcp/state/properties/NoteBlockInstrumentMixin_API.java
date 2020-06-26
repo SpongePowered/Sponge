@@ -29,13 +29,13 @@ import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(NoteBlockInstrument.class)
 public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {

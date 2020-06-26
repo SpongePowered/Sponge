@@ -31,8 +31,8 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetManager;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.net.URL;
 import java.util.Optional;

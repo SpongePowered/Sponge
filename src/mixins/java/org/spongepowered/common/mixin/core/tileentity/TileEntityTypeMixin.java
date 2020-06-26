@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -40,6 +39,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockEntityTrackerCategory;
 import org.spongepowered.common.config.category.BlockEntityTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(TileEntityType.class)
 public abstract class TileEntityTypeMixin implements CatalogKeyBridge, TrackableBridge, TileEntityTypeBridge {

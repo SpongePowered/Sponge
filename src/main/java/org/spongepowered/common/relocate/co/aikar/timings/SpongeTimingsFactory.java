@@ -29,16 +29,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.TimingsCategory;
+import org.spongepowered.plugin.PluginContainer;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
 
 public class SpongeTimingsFactory implements TimingsFactory {
 

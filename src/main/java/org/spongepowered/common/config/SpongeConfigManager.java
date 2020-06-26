@@ -31,9 +31,9 @@ import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.plugin.PluginContainerExtension;
+import org.spongepowered.plugin.PluginContainer;
 
 /**
  * Implementation of service to manage configurations.

@@ -25,11 +25,11 @@
 package org.spongepowered.common.util.metric;
 
 import com.google.inject.Singleton;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.MetricsCategory;
+import org.spongepowered.plugin.PluginContainer;
 
 @SuppressWarnings("deprecation")
 @Singleton

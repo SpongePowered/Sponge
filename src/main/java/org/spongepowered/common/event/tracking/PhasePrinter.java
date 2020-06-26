@@ -30,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -41,6 +40,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -314,9 +314,7 @@ public final class PhasePrinter {
 
     static void generateVersionInfo(final PrettyPrinter printer) {
         for (final PluginContainer pluginContainer : SpongeImpl.getInternalPlugins()) {
-            pluginContainer.getVersion().ifPresent(version ->
-                    printer.add("%s : %s", pluginContainer.getName(), version)
-            );
+            printer.add("%s : %s", pluginContainer.getMetadata().getName(), pluginContainer.getMetadata().getVersion());
         }
     }
 

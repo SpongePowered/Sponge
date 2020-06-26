@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive.fish;
 import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.TropicalFishShape;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(TropicalFishEntity.Type.class)
 public abstract class TropicalFishEntityMixin_TypeMixin_API implements TropicalFishShape {

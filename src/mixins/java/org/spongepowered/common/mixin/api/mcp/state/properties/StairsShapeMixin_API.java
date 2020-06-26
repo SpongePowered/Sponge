@@ -27,12 +27,12 @@ package org.spongepowered.common.mixin.api.mcp.state.properties;
 import net.minecraft.state.properties.StairsShape;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.StairShape;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(StairsShape.class)
 public abstract class StairsShapeMixin_API implements StairShape {

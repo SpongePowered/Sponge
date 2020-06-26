@@ -44,16 +44,15 @@ import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.event.advancement.CriterionEvent;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
+import org.spongepowered.plugin.PluginContainer;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implements Trigger.Builder<C> {

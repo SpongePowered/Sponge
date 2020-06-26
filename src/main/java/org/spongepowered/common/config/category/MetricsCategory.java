@@ -26,8 +26,8 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collections;
 import java.util.HashMap;

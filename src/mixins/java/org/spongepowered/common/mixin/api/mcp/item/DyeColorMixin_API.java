@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.item;
 import net.minecraft.block.material.MaterialColor;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.math.GenericMath;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(net.minecraft.item.DyeColor.class)
 public abstract class DyeColorMixin_API implements DyeColor {

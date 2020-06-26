@@ -46,7 +46,6 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.filter.FilterFactory;
@@ -57,7 +56,9 @@ import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseCo
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.util.TypeTokenHelper;
+import org.spongepowered.plugin.PluginContainer;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -74,8 +75,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @Singleton
 public class SpongeEventManager implements EventManager {

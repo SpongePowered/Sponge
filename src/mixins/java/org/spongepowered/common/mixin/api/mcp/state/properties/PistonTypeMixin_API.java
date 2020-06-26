@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.state.properties;
 
 import net.minecraft.state.properties.PistonType;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(PistonType.class)
 public abstract class PistonTypeMixin_API implements org.spongepowered.api.data.type.PistonType {

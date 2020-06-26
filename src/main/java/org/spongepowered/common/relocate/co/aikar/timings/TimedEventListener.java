@@ -28,8 +28,8 @@ import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.Method;
 

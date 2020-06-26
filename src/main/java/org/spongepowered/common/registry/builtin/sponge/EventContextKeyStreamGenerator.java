@@ -38,13 +38,13 @@ import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.SpongeEventContextKey;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.stream.Stream;
 

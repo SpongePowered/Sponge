@@ -43,11 +43,11 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.InjectedTest;
 import org.spongepowered.common.event.listener.NonPreListener;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

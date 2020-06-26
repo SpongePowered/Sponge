@@ -28,12 +28,12 @@ import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.FoxType;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(FoxEntity.Type.class)
 public abstract class FoxEntity_TypeMixin_API implements FoxType {

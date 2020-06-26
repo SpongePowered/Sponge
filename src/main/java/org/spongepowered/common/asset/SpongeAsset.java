@@ -25,7 +25,7 @@
 package org.spongepowered.common.asset;
 
 import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.net.URL;
 
