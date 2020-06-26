@@ -24,7 +24,7 @@
  */
 package org.spongepowered.vanilla.mixin.core.entity.player;
 
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 
-@Mixin(InventoryPlayer.class)
+@Mixin(PlayerInventory.class)
 public class InventoryPlayerMixin_Vanilla {
 
     @Redirect(method = "addResource", at = @At(value = "NEW", target = "net/minecraft/item/ItemStack"))
@@ -43,10 +43,10 @@ public class InventoryPlayerMixin_Vanilla {
     }
 
     @Redirect(method = "addResource",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;hasTagCompound()Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;hasTag()Z"),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isEmpty()Z"),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;setTagCompound(Lnet/minecraft/nbt/NBTTagCompound;)V")))
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;setTag(Lnet/minecraft/nbt/CompoundNBT;)V")))
     private boolean vanilla$ignoreHasCompoundSinceItemIsCopiedAbove(ItemStack itemStack) {
         return false;
     }

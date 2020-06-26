@@ -507,6 +507,8 @@ project("SpongeVanilla") {
         }
 
         vanillaLaunchConfig("org.spongepowered:mixin:0.8")
+        vanillaLaunchConfig("org.ow2.asm:asm-util:6.2")
+        vanillaLaunchConfig("org.ow2.asm:asm-tree:6.2")
         vanillaLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)

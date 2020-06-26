@@ -86,7 +86,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 @Mixin(ServerWorld.class)
-public abstract class ServerWorldMixin_API extends WorldMixin_API implements org.spongepowered.api.world.server.ServerWorld {
+public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowered.api.world.server.ServerWorld> implements org.spongepowered.api.world.server.ServerWorld {
 
 
     @Shadow public abstract void shadow$tick(BooleanSupplier p_72835_1_);

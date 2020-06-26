@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.chunk;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BitArray;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.IBlockStatePalette;
-import net.minecraft.world.chunk.NibbleArray;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,16 +36,12 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.BlockStateContainerBridge;
 
-import javax.annotation.Nullable;
-
 @Mixin(BlockStateContainer.class)
-public abstract class BlockStateContainerMixin implements BlockStateContainerBridge {
+public abstract class BlockStateContainerMixin<T> implements BlockStateContainerBridge {
 
     @Shadow private int bits;
-    @Shadow protected IBlockStatePalette palette;
+    @Shadow private IBlockStatePalette<T> palette;
     @Shadow protected BitArray storage;
-
-    @Shadow protected abstract void set(int index, BlockState state);
 
     @Override
     public int bridge$getBits() {
@@ -63,37 +56,6 @@ public abstract class BlockStateContainerMixin implements BlockStateContainerBri
     @Override
     public BitArray bridge$getStorage() {
         return this.storage;
-    }
-
-    /**
-     * @author barteks2x
-     *
-     * Attempts to fix invalid block metadata instead of completely throwing away the block.
-     * When block state lookup returns null - gets block by ID and attempts to use the default state.
-     */
-    @Redirect(
-            method = "setDataFromNBT",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/BlockStateContainer;set(ILnet/minecraft/block/state/IBlockState;)V")
-    )
-    private void setFixedBlockState(BlockStateContainer this_, int i, BlockState state, byte[] id, NibbleArray meta, @Nullable NibbleArray add) {
-        BlockState newState;
-
-        if (state != null) {
-            newState = state;
-        } else {
-            int x = i & 15;
-            int y = i >> 8 & 15;
-            int z = i >> 4 & 15;
-            int idAdd = add == null ? 0 : add.get(x, y, z);
-            int blockId = idAdd << 8 | (id[i] & 255);
-            Block block = Block.REGISTRY.getObjectById(blockId);
-            if (block != null) {
-                newState = block.getDefaultState();
-            } else {
-                newState = null;
-            }
-        }
-        this.set(i, newState);
     }
 
     /**

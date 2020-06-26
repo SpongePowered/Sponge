@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import java.time.Instant;
 import java.util.Date;
@@ -43,7 +44,6 @@ import javax.annotation.Nullable;
 @Mixin(CriterionProgress.class)
 public abstract class CriterionProgressMixin_API implements org.spongepowered.api.advancement.criteria.CriterionProgress {
 
-    @Shadow @Final private AdvancementProgress advancementProgress;
     @Shadow @Nullable private Date obtained;
     @Shadow public abstract void shadow$reset();
 
@@ -67,11 +67,12 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
         if (this.obtained != null) {
             return this.obtained.toInstant();
         }
-        final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
-                this.advancementProgress).getAdvancement();
-        ((AdvancementProgressBridge) this.advancementProgress).bridge$getPlayerAdvancements()
-                .grantCriterion(advancement, this.getCriterion().getName());
-        return this.obtained.toInstant();
+        throw new MissingImplementationException("CriterionProgress", "grant()java.time.Instant;");
+//        final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
+//                this.advancementProgress).getAdvancement();
+//        ((AdvancementProgressBridge) this.advancementProgress).bridge$getPlayerAdvancements()
+//                .grantCriterion(advancement, this.getCriterion().getName());
+//        return this.obtained.toInstant();
     }
 
     @Override

@@ -65,17 +65,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.chunk.Chunk;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.storage.WorldStorage;
-import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.asm.mixin.Final;
@@ -85,7 +78,6 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -96,7 +88,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Mixin(net.minecraft.world.World.class)
-public abstract class WorldMixin_API implements IWorldMixin_API<World>, World, IEnvironmentBlockReaderMixin_API, AutoCloseable {
+public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_API<W>, World<W>, IEnvironmentBlockReaderMixin_API, AutoCloseable {
     @Shadow protected static @Final Logger LOGGER;
     @Shadow private static @Final Direction[] FACING_VALUES;
     @Shadow public@Final List<TileEntity> loadedTileEntityList;
@@ -166,8 +158,8 @@ public abstract class WorldMixin_API implements IWorldMixin_API<World>, World, I
     @Shadow public abstract float shadow$getCelestialAngleRadians(float p_72929_1_);
     @Shadow public abstract boolean shadow$addTileEntity(TileEntity p_175700_1_);
     @Shadow public abstract void shadow$addTileEntities(Collection<TileEntity> p_147448_1_);
-    @Shadow public abstract void shadow$func_217391_K(); // tileTileEntities
-    @Shadow public abstract void shadow$func_217390_a(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
+    @Shadow public abstract void shadow$tickBlockEntities(); // tileTileEntities
+    @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
     @Shadow public abstract boolean shadow$checkBlockCollision(AxisAlignedBB p_72829_1_);
     @Shadow public abstract boolean shadow$isFlammableWithin(AxisAlignedBB p_147470_1_);
     @Shadow public abstract boolean shadow$isMaterialInBB(AxisAlignedBB p_72875_1_, Material p_72875_2_);
@@ -243,13 +235,13 @@ public abstract class WorldMixin_API implements IWorldMixin_API<World>, World, I
     @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
     @Shadow public abstract RecipeManager shadow$getRecipeManager();
     @Shadow public abstract NetworkTagManager shadow$getTags();
-    @Shadow public abstract BlockPos shadow$func_217383_a(int p_217383_1_, int p_217383_2_, int p_217383_3_, int p_217383_4_);
+    @Shadow public abstract BlockPos shadow$getBlockRandomPos(int p_217383_1_, int p_217383_2_, int p_217383_3_, int p_217383_4_);
     @Shadow public abstract boolean shadow$isSaveDisabled();
     @Shadow public abstract IProfiler shadow$getProfiler();
     @Shadow public abstract BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
 
     @Override
-    public Optional<Player> getClosestPlayer(int x, int y, int z, double distance, Predicate<? super Player> predicate) {
+    public Optional<? extends Player> getClosestPlayer(int x, int y, int z, double distance, Predicate<? super Player> predicate) {
         return Optional.empty();
     }
 
@@ -299,58 +291,8 @@ public abstract class WorldMixin_API implements IWorldMixin_API<World>, World, I
     }
 
     @Override
-    public Optional<Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean unloadChunk(Chunk chunk) {
-        return false;
-    }
-
-    @Override
     public Iterable<Chunk> getLoadedChunks() {
         return null;
-    }
-
-    @Override
-    public Path getDirectory() {
-        return null;
-    }
-
-    @Override
-    public WorldStorage getWorldStorage() {
-        return null;
-    }
-
-    @Override
-    public void triggerExplosion(Explosion explosion) {
-
-    }
-
-    @Override
-    public PortalAgent getPortalAgent() {
-        return null;
-    }
-
-    @Override
-    public boolean save() throws IOException {
-        return false;
-    }
-
-    @Override
-    public int getViewDistance() {
-        return 0;
-    }
-
-    @Override
-    public void setViewDistance(int viewDistance) {
-
-    }
-
-    @Override
-    public void resetViewDistance() {
-
     }
 
     @Override
@@ -361,21 +303,6 @@ public abstract class WorldMixin_API implements IWorldMixin_API<World>, World, I
     @Override
     public Context getContext() {
         return null;
-    }
-
-    @Override
-    public void sendMessage(ChatType type, Text message) {
-
-    }
-
-    @Override
-    public MessageChannel getMessageChannel() {
-        return null;
-    }
-
-    @Override
-    public void setMessageChannel(MessageChannel channel) {
-
     }
 
     @Override

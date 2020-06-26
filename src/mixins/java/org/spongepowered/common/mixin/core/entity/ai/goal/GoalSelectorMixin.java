@@ -132,21 +132,6 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
         });
     }
 
-    /**
-     * @author Zidane - February 22, 2016
-     * @reason Use SpongeAPI's method check instead of exposing mutex bits
-     *
-     * @param taskEntry1 The task entry to check compatibility
-     * @param taskEntry2 The second entry to check compatibility
-     * @return Whether the two tasks are compatible or "can run at the same time"
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Overwrite
-    // TODO this no longer works
-    private boolean areTasksCompatible(final PrioritizedGoal taskEntry1, final PrioritizedGoal taskEntry2) {
-        return (((org.spongepowered.api.entity.ai.goal.Goal) taskEntry2.getGoal()).canRunConcurrentWith((org.spongepowered.api.entity.ai.goal.Goal) taskEntry1.getGoal()));
-    }
-
     @Override
     public boolean bridge$initialized() {
         return this.initialized;

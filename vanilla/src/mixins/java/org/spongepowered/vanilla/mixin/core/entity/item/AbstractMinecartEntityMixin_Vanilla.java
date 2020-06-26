@@ -26,14 +26,11 @@ package org.spongepowered.vanilla.mixin.core.entity.item;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
-import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.common.bridge.entity.item.EntityMinecartBridge;
 import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
 import org.spongepowered.common.util.Constants;
 

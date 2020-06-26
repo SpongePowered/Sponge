@@ -1,15 +1,18 @@
 {
     "required": true,
-    "minVersion": "0.7.2",
+    "minVersion": "0.8",
     "package": "org.spongepowered.vanilla.mixin.core",
     "refmap": "mixins.vanilla.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "priority": 1111,
     "server": [
-
     ],
     "injectors": {
         "defaultRequire": 1
-    }
+    },
+    "mixins": [
+        "entity.player.InventoryPlayerMixin_Vanilla",
+        "entity.player.PlayerEntityMixin_Vanilla"
+    ]
 }
