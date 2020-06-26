@@ -38,8 +38,7 @@ import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.network.RawDataListener;
 import org.spongepowered.api.network.RemoteConnection;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.server.bridge.network.NetHandlerPlayServerBridge_Vanilla;
 
 import java.util.Set;

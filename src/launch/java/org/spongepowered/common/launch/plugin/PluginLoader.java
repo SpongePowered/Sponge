@@ -1,5 +1,5 @@
 /*
- * This file is part of plugin-spi, licensed under the MIT License (MIT).
+ * This file is part of launcher, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.launch.plugin;
 
+import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginEnvironment;
@@ -113,9 +114,14 @@ public final class PluginLoader {
             final PluginLanguageService languageService = languageCandidates.getKey();
             final Collection<PluginCandidate> candidates = languageCandidates.getValue();
             for (final PluginCandidate candidate : candidates) {
-                final PluginContainer pluginContainer = languageService.createPlugin(candidate, this.pluginEnvironment, PluginLoader.class.getClassLoader()).orElse(null);
-                // TODO Pass off to the PluginManager
-                this.pluginEnvironment.getLogger().info(pluginContainer);
+                final PluginContainer pluginContainer;
+                try {
+                    pluginContainer = languageService.createPlugin(candidate, this.pluginEnvironment, PluginLoader.class.getClassLoader()).orElse(null);
+                } catch (final InvalidPluginException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                this.pluginEnvironment.getLogger().info("Loaded plugin '{}'", pluginContainer.getMetadata().getId());
             }
         }
     }
