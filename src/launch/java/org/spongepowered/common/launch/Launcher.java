@@ -27,7 +27,7 @@ package org.spongepowered.common.launch;
 import com.google.inject.Guice;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.launch.plugin.PluginLoader;
+import org.spongepowered.common.launch.plugin.PluginLoader;
 import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
@@ -49,7 +49,8 @@ public abstract class Launcher {
         return Launcher.pluginEnvironment;
     }
 
-    protected static void populateBlackboard(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories) {
+    protected static void populateBlackboard(final String pluginSpiVersion, final Path baseDirectory,
+        final List<Path> pluginDirectories) {
         final Blackboard blackboard = Launcher.getPluginEnvironment().getBlackboard();
         blackboard.getOrCreate(PluginKeys.VERSION, () -> pluginSpiVersion);
         blackboard.getOrCreate(PluginKeys.BASE_DIRECTORY, () -> baseDirectory);

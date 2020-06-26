@@ -1,4 +1,4 @@
-package org.spongepowered.common.modlauncher;/*
+package org.spongepowered.modlauncher;/*
  * This file is part of plugin-spi, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
@@ -27,9 +27,9 @@ import com.google.common.collect.ImmutableList;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import org.spongepowered.launch.plugin.PluginLoader;
-import org.spongepowered.launch.util.ImmutableMapEntry;
-import org.spongepowered.launch.util.MixinUtils;
+import org.spongepowered.common.launch.plugin.PluginLoader;
+import org.spongepowered.common.launch.util.ImmutableMapEntry;
+import org.spongepowered.common.launch.util.MixinUtils;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginFile;
 import org.spongepowered.plugin.PluginKeys;

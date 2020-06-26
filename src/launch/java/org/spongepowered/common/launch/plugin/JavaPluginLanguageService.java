@@ -83,9 +83,10 @@ public final class JavaPluginLanguageService extends JVMPluginLanguageService {
 
             final LinksSection linksSection = pluginSection.getLinksSection();
             if (linksSection != null) {
-                metadataBuilder.setHomepage(linksSection.getHomepage());
-                metadataBuilder.setSource(linksSection.getSource());
-                metadataBuilder.setIssues(linksSection.getIssues());
+                // TODO - Zidane
+//                metadataBuilder.setHomepage(linksSection.getHomepage());
+//                metadataBuilder.setSource(linksSection.getSource());
+//                metadataBuilder.setIssues(linksSection.getIssues());
             }
 
             final List<ContributorSection> contributorSections = pluginSection.getContributorSections();
@@ -149,7 +150,7 @@ public final class JavaPluginLanguageService extends JVMPluginLanguageService {
             pluginMetadata.add(metadataBuilder.build());
         }
 
-        return Optional.of(PluginMetadataContainer.of(pluginMetadata));
+        return Optional.of(new PluginMetadataContainer(pluginMetadata));
     }
 
     @Override

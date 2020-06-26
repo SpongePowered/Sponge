@@ -30,7 +30,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.spongepowered.launch.plugin.config.section.PluginSection;
+import org.spongepowered.common.launch.plugin.config.section.PluginSection;
 import org.spongepowered.plugin.PluginEnvironment;
 
 import java.io.BufferedReader;

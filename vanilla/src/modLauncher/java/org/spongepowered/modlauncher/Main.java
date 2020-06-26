@@ -1,4 +1,4 @@
-package org.spongepowered.common.modlauncher;/*
+package org.spongepowered.modlauncher;/*
  * This file is part of plugin-spi, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
@@ -29,7 +29,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.util.PathConverter;
 import joptsimple.util.PathProperties;
-import org.spongepowered.modlauncher.util.ArgumentList;
+import org.spongepowered.common.modlauncher.util.ArgumentList;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
