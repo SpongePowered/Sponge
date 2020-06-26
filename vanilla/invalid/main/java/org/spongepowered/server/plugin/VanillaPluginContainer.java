@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.plugin;
+package org.spongepowered.vanilla.plugin;
 
 import com.google.inject.Injector;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;

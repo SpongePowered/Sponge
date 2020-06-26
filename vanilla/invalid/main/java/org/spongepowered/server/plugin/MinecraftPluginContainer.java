@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.plugin;
+package org.spongepowered.vanilla.plugin;
 
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.plugin.meta.PluginMetadata;
-import org.spongepowered.server.launch.plugin.PluginSource;
+import org.spongepowered.vanilla.launch.plugin.PluginSource;
 
 public final class MinecraftPluginContainer {
 

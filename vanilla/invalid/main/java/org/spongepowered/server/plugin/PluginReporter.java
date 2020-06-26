@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.plugin;
+package org.spongepowered.vanilla.plugin;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
-import org.spongepowered.server.launch.plugin.PluginCandidate;
+import org.spongepowered.vanilla.launch.plugin.PluginCandidate;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server;
+package org.spongepowered.vanilla;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.server.accessor.server.MinecraftServerAccessor_Vanilla;
+import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla;
 
 import java.nio.file.Path;
 

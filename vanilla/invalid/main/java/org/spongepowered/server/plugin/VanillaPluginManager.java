@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.plugin;
+package org.spongepowered.vanilla.plugin;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,10 +36,10 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.plugin.meta.PluginMetadata;
-import org.spongepowered.server.SpongeVanilla;
-import org.spongepowered.server.launch.plugin.PluginCandidate;
-import org.spongepowered.server.launch.plugin.PluginSource;
-import org.spongepowered.server.launch.plugin.VanillaLaunchPluginManager;
+import org.spongepowered.vanilla.SpongeVanilla;
+import org.spongepowered.vanilla.launch.plugin.PluginCandidate;
+import org.spongepowered.vanilla.launch.plugin.PluginSource;
+import org.spongepowered.vanilla.launch.plugin.VanillaLaunchPluginManager;
 
 import java.io.IOException;
 import java.nio.file.Path;

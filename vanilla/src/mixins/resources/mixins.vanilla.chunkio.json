@@ -1,7 +1,7 @@
 {
     "required": true,
     "minVersion": "0.7.2",
-    "package": "org.spongepowered.server.mixin.chunkio",
+    "package": "org.spongepowered.vanilla.mixin.mixin.chunkio",
     "refmap": "mixins.vanilla.refmap.json",
     "priority": 1112,
     "server": [

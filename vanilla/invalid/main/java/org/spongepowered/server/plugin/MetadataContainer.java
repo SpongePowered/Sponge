@@ -22,16 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.plugin;
+package org.spongepowered.vanilla.plugin;
 
-import static org.spongepowered.server.launch.VanillaLaunch.Environment.DEVELOPMENT;
+import static org.spongepowered.vanilla.launch.VanillaLaunch.Environment.DEVELOPMENT;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.plugin.meta.McModInfo;
 import org.spongepowered.plugin.meta.PluginMetadata;
-import org.spongepowered.server.launch.LaunchException;
-import org.spongepowered.server.launch.VanillaLaunch;
+import org.spongepowered.vanilla.launch.LaunchException;
+import org.spongepowered.vanilla.launch.VanillaLaunch;
 
 import java.io.IOException;
 import java.io.InputStream;

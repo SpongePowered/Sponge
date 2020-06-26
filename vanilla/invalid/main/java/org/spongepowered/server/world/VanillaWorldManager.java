@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.world;
+package org.spongepowered.vanilla.world;
 
 import static com.google.gson.internal.$Gson$Preconditions.checkNotNull;
 
@@ -71,8 +71,8 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.server.WorldRegistration;
-import org.spongepowered.server.accessor.world.storage.SaveFormatAccessor_Vanilla;
-import org.spongepowered.server.accessor.server.MinecraftServerAccessor_Vanilla;
+import org.spongepowered.vanilla.accessor.world.storage.SaveFormatAccessor_Vanilla;
+import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.plugin;
+package org.spongepowered.vanilla.plugin;
 
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.graph.CyclicGraphException;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.TopologicalOrder;
 import org.spongepowered.common.util.graph.DirectedGraph.DataNode;
-import org.spongepowered.server.launch.plugin.PluginCandidate;
+import org.spongepowered.vanilla.launch.plugin.PluginCandidate;
 
 import java.util.List;
 

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server.inject;
+package org.spongepowered.vanilla.inject;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -35,10 +35,10 @@ import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.inject.SpongeImplementationModule;
-import org.spongepowered.server.VanillaGame;
-import org.spongepowered.server.network.VanillaChannelRegistrar;
-import org.spongepowered.server.plugin.MetadataContainer;
-import org.spongepowered.server.plugin.VanillaPluginManager;
+import org.spongepowered.vanilla.VanillaGame;
+import org.spongepowered.vanilla.network.VanillaChannelRegistrar;
+import org.spongepowered.vanilla.plugin.MetadataContainer;
+import org.spongepowered.vanilla.plugin.VanillaPluginManager;
 
 public class SpongeVanillaModule extends SpongeImplementationModule {
 

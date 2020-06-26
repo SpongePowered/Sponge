@@ -1,8 +1,8 @@
 {
     "required": true,
     "minVersion": "0.7.10",
-    "package": "org.spongepowered.server.mixin.optimization",
-    "plugin": "org.spongepowered.server.mixin.SpongeVanillaOptimizationPlugin",
+    "package": "org.spongepowered.vanilla.mixin.optimization",
+    "plugin": "org.spongepowered.vanilla.mixin.mixin.SpongeVanillaOptimizationPlugin",
     "refmap": "mixins.vanilla.refmap.json",
     "priority": 1111,
     "target": "@env(DEFAULT)",

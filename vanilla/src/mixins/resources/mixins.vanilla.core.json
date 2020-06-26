@@ -1,7 +1,7 @@
 {
     "required": true,
     "minVersion": "0.7.2",
-    "package": "org.spongepowered.server.mixin.core",
+    "package": "org.spongepowered.vanilla.mixin.core",
     "refmap": "mixins.vanilla.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",

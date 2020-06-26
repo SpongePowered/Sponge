@@ -22,15 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.server;
+package org.spongepowered.vanilla;
 
 import static com.google.common.base.Preconditions.checkState;
 import static net.minecraft.server.MinecraftServer.USER_CACHE_FILE;
-import static org.spongepowered.server.launch.VanillaCommandLine.BONUS_CHEST;
-import static org.spongepowered.server.launch.VanillaCommandLine.PORT;
-import static org.spongepowered.server.launch.VanillaCommandLine.WORLD_DIR;
-import static org.spongepowered.server.launch.VanillaCommandLine.WORLD_NAME;
-import static org.spongepowered.server.launch.VanillaLaunch.Environment.DEVELOPMENT;
+import static org.spongepowered.vanilla.launch.VanillaCommandLine.BONUS_CHEST;
+import static org.spongepowered.vanilla.launch.VanillaCommandLine.PORT;
+import static org.spongepowered.vanilla.launch.VanillaCommandLine.WORLD_DIR;
+import static org.spongepowered.vanilla.launch.VanillaCommandLine.WORLD_NAME;
+import static org.spongepowered.vanilla.launch.VanillaLaunch.Environment.DEVELOPMENT;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -70,16 +70,16 @@ import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.sql.SqlServiceImpl;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
-import org.spongepowered.server.inject.SpongeVanillaModule;
-import org.spongepowered.server.launch.VanillaCommandLine;
-import org.spongepowered.server.launch.VanillaLaunch;
-import org.spongepowered.server.launch.plugin.PluginSource;
-import org.spongepowered.server.accessor.server.MinecraftServerAccessor_Vanilla;
-import org.spongepowered.server.plugin.MetaPluginContainer;
-import org.spongepowered.server.plugin.MetadataContainer;
-import org.spongepowered.server.plugin.MinecraftPluginContainer;
-import org.spongepowered.server.plugin.SpongeCommonContainer;
-import org.spongepowered.server.plugin.VanillaPluginManager;
+import org.spongepowered.vanilla.inject.SpongeVanillaModule;
+import org.spongepowered.vanilla.launch.VanillaCommandLine;
+import org.spongepowered.vanilla.launch.VanillaLaunch;
+import org.spongepowered.vanilla.launch.plugin.PluginSource;
+import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla;
+import org.spongepowered.vanilla.plugin.MetaPluginContainer;
+import org.spongepowered.vanilla.plugin.MetadataContainer;
+import org.spongepowered.vanilla.plugin.MinecraftPluginContainer;
+import org.spongepowered.vanilla.plugin.SpongeCommonContainer;
+import org.spongepowered.vanilla.plugin.VanillaPluginManager;
 
 import java.io.File;
 import java.io.IOException;
