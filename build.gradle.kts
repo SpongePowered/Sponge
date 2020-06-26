@@ -320,9 +320,12 @@ project("SpongeVanilla") {
 
     description = "The SpongeAPI implementation for Vanilla Minecraft"
 
+    val vanillaMinecraftConfig by configurations.named("minecraft")
     val vanillaLaunchConfig by configurations.register("modLauncher") {
         extendsFrom(launchConfig)
+        extendsFrom(vanillaMinecraftConfig)
     }
+
     val vanillaMain by vanillaProject.sourceSets.named("main") {
         val thisMain = this
         applyNamedDependencyOnOutput(
@@ -486,7 +489,7 @@ project("SpongeVanilla") {
     }
 
     dependencies {
-        minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
+        minecraft("net.minecraft:joined:$minecraftVersion")
 
         implementation(launch.get().output)
         implementation(accessors.get().output)
