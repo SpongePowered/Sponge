@@ -203,7 +203,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
         final String name = StringUtils.isNotEmpty(this.name) ? this.name : this.id;
         return (Trigger<C>) new SpongeTrigger((Class) this.configType, (Function) this.constructor,
-                new ResourceLocation(plugin.getId(), this.id), (Consumer) this.eventHandler, name);
+                new ResourceLocation(plugin.getMetadata().getId(), this.id), (Consumer) this.eventHandler, name);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class MetricsCategory {
     }
 
     public Tristate getCollectionState(PluginContainer container) {
-        return Optional.ofNullable(this.pluginStates.get(container.getId())).orElse(Tristate.UNDEFINED);
+        return Optional.ofNullable(this.pluginStates.get(container.getMetadata().getId())).orElse(Tristate.UNDEFINED);
     }
 
     public Map<String, Tristate> getCollectionStates() {

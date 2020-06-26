@@ -55,7 +55,7 @@ public final class SpongeDimensionType implements DimensionType {
         checkNotNull(dimensionFactory);
         checkNotNull(hasSkyLight);
 
-        final String modId = SpongeImplHooks.getActiveModContainer().getId();
+        final String modId = SpongeImplHooks.getActiveModContainer().getMetadata().getId();
         final String dimName = id.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
 
         this.key = CatalogKey.of(modId, dimName);

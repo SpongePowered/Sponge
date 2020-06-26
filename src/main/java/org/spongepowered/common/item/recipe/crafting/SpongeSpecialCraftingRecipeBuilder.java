@@ -36,13 +36,11 @@ import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialRecipe;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-@NonnullByDefault
 public final class SpongeSpecialCraftingRecipeBuilder extends SpongeCatalogBuilder<SpecialCraftingRecipe, SpecialCraftingRecipe.Builder> implements
         SpecialCraftingRecipe.Builder, SpecialCraftingRecipe.Builder.ResultStep, SpecialCraftingRecipe.Builder.EndStep {
 

@@ -48,7 +48,7 @@ public final class SpongeCatalogKeyBuilder implements CatalogKey.Builder {
     @Override
     public CatalogKey.Builder namespace(PluginContainer container) {
         checkNotNull(container, "PluginContainer cannot be null");
-        this.namespace = container.getId();
+        this.namespace = container.getMetadata().getId();
         return this;
     }
 

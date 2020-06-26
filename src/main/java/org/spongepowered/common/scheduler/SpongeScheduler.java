@@ -135,13 +135,13 @@ public abstract class SpongeScheduler implements Scheduler {
     @Override
     public Set<ScheduledTask> getTasksByPlugin(PluginContainer plugin) {
         checkNotNull(plugin, "plugin");
-        final String testOwnerId = plugin.getId();
+        final String testOwnerId = plugin.getMetadata().getId();
 
         final Set<ScheduledTask> allTasks = getTasks();
         final Iterator<ScheduledTask> it = allTasks.iterator();
 
         while (it.hasNext()) {
-            final String taskOwnerId = it.next().getOwner().getId();
+            final String taskOwnerId = it.next().getOwner().getMetadata().getId();
             if (!testOwnerId.equals(taskOwnerId)) {
                 it.remove();
             }

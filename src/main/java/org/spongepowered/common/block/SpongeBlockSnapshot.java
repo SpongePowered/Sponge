@@ -47,7 +47,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
@@ -56,7 +55,6 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
-@NonnullByDefault
 public class SpongeBlockSnapshot implements BlockSnapshot {
 
     private final BlockState blockState;

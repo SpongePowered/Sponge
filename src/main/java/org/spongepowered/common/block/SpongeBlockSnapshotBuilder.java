@@ -48,7 +48,6 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import javax.annotation.Nullable;
 import java.util.Deque;
@@ -57,7 +56,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-@NonnullByDefault
 public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapshot> implements BlockSnapshot.Builder {
 
     private static final Deque<SpongeBlockSnapshotBuilder> pool = new ConcurrentLinkedDeque<>();

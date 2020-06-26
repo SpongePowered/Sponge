@@ -81,7 +81,7 @@ class TimingsExport extends Thread {
     }
 
     private static String getServerName() {
-        return SpongeImpl.getPlugin().getName() + " " + SpongeImpl.getPlugin().getVersion().orElse("");
+        return SpongeImpl.getPlugin().getMetadata().getName() + " " + SpongeImpl.getPlugin().getMetadata().getVersion();
     }
 
     /**
@@ -113,7 +113,7 @@ class TimingsExport extends Thread {
         Platform platform = SpongeImpl.getGame().getPlatform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                .add("version", platform.getContainer(IMPLEMENTATION).getVersion().orElse(platform.getMinecraftVersion().getName() + "-DEV"))
+                .add("version", platform.getContainer(IMPLEMENTATION).getMetadata().getVersion())
                 .add("maxplayers", SpongeImpl.getGame().getServer().getMaxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
@@ -183,11 +183,11 @@ class TimingsExport extends Thread {
         // Information about loaded plugins
 
         builder.add("plugins", JSONUtil.mapArrayToObject(SpongeImpl.getGame().getPluginManager().getPlugins(), (plugin) -> {
-            return JSONUtil.objectBuilder().add(plugin.getId(), JSONUtil.objectBuilder()
-                    .add("version", plugin.getVersion().orElse(""))
-                    .add("description", plugin.getDescription().orElse(""))
-                    .add("website", plugin.getUrl().orElse(""))
-                    .add("authors", AUTHOR_LIST_JOINER.join(plugin.getAuthors()))
+            return JSONUtil.objectBuilder().add(plugin.getMetadata().getId(), JSONUtil.objectBuilder()
+                    .add("version", plugin.getMetadata().getVersion())
+                    .add("description", plugin.getMetadata().getDescription().orElse(""))
+                    .add("website", plugin.getMetadata().getLinks().getHomepage())
+                    .add("authors", AUTHOR_LIST_JOINER.join(plugin.getMetadata().getContributors()))
             ).build();
         }));
 

@@ -66,7 +66,6 @@ import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.util.ContainerUtil;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,7 +77,6 @@ import java.util.function.Predicate;
 /**
  * Register known Lenses here
  */
-@NonnullByDefault
 public class LensRegistrar {
 
     // Class of Inventory -> Size -> Lens

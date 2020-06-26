@@ -38,11 +38,9 @@ import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.common.item.recipe.crafting.custom.SpongeStonecuttingRecipe;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.util.function.Predicate;
 
-@NonnullByDefault
 public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<StoneCutterRecipe, StoneCutterRecipe.Builder> implements
         StoneCutterRecipe.Builder, StoneCutterRecipe.Builder.ResultStep, StoneCutterRecipe.Builder.EndStep {
 

@@ -35,8 +35,8 @@ public abstract class AbstractPluginContainer implements PluginContainer {
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper("Plugin")
                 .omitNullValues()
-                .add("id", this.getId())
-                .add("name", this.getName())
+                .add("id", this.getMetadata().getId())
+                .add("name", this.getMetadata().getName())
                 .add("version", this.getVersion().orElse(null))
                 .add("description", this.getDescription().orElse(null))
                 .add("url", this.getUrl().orElse(null))

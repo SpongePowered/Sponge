@@ -214,7 +214,7 @@ public class SpongeEventManager implements EventManager {
         checkNotNull(listenerObject, "listener");
 
         if (this.registeredListeners.contains(listenerObject)) {
-            this.logger.warn("Plugin {} attempted to register an already registered listener ({})", plugin.getId(),
+            this.logger.warn("Plugin {} attempted to register an already registered listener ({})", plugin.getMetadata().getId(),
                     listenerObject.getClass().getName());
             Thread.dumpStack();
             return;

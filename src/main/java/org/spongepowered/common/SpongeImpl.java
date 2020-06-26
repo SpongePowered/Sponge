@@ -48,16 +48,19 @@ import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.event.SpongeCauseStackManager;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.PluginKeys;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -187,12 +190,13 @@ public final class SpongeImpl {
         return SpongeLaunch.getPluginConfigDir(() -> ECOSYSTEM_ID, () -> SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().configDir());
     }
 
-    public static Path getPluginsDir() {
-        return SpongeLaunch.getPluginsDir();
+    public static List<Path> getPluginsDir() {
+        return Launcher.getPluginEnvironment().getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES)
+            .orElseGet(Collections::emptyList);
     }
 
     public static Path getSpongeConfigDir() {
-        return SpongeLaunch.getSpongeConfigDir();
+        return Launcher.getPluginEnvironment().getBlackboard().get();
     }
 
     public static SpongeConfigSaveManager getConfigSaveManager() {

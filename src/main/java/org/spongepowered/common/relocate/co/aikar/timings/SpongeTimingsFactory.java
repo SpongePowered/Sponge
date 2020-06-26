@@ -93,7 +93,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     @Override
     public Timing of(PluginContainer pluginObj, String name, @Nullable Timing groupHandler) {
         PluginContainer plugin = checkPlugin(pluginObj);
-        return TimingsManager.getHandler(plugin.getId(), name, groupHandler, true);
+        return TimingsManager.getHandler(plugin.getMetadata().getId(), name, groupHandler, true);
     }
 
     @Override
@@ -186,7 +186,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     }
 
     public static Timing ofSafe(PluginContainer plugin, String name) {
-        return ofSafe(plugin != null ? plugin.getName() : "Minecraft - Invalid Plugin", name);
+        return ofSafe(plugin != null ? plugin.getMetadata().getName().orElse(plugin.getMetadata().getId()) : "Minecraft - Invalid Plugin", name);
     }
 
     public static TimingHandler ofSafe(String name, Timing groupHandler) {
