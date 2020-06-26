@@ -53,6 +53,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
@@ -183,11 +184,13 @@ public final class SpongeImpl {
     }
 
     public static Path getGameDir() {
-        return SpongeLaunch.getGameDir();
+        return Launcher.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+            .orElseThrow(() -> new IllegalStateException("Somehow we do not have a Game Directory set"));
     }
 
     public static Path getPluginConfigDir() {
-        return SpongeLaunch.getPluginConfigDir(() -> ECOSYSTEM_ID, () -> SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().configDir());
+        throw new MissingImplementationException("SpongeImpl", "getPluginConfigDir");
+//        return SpongeLaunch.getPluginConfigDir(() -> ECOSYSTEM_ID, () -> SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().configDir());
     }
 
     public static List<Path> getPluginsDir() {
@@ -196,7 +199,7 @@ public final class SpongeImpl {
     }
 
     public static Path getSpongeConfigDir() {
-        return Launcher.getPluginEnvironment().getBlackboard().get();
+        throw new MissingImplementationException("SpongeImpl", "getSpongeConfigDir");
     }
 
     public static SpongeConfigSaveManager getConfigSaveManager() {
