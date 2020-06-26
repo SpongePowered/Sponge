@@ -452,7 +452,10 @@ project("SpongeVanilla") {
 
     val vanillaInvalidImplementation by configurations.named(vanillaInvalid.implementationConfigurationName)
     val vanillaAccessorsAnnotationProcessor by configurations.named(vanillaAccessors.annotationProcessorConfigurationName)
-    val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName)
+    val vanillaAccessorsImplementation by configurations.named(vanillaAccessors.implementationConfigurationName)
+    val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
+        extendsFrom(vanillaMinecraftConfig)
+    }
     val vanillaMixinsAnnotationProcessor by configurations.named(vanillaMixins.annotationProcessorConfigurationName)
 
     val vanillaModLauncherImplementation by configurations.named(vanillaModLauncher.implementationConfigurationName) {
@@ -503,6 +506,9 @@ project("SpongeVanilla") {
             exclude(group = "net.minecraft", module = "server")
         }
 
+        vanillaLaunchConfig("org.spongepowered:mixin:0.8")
+        vanillaLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
         vanillaModLauncherImplementation("cpw.mods:modlauncher:4.1.+")
@@ -510,9 +516,10 @@ project("SpongeVanilla") {
         vanillaModLauncherImplementation("cpw.mods:grossjava9hacks:1.1.+")
         vanillaModLauncherImplementation("net.minecraftforge:accesstransformers:1.0.+:shadowed")
         vanillaModLauncherImplementation("net.sf.jopt-simple:jopt-simple:5.0.4")
-        vanillaLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
         implementation(vanillaModLauncher.output)
         vanillaModLauncherImplementation(vanillaLaunchConfig)
+        vanillaMixinsImplementation(vanillaLaunchConfig)
+        vanillaAccessorsImplementation(vanillaLaunchConfig)
 
 
 
