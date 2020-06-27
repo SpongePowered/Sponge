@@ -24,8 +24,10 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
@@ -38,13 +40,16 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 @Plugin(id = "parrotdatatest", name = "Parrot Data Test", description = "A plugin to test parrot data.", version = "0.0.0")
-public class ParrotDataTest {
+public class ParrotDataTest implements LoadableModule {
 
-    private ParrotVariant parrotVariant;
+    @Inject private PluginContainer container;
+
+    private final ParrotDataEventListener listener = new ParrotDataEventListener();
 
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
@@ -52,10 +57,10 @@ public class ParrotDataTest {
                 CommandSpec.builder()
                         .arguments(GenericArguments.onlyOne(GenericArguments.catalogedElement(Text.of("parrot variant"), ParrotVariant.class)))
                         .executor((src, args) -> {
-                            this.parrotVariant = args.<ParrotVariant>getOne("parrot variant").get();
+                            this.listener.setParrotVariant(args.<ParrotVariant>getOne("parrot variant").get());
 
                             src.sendMessage(Text.of(TextColors.DARK_GREEN, "Click a parrot to change their variant to: ",
-                                    TextColors.GRAY, this.parrotVariant.getName()));
+                                    TextColors.GRAY, this.listener.getParrotVariant().getName()));
 
                             return CommandResult.success();
                         })
@@ -63,14 +68,32 @@ public class ParrotDataTest {
                 "parrottest");
     }
 
-    @Listener
-    public void onEntityInteract(InteractEntityEvent event, @Root Player player) {
-        final Entity entity = event.getTargetEntity();
-        if (entity.getType().equals(EntityTypes.PARROT) && this.parrotVariant != null) {
-            entity.offer(Keys.PARROT_VARIANT, this.parrotVariant);
-            player.sendMessage(Text.of(TextColors.GOLD, "The selected parrot has been turned to the variant: ",
-                    TextColors.GRAY, this.parrotVariant.getName()));
-            this.parrotVariant = null;
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class ParrotDataEventListener {
+
+        private ParrotVariant parrotVariant;
+
+        @Listener
+        public void onEntityInteract(InteractEntityEvent event, @Root Player player) {
+            final Entity entity = event.getTargetEntity();
+            if (entity.getType().equals(EntityTypes.PARROT) && this.parrotVariant != null) {
+                entity.offer(Keys.PARROT_VARIANT, this.parrotVariant);
+                player.sendMessage(Text.of(TextColors.GOLD, "The selected parrot has been turned to the variant: ",
+                        TextColors.GRAY, this.parrotVariant.getName()));
+                this.parrotVariant = null;
+            }
+        }
+
+        public ParrotVariant getParrotVariant() {
+            return this.parrotVariant;
+        }
+
+        public void setParrotVariant(ParrotVariant parrotVariant) {
+            this.parrotVariant = parrotVariant;
         }
     }
 
