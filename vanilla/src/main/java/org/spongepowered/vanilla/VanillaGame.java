@@ -53,4 +53,5 @@ public abstract class VanillaGame extends SpongeGame {
         super(platform, registry, dataManager, pluginManager, eventManager, assetManager, configManager, channelRegistrar, teleportHelper,
             causeStackManager, metricsConfigManager, commandManager, sqlManager, serviceProvider);
     }
+
 }

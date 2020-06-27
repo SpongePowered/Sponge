@@ -67,7 +67,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.service.permission.SpongeContextCalculator;
 import org.spongepowered.common.service.permission.SpongePermissionService;
-import org.spongepowered.common.service.sql.SqlServiceImpl;
+import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import org.spongepowered.vanilla.inject.SpongeVanillaModule;
@@ -144,11 +144,6 @@ public final class SpongeVanilla extends MetaPluginContainer {
     public void initialize() {
         this.registry.init();
 
-        if (!this.game.getServiceManager().provide(PermissionService.class).isPresent()) {
-            SpongePermissionService service = new SpongePermissionService(this.game);
-            this.game.getServiceManager().setProvider(this, PermissionService.class, service);
-        }
-
         SpongeCommon.postState(GameState.INITIALIZATION, SpongeEventFactory.createGameInitializationEvent(Sponge.getCauseStackManager().getCurrentCause()));
 
         this.registry.postInit();
@@ -180,8 +175,8 @@ public final class SpongeVanilla extends MetaPluginContainer {
 
     public void onServerStopped() throws IOException {
         SpongeCommon.postState(GameState.SERVER_STOPPED, SpongeEventFactory.createGameStoppedServerEvent(Sponge.getCauseStackManager().getCurrentCause()));
-        ((SqlServiceImpl) this.game.getServiceManager().provideUnchecked(SqlService.class)).close();
-        SpongeCommon.getConfigSaveManager().flush();
+        ((SpongeSqlManager) this.game.getServiceProvider().sqlService()).close();
+        SpongeImpl.getConfigSaveManager().flush();
     }
 
     @Override

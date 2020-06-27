@@ -30,8 +30,6 @@ import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,9 +37,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.service.permission.SubjectSettingCallback;
+import org.spongepowered.common.service.permission.SubjectHelper;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -59,7 +56,7 @@ public abstract class SubjectMixin implements SubjectBridge {
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void subjectConstructor(final CallbackInfo ci) {
         if (SpongeCommon.isInitialized()) {
-            SpongeInternalListeners.getInstance().registerExpirableServiceCallback(PermissionService.class, new SubjectSettingCallback(this));
+            SubjectHelper.applySubject(this);
         }
     }
 
@@ -71,14 +68,14 @@ public abstract class SubjectMixin implements SubjectBridge {
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
-            new SubjectSettingCallback(this).test(Sponge.getServiceProvider().permissionService());
+            SubjectHelper.applySubject(this);
         }
         return Optional.ofNullable(this.impl$subjectReference);
     }
 
     @Override
     public Optional<Subject> bridge$resolveOptional() {
-        return bridge$resolveReferenceOptional().map(SubjectReference::resolve).map(CompletableFuture::join);
+        return this.bridge$resolveReferenceOptional().map(SubjectReference::resolve).map(CompletableFuture::join);
     }
 
     @Override

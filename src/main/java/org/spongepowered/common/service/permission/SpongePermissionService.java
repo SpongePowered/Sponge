@@ -42,7 +42,6 @@ import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -52,6 +51,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 /**
  * Permission service representing the vanilla operator permission structure.
@@ -70,7 +71,7 @@ public final class SpongePermissionService implements PermissionService {
     private final SpongeSubject defaultData;
 
     @Inject
-    public SpongePermissionService(Game game) {
+    public SpongePermissionService(final Game game) {
         this.game = game;
         this.subjects.put(SUBJECTS_DEFAULT, (this.defaultCollection = this.newCollection(SUBJECTS_DEFAULT)));
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
@@ -103,7 +104,7 @@ public final class SpongePermissionService implements PermissionService {
         return SpongeCommon.getServer().getOpPermissionLevel();
     }
 
-    public Subject getGroupForOpLevel(int level) {
+    public Subject getGroupForOpLevel(final int level) {
         return this.getGroupSubjects().get("op_" + level);
     }
 
@@ -117,14 +118,14 @@ public final class SpongePermissionService implements PermissionService {
         return this.get(PermissionService.SUBJECTS_GROUP);
     }
 
-    private SpongeSubjectCollection newCollection(String identifier) {
+    private SpongeSubjectCollection newCollection(final String identifier) {
         return new DataFactoryCollection(identifier, this, GlobalMemorySubjectData::new);
     }
 
-    public SpongeSubjectCollection get(String identifier) {
+    public SpongeSubjectCollection get(final String identifier) {
         SpongeSubjectCollection ret = this.subjects.get(identifier);
         if (ret == null) {
-            SpongeSubjectCollection existingRet = this.subjects.putIfAbsent(identifier, (ret = this.newCollection(identifier)));
+            final SpongeSubjectCollection existingRet = this.subjects.putIfAbsent(identifier, (ret = this.newCollection(identifier)));
             if (existingRet != null) {
                 ret = existingRet;
             }
@@ -143,24 +144,24 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public SubjectReference newSubjectReference(String collectionIdentifier, String subjectIdentifier) {
+    public SubjectReference newSubjectReference(final String collectionIdentifier, final String subjectIdentifier) {
         checkNotNull(collectionIdentifier, "collectionIdentifier");
         checkNotNull(subjectIdentifier, "subjectIdentifier");
         return new SpongeSubjectReference(this, collectionIdentifier, subjectIdentifier);
     }
 
     @Override
-    public CompletableFuture<SubjectCollection> loadCollection(String identifier) {
+    public CompletableFuture<SubjectCollection> loadCollection(final String identifier) {
         return CompletableFuture.completedFuture(this.get(identifier));
     }
 
     @Override
-    public Optional<SubjectCollection> getCollection(String identifier) {
+    public Optional<SubjectCollection> getCollection(final String identifier) {
         return Optional.of(this.get(identifier));
     }
 
     @Override
-    public CompletableFuture<Boolean> hasCollection(String identifier) {
+    public CompletableFuture<Boolean> hasCollection(final String identifier) {
         return CompletableFuture.completedFuture(this.subjects.containsKey(identifier));
     }
 
@@ -175,13 +176,13 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public void registerContextCalculator(ContextCalculator<Subject> calculator) {
+    public void registerContextCalculator(final ContextCalculator<Subject> calculator) {
 
     }
 
     @Override
-    public Builder newDescriptionBuilder(PluginContainer instance) {
-        Optional<PluginContainer> container = this.game.getPluginManager().fromInstance(checkNotNull(instance, "instance"));
+    public Builder newDescriptionBuilder(final PluginContainer instance) {
+        final Optional<PluginContainer> container = this.game.getPluginManager().fromInstance(checkNotNull(instance, "instance"));
         if (!container.isPresent()) {
             throw new IllegalArgumentException("The provided plugin object does not have an associated plugin container "
                     + "(in other words, is 'plugin' actually your plugin object?)");
@@ -190,7 +191,7 @@ public final class SpongePermissionService implements PermissionService {
         return new SpongePermissionDescription.Builder(this, container.get());
     }
 
-    public void addDescription(PermissionDescription permissionDescription) {
+    public void addDescription(final PermissionDescription permissionDescription) {
         checkNotNull(permissionDescription, "permissionDescription");
         checkNotNull(permissionDescription.getId(), "permissionId");
         this.descriptionMap.put(permissionDescription.getId().toLowerCase(), permissionDescription);
@@ -198,7 +199,7 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public Optional<PermissionDescription> getDescription(String permissionId) {
+    public Optional<PermissionDescription> getDescription(final String permissionId) {
         return Optional.ofNullable(this.descriptionMap.get(checkNotNull(permissionId, "permissionId").toLowerCase()));
     }
 

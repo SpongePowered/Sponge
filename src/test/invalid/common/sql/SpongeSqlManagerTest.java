@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.service.sql;
+package org.spongepowered.common.sql;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -31,11 +31,11 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 
-public class SqlServiceImplTest {
+public class SpongeSqlManagerTest {
     @Test
     public void testMysqlConnectionInfo() throws SQLException {
         final String jdbcUrl = "jdbc:mysql://zml:totallymypassword@localhost/sponge";
-        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
+        final SpongeSqlManager.ConnectionInfo subject = SpongeSqlManager.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertEquals("zml", subject.getUser());
         assertEquals("totallymypassword", subject.getPassword());
@@ -46,7 +46,7 @@ public class SqlServiceImplTest {
     @Test
     public void testH2ConnectionInfo() throws SQLException {
         final String jdbcUrl = "jdbc:h2:sparkles.db";
-        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
+        final SpongeSqlManager.ConnectionInfo subject = SpongeSqlManager.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertNull(subject.getUser());
         assertNull(subject.getPassword());
@@ -57,7 +57,7 @@ public class SqlServiceImplTest {
     @Test
     public void testSqliteConnectionInfo() throws SQLException {
         final String jdbcUrl = "jdbc:sqlite:glitter.db";
-        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
+        final SpongeSqlManager.ConnectionInfo subject = SpongeSqlManager.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertNull(subject.getUser());
         assertNull(subject.getPassword());
@@ -68,7 +68,7 @@ public class SqlServiceImplTest {
     @Test
     public void testUrlEncodedInfo() throws SQLException {
         final String jdbcUrl = "jdbc:mysql://test%40%3A%C3%A4%C3%B6%C3%BC%26%3F+%40test:pw%40%3A%C3%A4%C3%B6%C3%BC%26%3F+%40pw@localhost/sponge";
-        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
+        final SpongeSqlManager.ConnectionInfo subject = SpongeSqlManager.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertEquals("test@:äöü&? @test", subject.getUser());
         assertEquals("pw@:äöü&? @pw", subject.getPassword());

@@ -85,10 +85,12 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     private Map<Short, PlayerTracker> trackerImpl$trackedShortBlockPositions = new HashMap<>();
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/ChunkPos;[Lnet/minecraft/world/biome/Biome;Lnet/minecraft/world/chunk/UpgradeData;Lnet/minecraft/world/ITickList;Lnet/minecraft/world/ITickList;J[Lnet/minecraft/world/chunk/ChunkSection;Ljava/util/function/Consumer;)V", at = @At("RETURN"))
-    private void tracker$setUpUserService(World worldIn, ChunkPos p_i49946_2_, Biome[] p_i49946_3_, UpgradeData p_i49946_4_,
-            ITickList<Block> p_i49946_5_, ITickList<Fluid> p_i49946_6_, long p_i49946_7_, ChunkSection[] p_i49946_9_, Consumer<Chunk> p_i49946_10_,
-            CallbackInfo ci) {
-        this.trackerImpl$userStorageService = worldIn != null && ((WorldBridge) worldIn).bridge$isFake() ? null : Sponge.getServiceProvider().userStorageService();
+    private void tracker$setUpUserService(final World worldIn, final ChunkPos p_i49946_2_, final Biome[] p_i49946_3_, final UpgradeData p_i49946_4_,
+            final ITickList<Block> p_i49946_5_, final ITickList<Fluid> p_i49946_6_, final long p_i49946_7_, final ChunkSection[] p_i49946_9_,
+            final Consumer<Chunk> p_i49946_10_, final CallbackInfo ci) {
+        this.trackerImpl$userStorageService = worldIn != null && ((WorldBridge) worldIn).bridge$isFake()
+                                  ? null
+                                  : SpongeCommon.getGame().getServiceProvider().userStorageService();
     }
 
     @Override

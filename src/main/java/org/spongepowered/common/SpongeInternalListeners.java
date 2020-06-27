@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
@@ -33,28 +31,10 @@ import org.spongepowered.api.event.world.SaveWorldEvent;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
-import java.util.Iterator;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 public class SpongeInternalListeners {
 
     public static SpongeInternalListeners getInstance() {
         return Holder.INSTANCE;
-    }
-
-    private Multimap<Class<?>, Predicate<Object>> serviceCallbacks = HashMultimap.create();
-
-    @SuppressWarnings("unchecked")
-    public <T> void registerExpirableServiceCallback(Class<T> service, Predicate<T> callback) {
-        this.serviceCallbacks.put(service, (Predicate<Object>) callback);
-    }
-
-    public <T> void registerServiceCallback(Class<T> service, Consumer<T> callback) {
-        this.registerExpirableServiceCallback(service, o -> {
-            callback.accept(o);
-            return true;
-        });
     }
 
     @Listener

@@ -43,6 +43,7 @@ import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.scheduler.AsyncScheduler;
+import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.util.LocaleCache;
 
 import java.nio.file.Path;
@@ -173,7 +174,7 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public Locale getLocale(String locale) {
+    public Locale getLocale(final String locale) {
         return LocaleCache.getLocale(Preconditions.checkNotNull(locale));
     }
 
@@ -183,4 +184,5 @@ public abstract class SpongeGame implements Game {
                 .add("platform", this.getPlatform())
                 .toString();
     }
+
 }

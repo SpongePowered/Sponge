@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.service.sql;
+package org.spongepowered.common.sql;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -75,7 +75,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
     static final Map<String, BiFunction<PluginContainer, String, String>> PATH_CANONICALIZERS;
 
     static {
-        ImmutableMap.Builder<String, Properties> build = ImmutableMap.builder();
+        final ImmutableMap.Builder<String, Properties> build = ImmutableMap.builder();
         final Properties mySqlProps = new Properties();
         mySqlProps.setProperty("useConfigs",
                 "maxPerformance"); // Config options based on http://assets.en.oreilly
@@ -86,14 +86,14 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
         PROTOCOL_SPECIFIC_PROPS = build.build();
         PATH_CANONICALIZERS = ImmutableMap.of("h2", (plugin, orig) -> {
             // Bleh if only h2 had a better way of supplying a base directory... oh well...
-            org.h2.engine.ConnectionInfo h2Info = new org.h2.engine.ConnectionInfo(orig);
+            final org.h2.engine.ConnectionInfo h2Info = new org.h2.engine.ConnectionInfo(orig);
             if (!h2Info.isPersistent() || h2Info.isRemote()) {
                 return orig;
             }
             if (orig.startsWith("file:")) {
                 orig = orig.substring("file:".length());
             }
-            Path origPath = Paths.get(orig);
+            final Path origPath = Paths.get(orig);
             if (origPath.isAbsolute()) {
                 return origPath.toString();
             }
@@ -117,14 +117,14 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
                     }
                 }))
                 .build((key) -> {
-                    HikariConfig config = new HikariConfig();
+                    final HikariConfig config = new HikariConfig();
                     config.setUsername(key.getUser());
                     config.setPassword(key.getPassword());
                     config.setDriverClassName(key.getDriverClassName());
                     // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing for info on pool sizing
                     config.setMaximumPoolSize((Runtime.getRuntime().availableProcessors() * 2) + 1);
                     config.setLeakDetectionThreshold(60 * 1000);
-                    Properties driverSpecificProperties = PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
+                    final Properties driverSpecificProperties = PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
                     if (driverSpecificProperties != null) {
                         config.setDataSourceProperties(driverSpecificProperties);
                     }
@@ -133,19 +133,19 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
                 });
     }
     @Override
-    public DataSource getDataSource(String jdbcConnection) throws SQLException {
+    public DataSource getDataSource(final String jdbcConnection) throws SQLException {
         return this.getDataSource(null, jdbcConnection);
     }
 
     @Override
-    public DataSource getDataSource(PluginContainer plugin, String jdbcConnection) throws SQLException {
+    public DataSource getDataSource(final PluginContainer plugin, final String jdbcConnection) throws SQLException {
         checkNotNull(this.connectionCache);
 
-        jdbcConnection = this.getConnectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
-        final ConnectionInfo info = ConnectionInfo.fromUrl(plugin, jdbcConnection);
+        final String jdbcConnectionString = this.getConnectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
+        final ConnectionInfo info = ConnectionInfo.fromUrl(plugin, jdbcConnectionString);
         try {
             return this.connectionCache.get(info);
-        } catch (CompletionException e) {
+        } catch (final CompletionException e) {
             throw new SQLException(e);
         }
     }
@@ -175,7 +175,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
          * @param authlessUrl A JDBC url for this driver not containing authentication information
          * @param fullUrl The full jdbc url containing user, password, and database info
          */
-        public ConnectionInfo(@Nullable String user, @Nullable String password, String driverClassName, String authlessUrl, String fullUrl) {
+        public ConnectionInfo(@Nullable final String user, @Nullable final String password, final String driverClassName, final String authlessUrl, final String fullUrl) {
             this.user = user;
             this.password = password;
             this.driverClassName = driverClassName;
@@ -207,14 +207,14 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
 
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
             if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
-            ConnectionInfo that = (ConnectionInfo) o;
+            final ConnectionInfo that = (ConnectionInfo) o;
             return Objects.equal(this.user, that.user)
                     && Objects.equal(this.password, that.password)
                     && Objects.equal(this.driverClassName, that.driverClassName)
@@ -236,8 +236,8 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
          * @return A constructed ConnectionInfo object using the info from the provided URL
          * @throws SQLException If the driver for the given URL is not present
          */
-        public static ConnectionInfo fromUrl(@Nullable PluginContainer container, String fullUrl) throws SQLException {
-            Matcher match = URL_REGEX.matcher(fullUrl);
+        public static ConnectionInfo fromUrl(@Nullable final PluginContainer container, final String fullUrl) throws SQLException {
+            final Matcher match = URL_REGEX.matcher(fullUrl);
             if (!match.matches()) {
                 throw new IllegalArgumentException("URL " + fullUrl + " is not a valid JDBC URL");
             }
@@ -247,7 +247,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
             final String user = urlDecode(match.group(3));
             final String pass = urlDecode(match.group(4));
             String serverDatabaseSpecifier = match.group(5);
-            BiFunction<PluginContainer, String, String> derelativizer = PATH_CANONICALIZERS.get(protocol);
+            final BiFunction<PluginContainer, String, String> derelativizer = PATH_CANONICALIZERS.get(protocol);
             if (container != null && derelativizer != null) {
                 serverDatabaseSpecifier = derelativizer.apply(container, serverDatabaseSpecifier);
             }
@@ -256,10 +256,10 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
             return new ConnectionInfo(user, pass, driverClass, unauthedUrl, fullUrl);
         }
 
-        private static String urlDecode(String str) {
+        private static String urlDecode(final String str) {
             try {
                 return str == null ? null : URLDecoder.decode(str, UTF_8);
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 // If UTF-8 is not supported, we have bigger problems...
                 throw new RuntimeException("UTF-8 is not supported on this system", e);
             }
@@ -267,7 +267,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
     }
 
     @Override
-    public Optional<String> getConnectionUrlFromAlias(String alias) {
+    public Optional<String> getConnectionUrlFromAlias(final String alias) {
         return Optional.ofNullable(SpongeCommon.getGlobalConfigAdapter().getConfig().getSql().getAliases().get(alias));
     }
 
