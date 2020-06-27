@@ -148,7 +148,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
             if (((WorldBridge) this.world).bridge$isFake()) {
                 return null;
             }
-            return ((WorldBridge) this.world).getEmptyChunk();
+            return ((WorldBridge) this.world).bridge$getEmptyChunk();
         }
 
         if (chunk == null) {
