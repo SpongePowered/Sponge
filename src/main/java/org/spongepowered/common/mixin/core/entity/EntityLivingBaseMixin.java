@@ -464,9 +464,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                     if (this.entityType.isModdedDamageEntityMethod) {
                         this.damageEntity(source, amount - this.lastDamage);
                     } else {
-                        if (!this.bridge$damageEntityHook(source, amount - this.lastDamage)) {
-                            return false;
-                        }
+                        this.bridge$damageEntityHook(source, amount - this.lastDamage);
                     }
 
                     // this.damageEntity(source, amount - this.lastDamage); // handled above
@@ -478,9 +476,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                     if (this.entityType.isModdedDamageEntityMethod) {
                         this.damageEntity(source, amount);
                     } else {
-                        if (!this.bridge$damageEntityHook(source, amount)) {
-                            return false;
-                        }
+                        this.bridge$damageEntityHook(source, amount);
                     }
                     this.lastDamage = amount;
                     this.hurtResistantTime = this.maxHurtResistantTime;
