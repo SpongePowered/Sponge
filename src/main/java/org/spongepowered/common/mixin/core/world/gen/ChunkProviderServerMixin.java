@@ -145,6 +145,9 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
 
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null && this.impl$canDenyChunkRequest()) {
+            if (((WorldBridge) this.world).bridge$isFake()) {
+                return null;
+            }
             return ((WorldBridge) this.world).getEmptyChunk();
         }
 
