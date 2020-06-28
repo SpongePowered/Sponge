@@ -26,6 +26,7 @@ package org.spongepowered.common.registry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -154,8 +155,8 @@ import org.spongepowered.common.registry.builtin.sponge.TextColorStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.TextSerializerStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.TextStyleTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.vanilla.ArmorMaterialStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.CriteriaTriggersSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.DimensionTypeSupplier;
@@ -172,9 +173,13 @@ import org.spongepowered.common.registry.builtin.vanilla.SoundEventSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.TileEntityTypeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.VillagerProfessionSupplier;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -226,7 +231,16 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     @Override
-    public <T extends CatalogType> Stream<T> getAllOf(Class<T> typeClass) {
+    public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
+        final Registry<CatalogType> registry = this.registries.get(typeClass);
+        if (registry == null) {
+            return Collections.emptyList();
+        }
+        return (Collection<T>) (Object) Arrays.asList(((SimpleRegistryAccessor) registry).accessor$getValues());
+    }
+
+    @Override
+    public <T extends CatalogType> Stream<T> streamAllOf(Class<T> typeClass) {
         final Registry<CatalogType> registry = this.registries.get(typeClass);
         final Stream<T> stream;
         if (registry == null) {
@@ -239,7 +253,22 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     @Override
-    public <T extends CatalogType> Stream<T> getAllFor(Class<T> typeClass, String namespace) {
+    public <T extends CatalogType> Collection<T> getAllFor(Class<T> typeClass, String namespace) {
+        Preconditions.checkNotNull(namespace);
+
+        final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
+        final List<T> types = new ArrayList<>();
+        for (final Map.Entry<ResourceLocation, Object> entry : ((SimpleRegistryAccessor) registry).accessor$getRegistryObjects().entrySet()) {
+            if (entry.getKey().getNamespace().equals(namespace)) {
+                types.add((T) entry.getValue());
+            }
+        }
+
+        return types;
+    }
+
+    @Override
+    public <T extends CatalogType> Stream<T> streamAllFor(Class<T> typeClass, String namespace) {
         checkNotNull(namespace);
 
         final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
@@ -279,7 +308,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this.registerRegistry(catalogClass, key, null, false);
     }
 
-    @SuppressWarnings("ConstantConditions")
     public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(Class<T> catalogClass, CatalogKey key, @Nullable Supplier<Set<T>> defaultsSupplier, boolean generateSuppliers) {
         checkNotNull(catalogClass);
         checkNotNull(key);
@@ -313,7 +341,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    private <T extends CatalogType> SpongeCatalogRegistry registerCallbackRegistry(Class<T> catalogClass, CatalogKey key, BiConsumer<ResourceLocation, T> callback) {
+    private <T extends CatalogType> SpongeCatalogRegistry generateCallbackRegistry(Class<T> catalogClass, CatalogKey key, BiConsumer<ResourceLocation, T> callback) {
         checkNotNull(catalogClass);
         checkNotNull(key);
 
@@ -398,6 +426,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .registerRegistry(Advancement.class, CatalogKey.minecraft("advancement"))
             .registerRegistry(AdvancementTree.class, CatalogKey.minecraft("advancement_tree"))
             .generateRegistry(AdvancementType.class, CatalogKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
+            .generateRegistry(ArmorMaterial.class, CatalogKey.minecraft("armor_material"), Arrays.stream(net.minecraft.item.ArmorMaterial.values()), true)
             .generateRegistry(BanType.class, CatalogKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true)
             .generateRegistry(BannerPatternShape.class, CatalogKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true)
             .generateRegistry(BossBarOverlay.class, CatalogKey.minecraft("boss_bar_overlay"), Arrays.stream(BossInfo.Overlay.values()), true)
@@ -408,10 +437,12 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(ChestAttachmentType.class, CatalogKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true)
             .generateRegistry(CollisionRule.class, CatalogKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
             .generateRegistry(ComparatorMode.class, CatalogKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true)
+            .generateRegistry(DamageType.class, CatalogKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true)
             .generateRegistry(Difficulty.class, CatalogKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true)
             .generateRegistry(DismountType.class, CatalogKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true)
             .generateRegistry(DragonPhaseType.class, CatalogKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true)
             .generateRegistry(DyeColor.class, CatalogKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
+            .generateRegistry(EventContextKey.class, CatalogKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true)
             .generateRegistry(FoxType.class, CatalogKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
             .generateRegistry(GameMode.class, CatalogKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true)
             .generateRegistry(GoalExecutorType.class, CatalogKey.minecraft("goal_executor_type"), GoalExecutorTypeStreamGenerator.stream(), true)
@@ -429,6 +460,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(RaidStatus.class, CatalogKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true)
             .generateRegistry(RailDirection.class, CatalogKey.minecraft("rail_direction"), Arrays.stream(RailShape.values()), true)
             .generateRegistry(SlabPortion.class, CatalogKey.minecraft("slab_portion"), Arrays.stream(SlabType.values()), true)
+            .generateRegistry(SpawnType.class, CatalogKey.sponge("spawn_type"), SpawnTypeStreamGenerator.stream(), true)
             .generateRegistry(SpellType.class, CatalogKey.minecraft("spell_type"), Arrays.stream(SpellcastingIllagerEntity.SpellType.values()), true)
             .generateRegistry(StairShape.class, CatalogKey.minecraft("stair_shape"), Arrays.stream(StairsShape.values()), true)
             .generateRegistry(StructureMode.class, CatalogKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true)
@@ -437,10 +469,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(WireAttachmentType.class, CatalogKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true)
             .generateRegistry(WoodType.class, CatalogKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true)
             .generateRegistry(Visibility.class, CatalogKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true)
-            .generateRegistry(SpawnType.class, CatalogKey.sponge("spawn_type"), SpawnTypeStreamGenerator.stream(), true)
-            .generateRegistry(EventContextKey.class, CatalogKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true)
-            .generateRegistry(DamageType.class, CatalogKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true)
-            .generateRegistry(ArmorMaterial.class, CatalogKey.sponge("armor_material"), ArmorMaterialStreamGenerator.stream(), true)
             .registerRegistry(Currency.class, CatalogKey.sponge("currency"))
         ;
 
@@ -458,8 +486,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateMappedRegistry(DisplaySlot.class, CatalogKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true)
         ;
 
-        this.registerCallbackRegistry(DataRegistration.class, CatalogKey.sponge("data_registration"),
-                (resourceLocation, value) -> SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) value));
+        this.generateCallbackRegistry(DataRegistration.class, CatalogKey.sponge("data_registration"), (key, value) -> SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) value));
     }
 
     /**
@@ -472,6 +499,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         // Class based/Likely for mods to override
         BiomeSupplier.registerSuppliers(this);
+        BlockSupplier.registerSuppliers(this);
         ContainerTypeSupplier.registerSuppliers(this);
         CriteriaTriggersSupplier.registerSuppliers(this);
         DimensionTypeSupplier.registerSuppliers(this);
@@ -491,7 +519,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     private <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(Class<T> catalogClass, CatalogKey key, Stream<E> valueStream, boolean generateSuppliers) {
-        this.registerRegistry(catalogClass, key, () -> valueStream.map(value -> (T) (Object) value).collect(Collectors.toSet()), generateSuppliers);
+        this.registerRegistry(catalogClass, key, () -> valueStream.map(value -> (T) value).collect(Collectors.toSet()), generateSuppliers);
         return this;
     }
 

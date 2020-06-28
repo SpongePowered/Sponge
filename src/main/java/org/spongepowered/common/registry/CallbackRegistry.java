@@ -29,7 +29,7 @@ import net.minecraft.util.registry.SimpleRegistry;
 
 import java.util.function.BiConsumer;
 
-public class CallbackRegistry<T> extends SimpleRegistry<T> {
+public final class CallbackRegistry<T> extends SimpleRegistry<T> {
 
     private final BiConsumer<ResourceLocation, T> callback;
 
@@ -37,7 +37,8 @@ public class CallbackRegistry<T> extends SimpleRegistry<T> {
         this.callback = callback;
     }
 
-    @Override public <V extends T> V register(int id, ResourceLocation name, V instance) {
+    @Override
+    public <V extends T> V register(int id, ResourceLocation name, V instance) {
         V value = super.register(id, name, instance);
         callback.accept(name, instance);
         return value;
