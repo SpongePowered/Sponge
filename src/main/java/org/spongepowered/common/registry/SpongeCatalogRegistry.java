@@ -128,6 +128,7 @@ import org.spongepowered.api.text.serializer.TextSerializer;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
@@ -149,6 +150,7 @@ import org.spongepowered.common.registry.builtin.sponge.LlamaTypeStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.PortalAgentTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.TextColorStreamGenerator;
@@ -395,16 +397,15 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return registry;
     }
 
-    public SpongeCatalogRegistry registerCatalog(CatalogType catalogType) {
+    public <C extends CatalogType> C registerCatalog(C catalogType) {
         checkNotNull(catalogType);
 
-        final Registry<CatalogType> registry = this.registriesByType.get(catalogType.getClass());
+        final Registry<C> registry = (Registry<C>) this.registriesByType.get(catalogType.getClass());
         if (registry == null) {
             throw new UnknownTypeException(String.format("Catalog '%s' with id '%s' has no registry registered!", catalogType.getClass(), catalogType.getKey()));
         }
 
-        ((SimpleRegistry<CatalogType>) registry).register((ResourceLocation) (Object) catalogType.getKey(), catalogType);
-        return this;
+        return ((SimpleRegistry<C>) registry).register((ResourceLocation) (Object) catalogType.getKey(), catalogType);
     }
 
     /**
@@ -456,6 +457,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(PhantomPhase.class, CatalogKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
             .generateRegistry(PickupRule.class, CatalogKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
             .generateRegistry(PistonType.class, CatalogKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true)
+            .generateRegistry(PortalAgentType.class, CatalogKey.minecraft("portal_agent_type"), PortalAgentTypeStreamGenerator.stream(), true)
             .generateRegistry(PortionType.class, CatalogKey.minecraft("portion_type"), Arrays.stream(Half.values()), true)
             .generateRegistry(RaidStatus.class, CatalogKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true)
             .generateRegistry(RailDirection.class, CatalogKey.minecraft("rail_direction"), Arrays.stream(RailShape.values()), true)

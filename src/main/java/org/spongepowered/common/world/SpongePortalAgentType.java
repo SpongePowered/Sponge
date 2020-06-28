@@ -22,23 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.biome;
+package org.spongepowered.common.world;
 
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.biome.BiomeBridge;
+import org.spongepowered.api.world.teleport.PortalAgent;
+import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 
-@Mixin(Biomes.class)
-public abstract class BiomesMixin {
+public final class SpongePortalAgentType extends SpongeCatalogType implements PortalAgentType {
 
-    @Inject(method = "register", at = @At("HEAD"))
-    private static void impl$setCatalogKey(int id, String key, Biome biome, CallbackInfoReturnable<Biome> cir) {
-        // TODO Minecraft 1.14 - Biomes are odd, Forge likely had Modders call another method so we need to intercept that too for the key
-        ((BiomeBridge) biome).bridge$setKey(CatalogKey.minecraft(key));
+    private final Class<? extends ForgeITeleporterBridge> portalAgentClass;
+
+    public SpongePortalAgentType(CatalogKey key, Class<? extends ForgeITeleporterBridge> portalAgentClass) {
+        super(key);
+        this.portalAgentClass = Preconditions.checkNotNull(portalAgentClass, "The class was null for '" + this.getKey() + ".");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Class<? extends PortalAgent> getPortalAgentClass() {
+        return (Class<? extends PortalAgent>) this.portalAgentClass;
     }
 }

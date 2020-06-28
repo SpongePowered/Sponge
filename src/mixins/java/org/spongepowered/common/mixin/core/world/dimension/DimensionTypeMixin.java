@@ -68,8 +68,7 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
         if (logicType == null) {
             logicType = new SpongeDimensionType(id, ((DimensionTypeAccessor) dimensionType)::accessor$getFactory, dimensionType::hasSkyLight);
-            DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, logicType);
-            SpongeImpl.getRegistry().getCatalogRegistry().registerCatalog(logicType);
+            DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, SpongeImpl.getRegistry().getCatalogRegistry().registerCatalog(logicType));
         }
     }
 
