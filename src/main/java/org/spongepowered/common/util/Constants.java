@@ -736,13 +736,6 @@ public final class Constants {
         }
 
         public static final class ArmorStand {
-            static {
-                try {
-                    Class.forName(String.valueOf(EntityArmorStand.class));
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
 
             public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultHeadRotation());
             public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(EntityArmorStandAccessor.accessor$getDefaultBodyRotation());
