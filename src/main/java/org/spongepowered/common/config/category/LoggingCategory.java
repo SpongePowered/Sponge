@@ -69,8 +69,9 @@ public class LoggingCategory extends ConfigCategory {
     private boolean logEntityCollisionChecks = false;
     @Setting(value = "entity-speed-removal", comment = "Whether to log entity removals due to speed")
     private boolean logEntitySpeedRemoval = false;
-    @Setting(value = "transaction-merge-fail", comment = "Log when two conflicting changes are merged into one. (This number specifies the maximum "
-            + "number of messages to log. Set to 0 to show all messages.)")
+    @Setting(value = "transaction-merge-fail",
+            comment = "Log when two conflicting changes are merged into one. (This number specifies the maximum number of"
+                    + "\nmessages to log. Set to 0 to show all messages.)")
     private int logTransactionMergeFailure = 25;
     @Setting(value = "world-auto-save", comment = ""
             + "Log when a world auto-saves its chunk data.\n"
