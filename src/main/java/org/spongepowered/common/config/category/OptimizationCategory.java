@@ -129,6 +129,13 @@ public class OptimizationCategory extends ConfigCategory {
     )
     private boolean disablePathFindingChunkLoads = false;
 
+    @Setting(value = "disable-raytracing-chunk-loads", comment = "In vanilla, ray tracing may result in loading chunks.\n" +
+            "You can disable that here, which may result in a\n" +
+            "performance improvement. This may not work well\n" +
+            "with mods."
+    )
+    private boolean disableRayTracingChunkLoads = false;
+
     public OptimizationCategory() {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -217,6 +224,10 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean disablePathFindingChunkLoads() {
         return this.disablePathFindingChunkLoads;
+    }
+
+    public boolean isDisableRayTracingChunkLoads() {
+        return this.disableRayTracingChunkLoads;
     }
 
 }
