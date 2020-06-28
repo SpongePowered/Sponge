@@ -24,11 +24,31 @@
  */
 package org.spongepowered.common.util;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
+import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
+import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
+
+import java.util.stream.Collectors;
+
 public class SpongeHooks {
 
-
     public static void refreshActiveConfigs() {
-        for (final BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
+        for (final BlockType blockType : Sponge.getRegistry().getCatalogRegistry().getAllOf(BlockType.class).collect(Collectors.toList())) {
             if (blockType instanceof CollisionCapabilityBridge) {
                 ((CollisionCapabilityBridge) blockType).collision$requiresCollisionsCacheRefresh(true);
             }
@@ -36,10 +56,10 @@ public class SpongeHooks {
                 ((BlockBridge) blockType).bridge$initializeTrackerState();
             }
         }
-        for (final BlockEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
-            ((SpongeTileEntityType) tileEntityType).initializeTrackerState();
+        for (final BlockEntityType blockEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
+            ((SpongeTileEntityType) blockEntityType).initializeTrackerState();
         }
-        for (final EntityType entityType : EntityTypeRegistryModule.getInstance().getAll()) {
+        for (final EntityType<?> entityType : EntityTypeRegistryModule.getInstance().getAll()) {
             ((SpongeEntityType) entityType).initializeTrackerState();
         }
 
@@ -71,6 +91,4 @@ public class SpongeHooks {
         }
         ConfigTeleportHelperFilter.invalidateCache();
     }
-
-
 }

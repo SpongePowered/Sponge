@@ -63,7 +63,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
 import org.spongepowered.math.vector.Vector3i;
 
