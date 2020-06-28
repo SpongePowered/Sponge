@@ -135,6 +135,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::isOptimizeHoppers)
             .put("org.spongepowered.common.mixin.optimization.entity.EntityMixin_UseActiveChunkForCollisions",
                     OptimizationCategory::isUseActiveChunkForCollisions)
+            .put("org.spongepowered.common.mixin.optimization.world.WorldMixin_RayTraceChunkLoadOptimizations",
+                    OptimizationCategory::isDisableRayTracingChunkLoads)
             .put("org.spongepowered.common.mixin.optimization.world.WorldMixin_UseActiveChunkForCollisions",
                     OptimizationCategory::isUseActiveChunkForCollisions)
             .put("org.spongepowered.common.mixin.optimization.world.WorldServerMixin_UseActiveChunkForCollisions",

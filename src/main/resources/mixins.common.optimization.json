@@ -21,6 +21,7 @@
         "server.MinecraftServerMixin_MapOptimization",
         "tileentity.TileEntityHopperMixin_HopperOptimization",
         "tileentity.TileEntityMixin_HopperOptimization",
+        "world.WorldMixin_RayTraceChunkLoadOptimizations",
         "world.WorldMixin_UseActiveChunkForCollisions",
         "world.WorldServerMixin_Async_Lighting",
         "world.WorldServerMixin_UseActiveChunkForCollisions",
