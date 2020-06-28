@@ -163,6 +163,8 @@
         "world.TrackedEntityMixin",
         "world.WorldMixin",
         "world.WorldSettingsMixin",
+        "world.biome.BiomeMixin",
+        "world.biome.BiomesMixin",
         "world.chunk.BlockStateContainerMixin",
         "world.chunk.ChunkMixin",
         "world.dimension.DimensionMixin",

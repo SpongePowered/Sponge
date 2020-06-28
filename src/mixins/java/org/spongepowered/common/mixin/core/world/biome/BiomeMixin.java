@@ -22,32 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.world.gen;
+package org.spongepowered.common.mixin.core.world.biome;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.MapGenBase;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
-import org.spongepowered.api.world.volume.block.MutableBlockVolume;
+import net.minecraft.world.biome.Biome;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.gen.ChunkBufferPrimer;
+import org.spongepowered.common.bridge.world.biome.BiomeBridge;
 
-@Mixin(MapGenBase.class)
-public abstract class MapGenBaseMixin_API implements GenerationPopulator {
+@Mixin(Biome.class)
+public abstract class BiomeMixin implements BiomeBridge {
 
-    @Shadow protected net.minecraft.world.World world;
-
-    @Shadow public abstract void generate(net.minecraft.world.World worldIn, int x, int z, ChunkPrimer chunkData);
+    private CatalogKey impl$key;
 
     @Override
-    public void populate(final World world, final MutableBlockVolume buffer, final ImmutableBiomeVolume biomes) {
-        Preconditions.checkNotNull(world);
-        final int x = buffer.getBlockMin().getX() / 16;
-        final int z = buffer.getBlockMin().getZ() / 16;
-        this.generate((net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));
+    public CatalogKey bridge$getKey() {
+        return this.impl$key;
     }
 
+    @Override
+    public void bridge$setKey(CatalogKey key) {
+        this.impl$key = key;
+    }
 }

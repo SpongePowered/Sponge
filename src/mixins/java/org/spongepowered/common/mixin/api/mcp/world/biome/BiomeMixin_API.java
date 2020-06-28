@@ -22,61 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.world.biome;
+package org.spongepowered.common.mixin.api.mcp.world.biome;
 
-import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeDecorator;
-import org.spongepowered.api.world.biome.BiomeGenerationSettings;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.biome.BiomeBridge;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
-import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 
 @Mixin(Biome.class)
 public abstract class BiomeMixin_API implements BiomeType {
 
-    @Shadow @Final private String biomeName;
-    @Shadow @Final private float temperature;
-    @Shadow @Final private float rainfall;
-    @Shadow public BiomeDecorator decorator;
-
+    @Shadow public abstract float shadow$getDefaultTemperature();
+    @Shadow public abstract float shadow$getDownfall();
 
     @Override
-    public BiomeGenerationSettings createDefaultGenerationSettings(org.spongepowered.api.world.World world) {
-        SpongeBiomeGenerationSettings gensettings = new SpongeBiomeGenerationSettings();
-        gensettings.getPopulators().clear();
-        gensettings.getGenerationPopulators().clear();
-        gensettings.getGroundCoverLayers().clear();
-        ((BiomeBridge) this).bridge$buildPopulators((World) world, gensettings);
-        if (!this.getClass().getName().startsWith("net.minecraft")) {
-            gensettings.getPopulators().add(new WrappedBiomeDecorator((Biome) (Object) this));
-        } else if (!this.decorator.getClass().getName().startsWith("net.minecraft")) {
-            gensettings.getPopulators().add(new WrappedBiomeDecorator(this.decorator));
-        }
-        return gensettings;
-    }
-
-    @Override
-    public String getName() {
-        return this.biomeName;
-    }
-
-    @Override
-    public final String getId() {
-        return ((BiomeBridge) this).bridge$getId();
+    public CatalogKey getKey() {
+        return ((BiomeBridge) this).bridge$getKey();
     }
 
     @Override
     public double getTemperature() {
-        return this.temperature;
+        return this.shadow$getDefaultTemperature();
     }
 
     @Override
     public double getHumidity() {
-        return this.rainfall;
+        return this.shadow$getDownfall();
     }
 }

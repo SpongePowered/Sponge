@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.biome;
 
+import org.spongepowered.api.CatalogKey;
+
 public interface BiomeBridge {
 
-    void bridge$setId(String id);
+    CatalogKey bridge$getKey();
 
-    String bridge$getId();
-
-    void bridge$setModId(String modId);
-
-    String bridge$getModId();
-
+    void bridge$setKey(CatalogKey key);
 }

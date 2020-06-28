@@ -22,34 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.world.gen;
+package org.spongepowered.common.mixin.core.world.biome;
 
-import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.NetherChunkGenerator;
-import net.minecraft.world.gen.feature.FortressStructure;
-import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.TerrainGenerator;
-import org.spongepowered.api.world.gen.feature.Feature;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.gen.PopulatorProviderBridge;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.world.biome.BiomeBridge;
 
-@Mixin(NetherChunkGenerator.class)
-public abstract class ChunkGeneratorHellMixin_API implements PopulatorProviderBridge {
+@Mixin(Biomes.class)
+public abstract class BiomesMixin {
 
-    @Shadow @Final private boolean generateStructures;
-    @Shadow @Final private FortressStructure genNetherBridge;
-    @Shadow @Final private MapGenBase genNetherCaves;
-
-    @Override
-    public void bridge$addPopulators(final TerrainGenerator generator) {
-        generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherCaves);
-
-        if (this.generateStructures) {
-            generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherBridge);
-            generator.getPopulators().add((Feature) this.genNetherBridge);
-        }
+    @Inject(method = "register", at = @At("HEAD"))
+    private static void impl$setCatalogKey(int id, String key, Biome biome, CallbackInfoReturnable<Biome> cir) {
+        // TODO Biomes are odd, Forge likely had Modders call another method so we need to intercept that too for the key
+        ((BiomeBridge) biome).bridge$setKey(CatalogKey.minecraft(key));
     }
-
 }
