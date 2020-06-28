@@ -25,9 +25,10 @@ The following steps will ensure your project is cloned properly.
 version. Local installations of Gradle may work but are untested. To execute the Gradle wrapper, run the `./gradlew` script on Unix systems or only
 `gradlew` on Windows systems.
 
-Before you are able to build SpongeCommon, you must first prepare the environment:
+Before you are able to build SpongeCommon, you must first prepare the environment (some IDEs may do this for you). This may not actually compile 
+SpongeCommon, but it will download all the dependencies so you can get started):
 
-  - Run `./gradlew setupDecompWorkspace --refresh-dependencies`
+  - Run `./gradlew build --refresh-dependencies`
 
 ### IDE Setup
 __For [Eclipse]__
@@ -52,7 +53,7 @@ The following steps will update your clone with the official repo.
 
 1. `git pull`
 2. `git submodule update --recursive`
-3. `./gradlew setupDecompWorkspace --refresh-dependencies`
+3. `./gradlew build --refresh-dependencies`
 
 ## Contributing
 Are you a talented programmer looking to contribute some code? We'd love the help!
