@@ -73,17 +73,16 @@ import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-
-import javax.annotation.Nullable;
 
 public class ProjectileLauncher {
 
@@ -170,7 +169,7 @@ public class ProjectileLauncher {
     }
 
     @SuppressWarnings("unchecked")
-    static <P extends Projectile> Optional<P> defaultLaunch(ProjectileSource source, Class<P> projectileClass, Location loc) {
+    static <P extends Projectile> Optional<P> defaultLaunch(ProjectileSource source, Class<P> projectileClass, ServerLocation loc) {
         Optional<EntityType> opType = EntityTypeRegistryModule.getInstance().getEntity(projectileClass);
         if (!opType.isPresent()) {
             return Optional.empty();
@@ -199,7 +198,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(TippedArrow.class, new SimpleItemLaunchLogic<TippedArrow>(TippedArrow.class, Items.ARROW) {
 
             @Override
-            protected Optional<TippedArrow> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<TippedArrow> createProjectile(LivingEntity source, ServerLocation loc) {
                 TippedArrow arrow = (TippedArrow) new ArrowEntity(source.world, source);
                 ((ArrowEntity) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
                 return doLaunch(loc.getWorld(), arrow);
@@ -208,7 +207,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(SpectralArrow.class, new SimpleItemLaunchLogic<SpectralArrow>(SpectralArrow.class, Items.SPECTRAL_ARROW) {
 
             @Override
-            protected Optional<SpectralArrow> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<SpectralArrow> createProjectile(LivingEntity source, ServerLocation loc) {
                 SpectralArrow arrow = (SpectralArrow) new SpectralArrowEntity(source.world, source);
                 ((SpectralArrowEntity) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
                 return doLaunch(loc.getWorld(), arrow);
@@ -217,7 +216,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(Arrow.class, new SimpleItemLaunchLogic<Arrow>(Arrow.class, Items.ARROW) {
 
             @Override
-            protected Optional<Arrow> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<Arrow> createProjectile(LivingEntity source, ServerLocation loc) {
                 TippedArrow arrow = (TippedArrow) new ArrowEntity(source.world, source);
                 ((ArrowEntity) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
                 return doLaunch(loc.getWorld(), arrow);
@@ -226,7 +225,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(Egg.class, new SimpleItemLaunchLogic<Egg>(Egg.class, Items.EGG) {
 
             @Override
-            protected Optional<Egg> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<Egg> createProjectile(LivingEntity source, ServerLocation loc) {
                 Egg egg = (Egg) new EggEntity(source.world, source);
                 ((ThrowableEntity) egg).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getWorld(), egg);
@@ -235,7 +234,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.FIRE_CHARGE) {
 
             @Override
-            protected Optional<SmallFireball> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<SmallFireball> createProjectile(LivingEntity source, ServerLocation loc) {
                 Vec3d lookVec = source.getLook(1);
                 SmallFireball fireball = (SmallFireball) new SmallFireballEntity(source.world, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
@@ -246,7 +245,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(FireworkRocket.class, new SimpleItemLaunchLogic<FireworkRocket>(FireworkRocket.class, Items.FIREWORKS) {
 
             @Override
-            protected Optional<FireworkRocket> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<FireworkRocket> createProjectile(LivingEntity source, ServerLocation loc) {
                 FireworkRocket firework = (FireworkRocket) new FireworkRocketEntity(source.world, loc.getX(), loc.getY(), loc.getZ(), ItemStack.EMPTY);
                 return doLaunch(loc.getWorld(), firework);
             }
@@ -254,7 +253,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(Snowball.class, new SimpleItemLaunchLogic<Snowball>(Snowball.class, Items.SNOWBALL) {
 
             @Override
-            protected Optional<Snowball> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<Snowball> createProjectile(LivingEntity source, ServerLocation loc) {
                 Snowball snowball = (Snowball) new SnowballEntity(source.world, source);
                 ((ThrowableEntity) snowball).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getWorld(), snowball);
@@ -263,7 +262,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(ExperienceBottle.class, new SimpleItemLaunchLogic<ExperienceBottle>(ExperienceBottle.class, Items.EXPERIENCE_BOTTLE) {
 
             @Override
-            protected Optional<ExperienceBottle> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<ExperienceBottle> createProjectile(LivingEntity source, ServerLocation loc) {
                 ExperienceBottle expBottle = (ExperienceBottle) new ExperienceBottleEntity(source.world, source);
                 ((ThrowableEntity) expBottle).shoot(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.7F, 0);
                 return doLaunch(loc.getWorld(), expBottle);
@@ -273,7 +272,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(EnderPearl.class, new SimpleDispenserLaunchLogic<EnderPearl>(EnderPearl.class) {
 
             @Override
-            protected Optional<EnderPearl> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<EnderPearl> createProjectile(LivingEntity source, ServerLocation loc) {
                 EnderPearl pearl = (EnderPearl) new EnderPearlEntity(source.world, source);
                 ((ThrowableEntity) pearl).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getWorld(), pearl);
@@ -282,7 +281,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(ExplosiveFireball.class, new SimpleDispenserLaunchLogic<ExplosiveFireball>(ExplosiveFireball.class) {
 
             @Override
-            protected Optional<ExplosiveFireball> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<ExplosiveFireball> createProjectile(LivingEntity source, ServerLocation loc) {
                 Vec3d lookVec = source.getLook(1);
                 ExplosiveFireball fireball = (ExplosiveFireball) new FireballEntity(source.world, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
@@ -291,7 +290,7 @@ public class ProjectileLauncher {
             }
 
             @Override
-            public Optional<ExplosiveFireball> createProjectile(ProjectileSource source, Class<ExplosiveFireball> projectileClass, Location loc) {
+            public Optional<ExplosiveFireball> createProjectile(ProjectileSource source, Class<ExplosiveFireball> projectileClass, ServerLocation loc) {
                 if (!(source instanceof DispenserTileEntity)) {
                     return super.createProjectile(source, projectileClass, loc);
                 }
@@ -310,7 +309,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(WitherSkull.class, new SimpleDispenserLaunchLogic<WitherSkull>(WitherSkull.class) {
 
             @Override
-            protected Optional<WitherSkull> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<WitherSkull> createProjectile(LivingEntity source, ServerLocation loc) {
                 Vec3d lookVec = source.getLook(1);
                 WitherSkull skull = (WitherSkull) new WitherSkullEntity(source.world, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
@@ -322,7 +321,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(FishingBobber.class, new SimpleDispenserLaunchLogic<FishingBobber>(FishingBobber.class) {
 
             @Override
-            protected Optional<FishingBobber> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<FishingBobber> createProjectile(LivingEntity source, ServerLocation loc) {
                 if (source instanceof PlayerEntity) {
                     FishingBobber hook = (FishingBobber) new FishingBobberEntity(source.world, (PlayerEntity) source);
                     return doLaunch(loc.getWorld(), hook);
@@ -333,7 +332,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(Potion.class, new SimpleDispenserLaunchLogic<Potion>(Potion.class) {
 
             @Override
-            protected Optional<Potion> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<Potion> createProjectile(LivingEntity source, ServerLocation loc) {
                 Potion potion = (Potion) new PotionEntity(source.world, source, new ItemStack(Items.SPLASH_POTION, 1));
                 ((ThrowableEntity) potion).shoot(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.5F, 0);
                 return doLaunch(loc.getWorld(), potion);
@@ -350,7 +349,7 @@ public class ProjectileLauncher {
             }
 
             @Override
-            public Optional<LlamaSpit> createProjectile(ProjectileSource source, Class<LlamaSpit> projectileClass, Location loc) {
+            public Optional<LlamaSpit> createProjectile(ProjectileSource source, Class<LlamaSpit> projectileClass, ServerLocation loc) {
                 LlamaEntity llama = (LlamaEntity) source;
                 LlamaSpit llamaSpit = (LlamaSpit) new LlamaSpitEntity(llama.world, (LlamaEntity) source);
                 Vec3d lookVec = llama.getLook(1);
@@ -361,7 +360,7 @@ public class ProjectileLauncher {
         registerProjectileLogic(DragonFireball.class, new SimpleDispenserLaunchLogic<DragonFireball>(DragonFireball.class) {
 
             @Override
-            protected Optional<DragonFireball> createProjectile(LivingEntity source, Location loc) {
+            protected Optional<DragonFireball> createProjectile(LivingEntity source, ServerLocation loc) {
                 Vec3d lookVec = source.getLook(1);
                 DragonFireball fireball = (DragonFireball) new DragonFireballEntity(source.world, source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);

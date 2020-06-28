@@ -40,7 +40,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
@@ -102,7 +102,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> apply(Location location) {
+    public Optional<org.spongepowered.api.entity.Entity> apply(ServerLocation location) {
         final Vector3d position = location.getPosition();
         final double x = position.getX();
         final double y = position.getY();
@@ -162,7 +162,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
-    public EntitySnapshot toSnapshot(Location location) {
+    public EntitySnapshot toSnapshot(ServerLocation location) {
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
         CompoundNBT newCompound = this.data.copy();

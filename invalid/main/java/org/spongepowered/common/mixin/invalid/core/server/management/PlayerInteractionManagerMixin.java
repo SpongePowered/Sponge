@@ -44,7 +44,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -123,7 +123,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
         // Sponge start - Fire interact block event
         // This was an @inject in SpongeVanilla and Forge is also firing its event.
         // To achieve compatibility and standardize this method, we use an @Overwrite
-        final BlockSnapshot blockSnapshot = Location.of((World) this.player.world, VecHelper.toVector3d(pos)).createSnapshot();
+        final BlockSnapshot blockSnapshot = ServerLocation.of((World) this.player.world, VecHelper.toVector3d(pos)).createSnapshot();
         final RayTraceResult result = SpongeImplHooks.rayTraceEyes(this.player, SpongeImplHooks.getBlockReachDistance(this.player));
         final Vector3d vec = result == null ? null : VecHelper.toVector3d(result.hitResult);
         final ItemStack stack = this.player.getHeldItemMainhand();

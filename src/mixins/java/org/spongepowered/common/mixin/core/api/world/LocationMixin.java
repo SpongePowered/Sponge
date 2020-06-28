@@ -25,15 +25,16 @@
 package org.spongepowered.common.mixin.core.api.world;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.api.LocationBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
+
 import javax.annotation.Nullable;
 
-@Mixin(value = Location.class, remap = false)
+@Mixin(value = ServerLocation.class, remap = false)
 public abstract class LocationMixin implements LocationBridge {
 
     @Shadow public abstract Vector3i getBlockPosition();

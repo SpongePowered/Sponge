@@ -37,18 +37,17 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public class SpongeLocatableBlock implements LocatableBlock {
 
@@ -56,7 +55,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     private final Vector3i position;
     private final UUID worldId;
     private final WeakReference<World> worldReference;
-    @Nullable private Location location;
+    @Nullable private ServerLocation location;
 
     SpongeLocatableBlock(SpongeLocatableBlockBuilder builder) {
         this.blockState = checkNotNull(builder.blockState.get(), "blockstate");
@@ -71,9 +70,9 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public Location getLocation() {
+    public ServerLocation getLocation() {
         if (this.location == null) {
-            this.location = Location.of(this.worldReference.get(), this.position);
+            this.location = ServerLocation.of(this.worldReference.get(), this.position);
         }
         return this.location;
     }

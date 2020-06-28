@@ -27,14 +27,14 @@ package org.spongepowered.common.event.damage;
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 
 public final class MinecraftBlockDamageSource extends DamageSource {
 
-    private final Location location;
+    private final ServerLocation location;
     private final BlockSnapshot blockSnapshot;
 
-    public MinecraftBlockDamageSource(final String damageTypeIn, final Location location) {
+    public MinecraftBlockDamageSource(final String damageTypeIn, final ServerLocation location) {
         super(damageTypeIn);
         this.blockSnapshot = location.createSnapshot();
         this.location = location;

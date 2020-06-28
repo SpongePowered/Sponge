@@ -46,7 +46,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.accessor.inventory.container.AbstractFurnaceContainerAccessor;
 import org.spongepowered.common.accessor.inventory.container.BeaconContainerAccessor;
@@ -77,6 +77,7 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLen
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -85,8 +86,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class ContainerUtil {
 
@@ -297,7 +296,7 @@ public final class ContainerUtil {
                 }
             }
         }
-        final Location loc = ((ContainerBridge) container).bridge$getOpenLocation();
+        final ServerLocation loc = ((ContainerBridge) container).bridge$getOpenLocation();
         if (loc != null) {
             return new SpongeLocationCarrier(loc, container);
         }

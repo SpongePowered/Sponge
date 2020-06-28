@@ -32,7 +32,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.MultiBlockCarrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,8 +50,8 @@ public abstract class DoubleSidedInventoryMixin_API implements MultiBlockCarrier
     @Shadow @Final private IInventory field_70478_c;
 
     @Override
-    public List<Location> getLocations() {
-        final List<Location> list = new ArrayList<>();
+    public List<ServerLocation> getLocations() {
+        final List<ServerLocation> list = new ArrayList<>();
         if (this.field_70477_b instanceof BlockEntity) {
             list.add(((BlockEntity) this.field_70477_b).getLocation());
         }
@@ -67,12 +67,12 @@ public abstract class DoubleSidedInventoryMixin_API implements MultiBlockCarrier
     }
 
     @Override
-    public Location getLocation() {
+    public ServerLocation getLocation() {
         return this.getLocations().get(0);
     }
 
     @Override
-    public Optional<Inventory> getInventory(final Location at) {
+    public Optional<Inventory> getInventory(final ServerLocation at) {
         if (this.getLocations().contains(at)) {
             return Optional.of(this.getInventory());
         }
@@ -80,7 +80,7 @@ public abstract class DoubleSidedInventoryMixin_API implements MultiBlockCarrier
     }
 
     @Override
-    public Optional<Inventory> getInventory(final Location at, final Direction from) {
+    public Optional<Inventory> getInventory(final ServerLocation at, final Direction from) {
         return this.getInventory(at);
     }
 

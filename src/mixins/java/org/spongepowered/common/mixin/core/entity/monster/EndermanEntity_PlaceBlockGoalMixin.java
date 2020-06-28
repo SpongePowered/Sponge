@@ -33,7 +33,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,10 +45,9 @@ import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.util.VecHelper;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 @Mixin(targets = "net/minecraft/entity/monster/EndermanEntity$PlaceBlockGoal")
 public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
@@ -99,8 +98,8 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
         if (blockState.func_224756_o(world, pos)) {
             // Sponge start
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-                final Location location = Location.of((World<?>) world, VecHelper.toVector3i(pos));
-                final List<Location> list = new ArrayList<>(1);
+                final ServerLocation location = ServerLocation.of((World<?>) world, VecHelper.toVector3i(pos));
+                final List<ServerLocation> list = new ArrayList<>(1);
                 list.add(location);
                 final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
                 final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list);

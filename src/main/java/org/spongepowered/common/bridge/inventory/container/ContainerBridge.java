@@ -28,7 +28,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,9 +43,9 @@ public interface ContainerBridge {
 
     @Nullable Predicate<PlayerEntity> bridge$getCanInteractWith();
 
-    @Nullable Location bridge$getOpenLocation();
+    @Nullable ServerLocation bridge$getOpenLocation();
 
-    void bridge$setOpenLocation(@Nullable Location loc);
+    void bridge$setOpenLocation(@Nullable ServerLocation loc);
 
     void bridge$setInUse(boolean inUse);
 

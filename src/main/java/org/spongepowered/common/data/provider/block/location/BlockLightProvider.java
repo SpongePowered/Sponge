@@ -27,20 +27,20 @@ package org.spongepowered.common.data.provider.block.location;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class BlockLightProvider extends GenericMutableDataProvider<Location, Integer> {
+public class BlockLightProvider extends GenericMutableDataProvider<ServerLocation, Integer> {
 
     public BlockLightProvider() {
         super(Keys.BLOCK_LIGHT);
     }
 
     @Override
-    protected Optional<Integer> getFrom(Location dataHolder) {
+    protected Optional<Integer> getFrom(ServerLocation dataHolder) {
         World world = (World) dataHolder.getWorld();
         int light = world.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(dataHolder));
         return Optional.of(light);

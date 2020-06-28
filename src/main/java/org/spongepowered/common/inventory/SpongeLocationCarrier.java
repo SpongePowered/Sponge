@@ -27,21 +27,21 @@ package org.spongepowered.common.inventory;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 
 public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
 
-    private final Location loc;
+    private final ServerLocation loc;
     private final Container container;
 
-    public SpongeLocationCarrier(Location loc, Container container) {
+    public SpongeLocationCarrier(ServerLocation loc, Container container) {
 
         this.loc = loc;
         this.container = container;
     }
 
     @Override
-    public Location getLocation() {
+    public ServerLocation getLocation() {
         return this.loc;
     }
 

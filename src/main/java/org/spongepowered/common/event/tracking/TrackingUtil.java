@@ -67,9 +67,8 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -95,6 +94,7 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -816,7 +816,7 @@ public final class TrackingUtil {
                 return;
             }
         }
-        final Location worldLocation = oldBlockSnapshot.getLocation().get();
+        final ServerLocation worldLocation = oldBlockSnapshot.getLocation().get();
         final World world = worldLocation.getWorld();
         final ServerWorld worldServer = (ServerWorld) world;
         // Now we can spawn the entity items appropriately

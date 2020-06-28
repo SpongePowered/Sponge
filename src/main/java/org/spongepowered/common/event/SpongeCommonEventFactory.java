@@ -28,10 +28,6 @@ import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUt
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
-import net.minecraft.block.DirectionalBlock;
-import net.minecraft.block.JukeboxBlock;
-import net.minecraft.block.state.PistonBlockStructureHelper;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -112,12 +108,10 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -135,6 +129,7 @@ import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -145,25 +140,22 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 public class SpongeCommonEventFactory {
 
@@ -337,11 +329,13 @@ public class SpongeCommonEventFactory {
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos) {
 
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(Location.of((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(
+            ServerLocation.of((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos, final Object source) {
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(Location.of((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(
+            ServerLocation.of((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
 
     /**
@@ -352,7 +346,7 @@ public class SpongeCommonEventFactory {
      * @param source The source of event
      * @return The event
      */
-    @SuppressWarnings("unchecked") private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<Location> locations, @Nullable Object source) {
+    @SuppressWarnings("unchecked") private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
             if (source == null) {
@@ -823,7 +817,7 @@ public class SpongeCommonEventFactory {
 
             // TODO: Add target side support
             final CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(frame.getCurrentCause(), (BlockState) state,
-                    Location.of((World) world, VecHelper.toVector3d(pos)), direction);
+                    ServerLocation.of((World) world, VecHelper.toVector3d(pos)), direction);
             final boolean cancelled = SpongeImpl.postEvent(event);
             if (!cancelled) {
                 final EntityBridge spongeEntity = (EntityBridge) entity;
@@ -854,7 +848,7 @@ public class SpongeCommonEventFactory {
             final Optional<User> owner = PhaseTracker.getInstance().getCurrentContext().getOwner();
             owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
 
-            final Location impactPoint = Location.of((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.getHitVec()));
+            final ServerLocation impactPoint = ServerLocation.of((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.getHitVec()));
             boolean cancelled = false;
 
             if (movingObjectType == RayTraceResult.Type.BLOCK) {
@@ -1069,7 +1063,7 @@ public class SpongeCommonEventFactory {
         } else {
             return null;
         }
-        final Location location = Location.of((World) bridge, pos.getX(), pos.getY(), pos.getZ());
+        final ServerLocation location = ServerLocation.of((World) bridge, pos.getX(), pos.getY(), pos.getZ());
         final PlaySoundEvent.Broadcast event = SpongeEventFactory.createPlaySoundEventBroadcast(frame.getCurrentCause(), location,
             SoundCategories.HOSTILE.get(), soundType.get(), 1.0F, volume);
         SpongeImpl.postEvent(event);
@@ -1079,7 +1073,7 @@ public class SpongeCommonEventFactory {
     public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final JukeboxTileEntity jukebox,
         final MusicDisc recordType, final int data) {
         final Jukebox apiJuke = (Jukebox) jukebox;
-        final Location location = apiJuke.getLocation();
+        final ServerLocation location = apiJuke.getLocation();
         final PlaySoundEvent.Record
             event =
             data == 0 ? SpongeEventFactory
@@ -1094,7 +1088,7 @@ public class SpongeCommonEventFactory {
     public static PlaySoundEvent.AtEntity callPlaySoundAtEntityEvent(final Cause cause, @Nullable final PlayerEntity entity,
         final WorldBridge worldMixin, final double x, final double y, final double z, final net.minecraft.util.SoundCategory category,
         final SoundEvent name, final float pitch, final float volume) {
-        final Location location = Location.of((World) worldMixin, x, y, z);
+        final ServerLocation location = ServerLocation.of((World) worldMixin, x, y, z);
         final PlaySoundEvent.AtEntity event = SpongeEventFactory.createPlaySoundEventAtEntity(cause, location, Optional.ofNullable(entity),
             (SoundCategory) (Object) category, (SoundType) name, pitch, volume);
         SpongeImpl.postEvent(event);
@@ -1102,7 +1096,7 @@ public class SpongeCommonEventFactory {
     }
 
     public static PlaySoundEvent.NoteBlock callPlaySoundNoteBlockEvent(final Cause cause, final World world, final BlockPos pos, final SoundEvent soundEvent, final InstrumentType instrument, final NotePitch notePitch, final Float pitch) {
-        final Location location = Location.of(world, pos.getX(), pos.getY(), pos.getZ());
+        final ServerLocation location = ServerLocation.of(world, pos.getX(), pos.getY(), pos.getZ());
         final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, notePitch, SoundCategories.RECORD.get(), (SoundType)soundEvent, pitch, 3.0F);
         SpongeImpl.postEvent(event);
         return event;

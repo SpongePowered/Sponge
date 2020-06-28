@@ -29,7 +29,7 @@ import net.minecraft.tileentity.SignTileEntity;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.SignSource;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -60,7 +60,7 @@ public abstract class TileEntitySign_1Mixin_API implements SignSource {
     }
 
     @Override
-    public Location getLocation() {
+    public ServerLocation getLocation() {
         return ((Sign) this.field_174795_a).getLocation();
     }
 }

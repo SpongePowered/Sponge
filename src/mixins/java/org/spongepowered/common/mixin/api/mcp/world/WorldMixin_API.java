@@ -66,7 +66,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
@@ -306,12 +306,12 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     }
 
     @Override
-    public Location getLocation(Vector3i position) {
+    public ServerLocation getLocation(Vector3i position) {
         return null;
     }
 
     @Override
-    public Location getLocation(Vector3d position) {
+    public ServerLocation getLocation(Vector3d position) {
         return null;
     }
 
@@ -365,4 +365,12 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
 
     }
 
+    /**
+     * Gets the {@link ServerLocation} of the spawn point.
+     *
+     * @return The location
+     */
+    public ServerLocation getSpawnLocation() {
+        return ServerLocation.of(this, this.getProperties().getSpawnPosition());
+    }
 }

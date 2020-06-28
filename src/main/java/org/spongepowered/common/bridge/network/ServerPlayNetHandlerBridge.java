@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.network;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 
 public interface ServerPlayNetHandlerBridge {
 
@@ -40,7 +40,7 @@ public interface ServerPlayNetHandlerBridge {
 
     void bridge$captureCurrentPlayerPosition();
 
-    void bridge$setLastMoveLocation(Location location);
+    void bridge$setLastMoveLocation(ServerLocation location);
 
     long bridge$getLastTryBlockPacketTimeStamp();
 }

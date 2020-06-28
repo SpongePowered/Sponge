@@ -27,8 +27,7 @@ package org.spongepowered.common.world.schematic;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
@@ -36,10 +35,9 @@ import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
 import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("deprecation")
 public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic {
@@ -64,7 +62,7 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
     }
 
     @Override
-    public void apply(Location location, BlockChangeFlag changeFlag) {
+    public void apply(ServerLocation location, BlockChangeFlag changeFlag) {
         super.apply(location, changeFlag);
         if (this.biomes != null) {
             this.biomes.getBiomeWorker().iterate((v, x, y, z) -> {

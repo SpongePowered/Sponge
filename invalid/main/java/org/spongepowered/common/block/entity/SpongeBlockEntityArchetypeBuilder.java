@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.block.entity;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockState;
@@ -40,7 +36,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -97,7 +93,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     }
 
     @Override
-    public BlockEntityArchetype.Builder from(Location location) {
+    public BlockEntityArchetype.Builder from(ServerLocation location) {
         final BlockEntity tileEntity = location.getBlockEntity()
                 .orElseThrow(() -> new IllegalArgumentException("There is no block entity available at the provided location: " + location));
 

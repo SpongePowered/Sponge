@@ -56,11 +56,6 @@ import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -72,7 +67,7 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -83,10 +78,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
+import org.spongepowered.common.accessor.world.server.EntityTrackerAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -99,14 +95,11 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
-import org.spongepowered.common.accessor.world.server.EntityTrackerAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
@@ -304,7 +297,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
         try {
             final AxisAlignedBB bb = this.shadow$getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
-            final Location location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
+            final ServerLocation location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getMaterial() == Material.LAVA);
             final MinecraftBlockDamageSource lava = new MinecraftBlockDamageSource("lava", location);
             ((DamageSourceBridge) (Object) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
@@ -328,7 +321,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         }
         try {
             final AxisAlignedBB bb = this.shadow$getBoundingBox().shrink(-0.001D);
-            final Location location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
+            final ServerLocation location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.LAVA);
 
             final MinecraftBlockDamageSource fire = new MinecraftBlockDamageSource("inFire", location);

@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.entity.projectile;
 
+import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.ServerLocation;
 
 import java.util.Optional;
-import net.minecraft.entity.LivingEntity;
 
 public class SimpleEntityLaunchLogic<P extends Projectile> implements ProjectileLogic<P> {
 
@@ -46,7 +45,7 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
         if (!(source instanceof Entity)) {
             return Optional.empty();
         }
-        Location loc = ((Entity) source).getLocation().add(0, ((net.minecraft.entity.Entity) source).getHeight() / 2, 0);
+        ServerLocation loc = ((Entity) source).getLocation().add(0, ((net.minecraft.entity.Entity) source).getHeight() / 2, 0);
         Optional<P> projectile;
         if (source instanceof LivingEntity) {
             projectile = this.createProjectile((LivingEntity) source, loc);
@@ -56,7 +55,7 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
         return projectile;
     }
 
-    protected Optional<P> createProjectile(LivingEntity source, Location loc) {
+    protected Optional<P> createProjectile(LivingEntity source, ServerLocation loc) {
         return this.createProjectile((ProjectileSource) source, this.projectileClass, loc);
     }
 }

@@ -41,7 +41,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
@@ -123,7 +123,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public BlockSnapshot.Builder from(final Location location) {
+    public BlockSnapshot.Builder from(final ServerLocation location) {
         throw new UnsupportedOperationException("Not implemented correctly.");
     }
 

@@ -30,16 +30,16 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
 public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
 
-    private Location location;
+    private ServerLocation location;
     private BlockSnapshot blockSnapshot;
 
     @Override
-    public BlockDamageSource.Builder block(final Location location) {
+    public BlockDamageSource.Builder block(final ServerLocation location) {
         this.location = location;
         return this;
     }

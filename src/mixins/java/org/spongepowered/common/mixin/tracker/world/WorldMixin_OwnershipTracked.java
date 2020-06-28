@@ -28,11 +28,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.Chunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -88,5 +89,14 @@ public abstract class WorldMixin_OwnershipTracked implements World {
 
         final BlockPos pos = new BlockPos(x, y, z);
         ((ChunkBridge) chunk).bridge$setBlockNotifier(pos, uuid);
+    }
+
+    /**
+     * Gets the {@link ServerLocation} of the spawn point.
+     *
+     * @return The location
+     */
+    public ServerLocation getSpawnLocation() {
+        return ServerLocation.of(this, this.getProperties().getSpawnPosition());
     }
 }

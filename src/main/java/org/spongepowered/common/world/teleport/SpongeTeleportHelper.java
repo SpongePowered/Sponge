@@ -29,7 +29,7 @@ import com.google.inject.Singleton;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
@@ -38,6 +38,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3i;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -52,7 +53,7 @@ import java.util.stream.Stream;
 public class SpongeTeleportHelper implements TeleportHelper {
 
     @Override
-    public Optional<Location> getSafeLocation(Location location, int height, int width, int distanceToDrop,
+    public Optional<ServerLocation> getSafeLocation(ServerLocation location, int height, int width, int distanceToDrop,
             TeleportHelperFilter filter, TeleportHelperFilter... additionalFilters) {
         final World world = location.getWorld();
         final Set<TeleportHelperFilter> filters = Sets.newHashSet(additionalFilters);
@@ -72,7 +73,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             // The vectors should be sorted by distance from the centre of the checking region, so
             // this makes it easier to try to get close, because we can just iterate and get progressively further out.
             Optional<Vector3i> result = this.getSafeLocation(world, this.getBlockLocations(location, height, width), distanceToDrop, filters);
-            return result.map(vector3i -> Location.of(world, vector3i.toDouble().add(0.5, 0, 0.5)));
+            return result.map(vector3i -> ServerLocation.of(world, vector3i.toDouble().add(0.5, 0, 0.5)));
         } finally {
             // Just in case some exception occurs, we want this to disable again.
             chunkProviderServer.bridge$setForceChunkRequests(previous);
@@ -80,7 +81,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
 
     }
 
-    private Stream<Vector3i> getBlockLocations(Location worldLocation, int height, int width) {
+    private Stream<Vector3i> getBlockLocations(ServerLocation worldLocation, int height, int width) {
         // We don't want to warp outside of the world border, so we want to check that we're within it.
         WorldBorder worldBorder = (WorldBorder) worldLocation.getWorld().getProperties().getWorldBorder();
         int worldBorderMinX = GenericMath.floor(worldBorder.minX());

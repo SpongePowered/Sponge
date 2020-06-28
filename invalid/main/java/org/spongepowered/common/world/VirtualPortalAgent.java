@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world;
 
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.SpongeImplHooks;
@@ -87,17 +87,17 @@ public class VirtualPortalAgent implements PortalAgent {
     }
 
     @Override
-    public Optional<Location> findOrCreatePortal(final Location targetLocation) {
+    public Optional<ServerLocation> findOrCreatePortal(final ServerLocation targetLocation) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<Location> findPortal(final Location targetLocation) {
+    public Optional<ServerLocation> findPortal(final ServerLocation targetLocation) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<Location> createPortal(final Location targetLocation) {
+    public Optional<ServerLocation> createPortal(final ServerLocation targetLocation) {
         return Optional.empty();
     }
 

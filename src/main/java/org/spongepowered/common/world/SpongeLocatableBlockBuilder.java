@@ -33,7 +33,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
@@ -63,7 +63,7 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     }
 
     @Override
-    public SpongeLocatableBlockBuilder location(final Location location) {
+    public SpongeLocatableBlockBuilder location(final ServerLocation location) {
         checkNotNull(location, "LocationBridge cannot be null!");
         this.blockState = location::getBlock;
         this.position = location::getBlockPosition;

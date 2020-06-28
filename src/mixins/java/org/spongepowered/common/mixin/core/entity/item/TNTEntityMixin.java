@@ -31,7 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,9 +47,9 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(TNTEntity.class)
 public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPrimedBridge, FusedExplosiveBridge, ExplosiveBridge {
@@ -112,7 +112,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
         final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
         final net.minecraft.world.Explosion.Mode modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-            .location(Location.of((World) world, new Vector3d(xIn, yIn, zIn)))
+            .location(ServerLocation.of((World) world, new Vector3d(xIn, yIn, zIn)))
             .sourceExplosive((PrimedTNT) this)
             .radius(this.bridge$explosionRadius)
             .shouldPlaySmoke(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal())

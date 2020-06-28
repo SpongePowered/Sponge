@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -46,7 +44,7 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeImpl;
@@ -143,10 +141,10 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     }
 
     @Override
-    public Optional<Location> getLocation() {
+    public Optional<ServerLocation> getLocation() {
         Optional<ServerWorld> optional = SpongeImpl.getGame().getServer().getWorldManager().getWorld(this.worldUuid);
         if (optional.isPresent()) {
-            final Location location = Location.of(optional.get(), this.position);
+            final ServerLocation location = ServerLocation.of(optional.get(), this.position);
             return Optional.of(location);
         }
         return Optional.empty();
@@ -371,7 +369,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     }
 
     @Override
-    public EntitySnapshot withLocation(Location location) {
+    public EntitySnapshot withLocation(ServerLocation location) {
         Preconditions.checkNotNull(location, "location");
         final SpongeEntitySnapshotBuilder builder = this.createBuilder();
         builder.position = location.getPosition();

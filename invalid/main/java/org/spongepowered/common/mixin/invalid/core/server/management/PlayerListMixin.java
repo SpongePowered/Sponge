@@ -63,7 +63,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.dimension.Dimension;
 import org.spongepowered.api.world.dimension.DimensionTypes;
@@ -166,8 +166,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Transform fromTransform = ((Player) player).getTransform();
         final ServerWorld fromWorld = player.getServerWorld();
         ServerWorld toWorld = this.shadow$getServer().getWorld(targetDimension);
-        Location toLocation;
-        final Location temp = ((World) player.getServerWorld()).getSpawnLocation();
+        ServerLocation toLocation;
+        final ServerLocation temp = ((World) player.getServerWorld()).getSpawnLocation();
         boolean tempIsBedSpawn = false;
         if (toWorld == null) { // Target world doesn't exist? Use global
             toLocation = temp;
@@ -192,7 +192,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                     player.connection.sendPacket(new SChangeGameStatePacket(0, 0.0F));
                 }
             }
-            toLocation = Location.of((World) toWorld, targetSpawnVec);
+            toLocation = ServerLocation.of((World) toWorld, targetSpawnVec);
         }
 
         Transform toTransform = Transform.of(toLocation.getPosition(), ((Player) player).getRotation(), Vector3d.ONE);
@@ -208,7 +208,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             }
 
             toTransform = teleportEvent.getToTransform();
-            toLocation = Location.of(teleportEvent.getToWorld(), toTransform.getPosition());
+            toLocation = ServerLocation.of(teleportEvent.getToWorld(), toTransform.getPosition());
         }
 
         this.shadow$getPlayers().remove(player);
@@ -262,7 +262,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         ((EntityBridge) newPlayer).bridge$setLocationAndAngles(event.getToTransform());
-        toLocation = Location.of(event.getToWorld(), event.getToTransform().getPosition());
+        toLocation = ServerLocation.of(event.getToWorld(), event.getToTransform().getPosition());
         toWorld = (ServerWorld) toLocation.getWorld();
 
         // Set the dimension again in case a plugin changed the target world during RespawnPlayerEvent

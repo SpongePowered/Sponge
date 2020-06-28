@@ -51,7 +51,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Final;
@@ -187,10 +187,10 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             : Collections.emptyList();
         // Now we can throw our Detonate Event
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
-            final List<Location> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
+            final List<ServerLocation> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
             final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
             for (final BlockPos pos : this.affectedBlockPositions) {
-                blockPositions.add(Location.of((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
+                blockPositions.add(ServerLocation.of((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
             }
             for (final Entity entity : list) {
                 // Make sure to check the entity is immune first.
@@ -208,7 +208,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                 return;
             }
             if (this.impl$shouldBreakBlocks) {
-                for (final Location worldLocation : detonate.getAffectedLocations()) {
+                for (final ServerLocation worldLocation : detonate.getAffectedLocations()) {
                     this.affectedBlockPositions.add(VecHelper.toBlockPos(worldLocation));
                 }
             }

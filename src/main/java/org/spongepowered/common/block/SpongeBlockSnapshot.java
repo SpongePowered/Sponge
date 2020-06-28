@@ -42,7 +42,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -102,12 +102,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public Optional<Location> getLocation() {
+    public Optional<ServerLocation> getLocation() {
         return Optional.empty();
     }
 
     @Override
-    public BlockSnapshot withLocation(final Location location) {
+    public BlockSnapshot withLocation(final ServerLocation location) {
         return null;
     }
 

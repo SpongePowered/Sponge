@@ -34,7 +34,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.teleport.PortalAgentType;
@@ -87,8 +87,8 @@ public abstract class TeleporterMixin_API implements PortalAgent {
     }
 
     @Override
-    public Optional<Location> findOrCreatePortal(Location targetLocation) {
-        Optional<Location> foundTeleporter = this.findPortal(targetLocation);
+    public Optional<ServerLocation> findOrCreatePortal(ServerLocation targetLocation) {
+        Optional<ServerLocation> foundTeleporter = this.findPortal(targetLocation);
         if (!foundTeleporter.isPresent()) {
             if (this.createPortal(targetLocation).isPresent()) {
                 return this.findPortal(targetLocation);
@@ -100,7 +100,7 @@ public abstract class TeleporterMixin_API implements PortalAgent {
     }
 
     @Override
-    public Optional<Location> findPortal(Location searchLocation) {
+    public Optional<ServerLocation> findPortal(ServerLocation searchLocation) {
         double closest = -1.0D;
         boolean addToCache = true;
         BlockPos portalPosition = BlockPos.ZERO;
@@ -149,14 +149,14 @@ public abstract class TeleporterMixin_API implements PortalAgent {
                         ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getGameTime()));
             }
 
-            return Optional.of(Location.of(searchLocation.getWorld(), VecHelper.toVector3d(portalPosition)));
+            return Optional.of(ServerLocation.of(searchLocation.getWorld(), VecHelper.toVector3d(portalPosition)));
         }
         return Optional.empty();
     }
 
 
     @Override
-    public Optional<Location> createPortal(Location toLocation) {
+    public Optional<ServerLocation> createPortal(ServerLocation toLocation) {
         double closest = -1.0D;
         int xNearTarget = toLocation.getBlockX();
         int yNearTarget = toLocation.getBlockY();
@@ -324,7 +324,7 @@ public abstract class TeleporterMixin_API implements PortalAgent {
             }
         }
 
-        return Optional.of(Location.of((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
+        return Optional.of(ServerLocation.of((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
     }
 
 }

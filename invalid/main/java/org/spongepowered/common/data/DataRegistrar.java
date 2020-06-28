@@ -45,7 +45,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.authlib.SpongeGameProfileBuilder;
@@ -149,7 +149,7 @@ public final class DataRegistrar {
         dataManager.registerBuilder(VariableAmount.Fixed.class, new FixedBuilder());
         dataManager.registerBuilder(VariableAmount.OptionalAmount.class, new OptionalVarianceBuilder());
 
-        dataManager.registerBuilder(Location.class, new LocationBuilder());
+        dataManager.registerBuilder(ServerLocation.class, new LocationBuilder());
         dataManager.registerBuilder(SpongePlayerData.class, new SpongePlayerData.Builder());
 
         dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());

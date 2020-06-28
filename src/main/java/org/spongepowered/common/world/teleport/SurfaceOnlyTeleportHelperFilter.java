@@ -26,7 +26,7 @@ package org.spongepowered.common.world.teleport;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
 
 public class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelperFilter {
@@ -36,7 +36,7 @@ public class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelperFilter
     }
 
     @Override
-    public Tristate isValidLocation(World world, Vector3i position) {
+    public Tristate isValidLocation(ServerWorld world, Vector3i position) {
         if (world.getHighestYAt(position.getX(), position.getZ()) >= position.getY()) {
             // We're below the highest y co-ordinate, so we're not interested in it.
             return Tristate.FALSE;

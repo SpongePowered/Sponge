@@ -43,7 +43,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -86,7 +86,7 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
     }
 
     @Override
-    public BlockSnapshot snapshotFor(Location location) {
+    public BlockSnapshot snapshotFor(ServerLocation location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
                 .blockState((net.minecraft.block.BlockState) (Object) this)
                 .position(location.getBlockPosition())

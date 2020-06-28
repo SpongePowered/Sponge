@@ -33,7 +33,7 @@ import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireb
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,9 +46,9 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(FireballEntity.class)
 public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin implements FireballEntityBridge, ExplosiveBridge {
@@ -85,7 +85,7 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
             frame.pushCause(shooter);
             final Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                    .location(Location.of((World<?>) worldObj, new Vector3d(x, y, z)))
+                    .location(ServerLocation.of((World<?>) worldObj, new Vector3d(x, y, z)))
                     .sourceExplosive(((ExplosiveFireball) this))
                     .radius(strength)
                     .canCauseFire(flaming && griefer)

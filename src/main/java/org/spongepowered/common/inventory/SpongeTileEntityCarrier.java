@@ -29,7 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 
 public class SpongeTileEntityCarrier implements DefaultSingleBlockCarrier {
@@ -44,9 +44,9 @@ public class SpongeTileEntityCarrier implements DefaultSingleBlockCarrier {
     }
 
     @Override
-    public Location getLocation() {
+    public ServerLocation getLocation() {
         final BlockPos pos = this.inventory.getPos();
-        return Location.of(((World<?>) this.inventory.getWorld()), pos.getX(), pos.getY(), pos.getZ());
+        return ServerLocation.of(((World<?>) this.inventory.getWorld()), pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override

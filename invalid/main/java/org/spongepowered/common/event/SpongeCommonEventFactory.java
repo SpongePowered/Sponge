@@ -35,7 +35,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -62,14 +62,14 @@ public class SpongeCommonEventFactory {
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((World) world).state((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
 
         // Sets toss out duplicate values (even though there shouldn't be any)
-        final HashSet<Location> locations = new HashSet<>();
-        locations.add(Location.of((World) world, pos.getX(), pos.getY(), pos.getZ()));
+        final HashSet<ServerLocation> locations = new HashSet<>();
+        locations.add(ServerLocation.of((World) world, pos.getX(), pos.getY(), pos.getZ()));
 
         final PistonBlockStructureHelper movedBlocks = new PistonBlockStructureHelper((ServerWorld) world, pos, direction, extending);
         movedBlocks.canMove(); // calculates blocks to be moved
 
         Stream.concat(movedBlocks.getBlocksToMove().stream(), movedBlocks.getBlocksToDestroy().stream())
-                .map(block -> Location.of((World) world, block.getX(), block.getY(), block.getZ()))
+                .map(block -> ServerLocation.of((World) world, block.getX(), block.getY(), block.getZ()))
                 .collect(Collectors.toCollection(() -> locations)); // SUPER
                                                                     // efficient
                                                                     // code!
@@ -85,7 +85,7 @@ public class SpongeCommonEventFactory {
                 // Add the offset of last block set to move
                 offsetPos = movedPositions.get(movedPositions.size() - 1).offset(direction);
             }
-            locations.add(Location.of((World) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
+            locations.add(ServerLocation.of((World) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
         }
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

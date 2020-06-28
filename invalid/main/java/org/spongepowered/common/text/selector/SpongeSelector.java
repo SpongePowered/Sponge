@@ -36,7 +36,7 @@ import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.extent.Extent;
 
 import java.util.Collection;
@@ -116,7 +116,7 @@ public class SpongeSelector implements Selector {
     }
 
     @Override
-    public ImmutableSet<Entity> resolve(Location location) {
+    public ImmutableSet<Entity> resolve(ServerLocation location) {
         Builder selector = Selector.builder().from(this);
         if (!this.has(ArgumentTypes.POSITION.x())) {
             selector.add(ArgumentTypes.POSITION.x(), location.getPosition().getFloorX());

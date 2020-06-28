@@ -28,19 +28,19 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public abstract class BlockLocationDataProviderBase<V extends Value<E>, E> extends GenericMutableDataProviderBase<Location, V, E> {
+public abstract class BlockLocationDataProviderBase<V extends Value<E>, E> extends GenericMutableDataProviderBase<ServerLocation, V, E> {
 
-    protected BlockLocationDataProviderBase(Supplier<Key<V>> key, Class<Location> holderType) {
+    protected BlockLocationDataProviderBase(Supplier<Key<V>> key, Class<ServerLocation> holderType) {
         super(key, holderType);
     }
 
-    protected BlockLocationDataProviderBase(Key<V> key, Class<Location> holderType) {
+    protected BlockLocationDataProviderBase(Key<V> key, Class<ServerLocation> holderType) {
         super(key, holderType);
     }
 
@@ -53,14 +53,14 @@ public abstract class BlockLocationDataProviderBase<V extends Value<E>, E> exten
     }
 
     @Override
-    protected Optional<E> getFrom(Location dataHolder) {
+    protected Optional<E> getFrom(ServerLocation dataHolder) {
         return this.getFrom((World) dataHolder.getWorld(), VecHelper.toBlockPos(dataHolder.getBlockPosition()));
     }
 
     protected abstract Optional<E> getFrom(World world, BlockPos blockPos);
 
     @Override
-    protected boolean set(Location dataHolder, E value) {
+    protected boolean set(ServerLocation dataHolder, E value) {
         return this.set((World) dataHolder.getWorld(), VecHelper.toBlockPos(dataHolder.getBlockPosition()), value);
     }
 
@@ -69,7 +69,7 @@ public abstract class BlockLocationDataProviderBase<V extends Value<E>, E> exten
     }
 
     @Override
-    protected boolean delete(Location dataHolder) {
+    protected boolean delete(ServerLocation dataHolder) {
         return this.delete((World) dataHolder.getWorld(), VecHelper.toBlockPos(dataHolder.getBlockPosition()));
     }
 

@@ -29,13 +29,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -53,7 +53,7 @@ public abstract class MagmaBlockMixin extends BlockMixin {
         if (!world.isRemote) {
             try {
                 final Vector3i blockPosition = VecHelper.toVector3i(pos);
-                final Location location = Location.of((org.spongepowered.api.world.World) world, blockPosition);
+                final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.World) world, blockPosition);
                 final MinecraftBlockDamageSource hotFloor = new MinecraftBlockDamageSource("hotFloor", location);
                 ((DamageSourceAccessor) (Object) hotFloor).accessor$setFireDamage();
                 ((DamageSourceBridge) (Object) hotFloor).bridge$setHotFloorSource();

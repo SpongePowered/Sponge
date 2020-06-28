@@ -36,7 +36,7 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.AbstractArchetype;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
@@ -74,7 +74,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     }
 
     @Override
-    public Optional<BlockEntity> apply(Location location) {
+    public Optional<BlockEntity> apply(ServerLocation location) {
         final BlockState currentState = location.getBlock();
         final Block currentBlock = ((net.minecraft.block.BlockState) currentState).getBlock();
         final Block newBlock = ((net.minecraft.block.BlockState) this.blockState).getBlock();
@@ -100,7 +100,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     }
 
     @Override
-    public BlockSnapshot toSnapshot(Location location) {
+    public BlockSnapshot toSnapshot(ServerLocation location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState = this.blockState;
         builder.compound = this.data.copy();

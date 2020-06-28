@@ -32,7 +32,7 @@ import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,10 +50,9 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(TNTMinecartEntity.class)
 public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin implements FusedExplosiveBridge, ExplosiveBridge {
@@ -148,7 +147,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
     private net.minecraft.world.Explosion onSpongeExplode(final net.minecraft.world.World world, final Entity entityIn,
         final double xIn, final double yIn, final double zIn, final float explosionRadius, final net.minecraft.world.Explosion.Mode modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-            .location(Location.of((World) world, new Vector3d(xIn, yIn, zIn))).sourceExplosive((TNTMinecart) this)
+            .location(ServerLocation.of((World) world, new Vector3d(xIn, yIn, zIn))).sourceExplosive((TNTMinecart) this)
             .radius(this.impl$explosionRadius != null ? this.impl$explosionRadius : explosionRadius)
             .shouldPlaySmoke(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal())
             .shouldBreakBlocks(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal()))

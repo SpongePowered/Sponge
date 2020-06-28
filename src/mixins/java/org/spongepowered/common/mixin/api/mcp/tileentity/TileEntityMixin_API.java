@@ -37,7 +37,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -67,8 +67,8 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     @Nullable private LocatableBlock api$LocatableBlock;
 
     @Override
-    public Location getLocation() {
-        return Location.of((World) this.world, VecHelper.toVector3i(this.shadow$getPos()));
+    public ServerLocation getLocation() {
+        return ServerLocation.of((World) this.world, VecHelper.toVector3i(this.shadow$getPos()));
     }
 
     @Override

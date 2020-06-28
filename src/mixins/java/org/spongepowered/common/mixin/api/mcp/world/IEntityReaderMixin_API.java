@@ -33,14 +33,13 @@ import net.minecraft.world.IEntityReader;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.world.volume.entity.ImmutableEntityVolume;
 import org.spongepowered.api.world.volume.entity.ReadableEntityVolume;
-import org.spongepowered.api.world.volume.entity.UnmodifiableEntityVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -49,8 +48,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 @Mixin(IEntityReader.class)
 public interface IEntityReaderMixin_API extends ReadableEntityVolume {
@@ -114,21 +111,6 @@ public interface IEntityReaderMixin_API extends ReadableEntityVolume {
 
     @Override
     default boolean isAreaAvailable(final int x, final int y, final int z) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
-    }
-
-    @Override
-    default ReadableEntityVolume getView(final Vector3i newMin, final Vector3i newMax) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
-    }
-
-    @Override
-    default UnmodifiableEntityVolume<?> asUnmodifiableEntityVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
-    }
-
-    @Override
-    default ImmutableEntityVolume asImmutableEntityVolume() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
     }
 

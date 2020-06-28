@@ -66,7 +66,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgent;
@@ -80,7 +80,6 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
@@ -98,6 +97,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,8 +109,6 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 public final class EntityUtil {
 
@@ -177,7 +175,7 @@ public final class EntityUtil {
                     // We need to make sure to only rollback if they completely changed the world
                     if (event.getFromWorld() != sEntity.getWorld()) {
                         if (teleporter instanceof TeleporterBridge) {
-                            final Vector3i chunkPosition = Location.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -198,7 +196,7 @@ public final class EntityUtil {
 
                         if (teleporter instanceof TeleporterBridge) {
 
-                            final Vector3i chunkPosition = Location.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -212,7 +210,7 @@ public final class EntityUtil {
                     // If we don't use the portal agent clear out the portal blocks that were created
                     if (!((MoveEntityEvent.Teleport.Portal) event).getUsePortalAgent()) {
                         if (teleporter instanceof TeleporterBridge) {
-                            final Vector3i chunkPosition = Location.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -223,7 +221,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge && !context.getCapturedBlockSupplier().isEmpty() && !TrackingUtil
                             .processBlockCaptures(context)) {
                             // Transactions were rolled back, the portal wasn't made. We need to bomb the dimension change and clear portal cache
-                            final Vector3i chunkPosition = Location.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 
@@ -263,7 +261,7 @@ public final class EntityUtil {
         }
 
         if (loadChunks) {
-            final Vector3i toChunkPosition = Location.of((World) toWorld, toTransform.getPosition()).getChunkPosition();
+            final Vector3i toChunkPosition = ServerLocation.of((World) toWorld, toTransform.getPosition()).getChunkPosition();
             // TODO - Figure out how to do chunk tickets
             throw new UnsupportedOperationException("Need to figure out how to load chunks");
 //            toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
@@ -348,7 +346,7 @@ public final class EntityUtil {
                     // We need to make sure to only rollback if they completely changed the world
                     if (event.getFromWorld() != sPlayer.getWorld()) {
                         if (teleporter instanceof TeleporterBridge) {
-                            final Vector3i chunkPosition = Location.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -368,7 +366,7 @@ public final class EntityUtil {
                         event.setCancelled(true);
 
                         if (teleporter instanceof TeleporterBridge) {
-                            final Vector3i chunkPosition = Location.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter).bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
 
@@ -380,7 +378,7 @@ public final class EntityUtil {
 
                     // If we don't use the portal agent clear out the portal blocks that
                     if (!((MoveEntityEvent.Teleport.Portal) event).getUsePortalAgent()) {
-                        final Vector3i chunkPosition = Location.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                        final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                         if (teleporter instanceof TeleporterBridge) {
                             ((TeleporterBridge) teleporter).bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -391,7 +389,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge && !context.getCapturedBlockSupplier().isEmpty() && !TrackingUtil
                             .processBlockCaptures(context)) {
                             // Transactions were rolled back, the portal wasn't made. We need to bomb the dimension change and clear portal cache
-                            final Vector3i chunkPosition = Location.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 
@@ -654,7 +652,7 @@ public final class EntityUtil {
         return entity.removed;
     }
 
-    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final Location location) {
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final ServerLocation location) {
         final Transform fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
         final Transform toTransform = fromTransform.withPosition(location.getPosition()).withRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, ((org.spongepowered.api.entity.Entity) entityIn).getWorld(), location.getWorld());

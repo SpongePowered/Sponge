@@ -64,8 +64,6 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.volume.entity.ImmutableEntityVolume;
-import org.spongepowered.api.world.volume.entity.UnmodifiableEntityVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.math.vector.Vector3d;
@@ -135,21 +133,6 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     @Override
     default boolean isAreaAvailable(final int x, final int y, final int z) {
         return this.shadow$chunkExists(x >> 4, z >> 4);
-    }
-
-    @Override
-    default BoundedWorldView<T> getView(final Vector3i newMin, final Vector3i newMax) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
-    }
-
-    @Override
-    default UnmodifiableEntityVolume<?> asUnmodifiableEntityVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
-    }
-
-    @Override
-    default ImmutableEntityVolume asImmutableEntityVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
     @Override

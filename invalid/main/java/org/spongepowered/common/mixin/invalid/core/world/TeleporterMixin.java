@@ -35,7 +35,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.asm.mixin.Final;
@@ -71,7 +71,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
      */
     @Overwrite
     public void placeInPortal(Entity entityIn, float rotationYaw) {
-        Location targetLocation = ((org.spongepowered.api.entity.Entity) entityIn).getLocation();
+        ServerLocation targetLocation = ((org.spongepowered.api.entity.Entity) entityIn).getLocation();
         // Sponge - remove hardcode to support any world using end or nether providers
         if (this.impl$createNetherPortal) {
             if (!this.placeInExistingPortal(entityIn, rotationYaw)) {
@@ -104,7 +104,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         }
     }
 
-    private void createEndPortal(Location targetLocation) {
+    private void createEndPortal(ServerLocation targetLocation) {
         int xTarget = targetLocation.getBlockX();
         int yTarget = targetLocation.getBlockY() - 1;
         int zTarget = targetLocation.getBlockZ();
@@ -136,7 +136,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
     @Overwrite
     public boolean placeInExistingPortal(Entity entityIn, float rotationYaw) {
         org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entityIn;
-        Optional<Location> location = ((PortalAgent) this).findPortal(spongeEntity.getLocation());
+        Optional<ServerLocation> location = ((PortalAgent) this).findPortal(spongeEntity.getLocation());
         if (location.isPresent()) {
             // last minute adjustments for portal exit
             this.impl$handleEntityPortalExit(entityIn, location.get(), rotationYaw);
@@ -146,7 +146,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         return false;
     }
 
-    private void impl$handleEntityPortalExit(Entity entityIn, Location portalLocation, float rotationYaw) {
+    private void impl$handleEntityPortalExit(Entity entityIn, ServerLocation portalLocation, float rotationYaw) {
         BlockPos blockPos = VecHelper.toBlockPos(portalLocation);
         double xTarget = portalLocation.getX() + 0.5D;
         double yTarget;

@@ -31,7 +31,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,6 +40,7 @@ import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,8 +48,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @Mixin(Container.class)
 public abstract class ContainerMixin_Container implements CarriedBridge, ContainerBridge, InventoryAdapter {
@@ -89,15 +88,15 @@ public abstract class ContainerMixin_Container implements CarriedBridge, Contain
         return this.impl$canInteractWithPredicate;
     }
 
-    @Nullable private Location impl$lastOpenLocation;
+    @Nullable private ServerLocation impl$lastOpenLocation;
 
     @Override
-    public Location bridge$getOpenLocation() {
+    public ServerLocation bridge$getOpenLocation() {
         return this.impl$lastOpenLocation;
     }
 
     @Override
-    public void bridge$setOpenLocation(final Location loc) {
+    public void bridge$setOpenLocation(final ServerLocation loc) {
         this.impl$lastOpenLocation = loc;
     }
 

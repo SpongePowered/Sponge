@@ -29,7 +29,7 @@ import net.minecraft.util.IWorldPosCallable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,9 +42,9 @@ public abstract class RepairContainerMixin_API implements SingleBlockCarrier {
     @Final @Shadow private IWorldPosCallable field_216980_g;
 
     @Override
-    public Location getLocation() {
+    public ServerLocation getLocation() {
         return this.field_216980_g.apply((world, pos) ->
-                Location.of(((World) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
+                ServerLocation.of(((World) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
         ).orElse(null);
     }
 

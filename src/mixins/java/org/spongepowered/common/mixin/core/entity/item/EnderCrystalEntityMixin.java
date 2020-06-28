@@ -29,7 +29,7 @@ import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,9 +41,9 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(EnderCrystalEntity.class)
 public abstract class EnderCrystalEntityMixin extends EntityMixin implements ExplosiveBridge, EnderCrystalEntityBridge {
@@ -87,7 +87,7 @@ public abstract class EnderCrystalEntityMixin extends EntityMixin implements Exp
                 frame.pushCause(source);
             }
             return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(Location.of((World) world, new Vector3d(x, y, z)))
+                .location(ServerLocation.of((World) world, new Vector3d(x, y, z)))
                 .radius(this.impl$explosionStrength)
                 .shouldPlaySmoke(smoking))
                 .orElse(null);

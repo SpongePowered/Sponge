@@ -58,7 +58,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -147,13 +147,13 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Location getLocation() {
-        return Location.of((World) this.world, this.getPosition());
+    public ServerLocation getLocation() {
+        return ServerLocation.of((World) this.world, this.getPosition());
     }
 
     @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Override
-    public boolean setLocation(Location location) {
+    public boolean setLocation(ServerLocation location) {
         checkNotNull(location, "The location was null!");
         if (this.isRemoved()) {
             return false;
@@ -178,7 +178,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                     return false;
                 }
 
-                location = Location.of(event.getToWorld(), event.getToTransform().getPosition());
+                location = ServerLocation.of(event.getToWorld(), event.getToTransform().getPosition());
                 this.rotationPitch = (float) event.getToTransform().getPitch();
                 this.rotationYaw = (float) event.getToTransform().getYaw();
             }
@@ -256,7 +256,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @SuppressWarnings({"RedundantCast", "ConstantConditions"})
     @Override
-    public boolean setLocationAndRotation(final Location location, final Vector3d rotation, final EnumSet<RelativePositions> relativePositions) {
+    public boolean setLocationAndRotation(final ServerLocation location, final Vector3d rotation, final EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;
 
         if (relativePositions.isEmpty()) {
@@ -291,7 +291,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 ((ServerPlayerEntity) ((Entity) (Object) this)).connection.setPlayerLocation(location.getPosition().getX(), location.getPosition()
                         .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
-                Location resultantLocation = this.getLocation();
+                ServerLocation resultantLocation = this.getLocation();
                 Vector3d resultantRotation = this.getRotation();
 
                 if (relativePositions.contains(RelativePositions.X)) {
@@ -323,7 +323,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean setLocationAndRotation(final Location location, final Vector3d rotation) {
+    public boolean setLocationAndRotation(final ServerLocation location, final Vector3d rotation) {
         final boolean result = this.setLocation(location);
         if (result) {
             this.setRotation(rotation);
@@ -367,7 +367,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public boolean transferToWorld(final World world, final Vector3d position) {
         checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
-        return this.setLocation(Location.of(world, position));
+        return this.setLocation(ServerLocation.of(world, position));
     }
 
     @Override

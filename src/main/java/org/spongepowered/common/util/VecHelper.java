@@ -31,7 +31,7 @@ import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.bridge.api.LocationBridge;
 import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.math.vector.Vector3d;
@@ -59,7 +59,7 @@ public final class VecHelper {
 
     // === SpongeAPI Location --> BlockPos ===
     @SuppressWarnings("ConstantConditions")
-    public static BlockPos toBlockPos(Location location) {
+    public static BlockPos toBlockPos(ServerLocation location) {
         if (location == null) {
             return null;
         }

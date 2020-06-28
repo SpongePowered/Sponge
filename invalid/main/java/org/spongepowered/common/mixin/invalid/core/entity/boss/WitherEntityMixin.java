@@ -28,7 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.WitherEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.living.monster.boss.Wither;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -150,7 +150,7 @@ public abstract class WitherEntityMixin extends MonsterEntityMixin implements Fu
         final net.minecraft.world.Explosion.Mode modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .sourceExplosive((Wither) this)
-                .location(Location.of((World) worldObj, new Vector3d(x, y, z)))
+                .location(ServerLocation.of((World) worldObj, new Vector3d(x, y, z)))
                 .radius(this.impl$explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking)

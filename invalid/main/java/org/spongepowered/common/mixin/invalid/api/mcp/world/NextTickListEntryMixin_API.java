@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.invalid.api.mcp.world;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,11 +40,11 @@ public abstract class NextTickListEntryMixin_API implements ScheduledBlockUpdate
     @Shadow public int priority;
     @Shadow public long scheduledTime;
 
-    private Location<org.spongepowered.api.world.World> location;
+    private ServerLocation<org.spongepowered.api.world.World> location;
     private World world;
 
     @Override
-    public Location<org.spongepowered.api.world.World> getLocation() {
+    public ServerLocation<org.spongepowered.api.world.World> getLocation() {
         return ((NextTickListEntryBridge) this).bridge$getLocation();
     }
 

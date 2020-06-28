@@ -38,10 +38,6 @@ import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.dimension.Dimension;
-import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
-import org.spongepowered.api.world.volume.biome.UnmodifiableBiomeVolume;
-import org.spongepowered.api.world.volume.entity.ImmutableEntityVolume;
-import org.spongepowered.api.world.volume.entity.UnmodifiableEntityVolume;
 import org.spongepowered.api.world.volume.game.ReadableRegion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -133,36 +129,6 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
     @Override
     default Random getRandom() {
         return new Random();
-    }
-
-    @Override
-    default UnmodifiableBiomeVolume<?> asUnmodifiableBiomeVolume() {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
-    default ImmutableBiomeVolume asImmutableBiomeVolume() {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
-    default R getView(final Vector3i newMin, final Vector3i newMax) {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
-    default UnmodifiableEntityVolume<?> asUnmodifiableEntityVolume() {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
-
-    @Override
-    default ImmutableEntityVolume asImmutableEntityVolume() {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override

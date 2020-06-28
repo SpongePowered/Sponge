@@ -25,11 +25,11 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.World;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 
 public interface NextTickListEntryBridge {
 
     void bridge$setWorld(World world);
 
-    Location bridge$getLocation();
+    ServerLocation bridge$getLocation();
 }

@@ -31,18 +31,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.fluid.FluidState;
-import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
-import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.volume.game.PrimitiveGameVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(IBlockReader.class)
 public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
@@ -52,11 +49,6 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
     @Shadow int shadow$getLightValue(BlockPos p_217298_1_);
     @Shadow int shadow$getMaxLightLevel();
     @Shadow int shadow$getHeight();
-
-    @Override
-    default PrimitiveGameVolume getView(Vector3i newMin, Vector3i newMax) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
-    }
 
     @Override
     default int getMaximumLight() {
@@ -96,16 +88,6 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
     @Override
     default FluidState getFluid(int x, int y, int z) {
         return (FluidState) this.shadow$getFluidState(new BlockPos(x, y, z));
-    }
-
-    @Override
-    default UnmodifiableBlockVolume<?> asUnmodifiableBlockVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
-    }
-
-    @Override
-    default ImmutableBlockVolume asImmutableBlockVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
     }
 
     @Override

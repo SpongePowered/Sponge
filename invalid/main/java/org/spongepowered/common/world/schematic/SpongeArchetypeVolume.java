@@ -37,8 +37,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.StorageType;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
@@ -51,6 +50,7 @@ import org.spongepowered.common.util.gen.AbstractBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -125,7 +125,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     }
 
     @Override
-    public void apply(Location location, BlockChangeFlag changeFlag) {
+    public void apply(ServerLocation location, BlockChangeFlag changeFlag) {
         this.backing.getBlockWorker().iterate((v, x, y, z) -> {
             location.getWorld().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag);
         });
@@ -138,7 +138,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
                 for (EntityArchetype entity : this.entities) {
                     final Vector3d vector3d = ((SpongeEntityArchetype) entity).getPosition().get();
-                    final Location target = location.add(vector3d);
+                    final ServerLocation target = location.add(vector3d);
                     entity.apply(target);
                 }
             }

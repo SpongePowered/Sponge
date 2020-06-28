@@ -88,7 +88,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -100,6 +100,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
@@ -112,7 +113,6 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -141,7 +141,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
 
     private boolean impl$justTeleported = false;
     private long impl$lastTryBlockPacketTimeStamp = 0;
-    @Nullable private Location impl$lastMoveLocation = null;
+    @Nullable private ServerLocation impl$lastMoveLocation = null;
     @Nullable private ResourcePack impl$lastReceivedPack, lastAcceptedPack;
     private final AtomicInteger impl$numResourcePacksInTransit = new AtomicInteger();
     private final LongObjectHashMap<Runnable> impl$customKeepAliveCallbacks = new LongObjectHashMap<>();
@@ -280,12 +280,12 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
             final Vector3d fromRotation = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
-            Location fromLocation = player.getLocation();
+            ServerLocation fromLocation = player.getLocation();
             if (this.impl$lastMoveLocation != null) {
                 fromLocation = this.impl$lastMoveLocation;
             }
 
-            Location toLocation = Location.of(player.getWorld(), ((CPlayerPacketAccessor) packetIn).accessor$getX(), ((CPlayerPacketAccessor) packetIn).accessor$getY(), ((CPlayerPacketAccessor) packetIn).accessor$getZ());
+            ServerLocation toLocation = ServerLocation.of(player.getWorld(), ((CPlayerPacketAccessor) packetIn).accessor$getX(), ((CPlayerPacketAccessor) packetIn).accessor$getY(), ((CPlayerPacketAccessor) packetIn).accessor$getZ());
             Vector3d toRotation = new Vector3d(((CPlayerPacketAccessor) packetIn).accessor$getPitch(), ((CPlayerPacketAccessor) packetIn).accessor$getYaw(), 0);
 
             // If we have zero movement, we have rotation only, we might as well note that now.
@@ -479,9 +479,9 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) ridingEntity;
         final Vector3d fromrot = spongeEntity.getRotation();
 
-        final Location from = spongeEntity.getLocation();
+        final ServerLocation from = spongeEntity.getLocation();
         final Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
-        final Location to = Location.of(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
+        final ServerLocation to = ServerLocation.of(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
         final Transform fromTransform = spongeEntity.getTransform().withPosition(from.getPosition()).withRotation(fromrot);
         final Transform toTransform = spongeEntity.getTransform().withPosition(to.getPosition()).withRotation(torot);
         final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (Player) this.player);
@@ -710,7 +710,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
     }
 
     @Override
-    public void bridge$setLastMoveLocation(final Location location) {
+    public void bridge$setLastMoveLocation(final ServerLocation location) {
         this.impl$lastMoveLocation = location;
     }
 

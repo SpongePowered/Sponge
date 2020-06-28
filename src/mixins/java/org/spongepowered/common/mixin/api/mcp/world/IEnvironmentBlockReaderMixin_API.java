@@ -29,8 +29,6 @@ import net.minecraft.world.IEnviromentBlockReader;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.world.LightType;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
-import org.spongepowered.api.world.volume.biome.UnmodifiableBiomeVolume;
 import org.spongepowered.api.world.volume.game.EnvironmentalVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,21 +43,6 @@ public interface IEnvironmentBlockReaderMixin_API extends IBlockReaderMixin_API,
     @Override
     default BiomeType getBiome(int x, int y, int z) {
         return (BiomeType) this.shadow$getBiome(new BlockPos(x, y, z));
-    }
-
-    @Override
-    default UnmodifiableBiomeVolume<?> asUnmodifiableBiomeVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEnviromentBlockReader that isn't part of Sponge API");
-    }
-
-    @Override
-    default ImmutableBiomeVolume asImmutableBiomeVolume() {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEnviromentBlockReader that isn't part of Sponge API");
-    }
-
-    @Override
-    default EnvironmentalVolume getView(Vector3i newMin, Vector3i newMax) {
-        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEnviromentBlockReader that isn't part of Sponge API");
     }
 
     @Override

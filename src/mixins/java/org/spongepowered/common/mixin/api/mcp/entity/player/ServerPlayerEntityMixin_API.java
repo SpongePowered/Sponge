@@ -75,7 +75,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -109,6 +109,7 @@ import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -117,8 +118,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(ServerPlayerEntity.class)
 @Implements(@Interface(iface = Player.class, prefix = "player$"))
@@ -476,7 +475,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public boolean setLocation(final Vector3d position, final UUID world) {
         final Optional<ServerWorld> targetWorld = Sponge.getServer().getWorldManager().getWorld(world);
-        return targetWorld.isPresent() && this.setLocation(Location.of(targetWorld.get(), position));
+        return targetWorld.isPresent() && this.setLocation(ServerLocation.of(targetWorld.get(), position));
     }
 
     @Override

@@ -26,13 +26,11 @@ package org.spongepowered.common.data.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.data.DataManipulator.Mutable;
-import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
@@ -50,15 +48,15 @@ public final class DataUtil {
         return dataView;
     }
 
-    public static Location getLocation(final DataView view, final boolean castToInt) {
+    public static ServerLocation getLocation(final DataView view, final boolean castToInt) {
         final UUID worldUuid = UUID.fromString(view.getString(Queries.WORLD_ID).orElseThrow(dataNotFound()));
         final double x = view.getDouble(Queries.POSITION_X).orElseThrow(dataNotFound());
         final double y = view.getDouble(Queries.POSITION_Y).orElseThrow(dataNotFound());
         final double z = view.getDouble(Queries.POSITION_Z).orElseThrow(dataNotFound());
         if (castToInt) {
-            return Location.of(SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), (int) x, (int) y, (int) z);
+            return ServerLocation.of(SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), (int) x, (int) y, (int) z);
         }
-        return Location.of(SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), x, y, z);
+        return ServerLocation.of(SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), x, y, z);
     }
 
     public static Vector3i getPosition3i(final DataView view) {

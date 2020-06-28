@@ -63,14 +63,14 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.item.ArmorItemAccessor;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
-import org.spongepowered.common.accessor.item.ArmorItemAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -337,7 +337,7 @@ public class DamageEventHandler {
         return Optional.empty();
     }
 
-    public static Location findFirstMatchingBlock(final Entity entity, final AxisAlignedBB bb, final Predicate<BlockState> predicate) {
+    public static ServerLocation findFirstMatchingBlock(final Entity entity, final AxisAlignedBB bb, final Predicate<BlockState> predicate) {
         final int i = MathHelper.floor(bb.minX);
         final int j = MathHelper.floor(bb.maxX + 1.0D);
         final int k = MathHelper.floor(bb.minY);
@@ -354,7 +354,7 @@ public class DamageEventHandler {
                         continue;
                     }
                     if (predicate.test(chunk.getBlockState(blockPos))) {
-                        return Location.of((World) entity.world, k1, l1, i2);
+                        return ServerLocation.of((World) entity.world, k1, l1, i2);
                     }
                 }
             }
@@ -387,7 +387,7 @@ public class DamageEventHandler {
                 ownerBridge.tracked$getOwnerReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
             }
         } else if (damageSource instanceof BlockDamageSource) {
-            final Location location = ((BlockDamageSource) damageSource).getLocation();
+            final ServerLocation location = ((BlockDamageSource) damageSource).getLocation();
             final BlockPos blockPos = VecHelper.toBlockPos(location);
             final ChunkBridge mixinChunk = (ChunkBridge) ((net.minecraft.world.World) location.getWorld()).getChunkAt(blockPos);
             mixinChunk.bridge$getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));

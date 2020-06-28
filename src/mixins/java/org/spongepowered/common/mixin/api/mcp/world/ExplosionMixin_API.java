@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
-import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Final;
@@ -35,10 +35,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Optional;
-import java.util.Random;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class ExplosionMixin_API implements Explosion {
@@ -52,12 +50,12 @@ public abstract class ExplosionMixin_API implements Explosion {
     @Shadow @Final private float size;
 
     @Shadow @Final private net.minecraft.world.Explosion.Mode mode;
-    @Nullable private Location api$location;
+    @Nullable private ServerLocation api$location;
 
     @Override
-    public Location getLocation() {
+    public ServerLocation getLocation() {
         if (this.api$location == null) {
-            this.api$location = Location.of((World) this.world, new Vector3d(this.x, this.y, this.z));
+            this.api$location = ServerLocation.of((World) this.world, new Vector3d(this.x, this.y, this.z));
         }
         return this.api$location;
     }
