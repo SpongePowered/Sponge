@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
-
-import javax.annotation.Nullable;
+import org.spongepowered.api.world.explosion.ResistanceCalculator;
 
 public interface ExplosionBridge {
 
@@ -50,5 +47,9 @@ public interface ExplosionBridge {
     void bridge$setKnockback(double knockback);
 
     double bridge$getKnockback();
+
+    void bridge$setResistanceCalculator(ResistanceCalculator resistanceCalculator);
+
+    ResistanceCalculator bridge$getResistanceCalculator();
 
 }
