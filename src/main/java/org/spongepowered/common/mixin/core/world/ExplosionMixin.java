@@ -112,6 +112,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
      * @author gabizou - September 8th, 2016
      * @reason Rewrites to use our own hooks that will patch with forge perfectly well,
      * and allows for maximal capability.
+     *
+     * @author BernardisGood - September 9th, 2019
+     * @reason Additional variables that allow increased control over the explosion's level of detail and entity knockback.
+     *
+     * @author BernardisGood - June 29th, 2020
+     * @reason Ability for plugins to insert custom logic when calculating the explosion resistance of blocks that are affected by the explosion.
      */
     @Final
     @Overwrite
@@ -143,10 +149,13 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 final IBlockState iblockstate = this.world.getBlockState(blockpos);
 
                                 if (iblockstate.getMaterial() != Material.AIR) {
-                                    final float f2 = impl$resistanceCalculator.calculateResistance(
-                                            (BlockState) iblockstate,
-                                            VecHelper.toVector3i(blockpos),
-                                            (Explosion) this);
+                                    // Sponge Start - Allows the insertion of custom block resistance calculations
+                                    final float f2 = impl$resistanceCalculator
+                                            .calculateResistance(
+                                                    (BlockState) iblockstate,
+                                                    VecHelper.toVector3i(blockpos),
+                                                    (Explosion) this);
+                                    // Sponge End
 
                                     f -= (f2 + 0.3F) * 0.3F;
                                 }
