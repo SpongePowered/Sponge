@@ -44,12 +44,14 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.explosion.ResistanceCalculator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -66,24 +68,16 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.explosion.ResistanceCalculator;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
 import javax.annotation.Nullable;
+import java.util.*;
 
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class ExplosionMixin implements ExplosionBridge {
 
     private boolean impl$shouldBreakBlocks;
     private boolean impl$shouldDamageEntities;
-//    private Cause createdCause;
+    //    private Cause createdCause;
     private int impl$resolution;
     private float impl$randomness;
     private double impl$knockback;
@@ -103,8 +97,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void onConstructed(final net.minecraft.world.World world, final Entity entity, final double originX, final double originY,
-            final double originZ, final float radius, final boolean isFlaming, final boolean isSmoking,
-            final CallbackInfo ci) {
+                               final double originZ, final float radius, final boolean isFlaming, final boolean isSmoking,
+                               final CallbackInfo ci) {
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
         this.impl$shouldBreakBlocks = this.damagesTerrain;
@@ -130,9 +124,9 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                 for (int k = 0; k < impl$resolution; ++k) {
                     for (int l = 0; l < impl$resolution; ++l) {
                         if (j == 0 || j == impl$resolution - 1 || k == 0 || k == impl$resolution - 1 || l == 0 || l == impl$resolution - 1) {
-                            double d0 = (double) ((float) j / (float)(impl$resolution - 1) * 2.0F - 1.0F);
-                            double d1 = (double) ((float) k / (float)(impl$resolution - 1) * 2.0F - 1.0F);
-                            double d2 = (double) ((float) l / (float)(impl$resolution - 1) * 2.0F - 1.0F);
+                            double d0 = (double) ((float) j / (float) (impl$resolution - 1) * 2.0F - 1.0F);
+                            double d1 = (double) ((float) k / (float) (impl$resolution - 1) * 2.0F - 1.0F);
+                            double d2 = (double) ((float) l / (float) (impl$resolution - 1) * 2.0F - 1.0F);
                             final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                             d0 = d0 / d3;
                             d1 = d1 / d3;
@@ -183,8 +177,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         // Sponge Start - Check if this explosion should damage entities
         final List<Entity> list = this.impl$shouldDamageEntities
-                            ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
-                            : Collections.emptyList();
+                ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
+                : Collections.emptyList();
         // Now we can throw our Detonate Event
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
             final List<Location<World>> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
@@ -200,7 +194,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             }
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             final ExplosionEvent.Detonate detonate =
-                SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities, (Explosion) this, (World) this.world);
+                    SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities, (Explosion) this, (World) this.world);
             SpongeImpl.postEvent(detonate);
             // Clear the positions so that they can be pulled from the event
             this.affectedBlockPositions.clear();
@@ -278,13 +272,13 @@ public abstract class ExplosionMixin implements ExplosionBridge {
      * @reason Since forge will attempt to call the normalized method for modded blocks,
      * we must artificially capture the block position for any block drops or changes during the
      * explosion phase.
-     *
+     * <p>
      * Does the second part of the explosion (sound, particles, drop spawn)
      */
     @Overwrite
     public void doExplosionB(final boolean spawnParticles) {
         this.world.playSound((EntityPlayer) null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
-            SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
+                SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
 
         if (this.size >= 2.0F && (this.damagesTerrain || this.impl$shouldBreakBlocks)) {
             // Sponge Start - Use WorldServer methods since we prune the explosion packets

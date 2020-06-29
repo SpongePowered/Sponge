@@ -30,15 +30,14 @@ import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.explosion.ResistanceCalculator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
-import org.spongepowered.api.world.explosion.ResistanceCalculator;
-
-import java.util.Optional;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class ExplosionMixin_API implements Explosion {
@@ -98,17 +97,17 @@ public abstract class ExplosionMixin_API implements Explosion {
 
     @Override
     public int getResolution() {
-        return  ((ExplosionBridge) this).bridge$getResolution();
+        return ((ExplosionBridge) this).bridge$getResolution();
     }
 
     @Override
     public float getRandomness() {
-        return  ((ExplosionBridge) this).bridge$getRandomness();
+        return ((ExplosionBridge) this).bridge$getRandomness();
     }
 
     @Override
     public double getKnockback() {
-        return  ((ExplosionBridge) this).bridge$getKnockback();
+        return ((ExplosionBridge) this).bridge$getKnockback();
     }
 
     @Override
