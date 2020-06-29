@@ -33,23 +33,11 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.explosion.ResistanceCalculator;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
-import org.spongepowered.common.util.VecHelper;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 public class SpongeExplosionBuilder implements Explosion.Builder {
-
-    private static final ResistanceCalculator DEFAULT_RESISTANCE_CALCULATOR = ((blockState, blockPosition, explosion) ->
-            explosion.getSourceExplosive().isPresent()
-                    ? ((Entity) explosion.getSourceExplosive().get())
-                    .getExplosionResistance(
-                            (net.minecraft.world.Explosion) explosion,
-                            (net.minecraft.world.World) explosion.getWorld(),
-                            VecHelper.toBlockPos(blockPosition),
-                            (IBlockState) blockState)
-
-                    : ((IBlockState) blockState).getBlock().getExplosionResistance((Entity) null));
 
     private Location<World> location;
     private Explosive sourceExplosive;
@@ -61,7 +49,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     private int resolution = 16;
     private float randomness = 1.0F;
     private double knockback = 1;
-    private ResistanceCalculator resistanceCalculator = DEFAULT_RESISTANCE_CALCULATOR;
+    private ResistanceCalculator resistanceCalculator;
 
     public SpongeExplosionBuilder() {
         reset();
@@ -146,7 +134,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.resolution = value.getResolution();
         this.randomness = value.getRandomness();
         this.knockback = value.getKnockback();
-        this.resistanceCalculator = value.getResistanceCalculator().orElse(DEFAULT_RESISTANCE_CALCULATOR);
+        this.resistanceCalculator = value.getResistanceCalculator().orElse(null);
         return this;
     }
 
@@ -162,7 +150,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.resolution = 16;
         this.randomness = 1.0F;
         this.knockback = 1;
-        this.resistanceCalculator = DEFAULT_RESISTANCE_CALCULATOR;
+        this.resistanceCalculator = null;
         return this;
     }
 

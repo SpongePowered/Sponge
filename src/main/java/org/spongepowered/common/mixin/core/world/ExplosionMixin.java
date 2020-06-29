@@ -69,8 +69,14 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
 import javax.annotation.Nullable;
-import java.util.*;
 
 @Mixin(net.minecraft.world.Explosion.class)
 public abstract class ExplosionMixin implements ExplosionBridge {
@@ -150,11 +156,17 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
                                 if (iblockstate.getMaterial() != Material.AIR) {
                                     // Sponge Start - Allows the insertion of custom block resistance calculations
-                                    final float f2 = impl$resistanceCalculator
-                                            .calculateResistance(
-                                                    (BlockState) iblockstate,
-                                                    VecHelper.toVector3i(blockpos),
-                                                    (Explosion) this);
+                                    float f2 = this.exploder != null
+                                            ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate)
+                                            : iblockstate.getBlock().getExplosionResistance((Entity) null);
+
+                                    if (this.impl$resistanceCalculator != null) {
+                                        f2 = this.impl$resistanceCalculator.calculateResistance(
+                                                (BlockState) iblockstate,
+                                                VecHelper.toVector3i(blockpos),
+                                                f2,
+                                                (Explosion) this);
+                                    }
                                     // Sponge End
 
                                     f -= (f2 + 0.3F) * 0.3F;
