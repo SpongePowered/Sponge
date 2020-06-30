@@ -193,6 +193,7 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:6.2")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
+    launchConfig(project(":SpongeAPI"))
     launchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
     launchConfig("org.spongepowered:mixin:0.8")
     launchConfig("org.checkerframework:checker-qual:2.8.1")

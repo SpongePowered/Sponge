@@ -1,0 +1,23 @@
+{
+    "plugins": [{
+        "id": "spongevanilla",
+        "name": "SpongeVanilla",
+        "version": "8.0.0-1.14.4",
+        "main-class": "org.spongepowered.vanilla.SpongeVanilla",
+        "description": "Vanilla Minecraft with Sponge",
+        "links": {
+            "homepage": "https://www.spongepowered.org",
+            "source": "https://www.spongepowered.org/source",
+            "issues": "https://www.spongepowered.org/issues"
+        },
+        "contributors": [{
+            "name": "SpongePowered",
+            "description": "Lead Developer"
+        }],
+        "dependencies": [{
+            "id": "sponge",
+            "version": "8.0.0"
+        }],
+        "extra": {}
+    }]
+}

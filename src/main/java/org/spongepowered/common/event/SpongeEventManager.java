@@ -415,7 +415,6 @@ public class SpongeEventManager implements EventManager {
                 }
                 handler.handle(event);
             } catch (Throwable e) {
-                // TODO - add some better handling, especially since we have the stack frame and phase context to boot
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
         }

@@ -35,12 +35,9 @@ import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.GameState;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
@@ -63,7 +60,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 @Singleton
@@ -184,7 +180,7 @@ public final class SpongeImpl {
     }
 
     public static Path getGameDir() {
-        return Launcher.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+        return Launcher.INSTANCE.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
             .orElseThrow(() -> new IllegalStateException("Somehow we do not have a Game Directory set"));
     }
 
@@ -194,7 +190,7 @@ public final class SpongeImpl {
     }
 
     public static List<Path> getPluginsDir() {
-        return Launcher.getPluginEnvironment().getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES)
+        return Launcher.INSTANCE.getPluginEnvironment().getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES)
             .orElseGet(Collections::emptyList);
     }
 
@@ -244,45 +240,6 @@ public final class SpongeImpl {
      */
     public static boolean postEvent(Event event) {
         return Sponge.getEventManager().post(event);
-    }
-
-    public static boolean postEvent(Event event, boolean allowClient) {
-        // TODO quick and dirty fix (cant cast in UnitTest)
-//        if (Sponge.getEventManager() instanceof SpongeEventManager) {
-//            return ((SpongeEventManager) Sponge.getEventManager()).post(event, allowClient);
-//        }
-        return true;
-    }
-
-    public static void postState(GameState state, GameStateEvent event) {
-        check(game);
-        game.setState(state);
-        postEvent(event, true);
-    }
-
-    public static void postShutdownEvents() {
-        check(game);
-        postState(GameState.GAME_STOPPING, SpongeEventFactory.createGameStoppingEvent(Sponge.getCauseStackManager().getCurrentCause()));
-        postState(GameState.GAME_STOPPED, SpongeEventFactory.createGameStoppedEvent(Sponge.getCauseStackManager().getCurrentCause()));
-    }
-
-    // TODO this code is used a BUNCH of times
-    /**
-     * Gets the {@link PluginContainer} for given plugin object.
-     *
-     * @param plugin The Plugin Object
-     * @return The associated plugin container
-     * @throws IllegalArgumentException when the argument has no associated plugin container (usually because it is not a plugin)
-     */
-    public static PluginContainer getPluginContainer(Object plugin) throws IllegalArgumentException {
-        Optional<PluginContainer> containerOptional = Sponge.getGame().getPluginManager().fromInstance(plugin);
-        if (!containerOptional.isPresent()) {
-            throw new IllegalArgumentException(
-                    "The provided plugin object does not have an associated plugin container "
-                            + "(in other words, is 'plugin' actually your plugin object?");
-        }
-
-        return containerOptional.get();
     }
 
     public static int directionToIndex(Direction direction) {

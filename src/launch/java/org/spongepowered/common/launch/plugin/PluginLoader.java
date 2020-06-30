@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.launch.plugin;
 
+import com.google.common.base.Preconditions;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginFile;
 import org.spongepowered.plugin.PluginLanguageService;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,12 +44,14 @@ import java.util.ServiceLoader;
 public final class PluginLoader {
 
     private final PluginEnvironment pluginEnvironment;
+    private final SpongePluginManager pluginManager;
     private final Map<String, PluginLanguageService> languageServices;
-    private final Map<String, List<PluginFile>> pluginFiles;
+    private final Map<String, List<Path>> pluginFiles;
     private final Map<PluginLanguageService, List<PluginCandidate>> pluginCandidates;
 
-    public PluginLoader(final PluginEnvironment pluginEnvironment) {
+    public PluginLoader(final PluginEnvironment pluginEnvironment, final SpongePluginManager pluginManager) {
         this.pluginEnvironment = pluginEnvironment;
+        this.pluginManager = pluginManager;
         this.languageServices = new HashMap<>();
         this.pluginFiles = new HashMap<>();
         this.pluginCandidates = new HashMap<>();
@@ -62,7 +65,7 @@ public final class PluginLoader {
         return Collections.unmodifiableMap(this.languageServices);
     }
 
-    public Map<String, Collection<PluginFile>> getResources() {
+    public Map<String, Collection<Path>> getResources() {
         return Collections.unmodifiableMap(this.pluginFiles);
     }
 
@@ -92,7 +95,7 @@ public final class PluginLoader {
     public void discoverResources() {
         for (final Map.Entry<String, PluginLanguageService> languageEntry : this.languageServices.entrySet()) {
             final PluginLanguageService languageService = languageEntry.getValue();
-            final List<PluginFile> pluginFiles = languageService.discoverResources(this.pluginEnvironment);
+            final List<Path> pluginFiles = languageService.discoverResources(this.pluginEnvironment);
             if (pluginFiles.size() > 0) {
                 this.pluginFiles.put(languageEntry.getKey(), pluginFiles);
             }
@@ -110,6 +113,8 @@ public final class PluginLoader {
     }
 
     public void createContainers() {
+        Preconditions.checkNotNull(this.pluginManager, "Attempt made to create containers outside the game classloader!");
+
         for (final Map.Entry<PluginLanguageService, List<PluginCandidate>> languageCandidates : this.pluginCandidates.entrySet()) {
             final PluginLanguageService languageService = languageCandidates.getKey();
             final Collection<PluginCandidate> candidates = languageCandidates.getValue();
@@ -122,6 +127,7 @@ public final class PluginLoader {
                     continue;
                 }
                 this.pluginEnvironment.getLogger().info("Loaded plugin '{}'", pluginContainer.getMetadata().getId());
+                this.pluginManager.addPlugin(pluginContainer);
             }
         }
     }
