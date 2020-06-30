@@ -33,7 +33,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;

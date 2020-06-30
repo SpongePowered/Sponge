@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -41,7 +42,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -116,7 +116,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract CommandSource shadow$getCommandSource();
 
     private boolean impl$isConstructing = true;
-    @Nullable private Text impl$displayName;
+    @Nullable private Component impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
     private boolean impl$trackedInWorld = false;
     private boolean vanish$collision = false;
@@ -620,21 +620,21 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 
     @Nullable
     @Override
-    public Text bridge$getDisplayNameText() {
+    public Component bridge$getDisplayNameText() {
         return this.impl$displayName;
     }
 
     @Override
     public void bridge$setDisplayName(
         @Nullable
-        final Text displayName) {
+        final Component displayName) {
         this.impl$displayName = displayName;
 
         this.impl$skipSettingCustomNameTag = true;
         if (this.impl$displayName == null) {
             this.shadow$setCustomName(null);
         } else {
-            this.shadow$setCustomName(SpongeTexts.toComponent(this.impl$displayName));
+            this.shadow$setCustomName(SpongeAdventure.vanilla(this.impl$displayName));
         }
 
         this.impl$skipSettingCustomNameTag = false;
@@ -644,7 +644,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         at = @At("RETURN"))
     private void impl$UpdatedisplayNameText(final ITextComponent name, final CallbackInfo ci) {
         if (!this.impl$skipSettingCustomNameTag) {
-            this.impl$displayName = SpongeTexts.toText(name);
+            this.impl$displayName = SpongeAdventure.adventure(name);
         }
     }
 

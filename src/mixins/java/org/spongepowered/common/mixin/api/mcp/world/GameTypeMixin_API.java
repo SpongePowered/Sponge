@@ -25,20 +25,15 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(GameType.class)
 public abstract class GameTypeMixin_API implements GameMode {
@@ -46,21 +41,14 @@ public abstract class GameTypeMixin_API implements GameMode {
     @Shadow public abstract ITextComponent shadow$getDisplayName();
 
     private ResourceKey api$key;
-    private SpongeTranslation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int gameTypeId, String gameTypeName, CallbackInfo ci) {
         this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), gameTypeName.isEmpty() ? "not_set" : gameTypeName.toLowerCase());
-        this.api$translation = new SpongeTranslation((TranslationTextComponent) this.shadow$getDisplayName());
     }
 
     @Override
     public ResourceKey getKey() {
         return this.api$key;
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return this.api$translation;
     }
 }

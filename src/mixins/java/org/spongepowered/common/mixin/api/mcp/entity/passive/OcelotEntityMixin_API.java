@@ -27,12 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.entity.passive;
 import net.minecraft.entity.passive.OcelotEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Collection;
 import java.util.Set;
 
 @Mixin(OcelotEntity.class)

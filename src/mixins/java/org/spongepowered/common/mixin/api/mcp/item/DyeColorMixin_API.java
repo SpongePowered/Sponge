@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.item;
 import net.minecraft.block.material.MaterialColor;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,10 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.math.GenericMath;
-import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(net.minecraft.item.DyeColor.class)
 public abstract class DyeColorMixin_API implements DyeColor {
@@ -46,22 +42,15 @@ public abstract class DyeColorMixin_API implements DyeColor {
     @Shadow public abstract float[] shadow$getColorComponentValues();
 
     private ResourceKey api$key;
-    private Translation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int idIn, String translationKey, int colorValueIn, MaterialColor mapColorIn, int fireworkColorIn, int textColorIn, CallbackInfo ci) {
         this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), translationKey.toLowerCase());
-        this.api$translation = new SpongeTranslation("color.minecraft." + translationKey);
     }
 
     @Override
     public ResourceKey getKey() {
         return this.api$key;
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return this.api$translation;
     }
 
     @Override

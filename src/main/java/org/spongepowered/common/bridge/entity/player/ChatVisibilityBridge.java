@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.bridge.entity.player;
 
-import org.spongepowered.api.text.chat.ChatType;
+import net.kyori.adventure.audience.MessageType;
 
 import java.util.Set;
 
 public interface ChatVisibilityBridge {
 
-    void bridge$setChatTypes(Set<ChatType> chatTypes);
+    void bridge$setChatTypes(Set<MessageType> types);
 
-    Set<ChatType> bridge$getVisibleChatTypes();
+    Set<MessageType> bridge$getVisibleChatTypes();
 }

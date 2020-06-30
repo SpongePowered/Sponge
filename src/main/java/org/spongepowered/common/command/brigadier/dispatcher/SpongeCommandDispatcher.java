@@ -36,6 +36,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
@@ -43,7 +44,6 @@ import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode
 import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,7 +84,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             frame.addContext(EventContextKeys.COMMAND, input.getString());
             return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$asCommandCause(), input.getRemaining()).getResult();
         } catch (final CommandException e) {
-            throw new net.minecraft.command.CommandException(SpongeTexts.toComponent(e.getText()));
+            throw new net.minecraft.command.CommandException(SpongeAdventure.asVanilla(e.getText()));
         }
     }
 

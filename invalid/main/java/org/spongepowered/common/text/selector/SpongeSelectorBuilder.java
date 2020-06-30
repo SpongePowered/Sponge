@@ -27,10 +27,10 @@ package org.spongepowered.common.text.selector;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.text.selector.Argument;
-import org.spongepowered.api.text.selector.ArgumentType;
-import org.spongepowered.api.text.selector.Selector;
-import org.spongepowered.api.text.selector.SelectorType;
+import org.spongepowered.api.entity.selector.Argument;
+import org.spongepowered.api.entity.selector.ArgumentType;
+import org.spongepowered.api.entity.selector.Selector;
+import org.spongepowered.api.entity.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 import javax.annotation.Nullable;

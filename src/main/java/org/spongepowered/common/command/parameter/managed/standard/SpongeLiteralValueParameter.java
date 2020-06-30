@@ -26,12 +26,13 @@ package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
@@ -65,12 +66,12 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
         int x = 0;
         while (iterator.hasNext() && x < toCompare.length) {
             if (!iterator.next().equals(toCompare[x++])) {
-                throw reader.createException(Text.of("The provided literal was not ", String.join(" ", collection)));
+                throw reader.createException(TextComponent.of("The provided literal was not " + String.join(" ", collection)));
             }
         }
 
         if (iterator.hasNext()) {
-            throw reader.createException(Text.of("The provided literal was not ", String.join(" ", collection)));
+            throw reader.createException(TextComponent.of("The provided literal was not " + String.join(" ", collection)));
         }
 
         return Optional.of(this.returnValue.get());
@@ -84,8 +85,8 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
 
     @Override
     @NonNull
-    public Text getUsage(@NonNull final Text key) {
-        return Text.of(String.join(" ", this.literalSupplier.get()));
+    public Component getUsage(@NonNull final String key) {
+        return TextComponent.of(String.join(" ", this.literalSupplier.get()));
     }
 
     @Override

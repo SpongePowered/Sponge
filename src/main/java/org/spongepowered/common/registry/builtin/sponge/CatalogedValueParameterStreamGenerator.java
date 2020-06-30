@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.command.arguments.*;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.dimension.Dimension;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigIntegerValueParameter;
@@ -100,22 +100,22 @@ public final class CatalogedValueParameterStreamGenerator {
                 StandardCatalogedArgumentParser.createConverter(
                         "text_formatting_code",
                         StringArgumentType.string(),
-                        (reader, cause, result) -> TextSerializers.FORMATTING_CODE.get().deserialize(result)),
+                        (reader, cause, result) -> SpongeAdventure.legacy(LegacyComponentSerializer.AMPERSAND_CHAR, result)),
                 StandardCatalogedArgumentParser.createConverter(
                         "text_formatting_code_all",
                         StringArgumentType.greedyString(),
-                        (reader, cause, result) -> TextSerializers.FORMATTING_CODE.get().deserialize(result)),
-                StandardCatalogedArgumentParser.createCast("text_json", ComponentArgument.component(), Text.class),
+                        (reader, cause, result) -> SpongeAdventure.legacy(LegacyComponentSerializer.AMPERSAND_CHAR, result)),
+                StandardCatalogedArgumentParser.createConverter("text_json", ComponentArgument.component(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)),
                 StandardCatalogedArgumentParser.createConverter(
                         "text_json_all",
                         StringArgumentType.greedyString(),
-                        (reader, cause, result) -> TextSerializers.JSON.get().deserialize(result)),
+                        (reader, cause, result) -> SpongeAdventure.json(result)),
                 StandardCatalogedArgumentParser.createConverter("url", StringArgumentType.string(),
                         (reader, cause, input) -> {
                             try {
                                 return new URL(input);
                             } catch (final MalformedURLException ex) {
-                                throw new SimpleCommandExceptionType((Message) Text.of("Could not parse " + input + " as a URL"))
+                                throw new SimpleCommandExceptionType(new StringTextComponent("Could not parse " + input + " as a URL"))
                                         .createWithContext(reader);
                             }
                         }),
@@ -125,7 +125,7 @@ public final class CatalogedValueParameterStreamGenerator {
                             try {
                                 return UUID.fromString(input);
                             } catch (final IllegalArgumentException ex) {
-                                throw new SimpleCommandExceptionType((Message) Text.of(ex.getMessage()))
+                                throw new SimpleCommandExceptionType(new StringTextComponent(ex.getMessage()))
                                         .createWithContext(reader);
                             }
                         }),

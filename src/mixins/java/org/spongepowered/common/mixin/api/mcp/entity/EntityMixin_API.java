@@ -51,7 +51,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.Transform;
@@ -493,11 +492,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         } catch (final Exception e) {
             throw new IllegalArgumentException("Could not copy the entity:", e);
         }
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return this.getType().getTranslation();
     }
 
     @Override

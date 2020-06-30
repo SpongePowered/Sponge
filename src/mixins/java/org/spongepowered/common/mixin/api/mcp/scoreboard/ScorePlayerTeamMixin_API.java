@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -39,9 +39,9 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
 import org.spongepowered.common.bridge.scoreboard.TeamBridge;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -77,44 +77,44 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return ((ScorePlayerTeamBridge) this).bridge$getDisplayName();
     }
 
     @Override
-    public void setDisplayName(final Text text) {
+    public void setDisplayName(final Component text) {
         ((ScorePlayerTeamBridge) this).bridge$setDisplayName(text);
     }
 
     @Override
-    public TextColor getColor() {
+    public NamedTextColor getColor() {
         return ((TeamBridge) this).bridge$getColor();
     }
 
     @Override
-    public void setColor(final TextColor color) {
+    public void setColor(final NamedTextColor color) {
         ((ScorePlayerTeamBridge) this).bridge$setColor(color);
     }
 
     @Override
-    public Text getPrefix() {
+    public Component getPrefix() {
         return ((ScorePlayerTeamBridge) this).bridge$getPrefix();
     }
 
     @Override
-    public void setPrefix(final Text prefix) {
+    public void setPrefix(final Component prefix) {
         ((ScorePlayerTeamBridge) this).bridge$setPrefix(prefix);
     }
 
     @Override
-    public Text getSuffix() {
+    public Component getSuffix() {
         return ((ScorePlayerTeamBridge) this).bridge$getSuffix();
     }
 
     @Shadow public abstract void setColor(TextFormatting color);
 
     @Override
-    public void setSuffix(final Text suffix) {
+    public void setSuffix(final Component suffix) {
         ((ScorePlayerTeamBridge) this).bridge$setSuffix(suffix);
     }
 
@@ -175,13 +175,13 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
     }
 
     @Override
-    public Set<Text> getMembers() {
-        return this.shadow$getMembershipCollection().stream().map(SpongeTexts::fromLegacy).collect(Collectors.toSet());
+    public Set<Component> getMembers() {
+        return this.shadow$getMembershipCollection().stream().map(SpongeAdventure::legacySection).collect(Collectors.toSet());
     }
 
     @Override
-    public void addMember(final Text member) {
-        final String legacyName = SpongeTexts.toLegacy(member);
+    public void addMember(final Component member) {
+        final String legacyName = SpongeAdventure.legacySection(member);
         if (legacyName.length() > 40) {
             throw new IllegalArgumentException(String.format("Member is %s characters long! It must be at most 40.", legacyName.length()));
         }
@@ -194,8 +194,8 @@ public abstract class ScorePlayerTeamMixin_API implements Team {
 
     @SuppressWarnings("RedundantCast")
     @Override
-    public boolean removeMember(final Text member) {
-        final String legacyName = SpongeTexts.toLegacy(member);
+    public boolean removeMember(final Component member) {
+        final String legacyName = SpongeAdventure.legacySection(member);
         if (this.scoreboard != null) {
             final ScorePlayerTeam realTeam = this.scoreboard.getPlayersTeam(legacyName);
 

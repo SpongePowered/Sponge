@@ -31,13 +31,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
@@ -120,7 +120,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
         try {
             return Optional.of(this.parse(parameterKey, (SpongeCommandContextBuilder) context, (SpongeStringReader) reader));
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(Text.of(e.getMessage()), e, e.getInput(), e.getCursor());
+            throw new ArgumentParseException(TextComponent.of(e.getMessage()), e, e.getInput(), e.getCursor());
         }
     }
 

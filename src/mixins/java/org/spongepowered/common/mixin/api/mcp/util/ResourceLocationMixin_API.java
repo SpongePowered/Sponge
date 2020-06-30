@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Preconditions;
+import net.kyori.adventure.key.Key;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Implements;
@@ -36,32 +34,25 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ResourceLocation.class)
-@Implements(value = @Interface(iface = ResourceKey.class, prefix = "resourceKey$"))
-public abstract class ResourceLocationMixin_API implements ResourceKey {
+@Implements(value = {
+      @Interface(iface = Key.class, prefix = "adventure$"),
+      @Interface(iface = ResourceKey.class, prefix = "resourceKey$")
+})
+public abstract class ResourceLocationMixin_API implements Key, ResourceKey {
 
     @Shadow public abstract String shadow$getNamespace();
     @Shadow public abstract String shadow$getPath();
-    @Shadow public abstract int shadow$compareTo(ResourceLocation p_compareTo_1_);
-    @Shadow public abstract String shadow$toString();
 
-    @Intrinsic
-    public String resourceKey$getNamespace() {
+    public String adventure$namespace() {
         return this.shadow$getNamespace();
     }
 
-    @Override
-    public String getValue() {
+    public String adventure$value() {
         return this.shadow$getPath();
     }
 
-    @Override
-    public String getFormatted() {
-        return this.shadow$toString();
-    }
-
     @Intrinsic
-    public int resourceKey$compareTo(ResourceKey o) {
-        Preconditions.checkNotNull(o);
-        return this.shadow$compareTo((ResourceLocation) (Object) o);
+    public int adventure$compareTo(Key o) {
+        return ResourceKey.super.compareTo(o);
     }
 }

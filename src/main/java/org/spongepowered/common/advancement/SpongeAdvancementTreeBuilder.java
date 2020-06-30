@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.text.translation.FixedTranslation;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
@@ -40,7 +38,7 @@ public final class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Adv
         AdvancementTree.Builder> implements AdvancementTree.Builder {
 
     private Advancement rootAdvancement;
-    private Translation translation;
+    private String name;
     private String background;
 
     public SpongeAdvancementTreeBuilder() {
@@ -68,13 +66,7 @@ public final class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Adv
 
     @Override
     public AdvancementTree.Builder name(String name) {
-        this.translation = new FixedTranslation(name);
-        return this;
-    }
-
-    @Override
-    public AdvancementTree.Builder name(Translation translation) {
-        this.translation = translation;
+        this.name = name;
         return this;
     }
 
@@ -82,7 +74,7 @@ public final class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Adv
     protected AdvancementTree build(ResourceKey key) {
         checkNotNull(key);
         checkState(this.rootAdvancement != null, "The root advancement must be set");
-        final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, key, this.translation);
+        final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, key, this.name);
         ((DisplayInfoBridge) this.rootAdvancement.getDisplayInfo().get()).bridge$setBackground(this.background);
         ((AdvancementBridge) this.rootAdvancement).bridge$setParent(null);
         applyTree(this.rootAdvancement, advancementTree);
@@ -99,7 +91,7 @@ public final class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Adv
     @Override
     public AdvancementTree.Builder reset() {
         this.key = null;
-        this.translation = null;
+        this.name = null;
         this.background = "minecraft:textures/gui/advancements/backgrounds/stone.png";
         this.rootAdvancement = null;
         return this;

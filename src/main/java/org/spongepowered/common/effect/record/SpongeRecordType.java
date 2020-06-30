@@ -35,11 +35,10 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.accessor.item.MusicDiscItemAccessor;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.math.vector.Vector3i;
 import javax.annotation.Nullable;
 
-public final class SpongeRecordType extends SpongeCatalogType.Translatable implements MusicDisc {
+public final class SpongeRecordType extends SpongeCatalogType implements MusicDisc {
 
     /**
      * This is the effect ID that is used by the Effect packet to play a record effect.
@@ -51,7 +50,7 @@ public final class SpongeRecordType extends SpongeCatalogType.Translatable imple
     private final int id;
 
     public SpongeRecordType(ResourceKey key, MusicDiscItem item) {
-        super(key, new SpongeTranslation(item.getTranslationKey()));
+        super(key);
         this.item = item;
         this.id = Registry.ITEM.getId(item);
     }

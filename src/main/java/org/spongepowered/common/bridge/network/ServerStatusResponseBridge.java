@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.bridge.network;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.ServerStatusResponse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.network.status.Favicon;
-import org.spongepowered.api.text.Text;
 
 public interface ServerStatusResponseBridge {
 
-    Text bridge$getDescription();
+    Component bridge$getDescription();
 
-    void bridge$setDescription(@Nullable Text text);
+    void bridge$setDescription(@Nullable Component text);
 
     @Nullable Favicon bridge$getFavicon();
 

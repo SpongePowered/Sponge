@@ -32,18 +32,18 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.network.RconConnection;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
 
@@ -71,7 +71,7 @@ class TimingsExport extends Thread {
     private final JsonObject out;
     private final TimingHistory[] history;
     private static long lastReport = 0;
-    final static List<MessageChannel> requestingReport = Lists.newArrayList();
+    final static List<Audience> requestingReport = Lists.newArrayList();
 
     TimingsExport(TimingsReportListener listeners, JsonObject out, TimingHistory[] history) {
         super("Timings paste thread");
@@ -97,17 +97,17 @@ class TimingsExport extends Thread {
         long now = System.currentTimeMillis();
         final long lastReportDiff = now - lastReport;
         if (lastReportDiff < 60000) {
-            listeners.send(Text.of(TextColors.RED, "Please wait at least 1 minute in between Timings reports. (" + (int)((60000 - lastReportDiff) / 1000) + " seconds)"));
+            listeners.send(TextComponent.of("Please wait at least 1 minute in between Timings reports. (" + (int)((60000 - lastReportDiff) / 1000) + " seconds)", NamedTextColor.RED));
             listeners.done();
             return;
         }
         final long lastStartDiff = now - TimingsManager.timingStart;
         if (lastStartDiff < 180000) {
-            listeners.send(Text.of(TextColors.RED, "Please wait at least 3 minutes before generating a Timings report. Unlike Timings v1, v2 benefits from longer timings and is not as useful with short timings. (" + (int)((180000 - lastStartDiff) / 1000) + " seconds)"));
+            listeners.send(TextComponent.of("Please wait at least 3 minutes before generating a Timings report. Unlike Timings v1, v2 benefits from longer timings and is not as useful with short timings. (" + (int)((180000 - lastStartDiff) / 1000) + " seconds)", NamedTextColor.RED));
             listeners.done();
             return;
         }
-        listeners.send(Text.of(TextColors.GREEN, "Preparing Timings Report..."));
+        listeners.send(TextComponent.of("Preparing Timings Report...", NamedTextColor.GREEN));
         lastReport = now;
 
         Platform platform = SpongeCommon.getGame().getPlatform();
@@ -120,7 +120,7 @@ class TimingsExport extends Thread {
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
             builder.add("server", getServerName())
-                    .add("motd", Sponge.getServer().getMotd().toPlain())
+                    .add("motd", SpongeAdventure.plain(Sponge.getServer().getMotd()))
                     .add("online-mode", Sponge.getServer().getOnlineMode())
                     .add("icon", SpongeCommon.getServer().getServerStatusResponse().getFavicon());
         }
@@ -259,16 +259,16 @@ class TimingsExport extends Thread {
     @Override
     public synchronized void start() {
         boolean containsRconSource = false;
-        for (MessageReceiver receiver : this.listeners.getChannel().getMembers()) {
+        for (Audience receiver : this.listeners.getChannel().audiences()) {
             if (receiver instanceof RconConnection) {
                 containsRconSource = true;
                 break;
             }
         }
         if (containsRconSource) {
-            this.listeners.send(Text.of(TextColors.RED, "Warning: Timings report done over RCON will cause lag spikes."));
-            this.listeners.send(Text.of(TextColors.RED, "You should use ", TextColors.YELLOW,
-                    "/sponge timings report" + TextColors.RED, " in game or console."));
+            this.listeners.send(TextComponent.of("Warning: Timings report done over RCON will cause lag spikes.", NamedTextColor.RED));
+            this.listeners.send(TextComponent.of("You should use ", NamedTextColor.RED).append(TextComponent.of("/sponge timings report",
+                    NamedTextColor.YELLOW)).append(TextComponent.of(" in game or console.", NamedTextColor.RED)));
             this.run();
         } else {
             super.start();
@@ -310,9 +310,8 @@ class TimingsExport extends Thread {
             response = this.getResponse(con);
 
             if (con.getResponseCode() != 302) {
-                this.listeners.send(Text.of(
-                        TextColors.RED, "Upload Error: " + con.getResponseCode() + ": " + con.getResponseMessage()));
-                this.listeners.send(Text.of(TextColors.RED, "Check your logs for more information"));
+                this.listeners.send(TextComponent.of("Upload Error: " + con.getResponseCode() + ": " + con.getResponseMessage(), NamedTextColor.RED));
+                this.listeners.send(TextComponent.of("Check your logs for more information", NamedTextColor.RED));
                 if (response != null) {
                     SpongeCommon.getLogger().fatal(response);
                 }
@@ -320,13 +319,13 @@ class TimingsExport extends Thread {
             }
 
             timingsURL = con.getHeaderField("Location");
-            this.listeners.send(Text.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(timingsURL)), timingsURL));
+            this.listeners.send(TextComponent.builder("View Timings Report: ").color(NamedTextColor.GREEN).append(TextComponent.of(timingsURL).clickEvent(ClickEvent.openUrl(timingsURL))).build());
 
             if (response != null && !response.isEmpty()) {
                 SpongeCommon.getLogger().info("Timing Response: " + response);
             }
         } catch (IOException ex) {
-            this.listeners.send(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
+            this.listeners.send(TextComponent.of("Error uploading timings, check your logs for more information", NamedTextColor.RED));
             if (response != null) {
                 SpongeCommon.getLogger().fatal(response);
             }
@@ -350,7 +349,7 @@ class TimingsExport extends Thread {
             return bos.toString();
 
         } catch (IOException ex) {
-            this.listeners.send(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
+            this.listeners.send(TextComponent.of("Error uploading timings, check your logs for more information", NamedTextColor.RED));
             SpongeCommon.getLogger().warn(con.getResponseMessage(), ex);
             return null;
         } finally {

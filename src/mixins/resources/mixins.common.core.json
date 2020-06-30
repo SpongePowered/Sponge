@@ -8,6 +8,9 @@
     "mixinPriority": 1101,
     "mixins": [
         "advancements.FunctionManagerMixin",
+        "adventure.bossbar.BossBarImplMixin",
+        "adventure.text.AbstractComponentMixin",
+        "adventure.text.format.StyleMixin",
         "command.CommandsMixin",
         "command.CommandSourceMixin",
         "command.arguments.ArgumentTypes_EntryMixin",
@@ -18,14 +21,19 @@
         "entity.player.PlayerEntityMixin",
         "entity.player.ServerPlayerEntityMixin",
         "network.rcon.RConConsoleSourceMixin",
+        "server.CustomServerBossInfoMixin",
         "server.MinecraftServerMixin",
         "server.management.PlayerProfileCacheMixin",
         "service.permission.SubjectMixin",
         "tileentity.CommandBlockTileEntity_1Mixin",
         "tileentity.LecternTileEntityMixin",
         "tileentity.SignTileEntityMixin",
+        "world.BossInfoMixin",
+        "world.ServerBossInfoMixin",
         "world.dimension.DimensionTypeMixin",
-        "util.datafix.versions.V1125Mixin"
+        "util.datafix.versions.V1125Mixin",
+        "util.text.StyleMixin",
+        "util.text.TextComponentMixin"
     ],
     "client": [
         "client.MinecraftMixin"

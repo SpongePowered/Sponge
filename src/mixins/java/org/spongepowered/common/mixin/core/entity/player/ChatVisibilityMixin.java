@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
+import net.kyori.adventure.audience.MessageType;
 import net.minecraft.entity.player.ChatVisibility;
-import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
 
@@ -35,15 +35,15 @@ import java.util.Set;
 @Mixin(ChatVisibility.class)
 public abstract class ChatVisibilityMixin implements ChatVisibilityBridge {
 
-    private Set<ChatType> impl$visibleChatTypes = new HashSet<>();
+    private Set<MessageType> impl$visibleChatTypes = new HashSet<>();
 
     @Override
-    public void bridge$setChatTypes(final Set<ChatType> chatTypes) {
-        this.impl$visibleChatTypes = chatTypes;
+    public void bridge$setChatTypes(final Set<MessageType> types) {
+        this.impl$visibleChatTypes = types;
     }
 
     @Override
-    public Set<ChatType> bridge$getVisibleChatTypes() {
+    public Set<MessageType> bridge$getVisibleChatTypes() {
         return this.impl$visibleChatTypes;
     }
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -33,7 +34,6 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 
@@ -65,7 +65,7 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
         if (check.contains(":")) {
             result = SpongeCommon.getRegistry().getCatalogRegistry().get(this.catalogType, ResourceKey.resolve(check));
             if (!result.isPresent()) {
-                throw reader.createException(Text.of("No ", this.catalogType.getSimpleName(), " with ID ", check, "exists"));
+                throw reader.createException(TextComponent.of("No " + this.catalogType.getSimpleName() + " with ID " + check + "exists"));
             }
         } else {
             for (final String prefix : this.prefixes) {
@@ -78,7 +78,7 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
             if (!result.isPresent()) {
                 final String ids = this.prefixes.stream().map(x -> x + ":" + check).collect(Collectors.joining(", "));
                 throw reader.createException(
-                        Text.of("No ", this.catalogType.getSimpleName(), " with any of the following IDs exist: ", ids));
+                        TextComponent.of("No " + this.catalogType.getSimpleName() + " with any of the following IDs exist: " + ids));
             }
         }
 

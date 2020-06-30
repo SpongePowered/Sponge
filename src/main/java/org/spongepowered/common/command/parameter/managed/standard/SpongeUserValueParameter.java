@@ -29,6 +29,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.arguments.EntityArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -38,7 +39,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
@@ -88,7 +88,7 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
                                 .selectOnePlayer(((SpongeCommandContextBuilder) context).getSource()));
                 return Optional.of(entity.getUser());
             } catch (final CommandSyntaxException e) {
-                throw reader.createException(Text.of(e.getContext()));
+                throw reader.createException(TextComponent.of(e.getContext()));
             }
         }
 
@@ -106,7 +106,7 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
             return user;
         }
 
-        throw reader.createException(Text.of("Could not find user with user name \"" + peek + "\""));
+        throw reader.createException(TextComponent.of("Could not find user with user name \"" + peek + "\""));
     }
 
 }

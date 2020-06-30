@@ -28,16 +28,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.mojang.authlib.GameProfile;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.management.IPBanEntry;
 import net.minecraft.server.management.IPBanList;
 import net.minecraft.server.management.ProfileBanEntry;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.IPBanListAccessor;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 import javax.annotation.Nullable;
 import java.net.InetAddress;
@@ -50,10 +50,10 @@ public final class SpongeBanBuilder implements Ban.Builder {
     private org.spongepowered.api.profile.GameProfile profile;
     private InetAddress address;
     private BanType banType;
-    @Nullable private Text reason;
+    @Nullable private Component reason;
     private Instant start = Instant.now();
     @Nullable private Instant end;
-    @Nullable private Text source;
+    @Nullable private Component source;
 
     @Override
     public Ban.Builder profile(final org.spongepowered.api.profile.GameProfile profile) {
@@ -85,7 +85,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
     }
 
     @Override
-    public Ban.Builder reason(@Nullable final Text reason) {
+    public Ban.Builder reason(@Nullable final Component reason) {
         this.reason = reason;
         return this;
     }
@@ -104,7 +104,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
     }
 
     @Override
-    public Ban.Builder source(@Nullable final Text source) {
+    public Ban.Builder source(@Nullable final Component source) {
         this.source = source;
         return this;
     }
@@ -113,13 +113,13 @@ public final class SpongeBanBuilder implements Ban.Builder {
     public Ban build() {
         checkState(this.banType != null, "BanType cannot be null!");
 
-        final String sourceName = this.source != null ? SpongeTexts.toLegacy(this.source) : null;
+        final String sourceName = this.source != null ? SpongeAdventure.legacySection(this.source) : null;
 
         if (this.banType == BanTypes.PROFILE.get()) {
             checkState(this.profile != null, "User cannot be null!");
             return (Ban) new ProfileBanEntry((GameProfile) this.profile, Date.from(this.start), sourceName,
                 this.toDate(this.end),
-                this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
+                this.reason != null ? SpongeAdventure.legacySection(this.reason) : null);
         }
         checkState(this.address != null, "Address cannot be null!");
 
@@ -130,7 +130,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
             Date.from(this.start),
             sourceName,
             this.toDate(this.end),
-            this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
+            this.reason != null ? SpongeAdventure.legacySection(this.reason) : null);
     }
 
     private Date toDate(final Instant instant) {

@@ -44,7 +44,6 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -162,11 +161,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     public boolean isNone() {
         throw new UnsupportedOperationException("Implement is empty");
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return this.privateStack.getTranslation();
     }
 
     @Override

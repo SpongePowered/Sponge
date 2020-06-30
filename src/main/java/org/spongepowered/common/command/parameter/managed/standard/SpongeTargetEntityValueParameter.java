@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -32,7 +33,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.argument.CatalogedZeroAdvanceValueParameter;
 
 import java.util.Optional;
@@ -68,10 +68,10 @@ public final class SpongeTargetEntityValueParameter extends CatalogedZeroAdvance
                     .filter(this::checkEntity).findFirst()
                     .orElseThrow(() -> reader.createException(Text.of("No entities matched and source was not looking at a valid entity!")));
              */
-            throw reader.createException(Text.of("The cause root is not looking at a entity!"));
+            throw reader.createException(TextComponent.of("The cause root is not looking at a entity!"));
         }
 
-        throw reader.createException(Text.of("The cause root must be a Living!"));
+        throw reader.createException(TextComponent.of("The cause root must be a Living!"));
     }
 
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.mojang.authlib.GameProfile;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerAbilities;
@@ -75,8 +76,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
-import org.spongepowered.common.service.permission.SpongePermissions;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -117,7 +116,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void impl$getDisplayNameWithParsing(final CallbackInfoReturnable<ITextComponent> ci) {
-        ci.setReturnValue(LegacyTexts.parseComponent((StringTextComponent) ci.getReturnValue(), SpongeTexts.COLOR_CHAR));
+        ci.setReturnValue(LegacyTexts.parseComponent((StringTextComponent) ci.getReturnValue(), LegacyComponentSerializer.SECTION_CHAR));
     }
 
     @Override

@@ -31,6 +31,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPlayerListHeaderFooterPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
@@ -41,10 +42,8 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListHeaderFooterPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -53,13 +52,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 public final class SpongeTabList implements TabList {
 
     private static final ITextComponent EMPTY_COMPONENT = new StringTextComponent("");
     private final ServerPlayerEntity player;
-    @Nullable private Text header;
-    @Nullable private Text footer;
+    @Nullable private Component header;
+    @Nullable private Component footer;
     private final Map<UUID, TabListEntry> entries = Maps.newHashMap();
 
     public SpongeTabList(final ServerPlayerEntity player) {
@@ -72,12 +72,12 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public Optional<Text> getHeader() {
+    public Optional<Component> getHeader() {
         return Optional.ofNullable(this.header);
     }
 
     @Override
-    public TabList setHeader(@Nullable final Text header) {
+    public TabList setHeader(@Nullable final Component header) {
         this.header = header;
 
         this.refreshClientHeaderFooter();
@@ -86,12 +86,12 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public Optional<Text> getFooter() {
+    public Optional<Component> getFooter() {
         return Optional.ofNullable(this.footer);
     }
 
     @Override
-    public TabList setFooter(@Nullable final Text footer) {
+    public TabList setFooter(@Nullable final Component footer) {
         this.footer = footer;
 
         this.refreshClientHeaderFooter();
@@ -100,7 +100,7 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public TabList setHeaderAndFooter(@Nullable final Text header, @Nullable final Text footer) {
+    public TabList setHeaderAndFooter(@Nullable final Component header, @Nullable final Component footer) {
         // Do not call the methods, set directly
         this.header = header;
         this.footer = footer;
@@ -114,8 +114,8 @@ public final class SpongeTabList implements TabList {
     private void refreshClientHeaderFooter() {
         final SPlayerListHeaderFooterPacket packet = new SPlayerListHeaderFooterPacket();
         // MC-98180 - Sending null as header or footer will cause an exception on the client
-        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setHeader(this.header == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.header));
-        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setFooter(this.footer == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.footer));
+        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setHeader(this.header == null ? EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.header));
+        ((SPlayerListHeaderFooterPacketAccessor) packet).accessor$setFooter(this.footer == null ? EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.footer));
         this.player.connection.sendPacket(packet);
     }
 
@@ -145,7 +145,7 @@ public final class SpongeTabList implements TabList {
             this.addEntry(new SpongeTabListEntry(
                     this,
                     (org.spongepowered.api.profile.GameProfile) entry.getProfile(),
-                    entry.getDisplayName() == null ? null : SpongeTexts.toText(entry.getDisplayName()),
+                    entry.getDisplayName() == null ? null : SpongeAdventure.asAdventure(entry.getDisplayName()),
                     entry.getPing(),
                     (GameMode) (Object) entry.getGameMode()
             ), false);
@@ -193,7 +193,7 @@ public final class SpongeTabList implements TabList {
         ((SPlayerListItemPacketAccessor) packet).accessor$setAction(action);
         final SPlayerListItemPacket.AddPlayerData data = packet.new AddPlayerData((GameProfile) entry.getProfile(),
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
-            entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null);
+            entry.getDisplayName().isPresent() ? SpongeAdventure.asVanilla(entry.getDisplayName().get()) : null);
         ((SPlayerListItemPacketAccessor) packet).accessor$getPlayers().add(data);
         this.player.connection.sendPacket(packet);
     }
@@ -219,7 +219,7 @@ public final class SpongeTabList implements TabList {
                 this.getEntry(data.getProfile().getId()).ifPresent(entry -> {
                     if (action == SPlayerListItemPacket.Action.UPDATE_DISPLAY_NAME) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
-                        entry.setDisplayName(data.getDisplayName() == null ? null : SpongeTexts.toText(data.getDisplayName()));
+                        entry.setDisplayName(data.getDisplayName() == null ? null : SpongeAdventure.asAdventure(data.getDisplayName()));
                     } else if (action == SPlayerListItemPacket.Action.UPDATE_LATENCY) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setLatency(data.getPing());

@@ -25,6 +25,15 @@
 package org.spongepowered.common.mixin.api.mcp.entity.player;
 
 import com.google.common.base.Preconditions;
+import java.util.Objects;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.sound.SoundStop;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.title.Title;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
@@ -35,14 +44,17 @@ import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundPacket;
 import net.minecraft.network.play.server.SSendResourcePackPacket;
 import net.minecraft.network.play.server.SStopSoundPacket;
+import net.minecraft.network.play.server.STitlePacket;
 import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.ServerBossInfo;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -50,29 +62,20 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.sound.SoundCategory;
-import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.PlayerChatRouter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.message.MessageChannelEvent;
-import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.text.BookView;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.api.text.chat.ChatVisibility;
-import org.spongepowered.api.text.title.Title;
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -83,9 +86,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.api.text.title.TitleBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
@@ -95,11 +98,9 @@ import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -126,6 +127,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Shadow public ServerPlayNetHandler connection;
     @Shadow private boolean chatColours;
 
+    private PlayerChatRouter api$chatRouter;
     private final TabList api$tabList = new SpongeTabList((ServerPlayerEntity) (Object) this);
     @Nullable private WorldBorder api$worldBorder;
 
@@ -181,41 +183,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public void sendMessage(final ChatType type, final Text message) {
-        if (this.impl$isFake) {
-            // Don't bother sending messages to fake players
-            return;
-        }
-        Preconditions.checkNotNull(type, "type");
-        Preconditions.checkNotNull(message, "message");
-
-        ITextComponent component = SpongeTexts.toComponent(message);
-        if (type == ChatTypes.ACTION_BAR.get()) {
-            component = SpongeTexts.fixActionBarFormatting(component);
-        }
-
-        this.connection.sendPacket(new SChatPacket(component, (net.minecraft.util.text.ChatType) (Object) type));
-    }
-
-    @Override
-    public void sendBookView(final BookView bookView) {
-        if (this.impl$isFake) {
-            // Don't bother sending messages to fake players
-            return;
-        }
-        BookUtil.fakeBookView(bookView, Collections.singletonList(this));
-    }
-
-    @Override
-    public void sendTitle(final Title title) {
-        if (this.impl$isFake) {
-            // Don't bother sending messages to fake players
-            return;
-        }
-        ((TitleBridge) (Object) title).bridge$send((ServerPlayerEntity) (Object) this);
-    }
-
-    @Override
     public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position) {
         if (this.impl$isFake) {
             // Don't bother sending messages to fake players
@@ -256,8 +223,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public Text getTeamRepresentation() {
-        return Text.of(this.shadow$getName());
+    public Component getTeamRepresentation() {
+        return SpongeAdventure.asAdventure(this.shadow$getName());
     }
 
     @Override
@@ -267,65 +234,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void kick() {
-        this.kick(Text.of(Translation.find("disconnect.disconnected").get()));
+        this.kick(TranslatableComponent.of("disconnect.disconnected"));
     }
 
     @Override
-    public void kick(final Text message) {
-        final ITextComponent component = SpongeTexts.toComponent(message);
+    public void kick(final Component message) {
+        final ITextComponent component = SpongeAdventure.asVanilla(message);
         this.connection.disconnect(component);
-    }
-
-    @Override
-    public void playSound(final SoundType sound, final SoundCategory category, final Vector3d position, final double volume) {
-        this.playSound(sound, category, position, volume, 1);
-    }
-
-    @Override
-    public void playSound(final SoundType sound, final SoundCategory category, final Vector3d position, final double volume, final double pitch) {
-        this.playSound(sound, category, position, volume, pitch, 0);
-    }
-
-    @Override
-    public void playSound(
-        final SoundType sound, final SoundCategory category, final Vector3d position, final double volume, final double pitch, final double minVolume) {
-        final SoundEvent event;
-        try {
-            // Check if the event is registered (ie has an integer ID)
-            event = Registry.SOUND_EVENT.getOrDefault((ResourceLocation) (Object) sound.getKey());
-        } catch (IllegalStateException e) {
-            // Otherwise send it as a custom sound
-            this.connection.sendPacket(new SPlaySoundPacket((ResourceLocation) (Object) sound.getKey(), (net.minecraft.util.SoundCategory) (Object) category,
-                VecHelper.toVec3d(position), (float) Math.max(minVolume, volume), (float) pitch));
-            return;
-        }
-
-        this.connection.sendPacket(new SPlaySoundEffectPacket(event, (net.minecraft.util.SoundCategory) (Object) category, position.getX(),
-                position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
-    }
-
-    @Override
-    public void stopSounds() {
-        this.stopSounds0(null, null);
-    }
-
-    @Override
-    public void stopSounds(final SoundType sound) {
-        this.stopSounds0(Preconditions.checkNotNull(sound, "sound"), null);
-    }
-
-    @Override
-    public void stopSounds(final SoundCategory category) {
-        this.stopSounds0(null, Preconditions.checkNotNull(category, "category"));
-    }
-
-    @Override
-    public void stopSounds(final SoundType sound, final SoundCategory category) {
-        this.stopSounds0(Preconditions.checkNotNull(sound, "sound"), Preconditions.checkNotNull(category, "category"));
-    }
-
-    private void stopSounds0(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
-        this.connection.sendPacket(new SStopSoundPacket((ResourceLocation) (Object) sound.getKey(), (net.minecraft.util.SoundCategory) (Object) category));
     }
 
     @Override
@@ -393,20 +308,28 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public MessageChannelEvent.Chat simulateChat(final Text message, final Cause cause) {
+    public PlayerChatRouter getChatRouter() {
+        if (this.api$chatRouter == null) {
+            this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(
+                    TranslatableComponent.of("chat.type.text", ((EntityBridge) player).bridge$getDisplayNameText(), message));
+        }
+        return this.api$chatRouter;
+    }
+
+    @Override
+    public void setChatRouter(final PlayerChatRouter router) {
+        this.api$chatRouter = Objects.requireNonNull(router, "router");
+    }
+
+    @Override
+    public PlayerChatEvent simulateChat(final Component message, final Cause cause) {
         Preconditions.checkNotNull(message, "message");
 
-        final TranslationTextComponent component = new TranslationTextComponent("chat.type.text", SpongeTexts.toComponent(((EntityBridge) this).bridge$getDisplayNameText()),
-                SpongeTexts.toComponent(message));
-        final Text[] messages = SpongeTexts.splitChatMessage(component);
-
-        final MessageChannel originalChannel = this.getMessageChannel();
-        final MessageChannelEvent.Chat event = SpongeEventFactory.createMessageChannelEventChat(
-                cause, originalChannel, Optional.of(originalChannel),
-                new MessageEvent.MessageFormatter(messages[0], messages[1]), message, false
-        );
-        if (!SpongeCommon.postEvent(event) && !event.isMessageCancelled()) {
-            event.getChannel().ifPresent(channel -> channel.send(this, event.getMessage(), ChatTypes.CHAT));
+        final PlayerChatRouter originalRouter = this.getChatRouter();
+        final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(
+                cause, originalRouter, Optional.of(originalRouter), message, message);
+        if (!SpongeCommon.postEvent(event)) {
+            event.getChatRouter().ifPresent(channel -> channel.chat(this, event.getMessage()));
         }
         return event;
     }
@@ -478,6 +401,122 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         this.spectatorTarget().map(Value::asImmutable).ifPresent(values::add);
 
         return values;
+    }
+
+    // Audience
+
+    @Override
+    public void sendMessage(final Component message, final MessageType type) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(message, "message");
+        Objects.requireNonNull(type, "type");
+        this.connection.sendPacket(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type)));
+    }
+
+    @Override
+    public void sendActionBar(final Component message) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(message, "message");
+        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.ACTIONBAR, SpongeAdventure.asVanilla(message)));
+    }
+
+    @Override
+    public void showTitle(final Title title) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(title, "title");
+        this.connection.sendPacket(new STitlePacket(ticks(title.fadeInTime()), ticks(title.fadeOutTime()), ticks(title.stayTime())));
+        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
+        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));
+    }
+
+    private static int ticks(final Duration duration) {
+        if (duration == null) {
+            return -1;
+        }
+        return (int) (duration.toMillis() / 50L);
+    }
+
+    @Override
+    public void clearTitle() {
+        if (this.impl$isFake) {
+            return;
+        }
+        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.CLEAR, null));
+    }
+
+    @Override
+    public void resetTitle() {
+        if (this.impl$isFake) {
+            return;
+        }
+        this.connection.sendPacket(new STitlePacket(STitlePacket.Type.RESET, null));
+    }
+
+    @Override
+    public void showBossBar(final BossBar bar) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(bar, "bar");
+        final ServerBossInfo vanilla = SpongeAdventure.asVanillaServer(bar);
+        vanilla.addPlayer((ServerPlayerEntity) (Object) this);
+    }
+
+    @Override
+    public void hideBossBar(final BossBar bar) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(bar, "bar");
+        final ServerBossInfo vanilla = SpongeAdventure.asVanillaServer(bar);
+        vanilla.removePlayer((ServerPlayerEntity) (Object) this);
+    }
+
+    @Override
+    public void playSound(final Sound sound) {
+        this.playSound(sound, this.posX, this.posY, this.posZ);
+    }
+
+    @Override
+    public void playSound(final Sound sound, final double x, final double y, final double z) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(sound, "sound");
+        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getValue(SpongeAdventure.asVanilla(sound.name()));
+        if (event.isPresent()) {
+            // Check if the event is registered
+            this.connection.sendPacket(new SPlaySoundEffectPacket(event.get(), SpongeAdventure.asVanilla(sound.source()),
+                    x, y, z, sound.volume(), sound.pitch()));
+        } else {
+            // Otherwise send it as a custom sound
+            this.connection.sendPacket(new SPlaySoundPacket(SpongeAdventure.asVanilla(sound.name()), SpongeAdventure.asVanilla(sound.source()),
+                    new Vec3d(x, y, z), sound.volume(), sound.pitch()));
+        }
+    }
+
+    @Override
+    public void stopSound(final SoundStop stop) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(stop, "stop");
+        this.connection.sendPacket(new SStopSoundPacket(SpongeAdventure.asVanillaNullable(stop.sound()), SpongeAdventure.asVanillaNullable(stop.source())));
+    }
+
+    @Override
+    public void openBook(@NonNull final Book book) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(book, "book");
+        BookUtil.fakeBookView(book, Collections.singletonList(this));
     }
 
 }

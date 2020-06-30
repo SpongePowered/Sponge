@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.text.selector;
 
-import org.spongepowered.api.text.selector.SelectorType;
+import org.spongepowered.api.entity.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeCatalogType;
 

@@ -24,24 +24,8 @@
  */
 package org.spongepowered.common.bridge.util.text;
 
-import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.text.Text;
-
-import java.util.Iterator;
+import net.kyori.adventure.text.Component;
 
 public interface TextComponentBridge {
-
-    Iterator<ITextComponent> bridge$childrenIterator();
-
-    Iterable<ITextComponent> bridge$withChildren();
-
-    String bridge$toPlain();
-
-    String bridge$getLegacyFormatting();
-
-    String bridge$toLegacy(char code);
-
-    String bridge$toLegacySingle(char code);
-
-    Text bridge$toText();
+    Component bridge$asAdventureComponent();
 }

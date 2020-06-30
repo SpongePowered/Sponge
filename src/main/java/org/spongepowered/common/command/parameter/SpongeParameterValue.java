@@ -25,6 +25,8 @@
 package org.spongepowered.common.command.parameter;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandException;
 import net.minecraft.util.text.StringTextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -37,7 +39,6 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 
 import java.util.ArrayList;
@@ -147,8 +148,8 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
         } else if (currentExceptions.size() == 1) {
             throw currentExceptions.get(0);
         } else {
-            final List<Text> errors = currentExceptions.stream().map(ArgumentParseException::getSuperText).collect(Collectors.toList());
-            throw new ArgumentParseException(Text.joinWith(Text.newLine(), errors), args.getInput(), args.getCursor());
+            final List<Component> errors = currentExceptions.stream().map(ArgumentParseException::getSuperText).collect(Collectors.toList());
+            throw new ArgumentParseException(TextComponent.join(TextComponent.newline(), errors), args.getInput(), args.getCursor());
         }
 
     }
@@ -167,14 +168,14 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     @Override
     @NonNull
-    public Text getUsage(@NonNull final CommandCause cause) {
+    public Component getUsage(@NonNull final CommandCause cause) {
         if (this.usage != null) {
-            return this.usage.getUsage(Text.of(this.key.key()));
+            return this.usage.getUsage(this.key.key());
         }
 
-        final Text usage = Text.of(this.key.key());
+        final Component usage = TextComponent.of(this.key.key());
         if (this.isOptional) {
-            return Text.of("[", usage, "]");
+            return TextComponent.builder().append("[").append(usage).append("]").build();
         }
 
         return usage;

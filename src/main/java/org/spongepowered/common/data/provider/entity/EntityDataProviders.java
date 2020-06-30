@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.properties.Property;
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.Entity;
@@ -102,7 +103,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.DyeColor;
@@ -127,7 +127,6 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
@@ -170,6 +169,7 @@ import org.spongepowered.common.accessor.entity.passive.horse.LlamaEntityAccesso
 import org.spongepowered.common.accessor.entity.passive.horse.TraderLlamaEntityAccessor;
 import org.spongepowered.common.accessor.entity.projectile.AbstractArrowEntityAccessor;
 import org.spongepowered.common.accessor.entity.projectile.ShulkerBulletEntityAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
@@ -471,7 +471,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
 
         register(GuardianEntity.class, Keys.BEAM_TARGET_ENTITY, e -> (Living) e.getTargetedEntity(), (e, t) -> ((GuardianEntityAccessor)e).accessor$setTargetedEntity(((LivingEntity) t).getEntityId()));
 
-        register(WitherEntityAccessor.class, Keys.BOSS_BAR, e -> (ServerBossBar) e.accessor$getBossInfo());
+        register(WitherEntityAccessor.class, Keys.BOSS_BAR, e -> SpongeAdventure.asAdventure(e.accessor$getBossInfo()));
         register(WitherEntity.class, Keys.WITHER_TARGETS,
                 e -> Stream.of(e.getWatchedTargetId(0), e.getWatchedTargetId(1), e.getWatchedTargetId(2))
                         .map(id -> e.getEntityWorld().getEntityByID(id))
@@ -941,7 +941,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(Entity.class, Keys.IS_SILENT, Entity::isSilent, Entity::setSilent);
         register(Entity.class, Keys.IS_GLOWING, Entity::isGlowing, Entity::setGlowing);
 
-        register(EntityBridge.class, Keys.DISPLAY_NAME, (Text) null,
+        register(EntityBridge.class, Keys.DISPLAY_NAME, (Component) null,
                 EntityBridge::bridge$getDisplayNameText,
                 EntityBridge::bridge$setDisplayName);
 

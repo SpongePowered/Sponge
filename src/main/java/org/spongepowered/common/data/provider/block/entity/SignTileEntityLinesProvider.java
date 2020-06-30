@@ -24,27 +24,28 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.tileentity.SignTileEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class SignTileEntityLinesProvider extends GenericMutableDataProvider<SignTileEntity, List<Text>> {
+public class SignTileEntityLinesProvider extends GenericMutableDataProvider<SignTileEntity, List<Component>> {
 
     public SignTileEntityLinesProvider() {
         super(Keys.SIGN_LINES);
     }
 
     @Override
-    protected boolean set(SignTileEntity dataHolder, List<Text> value) {
+    protected boolean set(SignTileEntity dataHolder, List<Component> value) {
         for (int i = 0; i < dataHolder.signText.length; i++) {
-            dataHolder.signText[i] = SpongeTexts.toComponent(i >= value.size() ? Text.empty() : value.get(i));
+            dataHolder.signText[i] = SpongeAdventure.asVanilla(i >= value.size() ? TextComponent.empty() : value.get(i));
         }
         dataHolder.markDirty();
         // ((ServerWorld) dataHolder.getWorld()).getPlayerChunkMap().markBlockForUpdate(sign.getPos());
@@ -52,10 +53,10 @@ public class SignTileEntityLinesProvider extends GenericMutableDataProvider<Sign
     }
 
     @Override
-    protected Optional<List<Text>> getFrom(SignTileEntity dataHolder) {
-        final List<Text> lines = new ArrayList<>(dataHolder.signText.length);
+    protected Optional<List<Component>> getFrom(SignTileEntity dataHolder) {
+        final List<Component> lines = new ArrayList<>(dataHolder.signText.length);
         for (int i = 0; i < dataHolder.signText.length; i++) {
-            lines.add(SpongeTexts.toText(dataHolder.signText[i]));
+            lines.add(SpongeAdventure.asAdventure(dataHolder.signText[i]));
         }
         return Optional.of(lines);
     }

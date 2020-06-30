@@ -27,35 +27,36 @@ package org.spongepowered.common.scoreboard.builder;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.CollisionRules;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 public class SpongeTeamBuilder implements Team.Builder {
 
     @Nullable private String name;
-    @Nullable private Text displayName;
-    private Supplier<? extends TextColor> color;
-    private Text prefix;
-    private Text suffix;
+    @Nullable private Component displayName;
+    private NamedTextColor color;
+    private Component prefix;
+    private Component suffix;
     private boolean allowFriendlyFire;
     private boolean showFriendlyInvisibles;
     private Supplier<? extends Visibility> nameTagVisibility;
     private Supplier<? extends Visibility> deathMessageVisibility;
     private Supplier<? extends CollisionRule> collisionRule;
-    private Set<Text> members;
+    private Set<Component> members;
 
     public SpongeTeamBuilder() {
         this.reset();
@@ -66,34 +67,34 @@ public class SpongeTeamBuilder implements Team.Builder {
         this.name = checkNotNull(name, "Name cannot be null!");
         checkState(name.length() < 17, "Name is " + name.length() + " characters long! It must be at most 16.");
         if (this.displayName == null) {
-            this.displayName = Text.of(this.name);
+            this.displayName = TextComponent.of(this.name);
         }
         return this;
     }
 
     @Override
-    public Team.Builder color(final TextColor color) {
+    public Team.Builder color(final NamedTextColor color) {
         checkNotNull(color, "Color cannot be null!");
-        this.color = () -> color;
+        this.color = color;
         return this;
     }
 
     @Override
-    public Team.Builder displayName(final Text displayName) throws IllegalArgumentException {
-        final int length = displayName.toPlain().length();
+    public Team.Builder displayName(final Component displayName) throws IllegalArgumentException {
+        final int length = SpongeAdventure.legacySection(displayName).length();
         checkState(length < 33, "DisplayName is " + length + " characters long! It must be at most 32.");
         this.displayName = checkNotNull(displayName, "DisplayName cannot be null!");
         return this;
     }
 
     @Override
-    public Team.Builder prefix(final Text prefix) {
+    public Team.Builder prefix(final Component prefix) {
         this.prefix = checkNotNull(prefix, "Prefix cannot be null!");
         return this;
     }
 
     @Override
-    public Team.Builder suffix(final Text suffix) {
+    public Team.Builder suffix(final Component suffix) {
         this.suffix = checkNotNull(suffix, "Suffix cannot be null!");
         return this;
     }
@@ -132,7 +133,7 @@ public class SpongeTeamBuilder implements Team.Builder {
     }
 
     @Override
-    public Team.Builder members(final Set<Text> members) {
+    public Team.Builder members(final Set<Component> members) {
         this.members = new HashSet<>(checkNotNull(members, "Members cannot be null!"));
         return this;
     }
@@ -157,9 +158,9 @@ public class SpongeTeamBuilder implements Team.Builder {
     public SpongeTeamBuilder reset() {
         this.name = null;
         this.displayName = null;
-        this.color = TextColors.RESET;
-        this.prefix = Text.of();
-        this.suffix = Text.of();
+        this.color = NamedTextColor.WHITE;
+        this.prefix = TextComponent.empty();
+        this.suffix = TextComponent.empty();
         this.allowFriendlyFire = false;
         this.showFriendlyInvisibles = false;
         this.nameTagVisibility = Visibilities.ALWAYS;
@@ -176,7 +177,7 @@ public class SpongeTeamBuilder implements Team.Builder {
 
         final Team team = (Team) new ScorePlayerTeam(null, this.name);
         team.setDisplayName(this.displayName);
-        team.setColor(this.color.get());
+        team.setColor(this.color);
         team.setPrefix(this.prefix);
         team.setSuffix(this.suffix);
         team.setAllowFriendlyFire(this.allowFriendlyFire);
@@ -184,7 +185,7 @@ public class SpongeTeamBuilder implements Team.Builder {
         team.setNameTagVisibility(this.nameTagVisibility.get());
         team.setDeathMessageVisibility(this.deathMessageVisibility.get());
         team.setCollisionRule(this.collisionRule.get());
-        for (final Text member: this.members) {
+        for (final Component member: this.members) {
             team.addMember(member);
         }
 

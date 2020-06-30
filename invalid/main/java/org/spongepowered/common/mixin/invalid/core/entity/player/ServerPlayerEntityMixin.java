@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.invalid.core.entity.player;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableSet;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -85,8 +87,8 @@ import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatVisibility;
+import org.spongepowered.api.entity.living.player.chat.ChatType;
+import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -466,12 +468,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     @Nullable
-    public Text bridge$getDisplayNameText() {
-        return Text.of(this.shadow$getScoreboardName());
+    public Component bridge$getDisplayNameText() {
+        return TextComponent.of(this.shadow$getScoreboardName());
     }
 
     @Override
-    public void bridge$setDisplayName(@Nullable final Text displayName) {
+    public void bridge$setDisplayName(@Nullable final Component displayName) {
         // Do nothing
     }
 

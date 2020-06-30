@@ -25,20 +25,27 @@
 package org.spongepowered.common.data.type;
 
 import com.google.common.base.MoreObjects;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeSkinPart extends SpongeCatalogType.Translatable implements SkinPart {
+public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart {
 
     private final int ordinal;
     private final int mask;
+    private final Component component;
 
-    public SpongeSkinPart(ResourceKey key, Translation translation, int ordinal) {
-        super(key, translation);
+    public SpongeSkinPart(ResourceKey key, int ordinal, final Component component) {
+        super(key);
         this.ordinal = ordinal;
+        this.component = component;
         this.mask = 1 << this.ordinal;
+    }
+
+    @Override
+    public Component asComponent() {
+        return this.component;
     }
 
     public boolean test(int flags) {

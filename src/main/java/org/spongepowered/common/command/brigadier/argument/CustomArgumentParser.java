@@ -32,6 +32,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -39,7 +40,6 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
@@ -116,9 +116,7 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
                     .createWithContext(reader, exceptions);
             /* throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
                     .createWithContext(reader,
-                            Text.joinWith(Text.newLine(), exceptions.stream()
-                                    .map(ArgumentParseException::getSuperText)
-                                    .collect(Collectors.toList()))); */
+                            TextComponent.join(TextComponent.newline(), exceptions.stream().map(ArgumentParseException::getSuperText).collect(Collectors.toList()))); */
         }
 
         // TODO: Check this - don't want Brig to blow up. If that happens, mandate everything returns an object.

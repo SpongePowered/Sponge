@@ -27,6 +27,10 @@ package org.spongepowered.common.event;
 import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.block.Block;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -61,8 +65,6 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.api.effect.sound.SoundCategories;
-import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
@@ -97,12 +99,9 @@ import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
-import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.LocatableBlock;
@@ -112,13 +111,13 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -136,7 +135,6 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
@@ -709,18 +707,17 @@ public final class SpongeCommonEventFactory {
         return null;
     }
     public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source, final boolean isMainThread) {
-        final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
-        final MessageChannel originalChannel;
-        final MessageChannel channel;
-        final Text originalMessage;
+        final Audience originalChannel;
+        final Audience channel;
+        final Component originalMessage;
         Optional<User> sourceCreator = Optional.empty();
         final boolean messageCancelled = false;
 
         if (entity instanceof ServerPlayerEntity) {
-            originalChannel = channel = ((ServerPlayerEntityBridge) entity).bridge$getDeathMessageChannel();
+            originalChannel = channel = (Player) entity;
         } else {
-            originalChannel = MessageChannel.toNone();
-            channel = MessageChannel.toNone();
+            originalChannel = Audience.empty();
+            channel = Audience.empty();
         }
         if (source instanceof EntityDamageSource) {
             final EntityDamageSource damageSource = (EntityDamageSource) source;
@@ -732,8 +729,7 @@ public final class SpongeCommonEventFactory {
             }
         }
 
-        originalMessage = SpongeTexts.toText(entity.getCombatTracker().getDeathMessage());
-        formatter.getBody().add(new MessageEvent.DefaultBodyApplier(originalMessage));
+        originalMessage = SpongeAdventure.asAdventure(entity.getCombatTracker().getDeathMessage());
         // Try-with-resources will not produce an NPE when trying to autoclose the frame if it is null. Client sided
         // checks need to be made here since entities can die on the client world.
         try (final CauseStackManager.StackFrame frame = isMainThread ? PhaseTracker.getCauseStackManager().pushCauseFrame() : null) {
@@ -748,13 +744,13 @@ public final class SpongeCommonEventFactory {
 
             final Cause cause = isMainThread ? PhaseTracker.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source == null ? entity : source);
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
-                originalChannel, Optional.of(channel), (Living) entity,
-                formatter, entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
+                originalChannel, Optional.of(channel), originalMessage, originalMessage, (Living) entity,
+                entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
             SpongeCommon.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
-            final Text message = event.getMessage();
+            final Component message = event.getMessage();
             // Check the event isn't cancelled either. If it is, then don't spawn the message.
-            if (!event.isCancelled() && !event.isMessageCancelled() && !message.isEmpty()) {
-                event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
+            if (!event.isCancelled() && !event.isMessageCancelled() && message != TextComponent.empty()) {
+                event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(message));
             }
             return Optional.of(event);
         }
@@ -1022,7 +1018,7 @@ public final class SpongeCommonEventFactory {
         }
         final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) bridge, pos.getX(), pos.getY(), pos.getZ());
         final PlaySoundEvent.Broadcast event = SpongeEventFactory.createPlaySoundEventBroadcast(frame.getCurrentCause(), location,
-            SoundCategories.HOSTILE.get(), soundType.get(), 1.0F, volume);
+            Sound.Source.HOSTILE, soundType.get(), 1.0F, volume);
         SpongeCommon.postEvent(event);
         return event;
     }
@@ -1034,9 +1030,9 @@ public final class SpongeCommonEventFactory {
         final PlaySoundEvent.Record
             event =
             data == 0 ? SpongeEventFactory
-                .createPlaySoundEventRecordStart(cause, apiJuke, location, recordType, SoundCategories.RECORD.get(), recordType.getSound(), 1.0F, 4.0F)
+                .createPlaySoundEventRecordStart(cause, apiJuke, location, recordType, Sound.Source.RECORD, recordType.getSound(), 1.0F, 4.0F)
                       : SpongeEventFactory
-                .createPlaySoundEventRecordStop(cause, apiJuke, location, recordType, SoundCategories.RECORD.get(), recordType.getSound(), 1.0F, 4.0F);
+                .createPlaySoundEventRecordStop(cause, apiJuke, location, recordType, Sound.Source.RECORD, recordType.getSound(), 1.0F, 4.0F);
         SpongeCommon.postEvent(event);
         return event;
     }
@@ -1047,14 +1043,14 @@ public final class SpongeCommonEventFactory {
         final SoundEvent name, final float pitch, final float volume) {
         final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldMixin, x, y, z);
         final PlaySoundEvent.AtEntity event = SpongeEventFactory.createPlaySoundEventAtEntity(cause, location, Optional.ofNullable(entity),
-            (SoundCategory) (Object) category, (SoundType) name, pitch, volume);
+            SpongeAdventure.asAdventure(category), (SoundType) name, pitch, volume);
         SpongeCommon.postEvent(event);
         return event;
     }
 
     public static PlaySoundEvent.NoteBlock callPlaySoundNoteBlockEvent(final Cause cause, final World world, final BlockPos pos, final SoundEvent soundEvent, final InstrumentType instrument, final NotePitch notePitch, final Float pitch) {
         final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
-        final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, notePitch, SoundCategories.RECORD.get(), (SoundType)soundEvent, pitch, 3.0F);
+        final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, notePitch, Sound.Source.RECORD, (SoundType)soundEvent, pitch, 3.0F);
         SpongeCommon.postEvent(event);
         return event;
     }

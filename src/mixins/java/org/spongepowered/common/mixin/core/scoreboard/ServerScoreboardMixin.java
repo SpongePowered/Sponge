@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.server.SDisplayObjectivePacket;
@@ -43,7 +44,6 @@ import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,12 +53,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.scoreboard.ScorePlayerTeamAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -82,7 +82,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     public ScoreObjective addObjective(final String name, final ScoreCriteria criteria, ITextComponent text, ScoreCriteria.RenderType type) {
         final SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
         objective.setDisplayMode((ObjectiveDisplayMode) (Object) type);
-        objective.setDisplayName((Text) text);
+        objective.setDisplayName(SpongeAdventure.asAdventure(text));
         ((org.spongepowered.api.scoreboard.Scoreboard) this).addObjective(objective);
         return objective.getObjectiveFor(this);
     }
@@ -121,7 +121,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Score getOrCreateScore(final String name, final ScoreObjective objective) {
-        return ((SpongeScore) ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getOrCreateScore(SpongeTexts.fromLegacy(name)))
+        return ((SpongeScore) ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getOrCreateScore(SpongeAdventure.legacySection(name)))
                 .getScoreFor(objective);
     }
 
@@ -129,14 +129,14 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     public void removeObjectiveFromEntity(final String name, final ScoreObjective objective) {
         if (objective != null) {
             final SpongeObjective spongeObjective = ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
-            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.getScore(SpongeTexts.fromLegacy(name));
+            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.getScore(SpongeAdventure.legacySection(name));
             if (score.isPresent()) {
                 spongeObjective.removeScore(score.get());
             } else {
                 SpongeCommon.getLogger().warn("Objective " + objective + " did have have the score " + name);
             }
         } else {
-            final Text textName = SpongeTexts.fromLegacy(name);
+            final Component textName = SpongeAdventure.legacySection(name);
             for (final ScoreObjective scoreObjective: this.getScoreObjectives()) {
                 ((ScoreObjectiveBridge) scoreObjective).bridge$getSpongeObjective().removeScore(textName);
             }

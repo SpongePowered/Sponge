@@ -25,15 +25,15 @@
 package org.spongepowered.common.command.result;
 
 import com.google.common.base.Preconditions;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.text.Text;
 
 public final class SpongeCommandResultBuilder implements CommandResult.Builder {
 
     private int result;
-    @Nullable private Text errorMessage;
+    @Nullable private Component errorMessage;
 
     @Override
     public CommandResult.@NonNull Builder setResult(final int result) {
@@ -43,7 +43,7 @@ public final class SpongeCommandResultBuilder implements CommandResult.Builder {
     }
 
     @Override
-    public CommandResult.@NonNull Builder error(@Nullable final Text errorMessage) {
+    public CommandResult.@NonNull Builder error(@Nullable final Component errorMessage) {
         this.errorMessage = errorMessage;
         return this;
     }

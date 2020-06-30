@@ -26,13 +26,13 @@ package org.spongepowered.common.command;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
 import org.spongepowered.common.command.brigadier.TranslatedParameter;
 import org.spongepowered.common.command.parameter.subcommand.SpongeSubcommandParameterBuilder;
@@ -54,8 +54,8 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     private final Map<Command.Parameterized, List<String>> subcommands = new HashMap<>();
     private final List<Parameter> parameters = new ArrayList<>();
     @Nullable private CommandExecutor commandExecutor;
-    @Nullable private Function<CommandCause, Optional<Text>> extendedDescription;
-    @Nullable private Function<CommandCause, Optional<Text>> shortDescription;
+    @Nullable private Function<CommandCause, Optional<Component>> extendedDescription;
+    @Nullable private Function<CommandCause, Optional<Component>> shortDescription;
     @Nullable private Predicate<CommandCause> executionRequirements;
 
     @Override
@@ -86,13 +86,13 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder setExtendedDescription(@NonNull final Function<CommandCause, Optional<Text>> extendedDescriptionFunction) {
+    public Command.@NonNull Builder setExtendedDescription(@NonNull final Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
         this.extendedDescription = extendedDescriptionFunction;
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder setShortDescription(@NonNull final Function<CommandCause, Optional<Text>> descriptionFunction) {
+    public Command.@NonNull Builder setShortDescription(@NonNull final Function<CommandCause, Optional<Component>> descriptionFunction) {
         this.shortDescription = descriptionFunction;
         return this;
     }

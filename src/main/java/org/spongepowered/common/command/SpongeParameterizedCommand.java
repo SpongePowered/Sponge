@@ -31,6 +31,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
@@ -40,7 +42,6 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.TranslatedParameter;
 
 import java.util.List;
@@ -53,16 +54,16 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     private final TranslatedParameter associatedCommandNode;
     private final List<Parameter> parameters;
-    private final Function<CommandCause, Optional<Text>> shortDescription;
-    private final Function<CommandCause, Optional<Text>> extendedDescription;
+    private final Function<CommandCause, Optional<Component>> shortDescription;
+    private final Function<CommandCause, Optional<Component>> extendedDescription;
     private final Predicate<CommandCause> executionRequirements;
     private final CommandExecutor executor;
 
     SpongeParameterizedCommand(
             final TranslatedParameter associatedCommandNode,
             final List<Parameter> parameters,
-            final Function<CommandCause, Optional<Text>> shortDescription,
-            final Function<CommandCause, Optional<Text>> extendedDescription,
+            final Function<CommandCause, Optional<Component>> shortDescription,
+            final Function<CommandCause, Optional<Component>> extendedDescription,
             final Predicate<CommandCause> executionRequirements,
             final CommandExecutor executor) {
         this.associatedCommandNode = associatedCommandNode;
@@ -90,20 +91,19 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     @NonNull
-    public Optional<Text> getShortDescription(@NonNull final CommandCause cause) {
+    public Optional<Component> getShortDescription(@NonNull final CommandCause cause) {
         return this.shortDescription.apply(cause);
     }
 
     @Override
     @NonNull
-    public Optional<Text> getExtendedDescription(@NonNull final CommandCause cause) {
+    public Optional<Component> getExtendedDescription(@NonNull final CommandCause cause) {
         return this.extendedDescription.apply(cause);
     }
 
     @Override
-    @NonNull
-    public Text getUsage(@NonNull final CommandCause cause) {
-        return Text.of(this.associatedCommandNode.getSourceCommandNode()
+    public @NonNull Component getUsage(final @NonNull CommandCause cause) {
+        return TextComponent.of(this.associatedCommandNode.getSourceCommandNode()
                 .getChildrenForSuggestions().stream().map(CommandNode::getUsageText).collect(Collectors.joining("|")));
     }
 

@@ -24,32 +24,32 @@
  */
 package org.spongepowered.common.data.provider.generic;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.util.INameable;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.CustomNameableBridge;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class INameableDisplayNameProvider extends GenericMutableDataProvider<INameable, Text> {
+public class INameableDisplayNameProvider extends GenericMutableDataProvider<INameable, Component> {
 
     public INameableDisplayNameProvider() {
         super(Keys.DISPLAY_NAME);
     }
 
     @Override
-    protected boolean set(INameable dataHolder, Text value) {
+    protected boolean set(INameable dataHolder, Component value) {
         if (dataHolder instanceof CustomNameableBridge) {
-            ((CustomNameableBridge) dataHolder).bridge$setCustomDisplayName(SpongeTexts.toComponent(value));
+            ((CustomNameableBridge) dataHolder).bridge$setCustomDisplayName(SpongeAdventure.asVanilla(value));
             return true;
         }
         return false;
     }
 
     @Override
-    protected Optional<Text> getFrom(INameable dataHolder) {
-        return Optional.of(SpongeTexts.toText(dataHolder.getDisplayName()));
+    protected Optional<Component> getFrom(INameable dataHolder) {
+        return Optional.of(SpongeAdventure.asAdventure(dataHolder.getDisplayName()));
     }
 }

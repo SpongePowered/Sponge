@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.network.login;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.login.ServerLoginNetHandler;
 import net.minecraft.network.play.server.SDisconnectPacket;
@@ -35,12 +37,8 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
-import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.network.ServerSideConnection;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,8 +47,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.SocketAddress;
 import java.util.Optional;
@@ -83,10 +81,10 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
         }
     }
 
-    private void impl$disconnectClient(final Optional<Text> disconnectMessage) {
+    private void impl$disconnectClient(final Optional<Component> disconnectMessage) {
         ITextComponent reason;
         if (disconnectMessage.isPresent()) {
-            reason = SpongeTexts.toComponent(disconnectMessage.get());
+            reason = SpongeAdventure.asVanilla(disconnectMessage.get());
         } else {
             reason = new TranslationTextComponent("disconnect.disconnected");
         }
@@ -95,12 +93,12 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
 
     @Override
     public boolean bridge$fireAuthEvent() {
-        final Text disconnectMessage = Text.of("You are not allowed to log in to this server.");
+        final Component disconnectMessage = TextComponent.of("You are not allowed to log in to this server.");
         // Cause is created directly as we can't access the cause stack manager
         // from off the main thread
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
-                Cause.of(EventContext.empty(), this.loginGameProfile), (ServerSideConnection) this.networkManager,
-                new MessageEvent.MessageFormatter(disconnectMessage), false
+                Cause.of(EventContext.empty(), this.loginGameProfile), disconnectMessage, disconnectMessage, (ServerSideConnection) this.networkManager,
+                false
         );
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {

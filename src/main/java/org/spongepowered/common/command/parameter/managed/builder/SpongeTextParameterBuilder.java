@@ -25,29 +25,29 @@
 package org.spongepowered.common.command.parameter.managed.builder;
 
 import com.google.common.base.Preconditions;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.ComponentSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializer;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTextValueParameter;
 
 import java.util.function.Supplier;
 
 public final class SpongeTextParameterBuilder implements VariableValueParameters.TextBuilder {
 
-    @Nullable private TextSerializer textSerializer;
+    @Nullable private ComponentSerializer<Component, ? extends Component, String> textSerializer;
     private boolean consumeAllArguments;
 
     @Override
-    public VariableValueParameters.@NonNull TextBuilder setSerializer(@NonNull final TextSerializer serializer) {
+    public VariableValueParameters.@NonNull TextBuilder setSerializer(@NonNull final ComponentSerializer<Component, ? extends Component, String> serializer) {
         Preconditions.checkNotNull(serializer, "The serializer cannot be null");
         return this.setSerializerSupplier(() -> serializer);
     }
 
     @Override
-    public VariableValueParameters.@NonNull TextBuilder setSerializerSupplier(@NonNull final Supplier<TextSerializer> serializerSupplier) {
+    public VariableValueParameters.@NonNull TextBuilder setSerializerSupplier(@NonNull final Supplier<ComponentSerializer<Component, ? extends Component, String>> serializerSupplier) {
         this.textSerializer = serializerSupplier.get();
         return this;
     }
@@ -59,7 +59,7 @@ public final class SpongeTextParameterBuilder implements VariableValueParameters
     }
 
     @Override
-    public ValueParameter<Text> build() throws IllegalStateException {
+    public ValueParameter<Component> build() throws IllegalStateException {
         Preconditions.checkState(this.textSerializer != null, "Text Serializer cannot be null.");
         return new SpongeTextValueParameter(this.textSerializer, this.consumeAllArguments);
     }

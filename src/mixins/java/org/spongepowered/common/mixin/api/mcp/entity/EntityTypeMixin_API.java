@@ -24,20 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
+import net.kyori.adventure.text.Component;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(net.minecraft.entity.EntityType.class)
 public abstract class EntityTypeMixin_API implements EntityType {
 
-    @Shadow public abstract String shadow$getTranslationKey();
-
-    private Translation api$translation;
+    @Shadow public abstract ITextComponent shadow$getName();
 
     @Override
     public ResourceKey getKey() {
@@ -45,11 +44,7 @@ public abstract class EntityTypeMixin_API implements EntityType {
     }
 
     @Override
-    public Translation getTranslation() {
-        if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(this.shadow$getTranslationKey());
-        }
-
-        return this.api$translation;
+    public Component asComponent() {
+        return SpongeAdventure.asAdventure(this.shadow$getName());
     }
 }

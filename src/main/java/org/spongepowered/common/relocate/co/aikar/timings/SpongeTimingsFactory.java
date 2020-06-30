@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
-import org.spongepowered.api.text.channel.MessageChannel;
+import net.kyori.adventure.audience.Audience;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.config.category.TimingsCategory;
 import org.spongepowered.plugin.PluginContainer;
@@ -173,7 +173,7 @@ public final class SpongeTimingsFactory implements TimingsFactory {
     }
 
     @Override
-    public void generateReport(MessageChannel channel) {
+    public void generateReport(Audience channel) {
         TimingsExport.requestingReport.add(channel);
     }
 

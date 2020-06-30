@@ -26,6 +26,7 @@ package org.spongepowered.common.event.inventory;
 
 import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -69,8 +70,8 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
@@ -83,7 +84,6 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.text.SpongeTexts;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -314,7 +314,7 @@ public class InventoryEventFactory {
     }
 
     @Nullable
-    public static Container displayContainer(final ServerPlayerEntity player, final Inventory inventory, final Text displayName) {
+    public static Container displayContainer(final ServerPlayerEntity player, final Inventory inventory, final Component displayName) {
         final net.minecraft.inventory.container.Container previousContainer = player.openContainer;
         final net.minecraft.inventory.container.Container container;
 
@@ -346,7 +346,7 @@ public class InventoryEventFactory {
                         level = 1;
                     }
                     if (displayName != null) {
-                        display = SpongeTexts.toComponent(displayName);
+                        display = SpongeAdventure.asVanilla(displayName);
                     }
                     OptionalInt containerId = player.openContainer(new SimpleNamedContainerProvider((id, playerInv, p) ->
                             new MerchantContainer(id, playerInv, merchant), display));

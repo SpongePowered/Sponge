@@ -25,34 +25,35 @@
 package org.spongepowered.common.relocate.co.aikar.timings;
 
 import com.google.common.collect.Lists;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.ForwardingAudience;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.api.adventure.Audiences;
 
 import java.util.List;
 
 public final class TimingsReportListener {
-    private final List<MessageChannel> channels;
+    private final List<Audience> channels;
     private final Runnable onDone;
     private String timingsURL;
-    private MessageChannel combinedChannel;
+    private ForwardingAudience audience;
 
-    public TimingsReportListener(MessageReceiver sender, Runnable onDone) {
-        this(Lists.newArrayList(MessageChannel.to(sender)), onDone);
+    public TimingsReportListener(Audience sender, Runnable onDone) {
+        this(Lists.newArrayList(sender), onDone);
     }
-    public TimingsReportListener(List<MessageChannel> channels) {
+    public TimingsReportListener(List<Audience> channels) {
         this(channels, null);
     }
-    public TimingsReportListener(List<MessageChannel> channels, Runnable onDone) {
+    public TimingsReportListener(List<Audience> channels, Runnable onDone) {
         Validate.notNull(channels);
         Validate.notEmpty(channels);
 
         this.channels = Lists.newArrayList(channels);
         this.addConsoleIfNeeded(this.channels);
         this.onDone = onDone;
-        this.combinedChannel = MessageChannel.combined(this.channels);
+        this.audience = (ForwardingAudience) Audience.of(this.channels);
     }
 
     public String getTimingsURL() {
@@ -70,27 +71,25 @@ public final class TimingsReportListener {
         }
     }
 
-    public void addConsoleIfNeeded(List<MessageChannel> channels) {
+    public void addConsoleIfNeeded(List<Audience> channels) {
         boolean hasConsole = false;
-        for (MessageChannel channel: channels) {
-            for (MessageReceiver receiver: channel.getMembers()) {
-                if (receiver instanceof Server) {
-                    hasConsole = true;
-                    break;
-                }
+        for (Audience channel: channels) {
+            if (channel instanceof Server) {
+                hasConsole = true;
+                break;
             }
         }
 
         if (!hasConsole) {
-            channels.add(MessageChannel.toServer());
+            channels.add(Audiences.server());
         }
     }
 
-    public void send(Text text) {
-        this.combinedChannel.send(text);
+    public void send(Component text) {
+        this.audience.sendMessage(text);
     }
 
-    public MessageChannel getChannel() {
-        return this.combinedChannel;
+    public ForwardingAudience getChannel() {
+        return this.audience;
     }
 }

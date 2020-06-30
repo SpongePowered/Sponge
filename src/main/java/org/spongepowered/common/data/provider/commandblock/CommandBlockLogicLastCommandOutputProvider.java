@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.data.provider.commandblock;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.tileentity.CommandBlockLogic;
 import net.minecraft.util.text.ITextComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.accessor.tileentity.CommandBlockLogicAccessor;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-public class CommandBlockLogicLastCommandOutputProvider<T> extends GenericMutableDataProvider<T, Text> {
+public class CommandBlockLogicLastCommandOutputProvider<T> extends GenericMutableDataProvider<T, Component> {
 
     private final Function<T, CommandBlockLogic> logicProvider;
 
@@ -46,14 +46,14 @@ public class CommandBlockLogicLastCommandOutputProvider<T> extends GenericMutabl
     }
 
     @Override
-    protected Optional<Text> getFrom(T dataHolder) {
+    protected Optional<Component> getFrom(T dataHolder) {
         @Nullable final ITextComponent component = ((CommandBlockLogicAccessor) this.logicProvider.apply(dataHolder)).accessor$getLastOutput();
-        return component == null ? Optional.empty() : Optional.of(SpongeTexts.toText(component));
+        return component == null ? Optional.empty() : Optional.of(SpongeAdventure.asAdventure(component));
     }
 
     @Override
-    protected boolean set(T dataHolder, Text value) {
-        this.logicProvider.apply(dataHolder).setLastOutput(SpongeTexts.toComponent(value));
+    protected boolean set(T dataHolder, Component value) {
+        this.logicProvider.apply(dataHolder).setLastOutput(SpongeAdventure.asVanilla(value));
         return true;
     }
 

@@ -24,19 +24,13 @@
  */
 package org.spongepowered.common.text.serializer;
 
-import com.google.common.collect.Lists;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.text.LiteralText;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.accessor.util.text.StringTextComponentAccessor;
 import org.spongepowered.common.accessor.util.text.StyleAccessor;
 import org.spongepowered.common.accessor.util.text.TextFormattingAccessor;
-import org.spongepowered.common.text.format.SpongeTextColor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -85,127 +79,6 @@ public final class LegacyTexts {
     public static TextFormatting parseFormat(final char format) {
         final int pos = findFormat(format);
         return pos != -1 ? formatting[pos] : null;
-    }
-
-    /**
-     * This method parses an input string with formatting codes into a
-     * {@link Text} object.
-     *
-     * <p>This implementation parses the input string in reverse direction
-     * to avoid recursion. It returns a {@link Text} which is equivalent
-     * to the input string when rendered on the client.</p>
-     *
-     * <p>Note: The implementation does not attempt to preserve redundant
-     * formatting codes (e.g. two consecutive color codes). Only relevant
-     * formatting codes are represented in the output.</p>
-     *
-     * @param input The input string
-     * @param code The formatting sign (e.g. {@code &})
-     * @return The parsed text
-     */
-    public static Text parse(final String input, final char code) {
-        int pos = input.length();
-        if (pos < FORMATTING_CODE_LENGTH) {
-            // Not enough characters to form a formatting code => plain text
-            return Text.of(input);
-        }
-
-        // Find the first (potential) formatting code
-        int next = input.lastIndexOf(code, pos - FORMATTING_CODE_LENGTH);
-        if (next == -1) {
-            // No potential formatting code found => plain text
-            return Text.of(input);
-        }
-
-        LiteralText.Builder current = null;
-        boolean reset = false;
-        final List<Text> parts = Lists.newArrayList();
-
-        do {
-            // Parse the formatting code
-            final TextFormatting format = parseFormat(input.charAt(next + 1));
-            if (format != null) {
-                final int from = next + FORMATTING_CODE_LENGTH;
-                if (from != pos) {
-                    // The plain text between the current and last formatting code
-                    final String content = input.substring(from, pos);
-
-                    if (current != null) {
-                        if (reset) {
-                            // Color codes reset the text style so we avoid inheritance
-                            // by adding directly to the root text
-                            parts.add(current.build());
-                            reset = false;
-                            current = Text.builder(content);
-                        } else {
-                            // Inherit color/style
-                            current = Text.builder(content).append(current.build());
-                        }
-                    } else {
-                        current = Text.builder(content);
-                    }
-                }
-
-                // current == null => style does not apply to any content
-                if (current != null) {
-                    reset |= applyStyle(current, format);
-                }
-
-                // Mark the current position
-                pos = next;
-            }
-
-            // Search for next formatting code
-            next = input.lastIndexOf(code, next - 1);
-        } while (next != -1);
-
-        if (current == null) {
-            // No formatted text found
-            if (pos == 0) {
-                // Text contains only (redundant) formatting codes => empty text
-                return Text.empty();
-            } else {
-                // No valid formatting code found => plain text
-                return Text.of(input);
-            }
-        }
-
-        // Return simple text if there is only one text style in the input string
-        if (pos == 0 && parts.isEmpty()) {
-            return current.build();
-        }
-
-        // Build the resulting text
-        parts.add(current.build());
-        Collections.reverse(parts);
-        return Text.builder(pos > 0 ? input.substring(0, pos) : "").append(parts).build();
-    }
-
-    private static boolean applyStyle(final Text.Builder builder, final TextFormatting formatting) {
-        switch (formatting) {
-            case BOLD:
-                builder.style(TextStyles.BOLD);
-                break;
-            case ITALIC:
-                builder.style(TextStyles.ITALIC);
-                break;
-            case UNDERLINE:
-                builder.style(TextStyles.UNDERLINE);
-                break;
-            case STRIKETHROUGH:
-                builder.style(TextStyles.STRIKETHROUGH);
-                break;
-            case OBFUSCATED:
-                builder.style(TextStyles.OBFUSCATED);
-                break;
-            default:
-                if (builder.getColor() == TextColors.NONE) {
-                    builder.color(SpongeTextColor.of(formatting));
-                }
-                return true;
-        }
-
-        return false;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -330,49 +203,6 @@ public final class LegacyTexts {
         }
 
         return new String(result);
-    }
-
-    public static String strip(final String text, final char code) {
-        return strip(text, code, false, false);
-    }
-
-    public static String stripAll(final String text, final char code) {
-        return strip(text, code, true, false);
-    }
-
-    public static String stripChars(final String text, final char code) {
-        return strip(text, code, false, true);
-    }
-
-    private static String strip(final String text, final char code, final boolean all, final boolean keepFormat) {
-        int next = text.indexOf(code);
-        final int last = text.length() - 1;
-        if (next == -1 || next == last) {
-            return text;
-        }
-
-        final StringBuilder result = new StringBuilder(text.length());
-
-        int pos = 0;
-        do {
-            if (pos != next) {
-                result.append(text, pos, next);
-            }
-
-            pos = next;
-
-            if (isFormat(text.charAt(next + 1))) {
-                pos = next += keepFormat ? 1 : 2; // Skip formatting
-            } else if (all) {
-                pos = next += 1; // Skip code only
-            } else {
-                next++;
-            }
-
-            next = text.indexOf(code, next);
-        } while (next != -1 && next < last);
-
-        return result.append(text, pos, text.length()).toString();
     }
 
 }

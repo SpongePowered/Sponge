@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.raid;
 
+import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.entity.monster.AbstractRaiderEntity;
 import net.minecraft.world.ServerBossInfo;
 import net.minecraft.world.World;
 import net.minecraft.world.raid.Raid;
-import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.raid.RaidBridge;
 
 import java.util.ArrayList;
@@ -63,14 +64,14 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
     }
 
     @Override
-    public ServerBossBar getBossBar() {
-        return (ServerBossBar) this.bossInfo;
+    public BossBar getBossBar() {
+        return SpongeAdventure.asAdventure(this.bossInfo);
     }
 
     @Override
-    public void setBossBar(ServerBossBar bossBar) {
+    public void setBossBar(BossBar bossBar) {
         checkNotNull(bossBar, "BossBar cannot be null.");
-        this.bossInfo = (ServerBossInfo) bossBar;
+        this.bossInfo = SpongeAdventure.asVanillaServer(bossBar);
     }
 
     @Override

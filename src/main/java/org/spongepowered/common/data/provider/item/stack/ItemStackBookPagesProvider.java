@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
-public class ItemStackBookPagesProvider extends AbstractItemStackBookPagesProvider<Text> {
+public class ItemStackBookPagesProvider extends AbstractItemStackBookPagesProvider<Component> {
 
     public ItemStackBookPagesProvider() {
         super(Keys.PAGES);
@@ -42,12 +42,12 @@ public class ItemStackBookPagesProvider extends AbstractItemStackBookPagesProvid
     }
 
     @Override
-    protected String translateTo(Text text) {
-        return TextSerializers.JSON.get().serialize(text);
+    protected String translateTo(Component text) {
+        return GsonComponentSerializer.gson().serialize(text);
     }
 
     @Override
-    protected Text translateFrom(String page) {
-        return TextSerializers.JSON.get().deserialize(page);
+    protected Component translateFrom(String page) {
+        return GsonComponentSerializer.gson().deserialize(page);
     }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.entity.player;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -34,8 +35,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -58,8 +57,6 @@ public interface ServerPlayerEntityBridge {
     void bridge$setVelocityOverride(@Nullable Vector3d velocity);
 
     void bridge$sendBlockChange(BlockPos pos, BlockState state);
-
-    MessageChannel bridge$getDeathMessageChannel();
 
     void bridge$initScoreboard();
 
@@ -89,7 +86,7 @@ public interface ServerPlayerEntityBridge {
 
     boolean bridge$hasForcedGamemodeOverridePermission();
 
-    void bridge$setContainerDisplay(Text displayName);
+    void bridge$setContainerDisplay(Component displayName);
 
     void bridge$setDelegateAfterRespawn(ServerPlayerEntity delegate);
 

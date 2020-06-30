@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge.scoreboard;
 
-import org.spongepowered.api.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public interface TeamBridge {
 
-    TextColor bridge$getColor();
+    NamedTextColor bridge$getColor();
 }

@@ -31,7 +31,7 @@ import net.minecraft.world.GameType;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.text.selector.ArgumentType;
+import org.spongepowered.api.entity.selector.ArgumentType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;

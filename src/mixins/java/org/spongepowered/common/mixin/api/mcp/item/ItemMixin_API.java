@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.item.Item;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -46,7 +46,6 @@ public abstract class ItemMixin_API implements ItemType {
     @Nullable protected BlockType blockType = null;
 
     private ResourceKey api$key;
-    private SpongeTranslation api$translation;
 
     @Override
     public final ResourceKey getKey() {
@@ -57,12 +56,8 @@ public abstract class ItemMixin_API implements ItemType {
     }
 
     @Override
-    public Translation getTranslation() {
-        if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(this.shadow$getTranslationKey() + ".name");
-        }
-
-        return this.api$translation;
+    public Component asComponent() {
+        return TranslatableComponent.of(this.shadow$getTranslationKey());
     }
 
     @Override

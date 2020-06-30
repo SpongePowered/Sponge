@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.sponge;
 
 import co.aikar.timings.Timings;
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -32,7 +33,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -104,19 +104,16 @@ public final class SpongeCommand {
         final PluginContainer apiPlugin = Launcher.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launcher.getInstance().getMinecraftPlugin();
 
-        SpongeCommon.getLogger().info("SpongePowered Minecraft Plugin Platform (running on Minecraft {})",
-                minecraftPlugin.getMetadata().getVersion());
-        SpongeCommon.getLogger().info("{} {}", apiPlugin.getMetadata().getName().get(), apiPlugin.getMetadata().getVersion());
-        SpongeCommon.getLogger().info("Implementation: {}, {}",
-                platformPlugin.getMetadata().getName().get(),
-                platformPlugin.getMetadata().getVersion());
-
-        /*
-        context.sendMessage(Text.of(
+        context.sendMessage(TextComponent.of(
                 "SpongePowered Minecraft Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"));
-        context.sendMessage(Text.of("SpongeAPI: ", apiPlugin.getMetadata().getName(), " ", apiPlugin.getMetadata().getVersion()));
-        context.sendMessage(Text.of("Implementation: ", platformPlugin.getMetadata().getName(), " ", platformPlugin.getMetadata().getVersion()));
-        */
+        context.sendMessage(TextComponent.builder("SpongeAPI: ").append(
+            TextComponent.of(apiPlugin.getMetadata().getName().get()),
+            TextComponent.space(),
+            TextComponent.of(apiPlugin.getMetadata().getVersion())).build());
+        context.sendMessage(TextComponent.builder("Implementation: ").append(
+            TextComponent.of(platformPlugin.getMetadata().getName().get()),
+            TextComponent.space(),
+            TextComponent.of(platformPlugin.getMetadata().getVersion())).build());
         return CommandResult.success();
     }
 
@@ -174,67 +171,67 @@ public final class SpongeCommand {
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.reset();
-                            context.sendMessage(Text.of("Timings reset"));
+                            context.sendMessage(TextComponent.of("Timings reset"));
                             return CommandResult.success();
                         })
                         .build(), "reset")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            Timings.generateReport(context.getMessageChannel());
+                            Timings.generateReport(context.getAudience());
                             return CommandResult.success();
                         })
                         .build(), "report", "paste")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             Timings.setTimingsEnabled(true);
-                            context.sendMessage(Text.of("Enabled Timings & Reset"));
+                            context.sendMessage(TextComponent.of("Enabled Timings & Reset"));
                             return CommandResult.success();
                         })
                         .build(), "on")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             Timings.setTimingsEnabled(false);
-                            context.sendMessage(Text.of("Disabled Timings"));
+                            context.sendMessage(TextComponent.of("Disabled Timings"));
                             return CommandResult.success();
                         })
                         .build(), "off")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.setVerboseTimingsEnabled(true);
-                            context.sendMessage(Text.of("Enabled Verbose Timings"));
+                            context.sendMessage(TextComponent.of("Enabled Verbose Timings"));
                             return CommandResult.success();
                         })
                         .build(), "verbon")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.setVerboseTimingsEnabled(false);
-                            context.sendMessage(Text.of("Disabled Verbose Timings"));
+                            context.sendMessage(TextComponent.of("Disabled Verbose Timings"));
                             return CommandResult.success();
                         })
                         .build(), "verboff")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            context.sendMessage(Text.of("Timings cost: " + SpongeTimingsFactory.getCost()));
+                            context.sendMessage(TextComponent.of("Timings cost: " + SpongeTimingsFactory.getCost()));
                             return CommandResult.success();
                         })
                         .build(), "cost")

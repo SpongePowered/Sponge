@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.text.translation.Translation;
 
 public abstract class SpongeCatalogType implements CatalogType {
 
@@ -69,26 +68,5 @@ public abstract class SpongeCatalogType implements CatalogType {
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
                 .add("key", this.key);
-    }
-
-    public static abstract class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
-
-        private final Translation translation;
-
-        public Translatable(ResourceKey key, Translation translation) {
-            super(key);
-            this.translation = checkNotNull(translation, "translation");
-        }
-
-        @Override
-        public final Translation getTranslation() {
-            return this.translation;
-        }
-
-        @Override
-        protected MoreObjects.ToStringHelper toStringHelper() {
-            return super.toStringHelper()
-                    .add("translation", this.getTranslation());
-        }
     }
 }

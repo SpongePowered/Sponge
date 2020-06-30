@@ -27,11 +27,11 @@ package org.spongepowered.common.entity.player.tab;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
 
@@ -39,7 +39,7 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
 
     @Nullable private TabList list;
     @Nullable private GameProfile profile;
-    @Nullable private Text displayName;
+    @Nullable private Component displayName;
     private int latency;
     @Nullable private GameMode gameMode;
 
@@ -56,7 +56,7 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
     }
 
     @Override
-    public TabListEntry.Builder displayName(@Nullable Text displayName) {
+    public TabListEntry.Builder displayName(@Nullable Component displayName) {
         this.displayName = displayName;
         return this;
     }

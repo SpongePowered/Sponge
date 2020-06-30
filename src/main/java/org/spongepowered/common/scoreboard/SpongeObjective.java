@@ -25,6 +25,8 @@
 package org.spongepowered.common.scoreboard;
 
 import com.google.common.collect.Maps;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
@@ -33,11 +35,10 @@ import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.accessor.scoreboard.ScoreAccessor;
 import org.spongepowered.common.accessor.scoreboard.ScoreObjectiveAccessor;
 import org.spongepowered.common.accessor.scoreboard.ScoreboardAccessor;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,14 +52,14 @@ public class SpongeObjective implements Objective {
     private Map<net.minecraft.scoreboard.Scoreboard, ScoreObjective> objectives = new HashMap<>();
 
     private String name;
-    private Text displayName;
+    private Component displayName;
     private Criterion criterion;
     private ObjectiveDisplayMode displayMode;
-    private Map<Text, Score> scores = new HashMap<>();
+    private Map<Component, Score> scores = new HashMap<>();
 
     public SpongeObjective(final String name, final Criterion criterion) {
         this.name = name;
-        this.displayName = SpongeTexts.fromLegacy(name);
+        this.displayName = SpongeAdventure.legacy(LegacyComponentSerializer.SECTION_CHAR, name);
         this.displayMode = ObjectiveDisplayModes.INTEGER.get();
         this.criterion = criterion;
     }
@@ -69,19 +70,19 @@ public class SpongeObjective implements Objective {
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getDisplayName() {
         return this.displayName;
     }
 
     @Override
-    public void setDisplayName(final Text displayName) throws IllegalArgumentException {
+    public void setDisplayName(final Component displayName) throws IllegalArgumentException {
         this.displayName = displayName;
         this.updateDisplayName();
     }
 
     private void updateDisplayName() {
         for (final ScoreObjective objective: this.objectives.values()) {
-            objective.setDisplayName(SpongeTexts.toComponent(this.displayName));
+            objective.setDisplayName(SpongeAdventure.asVanilla(this.displayName));
         }
     }
 
@@ -110,12 +111,12 @@ public class SpongeObjective implements Objective {
     }
 
     @Override
-    public Map<Text, Score> getScores() {
+    public Map<Component, Score> getScores() {
         return new HashMap<>(this.scores);
     }
 
     @Override
-    public boolean hasScore(final Text name) {
+    public boolean hasScore(final Component name) {
         return this.scores.containsKey(name);
     }
 
@@ -123,7 +124,7 @@ public class SpongeObjective implements Objective {
     public void addScore(final Score score) throws IllegalArgumentException {
         if (this.scores.containsKey(score.getName())) {
             throw new IllegalArgumentException(String.format("A score with the name %s already exists!",
-                    SpongeTexts.toLegacy(score.getName())));
+                    SpongeAdventure.legacySection(score.getName())));
         }
         this.scores.put(score.getName(), score);
 
@@ -155,12 +156,12 @@ public class SpongeObjective implements Objective {
     }
 
     @Override
-    public Optional<Score> getScore(final Text name) {
+    public Optional<Score> getScore(final Component name) {
         return Optional.ofNullable(this.scores.get(name));
     }
 
     @Override
-    public Score getOrCreateScore(final Text name) {
+    public Score getOrCreateScore(final Component name) {
         if (this.scores.containsKey(name)) {
             return this.scores.get(name);
         }
@@ -206,7 +207,7 @@ public class SpongeObjective implements Objective {
     }
 
     @Override
-    public boolean removeScore(final Text name) {
+    public boolean removeScore(final Component name) {
         final Optional<Score> score = this.getScore(name);
         return score.filter(this::removeScore).isPresent();
     }
@@ -217,7 +218,7 @@ public class SpongeObjective implements Objective {
             return this.objectives.get(scoreboard);
         }
         final ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (ScoreCriteria) this.criterion,
-                SpongeTexts.toComponent(this.displayName), (ScoreCriteria.RenderType) (Object) this.displayMode);
+            SpongeAdventure.asVanilla(this.displayName), (ScoreCriteria.RenderType) (Object) this.displayMode);
         this.objectives.put(scoreboard, objective);
         return objective;
     }

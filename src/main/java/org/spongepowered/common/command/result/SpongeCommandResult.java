@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.command.result;
 
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.text.Text;
 
 import java.util.Optional;
 
@@ -35,12 +35,12 @@ public final class SpongeCommandResult implements CommandResult {
 
     private final boolean isSuccess;
     private final int result;
-    @Nullable private final Text errorMessage;
+    @Nullable private final Component errorMessage;
 
     public SpongeCommandResult(
             final boolean isSuccess,
             final int result,
-            @Nullable final Text errorMessage) {
+            @Nullable final Component errorMessage) {
         this.isSuccess = isSuccess;
         this.result = result;
         this.errorMessage = errorMessage;
@@ -58,7 +58,7 @@ public final class SpongeCommandResult implements CommandResult {
 
     @Override
     @NonNull
-    public Optional<Text> getErrorMessage() {
+    public Optional<Component> getErrorMessage() {
         return Optional.ofNullable(this.errorMessage);
     }
 

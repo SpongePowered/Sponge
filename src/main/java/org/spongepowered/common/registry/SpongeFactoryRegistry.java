@@ -30,6 +30,8 @@ import co.aikar.timings.TimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.adventure.Audiences;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
@@ -38,8 +40,9 @@ import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.common.adventure.AudienceFactory;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.parameter.SpongeParameterValueFactory;
 import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParameterBuilderFactory;
 import org.spongepowered.common.command.registrar.tree.SpongeRootCommandTreeBuilderFactory;
@@ -47,7 +50,6 @@ import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
-import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
 import org.spongepowered.common.util.SpongeTransformFactory;
@@ -90,8 +92,11 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
 
     public void registerDefaultFactories() {
         this
+            .registerFactory(Audiences.Factory.class, new AudienceFactory())
+            .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory());
+
+        this
             .registerFactory(TimingsFactory.class, SpongeTimingsFactory.INSTANCE)
-            .registerFactory(TextSerializers.Factory.class, SpongeTextSerializerFactory.INSTANCE)
             .registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE)
             .registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE)
             .registerFactory(CommandCause.Factory.class, SpongeCommandCauseFactory.INSTANCE)

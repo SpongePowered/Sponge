@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.builtin.sponge;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.common.data.type.SpongeWoodType;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.stream.Stream;
 
@@ -42,12 +41,12 @@ public final class WoodTypeStreamGenerator {
         // TODO 1.14 - May need to remove tags altogether
 
         return Stream.of(
-            new SpongeWoodType(ResourceKey.minecraft("acacia"), new SpongeTranslation("block.minecraft.acacia_wood"), null),
-            new SpongeWoodType(ResourceKey.minecraft("birch"), new SpongeTranslation("block.minecraft.birch_wood"), null),
-            new SpongeWoodType(ResourceKey.minecraft("dark_oak"), new SpongeTranslation("block.minecraft.dark_oak_wood"), null),
-            new SpongeWoodType(ResourceKey.minecraft("jungle"), new SpongeTranslation("block.minecraft.jungle_wood"), null),
-            new SpongeWoodType(ResourceKey.minecraft("oak"), new SpongeTranslation("block.minecraft.oak_wood"), null),
-            new SpongeWoodType(ResourceKey.minecraft("spruce"), new SpongeTranslation("block.minecraft.spruce_wood"), null)
+            new SpongeWoodType(ResourceKey.minecraft("acacia"), null),
+            new SpongeWoodType(ResourceKey.minecraft("birch"), null),
+            new SpongeWoodType(ResourceKey.minecraft("dark_oak"), null),
+            new SpongeWoodType(ResourceKey.minecraft("jungle"), null),
+            new SpongeWoodType(ResourceKey.minecraft("oak"), null),
+            new SpongeWoodType(ResourceKey.minecraft("spruce"), null)
         );
     }
 }

@@ -24,30 +24,29 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.player;
 
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.entity.player.ChatVisibility;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
-import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(ChatVisibility.class)
-public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.text.chat.ChatVisibility {
+public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.entity.living.player.chat.ChatVisibility {
+
+    @Shadow private String field_221257_f;
 
     private ResourceKey api$key;
-    private SpongeTranslation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int p_i50176_3_, String p_i50176_4_, CallbackInfo ci) {
         this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
-        this.api$translation = new SpongeTranslation(p_i50176_4_);
     }
 
     @Override
@@ -56,12 +55,12 @@ public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.t
     }
 
     @Override
-    public Translation getTranslation() {
-        return this.api$translation;
+    public Component asComponent() {
+        return TranslatableComponent.of(this.field_221257_f);
     }
 
     @Override
-    public boolean isVisible(ChatType chatType) {
-        return ((ChatVisibilityBridge) this).bridge$getVisibleChatTypes().contains(chatType);
+    public boolean isVisible(MessageType type) {
+        return ((ChatVisibilityBridge) this).bridge$getVisibleChatTypes().contains(type);
     }
 }

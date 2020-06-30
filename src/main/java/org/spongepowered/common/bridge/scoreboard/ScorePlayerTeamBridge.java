@@ -24,28 +24,28 @@
  */
 package org.spongepowered.common.bridge.scoreboard;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.format.TextColor;
 
 public interface ScorePlayerTeamBridge {
 
-    Text bridge$getDisplayName();
+    Component bridge$getDisplayName();
 
-    void bridge$setDisplayName(Text text);
+    void bridge$setDisplayName(Component text);
 
-    Text bridge$getPrefix();
+    Component bridge$getPrefix();
 
-    void bridge$setPrefix(Text text);
+    void bridge$setPrefix(Component text);
 
-    Text bridge$getSuffix();
+    Component bridge$getSuffix();
 
-    void bridge$setSuffix(Text suffix);
+    void bridge$setSuffix(Component suffix);
 
-    void bridge$setColor(TextColor color);
+    void bridge$setColor(NamedTextColor color);
 
-    MessageChannel bridge$getTeamChannel(ServerPlayerEntity player);
+    Audience bridge$getTeamChannel(ServerPlayerEntity player);
 
-    MessageChannel bridge$getNonTeamChannel();
+    Audience bridge$getNonTeamChannel();
 }

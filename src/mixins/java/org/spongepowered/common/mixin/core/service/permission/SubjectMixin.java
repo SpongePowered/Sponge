@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.service.permission;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.rcon.RConConsoleSource;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.permission.Subject;
@@ -47,7 +46,7 @@ import java.util.concurrent.CompletableFuture;
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
-@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class}, targets = {"net/minecraft/tileentity/SignTileEntity$1", "net/minecraft/tileentity/SignTileEntity$2"})
+@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, RConConsoleSource.class}, targets = {"net/minecraft/tileentity/SignTileEntity$1", "net/minecraft/tileentity/SignTileEntity$2"})
 public abstract class SubjectMixin implements SubjectBridge {
 
     @Nullable
