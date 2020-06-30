@@ -103,8 +103,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void onConstructed(final net.minecraft.world.World world, final Entity entity, final double originX, final double originY,
-                               final double originZ, final float radius, final boolean isFlaming, final boolean isSmoking,
-                               final CallbackInfo ci) {
+            final double originZ, final float radius, final boolean isFlaming, final boolean isSmoking,
+            final CallbackInfo ci) {
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
         this.impl$shouldBreakBlocks = this.damagesTerrain;
@@ -120,10 +120,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
      * and allows for maximal capability.
      *
      * @author BernardisGood - September 9th, 2019
-     * @reason Additional variables that allow increased control over the explosion's level of detail and entity knockback.
+     * @reason Additional variables that allow increased control over
+     * the explosion's level of detail and entity knockback.
      *
      * @author BernardisGood - June 29th, 2020
-     * @reason Ability for plugins to insert custom logic when calculating the explosion resistance of blocks that are affected by the explosion.
+     * @reason Ability for plugins to insert custom logic when calculating
+     * the explosion resistance of blocks that are affected by the explosion.
      */
     @Final
     @Overwrite
@@ -157,7 +159,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 if (iblockstate.getMaterial() != Material.AIR) {
                                     // Sponge Start - Allows the insertion of custom block resistance calculations
                                     float f2 = this.exploder != null
-                                            ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate)
+                                            ? this.exploder
+                                            .getExplosionResistance((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate)
                                             : iblockstate.getBlock().getExplosionResistance((Entity) null);
 
                                     if (this.impl$resistanceCalculator != null) {
@@ -173,7 +176,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 }
 
                                 if (f > 0.0F && (this.exploder == null || this.exploder
-                                        .canExplosionDestroyBlock((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
+                                        .canExplosionDestroyBlock((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate,
+                                                f))) {
                                     set.add(blockpos);
                                 }
 
@@ -198,7 +202,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         // Sponge Start - Check if this explosion should damage entities
         final List<Entity> list = this.impl$shouldDamageEntities
-                ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
+                ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder,
+                new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
                 : Collections.emptyList();
         // Now we can throw our Detonate Event
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
@@ -262,7 +267,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                         final double d14 = (double) this.world.getBlockDensity(vec3d, entity.getEntityBoundingBox());
                         final double d10 = (1.0D - d12) * d14;
                         entity.attackEntityFrom(
-                                DamageSource.causeExplosionDamage((net.minecraft.world.Explosion) (Object) this), (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
+                                DamageSource.causeExplosionDamage((net.minecraft.world.Explosion) (Object) this),
+                                (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
                         double d11 = 1.0D;
 
                         if (entity instanceof EntityLivingBase) {
@@ -278,7 +284,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             final EntityPlayer entityplayer = (EntityPlayer) entity;
 
                             if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.capabilities.isFlying)) {
-                                this.playerKnockbackMap.put(entityplayer, new Vec3d(d5 * d10 * impl$knockback, d7 * d10 * impl$knockback, d9 * d10 * impl$knockback));
+                                this.playerKnockbackMap.put(entityplayer,
+                                        new Vec3d(d5 * d10 * impl$knockback, d7 * d10 * impl$knockback, d9 * d10 * impl$knockback));
                                 //Sponge End
                             }
                         }
@@ -347,7 +354,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                     d3 = d3 * d7;
                     d4 = d4 * d7;
                     d5 = d5 * d7;
-                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
+                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3,
+                            d4, d5, new int[0]);
                     this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
                 }
 
@@ -383,7 +391,8 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         if (this.causesFire) {
             for (final BlockPos blockpos1 : this.affectedBlockPositions) {
-                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock() && this.random.nextInt(3) == 0) {
+                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock()
+                        && this.random.nextInt(3) == 0) {
                     // Sponge Start - Track the block position being destroyed
                     try (final CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
                         if (pos != null) {

@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.world;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.Location;
@@ -33,9 +35,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.explosion.ResistanceCalculator;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 public class SpongeExplosionBuilder implements Explosion.Builder {
 
