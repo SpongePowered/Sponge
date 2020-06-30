@@ -22,32 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api;
+package org.spongepowered.common.effect.particle;
 
-import net.minecraft.inventory.EnderChestInventory;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.player.SpongeUser;
+import net.minecraft.network.IPacket;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.world.dimension.DimensionType;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Optional;
+import java.util.List;
 
-@Mixin(value = SpongeUser.class, remap = false)
-public abstract class SpongeUserMixin_API implements User {
+public class SpongeParticleHelper {
 
-    @Shadow private EnderChestInventory enderChest;
-    @Shadow protected abstract SpongeUser shadow$loadEnderInventory();
+    public static void sendPackets(ParticleEffect particleEffect, Vector3d position, int radius, DimensionType type, PlayerList playerList) {
+        final List<IPacket<?>> packets = toPackets(particleEffect, position);
+        if (!packets.isEmpty()) {
+            final double x = position.getX();
+            final double y = position.getY();
+            final double z = position.getZ();
 
-    @Override
-    public Inventory getEnderChestInventory() {
-        final Optional<Player> playerOpt = this.getPlayer();
-        if (playerOpt.isPresent()) {
-            return playerOpt.get().getEnderChestInventory();
+            for (final IPacket<?> packet : packets) {
+                playerList.sendToAllNearExcept(null, x, y, z, radius, type, packet);
+            }
         }
-        this.shadow$loadEnderInventory();
-        return ((Inventory) this.enderChest);
+    }
+
+    public static List<IPacket<?>> toPackets(final ParticleEffect effect, final Vector3d position) {
+        throw new UnsupportedOperationException("implement me - see invalid");
     }
 
 }

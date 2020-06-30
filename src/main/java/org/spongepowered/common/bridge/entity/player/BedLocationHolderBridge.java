@@ -30,7 +30,7 @@ import org.spongepowered.api.util.RespawnLocation;
 import java.util.Map;
 import java.util.UUID;
 
-public interface BedLocationHolder {
+public interface BedLocationHolderBridge {
 
     boolean bridge$setBedLocations(Map<UUID, RespawnLocation> value);
 

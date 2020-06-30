@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
 import java.util.Optional;
@@ -50,9 +49,8 @@ import java.util.concurrent.CompletableFuture;
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
-@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class,
-        SpongeUser.class}, targets = {"net/minecraft/tileentity/SignTileEntity$1", "net/minecraft/tileentity/SignTileEntity$2"})
-public abstract class SubjectMixin implements  SubjectBridge {
+@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class}, targets = {"net/minecraft/tileentity/SignTileEntity$1", "net/minecraft/tileentity/SignTileEntity$2"})
+public abstract class SubjectMixin implements SubjectBridge {
 
     @Nullable
     private SubjectReference impl$subjectReference;

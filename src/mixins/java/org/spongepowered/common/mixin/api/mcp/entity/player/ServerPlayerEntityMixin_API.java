@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.player;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SChangeBlockPacket;
 import net.minecraft.network.play.server.SChatPacket;
@@ -45,7 +47,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -58,6 +59,7 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -75,9 +77,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -98,6 +98,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.text.SpongeTexts;
@@ -109,19 +110,20 @@ import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(ServerPlayerEntity.class)
 @Implements(@Interface(iface = Player.class, prefix = "player$"))
-public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API implements Player {
+public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API implements ServerPlayer {
 
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final public PlayerInteractionManager interactionManager;
@@ -136,18 +138,29 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Nullable private WorldBorder api$worldBorder;
 
     @Override
+    public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position, final int radius) {
+        if (this.impl$isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
+        checkNotNull(particleEffect, "The particle effect cannot be null!");
+        checkNotNull(position, "The position cannot be null");
+        checkArgument(radius > 0, "The radius has to be greater then zero!");
+
+        final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
+
+        if (!packets.isEmpty()) {
+            if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
+                for (final IPacket<?> packet : packets) {
+                    this.connection.sendPacket(packet);
+                }
+            }
+        }
+    }
+
+    @Override
     public GameProfile getProfile() {
         return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
-    }
-
-    @Override
-    public boolean isOnline() {
-        return ((ServerPlayerEntityBridge) this).bridge$getUser().isOnline();
-    }
-
-    @Override
-    public Optional<Player> getPlayer() {
-        return Optional.of(this);
     }
 
     @Override
@@ -465,17 +478,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         throw new UnsupportedOperationException("This is an internal method not intended for use with Players " +
                 "as it causes the player to be placed into an undefined state. " +
                 "Consider putting them through the normal death process instead.");
-    }
-
-    @Override
-    public Optional<UUID> getWorldUniqueId() {
-        return Optional.of(this.getWorld().getProperties().getUniqueId());
-    }
-
-    @Override
-    public boolean setLocation(final Vector3d position, final UUID world) {
-        final Optional<ServerWorld> targetWorld = Sponge.getServer().getWorldManager().getWorld(world);
-        return targetWorld.isPresent() && this.setLocation(ServerLocation.of(targetWorld.get(), position));
     }
 
     @Override

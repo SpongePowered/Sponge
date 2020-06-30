@@ -30,9 +30,8 @@ import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
-import org.spongepowered.common.entity.player.SpongeUser;
 
-@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 899)
+@Mixin(value = {TileEntity.class, Entity.class, ItemStack.class}, priority = 899)
 public abstract class DataHolderMixin_API implements DataHolder, SpongeMutableDataHolder {
 
 }

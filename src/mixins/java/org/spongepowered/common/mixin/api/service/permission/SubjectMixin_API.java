@@ -29,125 +29,14 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockTileEntity;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.context.Contextual;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectData;
-import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.entity.player.SpongeUser;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import org.spongepowered.common.service.permission.SpongeBridgeSubject;
 
 /**
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
-@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class,
-        SpongeUser.class}, targets = {"net/minecraft/tileentity/SignTileEntity$1", "net/minecraft/tileentity/SignTileEntity$2"})
-public abstract class SubjectMixin_API implements Subject {
-
-    @Override
-    public SubjectReference asSubjectReference() {
-        return ((SubjectBridge) this).bridge$resolveReferenceOptional()
-                .orElseThrow(() -> new IllegalStateException("No subject reference present for user " + this));
-    }
-
-    @Override
-    public boolean isSubjectDataPersisted() {
-        return ((SubjectBridge) this).bridge$resolveOptional()
-            .map(Subject::isSubjectDataPersisted)
-            .orElse(false);
-    }
-
-    @Override
-    public Set<Context> getActiveContexts() {
-        return ((SubjectBridge) this).bridge$resolveOptional()
-            .map(Subject::getActiveContexts)
-            .orElseGet(Collections::emptySet);
-    }
-
-    @Override
-    public Optional<String> getFriendlyIdentifier() {
-        return ((SubjectBridge) this).bridge$resolveOptional()
-            .flatMap(Contextual::getFriendlyIdentifier);
-    }
-
-    @Override
-    public SubjectCollection getContainingCollection() {
-        return ((SubjectBridge) this).bridge$resolve().getContainingCollection();
-    }
-
-    @Override
-    public SubjectData getSubjectData() {
-        return ((SubjectBridge) this).bridge$resolve().getSubjectData();
-    }
-
-    @Override
-    public SubjectData getTransientSubjectData() {
-        return ((SubjectBridge) this).bridge$resolve().getTransientSubjectData();
-    }
-
-    @Override
-    public Tristate getPermissionValue(final Set<Context> contexts, final String permission) {
-        return ((SubjectBridge) this).bridge$resolveOptional()
-            .map(subject -> subject.getPermissionValue(contexts, permission))
-            .orElseGet(() -> ((SubjectBridge) this).bridge$permDefault(permission));
-    }
-
-    @Override
-    public boolean hasPermission(final Set<Context> contexts, final String permission) {
-        return ((SubjectBridge) this).bridge$resolveOptional()
-            .map(subject -> {
-                final Tristate ret = subject.getPermissionValue(contexts, permission);
-                if (ret == Tristate.UNDEFINED) {
-                    return ((SubjectBridge) this).bridge$permDefault(permission).asBoolean();
-                }
-                return ret.asBoolean();
-            })
-            .orElseGet(() -> ((SubjectBridge) this).bridge$permDefault(permission).asBoolean());
-    }
-
-    @Override
-    public boolean hasPermission(final String permission) {
-        // forwarded to the implementation in this class, and not the default
-        // in the Subject interface so permission defaults can be applied
-        return this.hasPermission(this.getActiveContexts(), permission);
-    }
-
-    @Override
-    public boolean isChildOf(final Set<Context> contexts, final SubjectReference parent) {
-        return ((SubjectBridge) this).bridge$resolve().isChildOf(contexts, parent);
-    }
-
-    @Override
-    public boolean isChildOf(final SubjectReference parent) {
-        return ((SubjectBridge) this).bridge$resolve().isChildOf(parent);
-    }
-
-    @Override
-    public List<SubjectReference> getParents(final Set<Context> contexts) {
-        return ((SubjectBridge) this).bridge$resolve().getParents(contexts);
-    }
-
-    @Override
-    public List<SubjectReference> getParents() {
-        return ((SubjectBridge) this).bridge$resolve().getParents();
-    }
-
-    @Override
-    public Optional<String> getOption(final Set<Context> contexts, final String key) {
-        return ((SubjectBridge) this).bridge$resolve().getOption(contexts, key);
-    }
-
-    @Override
-    public Optional<String> getOption(final String key) {
-        return ((SubjectBridge) this).bridge$resolve().getOption(key);
-    }
+@Mixin(value = {ServerPlayerEntity.class, CommandBlockTileEntity.class, MinecartCommandBlockEntity.class, MinecraftServer.class, RConConsoleSource.class},
+        targets = {"net/minecraft/tileentity/SignTileEntity$1", "net/minecraft/tileentity/SignTileEntity$2"})
+public abstract class SubjectMixin_API implements SpongeBridgeSubject {
 }

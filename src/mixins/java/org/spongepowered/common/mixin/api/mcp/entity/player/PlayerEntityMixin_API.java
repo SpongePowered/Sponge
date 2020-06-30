@@ -31,7 +31,7 @@ import net.minecraft.inventory.EnderChestInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -41,7 +41,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.mixin.api.mcp.entity.LivingEntityMixin_API;
 
 @Mixin(PlayerEntity.class)
-@Implements(@Interface(iface = User.class, prefix = "api$"))
+@Implements(@Interface(iface = Player.class, prefix = "api$"))
 public abstract class PlayerEntityMixin_API extends LivingEntityMixin_API {
 
     @Shadow public Container openContainer;

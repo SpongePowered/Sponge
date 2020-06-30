@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.entity.player;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -33,6 +36,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -40,27 +44,40 @@ import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.Tamer;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.item.inventory.ArmorEquipable;
-import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.UserInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.RespawnLocation;
+import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.bridge.entity.player.BedLocationHolder;
-import org.spongepowered.common.data.type.SpongeEquipmentType;
-import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
+import org.spongepowered.common.data.type.SpongeEquipmentType;
+import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.service.permission.SpongeBridgeSubject;
+import org.spongepowered.common.service.permission.SubjectSettingCallback;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -69,10 +86,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 /**
  * Implements things that are not implemented by mixins into this class. <p>This
@@ -84,11 +102,14 @@ import java.util.function.Supplier;
  * TODO Future note about data: The following data manipulators are always
  * applicable to User: BanData, WhitelistData, JoinData
  */
-public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier, BedLocationHolder {
+public class SpongeUser implements User, DataSerializable, BedLocationHolderBridge,
+        SpongeMutableDataHolder,
+        SpongeBridgeSubject, SubjectBridge,
+        DataCompoundHolder,
+        InvulnerableTrackedBridge, VanishableBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
 
-    private final User self = (User) this; // convenient access
     private final GameProfile profile;
 
     private final Map<UUID, RespawnLocation> spawnLocations = Maps.newHashMap();
@@ -112,6 +133,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     public SpongeUser(final GameProfile profile) {
         this.profile = profile;
+        if (SpongeImpl.isInitialized()) {
+            SpongeInternalListeners.getInstance().registerExpirableServiceCallback(PermissionService.class, new SubjectSettingCallback(this));
+        }
     }
 
     private void reset() {
@@ -123,8 +147,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public DataHolder getDataHolder(boolean markDirty) {
-        if (this.self.isOnline()) {
-            return this.self.getPlayer().get();
+        if (this.isOnline()) {
+            return this.getPlayer().get();
         }
         if (!this.isInitialized()) {
             this.initialize();
@@ -398,7 +422,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
     }
 
-    private SpongeUser loadInventory() {
+    private UserInventory loadInventory() {
         if (this.inventory == null) {
             if (!this.isInitialized()) {
                 this.initialize();
@@ -408,7 +432,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             this.inventory.readFromNBT(nbttaglist);
             this.inventory.currentItem = this.nbt.getInt(Constants.Entity.Player.SELECTED_ITEM_SLOT);
         }
-        return this;
+        return (UserInventory) this.inventory;
     }
 
     private SpongeUser loadEnderInventory() {
@@ -505,23 +529,33 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public boolean canEquip(final EquipmentType type) {
-        return this.getForInventory(p -> p.canEquip(type), u -> true);
+        return true;
     }
 
     @Override
     public boolean canEquip(final EquipmentType type, @Nullable final ItemStack equipment) {
-        return this.getForInventory(p -> p.canEquip(type, equipment), u -> true);
+        return true;
     }
 
     @Override
     public Optional<ItemStack> getEquipped(final EquipmentType type) {
-        return this.getForInventory(p -> p.getEquipped(type), u -> u.getEquippedItem(type));
+        if (type instanceof SpongeEquipmentType) {
+            final EquipmentSlotType[] slots = ((SpongeEquipmentType) type).getSlots();
+            if (slots.length == 1) {
+                final net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
+                if (!nmsItem.isEmpty()) {
+                    return Optional.of(ItemStackUtil.fromNative(nmsItem));
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         if (this.canEquip(type, equipment)) {
-            this.setForInventory(p -> p.equip(type, equipment), u -> u.setEquippedItem(type, equipment));
+            this.loadInventory();
+            this.setEquippedItem(type, equipment);
             return true;
         }
         return false;
@@ -529,18 +563,16 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @SuppressWarnings("rawtypes")
     @Override
-    public CarriedInventory<?> getInventory() {
-        return this.getForInventory(Player::getInventory, u -> (CarriedInventory) u.inventory);
+    public UserInventory getInventory() {
+        return this.loadInventory();
     }
 
     @Override
     public ItemStack getItemInHand(final HandType handType) {
-        if (handType == HandTypes.MAIN_HAND) {
-            return this.getForInventory(p -> p.getItemInHand(handType),
-                u -> u.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new));
-        } else if (handType == HandTypes.OFF_HAND) {
-            return this.getForInventory(p -> p.getItemInHand(handType),
-                u -> u.getEquipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new));
+        if (handType == HandTypes.MAIN_HAND.get()) {
+            this.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new);
+        } else if (handType == HandTypes.OFF_HAND.get()) {
+            this.getEquipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new);
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
@@ -587,12 +619,10 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public void setItemInHand(final HandType handType, @Nullable final ItemStack itemInHand) {
-        if (handType == HandTypes.MAIN_HAND) {
-            this.setForInventory(p -> p.setItemInHand(handType, itemInHand),
-                u -> u.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand));
-        } else if (handType == HandTypes.OFF_HAND) {
-            this.setForInventory(p -> p.setItemInHand(handType, itemInHand),
-                u -> u.setEquippedItem(EquipmentTypes.OFF_HAND, itemInHand));
+        if (handType == HandTypes.MAIN_HAND.get()) {
+            this.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand);
+        } else if (handType == HandTypes.OFF_HAND.get()) {
+            this.setEquippedItem(EquipmentTypes.OFF_HAND, itemInHand);
         } else {
             throw new IllegalArgumentException("Invalid hand " + handType);
         }
@@ -600,17 +630,17 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public Map<UUID, RespawnLocation> bridge$getBedlocations() {
-        final Optional<Player> player = this.self.getPlayer();
+        final Optional<Player> player = this.getPlayer();
         return player
-            .map(value -> ((BedLocationHolder) value).bridge$getBedlocations())
+            .map(value -> ((BedLocationHolderBridge) value).bridge$getBedlocations())
             .orElse(this.spawnLocations);
     }
 
     @Override
     public boolean bridge$setBedLocations(final Map<UUID, RespawnLocation> value) {
-        final Optional<Player> player = this.self.getPlayer();
+        final Optional<Player> player = this.getPlayer();
         if (player.isPresent()) {
-            return ((BedLocationHolder) player.get()).bridge$setBedLocations(value);
+            return ((BedLocationHolderBridge) player.get()).bridge$setBedLocations(value);
         }
         this.spawnLocations.clear();
         this.spawnLocations.putAll(value);
@@ -620,9 +650,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public ImmutableMap<UUID, RespawnLocation> bridge$removeAllBeds() {
-        final Optional<Player> player = this.self.getPlayer();
+        final Optional<Player> player = this.getPlayer();
         if (player.isPresent()) {
-            return ((BedLocationHolder) player.get()).bridge$removeAllBeds();
+            return ((BedLocationHolderBridge) player.get()).bridge$removeAllBeds();
         }
         final ImmutableMap<UUID, RespawnLocation> locations = ImmutableMap.copyOf(this.spawnLocations);
         this.spawnLocations.clear();
@@ -658,40 +688,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
     }
 
-    // Helpers for UserInventory
-
-    private <T> T getForInventory(final Function<? super Player, ? extends T> playerFunction,
-        final Function<? super SpongeUser, T> userFunction) {
-        if (this.self.getPlayer().isPresent()) {
-            return playerFunction.apply(this.self.getPlayer().get());
-        }
-        return userFunction.apply(this.loadInventory()); // Load Inventory if not yet loaded
-    }
-
-    private void setForInventory(final Consumer<? super Player> playerFunction,
-        final Consumer<? super SpongeUser> userFunction) {
-        if (this.self.getPlayer().isPresent()) {
-            playerFunction.accept(this.self.getPlayer().get());
-            return;
-        }
-        userFunction.accept(this.loadInventory()); // Load Inventory if not yet loaded
-    }
-
-
     // Helpers for Equipment:
-
-    private Optional<ItemStack> getEquippedItem(final EquipmentType type) {
-        if (type instanceof SpongeEquipmentType) {
-            final EquipmentSlotType[] slots = ((SpongeEquipmentType) type).getSlots();
-            if (slots.length == 1) {
-                final net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
-                if (!nmsItem.isEmpty()) {
-                    return Optional.of(ItemStackUtil.fromNative(nmsItem));
-                }
-            }
-        }
-        return Optional.empty();
-    }
 
     private void setEquippedItem(final Supplier<? extends EquipmentType> type, @Nullable final ItemStack item) {
         this.setEquippedItem(type.get(), item);
@@ -710,6 +707,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     private net.minecraft.item.ItemStack getItemStackFromSlot(final EquipmentSlotType slotIn) {
+        this.loadInventory();
         if (slotIn == EquipmentSlotType.MAINHAND) {
             return this.inventory.getCurrentItem();
         } else if (slotIn == EquipmentSlotType.OFFHAND) {
@@ -722,6 +720,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     private void setItemStackToSlot(final EquipmentSlotType slotIn, final net.minecraft.item.ItemStack stack) {
+        this.loadInventory();
         if (slotIn == EquipmentSlotType.MAINHAND) {
             this.inventory.mainInventory.set(this.inventory.currentItem, stack);
         } else if (slotIn == EquipmentSlotType.OFFHAND) {
@@ -729,6 +728,240 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         } else if (slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR) {
             this.inventory.armorInventory.set(slotIn.getIndex(), stack);
         }
+    }
+
+    @Override
+    public org.spongepowered.api.profile.GameProfile getProfile() {
+        return (org.spongepowered.api.profile.GameProfile) this.profile;
+    }
+
+    @Override
+    public boolean isOnline() {
+        return this.getPlayer().isPresent();
+    }
+
+    @Override
+    public Optional<Player> getPlayer() {
+        return Optional.ofNullable((Player) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
+    }
+
+    @Override
+    public Vector3d getPosition() {
+        return this.getPlayer()
+                .map(Player::getPosition)
+                .orElseGet(() -> new Vector3d(this.posX, this.posY, this.posZ));
+    }
+
+    @Override
+    public Optional<UUID> getWorldUniqueId() {
+        final Optional<Player> playerOpt = this.getPlayer();
+        if (playerOpt.isPresent()) {
+            return playerOpt.map(Player::getWorld).map(World::getUniqueId);
+        }
+        final DimensionType dimensionType = DimensionType.getById(this.dimension);
+        if (dimensionType == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(SpongeImpl.getWorldManager().getDimensionTypeUniqueId(dimensionType));
+    }
+
+    @Override
+    public boolean setLocation(Vector3d position, UUID worldUniqueId) {
+        final Optional<Player> playerOpt = this.getPlayer();
+        if (playerOpt.isPresent()) {
+            Optional<org.spongepowered.api.world.server.ServerWorld> world = SpongeImpl.getWorldManager().getWorld(worldUniqueId);
+            return world.filter(serverWorld -> playerOpt.get().setLocation(ServerLocation.of(serverWorld, position))).isPresent();
+        }
+        final WorldProperties properties =
+                SpongeImpl.getWorldManager().getProperties(worldUniqueId).orElseThrow(() -> new IllegalArgumentException(String.format("Unknown "
+                        + "World UUID '%s' given when setting location of user!", worldUniqueId)));
+        final Integer dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionType().getId();
+        this.dimension = dimensionId;
+        this.posX = position.getX();
+        this.posY = position.getY();
+        this.posZ = position.getZ();
+        this.markDirty();
+        return true;
+    }
+
+    @Override
+    public Vector3d getRotation() {
+        return this.getPlayer()
+                .map(Entity::getRotation)
+                .orElseGet(() -> new Vector3d(this.rotationPitch, this.rotationYaw, 0));
+    }
+
+    @Override
+    public void setRotation(final Vector3d rotation) {
+        checkNotNull(rotation, "Rotation was null!");
+        final Optional<Player> playerOpt = this.getPlayer();
+        if (playerOpt.isPresent()) {
+            playerOpt.get().setRotation(rotation);
+            return;
+        }
+        this.markDirty();
+        this.rotationPitch = ((float) rotation.getX()) % 360.0F;
+        this.rotationYaw = ((float) rotation.getY()) % 360.0F;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return this.profile.getId().toString();
+    }
+
+    @Override
+    public Inventory getEnderChestInventory() {
+        final Optional<Player> playerOpt = this.getPlayer();
+        if (playerOpt.isPresent()) {
+            return playerOpt.get().getEnderChestInventory();
+        }
+        this.loadEnderInventory();
+        return ((Inventory) this.enderChest);
+    }
+
+    @org.checkerframework.checker.nullness.qual.Nullable
+    private SubjectReference impl$subjectReference;
+
+    @Override
+    public void bridge$setSubject(final SubjectReference subj) {
+        this.impl$subjectReference = subj;
+    }
+
+    @Override
+    public Optional<SubjectReference> bridge$resolveReferenceOptional() {
+        if (this.impl$subjectReference == null) {
+            final Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
+            serv.ifPresent(permissionService -> new SubjectSettingCallback(this).test(permissionService));
+        }
+        return Optional.ofNullable(this.impl$subjectReference);
+    }
+
+    @Override
+    public Optional<Subject> bridge$resolveOptional() {
+        return bridge$resolveReferenceOptional().map(SubjectReference::resolve).map(CompletableFuture::join);
+    }
+
+    @Override
+    public Subject bridge$resolve() {
+        return this.bridge$resolveOptional()
+                .orElseThrow(() -> new IllegalStateException("No subject reference present for user " + this));
+    }
+
+    @Override
+    public String bridge$getSubjectCollectionIdentifier() {
+        return PermissionService.SUBJECTS_USER;
+    }
+
+    @Override
+    public Tristate bridge$permDefault(final String permission) {
+        return Tristate.FALSE;
+    }
+
+    @Override
+    public boolean data$hasSpongeCompound() {
+        if (this.nbt == null) {
+            return false;
+        }
+        return this.nbt.contains(Constants.Forge.FORGE_DATA);
+    }
+
+    @Override
+    public CompoundNBT data$getSpongeCompound() {
+        if (this.nbt == null) {
+            return new CompoundNBT();
+        }
+        CompoundNBT forgeCompound = this.nbt.getCompound(Constants.Forge.FORGE_DATA);
+        if (forgeCompound == null) { // TODO this is currently never null
+            forgeCompound = new CompoundNBT();
+            this.nbt.put(Constants.Forge.FORGE_DATA, forgeCompound);
+        }
+        return forgeCompound;
+    }
+
+    @Override
+    public void bridge$setInvulnerable(final boolean value) {
+        final Optional<Player> playerOpt = ((User) this).getPlayer();
+        if (playerOpt.isPresent()) {
+            ((InvulnerableTrackedBridge) playerOpt.get()).bridge$setInvulnerable(value);
+            return;
+        }
+        this.invulnerable = value;
+        this.markDirty();
+    }
+
+    @Override
+    public boolean bridge$getIsInvulnerable() {
+        return this.invulnerable;
+    }
+
+    @Override
+    public void bridge$setVanished(final boolean vanished) {
+        final Optional<Player> playerOpt = ((User) this).getPlayer();
+        if (playerOpt.isPresent()) {
+            ((VanishableBridge) playerOpt.get()).bridge$setVanished(vanished);
+            return;
+        }
+        this.isVanished = vanished;
+        this.markDirty();
+    }
+
+    @Override
+    public boolean bridge$isVanished() {
+        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanished()).orElseGet(() -> this.isVanished);
+    }
+
+    @Override
+    public boolean bridge$isInvisible() {
+        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isInvisible()).orElseGet(() -> this.isInvisible);
+    }
+
+    @Override
+    public void bridge$setInvisible(final boolean invisible) {
+        final Optional<Player> player = ((User) this).getPlayer();
+        if (player.isPresent()) {
+            ((VanishableBridge) player.get()).bridge$setInvisible(invisible);
+            return;
+        }
+        this.isInvisible = invisible;
+    }
+
+    @Override
+    public boolean bridge$isUncollideable() {
+        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isUncollideable()).orElseGet(() -> this.isVanishCollide);
+    }
+
+    @Override
+    public void bridge$setUncollideable(final boolean uncollideable) {
+        final Optional<Player> player = ((User) this).getPlayer();
+        if (player.isPresent()) {
+            ((VanishableBridge) player.get()).bridge$setUncollideable(uncollideable);
+            return;
+        }
+        this.isVanishCollide = uncollideable;
+    }
+
+    @Override
+    public boolean bridge$isUntargetable() {
+        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isUntargetable()).orElseGet(() -> this.isVanishTarget);
+    }
+
+    @Override
+    public void bridge$setUntargetable(final boolean untargetable) {
+        final Optional<Player> player = ((User) this).getPlayer();
+        if (player.isPresent()) {
+            ((VanishableBridge) player.get()).bridge$setUntargetable(untargetable);
+            return;
+        }
+        this.isVanishTarget = untargetable;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("isOnline", ((User) this).isOnline())
+                .add("profile", ((User) this).getProfile())
+                .toString();
     }
 
     @Override

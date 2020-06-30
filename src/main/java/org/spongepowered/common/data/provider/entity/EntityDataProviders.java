@@ -177,7 +177,7 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
 import org.spongepowered.common.bridge.entity.passive.horse.AbstractHorseEntityBridge;
-import org.spongepowered.common.bridge.entity.player.BedLocationHolder;
+import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
@@ -367,7 +367,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                     p.forEach(p1 -> e.getPassengers().add((Entity)p1));
                 });
 
-        register(BedLocationHolder.class, Keys.RESPAWN_LOCATIONS, BedLocationHolder::bridge$getBedlocations, BedLocationHolder::bridge$setBedLocations);
+        register(BedLocationHolderBridge.class, Keys.RESPAWN_LOCATIONS, BedLocationHolderBridge::bridge$getBedlocations, BedLocationHolderBridge::bridge$setBedLocations);
         register(LocationTargetingBridge.class, Keys.TARGET_LOCATION, LocationTargetingBridge::bridge$getTargetedLocation, LocationTargetingBridge::bridge$setTargetedLocation);
         register(PatrollerEntity.class, Keys.TARGET_POSITION, e -> VecHelper.toVector3i(e.getPatrolTarget()), (e, pos) -> e.setPatrolTarget(VecHelper.toBlockPos(pos)));
         register(EnderCrystalEntity.class, Keys.TARGET_POSITION, e -> VecHelper.toVector3i(e.getBeamTarget()), (e, pos) -> e.setBeamTarget(VecHelper.toBlockPos(pos)));

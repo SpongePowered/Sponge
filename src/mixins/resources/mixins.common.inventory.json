@@ -11,7 +11,6 @@
       "api.PlayerInventoryMixin_API",
       "api.ServerPlayerEntityMixin_API",
       "api.SpongeUserInventoryMixin_API",
-      "api.SpongeUserMixin_API",
       "api.carried.CarriedInventoryMixin_API",
       "api.carried.CarriedWrapperInventoryMixin_API",
       "api.carried.ContainerMinecartEntityMixin_API",
