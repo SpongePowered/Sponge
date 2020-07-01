@@ -25,19 +25,22 @@
 package org.spongepowered.vanilla.launch;
 
 import net.minecraft.client.main.Main;
+import org.spongepowered.common.launch.Launcher;
 
 import java.nio.file.Path;
 import java.util.List;
 
 public final class ClientLauncher extends VanillaLauncher {
 
-    protected ClientLauncher() {
-        super(null);
+    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
+        final ClientLauncher launcher = new ClientLauncher();
+        Launcher.setInstance(launcher);
+        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
     }
 
     @Override
-    public void launch0(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.launch0(pluginSpiVersion, baseDirectory, pluginDirectories, args);
+    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
+        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
         this.getLogger().info("Loading Minecraft Client, please wait...");
         Main.main(args);
     }

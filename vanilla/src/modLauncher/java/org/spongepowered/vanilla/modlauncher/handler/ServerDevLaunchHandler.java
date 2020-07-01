@@ -34,6 +34,7 @@ import org.spongepowered.vanilla.modlauncher.Main;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -73,7 +74,8 @@ public final class ServerDevLaunchHandler implements ILaunchHandlerService {
 
         return () -> {
             final PluginEnvironment launchPluginEnvironment = Main.getLaunchPluginEnvironment();
-            Class.forName("org.spongepowered.launch.ServerLauncher", true, launchClassLoader.getInstance()).getMethod("launch", String.class, Path.class, List.class, String[].class).invoke(null,
+            Class.forName("org.spongepowered.vanilla.launch.ServerLauncher", true, launchClassLoader.getInstance()).getMethod("launch", String.class,
+                Path.class, List.class, String[].class).invoke(null,
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.VERSION).orElse(null),
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElse(null),
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElse(null),

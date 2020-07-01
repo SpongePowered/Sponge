@@ -539,6 +539,7 @@ project("SpongeVanilla") {
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
         add(vanillaLaunch.implementationConfigurationName, vanillaLaunchConfig)
 
+        vanillaLaunchConfig(project(":SpongeAPI"))
         vanillaLaunchConfig("org.spongepowered:mixin:0.8")
         vanillaLaunchConfig("org.ow2.asm:asm-util:6.2")
         vanillaLaunchConfig("org.ow2.asm:asm-tree:6.2")

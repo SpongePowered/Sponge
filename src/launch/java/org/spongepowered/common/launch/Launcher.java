@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.launch;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Guice;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,17 +44,29 @@ import java.util.List;
 
 public abstract class Launcher {
 
-    public static Launcher INSTANCE;
+    private static Launcher INSTANCE;
 
     private final Logger logger;
     private final PluginEnvironment pluginEnvironment;
     private final SpongePluginManager pluginManager;
 
     protected Launcher(SpongePluginManager pluginManager) {
-        INSTANCE = this;
         this.logger = LogManager.getLogger("Sponge");
         this.pluginEnvironment = new PluginEnvironment();
         this.pluginManager = pluginManager;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <L extends Launcher> L getInstance() {
+        return (L) Launcher.INSTANCE;
+    }
+
+    public static void setInstance(Launcher instance) {
+        if (Launcher.INSTANCE != null) {
+            throw new RuntimeException("Attempt made to re-set launcher instance!");
+        }
+
+        Launcher.INSTANCE = Preconditions.checkNotNull(instance);
     }
 
     public Logger getLogger() {
@@ -68,11 +81,7 @@ public abstract class Launcher {
         return this.pluginManager;
     }
 
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        Launcher.INSTANCE.launch0(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-    }
-
-    protected void launch0(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
+    protected void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
         this.populateBlackboard(pluginSpiVersion, baseDirectory, pluginDirectories);
         this.createInternalPlugins();
         this.loadPlugins();
@@ -98,8 +107,7 @@ public abstract class Launcher {
     private void createInternalPlugins() {
         final Path gameDirectory = this.pluginEnvironment.getBlackboard().get(PluginKeys.BASE_DIRECTORY).get();
         try {
-            final Collection<PluginMetadata> read =
-                PluginMetadataHelper.builder().build().read(Launcher.class.getResourceAsStream("META-INF/plugins.json"));
+            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(Launcher.class.getResourceAsStream("/META-INF/plugins.json"));
             for (final PluginMetadata metadata : read) {
                 this.pluginManager.addPlugin(new DummyPluginContainer(metadata, gameDirectory, this.logger, this));
             }
