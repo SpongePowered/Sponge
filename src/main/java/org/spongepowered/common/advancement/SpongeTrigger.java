@@ -38,7 +38,7 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -103,7 +103,7 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     }
 
     @Override
-    public void bridge$trigger(final Player player) {
+    public void bridge$trigger(final ServerPlayer player) {
         final PlayerAdvancements playerAdvancements = ((ServerPlayerEntity) player).getAdvancements();
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         final TypeToken<FilteredTriggerConfiguration> typeToken = TypeToken.of(this.triggerConfigurationClass);

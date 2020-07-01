@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge.advancements;
 
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public interface TriggerBridge {
 
-    void bridge$trigger(Player player);
+    void bridge$trigger(ServerPlayer player);
 }

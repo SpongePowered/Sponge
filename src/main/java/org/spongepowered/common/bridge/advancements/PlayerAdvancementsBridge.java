@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.advancements;
 
 import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Set;
 
@@ -33,7 +33,7 @@ public interface PlayerAdvancementsBridge {
 
     Set<AdvancementTree> bridge$getAdvancementTrees();
 
-    Player bridge$getPlayer();
+    ServerPlayer bridge$getPlayer();
 
     void bridge$reloadAdvancementProgress();
 }

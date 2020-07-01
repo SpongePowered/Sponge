@@ -34,8 +34,6 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
@@ -45,6 +43,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -537,7 +536,7 @@ public abstract class BlockTransaction {
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                .add("world", ((World) this.worldBridge).getProperties().getDirectoryName())
+                .add("world", ((org.spongepowered.api.world.server.ServerWorld) this.worldBridge).getProperties().getDirectoryName())
                 .add("notifyState", this.notifyState)
                 .add("notifyPos", this.notifyPos)
                 .add("sourceBlock", this.sourceBlock)

@@ -30,8 +30,8 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.network.RemoteConnection;
@@ -63,7 +63,7 @@ public final class SpongeMessageHandler {
             return;
         }
 
-        Player player = ((PlayerConnection) connection).getPlayer();
+        ServerPlayer player = ((PlayerConnection) connection).getPlayer();
         if (!player.hasPermission("sponge.debug.block-tracking")) {
             return;
         }

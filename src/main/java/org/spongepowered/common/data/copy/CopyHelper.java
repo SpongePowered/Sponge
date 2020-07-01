@@ -109,7 +109,7 @@ public class CopyHelper {
         }
         if (map instanceof ImmutableMap) {
             if (copyEntries) {
-                final ImmutableMap.Builder<K, V> builder = ImmutableMap.builderWithExpectedSize(map.size());
+                final ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
                 map.forEach((key, value) -> builder.put(CopyHelper.copy(key), CopyHelper.copy(value)));
                 return (M) builder.build();
             }

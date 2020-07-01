@@ -29,7 +29,7 @@ import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.Container;
@@ -57,7 +57,7 @@ import javax.annotation.Nullable;
 public class SpongeInventoryMenu implements InventoryMenu {
 
     private ViewableInventory inventory;
-    private Map<Container, Player> tracked = new HashMap<>();
+    private Map<Container, ServerPlayer> tracked = new HashMap<>();
     private Text title;
 
     @Nullable
@@ -161,7 +161,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public Optional<Container> open(Player player) {
+    public Optional<Container> open(ServerPlayer player) {
         Optional<Container> container = player.openInventory(this.inventory, this.title);
         container.ifPresent(c -> {
             ((TrackedContainerBridge)c).bridge$setMenu(this);

@@ -35,7 +35,7 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.AdvancementEvent;
 import org.spongepowered.api.event.message.MessageEvent;
@@ -57,11 +57,12 @@ import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
@@ -137,8 +138,8 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
     }
 
     @Override
-    public Player bridge$getPlayer() {
-        return (Player) this.player;
+    public ServerPlayer bridge$getPlayer() {
+        return (ServerPlayer) this.player;
     }
 
     @Override
@@ -191,7 +192,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
                 channel,
                 Optional.of(channel),
                 (org.spongepowered.api.advancement.Advancement) advancement,
-                formatter, (Player) this.player, instant, false
+                formatter, (ServerPlayer) this.player, instant, false
 
         );
         SpongeImpl.postEvent(event);

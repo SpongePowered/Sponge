@@ -318,25 +318,25 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         // TODO deduplicate code
         register(CatEntity.class, Keys.CAT_TYPE, e -> {
             int type = e.getCatType();
-            return Sponge.getRegistry().getCatalogRegistry().getAllOf(CatType.class)
+            return Sponge.getRegistry().getCatalogRegistry().streamAllOf(CatType.class)
                     .filter(t -> ((SpongeCatType)t).getMetadata() == type)
                     .findFirst().orElse(null);
         }, (e, v) -> e.setCatType(((SpongeCatType)v).getMetadata()));
         register(ParrotEntity.class, Keys.PARROT_TYPE, e -> {
             int type = e.getVariant();
-            return Sponge.getRegistry().getCatalogRegistry().getAllOf(ParrotType.class)
+            return Sponge.getRegistry().getCatalogRegistry().streamAllOf(ParrotType.class)
                     .filter(t -> ((SpongeParrotType)t).getMetadata() == type)
                     .findFirst().orElse(null);
         }, (e, v) -> e.setVariant(((SpongeParrotType)v).getMetadata()));
         register(RabbitEntity.class, Keys.RABBIT_TYPE, e -> {
             int type = e.getRabbitType();
-            return Sponge.getRegistry().getCatalogRegistry().getAllOf(RabbitType.class)
+            return Sponge.getRegistry().getCatalogRegistry().streamAllOf(RabbitType.class)
                     .filter(t -> ((SpongeRabbitType)t).getMetadata() == type)
                     .findFirst().orElse(null);
         }, (e, v) -> e.setRabbitType(((SpongeRabbitType)v).getMetadata()));
         register(LlamaEntity.class, Keys.LLAMA_TYPE, e -> {
             int type = e.getVariant();
-            return Sponge.getRegistry().getCatalogRegistry().getAllOf(LlamaType.class)
+            return Sponge.getRegistry().getCatalogRegistry().streamAllOf(LlamaType.class)
                     .filter(t -> ((SpongeLlamaType)t).getMetadata() == type)
                     .findFirst().orElse(null);
         }, (e, v) -> e.setVariant(((SpongeLlamaType)v).getMetadata()));

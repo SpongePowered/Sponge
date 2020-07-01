@@ -30,7 +30,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 
@@ -50,7 +50,7 @@ public class CraftingGridInventoryAdapter extends GridInventoryAdapter implement
     }
 
     @Override
-    public Optional<CraftingRecipe> getRecipe(World world) {
+    public Optional<CraftingRecipe> getRecipe(ServerWorld world) {
         return Sponge.getRegistry().getRecipeRegistry().findMatchingRecipe(this, checkNotNull(world, "world")).map(CraftingRecipe.class::cast);
     }
 

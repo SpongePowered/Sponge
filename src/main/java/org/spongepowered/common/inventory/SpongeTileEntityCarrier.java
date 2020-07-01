@@ -30,7 +30,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 
 public class SpongeTileEntityCarrier implements DefaultSingleBlockCarrier {
 
@@ -46,7 +46,7 @@ public class SpongeTileEntityCarrier implements DefaultSingleBlockCarrier {
     @Override
     public ServerLocation getLocation() {
         final BlockPos pos = this.inventory.getPos();
-        return ServerLocation.of(((World<?>) this.inventory.getWorld()), pos.getX(), pos.getY(), pos.getZ());
+        return ServerLocation.of(((ServerWorld) this.inventory.getWorld()), pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override

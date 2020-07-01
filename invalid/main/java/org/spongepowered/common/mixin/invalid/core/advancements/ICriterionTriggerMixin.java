@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.invalid.core.advancements;
 
 import net.minecraft.advancements.ICriterionTrigger;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.advancements.TriggerBridge;
 
@@ -33,7 +33,7 @@ import org.spongepowered.common.bridge.advancements.TriggerBridge;
 public interface ICriterionTriggerMixin extends TriggerBridge {
 
     @Override
-    default void bridge$trigger(Player player) {
+    default void bridge$trigger(ServerPlayer player) {
         // This could possibly be implemented in all the vanilla triggers
         // and construct trigger method arguments based on context values
         // Not needed for now, just assume it always fails

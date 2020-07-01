@@ -30,7 +30,7 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.advancements.TriggerBridge;
@@ -51,12 +51,12 @@ public interface ICriterionTriggerMixin_API<C extends FilteredTriggerConfigurati
     }
 
     @Override
-    default void trigger(final Iterable<Player> players) {
+    default void trigger(final Iterable<ServerPlayer> players) {
         players.forEach(((TriggerBridge) this)::bridge$trigger);
     }
 
     @Override
-    default void trigger(final Player player) {
+    default void trigger(final ServerPlayer player) {
         ((TriggerBridge) this).bridge$trigger(player);
         // This could possibly be implemented in all the vanilla triggers
         // and construct trigger method arguments based on context values
